@@ -17,7 +17,7 @@ $hasDragAndDrop = $this->hasDragAndDrop();
 $this->surroundingHTML = '';
 ob_start();
 
-if (!self::isDragAndDropMode() && $hasPager) {
+if (!sly_Table::isDragAndDropMode() && $hasPager) {
 	$pager = new sly_Util_Pager($currentPage, $this->totalElements, self::$perPage);
 	$pager = $pager->getHTMLString($_GET, 'p_'.$tableID);
 
@@ -30,7 +30,7 @@ if ($this->enableDragAndDrop && ($hasSearch || $hasPager)) {
 	unset($params['p_'.$tableID]);
 	unset($params['q_'.$tableID]);
 
-	if (self::isDragAndDropMode()) {
+	if (sly_Table::isDragAndDropMode()) {
 		unset($params['tableswitch']);
 		$params = http_build_query($params, '', '&amp;');
 		print '<p class="sly-table-extras-sorting"><a href="index.php?'.$params.'">Sortiermodus beenden</a></p>';
@@ -42,7 +42,7 @@ if ($this->enableDragAndDrop && ($hasSearch || $hasPager)) {
 	}
 }
 
-if (!self::isDragAndDropMode() && $hasSearch) {
+if (!sly_Table::isDragAndDropMode() && $hasSearch) {
 	$key   = 'q_'.$tableID;
 	$query = sly_get($key, 'string');
 
@@ -72,7 +72,9 @@ print $this->surroundingHTML;
 		<tr class="nodrop nodrag">
 			<?
 			foreach ($this->columns as $idx => $col) {
-				$col->render($this, $idx);
+				$col->setTable($this);
+				$col->setIndex($idx);
+				print $col->render();
 			}
 			?>
 		</tr>

@@ -11,12 +11,15 @@
 /**
  * @ingroup table
  */
-class sly_Table_Column {
+class sly_Table_Column extends sly_Viewable {
 	protected $width;
 	protected $sortkey;
 	protected $direction;
 	protected $htmlAttributes;
 	protected $content;
+
+	private $table;
+	private $idx;
 
 	public function __construct($content, $width = '', $sortkey = '', $htmlAttributes = array()) {
 		$this->content        = $content;
@@ -36,11 +39,26 @@ class sly_Table_Column {
 		$this->content = $content;
 	}
 
-	public function render(sly_Table $table, $index) {
+	public function setTable(sly_Table $table) {
+		$this->table = $table;
+	}
+
+	public function setIndex($idx) {
+		$this->idx = (int) $idx;
+	}
+
+	public function render() {
 		if (!empty($this->width)) {
 			$this->htmlAttributes['style'] = 'width:'.$this->width;
 		}
 
-		include SLY_COREFOLDER.'/views/_table/table/column.phtml';
+		return $this->renderView('column.phtml', array('table' => $this->table, 'index' => $this->idx));
+	}
+
+	protected function getViewFile($file) {
+		$full = SLY_COREFOLDER.'/views/table/'.$file;
+		if (file_exists($full)) return $full;
+
+		throw new sly_Exception('View '.$file.' could not be found.');
 	}
 }

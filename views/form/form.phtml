@@ -40,11 +40,11 @@ $attributes = array(
 		if ($hasButtonBar) {
 			$fieldset = end($this->fieldsets);
 			if (!$fieldset) $fieldset = $this->beginFieldset($this->title);
-			$this->renderView('buttons.phtml', array('fieldset' => $fieldset, 'hasButtonBar' => $hasButtonBar));
+			print $this->renderView('buttons.phtml', array('fieldset' => $fieldset, 'hasButtonBar' => $hasButtonBar));
 		}
 
 		foreach ($this->fieldsets as $i => $fieldset) {
-			$fieldset->render();
+			print $fieldset->render();
 		}
 		?>
 	<? if (!$omitFormTag): ?>

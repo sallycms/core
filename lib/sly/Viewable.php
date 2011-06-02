@@ -38,6 +38,6 @@ abstract class sly_Viewable {
 
 		ob_start();
 		include $this->getViewFile($filenameHtuG50hNCdikAvf7CZ1F);
-		print ob_get_clean();
+		return ob_get_clean();
 	}
 }

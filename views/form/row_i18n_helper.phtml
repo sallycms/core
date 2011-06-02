@@ -14,5 +14,5 @@ $attributes     = compact('class', 'rel', 'style');
 $column         = 0;
 
 print '<div '.sly_Util_HTML::buildAttributeString($attributes).'>';
-include SLY_COREFOLDER.'/views/_form/element.phtml';
+print $this->renderView('element.phtml', compact('element', 'column'));
 print '</div>';

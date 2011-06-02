@@ -11,7 +11,7 @@
 /**
  * @ingroup table
  */
-class sly_Table {
+class sly_Table extends sly_Viewable {
 	protected $id;
 	protected $columns;
 	protected $isEmpty;
@@ -21,6 +21,8 @@ class sly_Table {
 	protected $enableDragAndDrop;
 	protected $dragAndDropHandler;
 	protected $totalElements;
+
+	private $content;
 
 	protected static $perPage = 30;
 
@@ -74,15 +76,34 @@ class sly_Table {
 	}
 
 	/**
-	 * @param int $totalElements  leave this to nul lto disabled the pager
+	 * @param int $totalElements  leave this to null to disable the pager
 	 */
-	public function renderHeader($totalElements = null) {
+	protected function renderHeader($totalElements = null) {
 		$this->totalElements = $totalElements;
-		include SLY_COREFOLDER.'/views/_table/table/header.phtml';
+		return $this->renderView('header.phtml', compact('totalElements'));
 	}
 
-	public function renderFooter() {
-		include SLY_COREFOLDER.'/views/_table/table/footer.phtml';
+	protected function renderFooter() {
+		return $this->renderView('footer.phtml');
+	}
+
+	public function openBuffer() {
+		ob_start();
+	}
+
+	public function closeBuffer() {
+		$this->content = ob_get_clean();
+	}
+
+	/**
+	 * @return string
+	 */
+	public function render($totalElements = null) {
+		ob_start();
+		print $this->renderHeader($totalElements);
+		print $this->content;
+		print $this->renderFooter();
+		return ob_get_clean();
 	}
 
 	/**
@@ -245,5 +266,12 @@ class sly_Table {
 		}
 
 		return array('sortby' => $sortby, 'direction' => $direction);
+	}
+
+	protected function getViewFile($file) {
+		$full = SLY_COREFOLDER.'/views/table/'.$file;
+		if (file_exists($full)) return $full;
+
+		throw new sly_Exception('View '.$file.' could not be found.');
 	}
 }

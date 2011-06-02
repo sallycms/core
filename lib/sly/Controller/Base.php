@@ -149,7 +149,7 @@ abstract class sly_Controller_Base {
 
 		ob_start();
 		include $this->getViewFolder().$filenameHtuG50hNCdikAvf7CZ1F;
-		print ob_get_clean();
+		return ob_get_clean();
 	}
 
 	protected function init() {
