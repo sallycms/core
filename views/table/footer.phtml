@@ -18,6 +18,6 @@ print $this->surroundingHTML;
 $hasSearch = $this->hasSearch();
 $hasPager  = $this->hasPager();
 
-if ((self::isDragAndDropMode() && ($hasSearch || $hasPager)) || ($this->enableDragAndDrop && !$hasSearch && !$hasPager)) {
+if ((sly_Table::isDragAndDropMode() && ($hasSearch || $hasPager)) || ($this->enableDragAndDrop && !$hasSearch && !$hasPager)) {
 	sly_Util_HTML::onDOMReady('$("#'.$this->id.'").dropAndDrop('.$this->dragAndDropHandler.');');
 }

@@ -22,7 +22,7 @@ for ($col = 0; $col < $columns; ++$col) {
 	if ($element === null) continue;
 
 	$column = $col;
-	$this->renderView('element.phtml', compact('column', 'col', 'element', 'formRowClass'));
+	print $this->renderView('element.phtml', compact('column', 'col', 'element', 'formRowClass'));
 }
 
 print '</div>';

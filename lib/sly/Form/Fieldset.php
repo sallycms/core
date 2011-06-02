@@ -117,13 +117,10 @@ class sly_Form_Fieldset extends sly_Viewable {
 	 * Renders the form and prints it by default. Change $print to false to get
 	 * the generated XHTML returned.
 	 *
-	 * @param  boolean $print  if false, the generated XHTML is returned
-	 * @return mixed           null if $print is true, else the XHTML (string)
+	 * @return mixed  null if $print is true, else the XHTML (string)
 	 */
-	public function render($print = true) {
-		if (!$print) ob_start();
-		$this->renderView('fieldset.phtml');
-		if (!$print) return ob_get_clean();
+	public function render() {
+		return $this->renderView('fieldset.phtml');
 	}
 
 	/**

@@ -290,9 +290,7 @@ abstract class sly_Form_ElementBase extends sly_Viewable {
 	 * @return string            the HTML code
 	 */
 	protected function renderFilename($filename) {
-		ob_start();
-		$this->renderView($filename);
-		return ob_get_clean();
+		return $this->renderView($filename);
 	}
 
 	protected function getViewFile($file) {

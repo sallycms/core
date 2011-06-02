@@ -89,7 +89,8 @@ else {
 $rel   = sly_Util_Language::isMultilingual() ? $containerID : '';
 $style = $rel && !$isEqual ? 'display:none' : '';
 $langs = sly_Util_Language::findAll();
-include SLY_COREFOLDER.'/views/_form/row_i18n_helper.phtml';
+
+print $this->renderView('row_i18n_helper.phtml', compact('element', 'formRowClass', 'class', 'rel', 'style'));
 
 // print the extended multilingual view
 
@@ -101,7 +102,8 @@ if (sly_Util_Language::isMultilingual()) {
 	$formRowClass = array('rex-form-row', 'sly-num'.$rowNum);
 	$rel          = '';
 	$style        = '';
-	include SLY_COREFOLDER.'/views/_form/row_i18n_helper.phtml';
+
+	print $this->renderView('row_i18n_helper.phtml', compact('element', 'formRowClass', 'class', 'rel', 'style'));
 
 	foreach ($elements as $clangID => $element) {
 		$formRowClass = array('rex-form-row', 'sly-num'.$rowNum, 'clang-'.$clangID);
@@ -109,7 +111,7 @@ if (sly_Util_Language::isMultilingual()) {
 		$element->setLabel('      '.$langs[$clangID]->getName());
 		$element->setHelpText(''); // is displayed in the filler row we created above
 
-		include SLY_COREFOLDER.'/views/_form/row_i18n_helper.phtml';
+		print $this->renderView('row_i18n_helper.phtml', compact('element', 'formRowClass', 'class', 'rel', 'style'));
 
 		$element = null;
 	}

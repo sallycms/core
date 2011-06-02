@@ -26,10 +26,10 @@ $id = $this->id ? ' id="'.sly_html($this->id).'"' : '';
 			}
 			else {
 				if ($this->isMultilingual($elements)) {
-					$this->renderView('row_i18n.phtml', compact('rowNum', 'elements', 'columns'));
+					print $this->renderView('row_i18n.phtml', compact('rowNum', 'elements', 'columns'));
 				}
 				else {
-					$this->renderView('row.phtml', compact('rowNum', 'elements', 'columns'));
+					print $this->renderView('row.phtml', compact('rowNum', 'elements', 'columns'));
 				}
 			}
 		}
