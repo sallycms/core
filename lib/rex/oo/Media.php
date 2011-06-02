@@ -190,7 +190,7 @@ class OOMedia {
 		// Falls nicht, verwenden wir von hier ab das Dummy-Icon.
 
 		if (!$this->isImage()) {
-			$path = 'media/';
+			$path = 'assets/';
 			$file = 'file_dummy.gif';
 
 			if (self::$dummeFileSize === null) {
@@ -371,7 +371,7 @@ class OOMedia {
 
 	public function getIcon($useDefaultIcon = true) {
 		$ext    = $this->getExtension();
-		$folder = SLY_HTDOCS_PATH.'sally/media/';
+		$folder = SLY_HTDOCS_PATH.'sally/backend/assets/';
 		$icon   = $folder.'mime-'.$ext.'.gif';
 
 		// Dateityp für den kein Icon vorhanden ist
