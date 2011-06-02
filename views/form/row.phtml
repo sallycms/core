@@ -1,0 +1,28 @@
+<?php
+/*
+ * Copyright (c) 2011, webvariants GbR, http://www.webvariants.de
+ *
+ * This file is released under the terms of the MIT license. You can find the
+ * complete text in the attached LICENSE file or online at:
+ *
+ * http://www.opensource.org/licenses/mit-license.php
+ */
+
+$formRowClass = array('rex-form-row', 'sly-num'.$rowNum, 'sly-monolingual');
+
+foreach ($elements as $element) {
+	$formRowClass[] = $element->getFormRowClass();
+}
+
+$formRowClass = implode(' ', array_filter($formRowClass));
+print '<div class="'.$formRowClass.'">';
+
+for ($col = 0; $col < $columns; ++$col) {
+	$element = isset($elements[$col]) ? $elements[$col] : null;
+	if ($element === null) continue;
+
+	$column = $col;
+	$this->renderView('element.phtml', compact('column', 'col', 'element', 'formRowClass'));
+}
+
+print '</div>';

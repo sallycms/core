@@ -41,6 +41,6 @@ class sly_Table_Column {
 			$this->htmlAttributes['style'] = 'width:'.$this->width;
 		}
 
-		include SLY_INCLUDE_PATH.'/views/_table/table/column.phtml';
+		include SLY_COREFOLDER.'/views/_table/table/column.phtml';
 	}
 }

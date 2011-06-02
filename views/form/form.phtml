@@ -1,0 +1,60 @@
+<?php
+/*
+ * Copyright (c) 2011, webvariants GbR, http://www.webvariants.de
+ *
+ * This file is released under the terms of the MIT license. You can find the
+ * complete text in the attached LICENSE file or online at:
+ *
+ * http://www.opensource.org/licenses/mit-license.php
+ */
+
+$attributes = array(
+	'class'   => implode(' ', $this->classes),
+	'method'  => strtolower($this->method),
+	'action'  => $this->action,
+	'id'      => $this->id,
+	'enctype' => $this->enctype
+);
+
+?>
+
+<div class="rex-form sly-form">
+	<? if (!$omitFormTag): ?>
+	<form <?= sly_Util_HTML::buildAttributeString($attributes) ?>>
+	<? endif ?>
+		<? if (!empty($this->hiddenValues)): ?>
+		<div>
+			<?php
+			foreach ($this->hiddenValues as $name => $value) {
+				$value['type'] = 'hidden';
+				$value['name'] = $name;
+				print '<input '.sly_Util_HTML::buildAttributeString($value).' />';
+			}
+			?>
+		</div>
+		<? endif ?>
+
+		<?php
+		$hasButtonBar = $this->submitButton || $this->resetButton || $this->applyButton || $this->deleteButton;
+
+		if ($hasButtonBar) {
+			$fieldset = end($this->fieldsets);
+			if (!$fieldset) $fieldset = $this->beginFieldset($this->title);
+			$this->renderView('buttons.phtml', array('fieldset' => $fieldset, 'hasButtonBar' => $hasButtonBar));
+		}
+
+		foreach ($this->fieldsets as $i => $fieldset) {
+			$fieldset->render();
+		}
+		?>
+	<? if (!$omitFormTag): ?>
+	</form>
+	<? endif ?>
+</div>
+
+
+<? if (!empty($this->focussedElement)): ?>
+<script type="text/javascript">
+jQuery('#<?= $this->focussedElement ?>').focus();
+</script>
+<? endif ?>

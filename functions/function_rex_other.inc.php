@@ -27,7 +27,7 @@ function rex_create_lang($locale = 'de_de', $searchpath = '', $setlocale = true)
 	$_searchpath = $searchpath;
 
 	if (empty($searchpath)) {
-		$searchpath = sly_Util_Directory::join(SLY_INCLUDE_PATH, 'lang');
+		$searchpath = sly_Util_Directory::join(SLY_COREFOLDER, 'lang');
 	}
 
 	$lang_object = new sly_I18N($locale, $searchpath);

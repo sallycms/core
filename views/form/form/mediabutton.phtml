@@ -1,0 +1,23 @@
+<?php
+/*
+ * Copyright (c) 2011, webvariants GbR, http://www.webvariants.de
+ *
+ * This file is released under the terms of the MIT license. You can find the
+ * complete text in the attached LICENSE file or online at:
+ *
+ * http://www.opensource.org/licenses/mit-license.php
+ */
+
+$id = $this->getWidgetID();
+$this->consumeWidgetID();
+?>
+
+<span class="sly-widget sly-mediabutton">
+	<input type="text" size="30" name="<?= sly_html($this->attributes['name']) ?>" value="<?= sly_html($this->attributes['value']) ?>" class="<?= sly_html($this->attributes['class']) ?>" id="REX_MEDIA_<?= $id ?>" readonly="readonly" />
+
+	<span class="sly-icons">
+		<a href="#" onclick="openREXMedia(<?= $id ?>, ''); return false;"><img src="media/file_open.gif" title="Medium auswählen" alt="Medium auswählen" /></a>
+		<a href="#" onclick="addREXMedia(<?= $id ?>); return false;"><img src="media/file_add.gif" title="Medium hinzufügen" alt="Medium hinzufügen" /></a>
+		<a href="#" onclick="deleteREXMedia(<?= $id ?>); return false;"><img src="media/file_del.gif" title="Medium entfernen" alt="Medium entfernen" /></a>
+	</span>
+</span>

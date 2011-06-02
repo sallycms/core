@@ -127,14 +127,17 @@ class sly_Form extends sly_Form_Base {
 	}
 
 	/**
-	 * @param boolean $print
-	 * @param boolean $omitFormTag
+	 * Render the form
+	 *
+	 * Renders the form and prints it by default. Change $print to false to get
+	 * the generated XHTML returned.
+	 *
+	 * @param  boolean $print  if false, the generated XHTML is returned
+	 * @return mixed           null if $print is true, else the XHTML (string)
 	 */
 	public function render($print = true, $omitFormTag = false) {
-		$viewRoot = SLY_INCLUDE_PATH.'/views/_form/';
-
 		if (!$print) ob_start();
-		include $viewRoot.'/form.phtml';
+		$this->renderView('form.phtml', array('form' => $this, 'omitFormTag' => $omitFormTag));
 		if (!$print) return ob_get_clean();
 	}
 

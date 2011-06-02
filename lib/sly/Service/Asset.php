@@ -228,7 +228,7 @@ class sly_Service_Asset {
 		$dir = sly_Util_Directory::join(SLY_DYNFOLDER, self::CACHE_DIR);
 		if (!is_dir($dir)) mkdir($dir, 0777, true);
 
-		$install  = SLY_INCLUDE_PATH.'/install/static-cache/';
+		$install  = SLY_COREFOLDER.'/install/static-cache/';
 		$htaccess = sly_Util_Directory::join($dir, '.htaccess');
 
 		if (!file_exists($htaccess)) {

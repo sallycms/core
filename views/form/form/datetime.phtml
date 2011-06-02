@@ -1,0 +1,94 @@
+<?php
+/*
+ * Copyright (c) 2011, webvariants GbR, http://www.webvariants.de
+ *
+ * This file is released under the terms of the MIT license. You can find the
+ * complete text in the attached LICENSE file or online at:
+ *
+ * http://www.opensource.org/licenses/mit-license.php
+ */
+
+/**
+ * Folgende Datentypen sind möglich:
+ *
+ * string => strtotime($value)    (alles, was PHP als Zeitangabe versteht)
+ * int    => intval($value)       (UNIX-Timestamp)
+ * false  => time()               (jetzt)
+ * null   => ''                   (kein Datum ausgeben)
+ */
+
+$name     = $this->getAttribute('name');
+$id       = $this->getAttribute('id');
+$minYear  = 1970; // Und es machte Booom im UNIX-Universum...
+$maxYear  = date('Y') + 20;
+$value    = $this->getDisplayValue();
+
+if ($value === '') {
+	$value = null;
+}
+
+if ($value === false) {
+	$value = time();
+}
+
+if ($value !== null) {
+	$value = sly_Util_String::isInteger($value) ? intval($value) : strtotime($value);
+}
+
+// JavaScript-Version
+
+$dateformat = '%d.%m.%Y'; // t('dateformat');
+$formatJS   = $dateformat;
+$formatJS   = str_replace(
+	array('%a', '%A', '%d', '%e', '%j', '%b', '%B', '%h', '%m', '%y', '%Y'),
+	array('D',  'DD', 'dd', 'd',  'oo', 'M',  'MM', 'M',  'mm', 'y',  'yy'),
+	$formatJS);
+
+$attrs['class'] = 'rex-form-text';
+$attrs['type']  = 'text';
+$attrs['name']  = $name;
+$attrs['id']    = $attrs['name'];
+$attrs['style'] = 'width:150px';
+$attrs['value'] = $value === null ? '' : sly_Util_String::formatStrftime($dateformat.($this->withTime() ? ' %H:%M' : ''), $value);
+
+print '<input '.sly_Util_HTML::buildAttributeString($attrs).' />';
+
+$registry = sly_Core::getTempRegistry();
+$locale   = t('htmllang');
+
+if (!$registry->has('sly.form.datetime.links')) {
+	$path   = 'media/js/';
+	$layout = sly_Core::getLayout();
+
+	$layout->addCSSFile($path.'jqueryui-theme/jqueryui.min.css');
+
+	$layout->addJavaScriptFile($path.'jqueryui.core.min.js');
+	$layout->addJavaScriptFile($path.'jqueryui.datepicker.min.js');
+	$layout->addJavaScriptFile($path.'jqueryui.effects.min.js');
+
+	if ($this->withTime()) {
+		$layout->addJavaScriptFile($path.'jqueryui.mouse.min.js');
+		$layout->addJavaScriptFile($path.'jqueryui.slider.min.js'); // widget ist im Core enthalten
+		$layout->addJavaScriptFile($path.'jquery.timepicker.min.js');
+	}
+
+	$registry->set('sly.form.datetime.links', true);
+}
+
+// Die userLang dient dazu, dass PHP auch ohne korrekt gesetztes Locale das
+// Datum richtig parsen kann.
+
+?>
+
+<script type="text/javascript">
+jQuery(function($) {
+<? if ($this->withTime()): ?>
+	$('#<?= sly_html($name) ?>').datetime({
+		dateFormat: '<?= addslashes($formatJS) ?>',
+		userLang: '<?= $locale ?>'
+	});
+<? else: ?>
+	$('#<?= sly_html($name) ?>').datepicker({dateFormat: '<?= addslashes($formatJS) ?>'});
+<? endif ?>
+});
+</script>

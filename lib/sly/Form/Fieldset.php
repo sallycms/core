@@ -24,7 +24,7 @@
  * @ingroup form
  * @author  Christoph
  */
-class sly_Form_Fieldset {
+class sly_Form_Fieldset extends sly_Viewable {
 	protected $rows;     ///< array
 	protected $num;      ///< int
 	protected $columns;  ///< int
@@ -121,10 +121,8 @@ class sly_Form_Fieldset {
 	 * @return mixed           null if $print is true, else the XHTML (string)
 	 */
 	public function render($print = true) {
-		global $REX;
-
 		if (!$print) ob_start();
-		include SLY_INCLUDE_PATH.'/views/_form/fieldset.phtml';
+		$this->renderView('fieldset.phtml');
 		if (!$print) return ob_get_clean();
 	}
 
@@ -209,5 +207,12 @@ class sly_Form_Fieldset {
 		$registry->set($key, $num);
 
 		return $num;
+	}
+
+	protected function getViewFile($file) {
+		$full = SLY_COREFOLDER.'/views/form/'.$file;
+		if (file_exists($full)) return $full;
+
+		throw new sly_Exception('View '.$file.' could not be found.');
 	}
 }

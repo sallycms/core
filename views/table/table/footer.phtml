@@ -1,0 +1,23 @@
+<?
+/*
+ * Copyright (c) 2011, webvariants GbR, http://www.webvariants.de
+ *
+ * This file is released under the terms of the MIT license. You can find the
+ * complete text in the attached LICENSE file or online at:
+ *
+ * http://www.opensource.org/licenses/mit-license.php
+ */
+
+if ($this->isEmpty) {
+	print '<tr><td class="center" colspan="'.count($this->columns).'">'.sly_html($this->emptyNotice).'</td></tr>';
+}
+
+print '</tbody></table>';
+print $this->surroundingHTML;
+
+$hasSearch = $this->hasSearch();
+$hasPager  = $this->hasPager();
+
+if ((self::isDragAndDropMode() && ($hasSearch || $hasPager)) || ($this->enableDragAndDrop && !$hasSearch && !$hasPager)) {
+	sly_Util_HTML::onDOMReady('$("#'.$this->id.'").dropAndDrop('.$this->dragAndDropHandler.');');
+}

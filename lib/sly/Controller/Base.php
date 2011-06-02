@@ -131,6 +131,8 @@ abstract class sly_Controller_Base {
 		print $output;
 	}
 
+	abstract protected function getViewFolder();
+
 	protected function render($filename, $params = array()) {
 		global $REX, $I18N;
 
@@ -146,7 +148,7 @@ abstract class sly_Controller_Base {
 		extract($paramsHtuG50hNCdikAvf7CZ1F);
 
 		ob_start();
-		include SLY_INCLUDE_PATH.DIRECTORY_SEPARATOR.$filenameHtuG50hNCdikAvf7CZ1F;
+		include $this->getViewFolder().$filenameHtuG50hNCdikAvf7CZ1F;
 		print ob_get_clean();
 	}
 

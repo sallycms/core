@@ -14,7 +14,7 @@
  * @ingroup form
  * @author  Christoph
  */
-abstract class sly_Form_Base {
+abstract class sly_Form_Base extends sly_Viewable {
 	protected $hiddenValues;  ///< array  assoc. list of hidden form values
 
 	/**
@@ -28,17 +28,6 @@ abstract class sly_Form_Base {
 	 * @return boolean     always true
 	 */
 	abstract public function addRow(array $row);
-
-	/**
-	 * Render the form
-	 *
-	 * Renders the form and prints it by default. Change $print to false to get
-	 * the generated XHTML returned.
-	 *
-	 * @param  boolean $print  if false, the generated XHTML is returned
-	 * @return mixed           null if $print is true, else the XHTML (string)
-	 */
-	abstract public function render($print = true);
 
 	/**
 	 * Add multiple form elements at once
@@ -149,5 +138,12 @@ abstract class sly_Form_Base {
 		}
 
 		return false;
+	}
+
+	protected function getViewFile($file) {
+		$full = SLY_COREFOLDER.'/views/form/'.$file;
+		if (file_exists($full)) return $full;
+
+		throw new sly_Exception('View '.$file.' could not be found.');
 	}
 }

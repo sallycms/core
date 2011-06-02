@@ -78,11 +78,11 @@ class sly_Table {
 	 */
 	public function renderHeader($totalElements = null) {
 		$this->totalElements = $totalElements;
-		include SLY_INCLUDE_PATH.'/views/_table/table/header.phtml';
+		include SLY_COREFOLDER.'/views/_table/table/header.phtml';
 	}
 
 	public function renderFooter() {
-		include SLY_INCLUDE_PATH.'/views/_table/table/footer.phtml';
+		include SLY_COREFOLDER.'/views/_table/table/footer.phtml';
 	}
 
 	/**

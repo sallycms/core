@@ -1,0 +1,80 @@
+<?
+/*
+ * Copyright (c) 2011, webvariants GbR, http://www.webvariants.de
+ *
+ * This file is released under the terms of the MIT license. You can find the
+ * complete text in the attached LICENSE file or online at:
+ *
+ * http://www.opensource.org/licenses/mit-license.php
+ */
+
+$tableID        = $this->id;
+$currentPage    = abs(sly_get('p_'.$tableID, 'int'));
+$hasPager       = $this->hasPager();
+$hasSearch      = $this->hasSearch();
+$hasDragAndDrop = $this->hasDragAndDrop();
+
+$this->surroundingHTML = '';
+ob_start();
+
+if (!self::isDragAndDropMode() && $hasPager) {
+	$pager = new sly_Util_Pager($currentPage, $this->totalElements, self::$perPage);
+	$pager = $pager->getHTMLString($_GET, 'p_'.$tableID);
+
+	print '<p class="sly-table-extras-pager">Seiten: '.$pager.'</p>';
+}
+
+if ($this->enableDragAndDrop && ($hasSearch || $hasPager)) {
+	$params = $_GET;
+
+	unset($params['p_'.$tableID]);
+	unset($params['q_'.$tableID]);
+
+	if (self::isDragAndDropMode()) {
+		unset($params['tableswitch']);
+		$params = http_build_query($params, '', '&amp;');
+		print '<p class="sly-table-extras-sorting"><a href="index.php?'.$params.'">Sortiermodus beenden</a></p>';
+	}
+	else {
+		$params['tableswitch'] = 'dodraganddrop';
+		$params = http_build_query($params, '', '&amp;');
+		print '<p class="sly-table-extras-sorting"><a href="index.php?'.$params.'">Tabelle sortieren</a></p>';
+	}
+}
+
+if (!self::isDragAndDropMode() && $hasSearch) {
+	$key   = 'q_'.$tableID;
+	$query = sly_get($key, 'string');
+
+	print '<form method="get" action="index.php">';
+	print '<p class="sly-table-extras-filter">Filter: ';
+
+	foreach ($_GET as $name => $value) {
+		if ($name != 'p_'.$this->id && $name != $key && is_scalar($value)) {
+			print '<input type="hidden" name="'.sly_html($name).'" value="'.sly_html($value).'" />';
+		}
+	}
+
+	print '<input type="text" name="'.$key.'" value="'.sly_html($query).'" class="filter_input_'.$this->id.'" />';
+
+	print '</p>';
+	print '</form>';
+}
+
+$this->surroundingHTML = ob_get_clean();
+print $this->surroundingHTML;
+
+?>
+
+<table id="<?= $this->id ?>" class="rex-table sly-table">
+	<caption><!-- sort für runde Ecken --></caption>
+	<thead>
+		<tr class="nodrop nodrag">
+			<?
+			foreach ($this->columns as $idx => $col) {
+				$col->render($this, $idx);
+			}
+			?>
+		</tr>
+	</thead>
+	<tbody>

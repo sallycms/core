@@ -1,0 +1,46 @@
+<?
+/*
+ * Copyright (c) 2011, webvariants GbR, http://www.webvariants.de
+ *
+ * This file is released under the terms of the MIT license. You can find the
+ * complete text in the attached LICENSE file or online at:
+ *
+ * http://www.opensource.org/licenses/mit-license.php
+ */
+
+if (!isset($this->htmlAttributes['class'])) {
+	$this->htmlAttributes['class'] = '';
+}
+
+$isRexIcon = strpos($this->htmlAttributes['class'], 'sly-icon') !== false;
+$link      = '';
+
+if (!$isRexIcon && $table->isSorting() && !$table->hasDragAndDrop() && !empty($this->sortkey)) {
+	$params = array_map('stripslashes', $_GET);
+	unset($params['sortby'], $params['direction']);
+
+	$params['sortby'] = $this->sortkey;
+
+	switch ($this->direction) {
+		case 'asc':
+			$params['direction'] = 'desc';
+			$link = ' <a href="index.php?'.http_build_query($params, '', '&amp;').'"><img src="media/ascending.gif" alt="" title="Aufsteigend sortiert" /></a>';
+			break;
+		case 'desc':
+			$params['direction'] = 'asc';
+			$link = ' <a href="index.php?'.http_build_query($params, '', '&amp;').'"><img src="media/descending.gif" alt="" title="Absteigend sortiert" /></a>';
+			break;
+		case 'none':
+		default:
+			$params['direction'] = 'asc';
+			$link = ' <a href="index.php?'.http_build_query($params, '', '&amp;').'"><img src="media/nosort.gif" alt="" title="Keine Sortierung" /></a>';
+			break;
+	}
+
+	$this->htmlAttributes['class'] .= ' has-sort-icon';
+}
+
+$this->htmlAttributes['class'] .= ' sly-col-'.chr(97 + $index);
+
+?>
+<th <?= sly_Util_HTML::buildAttributeString($this->htmlAttributes) ?>><?= $this->content.$link ?></th>

@@ -16,7 +16,7 @@
  * @ingroup form
  * @author  Christoph
  */
-abstract class sly_Form_ElementBase {
+abstract class sly_Form_ElementBase extends sly_Viewable {
 	protected $label;         ///< string
 	protected $attributes;    ///< array
 	protected $helpText;      ///< string
@@ -291,8 +291,15 @@ abstract class sly_Form_ElementBase {
 	 */
 	protected function renderFilename($filename) {
 		ob_start();
-		include SLY_INCLUDE_PATH.'/views/_form/'.$filename;
+		$this->renderView($filename);
 		return ob_get_clean();
+	}
+
+	protected function getViewFile($file) {
+		$full = SLY_COREFOLDER.'/views/form/'.$file;
+		if (file_exists($full)) return $full;
+
+		throw new sly_Exception('View '.$file.' could not be found.');
 	}
 
 	/**

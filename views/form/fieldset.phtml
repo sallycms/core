@@ -1,0 +1,46 @@
+<?php
+/*
+ * Copyright (c) 2011, webvariants GbR, http://www.webvariants.de
+ *
+ * This file is released under the terms of the MIT license. You can find the
+ * complete text in the attached LICENSE file or online at:
+ *
+ * http://www.opensource.org/licenses/mit-license.php
+ */
+
+$id = $this->id ? ' id="'.sly_html($this->id).'"' : '';
+
+?>
+
+<fieldset class="rex-form-col-<?= $this->columns ?> sly-num<?= ($this->num-1) ?>"<?= $id ?>>
+	<legend class="rex-lgnd"><?= sly_html(rex_translate($this->legend)) ?></legend>
+	<div class="rex-form-wrapper">
+		<?php
+
+		$rowCount = count($this->rows);
+		$columns  = $this->columns;
+
+		foreach ($this->rows as $rowNum => $elements) {
+			if (count($elements) == 1 && reset($elements) instanceof sly_Form_Fragment) {
+				print reset($elements)->render();
+			}
+			else {
+				if ($this->isMultilingual($elements)) {
+					$this->renderView('row_i18n.phtml', compact('rowNum', 'elements', 'columns'));
+				}
+				else {
+					$this->renderView('row.phtml', compact('rowNum', 'elements', 'columns'));
+				}
+			}
+		}
+
+		$registry = sly_Core::getTempRegistry();
+
+		if ($this->isMultilingual() && sly_Util_Language::isMultilingual() && !$registry->has('sly.form.i18n.checkimg')) {
+			sly_Core::getLayout()->addJavaScriptFile('media/js/jquery.imgcheckbox.min.js');
+			$registry->set('sly.form.i18n.checkimg', true);
+		}
+
+		?>
+	</div>
+</fieldset>

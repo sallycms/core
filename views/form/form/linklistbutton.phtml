@@ -1,0 +1,60 @@
+<?php
+/*
+ * Copyright (c) 2011, webvariants GbR, http://www.webvariants.de
+ *
+ * This file is released under the terms of the MIT license. You can find the
+ * complete text in the attached LICENSE file or online at:
+ *
+ * http://www.opensource.org/licenses/mit-license.php
+ */
+
+$value  = sly_makeArray($this->getDisplayValue());
+$value  = array_filter($value);
+$name   = $this->getAttribute('name');
+$layout = sly_Core::getLayout();
+
+$layout->addJavaScriptFile('media/js/jquery.autocomplete.min.js');
+
+print '<span class="sly-widget sly-linklistbutton">';
+
+$values = array();
+
+foreach ($value as $idx => $id) {
+	$article = sly_Util_Article::findById($id);
+	if ($article) $values[$id] = $article->getName();
+}
+
+$select = new sly_Form_Select_DropDown('list_'.$name, '', null, $values);
+$select->setAttribute('class', 'sly-linklist');
+$select->setAttribute('readonly', 'readonly');
+$select->setMultiple(false);
+$select->setSize(8);
+
+print $select->render();
+print ' ';
+
+?>
+<span class="sly-icons">
+	<a href="#" rel="top"><img src="media/file_top.gif" title="an den Anfang schieben" alt="" /></a>
+	<a href="#" rel="up"><img src="media/file_up.gif" title="hoch schieben" alt="" /></a>
+	<a href="#" rel="down"><img src="media/file_down.gif" title="runter schieben" alt="" /></a>
+	<a href="#" rel="bottom"><img src="media/file_bottom.gif" title="an das Ende schieben" alt="" /></a>
+</span>
+<?
+
+// Verstecktes Element, das die IDs enthält
+
+$hidden = new sly_Form_Input_Text($name, '', implode(',', $value));
+$hidden->setAttribute('type', 'hidden');
+
+print $hidden->render();
+print ' ';
+
+// Filter-Eingabefeld
+
+$filter = new sly_Form_Input_Text('filter_'.$name, '', '');
+$filter->setAttribute('class', 'sly-link-filter');
+
+print $filter->render();
+print '<span class="rex-form-notice">Drücken Sie [Entf], um den ausgewählten Eintrag zu entfernen.</span>';
+print '</span>';

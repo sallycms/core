@@ -23,6 +23,6 @@ class sly_Layout_XHTML5 extends sly_Layout_XHTML {
 	}
 
 	public function printHeader() {
-		$this->renderView('views/layout/xhtml5/head.phtml');
+		$this->renderView('layout/xhtml5/head.phtml');
 	}
 }

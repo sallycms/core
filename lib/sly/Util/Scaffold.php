@@ -26,7 +26,7 @@ class sly_Util_Scaffold {
 		static $isScaffoldInit = false;
 
 		if (!$isScaffoldInit) {
-			$scaffoldBase = sly_Util_Directory::join(SLY_INCLUDE_PATH, 'lib', 'Scaffold');
+			$scaffoldBase = sly_Util_Directory::join(SLY_COREFOLDER, 'lib', 'Scaffold');
 			require_once $scaffoldBase.'/libraries/Bootstrap.php';
 
 			if (!defined('SCAFFOLD_PRODUCTION')) {

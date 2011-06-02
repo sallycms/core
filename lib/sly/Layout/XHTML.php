@@ -73,7 +73,7 @@ class sly_Layout_XHTML extends sly_Layout {
 	}
 
 	public function printHeader() {
-		$this->renderView('views/layout/xhtml/head.phtml');
+		$this->renderView('layout/xhtml/head.phtml');
 	}
 
 	private function printHeadElements($format, $data) {

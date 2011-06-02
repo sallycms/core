@@ -1,0 +1,61 @@
+<?php
+/*
+ * Copyright (c) 2011, webvariants GbR, http://www.webvariants.de
+ *
+ * This file is released under the terms of the MIT license. You can find the
+ * complete text in the attached LICENSE file or online at:
+ *
+ * http://www.opensource.org/licenses/mit-license.php
+ */
+
+$id = !empty($this->id) ? ' id="'.$this->id.'"' : '';
+?>
+<div style="margin-bottom:1em">
+	<div class="rex-form">
+		<form method="<?= strtolower($this->method) ?>" action="<?= sly_html($this->action) ?>"<?= $id ?>>
+			<? foreach ($this->fieldsets as $i => $fieldset): ?>
+			<fieldset class="rex-form-col-1">
+				<legend class="rex-lgnd"><?= sly_html($fieldset['title']) ?></legend>
+				<div class="rex-form-wrapper">
+
+				<?php
+
+				// Es reicht, die Daten im ersten Fieldset auszugeben...
+
+				if ($i == 0) {
+					foreach ($this->hiddenValues as $name => $value) {
+						print '<input type="hidden" name="'.sly_html($name).'" value="'.sly_html($value['value']).'"';
+						if (!empty($value['id'])) print ' id="'.sly_html($value['id']).'"';
+						print ' />'.PHP_EOL;
+						print "\t\t\t";
+					}
+				}
+
+				$elementCount = count($fieldset['elements']);
+				$hasButtonBar = $this->submitButton || $this->resetButton || $this->applyButton || $this->deleteButton;
+
+				foreach ($fieldset['elements'] as $x => $element) {
+					$isLast = $i == $this->currentFieldset && $x-1 == $elementCount && !$hasButtonBar;
+					include 'elementi18n.phtml';
+				}
+
+				if ($i == $this->currentFieldset && $hasButtonBar) {
+					$isLast = $i == $this->currentFieldset;
+					include 'buttons.phtml';
+				}
+				?>
+
+				</div>
+			</fieldset>
+			<? endforeach; ?>
+		</form>
+	</div>
+</div>
+
+<? if (!empty($this->focussedElement)): ?>
+<script type="text/javascript">
+// <[!CDATA[
+jQuery('#<?= $this->focussedElement ?>').focus();
+// ]]>
+</script>
+<? endif ?>

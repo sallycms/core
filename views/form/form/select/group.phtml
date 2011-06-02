@@ -1,0 +1,41 @@
+<?php
+/*
+ * Copyright (c) 2011, webvariants GbR, http://www.webvariants.de
+ *
+ * This file is released under the terms of the MIT license. You can find the
+ * complete text in the attached LICENSE file or online at:
+ *
+ * http://www.opensource.org/licenses/mit-license.php
+ */
+?>
+<span class="sly-select-<?= $type ?>-list sly-select-group" id="<?= sly_html($this->attributes['id']) ?>">
+	<?
+	$selected  = sly_makeArray($this->getDisplayValue());
+	$elementID = $this->attributes['id'];
+
+	foreach ($this->values as $key => $value) {
+		$checked  = in_array($key, $selected);
+		$id       = 'sly_autogen_'.$elementID.'_'.$key.'_id';
+		$attr     = array(
+			'type'    => $type,
+			'value'   => $key,
+			'id'      => $id,
+			'name'    => $this->attributes['name'].($type == 'radio' ? '' : '[]'),
+			'checked' => $checked ? 'checked' : '',
+			'class'   => 'rex-chckbx',
+			'style'   => isset($this->attributes['style']) ? $this->attributes['style'] : ''
+		);
+
+		print '<input '.sly_Util_HTML::buildAttributeString($attr).' /> ';
+		print '<label for="'.$id.'" class="sly-inline">'.sly_html($value).'</label><br />';
+		print "\n";
+	}
+	?>
+</span>
+
+<? if ($type == 'checkbox'): ?>
+<span class="sly-select-checkbox-list rex-form-notice">
+	<a rel="all" href="#">alle auswählen</a> |
+	<a rel="none" href="#">nichts auswählen</a>
+</span>
+<? endif ?>

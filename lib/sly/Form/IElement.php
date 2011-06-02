@@ -21,15 +21,6 @@ interface sly_Form_IElement {
 	public function getValue(); ///< @return string
 
 	/**
-	 * Renders the element
-	 *
-	 * This method renders the form element and returns its XHTML code.
-	 *
-	 * @return string  the XHTML code
-	 */
-	public function render();
-
-	/**
 	 * Adds a new CSS class
 	 *
 	 * This method will add a new CSS class to the element. Classes are

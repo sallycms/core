@@ -155,7 +155,7 @@ class sly_DB_Importer {
 		$hasTable = sly_DB_Persistence::getInstance()->listTables($prefix.'user');
 
 		if (!$hasTable) {
-			$createStmt = file_get_contents(SLY_INCLUDE_PATH.'/install/user.sql');
+			$createStmt = file_get_contents(SLY_COREFOLDER.'/install/user.sql');
 			$createStmt = str_replace('%PREFIX%', $prefix, $createStmt);
 
 			$db = sly_DB_Persistence::getInstance();
