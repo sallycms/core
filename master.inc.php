@@ -38,11 +38,7 @@ if (ini_get('register_globals')) {
 
 // So, jetzt haben wir eine saubere Grundlage für unsere Aufgaben.
 
-// Wir gehen davon aus, dass SLY_HTDOCS_PATH existiert. Das ist
-// eine Annahme die den Code hier schneller macht und vertretbar ist.
-// Wer das falsch setzt, hat es verdient, dass das Script nicht läuft.
-
-define('SLY_BASE',          realpath(SLY_HTDOCS_PATH));
+define('SLY_BASE',          realpath(dirname(__FILE__).'/../../'));
 define('SLY_SALLYFOLDER',   SLY_BASE.DIRECTORY_SEPARATOR.'sally');
 define('SLY_COREFOLDER',    SLY_SALLYFOLDER.DIRECTORY_SEPARATOR.'core');
 define('SLY_DATAFOLDER',    SLY_SALLYFOLDER.DIRECTORY_SEPARATOR.'data');
