@@ -131,8 +131,6 @@ abstract class sly_Controller_Base {
 		print $output;
 	}
 
-	abstract protected function getViewFolder();
-
 	protected function render($filename, $params = array()) {
 		global $REX, $I18N;
 
@@ -158,6 +156,7 @@ abstract class sly_Controller_Base {
 	protected function teardown() {
 	}
 
-	protected abstract function index();
-	protected abstract function checkPermission();
+	abstract protected function getViewFolder();
+	abstract protected function index();
+	abstract protected function checkPermission();
 }
