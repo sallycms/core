@@ -360,6 +360,8 @@ function rex_copyContent($from_id, $to_id, $from_clang = 0, $to_clang = 0, $from
 	));
 
 	rex_deleteCacheArticle($to_id, $to_clang);
+	sly_Core::cache()->flush(OOArticleSlice::CACHE_NS);
+
 	return true;
 }
 
