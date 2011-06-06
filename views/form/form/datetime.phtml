@@ -44,11 +44,16 @@ $formatJS   = str_replace(
 	array('D',  'DD', 'dd', 'd',  'oo', 'M',  'MM', 'M',  'mm', 'y',  'yy'),
 	$formatJS);
 
+// Datum und Zeit als HTML5-Attribut ablegen, damit wir die RFC-konforme Version
+// per JavaScript setzen können.
+
+$attrs['data-date']     = strftime('%Y-%m-%d', $value);
+$attrs['data-datetime'] = strftime('%Y-%m-%dT%H:%M:%S', $value);
+
 $attrs['class'] = 'rex-form-text';
-$attrs['type']  = 'text';
+$attrs['type']  = $this->withTime() ? 'datetime-local' : 'date';
 $attrs['name']  = $name;
 $attrs['id']    = $attrs['name'];
-$attrs['style'] = 'width:150px';
 $attrs['value'] = $value === null ? '' : sly_Util_String::formatStrftime($dateformat.($this->withTime() ? ' %H:%M' : ''), $value);
 
 print '<input '.sly_Util_HTML::buildAttributeString($attrs).' />';
@@ -81,14 +86,28 @@ if (!$registry->has('sly.form.datetime.links')) {
 ?>
 
 <script type="text/javascript">
-jQuery(function($) {
+var element = $('#<?= sly_html($name) ?>');
 <? if ($this->withTime()): ?>
-	$('#<?= sly_html($name) ?>').datetime({
-		dateFormat: '<?= addslashes($formatJS) ?>',
-		userLang: '<?= $locale ?>'
+
+if (!Modernizr.inputtypes['datetime-local']) {
+	jQuery(function() {
+		element.datetime({dateFormat: '<?= addslashes($formatJS) ?>', userLang: '<?= $locale ?>'});
 	});
+}
+else {
+	element.val(element.data('datetime'));
+}
+
 <? else: ?>
-	$('#<?= sly_html($name) ?>').datepicker({dateFormat: '<?= addslashes($formatJS) ?>'});
+
+if (!Modernizr.inputtypes.date) {
+	jQuery(function() {
+		element.datepicker({dateFormat: '<?= addslashes($formatJS) ?>'});
+	});
+}
+else {
+	element.val(element.data('date'));
+}
+
 <? endif ?>
-});
 </script>
