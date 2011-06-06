@@ -95,7 +95,7 @@ if (!Modernizr.inputtypes['datetime-local']) {
 	});
 }
 else {
-	element.val(element.data('datetime'));
+	element.val(element.data('datetime')).attr('step', 'any');
 }
 
 <? else: ?>
@@ -106,7 +106,7 @@ if (!Modernizr.inputtypes.date) {
 	});
 }
 else {
-	element.val(element.data('date'));
+	element.val(element.data('date')).attr('step', 'any');
 }
 
 <? endif ?>
