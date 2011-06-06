@@ -18,7 +18,8 @@
  * @author  Christoph
  */
 abstract class sly_Form_Input_Base extends sly_Form_ElementBase implements sly_Form_IElement {
-	protected $annotation; ///< string text that will be shown right next to the input
+	protected $annotation;  ///< string  text that will be shown right next to the input
+	protected $placeholder; ///< string  HTML5 placeholder attribute
 
 	/**
 	 * Constructor
@@ -43,7 +44,9 @@ abstract class sly_Form_Input_Base extends sly_Form_ElementBase implements sly_F
 	public function render() {
 		$this->addClass('rex-form-text');
 
-		$this->attributes['value'] = $this->getDisplayValue();
+		$this->attributes['value']       = $this->getDisplayValue();
+		$this->attributes['placeholder'] = $this->placeholder;
+
 		$attributeString = $this->getAttributeString();
 		return '<input '.$attributeString.' />'.($this->annotation ? ' '.$this->annotation : '');
 	}
@@ -117,5 +120,16 @@ abstract class sly_Form_Input_Base extends sly_Form_ElementBase implements sly_F
 	 */
 	public function setAnnotation($annotation) {
 		$this->annotation = trim($annotation);
+	}
+
+	/**
+	 * Sets the placeholder
+	 *
+	 * This method sets the placeholder attribute, defined in HTML5.
+	 *
+	 * @param string $placeholder  the new placeholder
+	 */
+	public function setPlaceholder($placeholder) {
+		$this->placeholder = trim($placeholder);
 	}
 }
