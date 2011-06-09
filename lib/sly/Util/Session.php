@@ -28,7 +28,7 @@ class sly_Util_Session {
 		To work around this limitation, we check for $_SESSION. This var will be
 		explicitely unset() by FullPageCache.
 		*/
-		if (!isset($_SESSION)) session_start();
+		if (!isset($_SESSION) || !session_id()) session_start();
 	}
 
 	/**
