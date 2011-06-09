@@ -122,18 +122,32 @@ class sly_I18N implements sly_I18N_Base {
 	 * @param  string $searchpath  zu duruchsuchender Ordner
 	 * @return array               Array von gefundenen Sprachen (locales)
 	 */
-	public function getLocales($searchpath) {
-		if ($this->locales === null && is_readable($searchpath)) {
-			$this->locales = array();
+	public static function getLocales($searchpath) {
+		static $cache = array();
 
-			$files = glob($searchpath.'/*.yml');
+		$searchpath = realpath($searchpath);
+
+		if ($searchpath !== false && !isset($cache[$searchpath])) {
+			$locales = array();
+			$files   = glob($searchpath.'/*.yml');
 
 			foreach ($files as $filename) {
 				// von 'C:\foo\bar.yml' nur 'bar' speichern
-				$this->locales[] = substr(basename($filename), 0, -4);
+				$locales[] = substr(basename($filename), 0, -4);
 			}
+
+			$cache[$searchpath] = $locales;
 		}
 
-		return $this->locales === null ? array() : $this->locales;
+		return $cache[$searchpath];
+	}
+
+	/**
+	 * Return the locale code of this instance
+	 *
+	 * @return string  the locale code (like 'de_de')
+	 */
+	public function getLocale() {
+		return $this->locale;
 	}
 }

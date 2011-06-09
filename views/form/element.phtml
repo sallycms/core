@@ -10,10 +10,10 @@
 
 $char        = chr(97 + $column);
 $outerClass  = array('rex-form-col-'.$char, $element->getOuterClass());
-$help        = $element->getHelpText() ? '<span class="rex-form-notice">'.nl2br(sly_html($element->getHelpText())).'</span>' : '';
+$help        = $element->getHelpText() ? '<span class="rex-form-notice">'.nl2br(rex_translate($element->getHelpText())).'</span>' : '';
 $isContainer = $element->isContainer();
 $label       = $element->getLabel();
-$label       = empty($label) ? '&nbsp;' : sly_html(rex_translate($label, null, false).':');
+$label       = empty($label) ? '&nbsp;' : rex_translate($label).':';
 $label       = preg_replace('#\*\*(.*?)\*\*#i', '<strong>$1</strong>', $label);
 $label       = preg_replace('#__(.*?)__#i', '<em>$1</em>', $label);
 $label       = preg_replace('#//(.*?)//#i', '<em>$1</em>', $label);
