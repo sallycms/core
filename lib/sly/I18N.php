@@ -21,15 +21,37 @@ class sly_I18N implements sly_I18N_Base {
 	/**
 	 * Constructor
 	 *
-	 * @param string $locale      locale name (like 'de_de')
-	 * @param string $searchpath  path to .yml file
+	 * @param string  $locale      locale name (like 'de_de')
+	 * @param string  $searchpath  path to .yml file
+	 * @param boolean $setlocale   when true the locale will be set via setlocale()
 	 */
-	public function __construct($locale, $searchpath) {
+	public function __construct($locale, $searchpath, $setlocale = true) {
 		$this->searchpath  = $searchpath;
 		$this->texts       = array();
 		$this->locale      = $locale;
 		$this->locales     = null;
 		$this->text_loaded = false;
+
+		if ($setlocale) {
+			$this->setLocale();
+		}
+	}
+
+	/**
+	 * setlocale() wrapper
+	 */
+	public function setLocale() {
+		$locales = array();
+
+		foreach (explode(',', $this->msg('setlocale')) as $locale) {
+			$locales[] = $locale.'.UTF-8';
+			$locales[] = $locale.'.UTF8';
+			$locales[] = $locale.'.utf-8';
+			$locales[] = $locale.'.utf8';
+			$locales[] = $locale;
+		}
+
+		setlocale(LC_ALL, $locales);
 	}
 
 	/**

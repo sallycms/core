@@ -196,8 +196,8 @@ class OOArticleSlice {
 		return $content;
 	}
 
-		public function printContent() {
-		global $REX, $I18N;
+	public function printContent() {
+		global $REX;
 
 		$cachedir = SLY_DYNFOLDER.'/internal/sally/article_slice/';
 		sly_Util_Directory::create($cachedir);

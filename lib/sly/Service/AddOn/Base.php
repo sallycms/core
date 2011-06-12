@@ -26,7 +26,7 @@ abstract class sly_Service_AddOn_Base {
 	abstract protected function getConfPath($component);
 
 	/**
-	 * Include file with $REX and $I18N available
+	 * Include file with $REX available
 	 *
 	 * This prevents the included file from messing with the variables of the
 	 * surrounding code.
@@ -34,7 +34,7 @@ abstract class sly_Service_AddOn_Base {
 	 * @param string $filename
 	 */
 	protected function req($filename) {
-		global $REX, $I18N; // Nötig damit im Addon verfügbar
+		global $REX;
 		require $filename;
 	}
 
