@@ -23,7 +23,7 @@ abstract class sly_Viewable {
 	 * @param array  $params
 	 */
 	protected function renderView($filename, $params = array()) {
-		global $REX, $I18N;
+		global $REX;
 
 		// Die Parameternamen $params und $filename sind zu kurz, als dass
 		// man sie zuverlässig nutzen könnte. Wenn $params durch extract()

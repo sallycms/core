@@ -13,25 +13,6 @@
  * @package redaxo4
  */
 
-/**
- * setlocale() wrapper
- *
- * @param sly_I18N $i18n
- */
-function sly_set_locale(sly_I18N $i18n) {
-	$locales = array();
-
-	foreach (explode(',', $i18n->msg('setlocale')) as $locale) {
-		$locales[] = $locale.'.UTF-8';
-		$locales[] = $locale.'.UTF8';
-		$locales[] = $locale.'.utf-8';
-		$locales[] = $locale.'.utf8';
-		$locales[] = $locale;
-	}
-
-	setlocale(LC_ALL, $locales);
-}
-
 function rex_message($message, $cssClass, $sorroundTag) {
 	$return = '<div class="rex-message"><'.$sorroundTag.' class="'.$cssClass.'">';
 

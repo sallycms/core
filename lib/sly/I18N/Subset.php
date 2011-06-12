@@ -26,8 +26,8 @@ class sly_I18N_Subset implements sly_I18N_Base {
 	 * @return sly_I18N_Subset
 	 */
 	public static function create($prefix) {
-		global $I18N;
-		return new self($I18N, $prefix);
+		$i18n = sly_Core::getI18N();
+		return new self($i18n, $prefix);
 	}
 
 	public function msg($key)          { return $this->container->msg($this->prefix.$key);          }

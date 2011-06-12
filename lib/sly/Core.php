@@ -19,6 +19,7 @@ class sly_Core {
 	private $varTypes;
 	private $layout;
 	private $navigation;
+	private $i18n;
 
 	private function __construct() {
 		$this->cache = sly_Cache::factory();
@@ -193,9 +194,11 @@ class sly_Core {
 	}
 
 	public static function getI18N() {
-		global $I18N;
-		if (!isset($I18N)) $I18N = rex_create_lang();
-		return $I18N;
+		return self::getInstance()->i18n;
+	}
+
+	public static function setI18N(sly_I18N $i18n) {
+		self::getInstance()->i18n = $i18n;
 	}
 
 	/**
