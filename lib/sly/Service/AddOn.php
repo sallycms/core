@@ -17,8 +17,6 @@
  * @ingroup service
  */
 class sly_Service_AddOn extends sly_Service_AddOn_Base {
-	protected static $addonsLoaded = array(); ///< array  list of loaded addOns for depedency aware loading
-
 	public function baseFolder($addonName) {
 		$dir = SLY_ADDONFOLDER.DIRECTORY_SEPARATOR;
 		if (!empty($addonName)) $dir .= $addonName.DIRECTORY_SEPARATOR;
@@ -94,28 +92,7 @@ class sly_Service_AddOn extends sly_Service_AddOn_Base {
 	}
 
 	public function loadAddon($addonName) {
-		if (in_array($addonName, self::$addonsLoaded)) return true;
-
-		$this->loadConfig($addonName);
-
-		if ($this->isAvailable($addonName)) {
-			$requires = $this->getProperty($addonName, 'requires');
-
-			if (!empty($requires)) {
-				if (!is_array($requires)) $requires = sly_makeArray($requires);
-
-				foreach ($requires as $requiredAddon) {
-					$this->loadAddon($requiredAddon);
-				}
-			}
-
-			$this->checkUpdate($addonName);
-
-			$addonConfig = $this->baseFolder($addonName).'config.inc.php';
-			$this->req($addonConfig);
-
-			self::$addonsLoaded[] = $addonName;
-		}
+		return $this->load($addonName);
 	}
 
 	protected function getI18NPrefix() {
@@ -124,59 +101,6 @@ class sly_Service_AddOn extends sly_Service_AddOn_Base {
 
 	protected function getVersionKey($addon) {
 		return 'addons/'.$addon;
-	}
-
-	public function getDependencies($addonName, $onlyMissing = false) {
-		return $this->dependencyHelper($addonName, $onlyMissing);
-	}
-
-	public function dependencyHelper($addonName, $onlyMissing = false, $onlyFirst = false) {
-		$addonService  = sly_Service_Factory::getAddOnService();
-		$pluginService = sly_Service_Factory::getPluginService();
-		$addons        = $addonService->getAvailableAddons();
-		$result        = array();
-
-		if (!$this->isAvailable($addonName)) {
-			$this->loadConfig($addonName);
-		}
-
-		foreach ($addons as $addon) {
-			// don't check yourself
-			if ($addonName == $addon) continue;
-
-			$requires = sly_makeArray($this->getProperty($addon, 'requires'));
-			$inArray  = in_array($addonName, $requires);
-
-			if ($inArray && $onlyFirst) {
-				return array($addon);
-			}
-
-			if (!$onlyMissing || $inArray) {
-				$result[] = $addon;
-			}
-
-			$plugins = $pluginService->getAvailablePlugins($addon);
-
-			foreach ($plugins as $plugin) {
-				$requires = sly_makeArray($pluginService->getProperty(array($addon, $plugin), 'requires'));
-				$inArray  = in_array($addonName, $requires);
-
-				if ($inArray && $onlyFirst) {
-					return array(array($addon, $plugin));
-				}
-
-				if (!$onlyMissing || $inArray) {
-					$result[] = array($addon, $plugin);
-				}
-			}
-		}
-
-		return $onlyFirst ? reset($result) : $result;
-	}
-
-	public function isRequired($addonName) {
-		$dependency = $this->dependencyHelper($addonName, true, true);
-		return empty($dependency) ? false : reset($dependency);
 	}
 
 	/**

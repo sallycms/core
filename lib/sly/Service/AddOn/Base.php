@@ -13,6 +13,8 @@
  * @ingroup service
  */
 abstract class sly_Service_AddOn_Base {
+	protected static $loaded = array(); ///< array  list of loaded addOns and plugins for depedency aware loading
+
 	abstract public function baseFolder($component);
 	abstract public function setProperty($component, $property, $value);
 	abstract public function getProperty($component, $property, $default = null);
@@ -178,13 +180,10 @@ abstract class sly_Service_AddOn_Base {
 			$this->loadStatic($component); // static.yml
 		}
 
-		$requires = sly_makeArray($this->getProperty($component, 'requires'));
-		$aService = sly_Service_Factory::getAddOnService();
+		$msg = $this->checkDependencies($component);
 
-		foreach ($requires as $requiredAddon) {
-			if (!$this->isAvailable($requiredAddon)) {
-				return $this->I18N('addon_required', $requiredAddon, $componentName);
-			}
+		if ($msg !== true) {
+			return $msg;
 		}
 
 		// check Sally version
@@ -265,17 +264,17 @@ abstract class sly_Service_AddOn_Base {
 			return $this->deactivate($component);
 		}
 
-		// check for dependencies (only for addOns)
+		// check for dependencies
 
-		if (is_string($component)) {
-			if ($this->isActivated($component)) {
-				$dependencies = $this->getDependencies($component, true);
+		if ($this->isActivated($component)) {
+			$dependencies = $this->getDependencies($component, true);
 
-				if (!empty($dependencies)) {
-					$dep = reset($dependencies);
-					$msg = is_array($dep) ? 'addon_plugin_required' : 'addon_addon_required';
-					return t($msg, $addonName, is_array($dep) ? reset($dep).'/'.end($dep) : $dep);
-				}
+			if (!empty($dependencies)) {
+				$dep  = reset($dependencies);
+				$msg  = is_array($dep) ? 'requires_plugin' : 'requires_addon';
+				$comp = is_array($component) ? implode('/', $component) : $component;
+
+				return $this->I18N($msg, $comp, is_array($dep) ? implode('/', $dep) : $dep);
 			}
 		}
 
@@ -352,18 +351,10 @@ abstract class sly_Service_AddOn_Base {
 
 		$this->loadStatic($component);
 
-		$requires     = sly_makeArray($this->getProperty($component, 'requires'));
-		$addonService = sly_Service_Factory::getAddOnService();
+		$msg = $this->checkDependencies($component);
 
-		foreach ($requires as $requiredAddon) {
-			if (!$addonService->isAvailable($requiredAddon)) {
-				if (is_array($component)) {
-					return t('addon_plugin_required', $requiredAddon, end($component));
-				}
-				else {
-					return t('addon_addon_required', $requiredAddon, $component);
-				}
-			}
+		if ($msg !== true) {
+			return $msg;
 		}
 
 		$state = $this->extend('PRE', 'ACTIVATE', $component, true);
@@ -389,18 +380,16 @@ abstract class sly_Service_AddOn_Base {
 			return true;
 		}
 
-		// Requirement check works only for addOns since you cannot specify plugin dependencies
-		// in static.yml (yet?). BUT we have to check plugins for their dependencies.
+		// Check if this component is required
 
-		if (!is_array($component)) {
-			$addonService = sly_Service_Factory::getAddOnService();
-			$dependencies = $addonService->getDependencies($component, true);
+		$dependencies = $this->getDependencies($component, true);
 
-			if (!empty($dependencies)) {
-				$dep = reset($dependencies);
-				$msg = is_array($dep) ? 'addon_plugin_required' : 'addon_addon_required';
-				return t($msg, $component, is_array($dep) ? reset($dep).'/'.end($dep) : $dep);
-			}
+		if (!empty($dependencies)) {
+			$dep  = reset($dependencies);
+			$msg  = is_array($dep) ? 'requires_plugin' : 'requires_addon';
+			$comp = is_array($component) ? implode('/', $component) : $component;
+
+			return $this->I18N($msg, $comp, is_array($dep) ? implode('/', $dep) : $dep);
 		}
 
 		$state = $this->extend('PRE', 'DEACTIVATE', $component, true);
@@ -677,5 +666,147 @@ abstract class sly_Service_AddOn_Base {
 		}
 
 		return true;
+	}
+
+	private function checkDependencies($component) {
+		$requires      = sly_makeArray($this->getProperty($component, 'requires'));
+		$aService      = sly_Service_Factory::getAddOnService();
+		$pService      = sly_Service_Factory::getPluginService();
+		$componentName = is_array($component) ? implode('/', $component) : $component;
+
+		foreach ($requires as $requiredComponent) {
+			$requirement = explode('/', $requiredComponent, 2);
+
+			if (count($requirement) === 1 && !$aService->isAvailable($requirement[0])) {
+				return $this->I18N('requires_addon', $requirement[0], $componentName);
+			}
+
+			if (count($requirement) === 2 && !$pService->isAvailable($requirement)) {
+				return $this->I18N('requires_plugin', $requiredComponent, $componentName);
+			}
+		}
+
+		return true;
+	}
+
+	/**
+	 * Returns a list of dependent components
+	 *
+	 * This method will go through all addOns and plugins and check whether they
+	 * require the given component.
+	 *
+	 * @param  mixed   $component    addOn as string, plugin as array
+	 * @param  boolean $onlyMissing  if true, only not available components will be returned
+	 * @return array                 a list of components (containing strings for addOns and arrays for plugins)
+	 */
+	public function getDependencies($component, $onlyMissing = false) {
+		return $this->dependencyHelper($component, $onlyMissing);
+	}
+
+	/**
+	 * Returns a list of dependent components
+	 *
+	 * This method will go through all addOns and plugins and check whether they
+	 * require the given component. The return value will only contain direct
+	 * dependencies, it's not recursive.
+	 *
+	 * @param  mixed   $component    addOn as string, plugin as array
+	 * @param  boolean $onlyMissing  if true, only not available components will be returned
+	 * @param  boolean $onlyFirst    set this to true if you're only want to know whether a dependency exists
+	 * @return array                 a list of components (containing strings for addOns and arrays for plugins)
+	 */
+	public function dependencyHelper($component, $onlyMissing = false, $onlyFirst = false) {
+		$addonService  = sly_Service_Factory::getAddOnService();
+		$pluginService = sly_Service_Factory::getPluginService();
+		$addons        = $addonService->getAvailableAddons();
+		$result        = array();
+		$compAsString  = is_array($component) ? implode('/', $component) : $component;
+
+		if (!$this->isAvailable($component)) {
+			$this->loadConfig($component);
+		}
+
+		foreach ($addons as $addon) {
+			// don't check yourself
+			if ($compAsString === $addon) continue;
+
+			$requires = sly_makeArray($this->getProperty($addon, 'requires'));
+			$inArray  = in_array($compAsString, $requires);
+
+			if ($inArray && $onlyFirst) {
+				return array($addon);
+			}
+
+			if (!$onlyMissing || $inArray) {
+				$result[] = $addon;
+			}
+
+			$plugins = $pluginService->getAvailablePlugins($addon);
+
+			foreach ($plugins as $plugin) {
+				$requires = sly_makeArray($pluginService->getProperty(array($addon, $plugin), 'requires'));
+				$inArray  = in_array($compAsString, $requires);
+
+				if ($inArray && $onlyFirst) {
+					return array(array($addon, $plugin));
+				}
+
+				if (!$onlyMissing || $inArray) {
+					$result[] = array($addon, $plugin);
+				}
+			}
+		}
+
+		return $onlyFirst ? reset($result) : $result;
+	}
+
+	/**
+	 * Check if a component is required
+	 *
+	 * @param  mixed $component  addOn as string, plugin as array
+	 * @return mixed             false if not required, else the first found dependency
+	 */
+	public function isRequired($component) {
+		$dependency = $this->dependencyHelper($component, true, true);
+		return empty($dependency) ? false : reset($dependency);
+	}
+
+	protected function load($component) {
+		$addonService  = sly_Service_Factory::getAddOnService();
+		$pluginService = sly_Service_Factory::getPluginService();
+		$compAsString  = is_array($component) ? implode('/', $component) : $component;
+
+		if (in_array($compAsString, self::$loaded)) {
+			return true;
+		}
+
+		$this->loadConfig($component);
+
+		if ($this->isAvailable($component)) {
+			$requires = $this->getProperty($component, 'requires');
+
+			if (!empty($requires)) {
+				if (!is_array($requires)) $requires = sly_makeArray($requires);
+
+				foreach ($requires as $required) {
+					$required = explode('/', $required, 2);
+
+					// first load the addon
+					$this->load($required[0]);
+
+					// then the plugin
+					if (count($required) === 2) {
+						$this->load($required);
+					}
+				}
+			}
+
+			$this->checkUpdate($component);
+
+			$configFile = $this->baseFolder($component).'config.inc.php';
+			$this->req($configFile);
+
+			self::$loaded[] = $compAsString;
+		}
 	}
 }
