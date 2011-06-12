@@ -191,7 +191,7 @@ class OOMedia {
 
 		if (!$this->isImage()) {
 			$path = 'assets/';
-			$file = 'file_dummy.gif';
+			$file = 'file_dummy.png';
 
 			if (self::$dummeFileSize === null) {
 				self::$dummeFileSize = getimagesize($path.$file);
@@ -372,12 +372,12 @@ class OOMedia {
 	public function getIcon($useDefaultIcon = true) {
 		$ext    = $this->getExtension();
 		$folder = SLY_HTDOCS_PATH.'sally/backend/assets/';
-		$icon   = $folder.'mime-'.$ext.'.gif';
+		$icon   = $folder.'mime-'.$ext.'.png';
 
 		// Dateityp für den kein Icon vorhanden ist
 
 		if (!file_exists($icon)) {
-			$icon = $folder.($useDefaultIcon ? 'mime-default.gif' : 'mime-error.gif');
+			$icon = $folder.($useDefaultIcon ? 'mime-default.png' : 'mime-error.png');
 		}
 
 		return $icon;
