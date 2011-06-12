@@ -363,7 +363,7 @@ class sly_Service_Article extends sly_Service_Model_Base {
 			if ($categoryId !== 0) {
 				$category = sly_Service_Factory::getCategoryService()->findById($categoryId, $clangId);
 
-				if (!$ignore_offlines || ($ignore_offlines && $category->isOnline())) {
+				if ($category && (!$ignore_offlines || ($ignore_offlines && $category->isOnline()))) {
 					array_unshift($alist, $category->getId());
 				}
 			}
