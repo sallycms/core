@@ -24,16 +24,16 @@ if (!$isRexIcon && $table->isSorting() && !$table->hasDragAndDrop() && !empty($t
 	switch ($this->direction) {
 		case 'asc':
 			$params['direction'] = 'desc';
-			$link = ' <a href="index.php?'.http_build_query($params, '', '&amp;').'"><img src="assets/ascending.gif" alt="" title="Aufsteigend sortiert" /></a>';
+			$link = ' <a href="index.php?'.http_build_query($params, '', '&amp;').'"><img src="assets/ascending.png" alt="" title="Aufsteigend sortiert" /></a>';
 			break;
 		case 'desc':
 			$params['direction'] = 'asc';
-			$link = ' <a href="index.php?'.http_build_query($params, '', '&amp;').'"><img src="assets/descending.gif" alt="" title="Absteigend sortiert" /></a>';
+			$link = ' <a href="index.php?'.http_build_query($params, '', '&amp;').'"><img src="assets/descending.png" alt="" title="Absteigend sortiert" /></a>';
 			break;
 		case 'none':
 		default:
 			$params['direction'] = 'asc';
-			$link = ' <a href="index.php?'.http_build_query($params, '', '&amp;').'"><img src="assets/nosort.gif" alt="" title="Keine Sortierung" /></a>';
+			$link = ' <a href="index.php?'.http_build_query($params, '', '&amp;').'"><img src="assets/nosort.png" alt="" title="Keine Sortierung" /></a>';
 			break;
 	}
 
