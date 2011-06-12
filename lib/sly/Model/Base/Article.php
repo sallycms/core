@@ -240,7 +240,7 @@ class sly_Model_Base_Article extends sly_Model_Base {
 				$clangString = $divider.'clang='.$clang;
 			}
 
-			$url = $config->get('FRONTEND_FILE').'?article_id='.$id.$clangString.$paramString;
+			$url = 'index.php?article_id='.$id.$clangString.$paramString;
 		}
 
 		$urlCache[$cacheKey] = $url;
