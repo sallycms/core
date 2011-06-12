@@ -123,13 +123,7 @@ class sly_Service_Plugin extends sly_Service_AddOn_Base {
 	}
 
 	public function loadPlugin($plugin) {
-		$this->loadConfig($plugin);
-		if($this->isAvailable($plugin)) {
-			$this->checkUpdate($plugin);
-
-			$pluginConfig = $this->baseFolder($plugin).'config.inc.php';
-			$this->req($pluginConfig);
-		}
+		return $this->load($plugin);
 	}
 
 	protected function getI18NPrefix() {
