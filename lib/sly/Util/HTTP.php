@@ -27,7 +27,7 @@ class sly_Util_HTTP {
 			$noticeText = t('redirect_to', sly_html($targetUrl));
 		}
 
-		$stati  = array(301 => 'Moved Permanently', 302 => 'Found', 303 => 'See Other', 401 => 'Unauthorized');
+		$stati  = array(301 => 'Moved Permanently', 302 => 'Found', 303 => 'See Other');
 		$status = isset($stati[$status]) ? $status : 301;
 		$text   = $stati[$status];
 
