@@ -1,4 +1,4 @@
-<?
+<?php
 /*
  * Copyright (c) 2011, webvariants GbR, http://www.webvariants.de
  *
@@ -21,7 +21,7 @@ if (!sly_Table::isDragAndDropMode() && $hasPager) {
 	$pager = new sly_Util_Pager($currentPage, $this->totalElements, self::$perPage);
 	$pager = $pager->getHTMLString($_GET, 'p_'.$tableID);
 
-	print '<p class="sly-table-extras-pager">Seiten: '.$pager.'</p>';
+	print '<p class="sly-table-extras-pager">'.t('pages').': '.$pager.'</p>';
 }
 
 if ($this->enableDragAndDrop && ($hasSearch || $hasPager)) {
@@ -33,12 +33,12 @@ if ($this->enableDragAndDrop && ($hasSearch || $hasPager)) {
 	if (sly_Table::isDragAndDropMode()) {
 		unset($params['tableswitch']);
 		$params = http_build_query($params, '', '&amp;');
-		print '<p class="sly-table-extras-sorting"><a href="index.php?'.$params.'">Sortiermodus beenden</a></p>';
+		print '<p class="sly-table-extras-sorting"><a href="index.php?'.$params.'">'.t('end_sorting').'</a></p>';
 	}
 	else {
 		$params['tableswitch'] = 'dodraganddrop';
 		$params = http_build_query($params, '', '&amp;');
-		print '<p class="sly-table-extras-sorting"><a href="index.php?'.$params.'">Tabelle sortieren</a></p>';
+		print '<p class="sly-table-extras-sorting"><a href="index.php?'.$params.'">'.t('begin_sorting').'</a></p>';
 	}
 }
 
@@ -47,7 +47,7 @@ if (!sly_Table::isDragAndDropMode() && $hasSearch) {
 	$query = sly_get($key, 'string');
 
 	print '<form method="get" action="index.php">';
-	print '<p class="sly-table-extras-filter">Filter: ';
+	print '<p class="sly-table-extras-filter">'.t('filter').': ';
 
 	foreach ($_GET as $name => $value) {
 		if ($name != 'p_'.$this->id && $name != $key && is_scalar($value)) {
@@ -67,7 +67,7 @@ print $this->surroundingHTML;
 ?>
 
 <table id="<?= $this->id ?>" class="rex-table sly-table">
-	<caption><!-- sort für runde Ecken --></caption>
+	<caption><!-- sorgt für runde Ecken --></caption>
 	<thead>
 		<tr class="nodrop nodrag">
 			<?
