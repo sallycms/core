@@ -1,4 +1,4 @@
-<?
+<?php
 /*
  * Copyright (c) 2011, webvariants GbR, http://www.webvariants.de
  *
@@ -24,16 +24,16 @@ if (!$isRexIcon && $table->isSorting() && !$table->hasDragAndDrop() && !empty($t
 	switch ($this->direction) {
 		case 'asc':
 			$params['direction'] = 'desc';
-			$link = ' <a href="index.php?'.http_build_query($params, '', '&amp;').'"><img src="assets/ascending.png" alt="" title="Aufsteigend sortiert" /></a>';
+			$link = ' <a href="index.php?'.http_build_query($params, '', '&amp;').'"><img src="assets/ascending.png" alt="" title="'.t('sort_asc').'" /></a>';
 			break;
 		case 'desc':
 			$params['direction'] = 'asc';
-			$link = ' <a href="index.php?'.http_build_query($params, '', '&amp;').'"><img src="assets/descending.png" alt="" title="Absteigend sortiert" /></a>';
+			$link = ' <a href="index.php?'.http_build_query($params, '', '&amp;').'"><img src="assets/descending.png" alt="" title="'.t('sort_desc').'" /></a>';
 			break;
 		case 'none':
 		default:
 			$params['direction'] = 'asc';
-			$link = ' <a href="index.php?'.http_build_query($params, '', '&amp;').'"><img src="assets/nosort.png" alt="" title="Keine Sortierung" /></a>';
+			$link = ' <a href="index.php?'.http_build_query($params, '', '&amp;').'"><img src="assets/nosort.png" alt="" title="'.t('sort_none').'" /></a>';
 			break;
 	}
 
