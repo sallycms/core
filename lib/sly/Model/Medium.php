@@ -14,7 +14,7 @@
  * @author  christoph@webvariants.de
  * @ingroup model
  */
-class sly_Model_Media_Medium extends sly_Model_Base_Id {
+class sly_Model_Medium extends sly_Model_Base_Id {
 	protected $updateuser;
 	protected $category_id;
 	protected $revision;

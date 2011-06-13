@@ -122,4 +122,18 @@ abstract class sly_Service_Factory {
 	public static function getAssetService() {
 		return self::getService('Asset');
 	}
+
+	/**
+	 * @return sly_Service_Medium  The medium service instance
+	 */
+	public static function getMediumService() {
+		return self::getService('Medium');
+	}
+
+	/**
+	 * @return sly_Service_MediaCategory  The media category service instance
+	 */
+	public static function getMediaCategoryService() {
+		return self::getService('MediaCategory');
+	}
 }

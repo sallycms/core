@@ -46,7 +46,7 @@ abstract class sly_Form_Helper {
 			$rootCats = OOMediaCategory::getRootCategories();
 		}
 		else {
-			$service  = sly_Service_Factory::getService('Media_Category');
+			$service  = sly_Service_Factory::getMediaCategoryService();
 			$rootCat  = $service->findById((int) $root);
 			$rootCats = $rootCat ? array($rootCat) : null;
 		}
