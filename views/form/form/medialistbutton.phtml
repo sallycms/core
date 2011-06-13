@@ -10,7 +10,7 @@
 
 $id    = $this->getWidgetID();
 $files = sly_makeArray($this->getDisplayValue());
-$files  = empty($files) ? array() : array_filter($files);
+$files = empty($files) ? array() : array_filter($files);
 
 $this->consumeWidgetID();
 
@@ -25,15 +25,15 @@ $this->consumeWidgetID();
 		?>
 	</select>
 	<span class="sly-icons">
-		<a href="#" onclick="moveREXMedialist(<?= $id ?>, 'top'); return false;"><img src="assets/file_top.png" title="Ganz Hoch schieben" alt="Ganz Hoch schieben" /></a>
-		<a href="#" onclick="moveREXMedialist(<?= $id ?>, 'up'); return false;"><img src="assets/file_up.png" title="Hoch schieben" alt="Hoch schieben" /></a>
-		<a href="#" onclick="moveREXMedialist(<?= $id ?>, 'down'); return false;"><img src="assets/file_down.png" title="Runter schieben" alt="Runter schieben" /></a>
-		<a href="#" onclick="moveREXMedialist(<?= $id ?>, 'bottom'); return false;" style="margin-right:2em"><img src="assets/file_bottom.png" title="Ganz runter schieben" alt="Ganz runter schieben" /></a>
+		<a href="#" onclick="moveREXMedialist(<?= $id ?>, 'top'); return false;"><img src="assets/file_top.png" title="<?= t('var_medialist_move_top') ?>" alt="" /></a>
+		<a href="#" onclick="moveREXMedialist(<?= $id ?>, 'up'); return false;"><img src="assets/file_up.png" title="<?= t('var_medialist_move_up') ?>" alt="" /></a>
+		<a href="#" onclick="moveREXMedialist(<?= $id ?>, 'down'); return false;"><img src="assets/file_down.png" title="<?= t('var_medialist_move_down') ?>" alt="" /></a>
+		<a href="#" onclick="moveREXMedialist(<?= $id ?>, 'bottom'); return false;" style="margin-right:2em"><img src="assets/file_bottom.png" title="<?= t('var_medialist_move_bottom') ?>" alt="" /></a>
 	</span>
 
 	<span class="sly-icons">
-		<a href="#" onclick="openREXMedialist(<?= $id ?>); return false;"><img src="assets/file_open.png" title="Medium öffnen" alt="Medium öffnen" /></a>
-		<a href="#" onclick="addREXMedialist(<?= $id ?>); return false;"><img src="assets/file_add.png" title="Medium hinzufügen" alt="Medium hinzufügen" /></a>
-		<a href="#" onclick="deleteREXMedialist(<?= $id ?>); return false;"><img src="assets/file_del.png" title="Medium entfernen" alt="Medium entfernen" /></a>
+		<a href="#" onclick="openREXMedialist(<?= $id ?>); return false;"><img src="assets/file_open.png" title="<?= t('var_media_open') ?>" alt="" /></a>
+		<a href="#" onclick="addREXMedialist(<?= $id ?>); return false;"><img src="assets/file_add.png" title="<?= t('var_media_new') ?>" alt="" /></a>
+		<a href="#" onclick="deleteREXMedialist(<?= $id ?>); return false;"><img src="assets/file_del.png" title="<?= t('var_media_remove') ?>" alt="" /></a>
 	</span>
 </span>
