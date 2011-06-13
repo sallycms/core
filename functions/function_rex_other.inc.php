@@ -116,21 +116,3 @@ function rex_split_string($string) {
 
 	return $result;
 }
-
-function rex_highlight_string($string, $return = false) {
-	return _rex_highlight($string, $return, 'highlight_string');
-}
-
-function rex_highlight_file($filename, $return = false) {
-	return _rex_highlight($filename, $return, 'highlight_file');
-}
-
-function _rex_highlight($arg1, $return, $func) {
-	$s = '<p class="rex-code">'.$func($arg1, true).'</p>';
-
-	if ($return) {
-		return $s;
-	}
-
-	print $s;
-}
