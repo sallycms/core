@@ -93,12 +93,12 @@ abstract class sly_Form_Base extends sly_Viewable {
 	/**
 	 * Returns the form as rendered XHTML
 	 *
-	 * This is just a convenience wrapper for calling render() with false.
+	 * This is just a convenience wrapper.
 	 *
 	 * @return string  the rendered form
 	 */
 	public function __toString() {
-		return $this->render(false);
+		return $this->render();
 	}
 
 	/**
@@ -140,6 +140,16 @@ abstract class sly_Form_Base extends sly_Viewable {
 		return false;
 	}
 
+	/**
+	 * Get the full path for a view
+	 *
+	 * This methods prepends the filename of a specific view with its path. If
+	 * the view is not found inside the core, an exception is thrown.
+	 *
+	 * @throws sly_Exception  if the view could not be found
+	 * @param  string $file   the relative filename
+	 * @return string         the full path to the view file
+	 */
 	protected function getViewFile($file) {
 		$full = SLY_COREFOLDER.'/views/form/'.$file;
 		if (file_exists($full)) return $full;

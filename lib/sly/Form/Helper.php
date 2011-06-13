@@ -35,7 +35,7 @@ abstract class sly_Form_Helper {
 	 */
 	public static function getMediaCategorySelect($name, $root = null, sly_Model_User $user = null, $id = null) {
 		if (!self::$i18nLoaded) {
-			sly_Core::getI18N()->appendFile(SLY_COREFOLDER.'/lang/pages/mediapool/');
+			sly_Core::getI18N()->appendFile(SLY_SALLYFOLDER.'/backend/lang/pages/mediapool/');
 			self::$i18nLoaded = true;
 		}
 

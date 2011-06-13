@@ -293,6 +293,16 @@ abstract class sly_Form_ElementBase extends sly_Viewable {
 		return $this->renderView($filename);
 	}
 
+	/**
+	 * Get the full path for a view
+	 *
+	 * This methods prepends the filename of a specific view with its path. If
+	 * the view is not found inside the core, an exception is thrown.
+	 *
+	 * @throws sly_Exception  if the view could not be found
+	 * @param  string $file   the relative filename
+	 * @return string         the full path to the view file
+	 */
 	protected function getViewFile($file) {
 		$full = SLY_COREFOLDER.'/views/form/'.$file;
 		if (file_exists($full)) return $full;
