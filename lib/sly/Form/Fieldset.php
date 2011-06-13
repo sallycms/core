@@ -53,15 +53,15 @@ class sly_Form_Fieldset extends sly_Viewable {
 	 *
 	 * This method adds a row containing the form elements to the fieldset.
 	 *
-	 * @throws sly_Exception  if the form has multiple columns and one element is multilingual
-	 * @param  array $row     array containing the form elements
-	 * @return boolean        always true
+	 * @throws sly_Form_Exception  if the form has multiple columns and one element is multilingual
+	 * @param  array $row          array containing the form elements
+	 * @return boolean             always true
 	 */
 	public function addRow(array $row) {
 		$row = sly_makeArray($row);
 
 		if ($this->columns > 1 && $this->isMultilingual($row)) {
-			throw new sly_Exception('Mehrsprachige Elemente können nicht in mehrspaltige Fieldsets eingefügt werden.');
+			throw new sly_Form_Exception('Mehrsprachige Elemente können nicht in mehrspaltige Fieldsets eingefügt werden.');
 		}
 
 		$this->rows[] = $row;
@@ -138,15 +138,15 @@ class sly_Form_Fieldset extends sly_Viewable {
 	/**
 	 * Sets the number of columns
 	 *
-	 * @throws sly_Exception  if the form has multiple columns and one element is multilingual
-	 * @param  int $num       number of columns, ranging from 1 to 26
-	 * @return int            the new number of columns
+	 * @throws sly_Form_Exception  if the form has multiple columns and one element is multilingual
+	 * @param  int $num            number of columns, ranging from 1 to 26
+	 * @return int                 the new number of columns
 	 */
 	public function setColumns($num) {
 		$num = ($num > 0 && $num < 26) ? $num : 1;
 
 		if ($num > 1 && $this->isMultilingual()) {
-			throw new sly_Exception('Dieses Fieldset enthält mehrsprachige Elemente und muss daher einspaltig sein.');
+			throw new sly_Form_Exception('Dieses Fieldset enthält mehrsprachige Elemente und muss daher einspaltig sein.');
 		}
 
 		$this->columns = $num;
@@ -211,14 +211,14 @@ class sly_Form_Fieldset extends sly_Viewable {
 	 * This methods prepends the filename of a specific view with its path. If
 	 * the view is not found inside the core, an exception is thrown.
 	 *
-	 * @throws sly_Exception  if the view could not be found
-	 * @param  string $file   the relative filename
-	 * @return string         the full path to the view file
+	 * @throws sly_Form_Exception  if the view could not be found
+	 * @param  string $file        the relative filename
+	 * @return string              the full path to the view file
 	 */
 	protected function getViewFile($file) {
 		$full = SLY_COREFOLDER.'/views/form/'.$file;
 		if (file_exists($full)) return $full;
 
-		throw new sly_Exception('View '.$file.' could not be found.');
+		throw new sly_Form_Exception('View '.$file.' could not be found.');
 	}
 }

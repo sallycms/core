@@ -17,6 +17,7 @@
  *
  * @ingroup form
  * @author  Christoph
+ * @since   0.5
  */
 class sly_Form_Input_Number extends sly_Form_Input_Base {
 	protected $min  = null; ///< int

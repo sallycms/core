@@ -104,9 +104,9 @@ class sly_Form_Slice extends sly_Form_Base {
 	 *
 	 * Do not call me. I will throw up.
 	 *
-	 * @throws sly_Exception  always
+	 * @throws sly_Form_Exception  always
 	 */
 	public function render() {
-		throw new sly_Exception('Can\' render a slice.');
+		throw new sly_Form_Exception('Can\' render a slice.');
 	}
 }
