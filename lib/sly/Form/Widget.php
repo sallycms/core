@@ -24,7 +24,7 @@ abstract class sly_Form_Widget extends sly_Form_ElementBase {
 	/**
 	 * Constructor
 	 *
-	 * @param string $label      the element name
+	 * @param string $name       the element name
 	 * @param string $label      the label
 	 * @param string $value      the current widget value
 	 * @param string $id         optional ID
