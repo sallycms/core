@@ -60,8 +60,8 @@ class sly_Form extends sly_Form_Base {
 		$this->enctype  = false;
 		$this->classes  = array();
 
-		$this->submitButton    = new sly_Form_Input_Button('submit', 'submit', 'Speichern');
-		$this->resetButton     = new sly_Form_Input_Button('reset', 'reset', 'Zurücksetzen');
+		$this->submitButton    = new sly_Form_Input_Button('submit', 'submit', t('save'));
+		$this->resetButton     = new sly_Form_Input_Button('reset', 'reset', t('reset'));
 		$this->deleteButton    = null;
 		$this->applyButton     = null;
 		$this->hiddenValues    = array();
