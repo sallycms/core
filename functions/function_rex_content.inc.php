@@ -123,18 +123,13 @@ function rex_slice_module_exists($sliceID, $clang) {
 	$sliceID = (int) $sliceID;
 	$clang   = (int) $clang;
 	$slice   = OOArticleSlice::getArticleSliceById($sliceID, $clang);
-	if (is_null($slice)) return false;
-	$module  = $slice->getModuleName();
-	return rex_module_exists($module) ? $module : false;
-}
 
-/**
- * Prüft, ob ein Modul im System bekannt ist.
- *
- * @return boolean  true oder ... false
- */
-function rex_module_exists($module) {
-	return sly_Service_Factory::getModuleService()->exists($module);
+	if (is_null($slice)) {
+		return false;
+	}
+
+	$module = $slice->getModuleName();
+	return sly_Service_Factory::getModuleService()->exists($module) ? $module : false;
 }
 
 /**
