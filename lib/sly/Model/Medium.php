@@ -70,4 +70,13 @@ class sly_Model_Medium extends sly_Model_Base_Id {
 	public function setAttributes($attributes)     { $this->attributes   = $attributes;   }
 	public function setFiletype($filetype)         { $this->filetype     = $filetype;     }
 	public function setFilesize($filesize)         { $this->filesize     = $filesize;     }
+
+	public function getCategory() {
+		$service = sly_Service_Factory::getMediaCategoryService();
+		return $service->findById($this->category_id);
+	}
+
+	public function getFormattedSize() {
+		return sly_Util_String::formatFilesize($this->filesize);
+	}
 }
