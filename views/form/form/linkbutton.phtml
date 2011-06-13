@@ -32,7 +32,7 @@ $this->consumeWidgetID();
 	<input type="text" name="LINK_NAME[<?= $id ?>]" value="<?= $artName; ?>" class="<?= sly_html($this->attributes['class']) ?>" id="LINK_<?= $id ?>_NAME" readonly="readonly" />
 
 	<span class="sly-icons">
-		<a href="#" onclick="openLinkMap('LINK_<?= $id ?>', '<?= $params ?>'); return false;"><img src="assets/file_open.png" alt="Öffne Strukturansicht" title="Öffne Strukturansicht" /></a>
-		<a href="#" onclick="deleteREXLink('<?= $id ?>'); return false;"><img src="assets/file_del.png" title="Link entfernen" alt="Link entfernen" /></a>
+		<a href="#" onclick="openLinkMap('LINK_<?= $id ?>', '<?= $params ?>'); return false;"><img src="assets/file_open.png" title="<?= t('open_linkmap') ?>" alt="" /></a>
+		<a href="#" onclick="deleteREXLink('<?= $id ?>'); return false;"><img src="assets/file_del.png" title="<?= t('remove_link') ?>" alt="" /></a>
 	</span>
 </span>

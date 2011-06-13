@@ -35,10 +35,10 @@ print ' ';
 
 ?>
 <span class="sly-icons">
-	<a href="#" rel="top"><img src="assets/file_top.png" title="an den Anfang schieben" alt="" /></a>
-	<a href="#" rel="up"><img src="assets/file_up.png" title="hoch schieben" alt="" /></a>
-	<a href="#" rel="down"><img src="assets/file_down.png" title="runter schieben" alt="" /></a>
-	<a href="#" rel="bottom"><img src="assets/file_bottom.png" title="an das Ende schieben" alt="" /></a>
+	<a href="#" rel="top"><img src="assets/file_top.png" title="<?= t('var_linklist_move_top') ?>" alt="" /></a>
+	<a href="#" rel="up"><img src="assets/file_up.png" title="<?= t('var_linklist_move_up') ?>" alt="" /></a>
+	<a href="#" rel="down"><img src="assets/file_down.png" title="<?= t('var_linklist_move_down') ?>" alt="" /></a>
+	<a href="#" rel="bottom"><img src="assets/file_bottom.png" title="<?= t('var_linklist_move_bottom') ?>" alt="" /></a>
 </span>
 <?
 
@@ -56,5 +56,5 @@ $filter = new sly_Form_Input_Text('filter_'.$name, '', '');
 $filter->setAttribute('class', 'sly-link-filter');
 
 print $filter->render();
-print '<span class="rex-form-notice">Drücken Sie [Entf], um den ausgewählten Eintrag zu entfernen.</span>';
+print '<span class="rex-form-notice">'.t('press_del').'</span>';
 print '</span>';
