@@ -11,6 +11,10 @@
 /**
  * HTML5 input field for numbers (with spinbox)
  *
+ * This element will be rendered as a spinbox by browsers with HTML5 support,
+ * otherwise as a smaller input field. By default, the spinner will not be
+ * retricted (no min/max values).
+ *
  * @ingroup form
  * @author  Christoph
  */
@@ -32,18 +36,42 @@ class sly_Form_Input_Number extends sly_Form_Input_Base {
 		$this->setAttribute('type', 'number');
 	}
 
+	/**
+	 * Sets the minimum value
+	 *
+	 * @param int $min  the new value
+	 */
 	public function setMin($min) {
 		$this->min = (int) $min;
 	}
 
+	/**
+	 * Sets the maximum value
+	 *
+	 * @param int $max  the new value
+	 */
 	public function setMax($max) {
 		$this->max = (int) $max;
 	}
 
+	/**
+	 * Sets the step value
+	 *
+	 * @param int $step  the new value
+	 */
 	public function setStep($step) {
 		$this->step = (int) $step;
 	}
 
+	/**
+	 * Convenience wrapper to set the bounds
+	 *
+	 * This method will call setMin(), setMax() and setStep() in succession.
+	 *
+	 * @param int $min   the new min value
+	 * @param int $max   the new max value
+	 * @param int $step  the new step value
+	 */
 	public function setBounds($min, $max, $step = 1) {
 		$this->setMin($min);
 		$this->setMax($max);

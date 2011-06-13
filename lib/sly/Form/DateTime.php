@@ -12,7 +12,8 @@
  * Date picker with timing functionality
  *
  * Implements a date picker by using jQuery UI. The widget can optionally be
- * extended with a time picker.
+ * extended with a time picker. If possible, it tries to use the native HTML5
+ * date picker (date or datetime input type), currently only supported in Opera.
  *
  * @ingroup form
  * @author  Christoph

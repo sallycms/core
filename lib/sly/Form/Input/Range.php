@@ -11,6 +11,9 @@
 /**
  * HTML5 input field for numbers (with slider)
  *
+ * This element will be rendered as a slider by browsers with HTML5 support,
+ * otherwise as a slider using jQuery UI.
+ *
  * @ingroup form
  * @author  Christoph
  */

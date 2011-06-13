@@ -34,10 +34,10 @@ class sly_Form_Fieldset extends sly_Viewable {
 	/**
 	 * Constructor
 	 *
-	 * @param string $legend
-	 * @param string $id
-	 * @param int    $columns
-	 * @param int    $num
+	 * @param string $legend   the fieldset's legend
+	 * @param string $id       the HTML id
+	 * @param int    $columns  number of columns (use 1 or 2, more won't give you any useful results yet)
+	 * @param int    $num      the running number of this fieldset
 	 */
 	public function __construct($legend, $id = '', $columns = 1, $num = -1) {
 		$this->rows    = array();
@@ -114,10 +114,9 @@ class sly_Form_Fieldset extends sly_Viewable {
 	/**
 	 * Render the form
 	 *
-	 * Renders the form and prints it by default. Change $print to false to get
-	 * the generated XHTML returned.
+	 * Renders the form and returns the generated XHTML.
 	 *
-	 * @return mixed  null if $print is true, else the XHTML (string)
+	 * @return string  the XHTML
 	 */
 	public function render() {
 		return $this->renderView('fieldset.phtml');
@@ -206,6 +205,16 @@ class sly_Form_Fieldset extends sly_Viewable {
 		return $num;
 	}
 
+	/**
+	 * Get the full path for a view
+	 *
+	 * This methods prepends the filename of a specific view with its path. If
+	 * the view is not found inside the core, an exception is thrown.
+	 *
+	 * @throws sly_Exception  if the view could not be found
+	 * @param  string $file   the relative filename
+	 * @return string         the full path to the view file
+	 */
 	protected function getViewFile($file) {
 		$full = SLY_COREFOLDER.'/views/form/'.$file;
 		if (file_exists($full)) return $full;
