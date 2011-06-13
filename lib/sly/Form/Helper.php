@@ -121,7 +121,7 @@ abstract class sly_Form_Helper {
 
 			// Die Anzeige hängt immer vom aktuellen Benutzer ab.
 
-			if ($user->hasPerm('advancedMode[]')) {
+			if ($user->hasRight('advancedMode[]')) {
 				$name .= ' ['.$category->getId().']';
 			}
 
@@ -148,11 +148,11 @@ abstract class sly_Form_Helper {
 	private static function isAdmin() {
 		if (!self::$user) return false;
 
-		$isAdmin = self::$user->hasPerm('admin[]');
+		$isAdmin = self::$user->hasRight('admin[]');
 
 		switch (self::$type) {
-			case 'media':     $isAdmin |= self::$user->hasPerm('media[0]'); break;
-			case 'structure': $isAdmin |= self::$user->hasPerm('csw[0]'); break;
+			case 'media':     $isAdmin |= self::$user->hasRight('media[0]'); break;
+			case 'structure': $isAdmin |= self::$user->hasRight('csw[0]'); break;
 		}
 
 		return $isAdmin;
@@ -171,7 +171,7 @@ abstract class sly_Form_Helper {
 
 		switch (self::$type) {
 			case 'media':
-				return self::$user->hasPerm('media['.$category->getId().']');
+				return self::$user->hasRight('media['.$category->getId().']');
 
 			case 'structure':
 				return self::$user->hasCategoryRight($category->getId());
