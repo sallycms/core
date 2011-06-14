@@ -25,8 +25,13 @@
  */
 class sly_I18N_Subset implements sly_I18N_Base {
 	/**
-	 * @param sly_I18N_Base $i18nContainer
-	 * @param string        $prefix
+	 * Constructor
+	 *
+	 * Creates the wrapper object. Note that the contents of the wrapped i18n
+	 * container is not copied, the object is just referenced.
+	 *
+	 * @param sly_I18N_Base $i18nContainer  the base container
+	 * @param string        $prefix         the prefix to prepend
 	 */
 	public function __construct(sly_I18N_Base $i18nContainer, $prefix) {
 		$this->container = $i18nContainer;
@@ -34,15 +39,36 @@ class sly_I18N_Subset implements sly_I18N_Base {
 	}
 
 	/**
-	 * @param  string $prefix
-	 * @return sly_I18N_Subset
+	 * Convenience method to create the subset
+	 *
+	 * This method will just call the constructor with the i18n object from
+	 * sly_Core.
+	 *
+	 * @param  string $prefix   the prefix to prepend
+	 * @return sly_I18N_Subset  the created instance (no singleton)
 	 */
 	public static function create($prefix) {
 		$i18n = sly_Core::getI18N();
 		return new self($i18n, $prefix);
 	}
 
-	public function msg($key)          { return $this->container->msg($this->prefix.$key);          }
-	public function addMsg($key, $msg) { return $this->container->addMsg($this->prefix.$key, $msg); }
-	public function hasMsg($key)       { return $this->container->hasMsg($this->prefix.$key);       }
+	/**
+	 * Translate a key
+	 *
+	 * @param  string $key  the key to translate
+	 * @return string       the translated message
+	 */
+	public function msg($key) {
+		return $this->container->msg($this->prefix.$key);
+	}
+
+	/**
+	 * Check for a message
+	 *
+	 * @param  string $key  the key to find
+	 * @return boolean      true if the key exists, else false
+	 */
+	public function hasMsg($key) {
+		return $this->container->hasMsg($this->prefix.$key);
+	}
 }

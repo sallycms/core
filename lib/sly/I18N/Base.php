@@ -25,14 +25,6 @@ interface sly_I18N_Base {
 	public function msg($key);
 
 	/**
-	 * Add a new message to the translated database at runtime
-	 *
-	 * @param string $key
-	 * @param string $msg
-	 */
-	public function addMsg($key, $msg);
-
-	/**
 	 * Check if a message exists
 	 *
 	 * @param  string $key

@@ -9,30 +9,40 @@
  */
 
 /**
+ * Translation class
+ *
+ * This class implements the basic translation method used in Sally. An instance
+ * is created by loading a given locale file (and maybe appending more later
+ * on). Translations can be accessed via the msg() function or by using the
+ * global function t().
+ *
+ * Note that the locales used by this class having *nothing* to do with the
+ * frontend languages (clangs), so beware that when using translation in your
+ * frontend.
+ *
  * @ingroup i18n
  * @author  Christoph
  * @since   0.3
  */
 class sly_I18N implements sly_I18N_Base {
-	protected $locales;
-	protected $searchpath;
 	protected $locale;
 	protected $texts;
-	protected $text_loaded;
 
 	/**
 	 * Constructor
 	 *
-	 * @param string  $locale      locale name (like 'de_de')
-	 * @param string  $searchpath  path to .yml file
-	 * @param boolean $setlocale   when true the locale will be set via setlocale()
+	 * Creates the instance, loads the language file and optionally sets the
+	 * locale.
+	 *
+	 * @param string  $locale     locale name (like 'de_de')
+	 * @param string  $path       path to .yml files
+	 * @param boolean $setlocale  when true the locale will be set via setlocale()
 	 */
-	public function __construct($locale, $searchpath, $setlocale = true) {
-		$this->searchpath  = $searchpath;
-		$this->texts       = array();
-		$this->locale      = $locale;
-		$this->locales     = null;
-		$this->text_loaded = false;
+	public function __construct($locale, $path, $setlocale = true) {
+		$this->texts  = array();
+		$this->locale = $locale;
+
+		$this->appendFile($path);
 
 		if ($setlocale) {
 			$this->setLocale();
@@ -40,7 +50,11 @@ class sly_I18N implements sly_I18N_Base {
 	}
 
 	/**
-	 * setlocale() wrapper
+	 * Set the system locale
+	 *
+	 * This method will call setlocale() with the locale string given in the
+	 * loaded language file. Do this only once, since it hurts performance and
+	 * you don't need to change it at runtime anways.
 	 */
 	public function setLocale() {
 		$locales = array();
@@ -57,22 +71,17 @@ class sly_I18N implements sly_I18N_Base {
 	}
 
 	/**
-	 * Lädt alle Übersetzungen der aktuellen Sprache aus dem Sprachpfad und fügt diese dem Katalog hinzu.
-	 */
-	public function loadTexts() {
-		if ($this->appendFile($this->searchpath)) {
-			$this->text_loaded = true;
-		}
-	}
-
-	/**
-	 * Sucht im angegebenden Ordner nach eine Sprachdatei der aktuellen Sprache und f�gt diese dem Sprachkatalog an
+	 * Append a language file to the object
 	 *
-	 * @param  string $searchPath  Pfad in dem die Sprachdatei gesucht werden soll
-	 * @return boolean             true if the file was read, else false
+	 * This method looks in the given path for a matching language file (matching
+	 * in regard to the locale of this object) and appends its messages to the
+	 * internal list of messages.
+	 *
+	 * @param  string $path  path to look in for the matching YAML file
+	 * @return boolean       true if the file was found, else false
 	 */
-	public function appendFile($searchPath, $prefix = '') {
-		$filename = $searchPath.'/'.$this->locale.'.yml';
+	public function appendFile($path, $prefix = '') {
+		$filename = $path.'/'.$this->locale.'.yml';
 
 		if (is_readable($filename)) {
 			$lines = sly_Util_YAML::load($filename);
@@ -88,16 +97,16 @@ class sly_I18N implements sly_I18N_Base {
 	}
 
 	/**
-	 * Durchsucht den Sprachkatalog nach einem Schlüssel und gibt die dazugehörige Übersetzung zurück
+	 * Translate a key
 	 *
-	 * @param  string $key  zu suchender Schlüssel
-	 * @return string
+	 * Looks in the message list for a matching key and returns the message. This
+	 * method can be called with more than one argument, which will be used as
+	 * replacements for placeholders like {0}, {1} and so on.
+	 *
+	 * @param  string $key  key to translate
+	 * @return string       translated message or the key like in translate:key when not found
 	 */
 	public function msg($key) {
-		if (!$this->text_loaded) {
-			$this->loadTexts();
-		}
-
 		if ($this->hasMsg($key)) {
 			$msg = $this->texts[$key];
 		}
@@ -121,49 +130,46 @@ class sly_I18N implements sly_I18N_Base {
 	}
 
 	/**
-	 * Fügt dem Sprachkatalog unter dem gegebenen Schlüssel eine neue Übersetzung hinzu
+	 * Check for a key
 	 *
-	 * @param string $key  Schlüssel unter dem die Übersetzung abgelegt wird
-	 * @param string $msg  übersetzter Text
-	 */
-	public function addMsg($key, $msg) {
-		$this->texts[$key] = $msg;
-	}
-
-	/**
-	 * Prüft ob der Sprachkatalog zu dem gegebenen Schlüssel eine Übersetzung beinhaltet
-	 *
-	 * @param  string $key zu suchender Schlüssel
-	 * @return boolean     true wenn der Schlüssel gefunden wurde, sonst false
+	 * @param  string $key key to look for
+	 * @return boolean     true if the key exists, else false
 	 */
 	public function hasMsg($key) {
 		return isset($this->texts[$key]);
 	}
 
 	/**
-	 * Durchsucht den Searchpath nach allen verfügbaren Sprachdateien und gibt diese zurück
+	 * Get a list of all locales
 	 *
-	 * @param  string $searchpath  zu duruchsuchender Ordner
-	 * @return array               Array von gefundenen Sprachen (locales)
+	 * This method scans the given path for all language files and returns a list
+	 * of locales (filenames without the extension). The results will be cached
+	 * for the duration of the script execution.
+	 *
+	 * @param  string $path  path to look in
+	 * @return array         list of locales (unsorted)
 	 */
-	public static function getLocales($searchpath) {
+	public static function getLocales($path) {
 		static $cache = array();
 
-		$searchpath = realpath($searchpath);
+		$path = realpath($path);
 
-		if ($searchpath !== false && !isset($cache[$searchpath])) {
+		if ($path !== false && !isset($cache[$path])) {
 			$locales = array();
-			$files   = glob($searchpath.'/*.yml');
+			$files   = glob($path.'/*.yml');
 
 			foreach ($files as $filename) {
 				// von 'C:\foo\bar.yml' nur 'bar' speichern
 				$locales[] = substr(basename($filename), 0, -4);
 			}
 
-			$cache[$searchpath] = $locales;
+			$cache[$path] = $locales;
+		}
+		else {
+			return array();
 		}
 
-		return $cache[$searchpath];
+		return $cache[$path];
 	}
 
 	/**
