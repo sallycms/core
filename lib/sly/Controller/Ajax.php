@@ -17,6 +17,7 @@
  *
  * @ingroup controller
  * @author  Zozi
+ * @since   0.1
  */
 abstract class sly_Controller_Ajax extends sly_Controller_Base {
 	/**
