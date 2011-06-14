@@ -9,35 +9,61 @@
  */
 
 /**
+ * Base class for layouts
+ *
+ * Layouts are responsible for handling and rendering the HTML head and footer.
+ * This class lays out the general API for all concrete layouts (like XHTML
+ * or XHTML5).
+ *
  * @ingroup layout
+ * @author  Zozi
  */
 abstract class sly_Layout extends sly_Viewable {
-	protected $title           = '';
-	protected $cssCode         = '';
-	protected $javaScriptCode  = '';
-	protected $favIcon         = null;
-	protected $cssFiles        = array();
-	protected $javaScriptFiles = array();
-	protected $feedFiles       = array();
-	protected $bodyAttrs       = array();
-	protected $httpMetas       = array();
-	protected $metas           = array();
-	protected $links           = array();
-	protected $content         = '';
+	protected $title           = '';       ///< string
+	protected $cssCode         = '';       ///< string
+	protected $javaScriptCode  = '';       ///< string
+	protected $favIcon         = null;     ///< string
+	protected $cssFiles        = array();  ///< array
+	protected $javaScriptFiles = array();  ///< array
+	protected $feedFiles       = array();  ///< array
+	protected $bodyAttrs       = array();  ///< array
+	protected $httpMetas       = array();  ///< array
+	protected $metas           = array();  ///< array
+	protected $links           = array();  ///< array
+	protected $content         = '';       ///< string
 
+	/**
+	 * Open a new buffer
+	 *
+	 * This method is just a wrapper for ob_start().
+	 */
 	public function openBuffer() {
 		ob_start();
 	}
 
+	/**
+	 * Close the buffer
+	 *
+	 * This method closes the buffer and stores the output inside the content
+	 * field of this instance.
+	 */
 	public function closeBuffer() {
 		$this->content = ob_get_clean();
 	}
 
+	/**
+	 * Close all buffers
+	 */
 	public function closeAllBuffers() {
 		while (ob_get_level()) ob_end_clean();
 	}
 
 	/**
+	 * Render the page
+	 *
+	 * This method starts a buffer, prints the header, content and footer and
+	 * then returns the complete page's content.
+	 *
 	 * @return string
 	 */
 	public function render() {
@@ -49,36 +75,40 @@ abstract class sly_Layout extends sly_Viewable {
 	}
 
 	/**
-	 * Setzt den Inhalt den title Tags
+	 * Set the page title
 	 *
-	 * @param string $title
+	 * @param string $title  the new title
 	 */
 	public function setTitle($title) {
 		$this->title = $title;
 	}
 
 	/**
-	 * Erweitert den Inhalt des title Tags.
+	 * Append something to the title
 	 *
-	 * @param string $title
+	 * @param string $title  the string to append to the current title
 	 */
 	public function appendToTitle($title) {
 		$this->title .= $title;
 	}
 
 	/**
-	 * Setzt den pfad zu favicon
+	 * Set the fav icon
 	 *
-	 * @param string $iconPath
+	 * @param string $iconPath  the full URI to the favicon
 	 */
 	public function setFavIcon($iconPath) {
 		$this->favIcon = trim($iconPath);
 	}
 
 	/**
-	 * Füegt den übergebenen String dem css code des layouts zu.
+	 * Add inline CSS to the page
 	 *
-	 * @param string $css
+	 * Use this method if you have to generate dynamic CSS and add it directly to
+	 * the page, using a <style> tag. All added inline CSS will be printed in a
+	 * single <style> tag.
+	 *
+	 * @param string $css  the inline CSS code
 	 */
 	public function addCSS($css) {
 		$css = trim($css);
@@ -86,12 +116,16 @@ abstract class sly_Layout extends sly_Viewable {
 	}
 
 	/**
-	 * Fügt dem layout eine css datei zu. CSS Dateien werden Gruppen zugeordnet,
-	 * Funktionen der Gruppen siehe printCSSFiles().
+	 * Add CSS file
 	 *
-	 * @param string $cssFile  path to css file
-	 * @param string $media    media Attribut für den CSS Link
-	 * @param string $group    group css files by this param
+	 * This method adds a new CSS file to the layout. Files will be put into
+	 * groups, so that addOns can partially access them. Files must be unique
+	 * (or else the method returns false).
+	 *
+	 * @param  string $cssFile  path to css file
+	 * @param  string $media    media attribute für den CSS link
+	 * @param  string $group    group files by this param
+	 * @return boolean          true if the file was added, false if it already existed
 	 */
 	public function addCSSFile($cssFile, $media = 'all', $group = 'default') {
 		$cssFile = trim($cssFile);
@@ -109,9 +143,13 @@ abstract class sly_Layout extends sly_Viewable {
 	}
 
 	/**
-	 * Füegt den übergebenen String dem javascript code des layouts zu.
+	 * Add inline JavaScript to the page
 	 *
-	 * @param string $javascript
+	 * Use this method if you have to generate dynamic JS and add it directly to
+	 * the page, using a <script> tag. All added inline JS will be printed in a
+	 * single <script> tag.
+	 *
+	 * @param string $javascript  the inline JavaScript code
 	 */
 	public function addJavaScript($javascript) {
 		$javascript = trim($javascript);
@@ -119,11 +157,15 @@ abstract class sly_Layout extends sly_Viewable {
 	}
 
 	/**
-	 * Fügt dem layout eine Javascript datei zu. Javascript Dateien werden Gruppen zugeordnet,
-	 * Funktionen der Gruppen siehe printJavaScriptFiles().
+	 * Add JavaScript file
 	 *
-	 * @param string $javascriptFile path to javascript file
-	 * @param string $group group javascript files by this param
+	 * This method adds a new JS file to the layout. Files will be put into
+	 * groups, so that addOns can partially access them. Files must be unique
+	 * (or else the method returns false).
+	 *
+	 * @param  string $cssFile  path to js file
+	 * @param  string $group    group files by this param
+	 * @return boolean          true if the file was added, false if it already existed
 	 */
 	public function addJavaScriptFile($javascriptFile, $group = 'default') {
 		$javascriptFile = trim($javascriptFile);
@@ -137,12 +179,13 @@ abstract class sly_Layout extends sly_Viewable {
 	}
 
 	/**
-	 * Fügt dem body tag des Layouts HTML Attribute hinzu.
-	 * Attrributnamen, die mit 'on' beginnen werden statt inline gesetzt zu werden,
-	 * als funktion window.on... dem Jvascript Code des Layouts zugefügt.
+	 * Add an attribute to the body tag
 	 *
-	 * @param string $name
-	 * @param string $value
+	 * Attributes beginning with 'on' will not be added to the tag, but rather
+	 * as JavaScript event handler using inline JavaScript.
+	 *
+	 * @param string $name   attribute name
+	 * @param string $value  attribute value
 	 */
 	public function setBodyAttr($name, $value) {
 		$name  = trim($name);
@@ -157,42 +200,54 @@ abstract class sly_Layout extends sly_Viewable {
 	}
 
 	/**
-	 * Fügt dem Layout eine Metainformation hinzu.
+	 * Add meta tag
 	 *
-	 * @param string $name
-	 * @param string $content
+	 * Adds a regular meta tag to the page header.
+	 *
+	 * @param string $name     meta name
+	 * @param string $content  content attribute of the tag
 	 */
 	public function addMeta($name, $content) {
 		$this->metas[trim($name)] = trim($content);
 	}
 
 	/**
-	 * Fügt dem Layout eine HTTP Metainformation hinzu.
+	 * Add a http-equiv meta tag
 	 *
-	 * @param string $name
-	 * @param string $content
+	 * Adds a meta tag for HTTP equivalents to the page header. Use this to
+	 * specify the content-type.
+	 *
+	 * @param string $name     meta name
+	 * @param string $content  content attribute of the tag
 	 */
 	public function addHttpMeta($name, $content) {
 		$this->httpMetas[trim($name)] =trim($content);
 	}
 
 	/**
-	 * Fügt dem Layout einen Link hinzu.
+	 * Add generic link
 	 *
-	 * @param string $rel
-	 * @param string $href
-	 * @param string $type
+	 * This methods adds a generic <link> tag to the head. Use specialized
+	 * methods (like addCSSFile) whenever possible. Note that the links are not
+	 * made unique!
+	 *
+	 * @param string $rel    rel attribute value
+	 * @param string $href   href attribute value
+	 * @param string $type   type attribute value
+	 * @param string $title  title attribute value
 	 */
 	public function addLink($rel, $href, $type = '', $title= '') {
 		$this->links[] = array('rel' => trim($rel), 'href' => trim($href), 'type' => trim($type), 'title' => trim($title));
 	}
 
 	/**
-	 * Fügt dem Layout einen Feed Link hinzu.
-	 * Momentan werden RSS und Atom Feeds unterstützt
+	 * Add a feed
 	 *
-	 * @param string $feedFile
-	 * @param string $type
+	 * This method is a specialized version of addLink() and adds a RSS/Atom link
+	 * to the page header, automatically setting the title and type.
+	 *
+	 * @param string $feedFile  the URL to the feed
+	 * @param string $type      the type (rss, rss1, rss2 or atom)
 	 */
 	public function addFeedFile($feedFile, $type = '') {
 		if (!in_array($type, array('rss', 'rss1', 'rss2', 'atom'))) {
@@ -209,11 +264,11 @@ abstract class sly_Layout extends sly_Viewable {
 	}
 
 	/**
-	 * Schreibt css Styles in den Header
-	 * Ruft den Extension Point HEADER_CSS auf und übergibt
-	 * den CSS Code. Der vom Extension Point zurückgegebne
-	 * Wert wird in das <style> Tag geschrieben. Zum schreiben wird
-	 * die abstrakte Methode printCSSConcrete() aufgerufen.
+	 * Write the inline CSS
+	 *
+	 * This method will filter the inline CSS with the event HEADER_CSS and, if
+	 * it's not empty, writes it by calling the layout specific
+	 * printCSSConcrete() method.
 	 */
 	protected function printCSS() {
 		$this->cssCode = sly_Core::dispatcher()->filter('HEADER_CSS', $this->cssCode);
@@ -221,17 +276,11 @@ abstract class sly_Layout extends sly_Viewable {
 	}
 
 	/**
-	 * Schreint den inhalt von $this->cssCode in den Header.
-	 * Dabei werden layoutspezifische eigenheiten beachtet.
-	 */
-	protected abstract function printCSSConcrete();
-
-	/**
-	 * Schreibt CSS Files in den Header
-	 * Ruft den Extension Point HEADER_CSS_FILES auf und übergibt
-	 * die zugefügten CSS Dateien. Die vom Extension Point zurückgegebenen
-	 * Dateien wird in den Header geschrieben. Zum Schreiben wird
-	 * die abstrakte Methode printCSSFilesConcrete() aufgerufen.
+	 * Write the CSS files
+	 *
+	 * This method will filter the CSS files with the event HEADER_CSS_FILES and,
+	 * if they're not empty, write them by calling the layout specific
+	 * printCSSFilesConcrete() method.
 	 */
 	protected function printCSSFiles() {
 		$this->cssFiles = sly_Core::dispatcher()->filter('HEADER_CSS_FILES', $this->cssFiles);
@@ -239,17 +288,11 @@ abstract class sly_Layout extends sly_Viewable {
 	}
 
 	/**
-	 * Schreibt CSS Files ($this->cssFiles) in den Header
-	 */
-	protected abstract function printCSSFilesConcrete();
-
-	/**
-	 * Schreibt Javascript Code in den Header
-	 * Ruft den Extension Point HEADER_JAVASCRIPT auf und übergibt
-	 * den Javascript Code. Der vom Extension Point zurückgegebne
-	 * Wert wird in den HJeader. Zum schreiben wird
-	 * die abstrakte Methode printJavaScriptConcrete() aufgerufen.
+	 * Write the inline JavaScript
 	 *
+	 * This method will filter the inline JavaScript with the event
+	 * HEADER_JAVASCRIPT and, if it's not empty, writes it by calling the layout
+	 * specific printJavaScriptConcrete() method.
 	 */
 	protected function printJavaScript() {
 		$this->javaScriptCode = sly_Core::dispatcher()->filter('HEADER_JAVASCRIPT', $this->javaScriptCode);
@@ -257,45 +300,22 @@ abstract class sly_Layout extends sly_Viewable {
 	}
 
 	/**
-	 * Schreint den inhalt von $this->javaScriptCode in den Header.
-	 * Dabei werden layoutspezifische eigenheiten beachtet.
-	 */
-	protected abstract function printJavaScriptConcrete();
-
-	/**
-	 * Schreibt Javascript Files in den Header
-	 * Ruft den Extension Point HEADER_JAVASCRIPT_FILES auf und übergibt
-	 * die zugefügten JS Dateien. Die vom Extension Point zurückgegebenen
-	 * Dateien wird in den Header geschrieben. Zum Schreiben wird
-	 * die abstrakte Methode printJavascriptFilesConcrete() aufgerufen.
+	 * Write the JavaScript files
 	 *
+	 * This method will filter the JS files with the event
+	 * HEADER_JAVASCRIPT_FILES and, if they're not empty, write them by calling
+	 * the layout specific printJavaScriptFilesConcrete() method.
 	 */
 	protected function printJavaScriptFiles() {
 		$this->javaScriptFiles = sly_Core::dispatcher()->filter('HEADER_JAVASCRIPT_FILES', $this->javaScriptFiles);
 		$this->printJavaScriptFilesConcrete();
 	}
-	/**
-	 * Schreibt Javascript Files ($this->javaScriptFiles) in den Header
-	 */
-	protected abstract function printJavaScriptFilesConcrete();
 
 	/**
-	 * Schreibt die zugefügten body Attribute
-	 */
-	protected abstract function printBodyAttrs();
-
-	/**
-	 * Schreibt Metainformationen in den Header
-	 */
-	protected abstract function printMetas();
-
-	/**
-	 * Schreibt HTTP Metainformationen in den Header
-	 */
-	protected abstract function printHttpMetas();
-
-	/**
-	 * Schreibt die zugefügten Links in den Header
+	 * Print all links
+	 *
+	 * This function only loops over all links and calls printLink() for each
+	 * one.
 	 */
 	protected function printLinks() {
 		foreach ($this->links as $link) {
@@ -304,26 +324,77 @@ abstract class sly_Layout extends sly_Viewable {
 	}
 
 	/**
-	 * Schreibt einen Link in den Header
+	 * Print the inline CSS code
+	 */
+	protected abstract function printCSSConcrete();
+
+	/**
+	 * Print the list of CSS files
+	 */
+	protected abstract function printCSSFilesConcrete();
+
+	/**
+	 * Print the inline JavaScript code
+	 */
+	protected abstract function printJavaScriptConcrete();
+
+	/**
+	 * Print the list of JS files
+	 */
+	protected abstract function printJavaScriptFilesConcrete();
+
+	/**
+	 * Print the body attributes
+	 */
+	protected abstract function printBodyAttrs();
+
+	/**
+	 * Print regular meta tag
+	 */
+	protected abstract function printMetas();
+
+	/**
+	 * Print HTTP meta tag
+	 */
+	protected abstract function printHttpMetas();
+
+	/**
+	 * Prints a <link> tag
 	 *
-	 * @param array $attributes  ein Hash mit Attributen ($name => $value)
+	 * @param array $attributes  a hash with all attributes (name => value)
 	 */
 	protected abstract function printLink($attributes);
 
 	/**
-	 * Schreibt den Header
+	 * Print the header
+	 *
+	 * Starts the page by writing the html, head, title and body tag (no meta,
+	 * no doctype, no links, no script, ...). Most layouts will override this
+	 * method.
  	 */
 	public function printHeader() {
-		print '<html><head><title>'.$this->title.'</title></head><body>';
+		print '<html><head><title>'.sly_html(trim($this->title)).'</title></head><body>';
 	}
 
 	/**
-	 * Schreibt den Footer
+	 * Print the footer
+	 *
+	 * Prints the closing body and html tags.
 	 */
 	public function printFooter() {
 		print '</body></html>';
 	}
 
+	/**
+	 * Get the full path for a view
+	 *
+	 * This methods prepends the filename of a specific view with its path. If
+	 * the view is not found inside the core, an exception is thrown.
+	 *
+	 * @throws sly_Exception  if the view could not be found
+	 * @param  string $file   the relative filename
+	 * @return string         the full path to the view file
+	 */
 	protected function getViewFile($file) {
 		$full = SLY_COREFOLDER.'/views/'.$file;
 		if (file_exists($full)) return $full;

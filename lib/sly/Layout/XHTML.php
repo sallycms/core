@@ -9,15 +9,33 @@
  */
 
 /**
+ * XHTML layout
+ *
+ * This class generates a XHTML 1.0 Strict valid page and is the base for all
+ * backend pages. Transitional pages are possible, but have to be enabled.
+ *
  * @ingroup layout
+ * @author  Zozi
  */
 class sly_Layout_XHTML extends sly_Layout {
-	protected $isTransitional = false;
+	protected $isTransitional = false; ///< boolean  transitional flag
 
+	/**
+	 * Set the page to be transitional
+	 *
+	 * This method changes the generated DOCTYPE of the resulting page.
+	 *
+	 * @param boolean $isTransitional  true or false, it's your choice
+	 */
 	public function setTransitional($isTransitional = true) {
-		$this->isTransitional = $isTransitional;
+		$this->isTransitional = (boolean) $isTransitional;
 	}
 
+	/**
+	 * Print the inline CSS code
+	 *
+	 * This method generates a normal <style> tag containing the inline CSS.
+	 */
 	protected function printCSSConcrete() {
 		print "\t<style type=\"text/css\">$this->cssCode\n</style>\n";
 	}
@@ -38,6 +56,11 @@ class sly_Layout_XHTML extends sly_Layout {
 		}
 	}
 
+	/**
+	 * Print the inline JavaScript code
+	 *
+	 * This method generates a normal <script> tag containing the inline JS.
+	 */
 	protected function printJavaScriptConcrete() {
 		print "\t".'<script type="text/javascript">/*<![CDATA[*/'.trim($this->javaScriptCode).'/*]]>*/</script>';
 	}
@@ -51,7 +74,7 @@ class sly_Layout_XHTML extends sly_Layout {
 			}
 
 			if ($isConditional) print '<!--[if '.strtoupper(substr($group, 3)).']>'."\n";
-			print '<script type="text/javascript" src="'.join('"></script>'."\n".'<script type="text/javascript" src="' , $files).'"></script>'."\n";
+			print "\t".'<script type="text/javascript" src="'.join('"></script>'."\n".'<script type="text/javascript" src="' , $files).'"></script>'."\n";
 			if ($isConditional) print '<![endif]-->'."\n";
 		}
 	}
