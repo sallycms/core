@@ -9,17 +9,34 @@
  */
 
 /**
+ * Base ajax controller
+ *
+ * This class should be used for controllers that are supposed to be called
+ * via AJAX calls. It will clear all output buffers, open a fresh one and die
+ * away when done dispatching.
+ *
  * @ingroup controller
+ * @author  Zozi
  */
 abstract class sly_Controller_Ajax extends sly_Controller_Base {
-
+	/**
+	 * Initialize controller
+	 *
+	 * Clears all output buffers and opens a new, gzipped one.
+	 */
 	protected function init() {
-		//cleanup before dispatching
-		while(ob_get_level()) ob_end_clean();
+		while (ob_get_level()) ob_end_clean();
+		ob_start('ob_gzhandler');
 	}
 
+	/**
+	 * Finishes the dispatching
+	 *
+	 * This method will print the output buffer (if still open) and exit the
+	 * script execution.
+	 */
 	protected function teardown() {
-		//exit, our output should be clean
+		while (ob_get_level()) ob_end_flush();
 		exit();
 	}
 }

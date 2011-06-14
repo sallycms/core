@@ -9,7 +9,12 @@
  */
 
 /**
+ * Controller exception
+ *
+ * Nothing to see here, move along...
+ *
  * @ingroup controller
+ * @author  Zozi
  */
 class sly_Controller_Exception extends Exception {
 
