@@ -15,20 +15,22 @@ if ($this->isTransitional):
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <?php endif ?>
 <html xmlns="http://www.w3.org/1999/xhtml">
-<head>
-	<title><?php print sly_html(trim($this->title)) ?></title>
-	<?php
-		sly_Core::dispatcher()->notify('PAGE_HEADER', '');
-		if ($this->favIcon !== null) {
-			print '<link href="'.$this->favIcon.'" rel="shortcut icon" type="image/x-icon" />';
-		}
-		$this->printHttpMetas();
-		$this->printMetas();
-		$this->printLinks();
-		$this->printCSSFiles();
-		$this->printJavaScriptFiles();
-		$this->printCSS();
-		$this->printJavaScript();
-	?>
-</head>
+<head><?
+	print "\n\t<title>".sly_html(trim($this->title))."</title>\n";
+
+	// notify old listeners
+	sly_Core::dispatcher()->notify('PAGE_HEADER', '');
+
+	if ($this->favIcon !== null) {
+		print "\n\t<link href=\"$this->favIcon\" rel=\"shortcut icon\" type=\"image/x-icon\" />\n";
+	}
+
+	$this->printHttpMetas();
+	$this->printMetas();
+	$this->printLinks();
+	$this->printCSSFiles();
+	$this->printJavaScriptFiles();
+	$this->printCSS();
+	$this->printJavaScript();
+?></head>
 <body<?php print $this->printBodyAttrs() ?>>
