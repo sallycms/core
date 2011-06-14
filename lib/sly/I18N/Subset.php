@@ -9,7 +9,19 @@
  */
 
 /**
+ * Subset of a complete translation database
+ *
+ * This class wraps a regular sly_I18N object together with a specific prefix,
+ * so that callers can omit the prefix. This is used in the mediapool so that
+ * the common prefix of all strings ('pool_') does not have to be repeated over
+ * and over again.
+ *
+ * Since most controllers just wrap the i18n calls, this class will probably
+ * removed in a later release.
+ *
  * @ingroup i18n
+ * @author  Christoph
+ * @since   0.3
  */
 class sly_I18N_Subset implements sly_I18N_Base {
 	/**
