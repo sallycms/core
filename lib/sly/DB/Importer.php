@@ -89,7 +89,6 @@ class sly_DB_Importer {
 
 			$this->checkVersion();
 			$this->checkPrefix();
-			$this->checkCharset();
 
 			return true;
 		}
@@ -115,22 +114,6 @@ class sly_DB_Importer {
 			$this->returnValues['message'] = t('importer_no_valid_import_file_prefix');
 			throw new sly_Exception('bad prefix');
 		}
-	}
-
-	protected function checkCharset() {
-		$dumpCharset = $this->dump->getCharset();
-
-		if ($dumpCharset === false) {
-			$this->returnValues['message'] = t('importer_no_valid_charset');
-			throw new sly_Exception('bad charset');
-		}
-
-//		$thisCharset = t('htmlcharset');
-//
-//		if ($dumpCharset != $thisCharset) {
-//			$this->returnValues['message'] = t('importer_charset_mismatch');
-//			throw new sly_Exception('bad charset');
-//		}
 	}
 
 	protected function executeQueries() {
