@@ -18,7 +18,7 @@
  * returns true and 'filter' calls all listeners in succession and pipes the
  * results through them.
  *
- * @author  christoph@webvariants.de
+ * @author  Christoph
  * @since   0.2
  * @ingroup event
  */

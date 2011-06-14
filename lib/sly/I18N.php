@@ -10,6 +10,8 @@
 
 /**
  * @ingroup i18n
+ * @author  Christoph
+ * @since   0.3
  */
 class sly_I18N implements sly_I18N_Base {
 	protected $locales;

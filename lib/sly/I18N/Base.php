@@ -9,22 +9,32 @@
  */
 
 /**
+ * I18N interface
+ *
  * @ingroup i18n
+ * @author  Christoph
+ * @since   0.3
  */
 interface sly_I18N_Base {
 	/**
+	 * Translate a key
+	 *
 	 * @param  string $key
 	 * @return string
 	 */
 	public function msg($key);
 
 	/**
+	 * Add a new message to the translated database at runtime
+	 *
 	 * @param string $key
 	 * @param string $msg
 	 */
 	public function addMsg($key, $msg);
 
 	/**
+	 * Check if a message exists
+	 *
 	 * @param  string $key
 	 * @return boolean
 	 */
