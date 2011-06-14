@@ -9,18 +9,39 @@
  */
 
 /**
+ * Database dump
+ *
+ * This class wraps a single database dump and can be used to split it up and
+ * import it again. Database dumps contain the Sally version and table prefix of
+ * the system they were created in. These information needs to match when trying
+ * to import them. They are encoded in the comments in the top of the file.
+ *
+ * This class is primarily used when installing Sally, but also by the
+ * Import/Export addOn. It was moved here so that Sally can be installed without
+ * having the addOn installed.
+ *
  * @ingroup database
+ * @author  Christoph
+ * @since   0.3
  */
 class sly_DB_Dump {
-	protected $filename;
-	protected $headers;
-	protected $prefix;
-	protected $version;
-	protected $charset;
-	protected $queries;
+	protected $filename;  ///< string
+	protected $headers;   ///< array
+	protected $prefix;    ///< string
+	protected $version;   ///< string
+	protected $queries;   ///< array
 
-	private $content;
+	private $content;     ///< string
 
+	/**
+	 * Constructor
+	 *
+	 * Constructs the object, but does not yet do any work (like reading the
+	 * file).
+	 *
+	 * @throws sly_Exception     if the file was not found
+	 * @param  string $filename  the full path to the dump file
+	 */
 	public function __construct($filename) {
 		if (!file_exists($filename)) {
 			throw new sly_Exception(t('file', $filename));
@@ -30,15 +51,54 @@ class sly_DB_Dump {
 		$this->headers  = null;
 		$this->prefix   = null;
 		$this->version  = null;
-		$this->charset  = null;
 		$this->queries  = null;
 	}
 
-	public function getHeaders() { return $this->getProperty('headers'); }
-	public function getVersion() { return $this->getProperty('version'); }
-	public function getCharset() { return $this->getProperty('charset'); }
-	public function getPrefix()  { return $this->getProperty('prefix');  }
+	/**
+	 * Get the headers
+	 *
+	 * This method will read the headers from the dump file and return it.
+	 * Headers are the comments at the beginning of the dump file.
+	 *
+	 * @return array  the found headers
+	 */
+	public function getHeaders() {
+		return $this->getProperty('headers');
+	}
 
+	/**
+	 * Get the version
+	 *
+	 * This method will read the version from the dump file and return it.
+	 *
+	 * @return string  the found version
+	 */
+	public function getVersion() {
+		return $this->getProperty('version');
+	}
+
+	/**
+	 * Get the prefix
+	 *
+	 * This method will read the table prefix from the dump file and return it.
+	 *
+	 * @return string  the found prefix
+	 */
+	public function getPrefix() {
+		return $this->getProperty('prefix');
+	}
+
+	/**
+	 * Get the queries
+	 *
+	 * This method will split the dump file up into individual queries and
+	 * return them. When $replaceVariables is set to true, placeholders like
+	 * %TABLE_PREFIX% or %USER% are replaced. Use this only when you're sure
+	 * that this will not damage the dump's content.
+	 *
+	 * @param  boolean $replaceVariables  see description
+	 * @return array                      array of queries
+	 */
 	public function getQueries($replaceVariables = false) {
 		$queries = $this->getProperty('queries');
 		if ($replaceVariables === false) return $queries;
@@ -50,22 +110,46 @@ class sly_DB_Dump {
 		return $queries;
 	}
 
+	/**
+	 * Get the dump's content
+	 *
+	 * This method will read the dump file and return the content. Nothing more.
+	 *
+	 * @return string  the content
+	 */
 	public function getContent() {
 		return file_get_contents($this->filename);
 	}
 
+	/**
+	 * Get a property
+	 *
+	 * A property is one of the class fields. When called for the first time, it
+	 * will parse the file and extract all infos. Later on, this will just return
+	 * the field without doing any more work. It's just a convenience wrapper to
+	 * not have to parse to file over and over again.
+	 *
+	 * @return mixed  the property
+	 */
 	protected function getProperty($name) {
 		if ($this->$name === null) $this->parse();
 		return $this->$name;
 	}
 
+	/**
+	 * Parse the dump
+	 *
+	 * This method will coordinate the main work. It reads the headers, extracts
+	 * version and prefix, gets the queries and so on.
+	 *
+	 * @return boolean  true if successful, else false
+	 */
 	protected function parse() {
 		try {
 			$this->readHeaders();
 
 			$this->version = $this->findHeader('#^sally database dump version ([0-9.]+)#i');
 			$this->prefix  = $this->findHeader('#^prefix ([a-z0-9_]+)#i');
-			$this->charset = $this->findHeader('#^charset ([a-z0-9_-]+)#i');
 
 			$this->content = $this->getContent();
 			$this->replacePrefix();
@@ -79,14 +163,24 @@ class sly_DB_Dump {
 		}
 	}
 
+	/**
+	 * Read the file headers
+	 *
+	 * This method will read the file line by line, reading the headers. When the
+	 * first non-comment is encountered, the parsing stops (so in most cases,
+	 * this will read at most 2 or 3 lines).
+	 *
+	 * Comments can be either '--' style or '##' style.
+	 */
 	protected function readHeaders() {
 		$f = fopen($this->filename, 'r');
 		$this->headers = array();
 
 		for (;;) {
-			$line = fgets($f, 256);
+			$line  = fgets($f, 256);
+			$start = substr($line, 0, 2);
 
-			if (substr($line, 0, 2) != '##' && substr($line, 0, 2) != '--') {
+			if ($start !== '##' && $start !== '--') {
 				break;
 			}
 
@@ -96,6 +190,19 @@ class sly_DB_Dump {
 		fclose($f);
 	}
 
+	/**
+	 * Find a header
+	 *
+	 * Since headers can come in any order and have no identification, they have
+	 * to be found by giving a regex and going through all of them until one is
+	 * found.
+	 *
+	 * This method will return the contents of the first group of the given
+	 * regex.
+	 *
+	 * @param  string  the regex to find (must contain at least one group)
+	 * @return string  the first group, if found, else false
+	 */
 	protected function findHeader($regex) {
 		foreach ($this->headers as $header) {
 			if (preg_match($regex, $header, $match)) {
@@ -106,42 +213,62 @@ class sly_DB_Dump {
 		return false;
 	}
 
+	/**
+	 * Replace table prefix
+	 *
+	 * This method will attempt to replace the table prefix for the complete
+	 * file, making it compatible when importing. It does so by performing some
+	 * regex magic, so it will also replace the prefix inside of the actual
+	 * database contents. In many cases, this is desirable (for example, when
+	 * queries are stored), but be aware that this might lead to problems with
+	 * user defined (user meaning a visitor) content.
+	 */
 	protected function replacePrefix() {
 		$prefix = sly_Core::config()->get('DATABASE/TABLE_PREFIX');
 
-		if ($this->prefix && $prefix != $this->prefix) {
-			// Hier case-insensitive ersetzen, damit alle möglich Schreibweisen (TABLE TablE, tAblE,..) ersetzt werden
-			// Dies ist wichtig, da auch SQL innerhalb von Ein/Ausgabe der Module vom rex-admin verwendet werden
-			$this->content = preg_replace('/(TABLE `?)'.preg_quote($this->prefix, '/').'/i',  '$1'.$prefix, $this->content);
-			$this->content = preg_replace('/(INTO `?)'.preg_quote($this->prefix, '/').'/i',   '$1'.$prefix, $this->content);
-			$this->content = preg_replace('/(EXISTS `?)'.preg_quote($this->prefix, '/').'/i', '$1'.$prefix, $this->content);
+		if ($this->prefix && $prefix !== $this->prefix) {
+			$quoted = preg_quote($this->prefix, '/');
+
+			$this->content = preg_replace('/(TABLE `?)'.$quoted.'/i',  '$1'.$prefix, $this->content);
+			$this->content = preg_replace('/(INTO `?)'.$quoted.'/i',   '$1'.$prefix, $this->content);
+			$this->content = preg_replace('/(EXISTS `?)'.$quoted.'/i', '$1'.$prefix, $this->content);
 		}
 	}
 
+	/**
+	 * Replace placeholders
+	 *
+	 * This method will replace some special placeholders inside of a query.
+	 *
+	 *  - %USER% will be replaced with the currently logged in user's login
+	 *  - %TIME% will be replaced with the current unix timestamp
+	 *  - %TABLE_PREFIX% will be replaced with the table prefix
+	 *
+	 * @param  string $query  the query to work with
+	 * @return string         the result
+	 */
 	public static function replaceVariables($query) {
-		global $REX;
+		static $prefix = null;
 
-		static $prefix    = null;
-		static $tmpPrefix = null;
-
-		// $REX['USER'] gibts im Setup nicht.
-
-		if (isset($REX['USER'])) {
-			$query = str_replace('%USER%', $REX['USER']->getLogin(), $query);
-		}
+		$user = sly_Util_User::getCurrentUser();
 
 		if ($prefix === null) {
-			$prefix    = sly_Core::config()->get('DATABASE/TABLE_PREFIX');
-			$tmpPrefix = sly_Core::config()->get('TEMP_PREFIX');
+			$prefix = sly_Core::config()->get('DATABASE/TABLE_PREFIX');
 		}
 
+		$query = str_replace('%USER%', $user ? $user->getLogin() : '', $query);
 		$query = str_replace('%TIME%', time(), $query);
 		$query = str_replace('%TABLE_PREFIX%', $prefix, $query);
-		$query = str_replace('%TEMP_PREFIX%', $tmpPrefix, $query);
 
 		return $query;
 	}
 
+	/**
+	 * Split up the dump file
+	 *
+	 * This method will take the result of splitFile() and put the queries in
+	 * the 'queries' property.
+	 */
 	protected function readQueries() {
 		$this->splitFile();
 
@@ -150,6 +277,15 @@ class sly_DB_Dump {
 		}
 	}
 
+	/**
+	 * Split up the dump file
+	 *
+	 * This method will perform the actual parsing of the dump. It's a copy from
+	 * phpMyAdmin.
+	 *
+	 * @author  phpMyAdmin
+	 * @license GPLv2
+	 */
 	protected function splitFile() {
 		// do not trim, see bug #1030644
 		//$sql          = trim($this->content);

@@ -15,6 +15,7 @@
  *
  * @ingroup controller
  * @author  Zozi
+ * @since   0.1
  */
 class sly_Controller_Exception extends Exception {
 

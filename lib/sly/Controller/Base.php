@@ -21,6 +21,7 @@
  *
  * @ingroup controller
  * @author  Zozi
+ * @since   0.1
  */
 abstract class sly_Controller_Base {
 	const PAGEPARAM    = 'page';    ///< string  the request param that contains the page
