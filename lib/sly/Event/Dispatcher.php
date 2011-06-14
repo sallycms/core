@@ -11,28 +11,60 @@
 /**
  * Event system
  *
+ * This class is reponsible for holding the list of known event listeners and
+ * performing the actual dispatching of events. It supports three ways to call
+ * and combine the listeners: 'notify' just sends all listeners the same data
+ * and does not combining, 'notifyUntil' fires all listeners until the first one
+ * returns true and 'filter' calls all listeners in succession and pipes the
+ * results through them.
+ *
  * @author  christoph@webvariants.de
  * @since   0.2
  * @ingroup event
  */
 class sly_Event_Dispatcher {
-	private $listeners;
-	private static $instance;
+	private $listeners;         ///< array                 list of listeners
+	private static $instance;   ///< sly_Event_Dispatcher  the current dispatcher instance
 
+	/**
+	 * Constructor
+	 */
 	private function __construct() {
 		$this->listeners = array();
 	}
 
+	/**
+	 * Singleton access
+	 *
+	 * @return sly_Event_Dispatcher  the instance
+	 */
 	public static function getInstance() {
 		if (empty(self::$instance)) self::$instance = new self();
 		return self::$instance;
 	}
 
+	/**
+	 * Registers a listener
+	 *
+	 * Registers a callback for a given event, remembering it for later
+	 * execution. A listener can get a list of special parameters that will be
+	 * handed to it when it's called.
+	 *
+	 * @param string $event     the event name (case sensitive, use upper case by convention)
+	 * @param mixed  $listener  the callback (anything PHP regards as callable)
+	 * @param array  $array     additional params for the listener
+	 */
 	public function register($event, $listener, $params = array()) {
 		$params = sly_makeArray($params);
 		$this->listeners[$event][] = array('listener' => $listener, 'params' => $params);
 	}
 
+	/**
+	 * Return all listeners for one event
+	 *
+	 * @param  string $event  the event name
+	 * @return boolean        true if the event exists, else false
+	 */
 	public function clear($event) {
 		if (isset($this->listeners[$event])) {
 			$this->listeners[$event] = array();
@@ -42,14 +74,34 @@ class sly_Event_Dispatcher {
 		return false;
 	}
 
+	/**
+	 * Return a list of all known events
+	 *
+	 * This goes through all registered listeners and returns the list of all
+	 * events having a listener attachted to them.
+	 *
+	 * @return array  list of events (unsorted)
+	 */
 	public function getEvents() {
 		return array_keys($this->listeners);
 	}
 
+	/**
+	 * Check for listeners
+	 *
+	 * @param  string $event  the event name
+	 * @return boolean        true if the event has listeners, else false
+	 */
 	public function hasListeners($event) {
 		return !empty($this->listeners[$event]);
 	}
 
+	/**
+	 * Return all listeners
+	 *
+	 * @param  string $event  the event name
+	 * @return array          list of listeners (unsorted)
+	 */
 	public function getListeners($event) {
 		return $this->hasListeners($event) ? $this->listeners[$event] : array();
 	}
@@ -117,6 +169,19 @@ class sly_Event_Dispatcher {
 		return $result['result'];
 	}
 
+	/**
+	 * Iteration algorithm
+	 *
+	 * This method implements the actual iteration over all listeners, allowing
+	 * the three combination methods to configure how the results from one
+	 * listener should be combined with the next one.
+	 *
+	 * @param  string $event         the event to be triggered
+	 * @param  mixed  $subject       an optional value for the listeners to work with
+	 * @param  array  $params        additional parameters (if necessary)
+	 * @param  string $foldStrategy  'filter', 'forget' or 'stop'
+	 * @return array                 an array consisting of 'state' 'called' and 'result'
+	 */
 	protected function iterate($event, $subject, $params, $foldStrategy) {
 		if (!$this->hasListeners($event)) return array('state' => 'empty', 'called' => 0, 'result' => $subject);
 
