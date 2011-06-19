@@ -266,132 +266,53 @@ class sly_DB_Dump {
 	/**
 	 * Split up the dump file
 	 *
-	 * This method will take the result of splitFile() and put the queries in
-	 * the 'queries' property.
+	 * This method will perform the actual parsing of the dump. It's a copy from
+	 * Adminer (before Sally 0.5, this was a copy from phpMyAdmin, but was
+	 * replaced with this code since PMA uses GPLv2).
+	 *
+	 * @author  Adminer
+	 * @license Apache License, Version 2.0
 	 */
 	protected function readQueries() {
-		$this->splitFile();
+		$space     = "(?:\\s|/\\*.*\\*/|(?:#|-- )[^\n]*\n|--\n)";
+		$delimiter = ';';
+		$offset    = 0;
+		$parse     = '[\'`"]|/\\*|-- |#'; //! ` and # not everywhere
+		$query     = $this->content;
 
-		foreach ($this->queries as $idx => $line) {
-			$this->queries[$idx] = $line['query'];
-		}
-	}
+		while ($query !== '') {
+			if (!$offset && preg_match("~^$space*DELIMITER\\s+(.+)~i", $query, $match)) {
+				$delimiter = $match[1];
+				$query     = substr($query, strlen($match[0]));
+			}
+			else {
+				preg_match('('.preg_quote($delimiter)."|$parse|\$)", $query, $match, PREG_OFFSET_CAPTURE, $offset); // should always match
 
-	/**
-	 * Split up the dump file
-	 *
-	 * This method will perform the actual parsing of the dump. It's a copy from
-	 * phpMyAdmin.
-	 *
-	 * @author  phpMyAdmin
-	 * @license GPLv2
-	 */
-	protected function splitFile() {
-		// do not trim, see bug #1030644
-		//$sql          = trim($this->content);
-		$sql          = rtrim($this->content, "\n\r");
-		$sql_len      = strlen($this->content);
-		$char         = '';
-		$string_start = '';
-		$in_string    = false;
-		$nothing      = true;
-		$time0        = time();
+				$found  = $match[0][0];
+				$offset = $match[0][1] + strlen($found);
 
-		for ($i = 0; $i < $sql_len; ++$i) {
-			$char = $sql[$i];
+				if (!$found && rtrim($query) === '') {
+					break;
+				}
 
-			// We are in a string, check for not escaped end of strings except for
-			// backquotes that can't be escaped
-			if ($in_string) {
-				for (;;) {
-					$i = strpos($sql, $string_start, $i);
-					// No end of string found -> add the current substring to the
-					// returned array
-					if (!$i) {
-						$this->queries[] = $sql;
-						return true;
-					}
-					// Backquotes or no backslashes before quotes: it's indeed the
-					// end of the string -> exit the loop
-					elseif ($string_start == '`' || $sql[$i -1] != '\\') {
-						$string_start = '';
-						$in_string    = false;
-						break;
-					}
-					// one or more Backslashes before the presumed end of string...
-					else {
-						// ... first checks for escaped backslashes
-						$j = 2;
-						$escaped_backslash = false;
-						while ($i - $j > 0 && $sql[$i - $j] == '\\') {
-							$escaped_backslash = !$escaped_backslash;
-							$j ++;
-						}
-						// ... if escaped backslashes: it's really the end of the
-						// string -> exit the loop
-						if ($escaped_backslash) {
-							$string_start = '';
-							$in_string    = false;
+				if ($found && $found !== $delimiter) { // find matching quote or comment end
+					while (preg_match('(' . ($found == '/*' ? '\\*/' : ($found == '[' ? ']' : (preg_match('~^(-- |#)~', $found) ? "\n" : preg_quote($found) . "|\\\\."))) . '|$)s', $query, $match, PREG_OFFSET_CAPTURE, $offset)) { //! respect sql_mode NO_BACKSLASH_ESCAPES
+						$s      = $match[0][0];
+						$offset = $match[0][1] + strlen($s);
+
+						if ($s[0] != "\\") {
 							break;
 						}
-						// ... else loop
-						else {
-							$i ++;
-						}
-					} // end if...elseif...else
-				} // end for
-			} // end if (in string)
-
-			// lets skip comments (/*, -- and #)
-			elseif (($char == '-' && $sql_len > $i+2 && $sql[$i+1] == '-' && $sql[$i+2] <= ' ') || $char == '#' || ($char == '/' && $sql_len > $i+1 && $sql[$i+1] == '*')) {
-				$i = strpos($sql, $char == '/' ? '*/' : "\n", $i);
-				// didn't we hit end of string?
-				if ($i === false) break;
-				if ($char == '/') $i ++;
-			}
-
-			// We are not in a string, first check for delimiter...
-			elseif ($char == ';') {
-				// if delimiter found, add the parsed part to the returned array
-				$this->queries[] = array('query' => substr($sql, 0, $i), 'empty' => $nothing);
-
-				$nothing = true;
-				$sql     = ltrim(substr($sql, min($i + 1, $sql_len)));
-				$sql_len = strlen($sql);
-
-				if ($sql_len) {
-					$i = -1;
+					}
 				}
-				else {
-					// The submited statement(s) end(s) here
-					return true;
+				else { // end of a query
+					$q      = substr($query, 0, $match[0][1]);
+					$query  = substr($query, $offset);
+					$offset = 0;
+
+					$this->queries[] = trim($q);
 				}
-			} // end else if (is delimiter)
-
-			// ... then check for start of a string,...
-			elseif ($char == '"' || $char == '\'' || $char == '`') {
-				$in_string    = true;
-				$nothing      = false;
-				$string_start = $char;
-			} // end else if (is start of string)
-
-			elseif ($nothing) {
-				$nothing = false;
 			}
-
-			// loic1: send a fake header each 30 sec. to bypass browser timeout
-			$time1 = time();
-			if ($time1 >= $time0 + 30) {
-				$time0 = $time1;
-				header('X-pmaPing: Pong');
-			} // end if
-		} // end for
-
-		// add any rest to the returned array
-		if (!empty ($sql) && preg_match('@[^[:space:]]+@', $sql)) {
-			$this->queries[] = array('query' => $sql, 'empty' => $nothing);
 		}
-
-		return true;
 	}
 }
