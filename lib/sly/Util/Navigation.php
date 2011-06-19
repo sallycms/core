@@ -111,8 +111,7 @@ class sly_Util_Navigation {
 			if ($isActive) {
 				$this->activePathCategories[] = $category;
 			}
-
-			if (($isActive || $all) && $currentLevel +1 >= $maxDepth) {
+			if (($isActive || $all) && $currentLevel +1 <= $maxDepth) {
 				$children = $category->getChildren(true);
 				$childrenHTMLString = $this->walkCategories($children, $all, $maxDepth, $currentLevel+1);
 			}else {
@@ -257,7 +256,7 @@ class sly_Util_Navigation {
 	 */
 	public function getBreadcrumbs($separator = '->', $clickable = false, $offset = 0) {
 		$path = array();
-		for ($i = 1 + $offset; $i <= $this->maxDepth; $i++) {
+		for ($i = 0 + $offset; $i <= $this->maxDepth; $i++) {
 			$levelObject = $this->getActiveCategoryForLevel($i);
 			if(is_null($levelObject)) break;
 
@@ -267,7 +266,6 @@ class sly_Util_Navigation {
 			}
 			$path[] = $levelName;
 		}
-
 		return implode($separator, $path);
 	}
 
