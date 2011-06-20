@@ -96,6 +96,27 @@ class sly_Util_Array {
 
 		return $res;
 	}
+	
+	public function hasget($key, $default = null) {
+		$key = trim($key, '/');
+
+		if (empty($key)) return array(true, $this->array);
+
+		if(array_key_exists($key, $this->array)) array(true, $this->array[$key]);
+		
+		$path = self::getPath($key);
+		$res  = $this->array;
+
+		foreach ($path as $step) {
+			if (!array_key_exists($step, $res)) {
+				return array(false, $default);
+			}
+
+			$res = $res[$step];
+		}
+
+		return array(true, $res);
+	}
 
 	public function remove($key) {
 		$key = trim($key, '/');
@@ -145,7 +166,7 @@ class sly_Util_Array {
 	}
 
 	protected static function getPath($key) {
-		return preg_split('#/+#', $key);
+		return explode('/', $key);
 	}
 
 	/**
