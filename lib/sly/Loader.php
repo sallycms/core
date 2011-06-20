@@ -81,9 +81,9 @@ class sly_Loader {
 	public static function loadClass($className) {
 		global $REX; // für Code, der direkt beim Include ausgeführt wird.
 
-		if (class_exists($className, false)) {
+		/*if (class_exists($className, false)) {
 			return true;
-		}
+		}*/
 
 		$found = false;
 		$upper = strtoupper($className);

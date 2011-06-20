@@ -58,7 +58,7 @@ function rex_moveSlice($slice_id, $clang, $direction) {
 
 	// Slice finden
 
-	$articleSlice = OOArticleSlice::getArticleSliceById($slice_id, $clang);
+	$articleSlice = OOArticleSlice::getArticleSliceById($slice_id);
 
 	if ($articleSlice) {
 		$sql        = sly_DB_Persistence::getInstance();
@@ -119,10 +119,9 @@ function rex_deleteArticleSlice($slice_id) {
  *
  * @return boolean  true oder ... false
  */
-function rex_slice_module_exists($sliceID, $clang) {
+function rex_slice_module_exists($sliceID) {
 	$sliceID = (int) $sliceID;
-	$clang   = (int) $clang;
-	$slice   = OOArticleSlice::getArticleSliceById($sliceID, $clang);
+	$slice   = OOArticleSlice::getArticleSliceById($sliceID);
 
 	if (is_null($slice)) {
 		return false;
@@ -327,7 +326,7 @@ function rex_copyContent($from_id, $to_id, $from_clang = 0, $to_clang = 0, $from
 	$login    = sly_Util_User::getCurrentUser()->getLogin();
 
 	foreach ($sliceIds as $sliceId) {
-		$article_slice = OOArticleSlice::getArticleSliceById($sliceId, $from_clang);
+		$article_slice = OOArticleSlice::getArticleSliceById($sliceId);
 
 		$slice = $service->findById($article_slice->getSliceId());
 		$slice = $service->copy($slice);
