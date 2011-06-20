@@ -21,7 +21,6 @@ class OOArticleSlice {
 	private $_article_id;
 	private $_clang;
 	private $_slot;
-	private $_module;
 	private $_slice_id;
 	private $_prior;
 
@@ -42,7 +41,6 @@ class OOArticleSlice {
 		$this->_article_id = (int) $article_id;
 		$this->_clang      = (int) $clang;
 		$this->_slot       = $slot;
-		$this->_module     = $module;
 		$this->_slice_id   = (int) $slice_id;
 		$this->_prior   = (int) $prior;
 
@@ -56,18 +54,16 @@ class OOArticleSlice {
 	/**
 	 * @return OOArticleSlice
 	 */
-	public static function getArticleSliceById($id, $clang = false, $revision = 0) {
-		if ($clang === false) $clang = sly_Core::getCurrentClang();
+	public static function getArticleSliceById($id, $revision = 0) {
 
 		$namespace = 'sly.slice';
-		$clang     = (int) $clang;
 		$id        = (int) $id;
 		$revision  = (int) $revision;
-		$key       = sly_Cache::generateKey('by_id', $id, $clang, $revision);
+		$key       = sly_Cache::generateKey('by_id', $id, $revision);
 		$obj       = sly_Core::cache()->get($namespace, $key, null);
 
 		if ($obj === null) {
-			$obj = self::_getSliceWhere('id = '.$id.' AND clang = '.$clang.' AND revision = '.$revision);
+			$obj = self::_getSliceWhere('id = '.$id.' AND revision = '.$revision);
 			sly_Core::cache()->set(self::CACHE_NS, $key, $obj);
 		}
 
@@ -258,18 +254,18 @@ class OOArticleSlice {
 		return sly_Util_Article::findById($this->getArticleId());
 	}
 
-	public function getArticleId()  { return $this->_article_id; }
-	public function getClang()      { return $this->_clang;      }
-	public function getSlot()       { return $this->_slot;       }
-	public function getRevision()   { return $this->_revision;   }
-	public function getModuleName() { return $this->_module;     }
-	public function getId()         { return $this->_id;         }
-	public function getPrior()      { return $this->_prior;      }
-	public function getSliceId()    { return $this->_slice_id;   }
-	public function getCreatedate() { return $this->_createdate; }
-	public function getUpdatedate() { return $this->_updatedate; }
-	public function getCreateuser() { return $this->_createuser; }
-	public function getUpdateuser() { return $this->_updateuser; }
+	public function getArticleId()  { return $this->_article_id;             }
+	public function getClang()      { return $this->_clang;                  }
+	public function getSlot()       { return $this->_slot;                   }
+	public function getRevision()   { return $this->_revision;               }
+	public function getModuleName() { return $this->getSlice()->getModule(); }
+	public function getId()         { return $this->_id;                     }
+	public function getPrior()      { return $this->_prior;                  }
+	public function getSliceId()    { return $this->_slice_id;               }
+	public function getCreatedate() { return $this->_createdate;             }
+	public function getUpdatedate() { return $this->_updatedate;             }
+	public function getCreateuser() { return $this->_createuser;             }
+	public function getUpdateuser() { return $this->_updateuser;             }
 
 	/**
 	 *
