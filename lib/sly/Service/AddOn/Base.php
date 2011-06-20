@@ -47,20 +47,20 @@ abstract class sly_Service_AddOn_Base {
 	 * @param mixed $component  addOn as string, plugin as array
 	 */
 	public function loadConfig($component) {
-		$config       = sly_Core::config();
-		$defaultsFile = $this->baseFolder($component).'defaults.yml';
-		$globalsFile  = $this->baseFolder($component).'globals.yml';
-
-		if ($this->isActivated($component)) {
-			$this->loadStatic($component);
-		}
-
-		if (file_exists($globalsFile) && $this->isInstalled($component)) {
-			$config->loadStatic($globalsFile);
-		}
-
-		if (file_exists($defaultsFile) && $this->isActivated($component)) {
-			$config->loadProjectDefaults($defaultsFile, false, $this->getConfPath($component));
+		if($this->isInstalled($component)) {
+			$config       = sly_Core::config();
+			$defaultsFile = $this->baseFolder($component).'defaults.yml';
+			$globalsFile  = $this->baseFolder($component).'globals.yml';
+			if ($this->isActivated($component)) {
+				$this->loadStatic($component);
+				
+				if (file_exists($defaultsFile)) {
+					$config->loadProjectDefaults($defaultsFile, false, $this->getConfPath($component));
+				}
+			}
+			if (file_exists($globalsFile)) {
+				$config->loadStatic($globalsFile);
+			}
 		}
 	}
 

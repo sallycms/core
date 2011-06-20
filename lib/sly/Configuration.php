@@ -138,18 +138,22 @@ class sly_Configuration {
 	}
 
 	public function get($key, $default = null) {
-		if (!$this->has($key)) return $default;
+		$found = false;
+		
+		$p = $this->projectConfig->hasget($key, array());
+		if (!is_array($p[1])) return $p[1];
+		$found = $found || $p[0];
 
-		$p = $this->projectConfig->get($key, array());
-		if (!is_array($p)) return $p;
+		$l = $this->localConfig->hasget($key, array());
+		if (!is_array($l[1])) return $l[1];
+		$found = $found || $l[0];
 
-		$l = $this->localConfig->get($key, array());
-		if (!is_array($l)) return $l;
+		$s = $this->staticConfig->hasget($key, array());
+		if (!is_array($s[1])) return $s[1];
+		$found = $found || $s[0];
 
-		$s = $this->staticConfig->get($key, array());
-		if (!is_array($s)) return $s;
-
-		return array_replace_recursive($s, $l, $p);
+		if (!$found) return $default;
+		return array_replace_recursive($s[1], $l[1], $p[1]);
 	}
 
 	public function has($key) {
@@ -185,7 +189,7 @@ class sly_Configuration {
 		if (is_null($key) || strlen($key) === 0) {
 			throw new sly_Exception('Key '.$key.' ist nicht erlaubt!');
 		}
-		if (is_array($value) && !empty($value) && sly_Util_Array::isAssoc($value)) {
+		if (!empty($value) && sly_Util_Array::isAssoc($value)) {
 			foreach ($value as $ikey => $val) {
 				$currentPath = trim($key.'/'.$ikey, '/');
 				$this->setInternal($currentPath, $val, $mode, $force);
