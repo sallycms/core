@@ -81,4 +81,4 @@ if (ENC !== 'plain') {
 	header('Content-Encoding: '.ENC);
 }
 
-readfile(FILE);
+readfile($realfile);

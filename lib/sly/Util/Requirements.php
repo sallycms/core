@@ -109,7 +109,7 @@ class sly_Util_Requirements {
 		$mem = ini_get('memory_limit');
 
 		if ($mem >= 64) return $this->ok($mem.'B');
-		else if (ini_set('memory_limit', '64M') !== false) return $this->warning(t('phpcheck_memory', $mem));
+		else if (ini_set('memory_limit', '64M') !== false) return $this->warning($mem);
 		else if ($mem >= 16) return $this->ok($mem.'B');
 		else if (empty($mem)) return $this->warning('translate:unknown');
 		else return $this->failed($mem.'B');

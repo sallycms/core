@@ -112,6 +112,7 @@ abstract class sly_Service_DevelopBase {
 			sly_Core::config()->remove($this->getClassIdentifier());
 			$this->setData($newData);
 			$this->resetRefreshTime();
+			sly_Core::dispatcher()->notify('SLY_DEVELOP_REFRESHED');
 		}
 	}
 

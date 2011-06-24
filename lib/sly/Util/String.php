@@ -107,6 +107,33 @@ class sly_Util_String {
 
 		return $return;
 	}
+	/**
+	 * shortens a filename to a max lenght and leaves an optional suffix
+	 * prior to the extension
+	 *
+	 * @param string $name          filename to be shorten
+	 * @param int    $maxLength     maximum string length
+	 * @param int    $suffixLength  length of last characters
+	 * @return string  returns false on error
+	 */
+	public static function shortenFilename($name, $maxLength, $suffixLength = 3) {
+		if (!is_string($name) || !$name || !is_int($maxLength) || $maxLength < 1
+			|| !is_int($suffixLength) || $suffixLength < 0 ) {
+
+			return false;
+		}
+		$pos = strrpos($name, '.');
+		if ($pos === false || $pos <= $maxLength) return $name;
+
+		$shortname  = substr($name, 0, min($maxLength - $suffixLength, $pos));
+		if ($maxLength - $suffixLength < $pos) {
+			if ($suffixLength > 0) $shortname .= '…';
+			$shortname .= substr($name, $pos - $suffixLength, 3);
+		}
+		$shortname .= substr($name, $pos);
+
+		return $shortname;
+	}
 
 	/**
 	 * Dateigröße formatieren
@@ -123,26 +150,20 @@ class sly_Util_String {
 	 * @param  int $size  die Dateigröße in Byte
 	 * @return string     die Dateigröße im Format "X.YY _B" oder "< 1 KB"
 	 */
-	public static function formatFilesize($size) {
+	public static function formatFilesize($size, $precision=2, $unit='Bytes') {
 		// Wir teilen in die Funktion immer durch 999 anstatt durch 1024, damit
 		// als Größenangaben nicht "1023 KB", sondern "0,99 MB" errechnet werden.
 		// Das ist benutzerfreundlicher.
-
 		if ($size < 999) {
-			return $size.' Bytes';
+			return $size.' '.$unit;
 		}
-
-		$units = array('K','M','G','T','P','E','Z','Y');
-		$unit  = '';
-
-		while ($size > 999 && !empty($units)) {
+		$unitPrefixes = array('K','M','G','T','P','E','Z','Y');
+		while ($size > 999 && !empty($unitPrefixes)) {
 			$size /= 1024.0;
-			$unit = array_shift($units);
+			$unitPrefix = array_shift($unitPrefixes);
 		}
-
-		return self::formatNumber($size, 2).' '.$unit.'Bytes';
+		return self::formatNumber($size, $precision).' '.$unitPrefix.$unit;
 	}
-
 	/**
 	 * Führt eine Liste zusammen
 	 *

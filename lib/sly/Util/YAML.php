@@ -63,8 +63,8 @@ class sly_Util_YAML {
 
 		// get content from cache, when up to date
 		if (self::isCacheValid($filename, $cachefile) || (file_exists($cachefile) && $forceCached)) {
-			// lock the file
-			$handle = fopen($filename, 'r');
+			// lock the cachefile
+			$handle = fopen($cachefile, 'r');
 			flock($handle, LOCK_SH);
 
 			include $cachefile;
@@ -75,7 +75,14 @@ class sly_Util_YAML {
 		}
 		// get content from yaml file
 		else {
+			//lock the source
+			$handle = fopen($filename, 'r');
+			flock($handle, LOCK_SH);
 			$config = sfYaml::load($filename);
+			// release lock again
+			flock($handle, LOCK_UN);
+			fclose($handle);
+			
 			$exists = file_exists($cachefile);
 
 			file_put_contents($cachefile, '<?php $config = '.var_export($config, true).';', LOCK_EX);

@@ -159,10 +159,8 @@ class OOMediaCategory {
 
 			$sql    = sly_DB_Persistence::getInstance();
 			$result = array();
-
-			$sql->select('file', 'id', array('category_id' => $this->getId()));
+			$sql->select('file', 'id', array('category_id' => $this->getId()), null, 'updateDate DESC');
 			foreach ($sql as $row) $result[] = $row['id'];
-
 			foreach ($result as $id) {
 				$this->files[] = OOMedia::getMediaById($id);
 			}

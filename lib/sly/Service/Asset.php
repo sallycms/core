@@ -88,13 +88,17 @@ class sly_Service_Asset {
 						$realfile   = SLY_BASE.'/'.reset($translated); // "there can only be one!" ... or at least we hope so
 					}
 
+					$relative = str_replace(SLY_BASE, '', $realfile);
+					$relative = str_replace('\\', '/', $relative);
+					$relative = trim($relative, '/');
+
 					// delete cache file if original is missing or outdated
 					if (!file_exists($realfile) || filemtime($cacheFile) < filemtime($realfile)) {
 						unlink($cacheFile);
 					}
 
 					// delete file if it's protected but where in public or vice versa
-					elseif (in_array(basename($realfile), $protected) !== ($access === self::ACCESS_PROTECTED)) {
+					elseif (in_array($relative, $protected) !== ($access === self::ACCESS_PROTECTED)) {
 						unlink($cacheFile);
 					}
 				}
@@ -279,11 +283,28 @@ class sly_Service_Asset {
 		$me  = new self();
 		$dir = $me->getCacheDir('', '');
 
+		// Remember htaccess files, so that we do not kill and re-create them.
+		// This is important for servers which have custom rules (like RewriteBase settings).
+		$htaccess['root'] = file_get_contents($dir.'/.htaccess');
+
+		foreach (array(self::ACCESS_PUBLIC, self::ACCESS_PROTECTED) as $access) {
+			$htaccess[$access.'_gzip']    = file_get_contents($dir.'/'.$access.'/gzip/.htaccess');
+			$htaccess[$access.'_deflate'] = file_get_contents($dir.'/'.$access.'/deflate/.htaccess');
+		}
+
 		// clear the directory
 		rex_deleteDir($dir, true);
 
 		// re-init the cache dir
 		$me->initCache();
+
+		// restore the original .htaccess files again
+		$htaccess['root'] = file_put_contents($dir.'/.htaccess', $htaccess['root']);
+
+		foreach (array(self::ACCESS_PUBLIC, self::ACCESS_PROTECTED) as $access) {
+			file_put_contents($dir.'/'.$access.'/gzip/.htaccess', $htaccess[$access.'_gzip']);
+			file_put_contents($dir.'/'.$access.'/deflate/.htaccess', $htaccess[$access.'_deflate']);
+		}
 
 		return isset($params['subject']) ? $params['subject'] : true;
 	}
