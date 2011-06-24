@@ -220,12 +220,19 @@ class sly_Core {
 	}
 
 	public static function getVersion($pattern = 'X.Y.Z') {
-		$config  = self::config();
+		static $version = null;
+
+		if ($version === null)  {
+			$config  = self::config();
+			$version = $config->get('VERSION');
+		}
+
 		$pattern = str_replace('s', 'sly', $pattern);
 		$pattern = str_replace('S', 'sally', $pattern);
-		$pattern = str_replace('X', $config->get('VERSION'), $pattern);
-		$pattern = str_replace('Y', $config->get('SUBVERSION'), $pattern);
-		$pattern = str_replace('Z', $config->get('MINORVERSION'), $pattern);
+		$pattern = str_replace('X', $version['MAJOR'], $pattern);
+		$pattern = str_replace('Y', $version['MINOR'], $pattern);
+		$pattern = str_replace('Z', $version['BUGFIX'], $pattern);
+
 		return $pattern;
 	}
 
