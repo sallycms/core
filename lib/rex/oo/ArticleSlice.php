@@ -35,7 +35,7 @@ class OOArticleSlice {
 	/**
 	 * Constructor
 	 */
-	public function __construct($id, $article_id, $clang, $slot, $module, $prior,
+	public function __construct($id, $article_id, $clang, $slot, $prior,
 		$createdate, $updatedate, $createuser, $updateuser, $revision, $slice_id = 0) {
 		$this->_id         = (int) $id;
 		$this->_article_id = (int) $article_id;
@@ -112,7 +112,7 @@ class OOArticleSlice {
 		if ($clang === null) $clang = sly_Core::getCurrentClang();
 
 		if ($slot === null) {
-			$template = sly_Util_Article::findById($articleID)->getTemplateName();
+			$template = sly_Util_Article::findById($articleID, $clang)->getTemplateName();
 			$slot     = sly_Service_Factory::getTemplateService()->getFirstSlot($template);
 
 			if ($slot === null) return null;
@@ -124,7 +124,7 @@ class OOArticleSlice {
 		$revision  = (int) $revision;
 
 		return self::_getSliceWhere(
-			'a.article_id = '.$articleID.' AND a.clang = '.$clang.' AND a.slot = "'.mysql_real_escape_string($slot).'" AND '.
+			'a.article_id = '.$articleID.' AND a.clang = '.$clang.' AND a.slot = '. sly_DB_PDO_Persistence::getInstance()->quote($slot) .' AND '.
 			'((a.prior = 0  AND a.id = b.id) '.
 			'OR (b.slot != a.slot AND b.id = a.prior)) '.
 			'AND a.revision = '.$revision.' AND b.revision = '.$revision,
@@ -239,7 +239,7 @@ class OOArticleSlice {
 
 		foreach ($sql as $row) {
 			$slices[] = new OOArticleSlice(
-				$row['id'], $row['article_id'], $row['clang'], $row['slot'], $row['module'],
+				$row['id'], $row['article_id'], $row['clang'], $row['slot'],
 				$row['prior'], $row['createdate'],
 				$row['updatedate'], $row['createuser'], $row['updateuser'], $row['revision'],
 				$row['slice_id']
@@ -258,6 +258,10 @@ class OOArticleSlice {
 	public function getClang()      { return $this->_clang;                  }
 	public function getSlot()       { return $this->_slot;                   }
 	public function getRevision()   { return $this->_revision;               }
+	/**
+	 * @deprecated
+	 * @return string 
+	 */
 	public function getModuleName() { return $this->getSlice()->getModule(); }
 	public function getId()         { return $this->_id;                     }
 	public function getPrior()      { return $this->_prior;                  }
@@ -293,8 +297,7 @@ class OOArticleSlice {
 	private function replaceGlobals($content) {
 		// Slice-abhängige globale Variablen ersetzen
 
-		$slice   = sly_Service_Factory::getSliceService()->findById($this->getSliceId());
-		$content = str_replace('REX_MODULE',   $slice->getModule(), $content);
+		$content = str_replace('REX_MODULE',   $this->getSlice()->getModule(), $content);
 		$content = str_replace('REX_SLICE_ID', $this->getId(),      $content);
 		$content = str_replace('REX_CTYPE_ID', $this->getSlot(),    $content);
 		$content = str_replace('REX_SLOT',     $this->getSlot(),    $content);
@@ -343,7 +346,7 @@ class OOArticleSlice {
 			$user_login
 		);
 
-		return str_replace($search, $replace,$content);
+		return str_replace($search, $replace, $content);
 	}
 
 	private static function replaceLinks($content) {
@@ -381,6 +384,6 @@ class OOArticleSlice {
 
 	protected function getRexVarValue($type, $key) {
 		$value = sly_Service_Factory::getSliceValueService()->findBySliceTypeFinder($this->getSliceId(), $type, $key);
-		return $value ? $value->getValue() : null;
+		return $value;
 	}
 }

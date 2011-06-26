@@ -45,8 +45,8 @@ function rex_moveSlice($slice_id, $clang, $direction) {
 	$slice_id = (int) $slice_id;
 	$clang    = (int) $clang;
 
-	if (!in_array($direction, array('moveup', 'movedown'))) {
-		trigger_error('rex_moveSlice: Unsupported direction "'.$direction.'"!', E_USER_ERROR);
+	if (!in_array($direction, array('up', 'down'))) {
+		throw new sly_Exception('rex_moveSlice: Unsupported direction "'.$direction.'"!', E_USER_ERROR);
 	}
 
 	// slot beachten
@@ -65,7 +65,7 @@ function rex_moveSlice($slice_id, $clang, $direction) {
 		$article_id = (int) $articleSlice->getArticleId();
 		$prior      = (int) $articleSlice->getPrior();
 		$slot       = $articleSlice->getSlot();
-		$newprior   = $direction == 'moveup' ? $prior - 1 : $prior + 1;
+		$newprior   = $direction == 'up' ? $prior - 1 : $prior + 1;
 		$sliceCount = $sql->magicFetch('article_slice', 'COUNT(*)', array('article_id' => $article_id, 'clang' => $clang, 'slot' => $slot));
 
 		if ($newprior > -1 && $newprior < $sliceCount) {
