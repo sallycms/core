@@ -41,7 +41,16 @@ class sly_Model_Article extends sly_Model_Base_Article {
 	 * @return boolean
 	 */
 	public function hasType() {
-		return!empty($this->type);
+		return !empty($this->type);
+	}
+	
+	public function hasTemplate() {
+		if($this->hasType()) {
+			$templateName = $this->getTemplateName(); 
+			$templateService = sly_Service_Factory::getTemplateService();
+			return !empty($templateName) && $templateService->exists($templateName);
+		}
+		return false; 
 	}
 
 	/**
