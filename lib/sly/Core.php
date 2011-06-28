@@ -278,4 +278,17 @@ class sly_Core {
 		self::registerVarType('rex_var_link');
 		self::registerVarType('rex_var_media');
 	}
+
+	public static function registerListeners() {
+		$listeners  = self::config()->get('LISTENERS', array());
+		$dispatcher = self::dispatcher();
+
+		foreach ($listeners as $event => $callbacks) {
+			foreach ($callbacks as $callback) {
+				$dispatcher->register($event, $callback);
+			}
+		}
+
+		$dispatcher->notify('SLY_LISTENERS_REGISTERED');
+	}
 }
