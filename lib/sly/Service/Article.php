@@ -405,4 +405,10 @@ class sly_Service_Article extends sly_Service_Model_Base {
 
 		return true;
 	}
+	
+	public function touch(sly_Model_Article $article, sly_Model_User $user) {
+		$article->setUpdatedate(time());
+		$article->setUpdateuser($user->getLogin());
+		$this->update($article);
+	}
 }
