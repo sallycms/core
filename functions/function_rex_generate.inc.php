@@ -59,17 +59,12 @@ function rex_deleteCacheArticle($id, $clang = null) {
 		$cache->delete('sly.category.list', $id.'_'.$_clang.'_1');
 	}
 }
-
+/**
+ *
+ * @deprecated
+ */
 function rex_deleteCacheSliceContent($slice_id) {
-	$cachedir = SLY_DYNFOLDER.'/internal/sally/article_slice/';
-	sly_Util_Directory::create($cachedir);
-	$slices = glob($cachedir.$slice_id.'-*.slice.php');
-
-	if (is_array($slices)) {
-		foreach ($slices as $filename) {
-			@unlink($filename);
-		}
-	}
+	sly_Util_Slice::clearSliceCache($slice_id);
 }
 
 

@@ -19,7 +19,7 @@
  * @return array          ein Array welches den Status sowie eine Fehlermeldung beinhaltet
  */
 function rex_moveSliceUp($slice_id, $clang) {
-	return rex_moveSlice($slice_id, $clang, 'moveup');
+	return rex_moveSlice($slice_id, $clang, 'up');
 }
 
 /**
@@ -30,7 +30,7 @@ function rex_moveSliceUp($slice_id, $clang) {
  * @return array          ein Array welches den Status sowie eine Fehlermeldung beinhaltet
  */
 function rex_moveSliceDown($slice_id, $clang) {
-	return rex_moveSlice($slice_id, $clang, 'movedown');
+	return rex_moveSlice($slice_id, $clang, 'down');
 }
 
 /**
@@ -86,32 +86,12 @@ function rex_moveSlice($slice_id, $clang, $direction) {
 /**
  * Löscht einen Slice
  *
- * @param  int $slice_id  ID des Slices
+ * @param  int $article_slice_id  ID des Slices
  * @return boolean        true bei Erfolg, sonst false
+ * @deprecated
  */
-function rex_deleteArticleSlice($slice_id) {
-	$article_slice = OOArticleSlice::getArticleSliceById($slice_id);
-
-	if ($article_slice !== null) {
-		$sql = sly_DB_Persistence::getInstance();
-		$pre = sly_Core::config()->get('DATABASE/TABLE_PREFIX');
-
-		$sql->query('UPDATE '.$pre.'article_slice SET prior = prior -1 WHERE '.
-			sprintf('article_id = %d AND clang = %d AND slot = "%s" AND prior > %d',
-			$article_slice->getArticleId(), $article_slice->getClang(), $article_slice->getSlot(), $article_slice->getPrior()
-		));
-
-		$sql->delete('article_slice', array('id' => $slice_id));
-
-		sly_Service_Factory::getSliceService()->delete(array('id' => $article_slice->getSliceId()));
-		rex_deleteCacheSliceContent($article_slice->getSliceId());
-
-		// TODO delete less entries in cache
-		sly_Core::cache()->flush(OOArticleSlice::CACHE_NS);
-		return $sql->affectedRows() == 1;
-	}
-
-	return false;
+function rex_deleteArticleSlice($article_slice_id) {
+	return sly_Util_ArticleSlice::deleteById($article_slice_id);
 }
 
 /**
