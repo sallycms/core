@@ -1,0 +1,32 @@
+<?php
+/*
+ * Copyright (c) 2011, webvariants GbR, http://www.webvariants.de
+ *
+ * This file is released under the terms of the MIT license. You can find the
+ * complete text in the attached LICENSE file or online at:
+ *
+ * http://www.opensource.org/licenses/mit-license.php
+ */
+?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xml:lang="<?= I18NUtils::getLocale('shortLocale') ?>"
+  lang="<?= I18NUtils::getLocale('shortLocale') ?>"
+  <?= !empty($this->manifest) ? ' manifest="'.$this->manifest.'"' : '' ?>>
+<head>
+	<title><?= sly_html(trim($this->title)) ?></title>
+	<?php
+		sly_Core::dispatcher()->notify('PAGE_HEADER', '');
+		if ($this->favIcon !== null) {
+			print '<link href="'.$this->favIcon.'" rel="shortcut icon" type="image/x-icon" />';
+		}
+		$this->printHttpMetas();
+		$this->printMetas();
+		$this->printLinks();
+		$this->printCSSFiles();
+		$this->printJavaScriptFiles();
+		$this->printCSS();
+		$this->printJavaScript();
+	?>
+</head>
+<body<?= $this->printBodyAttrs() ?>>

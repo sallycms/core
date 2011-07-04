@@ -1,0 +1,20 @@
+v1.2.0
+======
+
+* fixed behaviour of apc_store() (cannot store the same value more than once
+  if it's not deleted in between)
+* fixed Memcached::_isset()
+* fixed Memcached using the Memcache (without d) API
+
+v1.1.0
+======
+
+* performance improvements for filesystem cache
+* filesystem cache does not use a runtime backup cache any more, since it was
+  actually bad for the overall performance
+* BabelCache::generateKey() now works correctly on empty arrays
+
+v1.0.0
+======
+
+* initial release
