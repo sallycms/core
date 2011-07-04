@@ -98,6 +98,8 @@ function rex_deleteArticleSlice($article_slice_id) {
  * Prüft, ob ein Modul für ein bestimmtes Slice im System bekannt ist.
  *
  * @return boolean  true oder ... false
+ * @deprecated
+ * @see slys_Util_ArticleSlice
  */
 function rex_slice_module_exists($sliceID) {
 	$sliceID = (int) $sliceID;

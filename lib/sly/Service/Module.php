@@ -52,7 +52,7 @@ class sly_Service_Module extends sly_Service_DevelopBase {
 		$sql->select('slice', 'id', $where);
 
 		foreach ($sql as $row) {
-			rex_deleteCacheSliceContent((int) $row['id']);
+			sly_Util_Slice::clearSliceCache((int) $row['id']);
 		}
 	}
 
