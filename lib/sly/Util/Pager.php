@@ -103,7 +103,7 @@ class sly_Util_Pager {
 		return $result;
 	}
 
-	public function getRawLinks($getParams, $pageParamName = 'p', $filename = 'index.php', $specialSymbols = array()) {
+	public function getRawLinks($getParams = array(), $pageParamName = 'p', $filename = 'index.php', $specialSymbols = array()) {
 		// Standardwerte für die Spezialsymbole
 
 		if (!isset($specialSymbols['first_active']))   $specialSymbols['first_active']   = '|&laquo;';
@@ -119,7 +119,7 @@ class sly_Util_Pager {
 		// Auf geht's!
 
 		$data = $this->getPaginationData();
-		unset($getParams[$pageParamName]);
+		if (isset($getParams[$pageParamName])) unset($getParams[$pageParamName]);
 		$links = array();
 
 		foreach ($data as $pageCode) {
@@ -186,7 +186,7 @@ class sly_Util_Pager {
 				case $this->currentPage:
 					$url     = '';
 					$text    = $pageCode + 1;
-					$attribs = array('class' => 'active page'.$this->currentPage);
+					$attribs = array('class' => 'active page'.($this->currentPage + 1));
 					break;
 
 				default:
@@ -207,7 +207,7 @@ class sly_Util_Pager {
 		return $links;
 	}
 
-	public function getHTMLString($getParams, $pageParamName = 'p', $filename = 'index.php', $specialSymbols = array()) {
+	public function getHTMLString($getParams = array(), $pageParamName = 'p', $filename = 'index.php', $specialSymbols = array()) {
 		$links = $this->getRawLinks($getParams, $pageParamName, $filename, $specialSymbols);
 
 		foreach ($links as $idx => $data) {
@@ -228,18 +228,19 @@ class sly_Util_Pager {
 		return "\n".implode("\n", $links)."\n";
 	}
 
-	public function getHTMLList($tag = 'ul', $getParams, $pageParamName = 'p', $filename = 'index.php', $specialSymbols = array()) {
+	public function getHTMLList($tag = 'ul', $getParams = array(), $pageParamName = 'p', $filename = 'index.php', $specialSymbols = array()) {
 		$links  = $this->getRawLinks($getParams, $pageParamName, $filename, $specialSymbols);
 		$result = "\n<$tag class=\"pager\">";
 
 		foreach ($links as $idx => $data) {
 			foreach ($data['attributes'] as $name => $value) {
-				$data['attributes'][$name] = $name.'="'.$value.'"';
+				if ($name == 'class' && $value == 'first') unset($data['attributes'][$name]);
+				else $data['attributes'][$name] = $name.'="'.$value.'"';
 			}
 
 			$attributes = implode(' ', $data['attributes']);
 			$attributes = empty($attributes) ? '' : " $attributes";
-			$link       = empty($data['url']) ? $data['text'] : '<a href="'.$data['url'].'">'.$data['text'].'</a>';
+			$link       = empty($data['url']) ? '<span>'.$data['text'].'</span>' : '<a href="'.$data['url'].'">'.$data['text'].'</a>';
 			$result    .= "\n<li$attributes>$link</li>";
 		}
 
@@ -256,7 +257,7 @@ class sly_Util_Pager {
 		return $elements;
 	}
 
-	protected function getURL($filename, $getParams, $pageParamName = 'p', $page = 0) {
+	protected function getURL($filename, $getParams = array(), $pageParamName = 'p', $page = 0) {
 		$link = $filename;
 		if ($page > 0) $getParams[$pageParamName] = $page;
 		$getString = http_build_query($getParams, '', '&amp;');
