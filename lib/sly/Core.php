@@ -20,6 +20,7 @@ class sly_Core {
 	private $layout;
 	private $navigation;
 	private $i18n;
+	private $errorHandler;
 
 	private function __construct() {
 		$this->cache = sly_Cache::factory();
@@ -290,5 +291,13 @@ class sly_Core {
 		}
 
 		$dispatcher->notify('SLY_LISTENERS_REGISTERED');
+	}
+
+	public static function setErrorHandler(sly_ErrorHandler $errorHandler) {
+		self::getInstance()->errorHandler = $errorHandler;
+	}
+
+	public static function getErrorHandler() {
+		return self::getInstance()->errorHandler;
 	}
 }
