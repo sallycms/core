@@ -47,6 +47,12 @@ define('SLY_MEDIAFOLDER',   SLY_DATAFOLDER.DIRECTORY_SEPARATOR.'mediapool');
 define('SLY_DEVELOPFOLDER', SLY_BASE.DIRECTORY_SEPARATOR.'develop');
 define('SLY_ADDONFOLDER',   SLY_SALLYFOLDER.DIRECTORY_SEPARATOR.'addons');
 
+// define these PHP 5.3 constants here so that they can be used in YAML files
+// (if someone really decides to put PHP code in their config files).
+if (!defined('E_RECOVERABLE_ERROR')) define('E_RECOVERABLE_ERROR', 4096);  // PHP 5.2
+if (!defined('E_DEPRECATED'))        define('E_DEPRECATED',        8192);  // PHP 5.3
+if (!defined('E_USER_DEPRECATED'))   define('E_USER_DEPRECATED',   16384); // PHP 5.3
+
 // Loader initialisieren
 
 require_once SLY_COREFOLDER.'/loader.php';
@@ -58,6 +64,12 @@ $config->loadStatic(SLY_COREFOLDER.'/config/sallyStatic.yml');
 $config->loadLocalConfig();
 $config->loadProjectConfig();
 $config->loadDevelop();
+
+// init basic error handling
+$errorHandler = sly_Core::isDeveloperMode() ? new sly_ErrorHandler_Development() : new sly_ErrorHandler_Production();
+$errorHandler->init();
+
+sly_Core::setErrorHandler($errorHandler);
 
 // Sync?
 if ($config->get('SETUP') === false) {
