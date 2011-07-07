@@ -121,7 +121,7 @@ class sly_ErrorHandler_Production extends sly_ErrorHandler_Base implements sly_E
 		$message = trim($message);
 
 		// doesn't really matter what method we call since we use our own format
-		$log->error("PHP $errorName ($errorCode): $message in $file line $line [$_SERVER[REQUEST_METHOD] $_SERVER[REQUEST_URI]]");
+		$this->log->error("PHP $errorName ($errorCode): $message in $file line $line [$_SERVER[REQUEST_METHOD] $_SERVER[REQUEST_URI]]");
 	}
 
 	/**
@@ -155,7 +155,7 @@ class sly_ErrorHandler_Production extends sly_ErrorHandler_Base implements sly_E
 		while (ob_get_level()) ob_end_clean();
 		header($_SERVER['SERVER_PROTOCOL'].' 500 Internal Server Error');
 
-		$errorpage = SLY_DEVEVELOPFOLDER.'/error.phtml';
+		$errorpage = SLY_DEVELOPFOLDER.'/error.phtml';
 
 		if (file_exists($errorpage)) {
 			include $errorpage;
