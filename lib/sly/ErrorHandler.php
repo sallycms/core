@@ -11,7 +11,4 @@
 interface sly_ErrorHandler {
 	public function init();
 	public function uninit();
-
-	public function handleError($severity, $message, $file, $line, array $context);
-	public function handleException(Exception $ex);
 }
