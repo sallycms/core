@@ -49,9 +49,11 @@ class sly_Util_Directory {
 				chmod($base.$s.$component, $perm);
 				$base .= $s.$component;
 			}
+
+			clearstatcache();
 		}
 
-		return true;
+		return $path;
 	}
 
 	public function exists() {
@@ -116,20 +118,54 @@ class sly_Util_Directory {
 		return $list;
 	}
 
-	public function deleteFiles() {
-		$level = error_reporting(0);
+	public function delete($force = false) {
+		if (!$this->exists()) return true;
 
+		$empty = count($this->listPlain(true, true, true, false, null)) === 0;
+
+		if (!$empty && (!$force || !$this->deleteFiles(true)) {
+			return false;
+		}
+
+		$retval = rmdir($this->directory);
+		clearstatcache();
+
+		return $retval;
+	}
+
+	public function deleteFiles($recursive = false) {
 		if ($this->exists()) {
-			$files = $this->listPlain(true, false, true, true, null);
-			if ($files) array_map('unlink', $files);
+			$level = error_reporting(0);
 
-			if ($this->listPlain(true, false, true, true, null)) {
-				error_reporting($level);
+			if ($recursive) {
+				// don't use listRecursive() because CHILD_FIRST matters
+				$iterator = new RecursiveDirectoryIterator($this->directory);
+				$iterator = new RecursiveIteratorIterator($iterator, RecursiveIteratorIterator::CHILD_FIRST);
+
+				foreach ($iterator as $file) {
+					if ($file->isDir()) {
+						rmdir($file->getPathname());
+					}
+					else {
+						unlink($file->getPathname());
+					}
+				}
+			}
+			else {
+				$files = $this->listPlain(true, $recursive, true, true, null);
+
+				if ($files) {
+					array_map('unlink', $files);
+				}
+			}
+
+			error_reporting($level);
+
+			if (count($this->listPlain(true, false, true, true, null)) > 0) {
 				return false;
 			}
 		}
 
-		error_reporting($level);
 		return true;
 	}
 
