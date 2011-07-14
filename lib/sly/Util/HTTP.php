@@ -56,7 +56,7 @@ class sly_Util_HTTP {
 	}
 
 	public static function getBaseUrl($addScriptPath = false) {
-		$baseURL = 'http'.(!empty($_SERVER['HTTPS']) ? 's' : '').'://'.$_SERVER['HTTP_HOST'].($addScriptPath ? str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'])) : '');
+		$baseURL = 'http'.(!empty($_SERVER['HTTPS']) ? 's' : '').'://'.self::getHost().($addScriptPath ? str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'])) : '');
 		return rtrim($baseURL, '/');
 	}
 
