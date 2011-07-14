@@ -233,6 +233,14 @@ abstract class sly_Service_AddOn_Base {
 			$this->copyAssets($component);
 		}
 
+		// load globals.yml
+
+		$globalsFile = $this->baseFolder($component).'globals.yml';
+
+		if (file_exists($globalsFile)) {
+			sly_Core::config()->loadStatic($globalsFile);
+		}
+
 		// mark component as installed
 		$this->setProperty($component, 'install', true);
 
