@@ -79,4 +79,21 @@ class sly_Model_Medium extends sly_Model_Base_Id {
 	public function getFormattedSize() {
 		return sly_Util_String::formatFilesize($this->filesize);
 	}
+
+	public function getExtension() {
+		return substr(strrchr($this->filename, '.'), 1);
+	}
+
+	public function exists() {
+		return strlen($this->filename) > 0 && file_exists(SLY_MEDIAFOLDER.'/'.$this->filename);
+	}
+
+	public function getFullPath() {
+		return SLY_MEDIAFOLDER.'/'.$this->filename;
+	}
+
+	public function isImage(array $allowed = null) {
+		$exts = $allowed === null ? array('gif', 'jpeg', 'jpg', 'png', 'bmp', 'tif', 'tiff', 'webp') : $allowed;
+		return in_array($this->getExtension(), $imageExtensions);
+	}
 }

@@ -47,8 +47,8 @@ class sly_Util_Medium {
 	 * @param  string $filename
 	 * @return sly_Model_Medium
 	 */
-	public static function findByName($filename) {
-		return sly_Service_Factory::getMediumService()->findByName($filename);
+	public static function findByFilename($filename) {
+		return sly_Service_Factory::getMediumService()->findByFilename($filename);
 	}
 
 	/**
@@ -58,5 +58,14 @@ class sly_Util_Medium {
 	 */
 	public static function findByCategory($categoryId) {
 		return sly_Service_Factory::getMediumService()->findMediaByCategory($categoryId);
+	}
+
+	/**
+	 *
+	 * @param  string $extension
+	 * @return array
+	 */
+	public static function findByExtension($extension) {
+		return sly_Service_Factory::getMediumService()->findMediaByExtension($extension);
 	}
 }
