@@ -73,7 +73,7 @@ class sly_ErrorHandler_Production extends sly_ErrorHandler_Base implements sly_E
 	 * @param int    $line
 	 * @param array  $context
 	 */
-	public function handleError($severity, $message, $file, $line, array $context) {
+	public function handleError($severity, $message, $file, $line, array $context = null) {
 		$errorLevel = error_reporting();
 
 		// only perform special handling when required
