@@ -153,18 +153,19 @@ class sly_ErrorHandler_Production extends sly_ErrorHandler_Base implements sly_E
 	 */
 	protected function aaaauuuggghhhh($error) {
 		while (ob_get_level()) ob_end_clean();
+		ob_start('ob_gzhandler');
+
 		header($_SERVER['SERVER_PROTOCOL'].' 500 Internal Server Error');
+		header('Content-Type: text/html; charset=UTF-8');
+		header('Expires: Fri, 30 Oct 1998 14:19:41 GMT');
 
 		$errorpage = SLY_DEVELOPFOLDER.'/error.phtml';
 
-		if (file_exists($errorpage)) {
-			include $errorpage;
-		}
-		else {
-			header('Content-Type: text/plain; charset=UTF-8');
-			print 'Es ist ein interner Fehler aufgetreten.'."\n".'Bitte versuchen Sie es später noch einmal.';
+		if (!file_exists($errorpage)) {
+			$errorpage = SLY_COREFOLDER.'/views/error.phtml';
 		}
 
+		include $errorpage;
 		die;
 	}
 }
