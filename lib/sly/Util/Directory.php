@@ -123,7 +123,7 @@ class sly_Util_Directory {
 
 		$empty = count($this->listPlain(true, true, true, false, null)) === 0;
 
-		if (!$empty && (!$force || !$this->deleteFiles(true)) {
+		if (!$empty && (!$force || !$this->deleteFiles(true))) {
 			return false;
 		}
 
