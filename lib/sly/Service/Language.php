@@ -26,9 +26,9 @@ class sly_Service_Language extends sly_Service_Model_Base_Id {
 	}
 
 	public function create($params) {
-		global $REX;
+		$langs = sly_Util_Language::findAll();
+		$sql   = sly_DB_Persistence::getInstance();
 
-		$sql = sly_DB_Persistence::getInstance();
 		$sql->beginTransaction();
 
 		try {
@@ -52,8 +52,8 @@ class sly_Service_Language extends sly_Service_Model_Base_Id {
 		}
 
 		// update cache before notifying the listeners (so that they can call findAll() and get fresh data)
-		$REX['CLANG'][$newLanguage->getId()] = $newLanguage;
-		sly_Core::cache()->set('sly.language', 'all', $REX['CLANG']);
+		$langs[$newLanguage->getId()] = $newLanguage;
+		sly_Core::cache()->set('sly.language', 'all', $langs);
 
 		// notify listeners
 		sly_Core::dispatcher()->notify('CLANG_ADDED', '', array('id' => $newLanguage->getId(), 'language' => $newLanguage));
@@ -62,22 +62,20 @@ class sly_Service_Language extends sly_Service_Model_Base_Id {
 	}
 
 	public function delete($where) {
-		global $REX;
-
 		$db = sly_DB_Persistence::getInstance();
 
 		// get languages first
-		$languages = $this->find($where);
+		$langs = sly_Util_Language::findAll();
 
 		// delete
 		$res = parent::delete($where);
 
 		// update cache (so that addOns can access fresh clang data when listening to CLANG_DELETED)
 		foreach ($languages as $language) {
-			unset($REX['CLANG'][$language->getId()]);
+			unset($langs[$language->getId()]);
 		}
 
-		sly_Core::cache()->set('sly.language', 'all', $REX['CLANG']);
+		sly_Core::cache()->set('sly.language', 'all', $langs);
 
 		// remove
 		foreach ($languages as $language) {

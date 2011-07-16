@@ -28,6 +28,8 @@ abstract class sly_Controller_Base {
 	const SUBPAGEPARAM = 'subpage'; ///< string  the request param that contains the subpage
 	const ACTIONPARAM  = 'func';    ///< string  the request param that contains the action
 
+	private static $currentPage = null;
+
 	protected $content_type = null; ///< string  the content type
 	protected $charset      = null; ///< string  the character set
 	protected $action       = null; ///< string  the action (method) to be called
@@ -162,34 +164,49 @@ abstract class sly_Controller_Base {
 	 * @return string  the currently active page
 	 */
 	public static function getPage() {
-		$config = sly_Core::config();
-		$page   = strtolower(self::getPageParam());
+		if (self::$currentPage === null) {
+			$config = sly_Core::config();
+			$page   = strtolower(self::getPageParam());
 
-		// do not allow any access to setup controller when SETUP=false
+			// do not allow any access to setup controller when SETUP=false
 
-		if ($config->get('SETUP') !== true && $page == 'setup') {
-			$page = 'profile';
-		}
+			if ($config->get('SETUP') !== true && $page == 'setup') {
+				$page = 'profile';
+			}
 
-		// Erst normale Startseite, dann User-Startseite, dann System-Startseite und
-		// zuletzt auf die Profilseite zurückfallen.
+			// Erst normale Startseite, dann User-Startseite, dann System-Startseite und
+			// zuletzt auf die Profilseite zurückfallen.
 
-		$nav = sly_Core::getNavigation();
+			$nav = sly_Core::getNavigation();
 
-		if (!$nav->hasPage($page) && !class_exists('sly_Controller_'.ucfirst($page))) {
-			$page = sly_Service_Factory::getUserService()->getCurrentUser()->getStartpage();
+			if (!$nav->hasPage($page) && !class_exists('sly_Controller_'.ucfirst($page))) {
+				$page = sly_Service_Factory::getUserService()->getCurrentUser()->getStartpage();
 
-			if (is_null($page) || !$nav->hasPage($page)) {
-				$page = strtolower($config->get('START_PAGE'));
+				if (is_null($page) || !$nav->hasPage($page)) {
+					$page = strtolower($config->get('START_PAGE'));
 
-				if (!$nav->hasPage($page)) {
-					$page = 'profile';
+					if (!$nav->hasPage($page)) {
+						$page = 'profile';
+					}
 				}
 			}
+
+			$_REQUEST[self::PAGEPARAM] = $page;
+			self::$currentPage         = $page;
 		}
 
-		$_REQUEST[self::PAGEPARAM] = $page;
-		return $page;
+		return self::$currentPage;
+	}
+
+	public static function setCurrentPage($page) {
+		if (self::$currentPage === null) {
+			self::$currentPage = $page;
+			return true;
+		}
+		else {
+			trigger_error('Current page has already been set and cannot be altered.', E_USER_WARNING);
+			return false;
+		}
 	}
 
 	/**
@@ -209,13 +226,21 @@ abstract class sly_Controller_Base {
 	 */
 	public static function factory($forcePage = null, $forceSubpage = null) {
 		$config  = sly_Core::config();
-		$page    = $forcePage === null    ? self::getPageParam($config->get('START_PAGE')) : $forcePage;
+		$page    = $forcePage === null    ? self::getPage() : $forcePage;
 		$subpage = $forceSubpage === null ? strtolower(self::getSubpageParam()) : $forceSubpage;
 		$name    = 'sly_Controller_'.ucfirst($page);
 
-		if (!empty($subpage) && $subpage != 'index') {
+		// don't use empty() to allow subpages like '0'
+		if (strlen($subpage) > 0 && $subpage !== 'index') {
 			$name .= '_'.ucfirst($subpage);
 		}
+
+		if (class_exists($name)) {
+			return new $name($name);
+		}
+
+		// try base controller without subpage
+		$name = 'sly_Controller_'.ucfirst($page);
 
 		if (class_exists($name)) {
 			return new $name($name);
@@ -267,8 +292,6 @@ abstract class sly_Controller_Base {
 	 * @return string            the generated output
 	 */
 	protected function render($filename, array $params = array()) {
-		global $REX;
-
 		// make sure keys in $params won't overwrite $filename and $params
 		$filenameHtuG50hNCdikAvf7CZ1F = $filename;
 		$paramsHtuG50hNCdikAvf7CZ1F   = $params;

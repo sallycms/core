@@ -43,7 +43,7 @@ class rex_var_category extends rex_var {
 		foreach ($matches as $match) {
 			list ($param_str, $args)   = $match;
 			list ($category_id, $args) = $this->extractArg('id',    $args, 0);
-			list ($clang, $args)       = $this->extractArg('clang', $args, '$REX[\'CUR_CLANG\']');
+			list ($clang, $args)       = $this->extractArg('clang', $args, 'sly_Core::getCurrentClang()');
 			list ($field, $args)       = $this->extractArg('field', $args, '');
 
 			$tpl = '';
@@ -58,7 +58,7 @@ class rex_var_category extends rex_var {
 					$varname_cat = '$__rex_cat';
 					$tpl         =
 						'<?php '.
-						$varname_art.' = sly_Util_Article::findById($REX[\'ARTICLE_ID\'], '.$clang.'); '.
+						$varname_art.' = sly_Core::getCurrentArticle('.$clang.'); '.
 						$varname_cat.' = '.$varname_art.' ? '.$varname_art.'->getCategory() : null; '.
 						'if ('.$varname_cat.') print sly_html('.$this->handleGlobalVarParamsSerialized($var, $args, $varname_cat.'->getValue(\''.addslashes($field).'\')').'); ?>';
 				}

@@ -300,4 +300,13 @@ class sly_Core {
 	public static function getErrorHandler() {
 		return self::getInstance()->errorHandler;
 	}
+
+	/**
+	 * Returns the current backend page
+	 *
+	 * @return string  current page or null if in frontend
+	 */
+	public static function getCurrentPage() {
+		return self::isBackend() ? sly_Controller_Base::getPage() : null;
+	}
 }

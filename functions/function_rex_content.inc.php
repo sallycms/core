@@ -147,8 +147,6 @@ function rex_execPostSaveAction($module_id, $function, $REX_ACTION) {
  * @return string              eine Meldung
  */
 function _rex_execSaveAction($type, $module_id, $function, $REX_ACTION) {
-	global $REX;
-
 	$type      = $type === 'pre' ? 'pre' : 'post';
 	$module_id = (int) $module_id;
 	$modebit   = rex_getActionModeBit($function);
