@@ -61,7 +61,7 @@ class rex_var_article extends rex_var {
 		foreach ($matches as $match) {
 			list ($param_str, $args)  = $match;
 			list ($article_id, $args) = $this->extractArg('id',    $args, 0);
-			list ($clang, $args)      = $this->extractArg('clang', $args, '$REX[\'CUR_CLANG\']');
+			list ($clang, $args)      = $this->extractArg('clang', $args, 'sly_Core::getCurrentClang()');
 			list ($slot,  $args)      = $this->extractArg('slot',  $args, '');
 			list ($field, $args)      = $this->extractArg('field', $args, '');
 

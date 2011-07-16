@@ -79,8 +79,6 @@ class sly_Loader {
 	 * @return boolean|string
 	 */
 	public static function loadClass($className) {
-		global $REX; // für Code, der direkt beim Include ausgeführt wird.
-
 		/*if (class_exists($className, false)) {
 			return true;
 		}*/

@@ -26,7 +26,7 @@ abstract class sly_Service_AddOn_Base {
 	abstract protected function getConfPath($component);
 
 	/**
-	 * Include file with $REX available
+	 * Include file
 	 *
 	 * This prevents the included file from messing with the variables of the
 	 * surrounding code.
@@ -34,30 +34,30 @@ abstract class sly_Service_AddOn_Base {
 	 * @param string $filename
 	 */
 	protected function req($filename) {
-		global $REX;
 		require $filename;
 	}
 
 	/**
 	 * Loads the YAML config file
 	 *
-	 * Loads static.yml and defaults.yml and populates some data (like
-	 * permissions) in $REX.
+	 * Loads globals.yml and defaults.yml.
 	 *
 	 * @param mixed $component  addOn as string, plugin as array
 	 */
 	public function loadConfig($component) {
-		if($this->isInstalled($component)) {
+		if ($this->isInstalled($component)) {
 			$config       = sly_Core::config();
 			$defaultsFile = $this->baseFolder($component).'defaults.yml';
 			$globalsFile  = $this->baseFolder($component).'globals.yml';
+
 			if ($this->isActivated($component)) {
 				$this->loadStatic($component);
-				
+
 				if (file_exists($defaultsFile)) {
 					$config->loadProjectDefaults($defaultsFile, false, $this->getConfPath($component));
 				}
 			}
+
 			if (file_exists($globalsFile)) {
 				$config->loadStatic($globalsFile);
 			}
@@ -65,22 +65,11 @@ abstract class sly_Service_AddOn_Base {
 	}
 
 	public function loadStatic($component) {
-		global $REX;
-
 		$config     = sly_Core::config();
 		$staticFile = $this->baseFolder($component).'static.yml';
 
 		if (file_exists($staticFile)) {
 			$config->loadStatic($staticFile, $this->getConfPath($component));
-
-			foreach (array('perm', 'extperm') as $type) {
-				$perm = sly_makeArray($this->getProperty($component, $type, null));
-				$upper = strtoupper($type);
-
-				foreach ($perm as $p) {
-					$REX[$upper][] = $p;
-				}
-			}
 		}
 	}
 

@@ -24,7 +24,7 @@ if (get_magic_quotes_gpc()) {
 // Register Globals entfernen
 
 if (ini_get('register_globals')) {
-	$superglobals = array('REX', '_GET', '_POST', '_REQUEST', '_ENV', '_FILES', '_SESSION', '_COOKIE', '_SERVER');
+	$superglobals = array('_GET', '_POST', '_REQUEST', '_ENV', '_FILES', '_SESSION', '_COOKIE', '_SERVER');
 	$keys         = array_keys($GLOBALS);
 
 	foreach ($keys as $key) {
@@ -76,22 +76,13 @@ if ($config->get('SETUP') === false) {
 	// Standard-Variablen
 	sly_Core::registerCoreVarTypes();
 
-	// Sprachen laden
-	$REX['CLANG']      = sly_Util_Language::findAll();
-	$REX['CUR_CLANG']  = sly_Core::getCurrentClang();
-	$REX['ARTICLE_ID'] = sly_Core::getCurrentArticleId();
-
 	// Cache-Util initialisieren
 	sly_Util_Cache::registerListener();
 }
 else {
 	$config->loadProjectDefaults(SLY_COREFOLDER.'/config/sallyProjectDefaults.yml');
 	$config->loadLocalDefaults(SLY_COREFOLDER.'/config/sallyLocalDefaults.yml');
-	$REX = array();
 }
-
-// REDAXO compatibility
-$REX = array_merge($REX, $config->get(null));
 
 // Check for system updates
 $coreVersion  = sly_Core::getVersion('X.Y.Z');
