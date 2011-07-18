@@ -91,9 +91,4 @@ class sly_Model_Medium extends sly_Model_Base_Id {
 	public function getFullPath() {
 		return SLY_MEDIAFOLDER.'/'.$this->filename;
 	}
-
-	public function isImage(array $allowed = null) {
-		$exts = $allowed === null ? array('gif', 'jpeg', 'jpg', 'png', 'bmp', 'tif', 'tiff', 'webp') : $allowed;
-		return in_array($this->getExtension(), $imageExtensions);
-	}
 }
