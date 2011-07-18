@@ -27,14 +27,7 @@ require_once SLY_COREFOLDER.'/lib/functions.php';
 require_once SLY_COREFOLDER.'/functions/function_rex_globals.inc.php';
 require_once SLY_COREFOLDER.'/functions/function_rex_client_cache.inc.php';
 require_once SLY_COREFOLDER.'/functions/function_rex_other.inc.php';
-
-if (defined('IS_SALLY_BACKEND')) {
-	sly_Loader::addLoadPath(SLY_COREFOLDER.'/layout', 'sly_Layout');
-	sly_Loader::addLoadPath(SLY_COREFOLDER.'/controllers', 'sly_Controller');
-	sly_Loader::addLoadPath(SLY_COREFOLDER.'/helpers', 'sly_Helper');
-
-	require_once SLY_COREFOLDER.'/functions/function_rex_generate.inc.php';
-}
+require_once SLY_COREFOLDER.'/functions/function_rex_generate.inc.php';
 
 // register sly_Loader for cache clearing
 sly_Core::dispatcher()->register('ALL_GENERATED', array('sly_Loader', 'clearCache'));

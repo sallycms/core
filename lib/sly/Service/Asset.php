@@ -158,7 +158,8 @@ class sly_Service_Asset {
 	}
 
 	protected function generateCacheFile($file, $cacheFile) {
-		if (!is_dir(dirname($cacheFile))) mkdir(dirname($cacheFile), 0777, true);
+		// TODO: eeeh, eeeh, eeeh: the '@' sucks
+		if (!is_dir(dirname($cacheFile))) @mkdir(dirname($cacheFile), 0777, true);
 
 		$enc = $this->getPreferredClientEncoding();
 

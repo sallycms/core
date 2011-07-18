@@ -123,7 +123,7 @@ class sly_Util_Navigation {
 		}
 
 		if(!empty($resultString)) {
-			$resultString = '<ul class=nav'.$currentLevel.'>'.$resultString.'</ul>';
+			$resultString = '<ul class="nav'.$currentLevel.'">'.$resultString.'</ul>';
 		}
 		return $resultString;
 	}
@@ -162,7 +162,7 @@ class sly_Util_Navigation {
 	protected function getHTMLForCategoryData($text, $url, $childrenHTMLString, $isActive, $isLast, $isActiveLeaf, $position) {
 		return '
 				<li class="num'.$position.($isActive ? ' active' : '').($isLast ? ' last' : '').($isActiveLeaf ? ' active_leaf' : '').'">
-					<a href="'.$url.'">'.$text.'</a>
+					<a href="'.$url.'"'.($isActive ? ' class="active"' : '').'>'.$text.'</a>
 					'.$childrenHTMLString.'
 				</li>';
 	}

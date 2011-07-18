@@ -21,6 +21,7 @@ class sly_Table extends sly_Viewable {
 	protected $enableDragAndDrop;
 	protected $dragAndDropHandler;
 	protected $totalElements;
+	protected $caption;
 
 	private $content;
 
@@ -41,6 +42,7 @@ class sly_Table extends sly_Viewable {
 		$this->enableDragAndDrop  = false;
 		$this->dragAndDropHandler = '';
 		$this->totalElements      = null;
+		$this->caption            = null;
 	}
 
 	/**
@@ -111,6 +113,10 @@ class sly_Table extends sly_Viewable {
 	 */
 	public function setIsEmpty($isEmpty) {
 		$this->isEmpty = (bool) $isEmpty;
+	}
+
+	public function setCaption($string) {
+		if (is_string($string)) $this->caption = $string;
 	}
 
 	/**

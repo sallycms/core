@@ -83,6 +83,18 @@ class sly_Util_String {
 		return $str;
 	}
 
+	public static function formatDate($timestamp = null) {
+		return self::formatStrftime(t('dateformat'), $timestamp);
+	}
+
+	public static function formatTime($timestamp = null) {
+		return self::formatStrftime(t('timeformat'), $timestamp);
+	}
+
+	public static function formatDatetime($timestamp = null) {
+		return self::formatStrftime(t('datetimeformat'), $timestamp);
+	}
+
 	/**
 	 * Die folgende Funktion schneidet einen Text nach der einer bestimmten Anzahl
 	 * von Zeichen ab und hängt ... an, falls etwas abgeschnitten wurde.

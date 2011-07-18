@@ -24,7 +24,7 @@ if (get_magic_quotes_gpc()) {
 // Register Globals entfernen
 
 if (ini_get('register_globals')) {
-	$superglobals = array('REX', '_GET', '_POST', '_REQUEST', '_ENV', '_FILES', '_SESSION', '_COOKIE', '_SERVER');
+	$superglobals = array('_GET', '_POST', '_REQUEST', '_ENV', '_FILES', '_SESSION', '_COOKIE', '_SERVER');
 	$keys         = array_keys($GLOBALS);
 
 	foreach ($keys as $key) {
@@ -47,6 +47,12 @@ define('SLY_MEDIAFOLDER',   SLY_DATAFOLDER.DIRECTORY_SEPARATOR.'mediapool');
 define('SLY_DEVELOPFOLDER', SLY_BASE.DIRECTORY_SEPARATOR.'develop');
 define('SLY_ADDONFOLDER',   SLY_SALLYFOLDER.DIRECTORY_SEPARATOR.'addons');
 
+// define these PHP 5.3 constants here so that they can be used in YAML files
+// (if someone really decides to put PHP code in their config files).
+if (!defined('E_RECOVERABLE_ERROR')) define('E_RECOVERABLE_ERROR', 4096);  // PHP 5.2
+if (!defined('E_DEPRECATED'))        define('E_DEPRECATED',        8192);  // PHP 5.3
+if (!defined('E_USER_DEPRECATED'))   define('E_USER_DEPRECATED',   16384); // PHP 5.3
+
 // Loader initialisieren
 
 require_once SLY_COREFOLDER.'/loader.php';
@@ -59,15 +65,16 @@ $config->loadLocalConfig();
 $config->loadProjectConfig();
 $config->loadDevelop();
 
+// init basic error handling
+$errorHandler = sly_Core::isDeveloperMode() ? new sly_ErrorHandler_Development() : new sly_ErrorHandler_Production();
+$errorHandler->init();
+
+sly_Core::setErrorHandler($errorHandler);
+
 // Sync?
 if ($config->get('SETUP') === false) {
 	// Standard-Variablen
 	sly_Core::registerCoreVarTypes();
-
-	// Sprachen laden
-	$REX['CLANG']      = sly_Util_Language::findAll();
-	$REX['CUR_CLANG']  = sly_Core::getCurrentClang();
-	$REX['ARTICLE_ID'] = sly_Core::getCurrentArticleId();
 
 	// Cache-Util initialisieren
 	sly_Util_Cache::registerListener();
@@ -75,11 +82,7 @@ if ($config->get('SETUP') === false) {
 else {
 	$config->loadProjectDefaults(SLY_COREFOLDER.'/config/sallyProjectDefaults.yml');
 	$config->loadLocalDefaults(SLY_COREFOLDER.'/config/sallyLocalDefaults.yml');
-	$REX = array();
 }
-
-// REDAXO compatibility
-$REX = array_merge($REX, $config->get(null));
 
 // Check for system updates
 $coreVersion  = sly_Core::getVersion('X.Y.Z');

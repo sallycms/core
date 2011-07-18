@@ -8,7 +8,7 @@
  * http://www.opensource.org/licenses/mit-license.php
  */
 
-/**
- * @ingroup database
- */
-class sly_DB_PDO_Exception extends sly_DB_Exception { }
+interface sly_ErrorHandler {
+	public function init();
+	public function uninit();
+}
