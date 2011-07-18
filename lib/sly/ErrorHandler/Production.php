@@ -168,4 +168,11 @@ class sly_ErrorHandler_Production extends sly_ErrorHandler_Base implements sly_E
 		include $errorpage;
 		die;
 	}
+
+	/**
+	 * @return sly_Log  the current log instance
+	 */
+	public function getLog() {
+		return $this->log;
+	}
 }
