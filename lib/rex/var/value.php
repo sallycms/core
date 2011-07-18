@@ -20,7 +20,7 @@
 class rex_var_value extends rex_var {
 	// --------------------------------- Actions
 
-	public function getACRequestValues($REX_ACTION) {
+	public function getRequestValues($REX_ACTION) {
 		$values = sly_requestArray('VALUE', 'string');
 
 		foreach ($values as $key => $value) {
@@ -30,7 +30,7 @@ class rex_var_value extends rex_var {
 		return $REX_ACTION;
 	}
 
-	public function getACDatabaseValues($REX_ACTION, $slice_id) {
+	public function getDatabaseValues($REX_ACTION, $slice_id) {
 		$values = sly_Service_Factory::getSliceValueService()->find(array('slice_id' => $slice_id, 'type' => 'REX_VALUE'));
 
 		foreach ($values as $value) {
@@ -40,7 +40,7 @@ class rex_var_value extends rex_var {
 		return $REX_ACTION;
 	}
 
-	public function setACValues($slice_id, $REX_ACTION, $escape = false, $prependTableName = true) {
+	public function setSliceValues($slice_id, $REX_ACTION) {
 		$slice = sly_Service_Factory::getSliceService()->findById($slice_id);
 
 		if (isset($REX_ACTION['REX_VALUE'])){
@@ -52,23 +52,13 @@ class rex_var_value extends rex_var {
 
 	// --------------------------------- Output
 
-	public function getBEOutput($slice_id, $content) {
-		$content = $this->getOutput($slice_id, $content, true);
-		return $content;
-	}
-
 	public function getBEInput($slice_id, $content) {
 		$content = $this->getOutput($slice_id, $content);
 		return $content;
 	}
 
-	public function getFEOutput($slice_id, $content) {
-		$content = $this->getOutput($slice_id, $content, true);
-		return $content;
-	}
-
-	public function getOutput($slice_id, $content, $nl2br = false) {
-		$content = $this->matchValue($slice_id, $content, $nl2br);
+	public function getOutput($slice_id, $content) {
+		$content = $this->matchValue($slice_id, $content, true);
 		$content = $this->matchHtmlValue($slice_id, $content);
 		$content = $this->matchIsValue($slice_id, $content);
 		$content = $this->matchPhpValue($slice_id, $content);
@@ -102,7 +92,7 @@ class rex_var_value extends rex_var {
 				}
 
 				if ($stripPHP) {
-					$replace = self::stripPHP($replace);
+					$replace = sly_Util_String::escapePHP($replace);
 				}
 
 				$replace = $this->handleGlobalVarParams($var, $args, $replace);

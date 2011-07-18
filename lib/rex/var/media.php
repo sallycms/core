@@ -29,7 +29,7 @@ class rex_var_media extends rex_var {
 	const FILE      = 'REX_FILE';
 	const FILELIST  = 'REX_FILELIST';
 
-	public function getACRequestValues($REX_ACTION) {
+	public function getRequestValues($REX_ACTION) {
 		foreach (array('MEDIA', 'MEDIALIST') as $type) {
 			$media = sly_request($type, 'array');
 			$type  = 'REX_'.$type;
@@ -42,7 +42,7 @@ class rex_var_media extends rex_var {
 		return $REX_ACTION;
 	}
 
-	public function getACDatabaseValues($REX_ACTION, $slice_id) {
+	public function getDatabaseValues($REX_ACTION, $slice_id) {
 		$service = sly_Service_Factory::getSliceValueService();
 
 		foreach (array('REX_MEDIA', 'REX_MEDIALIST') as $type) {
@@ -56,7 +56,7 @@ class rex_var_media extends rex_var {
 		return $REX_ACTION;
 	}
 
-	public function setACValues($slice_id, $REX_ACTION, $escape = false, $prependTableName = true) {
+	public function setSliceValues($slice_id, $REX_ACTION) {
 		$slice = sly_Service_Factory::getSliceService()->findById($slice_id);
 
 		foreach (array('REX_MEDIA', 'REX_MEDIALIST') as $type) {
@@ -73,11 +73,6 @@ class rex_var_media extends rex_var {
 	public function getBEInput($slice_id, $content) {
 		$content = $this->matchMediaButton($slice_id, $content);
 		$content = $this->matchMediaListButton($slice_id, $content);
-		$content = $this->getOutput($slice_id, $content);
-		return $content;
-	}
-
-	public function getBEOutput($slice_id, $content) {
 		$content = $this->getOutput($slice_id, $content);
 		return $content;
 	}

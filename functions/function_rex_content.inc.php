@@ -109,79 +109,8 @@ function rex_slice_module_exists($sliceID) {
 		return false;
 	}
 
-	$module = $slice->getModuleName();
+	$module = $slice->getModule();
 	return sly_Service_Factory::getModuleService()->exists($module) ? $module : false;
-}
-
-/**
- * Führt alle pre-save Aktionen eines Moduls aus
- *
- * @param  int    $module_id   ID des Moduls
- * @param  string $function    Funktion/Modus der Aktion
- * @param  array  $REX_ACTION  Array zum Speichern des Status'
- * @return array               ein Array welches den Status sowie eine Fehlermeldung beinhaltet
- */
-function rex_execPreSaveAction($module_id, $function, $REX_ACTION) {
-	// actions are disabled because we don't have sly_module_actions in the database
-	return array('', $REX_ACTION); // _rex_execSaveAction('pre', $module_id, $function, $REX_ACTION);
-}
-
-/**
- * Führt alle post-save Aktionen eines Moduls aus
- *
- * @param  int    $module_id   ID des Moduls
- * @param  string $function    Funktion/Modus der Aktion
- * @param  array  $REX_ACTION  Array zum Speichern des Status'
- * @return string              eine Meldung
- */
-function rex_execPostSaveAction($module_id, $function, $REX_ACTION) {
-	// actions are disabled because we don't have sly_module_actions in the database
-	return array('', $REX_ACTION); // _rex_execSaveAction('post', $module_id, $function, $REX_ACTION);
-}
-
-/**
- * Führt alle X-save Aktionen eines Moduls aus
- *
- * @param  string $type        'pre' oder 'post'
- * @param  int    $module_id   ID des Moduls
- * @param  string $function    Funktion/Modus der Aktion
- * @param  array  $REX_ACTION  Array zum Speichern des Status'
- * @return string              eine Meldung
- */
-function _rex_execSaveAction($type, $module_id, $function, $REX_ACTION) {
-	global $REX;
-
-	$type      = $type === 'pre' ? 'pre' : 'post';
-	$module_id = (int) $module_id;
-	$modebit   = rex_getActionModeBit($function);
-	$message   = '';
-
-	$prefix = sly_Core::config()->get('DATABASE/TABLE_PREFIX');
-	$sql    = sly_DB_Persistence::getInstance();
-
-	$sql->query(
-		'SELECT postsave FROM '.$prefix.'module_action ma, '.$prefix.'action a '.
-		'WHERE '.$type.'save <> "" AND ma.action_id = a.id AND module_id = '.$module_id.' AND '.
-		'((a.'.$type.'savemode & '.$modebit.') = '.$modebit.')'
-	);
-
-	foreach ($sql as $row) {
-		$REX_ACTION['MSG'] = '';
-		$iaction = reset($row);
-
-		// replace values
-		foreach (sly_Core::getVarTypes() as $obj) {
-			$iaction = $obj->getACOutput($REX_ACTION, $iaction);
-		}
-
-		eval('?>'.$iaction);
-
-		if ($REX_ACTION['MSG'] != '') {
-			$message .= ' | '.$REX_ACTION['MSG'];
-		}
-	}
-
-	return array($message, $REX_ACTION);
 }
 
 /**

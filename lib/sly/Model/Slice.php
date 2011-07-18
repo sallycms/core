@@ -54,7 +54,7 @@ class sly_Model_Slice extends sly_Model_Base_Id {
 		$output   = $service->getContent($filename);
 
 		foreach (sly_Core::getVarTypes() as $idx => $var) {
-			$output = $var->getFEOutput($this->getId(), $output);
+			$output = $var->getOutput($this->getId(), $output);
 		}
 
 		return $output;

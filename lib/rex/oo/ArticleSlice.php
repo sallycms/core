@@ -197,7 +197,7 @@ class OOArticleSlice {
 
 		$cachedir = SLY_DYNFOLDER.'/internal/sally/article_slice/';
 		sly_Util_Directory::create($cachedir);
-		$modulefile = sly_Service_Factory::getModuleService()->getOutputFilename($this->getModuleName());
+		$modulefile = sly_Service_Factory::getModuleService()->getOutputFilename($this->getModule());
 
 		$slice_content_file = $cachedir.$this->getSliceId().'-'.md5($modulefile).'.slice.php';
 
@@ -262,7 +262,7 @@ class OOArticleSlice {
 	 * @deprecated
 	 * @return string 
 	 */
-	public function getModuleName() { return $this->getSlice()->getModule(); }
+	public function getModule()     { return $this->getSlice()->getModule(); }
 	public function getId()         { return $this->_id;                     }
 	public function getPrior()      { return $this->_prior;                  }
 	public function getSliceId()    { return $this->_slice_id;               }
@@ -296,56 +296,29 @@ class OOArticleSlice {
 
 	private function replaceGlobals($content) {
 		// Slice-abhängige globale Variablen ersetzen
-
-		$content = str_replace('REX_MODULE',   $this->getSlice()->getModule(), $content);
-		$content = str_replace('REX_SLICE_ID', $this->getId(),      $content);
-		$content = str_replace('REX_CTYPE_ID', $this->getSlot(),    $content);
-		$content = str_replace('REX_SLOT',     $this->getSlot(),    $content);
-
-		return $content;
-	}
-
-	/**
-	 * Artikelweite globale variablen werden ersetzt
-	 */
-	private function replaceCommonVars($content) {
-		static $user_id    = null;
-		static $user_login = null;
-
-		// UserId gibt's nur im Backend
-
-		if ($user_id === null) {
-			$user = sly_Util_User::getCurrentUser();
-			if (!is_null($user)) {
-				$user_id    = $user->getId();
-				$user_login = $user->getLogin();
-			}
-			else {
-				$user_id    = '';
-				$user_login = '';
-			}
-		}
-
-		$article = $this->getArticle();
-
 		static $search = array(
-			'REX_ARTICLE_ID',
-			'REX_CATEGORY_ID',
-			'REX_CLANG_ID',
-			'REX_TEMPLATE_NAME',
-			'REX_USER_ID',
-			'REX_USER_LOGIN'
+			'ARTICLE_ID',
+			'CLANG_ID',
+			'TEMPLATE_NAME',
+			'MODULE',
+			'SLICE_ID',
+			'SLOT',
+			'POSITION',
+			'CREATE_USER_LOGIN'
 		);
-
+		
 		$replace = array(
-			$article->getId(),
-			$article->getCategoryId(),
-			$article->getClang(),
-			$article->getTemplateName(),
-			$user_id,
-			$user_login
+			$this->getArticleId(),
+			$this->getClang(),
+			$this->getArticle()->getTemplateName(),
+			$this->getModule(),
+			$this->getId(),
+			$this->getSlot(),
+			$this->getPrior(),
+			$this->getCreateuser()
 		);
-
+		
+		
 		return str_replace($search, $replace, $content);
 	}
 
