@@ -13,13 +13,12 @@
  * @ingroup redaxo
  */
 abstract class rex_var {
-	// --------------------------------- Actions
 
 	/**
 	 * Actionmethode:
 	 * Zum füllen des sql aus dem $REX_ACTION Array
 	 */
-	public function setACValues($sql, $REX_ACTION, $escape = false, $prependTableName = true) {
+	public function setSliceValues($slice_id, $REX_ACTION) {
 		// nichts tun
 	}
 
@@ -28,7 +27,7 @@ abstract class rex_var {
 	 * Zum füllen des $REX_ACTION Arrays aus den Input Formularwerten
 	 * @return REX_ACTION Array
 	 */
-	public function getACRequestValues($REX_ACTION) {
+	public function getRequestValues($REX_ACTION) {
 		return $REX_ACTION;
 	}
 
@@ -37,7 +36,7 @@ abstract class rex_var {
 	 * Zum Füllen des $REX_ACTION Arrays aus der Datenbank (rex_sql)
 	 * @return REX_ACTION Array
 	 */
-	public function getACDatabaseValues($REX_ACTION, $sql) {
+	public function getDatabaseValues($REX_ACTION, $sql) {
 		return $REX_ACTION;
 	}
 
@@ -48,31 +47,11 @@ abstract class rex_var {
 	 */
 	public function getACOutput($REX_ACTION, $content) {
 		$sql = new rex_sql();
-		$this->setACValues($sql, $REX_ACTION);
-		return $this->getBEOutput($sql, $content);
+		$this->setSliceValues($sql, $REX_ACTION);
+		return $this->getOutput($sql, $content);
 	}
 
 	// --------------------------------- Ouput
-
-	/**
-	 * Ausgabe eines Modules fürs Frontend
-	 * sql Objekt mit der passenden Slice
-	 *
-	 * FE = Frontend
-	 */
-	public function getFEOutput($sql, $content) {
-		return $this->getBEOutput($sql, $content);
-	}
-
-	/**
-	 * Ausgabe eines Modules im Backend bei der Ausgabe
-	 * sql Objekt mit der passenden Slice
-	 *
-	 * BE = Backend
-	 */
-	public function getBEOutput($sql, $content) {
-		return $content;
-	}
 
 	/**
 	 * Ausgabe eines Modules im Backend bei der Eingabe
@@ -81,7 +60,7 @@ abstract class rex_var {
 	 * BE = Backend
 	 */
 	public function getBEInput($sql, $content) {
-		return $this->getBEOutput($sql, $content);
+		return $this->getOutput($sql, $content);
 	}
 
 	/**
@@ -89,13 +68,6 @@ abstract class rex_var {
 	 */
 	public function getTemplate($content) {
 		return $content;
-	}
-
-	/**
-	 * Wandelt PHP Code in einfache Textausgaben um
-	 */
-	protected static function stripPHP($content) {
-		return str_replace(array('<?', '?>'), array('&lt;?', '?&gt;'), $content);
 	}
 
 	/**
@@ -182,11 +154,8 @@ abstract class rex_var {
 	 * Gibt die Parameter der Treffer (Text der Variable zwischen den []) als Array zur�ck.
 	 */
 	private function matchVar($content, $varname) {
-		if (preg_match_all('/'.preg_quote($varname, '/').'\[([^\]]*)\]/ms', $content, $matches)) {
-			return $matches[1];
-		}
-
-		return array();
+		$hasVars = preg_match_all('/'.preg_quote($varname, '/').'\[([^\]]*)\]/ms', $content, $matches); 
+		return $hasVars ? $matches[1] : array();
 	}
 
 	/**
@@ -201,17 +170,5 @@ abstract class rex_var {
 		}
 
 		return array($val, $args);
-	}
-
-	public static function isAddEvent() {
-		return sly_request('function', 'string') == 'add';
-	}
-
-	public static function isEditEvent() {
-		return sly_request('function', 'string') == 'edit';
-	}
-
-	public static function isDeleteEvent() {
-		return sly_request('function', 'string') == 'delete';
 	}
 }

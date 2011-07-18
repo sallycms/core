@@ -32,7 +32,7 @@ class sly_Util_ArticleSlice {
 		$article_slice_id = (int) $article_slice_id;
 		$articleSlice   = self::findById($article_slice_id);
 		if(is_null($articleSlice)) return '';
-		return $articleSlice->getModuleName();
+		return $articleSlice->getModule();
 	}
 	
 	/**

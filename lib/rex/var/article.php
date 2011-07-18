@@ -26,10 +26,6 @@ class rex_var_article extends rex_var {
 		return $this->matchArticle($content, true);
 	}
 
-	public function getBEOutput($slice_id, $content) {
-		return $this->matchArticle($content);
-	}
-
 	protected function handleDefaultParam($varname, $args, $name, $value) {
 		switch ($name) {
 			case '1':

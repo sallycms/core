@@ -223,4 +223,8 @@ class sly_Util_String {
 		preg_match($pattern, $subject, $treffer);
 		return !empty($treffer);
 	}
+	
+	public static function escapePHP($text) {
+		return str_replace(array('<?', '?>'), array('&lt;?', '?&gt;'), $text);
+	}
 }
