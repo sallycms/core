@@ -67,7 +67,10 @@ print $this->surroundingHTML;
 ?>
 
 <table id="<?= $this->id ?>" class="rex-table sly-table">
-	<caption><!-- sorgt für runde Ecken --></caption>
+	<caption>
+		<!-- sort für runde Ecken -->
+		<?= $this->caption ? '<span>'.sly_html($this->caption).'</span>' : '' ?>
+	</caption>
 	<thead>
 		<tr class="nodrop nodrag">
 			<?

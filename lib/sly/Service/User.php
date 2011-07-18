@@ -80,6 +80,7 @@ class sly_Service_User extends sly_Service_Model_Base_Id {
 
 	public function logout() {
 		sly_Util_Session::set('UID', '');
+		self::$currentUser = null;
 	}
 
 	/**

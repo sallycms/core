@@ -1,5 +1,4 @@
 <?php
-
 /*
  * Copyright (c) 2011, webvariants GbR, http://www.webvariants.de
  *
@@ -29,7 +28,7 @@ class sly_Util_Category {
 	/**
 	 *
 	 * @param sly_Model_Category $category
-	 * @return boolean 
+	 * @return boolean
 	 */
 	public static function isValid($category) {
 		return is_object($category) && ($category instanceof sly_Model_Category);
@@ -39,18 +38,18 @@ class sly_Util_Category {
 	 *
 	 * @param  int $categoryId
 	 * @param  int $clang
-	 * @return sly_Model_Category 
+	 * @return sly_Model_Category
 	 */
 	public static function findById($categoryId, $clang = null) {
 		return sly_Service_Factory::getCategoryService()->findById($categoryId, $clang);
 	}
-	
+
 	/**
 	 *
 	 * @param  int     $parentId
 	 * @param  boolean $ignore_offlines
 	 * @param  int     $clang
-	 * @return array 
+	 * @return array
 	 */
 	public static function findByParentId($parentId, $ignore_offlines = false, $clang = null) {
 		return sly_Service_Factory::getCategoryService()->findByParentId($parentId, $ignore_offlines, $clang);
@@ -60,12 +59,12 @@ class sly_Util_Category {
 	 *
 	 * @param  boolean $ignore_offlines
 	 * @param  int $clang
-	 * @return array 
+	 * @return array
 	 */
 	public static function getRootCategories($ignore_offlines = false, $clang = null) {
 		return self::findByParentId(0, $ignore_offlines, $clang);
 	}
-	
+
 	public static function hasPermissionOnCategory(sly_Model_User $user, $categoryId) {
 		if ($user->isAdmin() || $user->hasRight('csw[0]')) return true;
 		if ($user->hasRight('editContentOnly[]')) return false;

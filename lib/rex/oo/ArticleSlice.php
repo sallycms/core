@@ -193,8 +193,6 @@ class OOArticleSlice {
 	}
 
 	public function printContent() {
-		global $REX;
-
 		$cachedir = SLY_DYNFOLDER.'/internal/sally/article_slice/';
 		sly_Util_Directory::create($cachedir);
 		$modulefile = sly_Service_Factory::getModuleService()->getOutputFilename($this->getModule());
@@ -260,7 +258,7 @@ class OOArticleSlice {
 	public function getRevision()   { return $this->_revision;               }
 	/**
 	 * @deprecated
-	 * @return string 
+	 * @return string
 	 */
 	public function getModule()     { return $this->getSlice()->getModule(); }
 	public function getId()         { return $this->_id;                     }
@@ -317,7 +315,6 @@ class OOArticleSlice {
 			$this->getPrior(),
 			$this->getCreateuser()
 		);
-		
 		
 		return str_replace($search, $replace, $content);
 	}
