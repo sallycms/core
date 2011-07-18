@@ -34,7 +34,7 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id {
 			$medium = $this->findOne(array('id' => $id));
 
 			if ($medium !== null) {
-				sly_Core::cache()->set('sly.medium', $id, $article);
+				sly_Core::cache()->set('sly.medium', $id, $medium);
 			}
 		}
 
@@ -105,5 +105,97 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id {
 		}
 
 		return $objlist;
+	}
+
+	public function add($filename, $title, $categoryID, $mimetype = null, $originalName = null) {
+		// check file itself
+
+		$filename = basename($filename);
+		$fullname = SLY_MEDIAFOLDER.'/'.$filename;
+
+		if (!file_exists($fullname)) {
+			throw new sly_Exception('Can only add existing files.');
+		}
+
+		// check category
+
+		$categoryID = (int) $categoryID;
+
+		if (!sly_Util_MediaCategory::exists($categoryID)) {
+			$categoryID = 0;
+		}
+
+		$size = @getimagesize($fullname);
+
+		// finfo:             PHP >= 5.3, PECL fileinfo
+		// mime_content_type: PHP >= 4.3 (deprecated)
+
+		if (empty($mimetype)) {
+			// if it's an image, we know the type
+			if (isset($size['mime'])) {
+				$mimetype = $size['mime'];
+			}
+
+			// or else try the new, recommended way
+			elseif (function_exists('finfo_file')) {
+				$finfo    = finfo_open(FILEINFO_MIME_TYPE);
+				$mimetype = finfo_file($finfo, $fullname);
+			}
+
+			// argh, let's see if this old one exists
+			elseif (function_exists('mime_content_type')) {
+				$mimetype = mime_content_type($fullname);
+			}
+
+			// fallback to a generic type
+			else {
+				$mimetype = 'application/octet-stream';
+			}
+		}
+
+		// create file object
+
+		$file = new sly_Model_Medium();
+		$file->setFiletype($mimetype);
+		$file->setTitle($title);
+		$file->setOriginalName($originalName === null ? $filename : basename($originalName));
+		$file->setFilename($filename);
+		$file->setFilesize(filesize($fullname));
+		$file->setCategoryId((int) $categoryID);
+		$file->setRevision(0); // totally useless...
+		$file->setReFileId(0); // even more useless
+		$file->setCreateColumns();
+
+		if ($size) {
+			$file->setWidth($size[0]);
+			$file->setHeight($size[1]);
+		}
+
+		// store and return it
+
+		$this->save($file);
+		sly_Core::dispatcher()->notify('SLY_MEDIA_ADDED', $file);
+		return $file;
+	}
+
+	public function delete($mediumID) {
+		$medium = $this->findById($mediumID);
+
+		try {
+			$sql = sly_DB_Persistence::getInstance();
+			$sql->delete('file', array('id' => $medium->getId()));
+
+			if ($medium->exists()) {
+				unlink(SLY_MEDIAFOLDER.'/'.$medium->getFilename());
+			}
+		}
+		catch (Exception $e) {
+			throw new sly_Exception('Cannot delete medium: '.$e->getMessage());
+		}
+
+		sly_Core::cache()->delete('sly.medium', $medium->getId());
+		sly_Core::dispatcher()->notify('SLY_MEDIA_DELETED', $medium);
+
+		return true;
 	}
 }
