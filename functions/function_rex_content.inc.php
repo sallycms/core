@@ -114,26 +114,6 @@ function rex_slice_module_exists($sliceID) {
 }
 
 /**
- * Übersetzt den Modus in das dazugehörige Bitwort
- *
- * @param  string $function  Funktion/Modus der Aktion
- * @return int               ein Bitwort
- */
-function rex_getActionModeBit($function) {
-	if ($function == 'edit') {
-		$modebit = '2'; // pre-action and edit
-	}
-	elseif ($function == 'delete') {
-		$modebit = '4'; // pre-action and delete
-	}
-	else {
-		$modebit = '1'; // pre-action and add
-	}
-
-	return $modebit;
-}
-
-/**
  * Konvertiert einen Artikel zum Startartikel der eigenen Kategorie
  *
  * @param  int $neu_id  Artikel ID des Artikels, der Startartikel werden soll
