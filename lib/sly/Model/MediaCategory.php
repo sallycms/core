@@ -56,7 +56,7 @@ class sly_Model_MediaCategory extends sly_Model_Base_Id {
 	}
 
 	public function getChildren() {
-		return sly_Util_MediaCategory::findByParentId($this->re_id);
+		return sly_Util_MediaCategory::findByParentId($this->id);
 	}
 
 	public function isRootCategory() {
