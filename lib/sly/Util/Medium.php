@@ -84,10 +84,10 @@ class sly_Util_Medium {
 		// file matches the old one.
 
 		if ($mediumToReplace) {
-			$newType = $fileData['type'];
-			$oldType = $media->getFiletype();
+			$newType = self::getMimetype($fileData['tmp_name']);
+			$oldType = $mediumToReplace->getFiletype();
 
-			if ($newType !== $oldType && !self::compareImageTypes($newType, $oldType)) {
+			if ($newType !== $oldType) {
 				throw new sly_Exception('The types of the old and new file don\'t match.', self::ERR_TYPE_MISMATCH);
 			}
 		}
