@@ -17,6 +17,9 @@ class sly_Util_BootCache {
 	public static function init() {
 		// add core classes
 		self::$classes = sly_Util_YAML::load(SLY_COREFOLDER.'/config/bootcache.yml');
+
+		// add current cache instance
+		self::addClass(get_class(sly_Core::cache()));
 	}
 
 	public static function recreate() {
