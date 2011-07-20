@@ -8,6 +8,8 @@
  * http://www.opensource.org/licenses/mit-license.php
  */
 
+// load boot cache (disabled, still in beta)
+// include SLY_COREFOLDER.'/lib/bootcache.php';
 require_once SLY_COREFOLDER.'/lib/sly/Loader.php';
 
 sly_Loader::enablePathCache();
