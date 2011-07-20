@@ -22,10 +22,10 @@
  */
 function rex_send_article($article, $content, $environment) {
 	$config  = sly_Core::config();
-	$content = sly_Core::dispatcher()->filter('OUTPUT_FILTER', $content, array('environment' => $environment));
+	$content = sly_Core::dispatcher()->filter('OUTPUT_FILTER', $content, compact('environment'));
 
 	// keine Manipulation der Ausgaben ab hier
-	sly_Core::dispatcher()->notify('OUTPUT_FILTER_CACHE', $content, '', true);
+	sly_Core::dispatcher()->notify('OUTPUT_FILTER_CACHE', $content);
 
 	if ($article) {
 		$lastModified = $article->getUpdateDate();
