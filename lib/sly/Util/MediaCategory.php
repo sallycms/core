@@ -44,6 +44,15 @@ class sly_Util_MediaCategory {
 
 	/**
 	 *
+	 * @param  int $name
+	 * @return array
+	 */
+	public static function findByName($name) {
+		return sly_Service_Factory::getMediaCategoryService()->findByName($name);
+	}
+
+	/**
+	 *
 	 * @param  int $parentId
 	 * @return array
 	 */

@@ -14,6 +14,10 @@
  * @author Christoph
  */
 class sly_Util_Medium {
+	const ERR_TYPE_MISMATCH    = 1;
+	const ERR_INVALID_FILEDATA = 2;
+	const ERR_UPLOAD_FAILED    = 3;
+
 	/**
 	 * checks wheter a medium exists or not
 	 *
@@ -69,11 +73,23 @@ class sly_Util_Medium {
 		return sly_Service_Factory::getMediumService()->findMediaByExtension($extension);
 	}
 
-	public static function upload(array $fileData, $categoryID, $title) {
+	public static function upload(array $fileData, $categoryID, $title, sly_Model_Medium $mediumToReplace = null) {
 		// check file data
 
 		if (!isset($fileData['tmp_name'])) {
-			throw new sly_Exception('Invalid file data array given.');
+			throw new sly_Exception('Invalid file data array given.', self::ERR_INVALID_FILEDATA);
+		}
+
+		// If we're going to replace a medium, check if the type of the new
+		// file matches the old one.
+
+		if ($mediumToReplace) {
+			$newType = $fileData['type'];
+			$oldType = $media->getFiletype();
+
+			if ($newType !== $oldType && !self::compareImageTypes($newType, $oldType)) {
+				throw new sly_Exception('The types of the old and new file don\'t match.', self::ERR_TYPE_MISMATCH);
+			}
 		}
 
 		// check category
@@ -81,21 +97,20 @@ class sly_Util_Medium {
 		$categoryID = (int) $categoryID;
 
 		if (!sly_Util_MediaCategory::exists($categoryID)) {
-			$categoryID = 0;
+			$categoryID = $mediumToReplace ? $mediumToReplace->getCategoryId() : 0;
 		}
-
-		$filename    = $fileData['name'];
-		$newFilename = self::createFilename($filename);
 
 		// create filenames
 
-		$dstFile = SLY_MEDIAFOLDER.'/'.$newFilename;
-		$file    = null;
+		$filename    = $fileData['name'];
+		$newFilename = $mediumToReplace ? $mediumToReplace->getFilename() : self::createFilename($filename);
+		$dstFile     = SLY_MEDIAFOLDER.'/'.$newFilename;
+		$file        = null;
 
 		// move uploaded file
 
 		if (!@move_uploaded_file($fileData['tmp_name'], $dstFile)) {
-			throw new sly_Exception('Error while moving the uploaded file.');
+			throw new sly_Exception('Error while moving the uploaded file.', self::ERR_UPLOAD_FAILED);
 		}
 
 		@chmod($dstFile, sly_Core::config()->get('FILEPERM'));
@@ -103,7 +118,27 @@ class sly_Util_Medium {
 		// create and save our file
 
 		$service = sly_Service_Factory::getMediumService();
-		$file    = $service->add(basename($dstFile), $title, $category, $fileData['type'], $filename);
+
+		if ($mediumToReplace) {
+			$mediumToReplace->setFiletype($newType);
+			$mediumToReplace->setFilesize(filesize($dstFile));
+
+			$size = @getimagesize($targetFile);
+
+			if ($size) {
+				$mediumToReplace->setWidth($size[0]);
+				$mediumToReplace->setHeight($size[1]);
+			}
+
+			$file = $service->update($mediumToReplace);
+
+			// re-validate asset cache
+			$service = sly_Service_Factory::getAssetService();
+			$service->validateCache();
+		}
+		else {
+			$file = $service->add(basename($dstFile), $title, $category, $fileData['type'], $filename);
+		}
 
 		return $file;
 	}
@@ -154,5 +189,35 @@ class sly_Util_Medium {
 		$enc = mb_detect_encoding($filename, 'Windows-1252, ISO-8859-1, ISO-8859-2, UTF-8');
 		if ($enc != 'UTF-8') $filename = mb_convert_encoding($filename, 'UTF-8', $enc);
 		return $filename;
+	}
+
+	public static function getMimetype($filename) {
+		$size = @getimagesize($filename);
+
+		// finfo:             PHP >= 5.3, PECL fileinfo
+		// mime_content_type: PHP >= 4.3 (deprecated)
+
+		// if it's an image, we know the type
+		if (isset($size['mime'])) {
+			$mimetype = $size['mime'];
+		}
+
+		// or else try the new, recommended way
+		elseif (function_exists('finfo_file')) {
+			$finfo    = finfo_open(FILEINFO_MIME_TYPE);
+			$mimetype = finfo_file($finfo, $filename);
+		}
+
+		// argh, let's see if this old one exists
+		elseif (function_exists('mime_content_type')) {
+			$mimetype = mime_content_type($filename);
+		}
+
+		// fallback to a generic type
+		else {
+			$mimetype = 'application/octet-stream';
+		}
+
+		return $mimetype;
 	}
 }

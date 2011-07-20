@@ -50,4 +50,43 @@ class sly_Model_MediaCategory extends sly_Model_Base_Id {
 	public function getUpdateUser() { return $this->updateuser; }
 	public function getAttributes() { return $this->attributes; }
 	public function getRevision()   { return $this->revision;   }
+
+	public function getParent() {
+		return sly_Util_MediaCategory::findById($this->re_id);
+	}
+
+	public function getChildren() {
+		return sly_Util_MediaCategory::findByParentId($this->re_id);
+	}
+
+	public function isRootCategory() {
+		return $this->re_id === 0;
+	}
+
+	public function getParentTree($asInstances = true) {
+		$list = array();
+
+		if ($this->path) {
+			$list = array_filter(explode('|', $this->path));
+
+			if ($asInstances) {
+				foreach ($list as $idx => $catID) {
+					$list[$idx] = sly_Util_MediaCategory::findById($catID);
+				}
+			}
+		}
+
+		return $list;
+	}
+
+	public function inParentTree($reference) {
+		$ref  = $reference instanceof self ? $reference->getId() : (int) $reference;
+		$list = $this->getParentTree(false);
+
+		return in_array($ref, $list);
+	}
+
+	public function getMedia() {
+		return sly_Util_Medium::findByCategory($this->id);
+	}
 }

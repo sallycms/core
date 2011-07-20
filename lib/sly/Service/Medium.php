@@ -24,7 +24,7 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id {
 	public function findById($id) {
 		$id = (int) $id;
 
-		if ($id === 0) {
+		if ($id <= 0) {
 			return null;
 		}
 
@@ -68,7 +68,7 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id {
 			$list = array();
 
 			$sql->select('file', 'id', array('SUBSTRING(filename, LOCATE(".", filename) + 1)' => $extension), null, 'filename');
-			foreach ($sql as $row) $list[] = $row['id'];
+			foreach ($sql as $row) $list[] = (int) $row['id'];
 
 			sly_Core::cache()->set($namespace, $extension, $list);
 		}
@@ -125,33 +125,8 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id {
 			$categoryID = 0;
 		}
 
-		$size = @getimagesize($fullname);
-
-		// finfo:             PHP >= 5.3, PECL fileinfo
-		// mime_content_type: PHP >= 4.3 (deprecated)
-
-		if (empty($mimetype)) {
-			// if it's an image, we know the type
-			if (isset($size['mime'])) {
-				$mimetype = $size['mime'];
-			}
-
-			// or else try the new, recommended way
-			elseif (function_exists('finfo_file')) {
-				$finfo    = finfo_open(FILEINFO_MIME_TYPE);
-				$mimetype = finfo_file($finfo, $fullname);
-			}
-
-			// argh, let's see if this old one exists
-			elseif (function_exists('mime_content_type')) {
-				$mimetype = mime_content_type($fullname);
-			}
-
-			// fallback to a generic type
-			else {
-				$mimetype = 'application/octet-stream';
-			}
-		}
+		$size     = @getimagesize($fullname);
+		$mimetype = empty($mimetype) ? sly_Util_Medium::getMimetype($fullname) : $mimetype;
 
 		// create file object
 
@@ -174,12 +149,29 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id {
 		// store and return it
 
 		$this->save($file);
+
+		sly_Core::cache()->flush('sly.medium.list');
 		sly_Core::dispatcher()->notify('SLY_MEDIA_ADDED', $file);
+
 		return $file;
+	}
+
+	public function update(sly_Model_Medium $medium) {
+		// store data
+		$medium->setUpdateColumns();
+		$this->save($medium);
+
+		// notify the listeners and clear our own cache
+		sly_Core::cache()->delete('sly.medium', $medium->getId());
+		sly_Core::dispatcher()->notify('SLY_MEDIA_UPDATED', $medium);
 	}
 
 	public function delete($mediumID) {
 		$medium = $this->findById($mediumID);
+
+		if (!$medium) {
+			throw new sly_Exception('Cannot delete medium: ID '.$mediumID.' not found.');
+		}
 
 		try {
 			$sql = sly_DB_Persistence::getInstance();
@@ -193,7 +185,10 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id {
 			throw new sly_Exception('Cannot delete medium: '.$e->getMessage());
 		}
 
-		sly_Core::cache()->delete('sly.medium', $medium->getId());
+		$cache = sly_Core::cache();
+		$cache->flush('sly.medium.list');
+		$cache->delete('sly.medium', $medium->getId());
+
 		sly_Core::dispatcher()->notify('SLY_MEDIA_DELETED', $medium);
 
 		return true;

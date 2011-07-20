@@ -182,8 +182,8 @@ class rex_var_media extends rex_var {
 
 				// Mimetype ausgeben
 				if (isset($args['mimetype'])) {
-					$OOM = OOMedia::getMediaByName($value);
-					if ($OOM) $replace = $OOM->getType();
+					$medium = sly_Util_Medium::findByFilename($value);
+					if ($medium) $replace = $medium->getType();
 				}
 				// "normale" Ausgabe
 				else {
@@ -277,21 +277,14 @@ class rex_var_media extends rex_var {
 		}
 
 		$options        = '';
-		$medialistarray = explode(',', $value);
+		$medialistarray = array_filter(explode(',', $value));
 
-		if (is_array($medialistarray)) {
-			foreach ($medialistarray as $file) {
-				if ($file != '') {
-					$options .= '<option value="'.$file.'">'.$file.'</option>';
-				}
-			}
+		foreach ($medialistarray as $file) {
+			$options .= '<option value="'.$file.'">'.$file.'</option>';
 		}
 
 		$button = new sly_Form_Widget_MediaListButton('MEDIALIST['.$id.']', null, $medialistarray, $id);
-		$widget = '
-		<div class="rex-widget">'
-		.$button->render().
-		'</div>';
+		$widget = '<div class="rex-widget">'.$button->render().'</div>';
 
 		return $widget;
 	}

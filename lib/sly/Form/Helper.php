@@ -43,7 +43,7 @@ abstract class sly_Form_Helper {
 		$select = new sly_Form_Select_DropDown($name, '', -1, $init, $id);
 
 		if ($root === null) {
-			$rootCats = OOMediaCategory::getRootCategories();
+			$rootCats = sly_Util_MediaCategory::getRootCategories();
 		}
 		else {
 			$service  = sly_Service_Factory::getMediaCategoryService();
