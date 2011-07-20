@@ -84,41 +84,19 @@ class sly_Loader {
 		}*/
 
 		$found = false;
-		$upper = strtoupper($className);
 
 		if (isset(self::$pathCache[$className])) {
 			$fullPath = self::$pathCache[$className];
 			$found    = true;
 		}
 		else {
-			foreach (self::$loadPaths as $path => $prefix) {
-				// Präfix vom Klassennamen abschneiden, wenn Klasse damit beginnt.
+			$fullPath = self::findClass($className);
+			$found    = (boolean) $fullPath;
 
-				if (!empty($prefix) && strpos($upper, strtoupper($prefix)) === 0) {
-					$shortClass = substr($className, strlen($prefix));
-				}
-				else {
-					$shortClass = $className;
-				}
-
-				$file     = str_replace('_', DIRECTORY_SEPARATOR, $shortClass).'.php';
-				$fullPath = $path.DIRECTORY_SEPARATOR.$file;
-
-				// file_exists + !is_dir is faster than calling is_file and since we
-				// do not care whether the file really has a class in it, we can skip
-				// this check.
-
-				if (file_exists($fullPath) && !is_dir($fullPath)) {
-					$found = true;
-
-					if (self::$enablePathCache) {
-						// update path cache file
-						self::$pathCache[$className] = realpath($fullPath);
-						self::storePathCache();
-					}
-
-					break;
-				}
+			if ($fullPath && self::$enablePathCache) {
+				// update path cache file
+				self::$pathCache[$className] = realpath($fullPath);
+				self::storePathCache();
 			}
 		}
 
@@ -143,6 +121,34 @@ class sly_Loader {
 		if (class_exists($className, false)) {
 			++self::$counter;
 			return true;
+		}
+
+		return false;
+	}
+
+	public static function findClass($className) {
+		$upper = strtoupper($className);
+
+		foreach (self::$loadPaths as $path => $prefix) {
+			// Präfix vom Klassennamen abschneiden, wenn Klasse damit beginnt.
+
+			if (!empty($prefix) && strpos($upper, strtoupper($prefix)) === 0) {
+				$shortClass = substr($className, strlen($prefix));
+			}
+			else {
+				$shortClass = $className;
+			}
+
+			$file     = str_replace('_', DIRECTORY_SEPARATOR, $shortClass).'.php';
+			$fullPath = $path.DIRECTORY_SEPARATOR.$file;
+
+			// file_exists + !is_dir is faster than calling is_file and since we
+			// do not care whether the file really has a class in it, we can skip
+			// this check.
+
+			if (file_exists($fullPath) && !is_dir($fullPath)) {
+				return $fullPath;
+			}
 		}
 
 		return false;

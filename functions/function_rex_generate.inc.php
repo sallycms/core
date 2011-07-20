@@ -27,6 +27,9 @@ function rex_generateAll() {
 
 	sly_Core::cache()->flush('sly', true);
 
+	// create bootcache
+	sly_Util_BootCache::recreate();
+
 	$MSG = t('delete_cache_message');
 	$MSG = sly_Core::dispatcher()->filter('ALL_GENERATED', $MSG);
 
