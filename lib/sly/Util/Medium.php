@@ -137,7 +137,7 @@ class sly_Util_Medium {
 			$service->validateCache();
 		}
 		else {
-			$file = $service->add(basename($dstFile), $title, $category, $fileData['type'], $filename);
+			$file = $service->add(basename($dstFile), $title, $categoryID, $fileData['type'], $filename);
 		}
 
 		return $file;
