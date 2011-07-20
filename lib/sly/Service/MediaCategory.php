@@ -51,7 +51,7 @@ class sly_Service_MediaCategory extends sly_Service_Model_Base_Id {
 	public function findByParentId($id) {
 		$id = (int) $id;
 
-		if ($id <= 0) {
+		if ($id < 0) {
 			return array();
 		}
 
