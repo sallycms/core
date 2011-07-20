@@ -9,8 +9,15 @@
  */
 
 // load boot cache (disabled, still in beta)
-// include SLY_COREFOLDER.'/lib/bootcache.php';
-require_once SLY_COREFOLDER.'/lib/sly/Loader.php';
+$bootcache   = SLY_DYNFOLDER.'/internal/sally/bootcache.php';
+$cacheExists = file_exists($bootcache);
+
+if ($cacheExists) {
+	require $bootcache;
+}
+else {
+	require_once SLY_COREFOLDER.'/lib/sly/Loader.php';
+}
 
 sly_Loader::enablePathCache();
 sly_Loader::addLoadPath(SLY_DEVELOPFOLDER.'/lib');
@@ -21,15 +28,14 @@ sly_Loader::addLoadPath(SLY_COREFOLDER.'/lib/rex/oo', 'OO');
 sly_Loader::addLoadPath(SLY_COREFOLDER.'/lib/PEAR');
 sly_Loader::register();
 
-require_once SLY_COREFOLDER.'/lib/compatibility.php';
-require_once SLY_COREFOLDER.'/lib/functions.php';
-
-// Funktionen
-
-require_once SLY_COREFOLDER.'/functions/function_rex_globals.inc.php';
-require_once SLY_COREFOLDER.'/functions/function_rex_client_cache.inc.php';
-require_once SLY_COREFOLDER.'/functions/function_rex_other.inc.php';
-require_once SLY_COREFOLDER.'/functions/function_rex_generate.inc.php';
+if (!$cacheExists) {
+	require_once SLY_COREFOLDER.'/lib/compatibility.php';
+	require_once SLY_COREFOLDER.'/lib/functions.php';
+	require_once SLY_COREFOLDER.'/functions/function_rex_globals.inc.php';
+	require_once SLY_COREFOLDER.'/functions/function_rex_client_cache.inc.php';
+	require_once SLY_COREFOLDER.'/functions/function_rex_other.inc.php';
+	require_once SLY_COREFOLDER.'/functions/function_rex_generate.inc.php';
+}
 
 // register sly_Loader for cache clearing
 sly_Core::dispatcher()->register('ALL_GENERATED', array('sly_Loader', 'clearCache'));
