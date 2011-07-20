@@ -37,7 +37,7 @@ CREATE TABLE `sly_article_slice` (
   `createuser` VARCHAR(255) NOT NULL,
   `updateuser` VARCHAR(255) NOT NULL,
   `revision` INT(11) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`id`, `article_id`, `module`)
+  PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 CREATE TABLE `sly_clang` (

@@ -154,7 +154,11 @@ class sly_I18N implements sly_I18N_Base {
 
 		$path = realpath($path);
 
-		if ($path !== false && !isset($cache[$path])) {
+		if ($path === false) {
+			return array();
+		}
+
+		if (!isset($cache[$path])) {
 			$locales = array();
 			$files   = glob($path.'/*.yml');
 
@@ -164,9 +168,6 @@ class sly_I18N implements sly_I18N_Base {
 			}
 
 			$cache[$path] = $locales;
-		}
-		else {
-			return array();
 		}
 
 		return $cache[$path];
