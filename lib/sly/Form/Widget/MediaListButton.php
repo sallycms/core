@@ -19,7 +19,7 @@
  * @ingroup form
  * @author  Christoph
  */
-class sly_Form_Widget_MediaListButton extends sly_Form_Widget implements sly_Form_IElement {
+class sly_Form_Widget_MediaListButton extends sly_Form_ElementBase implements sly_Form_IElement {
 	/**
 	 * Constructor
 	 *
@@ -41,16 +41,6 @@ class sly_Form_Widget_MediaListButton extends sly_Form_Widget implements sly_For
 	public function render() {
 		$this->attributes['value'] = $this->getDisplayValue();
 		return $this->renderFilename('form/medialistbutton.phtml');
-	}
-
-	/**
-	 * Returns the element ID
-	 *
-	 * @see    getWidgetID()
-	 * @return string  a string like 'REX_MEDIALIST_X', with X being the running widget ID
-	 */
-	public function getID() {
-		return 'REX_MEDIALIST_'.$this->getWidgetID();
 	}
 
 	/**
