@@ -22,7 +22,7 @@
  * @ingroup form
  * @author  Christoph
  */
-class sly_Form_Widget_LinkButton extends sly_Form_Widget implements sly_Form_IElement {
+class sly_Form_Widget_LinkButton extends sly_Form_ElementBase implements sly_Form_IElement {
 	/**
 	 * Constructor
 	 *
@@ -54,16 +54,6 @@ class sly_Form_Widget_LinkButton extends sly_Form_Widget implements sly_Form_IEl
 	public function getOuterClass() {
 		$this->addOuterClass('rex-form-text');
 		return $this->outerClass;
-	}
-
-	/**
-	 * Returns the element ID
-	 *
-	 * @see    getWidgetID()
-	 * @return string  a string like 'LINK_X', with X being the running widget ID
-	 */
-	public function getID() {
-		return 'LINK_'.$this->getWidgetID();
 	}
 
 	/**

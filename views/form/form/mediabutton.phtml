@@ -8,16 +8,15 @@
  * http://www.opensource.org/licenses/mit-license.php
  */
 
-$id = $this->getWidgetID();
-$this->consumeWidgetID();
+$name = sly_html($this->attributes['name']);
 ?>
 
-<span class="sly-widget sly-mediabutton">
-	<input type="text" size="30" name="<?= sly_html($this->attributes['name']) ?>" value="<?= sly_html($this->attributes['value']) ?>" class="<?= sly_html($this->attributes['class']) ?>" id="REX_MEDIA_<?= $id ?>" readonly="readonly" />
+<span class="sly-widget sly-mediabutton" data-id="<?= $name ?>">
+	<input type="text" name="<?= $name ?>" id="<?= $name ?>" value="<?= sly_html($this->attributes['value']) ?>" class="<?= sly_html($this->attributes['class']) ?>" readonly="readonly" />
 
 	<span class="sly-icons">
-		<a href="#" onclick="openREXMedia(<?= $id ?>, ''); return false;"><img src="assets/file_open.png" title="<?= t('var_media_open') ?>" alt="" /></a>
-		<a href="#" onclick="addREXMedia(<?= $id ?>); return false;"><img src="assets/file_add.png" title="<?= t('var_media_new') ?>" alt="" /></a>
-		<a href="#" onclick="deleteREXMedia(<?= $id ?>); return false;"><img src="assets/file_del.png" title="<?= t('var_media_remove') ?>" alt="" /></a>
+		<a href="#" rel="open"><img src="assets/file_open.png" title="<?= t('var_media_open') ?>" alt="" /></a>
+		<a href="#" rel="add"><img src="assets/file_add.png" title="<?= t('var_media_new') ?>" alt="" /></a>
+		<a href="#" rel="delete"><img src="assets/file_del.png" title="<?= t('var_media_remove') ?>" alt="" /></a>
 	</span>
 </span>

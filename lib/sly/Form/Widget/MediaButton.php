@@ -19,7 +19,7 @@
  * @ingroup form
  * @author  Christoph
  */
-class sly_Form_Widget_MediaButton extends sly_Form_Widget implements sly_Form_IElement {
+class sly_Form_Widget_MediaButton extends sly_Form_ElementBase implements sly_Form_IElement {
 	/**
 	 * Constructor
 	 *
@@ -41,16 +41,6 @@ class sly_Form_Widget_MediaButton extends sly_Form_Widget implements sly_Form_IE
 	public function render() {
 		$this->attributes['value'] = $this->getDisplayValue();
 		return $this->renderFilename('form/mediabutton.phtml');
-	}
-
-	/**
-	 * Returns the element ID
-	 *
-	 * @see    getWidgetID()
-	 * @return string  a string like 'REX_MEDIA_X', with X being the running widget ID
-	 */
-	public function getID() {
-		return 'REX_MEDIA_'.$this->getWidgetID();
 	}
 
 	/**
