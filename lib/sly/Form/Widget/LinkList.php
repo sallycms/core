@@ -9,18 +9,16 @@
  */
 
 /**
- * Linklist button
+ * Linklist widget
  *
  * This element will render a special widget that allows the user to select
  * a list of articles. The articles will be returned without any language
  * information, so only their IDs are returned.
- * Currently, only filtering the articles by name is supported. The linkmap
- * popup is not used yet.
  *
  * @ingroup form
  * @author  Christoph
  */
-class sly_Form_Widget_LinkListButton extends sly_Form_ElementBase implements sly_Form_IElement {
+class sly_Form_Widget_LinkList extends sly_Form_ElementBase implements sly_Form_IElement {
 	/**
 	 * Constructor
 	 *
@@ -41,7 +39,7 @@ class sly_Form_Widget_LinkListButton extends sly_Form_ElementBase implements sly
 	 */
 	public function render() {
 		$this->attributes['value'] = $this->getDisplayValue();
-		return $this->renderFilename('form/linklistbutton.phtml');
+		return $this->renderFilename('element/widget/linklist.phtml');
 	}
 
 	/**

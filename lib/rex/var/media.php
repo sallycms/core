@@ -10,12 +10,12 @@
 /**
  * REX_FILE[1],
  * REX_FILELIST[1],
- * REX_FILE_BUTTON[1],
- * REX_FILELIST_BUTTON[1],
+ * REX_FILE_WIDGET[1],
+ * REX_FILELIST_WIDGET[1],
  * REX_MEDIA[1],
  * REX_MEDIALIST[1],
- * REX_MEDIA_BUTTON[1],
- * REX_MEDIALIST_BUTTON[1]
+ * REX_MEDIA_WIDGET[1],
+ * REX_MEDIALIST_WIDGET[1]
  *
  * Alle Variablen die mit REX_FILE beginnnen sind als deprecated anzusehen!
  *
@@ -71,8 +71,8 @@ class rex_var_media extends rex_var {
 	// --------------------------------- Output
 
 	public function getBEInput($slice_id, $content) {
-		$content = $this->matchMediaButton($slice_id, $content);
-		$content = $this->matchMediaListButton($slice_id, $content);
+		$content = $this->matchMediaWidget($slice_id, $content);
+		$content = $this->matchMediaListWidget($slice_id, $content);
 		$content = $this->getOutput($slice_id, $content);
 		return $content;
 	}
@@ -109,10 +109,10 @@ class rex_var_media extends rex_var {
 	}
 
 	/**
-	 * MediaButton für die Eingabe
+	 * MediaWidget für die Eingabe
 	 */
-	public function matchMediaButton($slice_id, $content) {
-		$vars = array('REX_FILE_BUTTON', 'REX_MEDIA_BUTTON');
+	public function matchMediaWidget($slice_id, $content) {
+		$vars = array('REX_FILE_WIDGET', 'REX_MEDIA_WIDGET');
 
 		foreach ($vars as $var) {
 			$matches = $this->getVarParams($content, $var);
@@ -125,7 +125,7 @@ class rex_var_media extends rex_var {
 				$value = $service->findBySliceTypeFinder($slice_id, self::MEDIA, $id);
 				$value = $value ? $value->getValue() : '';
 
-				$replace = $this->getMediaButton($id, $value, $category, $args);
+				$replace = $this->getMediaWidget($id, $value, $category, $args);
 				$replace = $this->handleGlobalWidgetParams($var, $args, $replace);
 				$content = str_replace($var.'['.$param_str.']', $replace, $content);
 			}
@@ -135,10 +135,10 @@ class rex_var_media extends rex_var {
 	}
 
 	/**
-	 * MediaListButton für die Eingabe
+	 * MediaListWidget für die Eingabe
 	 */
-	public function matchMediaListButton($slice_id, $content) {
-		$vars    = array('REX_FILELIST_BUTTON', 'REX_MEDIALIST_BUTTON');
+	public function matchMediaListWidget($slice_id, $content) {
+		$vars    = array('REX_FILELIST_WIDGET', 'REX_MEDIALIST_WIDGET');
 		$service = sly_Service_Factory::getSliceValueService();
 
 		foreach ($vars as $var) {
@@ -157,7 +157,7 @@ class rex_var_media extends rex_var {
 					unset($args['category']);
 				}
 
-				$replace = $this->getMedialistButton($id, $value, $category, $args);
+				$replace = $this->getMedialistWidget($id, $value, $category, $args);
 				$replace = $this->handleGlobalWidgetParams($var, $args, $replace);
 				$content = str_replace($var.'['.$param_str.']', $replace, $content);
 			}
@@ -227,26 +227,26 @@ class rex_var_media extends rex_var {
 	}
 
 	/**
-	 * Gibt das Button Template zurück
+	 * Gibt das Widget Template zurück
 	 */
-	public function getMediaButton($id, $value, $category = '', $args = array()) {
-		// TODO: Build something like $button->setRootCat($category);
+	public function getMediaWidget($id, $value, $category = '', $args = array()) {
+		// TODO: Build something like $widget->setRootCat($category);
 
-		$button = new sly_Form_Widget_MediaButton('MEDIA['.$id.']', null, $value, $id);
-		$widget = '<div class="rex-widget">'.$button->render().'</div>';
+		$widget = new sly_Form_Widget_Media('MEDIA['.$id.']', null, $value, $id);
+		$widget = '<div class="rex-widget">'.$widget->render().'</div>';
 
 		return $widget;
 	}
 
 	/**
-	 * Gibt das ListButton Template zurück
+	 * Gibt das ListWidget Template zurück
 	 */
-	public function getMedialistButton($id, $value, $category = '', $args = array()) {
-		// TODO: Build something like $button->setRootCat($category);
+	public function getMedialistWidget($id, $value, $category = '', $args = array()) {
+		// TODO: Build something like $widget->setRootCat($category);
 
 		$files  = array_filter(explode(',', $value));
-		$button = new sly_Form_Widget_MediaListButton('MEDIALIST['.$id.']', null, $medialistarray, $id);
-		$widget = '<div class="rex-widget">'.$button->render().'</div>';
+		$widget = new sly_Form_Widget_MediaList('MEDIALIST['.$id.']', null, $medialistarray, $id);
+		$widget = '<div class="rex-widget">'.$widget->render().'</div>';
 
 		return $widget;
 	}

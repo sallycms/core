@@ -13,7 +13,7 @@ $files = sly_makeArray($this->getDisplayValue());
 $files = empty($files) ? array() : array_filter($files);
 
 ?>
-<span class="sly-widget sly-medialistbutton" data-id="<?= $name ?>">
+<span class="sly-widget sly-medialist" data-id="<?= $name ?>">
 	<input type="hidden" name="<?= $name ?>" id="<?= $name ?>" value="<?= sly_html(implode(',', $files)) ?>" />
 	<select size="8" class="<?= $this->attributes['class'] ?>">
 		<? foreach ($files as $file): ?>

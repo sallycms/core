@@ -19,7 +19,7 @@ foreach ($value as $idx => $id) {
 }
 
 ?>
-<span class="sly-widget sly-linklistbutton" data-id="<?= $name ?>">
+<span class="sly-widget sly-linklist" data-id="<?= $name ?>">
 	<input type="hidden" name="<?= $name ?>" id="<?= $name ?>" value="<?= sly_html(implode(',', array_keys($values))) ?>" />
 	<select size="8" class="<?= $this->attributes['class'] ?>">
 		<? foreach ($values as $id => $name): ?>

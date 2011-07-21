@@ -8,10 +8,10 @@
  */
 
 /**
- * REX_LINK_BUTTON,
+ * REX_LINK_WIDGET,
  * REX_LINK,
  * REX_LINK_ID,
- * REX_LINKLIST_BUTTON,
+ * REX_LINKLIST_WIDGET,
  * REX_LINKLIST
  *
  * @ingroup redaxo
@@ -62,8 +62,8 @@ class rex_var_link extends rex_var {
 
 	public function getBEInput($slice_id, $content) {
 		$content = $this->getOutput($slice_id, $content);
-		$content = $this->matchLinkButton($slice_id, $content);
-		$content = $this->matchLinkListButton($slice_id, $content);
+		$content = $this->matchLinkWidget($slice_id, $content);
+		$content = $this->matchLinkListWidget($slice_id, $content);
 
 		return $content;
 	}
@@ -87,9 +87,9 @@ class rex_var_link extends rex_var {
 	}
 
 	/**
-	 * Button für die Eingabe
+	 * Widget für die Eingabe
 	 */
-	public function matchLinkButton($slice_id, $content) {
+	public function matchLinkWidget($slice_id, $content) {
 		$def_category = '';
 		$article_id   = sly_request('article_id', 'int');
 
@@ -98,7 +98,7 @@ class rex_var_link extends rex_var {
 			$def_category = $art->getCategoryId();
 		}
 
-		$var     = 'REX_LINK_BUTTON';
+		$var     = 'REX_LINK_WIDGET';
 		$matches = $this->getVarParams($content, $var);
 		$service = sly_Service_Factory::getSliceValueService();
 
@@ -113,7 +113,7 @@ class rex_var_link extends rex_var {
 			// die Linkmap mit der aktuellen Kategorie öffnen
 			list ($category, $args) = $this->extractArg('category', $args, $def_category);
 
-			$replace = $this->getLinkButton($id, $value, $category, $args);
+			$replace = $this->getLinkWidget($id, $value, $category, $args);
 			$replace = $this->handleGlobalWidgetParams($var, $args, $replace);
 			$content = str_replace($var.'['.$param_str.']', $replace, $content);
 		}
@@ -122,10 +122,10 @@ class rex_var_link extends rex_var {
 	}
 
 	/**
-	 * Button für die Eingabe
+	 * Widget für die Eingabe
 	 */
-	public function matchLinkListButton($slice_id, $content) {
-		$var     = 'REX_LINKLIST_BUTTON';
+	public function matchLinkListWidget($slice_id, $content) {
+		$var     = 'REX_LINKLIST_WIDGET';
 		$matches = $this->getVarParams($content, $var);
 		$service = sly_Service_Factory::getSliceValueService();
 
@@ -137,7 +137,7 @@ class rex_var_link extends rex_var {
 			$value = $service->findBySliceTypeFinder($slice_id, 'REX_LINKLIST', $id);
 			$value = $value ? $value->getValue() : '';
 
-			$replace = $this->getLinklistButton($id, $value, $category);
+			$replace = $this->getLinklistWidget($id, $value, $category);
 			$replace = $this->handleGlobalWidgetParams($var, $args, $replace);
 			$content = str_replace($var.'['.$param_str.']', $replace, $content);
 		}
@@ -213,24 +213,24 @@ class rex_var_link extends rex_var {
 	}
 
 	/**
-	 * Gibt das Button Template zurück
+	 * Gibt das Widget Template zurück
 	 */
-	public function getLinkButton($id, $article_id, $category = '') {
-		// TODO: Build something like $button->setRootCat($category);
-		$button = new sly_Form_Widget_LinkButton('LINK['.$id.']', null, $article_id, $id);
-		$widget = '<div class="rex-widget">'.$button->render().'</div>';
+	public function getLinkWidget($id, $article_id, $category = '') {
+		// TODO: Build something like $widget->setRootCat($category);
+		$widget = new sly_Form_Widget_Link('LINK['.$id.']', null, $article_id, $id);
+		$widget = '<div class="rex-widget">'.$widget->render().'</div>';
 
 		return $widget;
 	}
 
 	/**
-	 * Gibt das ListButton Template zurück
+	 * Gibt das ListWidget Template zurück
 	 */
-	public function getLinklistButton($id, $value, $category = '') {
-		// TODO: Build something like $button->setRootCat($category);
+	public function getLinklistWidget($id, $value, $category = '') {
+		// TODO: Build something like $widget->setRootCat($category);
 		$articles = explode(',', $value);
-		$button   = new sly_Form_Widget_LinkListButton('LINKLIST['.$id.']', null, $articles, $id);
-		$widget   = '<div class="rex-widget">'.$button->render().'</div>';
+		$widget   = new sly_Form_Widget_LinkList('LINKLIST['.$id.']', null, $articles, $id);
+		$widget   = '<div class="rex-widget">'.$widget->render().'</div>';
 
 		return $widget;
 	}

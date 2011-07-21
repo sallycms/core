@@ -9,28 +9,26 @@
  */
 
 /**
- * Media button
+ * Medialist widget
  *
  * This element will render a special widget that allows the user to select
- * a file from the mediapool. The handled value is the file's name, not its ID.
- *
- * Elements will be called 'REX_MEDIA_X', where X is the running widget ID.
+ * a list of files from the mediapool.
  *
  * @ingroup form
  * @author  Christoph
  */
-class sly_Form_Widget_MediaButton extends sly_Form_ElementBase implements sly_Form_IElement {
+class sly_Form_Widget_MediaList extends sly_Form_ElementBase implements sly_Form_IElement {
 	/**
 	 * Constructor
 	 *
 	 * @param string $name   the element name
 	 * @param string $label  the label
-	 * @param string $value  the current value (a filename)
+	 * @param array  $value  the current value (a list of filenames)
 	 * @param string $id     optional HTML ID
 	 */
 	public function __construct($name, $label, $value, $id = null) {
-		parent::__construct($name, $label, $value, $id, 'mediabutton');
-		$this->setAttribute('class', 'rex-form-text');
+		parent::__construct($name, $label, $value, $id);
+		$this->setAttribute('class', 'rex-form-select');
 	}
 
 	/**
@@ -40,7 +38,7 @@ class sly_Form_Widget_MediaButton extends sly_Form_ElementBase implements sly_Fo
 	 */
 	public function render() {
 		$this->attributes['value'] = $this->getDisplayValue();
-		return $this->renderFilename('form/mediabutton.phtml');
+		return $this->renderFilename('element/widget/medialist.phtml');
 	}
 
 	/**
@@ -51,9 +49,9 @@ class sly_Form_Widget_MediaButton extends sly_Form_ElementBase implements sly_Fo
 	 * shown instead of those that were given when the form elements are
 	 * initialized.
 	 *
-	 * @return string  the submitted filename
+	 * @return array  a list of filenames
 	 */
 	public function getDisplayValue() {
-		return $this->getDisplayValueHelper('string', false);
+		return $this->getDisplayValueHelper('string', true);
 	}
 }

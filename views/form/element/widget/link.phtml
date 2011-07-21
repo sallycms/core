@@ -21,7 +21,7 @@ if (sly_Util_Article::isValid($art)) {
 
 ?>
 
-<span class="sly-widget sly-linkbutton" data-id="<?= $name ?>" data-catid="<?= $category ?>">
+<span class="sly-widget sly-link" data-id="<?= $name ?>" data-catid="<?= $category ?>">
 	<input type="hidden" name="<?= $name ?>" id="<?= $name ?>" value="<?= sly_html($artID) ?>" />
 	<input type="text" value="<?= $artName ?>" class="<?= sly_html($this->attributes['class']) ?>" readonly="readonly" />
 
