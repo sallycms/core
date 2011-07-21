@@ -40,4 +40,8 @@ abstract class sly_Controller_Ajax extends sly_Controller_Base {
 		while (ob_get_level()) ob_end_flush();
 		exit();
 	}
+	
+	protected function getViewFolder() {
+		return false;
+	}
 }
