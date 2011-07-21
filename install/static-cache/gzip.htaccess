@@ -1,0 +1,2 @@
+Header set Content-Encoding "gzip"
+SetEnv no-gzip dont-vary
