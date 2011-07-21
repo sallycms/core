@@ -216,25 +216,9 @@ class rex_var_link extends rex_var {
 	 * Gibt das Button Template zurück
 	 */
 	public function getLinkButton($id, $article_id, $category = '') {
-		$art_name = '';
-		$clang    = '';
-		$art      = sly_Util_Article::findById($article_id);
-
-		// Falls ein Artikel vorausgewählt ist, dessen Namen anzeigen und beim Öffnen der Linkmap dessen Kategorie anzeigen
-
-		if (sly_Util_Article::isValid($art)) {
-			$art_name = $art->getName();
-			$category = $art->getCategoryId();
-		}
-
-		$open_params = '&clang='.sly_Core::getCurrentClang();
-		if ($category != '') $open_params .= '&category_id='.$category;
-
+		// TODO: Build something like $button->setRootCat($category);
 		$button = new sly_Form_Widget_LinkButton('LINK['.$id.']', null, $article_id, $id);
-		$widget = '
-		<div class="rex-widget">'
-		.$button->render().
-		'</div>';
+		$widget = '<div class="rex-widget">'.$button->render().'</div>';
 
 		return $widget;
 	}
@@ -243,17 +227,10 @@ class rex_var_link extends rex_var {
 	 * Gibt das ListButton Template zurück
 	 */
 	public function getLinklistButton($id, $value, $category = '') {
-		$open_params = '&clang='.sly_Core::getCurrentClang();
-		if ($category != '') $open_params .= '&category_id='.$category;
-
-		$options       = '';
-		$linklistarray = explode(',', $value);
-
-		$button = new sly_Form_Widget_LinkListButton('LINKLIST['.$id.']', null, $linklistarray, $id);
-		$widget = '
-		<div class="rex-widget">'
-		.$button->render().
-		'</div>';
+		// TODO: Build something like $button->setRootCat($category);
+		$articles = explode(',', $value);
+		$button   = new sly_Form_Widget_LinkListButton('LINKLIST['.$id.']', null, $articles, $id);
+		$widget   = '<div class="rex-widget">'.$button->render().'</div>';
 
 		return $widget;
 	}

@@ -122,7 +122,10 @@ class rex_var_media extends rex_var {
 				list ($id, $args)        = $this->extractArg('id', $args, 0);
 				list ($category, $args)  = $this->extractArg('category', $args, '');
 
-				$replace = $this->getMediaButton($id, $category, $args);
+				$value = $service->findBySliceTypeFinder($slice_id, self::MEDIA, $id);
+				$value = $value ? $value->getValue() : '';
+
+				$replace = $this->getMediaButton($id, $value, $category, $args);
 				$replace = $this->handleGlobalWidgetParams($var, $args, $replace);
 				$content = str_replace($var.'['.$param_str.']', $replace, $content);
 			}
@@ -226,30 +229,11 @@ class rex_var_media extends rex_var {
 	/**
 	 * Gibt das Button Template zurück
 	 */
-	public function getMediaButton($id, $category = '', $args = array()) {
-		$open_params = '';
+	public function getMediaButton($id, $value, $category = '', $args = array()) {
+		// TODO: Build something like $button->setRootCat($category);
 
-		if ($category != '') {
-			$open_params = '&amp;rex_file_category='.$category;
-		}
-
-		foreach ($args as $aname => $avalue) {
-			$open_params .= '&amp;args['.urlencode($aname).']='.urlencode($avalue);
-		}
-
-		$wdgtClass = 'rex-widget-media';
-		$service   = sly_Service_Factory::getAddOnService();
-
-		// TODO: image_resize aus dem Core entfernen
-		if (isset($args['preview']) && $args['preview'] && $service->isAvailable('image_resize')) {
-			$wdgtClass .= ' rex-widget-preview';
-		}
-
-		$button = new sly_Form_Widget_MediaButton('MEDIA['.$id.']', null, 'REX_MEDIA['.$id.']', $id);
-		$widget = '
-		<div class="rex-widget">'
-		.$button->render().
-		'</div>';
+		$button = new sly_Form_Widget_MediaButton('MEDIA['.$id.']', null, $value, $id);
+		$widget = '<div class="rex-widget">'.$button->render().'</div>';
 
 		return $widget;
 	}
@@ -258,31 +242,9 @@ class rex_var_media extends rex_var {
 	 * Gibt das ListButton Template zurück
 	 */
 	public function getMedialistButton($id, $value, $category = '', $args = array()) {
-		$open_params = '';
+		// TODO: Build something like $button->setRootCat($category);
 
-		if ($category != '') {
-			$open_params = '&amp;rex_file_category='.$category;
-		}
-
-		foreach ($args as $aname => $avalue) {
-			$open_params .= '&amp;args['. $aname .']='. urlencode($avalue);
-		}
-
-		$wdgtClass = 'rex-widget-medialist';
-		$service   = sly_Service_Factory::getAddOnService();
-
-		// TODO: image_resize aus dem Core entfernen
-		if (isset($args['preview']) && $args['preview'] && $service->isAvailable('image_resize')) {
-			$wdgtClass .= ' rex-widget-preview';
-		}
-
-		$options        = '';
-		$medialistarray = array_filter(explode(',', $value));
-
-		foreach ($medialistarray as $file) {
-			$options .= '<option value="'.$file.'">'.$file.'</option>';
-		}
-
+		$files  = array_filter(explode(',', $value));
 		$button = new sly_Form_Widget_MediaListButton('MEDIALIST['.$id.']', null, $medialistarray, $id);
 		$widget = '<div class="rex-widget">'.$button->render().'</div>';
 
