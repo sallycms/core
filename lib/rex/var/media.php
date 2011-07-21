@@ -8,16 +8,10 @@
  */
 
 /**
- * REX_FILE[1],
- * REX_FILELIST[1],
- * REX_FILE_WIDGET[1],
- * REX_FILELIST_WIDGET[1],
  * REX_MEDIA[1],
  * REX_MEDIALIST[1],
  * REX_MEDIA_WIDGET[1],
  * REX_MEDIALIST_WIDGET[1]
- *
- * Alle Variablen die mit REX_FILE beginnnen sind als deprecated anzusehen!
  *
  * @ingroup redaxo
  */
@@ -26,8 +20,6 @@ class rex_var_media extends rex_var {
 
 	const MEDIA     = 'REX_MEDIA';
 	const MEDIALIST = 'REX_MEDIALIST';
-	const FILE      = 'REX_FILE';
-	const FILELIST  = 'REX_FILELIST';
 
 	public function getRequestValues($REX_ACTION) {
 		foreach (array('MEDIA', 'MEDIALIST') as $type) {
@@ -112,23 +104,20 @@ class rex_var_media extends rex_var {
 	 * MediaWidget für die Eingabe
 	 */
 	public function matchMediaWidget($slice_id, $content) {
-		$vars = array('REX_FILE_WIDGET', 'REX_MEDIA_WIDGET');
+		$var     = 'REX_MEDIA_WIDGET';
+		$matches = $this->getVarParams($content, $var);
 
-		foreach ($vars as $var) {
-			$matches = $this->getVarParams($content, $var);
+		foreach ($matches as $match) {
+			list ($param_str, $args) = $match;
+			list ($id, $args)        = $this->extractArg('id', $args, 0);
+			list ($category, $args)  = $this->extractArg('category', $args, '');
 
-			foreach ($matches as $match) {
-				list ($param_str, $args) = $match;
-				list ($id, $args)        = $this->extractArg('id', $args, 0);
-				list ($category, $args)  = $this->extractArg('category', $args, '');
+			$value = $service->findBySliceTypeFinder($slice_id, self::MEDIA, $id);
+			$value = $value ? $value->getValue() : '';
 
-				$value = $service->findBySliceTypeFinder($slice_id, self::MEDIA, $id);
-				$value = $value ? $value->getValue() : '';
-
-				$replace = $this->getMediaWidget($id, $value, $category, $args);
-				$replace = $this->handleGlobalWidgetParams($var, $args, $replace);
-				$content = str_replace($var.'['.$param_str.']', $replace, $content);
-			}
+			$replace = $this->getMediaWidget($id, $value, $category, $args);
+			$replace = $this->handleGlobalWidgetParams($var, $args, $replace);
+			$content = str_replace($var.'['.$param_str.']', $replace, $content);
 		}
 
 		return $content;
@@ -138,29 +127,26 @@ class rex_var_media extends rex_var {
 	 * MediaListWidget für die Eingabe
 	 */
 	public function matchMediaListWidget($slice_id, $content) {
-		$vars    = array('REX_FILELIST_WIDGET', 'REX_MEDIALIST_WIDGET');
+		$var     = 'REX_MEDIALIST_WIDGET';
 		$service = sly_Service_Factory::getSliceValueService();
+		$matches = $this->getVarParams($content, $var);
 
-		foreach ($vars as $var) {
-			$matches = $this->getVarParams($content, $var);
+		foreach ($matches as $match) {
+			list ($param_str, $args) = $match;
+			list ($id, $args) = $this->extractArg('id', $args, 0);
 
-			foreach ($matches as $match) {
-				list ($param_str, $args) = $match;
-				list ($id, $args) = $this->extractArg('id', $args, 0);
+			$value    = $service->findBySliceTypeFinder($slice_id, self::MEDIALIST, $id);
+			$value    = $value ? $value->getValue() : '';
+			$category = '';
 
-				$value    = $service->findBySliceTypeFinder($slice_id, self::MEDIALIST, $id);
-				$value    = $value ? $value->getValue() : '';
-				$category = '';
-
-				if (isset($args['category'])) {
-					$category = $args['category'];
-					unset($args['category']);
-				}
-
-				$replace = $this->getMedialistWidget($id, $value, $category, $args);
-				$replace = $this->handleGlobalWidgetParams($var, $args, $replace);
-				$content = str_replace($var.'['.$param_str.']', $replace, $content);
+			if (isset($args['category'])) {
+				$category = $args['category'];
+				unset($args['category']);
 			}
+
+			$replace = $this->getMedialistWidget($id, $value, $category, $args);
+			$replace = $this->handleGlobalWidgetParams($var, $args, $replace);
+			$content = str_replace($var.'['.$param_str.']', $replace, $content);
 		}
 
 		return $content;
@@ -170,32 +156,29 @@ class rex_var_media extends rex_var {
 	 * Wert für die Ausgabe
 	 */
 	public function matchMedia($slice_id, $content) {
-		$vars    = array(self::FILE, self::MEDIA);
+		$var     = self::MEDIA;
 		$service = sly_Service_Factory::getSliceValueService();
+		$matches = $this->getVarParams($content, $var);
 
-		foreach ($vars as $var) {
-			$matches = $this->getVarParams($content, $var);
+		foreach ($matches as $match) {
+			list ($param_str, $args) = $match;
+			list ($id, $args)        = $this->extractArg('id', $args, 0);
 
-			foreach ($matches as $match) {
-				list ($param_str, $args) = $match;
-				list ($id, $args)        = $this->extractArg('id', $args, 0);
+			$value = $service->findBySliceTypeFinder($slice_id, self::MEDIA, $id);
+			$value = $value ? $value->getValue() : '';
 
-				$value = $service->findBySliceTypeFinder($slice_id, self::MEDIA, $id);
-				$value = $value ? $value->getValue() : '';
-
-				// Mimetype ausgeben
-				if (isset($args['mimetype'])) {
-					$medium = sly_Util_Medium::findByFilename($value);
-					if ($medium) $replace = $medium->getType();
-				}
-				// "normale" Ausgabe
-				else {
-					$replace = $value;
-				}
-
-				$replace = $this->handleGlobalVarParams($var, $args, $replace);
-				$content = str_replace($var.'['.$param_str.']', $replace, $content);
+			// Mimetype ausgeben
+			if (isset($args['mimetype'])) {
+				$medium = sly_Util_Medium::findByFilename($value);
+				if ($medium) $replace = $medium->getType();
 			}
+			// "normale" Ausgabe
+			else {
+				$replace = $value;
+			}
+
+			$replace = $this->handleGlobalVarParams($var, $args, $replace);
+			$content = str_replace($var.'['.$param_str.']', $replace, $content);
 		}
 
 		return $content;
@@ -205,22 +188,19 @@ class rex_var_media extends rex_var {
 	 * Wert für die Ausgabe
 	 */
 	public function matchMediaList($slice_id, $content) {
-		$vars    = array(self::FILELIST, self::MEDIALIST);
+		$var     = self::MEDIALIST;
 		$service = sly_Service_Factory::getSliceValueService();
+		$matches = $this->getVarParams($content, $var);
 
-		foreach ($vars as $var) {
-			$matches = $this->getVarParams($content, $var);
+		foreach ($matches as $match) {
+			list ($param_str, $args) = $match;
+			list ($id, $args) = $this->extractArg('id', $args, 0);
 
-			foreach ($matches as $match) {
-				list ($param_str, $args) = $match;
-				list ($id, $args) = $this->extractArg('id', $args, 0);
+			$value = $service->findBySliceTypeFinder($slice_id, self::MEDIALIST, $id);
+			$value = $value ? $value->getValue() : '';
 
-				$value = $service->findBySliceTypeFinder($slice_id, self::MEDIALIST, $id);
-				$value = $value ? $value->getValue() : '';
-
-				$replace = $this->handleGlobalVarParams($var, $args, $value);
-				$content = str_replace($var.'['.$param_str.']', $replace, $content);
-			}
+			$replace = $this->handleGlobalVarParams($var, $args, $value);
+			$content = str_replace($var.'['.$param_str.']', $replace, $content);
 		}
 
 		return $content;
