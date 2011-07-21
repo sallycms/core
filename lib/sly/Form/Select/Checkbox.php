@@ -27,6 +27,6 @@ class sly_Form_Select_Checkbox extends sly_Form_Select_Base implements sly_Form_
 	 * @return string  the XHTML code
 	 */
 	public function render() {
-		return $this->renderFilename('form/select/checkbox.phtml');
+		return $this->renderFilename('element/select/checkbox.phtml');
 	}
 }
