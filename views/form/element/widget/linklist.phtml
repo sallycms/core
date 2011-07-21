@@ -10,7 +10,6 @@
 
 $value  = sly_makeArray($this->getDisplayValue());
 $value  = array_filter($value);
-$name   = $this->getAttribute('name');
 $values = array();
 
 foreach ($value as $idx => $id) {
@@ -18,9 +17,12 @@ foreach ($value as $idx => $id) {
 	if ($article) $values[$id] = $article->getName();
 }
 
+$name = sly_html($this->getName());
+$id   = sly_html($this->getID());
+
 ?>
 <span class="sly-widget sly-linklist" data-id="<?= $name ?>">
-	<input type="hidden" name="<?= $name ?>" id="<?= $name ?>" value="<?= sly_html(implode(',', array_keys($values))) ?>" />
+	<input type="hidden" name="<?= $name ?>" id="<?= $id ?>" value="<?= sly_html(implode(',', array_keys($values))) ?>" />
 	<select size="8" class="<?= $this->attributes['class'] ?>">
 		<? foreach ($values as $id => $name): ?>
 		<option value="<?= sly_html($id) ?>"><?= sly_html($name) ?></option>

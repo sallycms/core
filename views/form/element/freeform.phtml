@@ -8,7 +8,7 @@
  * http://www.opensource.org/licenses/mit-license.php
  */
 
-$id    = empty($this->attributes['id']) ? $this->attributes['name'] : $this->attributes['id'];
+$id    = $this->getID();
 $class = empty($this->attributes['class']) ? '' : ' class="'.sly_html($this->attributes['class']).'"';
 
 print '<span id="freeform-for-'.$id.'"'.$class.'>'.$this->content.'</span>';

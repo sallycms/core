@@ -8,10 +8,10 @@
  * http://www.opensource.org/licenses/mit-license.php
  */
 ?>
-<span class="sly-select-<?= $type ?>-list sly-select-group" id="<?= sly_html($this->attributes['id']) ?>">
+<span class="sly-select-<?= $type ?>-list sly-select-group" id="<?= sly_html($this->getID()) ?>">
 	<?
 	$selected  = sly_makeArray($this->getDisplayValue());
-	$elementID = $this->attributes['id'];
+	$elementID = $this->getID();
 
 	foreach ($this->values as $key => $value) {
 		$checked  = in_array($key, $selected);

@@ -8,13 +8,14 @@
  * http://www.opensource.org/licenses/mit-license.php
  */
 
-$name  = sly_html($this->attributes['name']);
+$name  = sly_html($this->getName());
+$id    = sly_html($this->getID());
 $files = sly_makeArray($this->getDisplayValue());
 $files = empty($files) ? array() : array_filter($files);
 
 ?>
 <span class="sly-widget sly-medialist" data-id="<?= $name ?>">
-	<input type="hidden" name="<?= $name ?>" id="<?= $name ?>" value="<?= sly_html(implode(',', $files)) ?>" />
+	<input type="hidden" name="<?= $name ?>" id="<?= $id ?>" value="<?= sly_html(implode(',', $files)) ?>" />
 	<select size="8" class="<?= $this->attributes['class'] ?>">
 		<? foreach ($files as $file): ?>
 		<option value="<?= sly_html($file) ?>"><?= sly_html($file) ?></option>

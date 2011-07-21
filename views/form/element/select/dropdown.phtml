@@ -8,7 +8,7 @@
  * http://www.opensource.org/licenses/mit-license.php
  */
 
-$name     = $this->getAttribute('name');
+$name     = $this->getName();
 $selected = sly_makeArray($this->getDisplayValue()); // list of selected keys
 
 if ($this->getAttribute('multiple') == 'multiple') {

@@ -47,15 +47,13 @@ $id = !empty($this->id) ? ' id="'.$this->id.'"' : '';
 
 				</div>
 			</fieldset>
-			<? endforeach; ?>
+			<? endforeach ?>
 		</form>
 	</div>
 </div>
 
 <? if (!empty($this->focussedElement)): ?>
 <script type="text/javascript">
-// <[!CDATA[
-jQuery('#<?= $this->focussedElement ?>').focus();
-// ]]>
+$('#<?= $this->focussedElement ?>').focus();
 </script>
 <? endif ?>
