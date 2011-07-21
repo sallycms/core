@@ -51,7 +51,7 @@ class sly_Form_Freeform extends sly_Form_ElementBase implements sly_Form_IElemen
 	 * @return string  the XHTML code
 	 */
 	public function render() {
-		return $this->renderFilename('form/freeform.phtml');
+		return $this->renderFilename('element/freeform.phtml');
 	}
 
 	/**

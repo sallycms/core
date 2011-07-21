@@ -63,7 +63,7 @@ class sly_Form_DateTime extends sly_Form_ElementBase implements sly_Form_IElemen
 	 * @return string  the XHTML code
 	 */
 	public function render() {
-		return $this->renderFilename('form/datetime.phtml');
+		return $this->renderFilename('element/datetime.phtml');
 	}
 
 	/**
