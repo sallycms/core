@@ -41,7 +41,7 @@ class sly_Form_Textarea extends sly_Form_Input_Base {
 	 */
 	public function render() {
 		$this->attributes['value'] = $this->getDisplayValue();
-		return $this->renderFilename('form/textarea.phtml');
+		return $this->renderFilename('element/textarea.phtml');
 	}
 
 	/**

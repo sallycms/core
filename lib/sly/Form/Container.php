@@ -54,7 +54,7 @@ class sly_Form_Container extends sly_Form_ElementBase implements sly_Form_IEleme
 	 * @return string  the XHTML code
 	 */
 	public function render() {
-		return $this->renderFilename('form/container.phtml');
+		return $this->renderFilename('element/container.phtml');
 	}
 
 	/**

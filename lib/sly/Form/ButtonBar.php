@@ -41,7 +41,7 @@ class sly_Form_ButtonBar extends sly_Form_ElementBase implements sly_Form_IEleme
 	 * @return string  the XHTML code
 	 */
 	public function render() {
-		return $this->renderFilename('form/buttonbar.phtml');
+		return $this->renderFilename('element/buttonbar.phtml');
 	}
 
 	/**
