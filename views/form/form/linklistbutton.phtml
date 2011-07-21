@@ -11,12 +11,6 @@
 $value  = sly_makeArray($this->getDisplayValue());
 $value  = array_filter($value);
 $name   = $this->getAttribute('name');
-$layout = sly_Core::getLayout();
-
-$layout->addJavaScriptFile('assets/js/jquery.autocomplete.min.js');
-
-print '<span class="sly-widget sly-linklistbutton">';
-
 $values = array();
 
 foreach ($value as $idx => $id) {
@@ -24,37 +18,24 @@ foreach ($value as $idx => $id) {
 	if ($article) $values[$id] = $article->getName();
 }
 
-$select = new sly_Form_Select_DropDown('list_'.$name, '', null, $values);
-$select->setAttribute('class', 'sly-linklist');
-$select->setAttribute('readonly', 'readonly');
-$select->setMultiple(false);
-$select->setSize(8);
-
-print $select->render();
-print ' ';
-
 ?>
-<span class="sly-icons">
-	<a href="#" rel="top"><img src="assets/file_top.png" title="<?= t('var_linklist_move_top') ?>" alt="" /></a>
-	<a href="#" rel="up"><img src="assets/file_up.png" title="<?= t('var_linklist_move_up') ?>" alt="" /></a>
-	<a href="#" rel="down"><img src="assets/file_down.png" title="<?= t('var_linklist_move_down') ?>" alt="" /></a>
-	<a href="#" rel="bottom"><img src="assets/file_bottom.png" title="<?= t('var_linklist_move_bottom') ?>" alt="" /></a>
+<span class="sly-widget sly-linklistbutton" data-id="<?= $name ?>">
+	<input type="hidden" name="<?= $name ?>" id="<?= $name ?>" value="<?= sly_html(implode(',', array_keys($values))) ?>" />
+	<select size="8" class="<?= $this->attributes['class'] ?>">
+		<? foreach ($values as $id => $name): ?>
+		<option value="<?= sly_html($id) ?>"><?= sly_html($name) ?></option>
+		<? endforeach ?>
+	</select>
+
+	<span class="sly-icons move">
+		<a href="#" rel="top"><img src="assets/file_top.png" title="<?= t('var_linklist_move_top') ?>" alt="" /></a>
+		<a href="#" rel="up"><img src="assets/file_up.png" title="<?= t('var_linklist_move_up') ?>" alt="" /></a>
+		<a href="#" rel="down"><img src="assets/file_down.png" title="<?= t('var_linklist_move_down') ?>" alt="" /></a>
+		<a href="#" rel="bottom"><img src="assets/file_bottom.png" title="<?= t('var_linklist_move_bottom') ?>" alt="" /></a>
+	</span>
+
+	<span class="sly-icons edit">
+		<a href="#" rel="open"><img src="assets/file_open.png" title="<?= t('var_link_open') ?>" alt="" /></a>
+		<a href="#" rel="delete"><img src="assets/file_del.png" title="<?= t('var_link_remove') ?>" alt="" /></a>
+	</span>
 </span>
-<?
-
-// Verstecktes Element, das die IDs enthält
-
-$hidden = new sly_Form_Input_Text($name, '', implode(',', $value));
-$hidden->setAttribute('type', 'hidden');
-
-print $hidden->render();
-print ' ';
-
-// Filter-Eingabefeld
-
-$filter = new sly_Form_Input_Text('filter_'.$name, '', '');
-$filter->setAttribute('class', 'sly-link-filter');
-
-print $filter->render();
-print '<span class="rex-form-notice">'.t('press_del').'</span>';
-print '</span>';
