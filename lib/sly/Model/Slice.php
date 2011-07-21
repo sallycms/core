@@ -54,7 +54,8 @@ class sly_Model_Slice extends sly_Model_Base_Id {
 		$output   = $service->getContent($filename);
 
 		foreach (sly_Core::getVarTypes() as $idx => $var) {
-			$output = $var->getOutput($this->getId(), $output);
+			$data   = $var->getDatabaseValues($this->getId());
+			$output = $var->getOutput($data, $output);
 		}
 
 		return $output;
@@ -64,10 +65,6 @@ class sly_Model_Slice extends sly_Model_Base_Id {
 		$service  = sly_Service_Factory::getModuleService();
 		$filename = $service->getInputFilename($this->getModule());
 		$output   = $service->getContent($filename);
-
-		foreach (sly_Core::getVarTypes() as $idx => $var) {
-			$output = $var->getBEInput($this->getId(), $output);
-		}
 
 		return $output;
 	}

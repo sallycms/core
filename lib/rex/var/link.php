@@ -17,7 +17,12 @@
  * @ingroup redaxo
  */
 class rex_var_link extends rex_var {
-	// --------------------------------- Actions
+	
+	const LINK           = 'REX_LINK';
+	const LINKID        = 'REX_LINK_ID';
+	const LINKLIST       = 'REX_LINKLIST';
+	const LINKBUTTON     = 'REX_LINK_BUTTON';
+	const LINKLISTBUTTON = 'REX_LINKLIST_BUTTON';
 
 	public function getRequestValues($REX_ACTION) {
 		foreach (array('LINK', 'LINKLIST') as $type) {
@@ -32,21 +37,21 @@ class rex_var_link extends rex_var {
 		return $REX_ACTION;
 	}
 
-	public function getDatabaseValues($REX_ACTION, $slice_id) {
+	public function getDatabaseValues($slice_id) {
 		$service = sly_Service_Factory::getSliceValueService();
-
+		$data = array();
 		foreach (array('REX_LINK', 'REX_LINKLIST') as $type) {
 			$values = $service->find(array('slice_id' => $slice_id, 'type' => $type));
 
 			foreach ($values as $value) {
-				$REX_ACTION[$type][$value->getFinder()] = $value->getValue();
+				$data[$type][$value->getFinder()] = $value->getValue();
 			}
 		}
 
-		return $REX_ACTION;
+		return $data;
 	}
 
-	public function setSliceValues($slice_id, $REX_ACTION) {
+	public function setSliceValues($REX_ACTION, $slice_id) {
 		$slice = sly_Service_Factory::getSliceService()->findById($slice_id);
 
 		foreach (array('REX_LINK', 'REX_LINKLIST') as $type) {
@@ -60,18 +65,18 @@ class rex_var_link extends rex_var {
 
 	// --------------------------------- Output
 
-	public function getBEInput($slice_id, $content) {
-		$content = $this->getOutput($slice_id, $content);
-		$content = $this->matchLinkButton($slice_id, $content);
-		$content = $this->matchLinkListButton($slice_id, $content);
+	public function getBEInput($REX_ACTION, $content) {
+		$content = $this->getOutput($REX_ACTION, $content);
+		$content = $this->matchLinkButton($REX_ACTION, $content);
+		$content = $this->matchLinkListButton($REX_ACTION, $content);
 
 		return $content;
 	}
 
-	public function getOutput($slice_id, $content) {
-		$content = $this->matchLinkList($slice_id, $content);
-		$content = $this->matchLink($slice_id, $content);
-		$content = $this->matchLinkId($slice_id, $content);
+	public function getOutput($REX_ACTION, $content) {
+		$content = $this->matchLinkList($REX_ACTION, $content);
+		$content = $this->matchLink($REX_ACTION, $content);
+		$content = $this->matchLinkId($REX_ACTION, $content);
 
 		return $content;
 	}
@@ -89,7 +94,7 @@ class rex_var_link extends rex_var {
 	/**
 	 * Button für die Eingabe
 	 */
-	public function matchLinkButton($slice_id, $content) {
+	public function matchLinkButton($REX_ACTION, $content) {
 		$def_category = '';
 		$article_id   = sly_request('article_id', 'int');
 
@@ -98,16 +103,14 @@ class rex_var_link extends rex_var {
 			$def_category = $art->getCategoryId();
 		}
 
-		$var     = 'REX_LINK_BUTTON';
+		$var     = self::LINKBUTTON;
 		$matches = $this->getVarParams($content, $var);
-		$service = sly_Service_Factory::getSliceValueService();
 
 		foreach ($matches as $match) {
 			list ($param_str, $args) = $match;
 			list ($id, $args)        = $this->extractArg('id', $args, 0);
 
-			$value = $service->findBySliceTypeFinder($slice_id, 'REX_LINK', $id);
-			$value = $value ? $value->getValue() : '';
+			$value = isset($REX_ACTION[self::LINK][$id]) ? strval($REX_ACTION[self::LINK][$id]) : '';
 
 			// Wenn vom Programmierer keine Kategorie vorgegeben wurde,
 			// die Linkmap mit der aktuellen Kategorie öffnen
@@ -124,18 +127,16 @@ class rex_var_link extends rex_var {
 	/**
 	 * Button für die Eingabe
 	 */
-	public function matchLinkListButton($slice_id, $content) {
-		$var     = 'REX_LINKLIST_BUTTON';
+	public function matchLinkListButton($REX_ACTION, $content) {
+		$var     = self::LINKLISTBUTTON;
 		$matches = $this->getVarParams($content, $var);
-		$service = sly_Service_Factory::getSliceValueService();
 
 		foreach ($matches as $match) {
 			list ($param_str, $args) = $match;
 			list ($id, $args)        = $this->extractArg('id', $args, 0);
 			list ($category, $args)  = $this->extractArg('category', $args, 0);
 
-			$value = $service->findBySliceTypeFinder($slice_id, 'REX_LINKLIST', $id);
-			$value = $value ? $value->getValue() : '';
+			$value = isset($REX_ACTION[self::LINKLIST][$id]) ? strval($REX_ACTION[self::LINKLIST][$id]) : '';
 
 			$replace = $this->getLinklistButton($id, $value, $category);
 			$replace = $this->handleGlobalWidgetParams($var, $args, $replace);
@@ -148,17 +149,15 @@ class rex_var_link extends rex_var {
 	/**
 	 * Wert für die Ausgabe
 	 */
-	public function matchLink($slice_id, $content) {
-		$var     = 'REX_LINK';
+	public function matchLink($REX_ACTION, $content) {
+		$var     = self::LINK;
 		$matches = $this->getVarParams($content, $var);
-		$service = sly_Service_Factory::getSliceValueService();
 
 		foreach ($matches as $match) {
 			list ($param_str, $args) = $match;
 			list ($id, $args)        = $this->extractArg('id', $args, 0);
 
-			$value = $service->findBySliceTypeFinder($slice_id, 'REX_LINK', $id);
-			$value = $value ? $value->getValue() : '';
+			$value = isset($REX_ACTION[self::LINK][$id]) ? strval($REX_ACTION[self::LINK][$id]) : '';
 
 			$replace = $value === '' ? '' : sly_Util_Article::findById($value)->getUrl();
 			$replace = $this->handleGlobalVarParams($var, $args, $replace);
@@ -171,17 +170,15 @@ class rex_var_link extends rex_var {
 	/**
 	 * Wert für die Ausgabe
 	 */
-	public function matchLinkId($slice_id, $content) {
-		$var     = 'REX_LINK_ID';
+	public function matchLinkId($REX_ACTION, $content) {
+		$var     = self::LINKID;
 		$matches = $this->getVarParams($content, $var);
-		$service = sly_Service_Factory::getSliceValueService();
 
 		foreach ($matches as $match) {
 			list ($param_str, $args) = $match;
 			list ($id, $args)        = $this->extractArg('id', $args, 0);
 
-			$value = $service->findBySliceTypeFinder($slice_id, 'REX_LINK', $id);
-			$value = $value ? $value->getValue() : '';
+			$value = isset($REX_ACTION[self::LINK][$id]) ? strval($REX_ACTION[self::LINK][$id]) : '';
 
 			$replace = $this->handleGlobalVarParams($var, $args, $value);
 			$content = str_replace($var.'['.$param_str.']', $replace, $content);
@@ -193,17 +190,15 @@ class rex_var_link extends rex_var {
 	/**
 	 * Wert für die Ausgabe
 	 */
-	public function matchLinkList($slice_id, $content) {
-		$var     = 'REX_LINKLIST';
+	public function matchLinkList($REX_ACTION, $content) {
+		$var     = self::LINKLIST;
 		$matches = $this->getVarParams($content, $var);
-		$service = sly_Service_Factory::getSliceValueService();
 
 		foreach ($matches as $match) {
 			list ($param_str, $args) = $match;
 			list ($id, $args)        = $this->extractArg('id', $args, 0);
 
-			$value = $service->findBySliceTypeFinder($slice_id, 'REX_LINKLIST', $id);
-			$value = $value ? $value->getValue() : '';
+			$value = isset($REX_ACTION[self::LINKLIST][$id]) ? strval($REX_ACTION[self::LINKLIST][$id]) : '';
 
 			$replace = $this->handleGlobalVarParams($var, $args, $value);
 			$content = str_replace($var.'['.$param_str.']', $replace, $content);
