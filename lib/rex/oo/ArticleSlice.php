@@ -178,7 +178,6 @@ class OOArticleSlice {
 		$slice = $this->getSlice();
 		$content = $slice->getOutput();
 		$content = self::replaceLinks($content);
-		$content = $this->replaceCommonVars($content);
 		$content = $this->replaceGlobals($content);
 
 		return $content;
@@ -187,7 +186,6 @@ class OOArticleSlice {
 	public function getInput() {
 		$slice = $this->getSlice();
 		$content = $slice->getInput();
-		$content = $this->replaceCommonVars($content);
 		$content = $this->replaceGlobals($content);
 		return $content;
 	}
