@@ -8,17 +8,27 @@
  * http://www.opensource.org/licenses/mit-license.php
  */
 
-$name  = sly_html($this->getName());
-$id    = sly_html($this->getID());
-$files = sly_makeArray($this->getDisplayValue());
-$files = empty($files) ? array() : array_filter($files);
+$name   = sly_html($this->getName());
+$id     = sly_html($this->getID());
+$files  = sly_makeArray($this->getDisplayValue());
+$files  = empty($files) ? array() : array_filter($files);
+$values = array();
+$list   = array();
+
+foreach ($files as $filename) {
+	$fullName = sly_Form_Widget_Media::getFullName($filename);
+	if (empty($fullName)) continue;
+
+	$values[] = $filename;
+	$list[]   = array($filename, $fullName);
+}
 
 ?>
-<span class="sly-widget sly-medialist" data-id="<?= $name ?>">
-	<input type="hidden" name="<?= $name ?>" id="<?= $id ?>" value="<?= sly_html(implode(',', $files)) ?>" />
+<span class="sly-widget sly-medialist">
+	<input type="hidden" name="<?= $name ?>" id="<?= $id ?>" value="<?= sly_html(implode(',', $values)) ?>" />
 	<select size="8" class="<?= $this->attributes['class'] ?>">
-		<? foreach ($files as $file): ?>
-		<option value="<?= sly_html($file) ?>"><?= sly_html($file) ?></option>
+		<? foreach ($list as $element): ?>
+		<option value="<?= sly_html($element[0]) ?>"><?= sly_html($element[1]) ?></option>
 		<? endforeach ?>
 	</select>
 

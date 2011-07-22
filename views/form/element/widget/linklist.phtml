@@ -8,24 +8,28 @@
  * http://www.opensource.org/licenses/mit-license.php
  */
 
-$value  = sly_makeArray($this->getDisplayValue());
-$value  = array_filter($value);
-$values = array();
+$articles = sly_makeArray($this->getDisplayValue());
+$articles = array_filter($articles);
+$values   = array();
+$list     = array();
 
-foreach ($value as $idx => $id) {
-	$article = sly_Util_Article::findById($id);
-	if ($article) $values[$id] = $article->getName();
+foreach ($articles as $articleID) {
+	$fullName = sly_Form_Widget_Link::getFullName($articleID);
+	if (empty($fullName)) continue;
+
+	$values[] = $articleID;
+	$list[]   = array($articleID, $fullName);
 }
 
 $name = sly_html($this->getName());
 $id   = sly_html($this->getID());
 
 ?>
-<span class="sly-widget sly-linklist" data-id="<?= $name ?>">
-	<input type="hidden" name="<?= $name ?>" id="<?= $id ?>" value="<?= sly_html(implode(',', array_keys($values))) ?>" />
+<span class="sly-widget sly-linklist">
+	<input type="hidden" name="<?= $name ?>" id="<?= $id ?>" value="<?= sly_html(implode(',', $values)) ?>" />
 	<select size="8" class="<?= $this->attributes['class'] ?>">
-		<? foreach ($values as $id => $name): ?>
-		<option value="<?= sly_html($id) ?>"><?= sly_html($name) ?></option>
+		<? foreach ($list as $element): ?>
+		<option value="<?= sly_html($element[0]) ?>"><?= sly_html($element[1]) ?></option>
 		<? endforeach ?>
 	</select>
 
