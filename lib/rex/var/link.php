@@ -127,7 +127,7 @@ class rex_var_link extends rex_var {
 	/**
 	 * Widget für die Eingabe
 	 */
-	public function matchLinkListButton($REX_ACTION, $content) {
+	public function matchLinkListWidget($REX_ACTION, $content) {
 		$var     = self::LINKLISTWIDGET;
 		$matches = $this->getVarParams($content, $var);
 
