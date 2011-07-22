@@ -76,4 +76,26 @@ class sly_Form_Widget_Link extends sly_Form_ElementBase implements sly_Form_IEle
 	public function getDisplayValue() {
 		return $this->getDisplayValueHelper('int', false);
 	}
+
+	public static function getFullName($articleID) {
+		static $advanced = null;
+
+		if ($advanced === null) {
+			$advanced = sly_Util_User::getCurrentUser()->hasRight('advancedMode[]');
+		}
+
+		$article = sly_Util_Article::findById($articleID);
+		$value   = '';
+
+		if ($article) {
+			$title = $article->getName();
+			$value = $title ? $title : $filename;
+
+			if ($advanced) {
+				$value .= " [$articleID]";
+			}
+		}
+
+		return $value;
+	}
 }

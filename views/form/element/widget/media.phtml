@@ -8,12 +8,20 @@
  * http://www.opensource.org/licenses/mit-license.php
  */
 
-$name = sly_html($this->getName());
-$id   = sly_html($this->getID());
+$name     = sly_html($this->getName());
+$id       = sly_html($this->getID());
+$filename = $this->getDisplayValue();
+$value    = sly_Form_Widget_Media::getFullName($filename);
+
+if ($value === '') {
+	$filename = '';
+}
+
 ?>
 
-<span class="sly-widget sly-media" data-id="<?= $name ?>">
-	<input type="text" name="<?= $name ?>" id="<?= $id ?>" value="<?= sly_html($this->attributes['value']) ?>" class="<?= sly_html($this->attributes['class']) ?>" readonly="readonly" />
+<span class="sly-widget sly-media">
+	<input rel="value" type="hidden" name="<?= $name ?>" id="<?= $id ?>" value="<?= sly_html($filename) ?>" />
+	<input rel="name" type="text" value="<?= sly_html($value) ?>" class="<?= sly_html($this->attributes['class']) ?>" readonly="readonly" />
 
 	<span class="sly-icons">
 		<a href="#" rel="open"><img src="assets/file_open.png" title="<?= t('var_media_open') ?>" alt="" /></a>

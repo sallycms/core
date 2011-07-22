@@ -54,4 +54,26 @@ class sly_Form_Widget_Media extends sly_Form_ElementBase implements sly_Form_IEl
 	public function getDisplayValue() {
 		return $this->getDisplayValueHelper('string', false);
 	}
+
+	public static function getFullName($filename) {
+		static $advanced = null;
+
+		if ($advanced === null) {
+			$advanced = sly_Util_User::getCurrentUser()->hasRight('advancedMode[]');
+		}
+
+		$medium = sly_Util_Medium::findByFilename($filename);
+		$value  = '';
+
+		if ($medium) {
+			$title = $medium->getTitle();
+			$value = $title ? $title : $filename;
+
+			if ($advanced) {
+				$value .= " ($filename)";
+			}
+		}
+
+		return $value;
+	}
 }
