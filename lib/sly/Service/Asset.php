@@ -293,8 +293,15 @@ class sly_Service_Asset {
 			$htaccess[$access.'_deflate'] = file_get_contents($dir.'/'.$access.'/deflate/.htaccess');
 		}
 
-		// clear the directory
-		rex_deleteDir($dir, true);
+		// remove the cache directory
+		$obj = new sly_Util_Directory($dir);
+		$obj->delete(true);
+
+		// clear the Scaffold temp dir
+		$scaffoldDir = sly_Util_Directory::join(SLY_DYNFOLDER, self::TEMP_DIR);
+		$obj         = new sly_Util_Directory($scaffoldDir);
+
+		$obj->deleteFiles(true);
 
 		// re-init the cache dir
 		$me->initCache();

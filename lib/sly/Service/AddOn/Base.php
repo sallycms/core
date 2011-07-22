@@ -454,7 +454,9 @@ abstract class sly_Service_AddOn_Base {
 			return $state;
 		}
 
-		if (is_dir($dir) && !rex_deleteDir($dir, true)) {
+		$obj = new sly_Util_Directory($dir);
+
+		if (!$obj->delete(true)) {
 			return $this->I18N('install_cant_delete_files');
 		}
 

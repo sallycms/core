@@ -8,35 +8,25 @@
  */
 
 /**
- * Funktionensammlung für die generierung der
- * Artikel/Templates/Kategorien/Metainfos.. etc.
- *
  * @package redaxo4
  */
-
-// ----------------------------------------- Alles generieren
-// (heißt in REDAXO-Sprech: Alles löschen....)
 
 /**
  * Löscht den vollständigen Artikel-Cache.
  */
 function rex_generateAll() {
-	rex_deleteDir(SLY_DYNFOLDER.'/internal/sally/article_slice', false);
-	rex_deleteDir(SLY_DYNFOLDER.'/internal/sally/templates', false);
-	rex_deleteDir(SLY_DYNFOLDER.'/internal/sally/files', false);
+	foreach (array('article_slice', 'templates') as $dir) {
+		$obj = new sly_Util_Directory(SLY_DYNFOLDER.'/internal/sally/'.$dir);
+		$obj->deleteFiles();
+	}
 
 	sly_Core::cache()->flush('sly', true);
 
 	// create bootcache
 	sly_Util_BootCache::recreate();
 
-	$MSG = t('delete_cache_message');
-	$MSG = sly_Core::dispatcher()->filter('ALL_GENERATED', $MSG);
-
-	return $MSG;
+	return sly_Core::dispatcher()->filter('ALL_GENERATED', t('delete_cache_message'));
 }
-
-// ----------------------------------------- ARTICLE
 
 /**
  * Löscht die gecachten Dateien eines Artikels. Wenn keine clang angegeben, wird
@@ -62,14 +52,6 @@ function rex_deleteCacheArticle($id, $clang = null) {
 		$cache->delete('sly.category.list', $id.'_'.$_clang.'_1');
 	}
 }
-/**
- *
- * @deprecated
- */
-function rex_deleteCacheSliceContent($slice_id) {
-	sly_Util_Slice::clearSliceCache($slice_id);
-}
-
 
 /**
  * Löscht einen Artikel
@@ -136,93 +118,6 @@ function rex_deleteArticle($id) {
 
 	$return['message'] = t('category_doesnt_exist');
 	return $return;
-}
-
-/**
- * Löscht einen Ordner/Datei mit Unterordnern
- *
- * @param  string $file            Zu löschender Ordner/Datei
- * @param  bool   $delete_folders  Ordner auch löschen? false => nein, true => ja
- * @param  bool   $isRecursion     wird beim rekursiven Aufruf auf true gesetzt, um zu vermeiden, immer wieder das Error-Reporting auf 0 zu setzen
- * @return bool                    true bei Erfolg, sonst false
- */
-function rex_deleteDir($file, $delete_folders = false, $isRecursion = false) {
-	$state = true;
-	$level = $isRecursion ? -1 : error_reporting(0);
-	$file  = rtrim($file, '/\\');
-
-	if (file_exists($file)) {
-		if (is_dir($file)) {
-			$handle = opendir($file);
-
-			if (!$handle) {
-				if (!$isRecursion) error_reporting($level);
-				return false;
-			}
-
-			while ($filename = readdir($handle)) {
-				if ($filename == '.' || $filename == '..') {
-					continue;
-				}
-
-				$full = $file.DIRECTORY_SEPARATOR.$filename;
-
-				// Auch wenn wir beim rekursiven Aufruf eine einzelne Datei löschen
-				// würden, sparen wir uns den Aufwand und erledigen es gleich mit.
-
-				if (is_dir($full) && !rex_deleteDir($full, $delete_folders, true)) {
-					$state = false;
-				}
-
-				if (is_file($full) && !unlink($full)) {
-					$state = false;
-				}
-			}
-
-			closedir($handle);
-
-			if ($state !== true) {
-				if (!$isRecursion) error_reporting($level);
-				return false;
-			}
-
-			// Ordner auch löschen?
-
-			if ($delete_folders && !rmdir($file)) {
-				if (!$isRecursion) error_reporting($level);
-				return false;
-			}
-		}
-		else {
-			// Datei löschen
-
-			if (!unlink($file)) {
-				if (!$isRecursion) error_reporting($level);
-				return false;
-			}
-		}
-	}
-	else {
-		// Datei/Ordner existiert nicht
-
-		if (!$isRecursion) error_reporting($level);
-		return false;
-	}
-
-	if (!$isRecursion) error_reporting($level);
-	return true;
-}
-
-/**
- * Lösch allen Datei in einem Ordner
- *
- * @deprecated
- * @param  string $file  Pfad zum Ordner
- * @return bool          true bei Erfolg, sonst false
- */
-function rex_deleteFiles($directory) {
-	$directory = new sly_Util_Directory($directory);
-	return $directory->deleteFiles();
 }
 
 /**
