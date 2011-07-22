@@ -260,14 +260,14 @@ abstract class sly_Form_ElementBase extends sly_Viewable {
 	public function getDisplayValueHelper($type = 'string', $asArray = false) {
 		// Prüfen, ob das Formular bereits abgeschickt und noch einmal angezeigt
 		// werden soll. Falls ja, übernehmen wir den Wert aus den POST-Daten.
-
+		
 		$name = $this->attributes['name'];
 
 		if (isset($_POST[$name]) && !$asArray) {
 			return sly_post($name, $type);
 		}
 
-		if (isset($_POST[$name]) && $asArray && is_array($_POST[$name])) {
+		if (isset($_POST[$name]) && $asArray) {
 			return sly_postArray($name, $type);
 		}
 

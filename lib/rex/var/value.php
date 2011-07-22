@@ -30,20 +30,20 @@ class rex_var_value extends rex_var {
 		return $REX_ACTION;
 	}
 
-	public function getDatabaseValues($REX_ACTION, $slice_id) {
+	public function getDatabaseValues($slice_id) {
 		$values = sly_Service_Factory::getSliceValueService()->find(array('slice_id' => $slice_id, 'type' => 'REX_VALUE'));
-
+		$data = array();
 		foreach ($values as $value) {
-			$REX_ACTION['REX_VALUE'][$value->getFinder()] = $value->getValue();
+			$data['REX_VALUE'][$value->getFinder()] = $value->getValue();
 		}
 
-		return $REX_ACTION;
+		return $data;
 	}
 
-	public function setSliceValues($slice_id, $REX_ACTION) {
+	public function setSliceValues($REX_ACTION, $slice_id) {
 		$slice = sly_Service_Factory::getSliceService()->findById($slice_id);
 
-		if (isset($REX_ACTION['REX_VALUE'])){
+		if (isset($REX_ACTION['REX_VALUE'])) {
 			foreach ($REX_ACTION['REX_VALUE'] as $key => $value){
 				$slice->addValue('REX_VALUE', $key, $value);
 			}
@@ -52,16 +52,16 @@ class rex_var_value extends rex_var {
 
 	// --------------------------------- Output
 
-	public function getBEInput($slice_id, $content) {
-		$content = $this->getOutput($slice_id, $content);
+	public function getBEInput($REX_ACTION, $content) {
+		$content = $this->getOutput($REX_ACTION, $content);
 		return $content;
 	}
 
-	public function getOutput($slice_id, $content) {
-		$content = $this->matchValue($slice_id, $content, true);
-		$content = $this->matchHtmlValue($slice_id, $content);
-		$content = $this->matchIsValue($slice_id, $content);
-		$content = $this->matchPhpValue($slice_id, $content);
+	public function getOutput($REX_ACTION, $content) {
+		$content = $this->matchValue($REX_ACTION, $content, true);
+		$content = $this->matchHtmlValue($REX_ACTION, $content);
+		$content = $this->matchIsValue($REX_ACTION, $content);
+		$content = $this->matchPhpValue($REX_ACTION, $content);
 
 		return $content;
 	}
@@ -69,15 +69,14 @@ class rex_var_value extends rex_var {
 	/**
 	 * Wert für die Ausgabe
 	 */
-	private function _matchValue($slice_id, $content, $var, $escape = false, $nl2br = false, $stripPHP = false, $booleanize = false) {
+	private function _matchValue($REX_ACTION, $content, $var, $escape = false, $nl2br = false, $stripPHP = false, $booleanize = false) {
 		$matches = $this->getVarParams($content, $var);
 
 		foreach ($matches as $match) {
 			list ($param_str, $args) = $match;
 			list ($id, $args) = $this->extractArg('id', $args, 0);
 
-			$replace = sly_Service_Factory::getSliceValueService()->findBySliceTypeFinder($slice_id, 'REX_VALUE', $id);
-			$replace = $replace ? $replace->getValue() : '';
+			$replace = isset($REX_ACTION['REX_VALUE'][$id]) ? strval($REX_ACTION['REX_VALUE'][$id]) : '';
 
 			if ($booleanize) {
 				$replace = empty($replace);

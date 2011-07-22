@@ -18,8 +18,8 @@ abstract class rex_var {
 	 * Actionmethode:
 	 * Zum füllen des sql aus dem $REX_ACTION Array
 	 */
-	public function setSliceValues($slice_id, $REX_ACTION) {
-		// nichts tun
+	public function setSliceValues($REX_ACTION, $slice_id) {
+		// do nothing
 	}
 
 	/**
@@ -36,8 +36,8 @@ abstract class rex_var {
 	 * Zum Füllen des $REX_ACTION Arrays aus der Datenbank (rex_sql)
 	 * @return REX_ACTION Array
 	 */
-	public function getDatabaseValues($REX_ACTION, $sql) {
-		return $REX_ACTION;
+	public function getDatabaseValues($slice_id) {
+		return array();
 	}
 
 	/**
@@ -45,10 +45,8 @@ abstract class rex_var {
 	 * Ersetzen der Werte in dem Aktionsscript
 	 * @return output String
 	 */
-	public function getACOutput($REX_ACTION, $content) {
-		$sql = new rex_sql();
-		$this->setSliceValues($sql, $REX_ACTION);
-		return $this->getOutput($sql, $content);
+	public function getOutput($REX_ACTION, $content) {
+		return $content;
 	}
 
 	// --------------------------------- Ouput
