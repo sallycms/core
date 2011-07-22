@@ -77,8 +77,10 @@ abstract class sly_Form_Helper {
 	 * @param  string         $id           the elements ID
 	 * @return sly_Form_Select_DropDown     the generated select element
 	 */
-	public static function getCategorySelect($name, $hideOffline = true, $clang = null, $root = null, sly_Model_User $user = null, $id = null) {
-		$select = new sly_Form_Select_DropDown($name, '', -1, array(0 => 'Homepage'), $id);
+	public static function getCategorySelect($name, $hideOffline = true, $clang = null, $root = null, sly_Model_User $user = null, $id = null, $addHomepage = true) {
+		$values = array();
+		if($addHomepage) $values[0] = 'Homepage';
+		$select = new sly_Form_Select_DropDown($name, '', -1, $values, $id);
 
 		if ($root === null) {
 			$rootCats = sly_Util_Category::getRootCategories($hideOffline, $clang);
