@@ -169,8 +169,35 @@ class sly_Util_Directory {
 		return true;
 	}
 	
-	public function copyTo($dir) {
+	/**
+	 * Copies the content of this directory to another directory.
+	 * 
+	 * @param  string $destination
+	 * @return boolean 
+	 */
+	public function copyTo($destination) {
+		if (!$this->exists()) return false;
 		
+		$destination = sly_Util_Directory::create($destination);
+		if ($destination === false) return false;
+		
+		$files = $this->listPlain(true, true, false, false);
+		
+		foreach($files as $file) {
+			$src = self::join($this->directory, $file);
+			$dst = self::join($destination, $file);
+			if(is_dir($src)) {
+				$dst = self::create($dst);
+				if($dst === false) return false;
+				$dir = new sly_Util_Directory($src);
+				$recursion = $dir->copyTo($dst);
+				if($recursion === false) return false;
+			}elseif(is_file($src_abs)) {
+				if (copy($src, $dst)) chmod($dst_abs, 0777);
+				else return false;
+			}
+		}
+		return true;	
 	}
 
 	public function __toString() {

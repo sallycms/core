@@ -228,48 +228,12 @@ function rex_deleteFiles($directory) {
 /**
  * Kopiert eine Ordner von $srcdir nach $dstdir
  *
+ * @deprecated
  * @param  string $srcdir    Zu kopierendes Verzeichnis
  * @param  string $dstdir    Zielpfad
  * @return bool              true bei Erfolg, false bei Fehler
  */
 function rex_copyDir($srcdir, $dstdir) {
-	$state = true;
-
-	if (!is_dir($dstdir)) {
-		sly_Util_Directory::create($dstdir);
-	}
-
-	if ($curdir = opendir($srcdir)) {
-		while ($file = readdir($curdir)) {
-			if ($file[0] != '.') {
-				$srcfile = $srcdir.DIRECTORY_SEPARATOR.$file;
-				$dstfile = $dstdir.DIRECTORY_SEPARATOR.$file;
-
-				if (is_file($srcfile)) {
-					$isNewer = true;
-
-					if (is_file($dstfile)) {
-						$isNewer = (filemtime($srcfile) - filemtime($dstfile)) > 0;
-					}
-
-					if ($isNewer) {
-						if (copy($srcfile, $dstfile)) {
-							touch($dstfile, filemtime($srcfile));
-							chmod($dstfile, 0777);
-						}
-						else {
-							return false;
-						}
-					}
-				}
-				elseif (is_dir($srcfile)) {
-					$state &= rex_copyDir($srcfile, $dstfile);
-				}
-			}
-		}
-
-		closedir($curdir);
-	}
-
-	return $state;
+	$srcdir = new sly_Util_Directory($srcdir);
+	return $srcdir->copyTo($dstdir);
 }
