@@ -168,36 +168,41 @@ class sly_Util_Directory {
 
 		return true;
 	}
-	
+
 	/**
 	 * Copies the content of this directory to another directory.
-	 * 
+	 *
 	 * @param  string $destination
-	 * @return boolean 
+	 * @return boolean
 	 */
 	public function copyTo($destination) {
 		if (!$this->exists()) return false;
-		
+
 		$destination = sly_Util_Directory::create($destination);
 		if ($destination === false) return false;
-		
+
 		$files = $this->listPlain(true, true, false, false);
-		
-		foreach($files as $file) {
+
+		foreach ($files as $file) {
 			$src = self::join($this->directory, $file);
 			$dst = self::join($destination, $file);
-			if(is_dir($src)) {
+
+			if (is_dir($src)) {
 				$dst = self::create($dst);
-				if($dst === false) return false;
-				$dir = new sly_Util_Directory($src);
+				if ($dst === false) return false;
+
+				$dir       = new sly_Util_Directory($src);
 				$recursion = $dir->copyTo($dst);
-				if($recursion === false) return false;
-			}elseif(is_file($src)) {
+
+				if ($recursion === false) return false;
+			}
+			elseif (is_file($src)) {
 				if (copy($src, $dst)) chmod($dst, 0777);
 				else return false;
 			}
 		}
-		return true;	
+
+		return true;
 	}
 
 	public function __toString() {
