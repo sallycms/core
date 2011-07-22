@@ -192,8 +192,8 @@ class sly_Util_Directory {
 				$dir = new sly_Util_Directory($src);
 				$recursion = $dir->copyTo($dst);
 				if($recursion === false) return false;
-			}elseif(is_file($src_abs)) {
-				if (copy($src, $dst)) chmod($dst_abs, 0777);
+			}elseif(is_file($src)) {
+				if (copy($src, $dst)) chmod($dst, 0777);
 				else return false;
 			}
 		}
