@@ -77,8 +77,13 @@ class sly_Log {
 	public static function getInstance($name) {
 		$name = preg_replace('#[^a-z0-9-_]#i', '_', $name);
 		$dir  = self::getLogDirectory();
+		$key  = $dir.'/'.$name;
 
-		return new self($dir.'/'.$name.'.log');
+		if (!isset(self::$instances[$key])) {
+			self::$instances[$key] = new self($key.'.log');
+		}
+
+		return self::$instances[$key];
 	}
 
 	/**
