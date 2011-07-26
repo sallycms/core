@@ -8,9 +8,9 @@
  * http://www.opensource.org/licenses/mit-license.php
  */
 
-// load boot cache (disabled, still in beta)
-$bootcache   = SLY_DYNFOLDER.'/internal/sally/bootcache.php';
-$cacheExists = file_exists($bootcache);
+// load boot cache (frontend or backend, but never when in testing mode)
+$bootcache   = SLY_DYNFOLDER.'/internal/sally/bootcache.'.(IS_SALLY_BACKEND ? 'backend' : 'frontend').'.php';
+$cacheExists = SLY_IS_TESTING ? false : file_exists($bootcache);
 
 if ($cacheExists) {
 	require $bootcache;

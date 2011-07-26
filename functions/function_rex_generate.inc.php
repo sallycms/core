@@ -23,7 +23,8 @@ function rex_generateAll() {
 	sly_Core::cache()->flush('sly', true);
 
 	// create bootcache
-	sly_Util_BootCache::recreate();
+	sly_Util_BootCache::recreate('frontend');
+	sly_Util_BootCache::recreate('backend');
 
 	return sly_Core::dispatcher()->filter('ALL_GENERATED', t('delete_cache_message'));
 }
