@@ -1,41 +1,44 @@
 # A list of files that are required for (nearly) all requests to Sally.
 # They will be cached using the bootcache, together with addOn files.
 
-- sly_Loader
-- sly_Core
-- sly_Event_Dispatcher
-- sly_Configuration
-- sly_Util_Array
-- sly_Util_YAML
-- sly_Util_Directory
-- sly_Util_String
-- sly_ErrorHandler_Base
-- sly_ErrorHandler
-- BabelCache
-- BabelCache_Interface
-- BabelCache_Factory
-- BabelCache_Abstract
-- sly_DB_Persistence
-- sly_DB_PDO_Persistence
-- sly_DB_PDO_Connection
-- sly_DB_PDO_Driver
-- sly_DB_PDO_Driver_MYSQL
-- sly_DB_PDO_SQLBuilder
-- sly_DB_PDO_SQLBuilder_MYSQL
-- sly_DB_PDO_Expression
-- sly_Cache
-- sly_Util_Cache
-- sly_Util_Versions
-- sly_I18N_Base
-- sly_I18N
-- sly_Service_Factory
-- sly_Service_Asset
-- sly_Service_AddOn_Base
-- sly_Service_AddOn
-- sly_Service_Plugin
-- sly_Util_Article
-- sly_Service_Model_Base
-- sly_Service_Article
-- sly_Model_Base
-- sly_Model_Base_Article
-- sly_Model_Article
+static:
+  - sly_Loader
+  - sly_Core
+  - sly_Event_Dispatcher
+  - sly_Configuration
+  - sly_Util_Array
+  - sly_Util_YAML
+  - sly_Util_Directory
+  - sly_Util_String
+  - sly_ErrorHandler_Base
+  - sly_ErrorHandler
+  - BabelCache
+  - BabelCache_Interface
+  - BabelCache_Factory
+  - BabelCache_Abstract
+  - sly_DB_Persistence
+  - sly_DB_PDO_Persistence
+  - sly_DB_PDO_Connection
+  - sly_DB_PDO_Driver
+  - sly_DB_PDO_Driver_MYSQL
+  - sly_DB_PDO_SQLBuilder
+  - sly_DB_PDO_SQLBuilder_MYSQL
+  - sly_DB_PDO_Expression
+  - sly_Cache
+  - sly_Util_Cache
+  - sly_Util_Versions
+  - sly_I18N_Base
+  - sly_I18N
+  - sly_Service_Factory
+  - sly_Service_Asset
+  - sly_Service_AddOn_Base
+  - sly_Service_AddOn
+  - sly_Service_Plugin
+  - sly_Util_Article
+  - sly_Service_Model_Base
+  - sly_Service_Article
+  - sly_Model_Base
+  - sly_Model_Base_Article
+  - sly_Model_Article
+frontend: []
+backend: []

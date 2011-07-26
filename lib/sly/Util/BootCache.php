@@ -14,19 +14,24 @@
 class sly_Util_BootCache {
 	protected static $classes = array();
 
-	public static function init() {
+	public static function init($environment) {
 		// add core classes
-		self::$classes = sly_Util_YAML::load(SLY_COREFOLDER.'/config/bootcache.yml');
+		$list = sly_Util_YAML::load(SLY_COREFOLDER.'/config/bootcache.yml');
+		self::$classes = $list['static'];
+
+		if (isset($list[$environment])) {
+			self::$classes = array_merge(self::$classes, $list[$environment]);
+		}
 
 		// add current cache instance
 		self::addClass(get_class(sly_Core::cache()));
 	}
 
-	public static function recreate() {
+	public static function recreate($environment) {
 		// when in developer mode, only remove a possibly existing cache file
 
 		if (sly_Core::isDeveloperMode()) {
-			$target = self::getCacheFile();
+			$target = self::getCacheFile($environment);
 
 			if (file_exists($target)) {
 				unlink($target);
@@ -37,9 +42,9 @@ class sly_Util_BootCache {
 
 		// create the file
 
-		self::init();
-		sly_Core::dispatcher()->notify('SLY_BOOTCACHE_CLASSES');
-		self::createCacheFile();
+		self::init($environment);
+		sly_Core::dispatcher()->notify('SLY_BOOTCACHE_CLASSES_'.strtoupper($environment));
+		self::createCacheFile($environment);
 	}
 
 	public static function addClass($className) {
@@ -47,12 +52,12 @@ class sly_Util_BootCache {
 		self::$classes   = array_unique(self::$classes);
 	}
 
-	public static function getCacheFile() {
-		return SLY_DYNFOLDER.'/internal/sally/bootcache.php';
+	public static function getCacheFile($environment) {
+		return SLY_DYNFOLDER.'/internal/sally/bootcache.'.$environment.'.php';
 	}
 
-	public static function createCacheFile() {
-		$target = self::getCacheFile();
+	public static function createCacheFile($environment) {
+		$target = self::getCacheFile($environment);
 
 		if (file_exists($target)) {
 			unlink($target);
