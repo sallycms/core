@@ -74,16 +74,15 @@ function rex_deleteArticle($id) {
 	// -> startpage = 1
 	// --> rekursiv aufrufen
 
-	$config = sly_Core::config();
 	$return = array();
 	$return['state'] = false;
 
-	if ($id == $config->get('START_ARTICLE_ID')) {
+	if ($id == sly_Core::getSiteStartArticleId()) {
 		$return['message'] = t('cant_delete_sitestartarticle');
 		return $return;
 	}
 
-	if ($id == $config->get('NOTFOUND_ARTICLE_ID')) {
+	if ($id == sly_Core::getNotFoundArticleId()) {
 		$return['message'] = t('cant_delete_notfoundarticle');
 		return $return;
 	}

@@ -51,7 +51,7 @@ class sly_Cache extends BabelCache_Factory {
 	 * @return string
 	 */
 	public static function getStrategy() {
-		return sly_Core::config()->get('CACHING_STRATEGY', 'sly_Cache_Memory');
+		return sly_Core::getCachingStrategy();
 	}
 
 	/**

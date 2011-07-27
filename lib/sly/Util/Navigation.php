@@ -50,8 +50,8 @@ class sly_Util_Navigation {
 		$this->maxDepth            = $depth;
 		$this->useHTMLSpecialchars = $useHTMLSpecialchars;
 		$this->activeArticleId     = (is_null($activeArticleId)) ? sly_Core::getCurrentArticleId() : $activeArticleId;
-		$this->startArticleId      = sly_Core::config()->get('START_ARTICLE_ID');
-		$this->isStartClang        = sly_Core::config()->get('START_CLANG_ID') == sly_Core::getCurrentClang();
+		$this->startArticleId      = sly_Core::getSiteStartArticleId();
+		$this->isStartClang        = sly_Core::getDefaultLanguageId() == sly_Core::getCurrentClang();
 
 		$baseCategories            = (is_null($baseCategories)) ? sly_Util_Category::getRootCategories(true) : $baseCategories;
 		$this->generateNavigation($baseCategories, $fullNavigation);
