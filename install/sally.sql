@@ -1,8 +1,5 @@
 ## Sally Database Dump Version 0.5
 ## Prefix sly_
-## Charset utf-8
-
-START TRANSACTION;
 
 CREATE TABLE `sly_article` (
   `id` INT(11) NOT NULL,
@@ -22,7 +19,7 @@ CREATE TABLE `sly_article` (
   `createuser` VARCHAR(255) NOT NULL,
   `updateuser` VARCHAR(255) NOT NULL,
   `revision` INT(11) NOT NULL DEFAULT '0',
-  UNIQUE KEY `id` (`id`, `clang`)
+  PRIMARY KEY (`id`, `clang`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 CREATE TABLE `sly_article_slice` (
@@ -37,7 +34,8 @@ CREATE TABLE `sly_article_slice` (
   `createuser` VARCHAR(255) NOT NULL,
   `updateuser` VARCHAR(255) NOT NULL,
   `revision` INT(11) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `find_article` (`article_id`, `clang`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 CREATE TABLE `sly_clang` (
@@ -65,7 +63,8 @@ CREATE TABLE `sly_file` (
   `createuser` VARCHAR(255) NOT NULL,
   `updateuser` VARCHAR(255) NOT NULL,
   `revision` INT(11) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `filename` (`filename`(255))
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 CREATE TABLE `sly_file_category` (
@@ -79,7 +78,7 @@ CREATE TABLE `sly_file_category` (
   `createuser` VARCHAR(255) NOT NULL,
   `updateuser` VARCHAR(255) NOT NULL,
   `revision` INT(11) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`id`, `name`)
+  PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 CREATE TABLE `sly_user` (
@@ -117,11 +116,10 @@ CREATE TABLE `sly_slice_value` (
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 CREATE TABLE `sly_registry` (
-  `name` VARCHAR(255) NOT NULL UNIQUE,
-  `value` MEDIUMTEXT
+  `name` VARCHAR(255) NOT NULL,
+  `value` MEDIUMTEXT,
+  PRIMARY KEY (`name`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 -- populate database with some initial data
 INSERT INTO `sly_clang` (`name`, `locale`) VALUES ('deutsch', 'de_DE');
-
-COMMIT;
