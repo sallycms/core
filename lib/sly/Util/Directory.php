@@ -25,8 +25,9 @@ class sly_Util_Directory {
 		$this->directory = $directory;
 	}
 
-	public static function create($path, $perm = 0777) {
+	public static function create($path, $perm = null) {
 		$path = self::normalize($path);
+		$perm = $perm === null ? sly_Core::getDirPerm() : (int) $perm;
 
 		if (!is_dir($path)) {
 			if (!mkdir($path, $perm, true)) {

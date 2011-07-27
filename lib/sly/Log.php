@@ -327,7 +327,7 @@ class sly_Log {
 	protected function write($line) {
 		if (!file_exists($this->filename)) {
 			@touch($this->filename);
-			@chmod($this->filename, 0777);
+			@chmod($this->filename, sly_Core::getFilePerm());
 		}
 
 		$this->rotate();

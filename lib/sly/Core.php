@@ -225,6 +225,14 @@ class sly_Core {
 	public static function getTimezone() {
 		return self::config()->get('TIMEZONE');
 	}
+	
+	public static function getFilePerm() {
+		return (int) self::config()->get('FILEPERM');
+	}
+	
+	public static function getDirPerm() {
+		return (int) self::config()->get('DIRPERM');
+	}
 
 	public static function getI18N() {
 		return self::getInstance()->i18n;

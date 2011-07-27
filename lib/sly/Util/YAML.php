@@ -82,11 +82,11 @@ class sly_Util_YAML {
 			// release lock again
 			flock($handle, LOCK_UN);
 			fclose($handle);
-			
+
 			$exists = file_exists($cachefile);
 
 			file_put_contents($cachefile, '<?php $config = '.var_export($config, true).';', LOCK_EX);
-			if (!$exists) chmod($cachefile, 0777);
+			if (!$exists) chmod($cachefile, sly_Core::getFilePerm());
 		}
 
 		return $config;
@@ -97,6 +97,6 @@ class sly_Util_YAML {
 		$exists = file_exists($filename);
 
 		file_put_contents($filename, $data, LOCK_EX);
-		if (!$exists) chmod($filename, 0777);
+		if (!$exists) chmod($filename, sly_Core::getFilePerm());
 	}
 }

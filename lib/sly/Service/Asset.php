@@ -159,7 +159,7 @@ class sly_Service_Asset {
 
 	protected function generateCacheFile($file, $cacheFile) {
 		// TODO: eeeh, eeeh, eeeh: the '@' sucks
-		if (!is_dir(dirname($cacheFile))) @mkdir(dirname($cacheFile), 0777, true);
+		if (!is_dir(dirname($cacheFile))) @mkdir(dirname($cacheFile), sly_Core::getDirPerm(), true);
 
 		$enc = $this->getPreferredClientEncoding();
 
@@ -220,7 +220,7 @@ class sly_Service_Asset {
 			$css = sly_Util_Scaffold::process($file);
 
 			$tmpFile = sly_Util_Directory::join(SLY_DYNFOLDER, self::TEMP_DIR, md5($css).'.css');
-			if (!file_exists(dirname($tmpFile))) mkdir(dirname($tmpFile), 0777, true);
+			if (!file_exists(dirname($tmpFile))) mkdir(dirname($tmpFile), sly_Core::getDirPerm(), true);
 			file_put_contents($tmpFile, $css);
 
 			return $tmpFile;
@@ -231,7 +231,7 @@ class sly_Service_Asset {
 
 	private function initCache() {
 		$dir = sly_Util_Directory::join(SLY_DYNFOLDER, self::CACHE_DIR);
-		if (!is_dir($dir)) mkdir($dir, 0777, true);
+		if (!is_dir($dir)) mkdir($dir, sly_Core::getDirPerm(), true);
 
 		$install  = SLY_COREFOLDER.'/install/static-cache/';
 		$htaccess = sly_Util_Directory::join($dir, '.htaccess');
@@ -258,9 +258,9 @@ class sly_Service_Asset {
 		}
 
 		foreach (array(self::ACCESS_PUBLIC, self::ACCESS_PROTECTED) as $access) {
-			sly_Util_Directory::create($dir.'/'.$access.'/gzip',    0777);
-			sly_Util_Directory::create($dir.'/'.$access.'/deflate', 0777);
-			sly_Util_Directory::create($dir.'/'.$access.'/plain',   0777);
+			sly_Util_Directory::create($dir.'/'.$access.'/gzip');
+			sly_Util_Directory::create($dir.'/'.$access.'/deflate');
+			sly_Util_Directory::create($dir.'/'.$access.'/plain');
 
 			if (!file_exists($dir.'/'.$access.'/gzip/.htaccess'))    copy($install.'gzip.htaccess',    $dir.'/'.$access.'/gzip/.htaccess');
 			if (!file_exists($dir.'/'.$access.'/deflate/.htaccess')) copy($install.'deflate.htaccess', $dir.'/'.$access.'/deflate/.htaccess');
