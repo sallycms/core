@@ -123,7 +123,7 @@ class sly_Service_Category extends sly_Service_Model_Base {
 
 		// Kategorie in allen Sprachen anlegen
 
-		$defaultType = sly_Core::config()->get('DEFAULT_ARTICLE_TYPE', '');
+		$defaultType = sly_Core::getDefaultArticleType();
 		$dispatcher  = sly_Core::dispatcher();
 
 		foreach (sly_Util_Language::findAll(true) as $clangID) {

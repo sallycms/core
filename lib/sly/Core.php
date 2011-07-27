@@ -60,7 +60,7 @@ class sly_Core {
 		$instance = self::getInstance();
 
 		if (!isset($instance->curClang)) {
-			$instance->curClang = sly_request('clang', 'rex-clang-id', self::config()->get('START_CLANG_ID'));
+			$instance->curClang = sly_request('clang', 'rex-clang-id', self::getDefaultLanguageId());
 		}
 
 		return $instance->curClang;
@@ -93,10 +93,10 @@ class sly_Core {
 		$instance = self::getInstance();
 
 		if (!isset($instance->curArticleId)) {
-			$instance->curArticleId = sly_request('article_id', 'int', $conf->get('START_ARTICLE_ID'));
+			$instance->curArticleId = sly_request('article_id', 'int', self::getSiteStartArticleId());
 
 			if (!sly_Util_Article::exists($instance->curArticleId)) {
-				$instance->curArticleId = $conf->get('NOTFOUND_ARTICLE_ID');
+				$instance->curArticleId = self::getNotFoundArticleId();
 			}
 
 			if (!sly_Util_Article::exists($instance->curArticleId)) {
@@ -190,8 +190,40 @@ class sly_Core {
 
 	public static function isDeveloperMode() {
 		static $var = null;
-		if ($var === null) $var = (boolean) sly_Core::config()->get('DEVELOPER_MODE');
+		if ($var === null) $var = (boolean) self::config()->get('DEVELOPER_MODE');
 		return $var;
+	}
+
+	public static function getProjectName() {
+		return self::config()->get('PROJECTNAME');
+	}
+
+	public static function getSiteStartArticleId() {
+		return (int) self::config()->get('START_ARTICLE_ID');
+	}
+
+	public static function getNotFoundArticleId() {
+		return (int) self::config()->get('NOTFOUND_ARTICLE_ID');
+	}
+
+	public static function getDefaultLanguageId() {
+		return (int) self::config()->get('START_CLANG_ID');
+	}
+
+	public static function getDefaultLocale() {
+		return self::config()->get('LANG');
+	}
+
+	public static function getDefaultArticleType() {
+		return self::config()->get('DEFAULT_ARTICLE_TYPE');
+	}
+
+	public static function getCachingStrategy() {
+		return self::config()->get('CACHING_STRATEGY');
+	}
+
+	public static function getTimezone() {
+		return self::config()->get('TIMEZONE');
 	}
 
 	public static function getI18N() {

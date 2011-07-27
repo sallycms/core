@@ -66,8 +66,9 @@ class sly_Configuration {
 
 	public function loadDevelop() {
 		$dir = new sly_Util_Directory(SLY_BASE.DIRECTORY_SEPARATOR.'develop'.DIRECTORY_SEPARATOR.'config');
-		if($dir->exists()) {
-			foreach($dir->listPlain() as $file) {
+
+		if ($dir->exists()) {
+			foreach ($dir->listPlain() as $file) {
 				$this->loadStatic($dir.DIRECTORY_SEPARATOR.$file);
 			}
 		}
@@ -91,16 +92,17 @@ class sly_Configuration {
 
 	public function loadLocalConfig(){
 		$filename = $this->getLocalConfigFile();
-		if(file_exists($filename)) {
+
+		if (file_exists($filename)) {
 			$config = sly_Util_YAML::load($filename);
 			$this->localConfig = new sly_Util_Array($config);
-
 		}
 	}
 
 	public function loadProjectConfig(){
 		$filename = $this->getProjectConfigFile();
-		if(file_exists($filename)) {
+
+		if (file_exists($filename)) {
 			$config = sly_Util_YAML::load($filename);
 			$this->projectConfig = new sly_Util_Array($config);
 		}
@@ -108,10 +110,11 @@ class sly_Configuration {
 
 	protected function loadInternal($filename, $mode, $force = false, $key = '/') {
 		if ($mode != self::STORE_LOCAL_DEFAULT && $mode != self::STORE_STATIC && $mode != self::STORE_PROJECT_DEFAULT) {
-			throw new Exception('Konfigurationsdateien können nur mit STORE_STATIC, STORE_LOCAL_DEFAULT oder STORE_PROJECT_DEFAULT geladen werden.');
+			throw new sly_Exception('Konfigurationsdateien können nur mit STORE_STATIC, STORE_LOCAL_DEFAULT oder STORE_PROJECT_DEFAULT geladen werden.');
 		}
-		if (empty($filename) || !is_string($filename)) throw new Exception('Keine Konfigurationsdatei angegeben.');
-		if (!file_exists($filename)) throw new Exception('Konfigurationsdatei '.$filename.' konnte nicht gefunden werden.');
+
+		if (empty($filename) || !is_string($filename)) throw new sly_Exception('Keine Konfigurationsdatei angegeben.');
+		if (!file_exists($filename)) throw new sly_Exception('Konfigurationsdatei '.$filename.' konnte nicht gefunden werden.');
 
 		$isStatic = $mode == self::STORE_STATIC;
 
@@ -139,7 +142,7 @@ class sly_Configuration {
 
 	public function get($key, $default = null) {
 		$found = false;
-		
+
 		$p = $this->projectConfig->hasget($key, array());
 		if (!is_array($p[1])) return $p[1];
 		$found = $found || $p[0];
@@ -189,6 +192,7 @@ class sly_Configuration {
 		if (is_null($key) || strlen($key) === 0) {
 			throw new sly_Exception('Key '.$key.' ist nicht erlaubt!');
 		}
+
 		if (!empty($value) && sly_Util_Array::isAssoc($value)) {
 			foreach ($value as $ikey => $val) {
 				$currentPath = trim($key.'/'.$ikey, '/');
@@ -235,8 +239,9 @@ class sly_Configuration {
 		if ($mode == self::STORE_LOCAL_DEFAULT) $mode = self::STORE_LOCAL;
 		if ($this->checkMode($key, $mode)) return;
 		if (isset($this->mode[$key])) {
-			throw new Exception('Mode für '.$key.' wurde bereits auf '.$this->mode[$key].' gesetzt.');
+			throw new sly_Exception('Mode für '.$key.' wurde bereits auf '.$this->mode[$key].' gesetzt.');
 		}
+
 		$this->mode[$key] = $mode;
 	}
 
@@ -251,10 +256,11 @@ class sly_Configuration {
 	}
 
 	protected function flush() {
-		if($this->localConfigModified) {
+		if ($this->localConfigModified) {
 			sly_Util_YAML::dump($this->getLocalConfigFile(), $this->localConfig->get(null));
 		}
-		if($this->projectConfigModified) {
+
+		if ($this->projectConfigModified) {
 			sly_Util_YAML::dump($this->getProjectConfigFile(), $this->projectConfig->get(null));
 		}
 	}

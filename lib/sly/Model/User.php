@@ -50,7 +50,7 @@ class sly_Model_User extends sly_Model_Base_Id {
 
 		$this->rightsArray   = array_filter(explode('#', $this->getRights()));
 		$this->startpage     = $config->get('START_PAGE');
-		$this->backendLocale = $config->get('LANG');
+		$this->backendLocale = sly_Core::getDefaultLocale();
 		$this->isAdmin       = false;
 
 		foreach ($this->rightsArray as $right) {

@@ -21,7 +21,6 @@
  * @param string            $environment  die Umgebung aus der der Inhalt gesendet wird (frontend/backend)
  */
 function rex_send_article($article, $content, $environment) {
-	$config  = sly_Core::config();
 	$content = sly_Core::dispatcher()->filter('OUTPUT_FILTER', $content, compact('environment'));
 
 	// keine Manipulation der Ausgaben ab hier
@@ -30,9 +29,10 @@ function rex_send_article($article, $content, $environment) {
 	if ($article) {
 		$lastModified = $article->getUpdateDate();
 		$requestedID  = sly_request('article_id', 'int');
-		$notFoundID   = $config->get('NOTFOUND_ARTICLE_ID');
+		$notFoundID   = sly_Core::getNotFoundArticleId();
+		$startID      = sly_Core::getSiteStartArticleId();
 
-		if ($requestedID != $notFoundID && $article->getId() == $notFoundID && $article->getId() != $config->get('START_ARTICLE_ID')) {
+		if ($requestedID != $notFoundID && $article->getId() == $notFoundID && $article->getId() != $startID) {
 			header('HTTP/1.0 404 Not Found');
 		}
 	}

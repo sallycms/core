@@ -50,7 +50,7 @@ class sly_Util_Article {
 	 * @return sly_Model_Article
 	 */
 	public static function findSiteStartArticle($clang = null) {
-		return self::findById(sly_core::config()->get('START_ARTICLE_ID'), $clang);
+		return self::findById(sly_core::getSiteStartArticleId(), $clang);
 	}
 
 	/**
@@ -80,7 +80,7 @@ class sly_Util_Article {
 	 * @return boolean
 	 */
 	public function isSiteStartArticle(sly_Model_Article $article) {
-		return $article->getId() == sly_Core::config()->get('START_ARTICLE_ID');
+		return $article->getId() == sly_Core::getSiteStartArticleId();
 	}
 
 	/**
@@ -89,6 +89,6 @@ class sly_Util_Article {
 	 * @return boolean
 	 */
 	public function isNotFoundArticle(sly_Model_Article $article) {
-		return $article->getId() == sly_Core::config()->get('NOTFOUND_ARTICLE_ID');
+		return $article->getId() == sly_Core::getNotFoundArticleId();
 	}
 }

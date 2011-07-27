@@ -127,7 +127,7 @@ class sly_Service_Article extends sly_Service_Model_Base {
 
 		// Artikel in allen Sprachen anlegen
 
-		$defaultType = sly_Core::config()->get('DEFAULT_ARTICLE_TYPE', '');
+		$defaultType = sly_Core::getDefaultArticleType();
 		$dispatcher  = sly_Core::dispatcher();
 
 		foreach (sly_Util_Language::findAll(true) as $clangID) {
@@ -405,7 +405,7 @@ class sly_Service_Article extends sly_Service_Model_Base {
 
 		return true;
 	}
-	
+
 	public function touch(sly_Model_Article $article, sly_Model_User $user) {
 		$article->setUpdatedate(time());
 		$article->setUpdateuser($user->getLogin());

@@ -234,9 +234,8 @@ class sly_Model_Base_Article extends sly_Model_Base {
 		if (empty($url)) {
 			$clangString  = '';
 			$multilingual = sly_Util_Language::isMultilingual();
-			$config       = sly_Core::config();
 
-			if ($multilingual && $clang != $config->get('START_CLANG_ID')) {
+			if ($multilingual && $clang != sly_Core::getDefaultLanguageId()) {
 				$clangString = $divider.'clang='.$clang;
 			}
 
