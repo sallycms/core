@@ -59,7 +59,8 @@ class sly_Form_Widget_Media extends sly_Form_ElementBase implements sly_Form_IEl
 		static $advanced = null;
 
 		if ($advanced === null) {
-			$advanced = sly_Util_User::getCurrentUser()->hasRight('advancedMode[]');
+			$user     = sly_Util_User::getCurrentUser();
+			$advanced = $user ? $user->hasRight('advancedMode[]') : false;
 		}
 
 		$medium = sly_Util_Medium::findByFilename($filename);

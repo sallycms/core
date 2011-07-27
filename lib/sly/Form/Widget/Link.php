@@ -81,7 +81,8 @@ class sly_Form_Widget_Link extends sly_Form_ElementBase implements sly_Form_IEle
 		static $advanced = null;
 
 		if ($advanced === null) {
-			$advanced = sly_Util_User::getCurrentUser()->hasRight('advancedMode[]');
+			$user     = sly_Util_User::getCurrentUser();
+			$advanced = $user ? $user->hasRight('advancedMode[]') : false;
 		}
 
 		$article = sly_Util_Article::findById($articleID);
