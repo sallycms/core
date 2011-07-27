@@ -207,11 +207,11 @@ class sly_Core {
 	}
 
 	public static function getDefaultLanguageId() {
-		return (int) self::config()->get('START_CLANG_ID');
+		return (int) self::config()->get('DEFAULT_CLANG_ID');
 	}
 
 	public static function getDefaultLocale() {
-		return self::config()->get('LANG');
+		return self::config()->get('DEFAULT_LOCALE');
 	}
 
 	public static function getDefaultArticleType() {
