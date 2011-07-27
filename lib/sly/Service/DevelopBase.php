@@ -48,9 +48,11 @@ abstract class sly_Service_DevelopBase {
 	 */
 	public function getFolder() {
 		$dir = sly_Util_Directory::join(SLY_DEVELOPFOLDER, $this->getClassIdentifier());
-		if (!is_dir($dir) && !@mkdir($dir, sly_Core::config()->get('DIRPERM'), true)) {
-			throw new sly_Exception('Konnte Verzeichnis ' . $dir . ' nicht erstellen.');
+
+		if (!is_dir($dir) && !@mkdir($dir, sly_Core::getDirPerm(), true)) {
+			throw new sly_Exception('Konnte Verzeichnis '.$dir.' nicht erstellen.');
 		}
+
 		return $dir;
 	}
 

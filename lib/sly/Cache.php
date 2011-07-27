@@ -98,6 +98,11 @@ class sly_Cache extends BabelCache_Factory {
 			self::$cachingStrategy = $cachingStrategy;
 		}
 
+		if ($cachingStrategy === 'BabelCache_Filesystem') {
+			BabelCache_Filesystem::setDirPermissions(sly_Core::getDirPerm());
+			BabelCache_Filesystem::setFilePermissions(sly_Core::getFilePerm());
+		}
+
 		return self::getInstance()->getCache($cachingStrategy);
 	}
 

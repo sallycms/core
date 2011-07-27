@@ -34,7 +34,7 @@ class sly_Util_Scaffold {
 			}
 
 			$cacheDir = SLY_DYNFOLDER.'/internal/sally/css-cache';
-			sly_Util_Directory::create($cacheDir, 0777);
+			sly_Util_Directory::create($cacheDir);
 
 			$config = array(
 				'document_root'    => SLY_BASE,

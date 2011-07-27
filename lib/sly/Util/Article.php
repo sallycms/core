@@ -79,7 +79,7 @@ class sly_Util_Article {
 	 * @param  sly_Model_Article $article
 	 * @return boolean
 	 */
-	public function isSiteStartArticle(sly_Model_Article $article) {
+	public static function isSiteStartArticle(sly_Model_Article $article) {
 		return $article->getId() == sly_Core::getSiteStartArticleId();
 	}
 
@@ -88,7 +88,7 @@ class sly_Util_Article {
 	 * @param  sly_Model_Article $article
 	 * @return boolean
 	 */
-	public function isNotFoundArticle(sly_Model_Article $article) {
+	public static function isNotFoundArticle(sly_Model_Article $article) {
 		return $article->getId() == sly_Core::getNotFoundArticleId();
 	}
 }
