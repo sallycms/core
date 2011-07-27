@@ -11,17 +11,23 @@
 /**
  * @ingroup database
  */
-abstract class sly_DB_PDO_Driver{
+abstract class sly_DB_PDO_Driver {
 	protected $host;
 	protected $login;
 	protected $password;
 	protected $database;
+
+	public static $drivers = array('mysql', 'oci', 'pgsql', 'sqlite');
 
 	public function __construct($host, $login, $password, $database) {
 		$this->host     = $host;
 		$this->login    = $login;
 		$this->password = $password;
 		$this->database = $database;
+	}
+
+	public static function getAvailable() {
+		return array_intersect(self::$drivers, PDO::getAvailableDrivers());
 	}
 
 	abstract public function getDSN();
