@@ -11,10 +11,15 @@
  * Sonstige Funktionen
  *
  * @package redaxo4
+ 
  */
 
+/**
+ *
+ * @deprecated use sly_Util_Message::message
+ */
 function rex_message($message, $cssClass, $sorroundTag) {
-	$return = '<div class="rex-message"><'.$sorroundTag.' class="'.$cssClass.'">';
+	$return = '<div class="sly-message '.$cssClass.'"><'.$sorroundTag.'>';
 
 	if ($sorroundTag != 'p') $return .= '<p>';
 	$return .= '<span>'. $message .'</span>';
@@ -24,14 +29,22 @@ function rex_message($message, $cssClass, $sorroundTag) {
 	return $return;
 }
 
+/**
+ *
+ * @deprecated use sly_Util_Message::info
+ */
 function rex_info($message, $cssClass = null, $sorroundTag = null) {
-	if (!$cssClass)    $cssClass    = 'rex-info';
+	if (!$cssClass)    $cssClass    = 'sly-info';
 	if (!$sorroundTag) $sorroundTag = 'div';
 	return rex_message($message, $cssClass, $sorroundTag);
 }
 
+/**
+ *
+ * @deprecated use sly_Util_Message::warn
+ */
 function rex_warning($message, $cssClass = null, $sorroundTag = null) {
-	if (!$cssClass)    $cssClass    = 'rex-warning';
+	if (!$cssClass)    $cssClass    = 'sly-warn';
 	if (!$sorroundTag) $sorroundTag = 'div';
 	return rex_message($message, $cssClass, $sorroundTag);
 }
@@ -45,13 +58,12 @@ function rex_warning($message, $cssClass = null, $sorroundTag = null) {
  * @return string              der übersetzte Wert
  */
 function rex_translate($text, sly_I18N $i18n = null, $as_html = true) {
-	if (!$i18n) {
-		$i18n = sly_Core::getI18N();
-	}
-
 	$transKey = 'translate:';
 
 	if (sly_Util_String::startsWith($text, $transKey)) {
+		if (!$i18n) {
+			$i18n = sly_Core::getI18N();
+		}
 		$text = $i18n->msg(substr($text, strlen($transKey)));
 	}
 
