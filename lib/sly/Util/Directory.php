@@ -40,13 +40,14 @@ class sly_Util_Directory {
 
 			$base = '.';
 			$s    = DIRECTORY_SEPARATOR;
+			$p    = $path;
 
 			if (sly_Util_String::startsWith($path, SLY_BASE)) {
 				$base = SLY_BASE;
-				$path = trim(substr($path, strlen(SLY_BASE)), $s);
+				$p    = trim(substr($path, strlen(SLY_BASE)), $s);
 			}
 
-			foreach (explode($s, $path) as $component) {
+			foreach (explode($s, $p) as $component) {
 				chmod($base.$s.$component, $perm);
 				$base .= $s.$component;
 			}
