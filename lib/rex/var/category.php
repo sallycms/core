@@ -8,10 +8,10 @@
  */
 
 /**
- * REX_CATEGORY[xzy]
- * REX_CATEGORY[field=xzy]
- * REX_CATEGORY[field=xzy id=3]
- * REX_CATEGORY[field=xzy id=3 clang=2]
+ * SLY_CATEGORY[xzy]
+ * SLY_CATEGORY[field=xzy]
+ * SLY_CATEGORY[field=xzy id=3]
+ * SLY_CATEGORY[field=xzy id=3 clang=2]
  *
  * @ingroup redaxo
  */
@@ -33,7 +33,7 @@ class rex_var_category extends rex_var {
 	 * Wert für die Ausgabe
 	 */
 	public function matchCategory($content, $replaceInTemplate = false) {
-		$var     = 'REX_CATEGORY';
+		$var     = 'SLY_CATEGORY';
 		$matches = $this->getVarParams($content, $var);
 
 		foreach ($matches as $match) {
@@ -60,7 +60,7 @@ class rex_var_category extends rex_var {
 				}
 			}
 			else if ($category_id > 0) {
-				// REX_CATEGORY[field=name id=5] feld von gegebene category_id verwenden
+				// SLY_CATEGORY[field=name id=5] feld von gegebene category_id verwenden
 				if ($field && OOCategory::hasValue($field)) {
 					// bezeichner wählen, der keine variablen
 					// aus modulen/templates überschreibt
