@@ -1,0 +1,47 @@
+<?php
+/*
+ * Copyright (c) 2011, webvariants GbR, http://www.webvariants.de
+ *
+ * This file is released under the terms of the MIT license. You can find the
+ * complete text in the attached LICENSE file or online at:
+ *
+ * http://www.opensource.org/licenses/mit-license.php
+ */
+
+$name   = sly_html($this->getName());
+$id     = sly_html($this->getID());
+$files  = sly_makeArray($this->getDisplayValue());
+$files  = empty($files) ? array() : array_filter($files);
+$values = array();
+$list   = array();
+
+foreach ($files as $filename) {
+	$fullName = sly_Form_Widget_Media::getFullName($filename);
+	if (empty($fullName)) continue;
+
+	$values[] = $filename;
+	$list[]   = array($filename, $fullName);
+}
+
+?>
+<span class="sly-widget sly-medialist">
+	<input type="hidden" name="<?= $name ?>" id="<?= $id ?>" value="<?= sly_html(implode(',', $values)) ?>" />
+	<select size="8" class="<?= $this->attributes['class'] ?>">
+		<? foreach ($list as $element): ?>
+		<option value="<?= sly_html($element[0]) ?>"><?= sly_html($element[1]) ?></option>
+		<? endforeach ?>
+	</select>
+
+	<span class="sly-icons move">
+		<a href="#" rel="top"><img src="assets/file_top.png" title="<?= t('var_medialist_move_top') ?>" alt="" /></a>
+		<a href="#" rel="up"><img src="assets/file_up.png" title="<?= t('var_medialist_move_up') ?>" alt="" /></a>
+		<a href="#" rel="down"><img src="assets/file_down.png" title="<?= t('var_medialist_move_down') ?>" alt="" /></a>
+		<a href="#" rel="bottom" style="margin-right:2em"><img src="assets/file_bottom.png" title="<?= t('var_medialist_move_bottom') ?>" alt="" /></a>
+	</span>
+
+	<span class="sly-icons edit">
+		<a href="#" rel="open"><img src="assets/file_open.png" title="<?= t('var_media_open') ?>" alt="" /></a>
+		<a href="#" rel="add"><img src="assets/file_add.png" title="<?= t('var_media_new') ?>" alt="" /></a>
+		<a href="#" rel="delete"><img src="assets/file_del.png" title="<?= t('var_media_remove') ?>" alt="" /></a>
+	</span>
+</span>
