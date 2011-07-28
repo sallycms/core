@@ -8,33 +8,34 @@
  */
 
 /**
- * REX_VALUE[1],
- * REX_HTML_VALUE[1],
- * REX_PHP_VALUE[1],
- * REX_PHP,
- * REX_HTML,
- * REX_IS_VALUE
+ * SLY_VALUE[1],
+ * SLY_HTML_VALUE[1],
+ * SLY_PHP_VALUE[1],
+ * SLY_IS_VALUE[1]
  *
  * @ingroup redaxo
  */
 class rex_var_value extends rex_var {
-	// --------------------------------- Actions
 
+	const VALUE      = 'SLY_VALUE';
+	const HTML_VALUE = 'SLY_HTML_VALUE';
+	const PHP_VALUE  = 'SLY_PHP_VALUE';
+	const IS_VALUE   = 'SLY_IS_VALUE';
+	
 	public function getRequestValues($REX_ACTION) {
 		$values = sly_requestArray('VALUE', 'string');
 
 		foreach ($values as $key => $value) {
-			$REX_ACTION['REX_VALUE'][$key] = $value;
+			$REX_ACTION[self::VALUE][$key] = $value;
 		}
-
 		return $REX_ACTION;
 	}
 
 	public function getDatabaseValues($slice_id) {
-		$values = sly_Service_Factory::getSliceValueService()->find(array('slice_id' => $slice_id, 'type' => 'REX_VALUE'));
+		$values = sly_Service_Factory::getSliceValueService()->find(array('slice_id' => $slice_id, 'type' => 'SLY_VALUE'));
 		$data = array();
 		foreach ($values as $value) {
-			$data['REX_VALUE'][$value->getFinder()] = $value->getValue();
+			$data[self::VALUE][$value->getFinder()] = $value->getValue();
 		}
 
 		return $data;
@@ -42,10 +43,9 @@ class rex_var_value extends rex_var {
 
 	public function setSliceValues($REX_ACTION, $slice_id) {
 		$slice = sly_Service_Factory::getSliceService()->findById($slice_id);
-
-		if (isset($REX_ACTION['REX_VALUE'])) {
-			foreach ($REX_ACTION['REX_VALUE'] as $key => $value){
-				$slice->addValue('REX_VALUE', $key, $value);
+		if (isset($REX_ACTION[self::VALUE])) {
+			foreach ($REX_ACTION[self::VALUE] as $key => $value){
+				$slice->addValue(self::VALUE, $key, $value);
 			}
 		}
 	}
@@ -76,7 +76,7 @@ class rex_var_value extends rex_var {
 			list ($param_str, $args) = $match;
 			list ($id, $args) = $this->extractArg('id', $args, 0);
 
-			$replace = isset($REX_ACTION['REX_VALUE'][$id]) ? strval($REX_ACTION['REX_VALUE'][$id]) : '';
+			$replace = isset($REX_ACTION[self::VALUE][$id]) ? strval($REX_ACTION[self::VALUE][$id]) : '';
 
 			if ($booleanize) {
 				$replace = empty($replace);
@@ -103,18 +103,18 @@ class rex_var_value extends rex_var {
 	}
 
 	public function matchValue($slice_id, $content, $nl2br = false) {
-		return $this->_matchValue($slice_id, $content, 'REX_VALUE', true, $nl2br);
+		return $this->_matchValue($slice_id, $content, self::VALUE, true, $nl2br);
 	}
 
 	private function matchHtmlValue($slice_id, $content) {
-		return $this->_matchValue($slice_id, $content, 'REX_HTML_VALUE', false, false, true);
+		return $this->_matchValue($slice_id, $content, self::HTML_VALUE, false, false, true);
 	}
 
 	private function matchPhpValue($slice_id, $content) {
-		return $this->_matchValue($slice_id, $content, 'REX_PHP_VALUE', false, false, false);
+		return $this->_matchValue($slice_id, $content, self::PHP_VALUE, false, false, false);
 	}
 
 	private function matchIsValue($slice_id, $content) {
-		return $this->_matchValue($slice_id, $content, 'REX_IS_VALUE', false, false, false, true);
+		return $this->_matchValue($slice_id, $content, self::IS_VALUE, false, false, false, true);
 	}
 }
