@@ -23,7 +23,7 @@ class rex_var_template extends rex_var {
 	 * Wert für die Ausgabe
 	 */
 	public function matchTemplate($content) {
-		$var        = 'REX_TEMPLATE';
+		$var        = 'SLY_TEMPLATE';
 		$matches    = $this->getVarParams($content, $var);
 		$tplService = sly_Service_Factory::getTemplateService();
 

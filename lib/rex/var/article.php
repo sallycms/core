@@ -8,10 +8,10 @@
  */
 
 /**
- * REX_ARTICLE[1]
- * REX_ARTICLE[id=1]
+ * SLY_ARTICLE[1]
+ * SLY_ARTICLE[id=1]
  *
- * REX_ARTICLE[id=1 slot=2 clang=1] or REX_ARTICLE[id=1 ctype=2 clang=1]
+ * SLY_ARTICLE[id=1 slot=2 clang=1] or SLY_ARTICLE[id=1 ctype=2 clang=1]
  *
  * @ingroup redaxo
  */
@@ -31,7 +31,6 @@ class rex_var_article extends rex_var {
 
 			case '2':
 			case 'slot':
-			case 'ctype':
 				$args['slot'] = $value;
 				break;
 		}
@@ -43,7 +42,7 @@ class rex_var_article extends rex_var {
 	 * Wert für die Ausgabe
 	 */
 	public function matchArticle($content, $replaceInTemplate = false) {
-		$var     = 'REX_ARTICLE';
+		$var     = 'SLY_ARTICLE';
 		$matches = $this->getVarParams($content, $var);
 
 		foreach ($matches as $match) {
@@ -55,7 +54,7 @@ class rex_var_article extends rex_var {
 			$tpl = '';
 
 			if ($article_id == 0) {
-				// REX_ARTICLE[] keine id -> aktuellen artikel verwenden
+				// SLY_ARTICLE[] keine id -> aktuellen artikel verwenden
 				if ($replaceInTemplate) {
 					// aktueller Artikel darf nur in Templates, nicht in Modulen eingebunden werden
 					// => endlossschleife
@@ -63,7 +62,7 @@ class rex_var_article extends rex_var {
 				}
 			}
 			elseif ($article_id > 0) {
-				// REX_ARTICLE[id=5] kompletten artikel mit gegebener artikel id einbinden
+				// SLY_ARTICLE[id=5] kompletten artikel mit gegebener artikel id einbinden
 				// bezeichner wählen, der keine variablen aus modulen/templates überschreibt
 				$varname = '$__rex_art';
 				$tpl     =

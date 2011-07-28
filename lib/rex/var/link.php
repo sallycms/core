@@ -8,27 +8,25 @@
  */
 
 /**
- * REX_LINK_WIDGET,
- * REX_LINK,
- * REX_LINK_ID,
- * REX_LINKLIST_WIDGET,
- * REX_LINKLIST
+ * SLY_LINK_WIDGET,
+ * SLY_LINK,
+ * SLY_LINK_URL,
+ * SLY_LINKLIST_WIDGET,
+ * SLY_LINKLIST
  *
  * @ingroup redaxo
  */
 class rex_var_link extends rex_var {
 	
-	const LINK           = 'REX_LINK';
-	const LINKID         = 'REX_LINK_ID';
-	const LINKLIST       = 'REX_LINKLIST';
-	const LINKWIDGET     = 'REX_LINK_WIDGET';
-	const LINKLISTWIDGET = 'REX_LINKLIST_WIDGET';
+	const LINK           = 'SLY_LINK';
+	const LINKURL        = 'SLY_LINK_URL';
+	const LINKLIST       = 'SLY_LINKLIST';
+	const LINKWIDGET     = 'SLY_LINK_WIDGET';
+	const LINKLISTWIDGET = 'SLY_LINKLIST_WIDGET';
 
 	public function getRequestValues($REX_ACTION) {
-		foreach (array('LINK', 'LINKLIST') as $type) {
+		foreach (array(self::LINK, self::LINKLIST) as $type) {
 			$link = sly_requestArray($type, 'string');
-			$type = 'REX_'.$type;
-
 			foreach ($link as $key => $value) {
 				$REX_ACTION[$type][$key] = $value;
 			}
@@ -40,9 +38,8 @@ class rex_var_link extends rex_var {
 	public function getDatabaseValues($slice_id) {
 		$service = sly_Service_Factory::getSliceValueService();
 		$data = array();
-		foreach (array('REX_LINK', 'REX_LINKLIST') as $type) {
+		foreach (array(self::LINK, self::LINKLIST) as $type) {
 			$values = $service->find(array('slice_id' => $slice_id, 'type' => $type));
-
 			foreach ($values as $value) {
 				$data[$type][$value->getFinder()] = $value->getValue();
 			}
@@ -54,7 +51,7 @@ class rex_var_link extends rex_var {
 	public function setSliceValues($REX_ACTION, $slice_id) {
 		$slice = sly_Service_Factory::getSliceService()->findById($slice_id);
 
-		foreach (array('REX_LINK', 'REX_LINKLIST') as $type) {
+		foreach (array(self::LINK, self::LINKLIST) as $type) {
 			if (isset($REX_ACTION[$type])) {
 				foreach ($REX_ACTION[$type] as $key => $value){
 					$slice->addValue($type, $key, $value);
@@ -76,7 +73,7 @@ class rex_var_link extends rex_var {
 	public function getOutput($REX_ACTION, $content) {
 		$content = $this->matchLinkList($REX_ACTION, $content);
 		$content = $this->matchLink($REX_ACTION, $content);
-		$content = $this->matchLinkId($REX_ACTION, $content);
+		$content = $this->matchLinkUrl($REX_ACTION, $content);
 
 		return $content;
 	}
@@ -159,8 +156,7 @@ class rex_var_link extends rex_var {
 
 			$value = isset($REX_ACTION[self::LINK][$id]) ? strval($REX_ACTION[self::LINK][$id]) : '';
 
-			$replace = $value === '' ? '' : sly_Util_Article::findById($value)->getUrl();
-			$replace = $this->handleGlobalVarParams($var, $args, $replace);
+			$replace = $this->handleGlobalVarParams($var, $args, $value);
 			$content = str_replace($var.'['.$param_str.']', $replace, $content);
 		}
 
@@ -170,8 +166,8 @@ class rex_var_link extends rex_var {
 	/**
 	 * Wert für die Ausgabe
 	 */
-	public function matchLinkId($REX_ACTION, $content) {
-		$var     = self::LINKID;
+	public function matchLinkUrl($REX_ACTION, $content) {
+		$var     = self::LINKURL;
 		$matches = $this->getVarParams($content, $var);
 
 		foreach ($matches as $match) {
@@ -180,7 +176,8 @@ class rex_var_link extends rex_var {
 
 			$value = isset($REX_ACTION[self::LINK][$id]) ? strval($REX_ACTION[self::LINK][$id]) : '';
 
-			$replace = $this->handleGlobalVarParams($var, $args, $value);
+			$replace = $value === '' ? '' : sly_Util_Article::findById($value)->getUrl();
+			$replace = $this->handleGlobalVarParams($var, $args, $replace);
 			$content = str_replace($var.'['.$param_str.']', $replace, $content);
 		}
 
@@ -212,7 +209,7 @@ class rex_var_link extends rex_var {
 	 */
 	public function getLinkWidget($id, $article_id, $category = '') {
 		// TODO: Build something like $widget->setRootCat($category);
-		$widget = new sly_Form_Widget_Link('LINK['.$id.']', null, $article_id, $id);
+		$widget = new sly_Form_Widget_Link(self::LINK.'['.$id.']', null, $article_id, $id);
 		$widget = '<div class="rex-widget">'.$widget->render().'</div>';
 
 		return $widget;
@@ -224,7 +221,7 @@ class rex_var_link extends rex_var {
 	public function getLinklistWidget($id, $value, $category = '') {
 		// TODO: Build something like $widget->setRootCat($category);
 		$articles = explode(',', $value);
-		$widget   = new sly_Form_Widget_LinkList('LINKLIST['.$id.']', null, $articles, $id);
+		$widget   = new sly_Form_Widget_LinkList(self::LINKLIST.'['.$id.']', null, $articles, $id);
 		$widget   = '<div class="rex-widget">'.$widget->render().'</div>';
 
 		return $widget;
