@@ -8,25 +8,25 @@
  */
 
 /**
- * REX_MEDIA[1],
- * REX_MEDIALIST[1],
- * REX_MEDIA_WIDGET[1],
- * REX_MEDIALIST_WIDGET[1]
+ * SLY_MEDIA[1],
+ * SLY_MEDIALIST[1],
+ * SLY_MEDIA_WIDGET[1],
+ * SLY_MEDIALIST_WIDGET[1]
  *
  * @ingroup redaxo
  */
 class rex_var_media extends rex_var {
 	// --------------------------------- Actions
 
-	const MEDIA           = 'REX_MEDIA';
-	const MEDIALIST       = 'REX_MEDIALIST';
-	const MEDIAWIDGET     = 'REX_MEDIA_WIDGET';
-	const MEDIALISTWIDGET = 'REX_MEDIALIST_WIDGET';
+	const MEDIA           = 'SLY_MEDIA';
+	const MEDIALIST       = 'SLY_MEDIALIST';
+	const MEDIAWIDGET     = 'SLY_MEDIA_WIDGET';
+	const MEDIALISTWIDGET = 'SLY_MEDIALIST_WIDGET';
 
 	public function getRequestValues($REX_ACTION) {
 		foreach (array('MEDIA', 'MEDIALIST') as $type) {
 			$media = sly_request($type, 'array');
-			$type  = 'REX_'.$type;
+			$type  = 'SLY_'.$type;
 
 			foreach ($media as $key => $value) {
 				$REX_ACTION[$type][$key] = $value;
@@ -39,7 +39,8 @@ class rex_var_media extends rex_var {
 	public function getDatabaseValues($slice_id) {
 		$service = sly_Service_Factory::getSliceValueService();
 		$data = array();
-		foreach (array('REX_MEDIA', 'REX_MEDIALIST') as $type) {
+		foreach (array('MEDIA', 'MEDIALIST') as $type) {
+			$type  = 'SLY_'.$type;
 			$values = $service->find(array('slice_id' => $slice_id, 'type' => $type));
 
 			foreach ($values as $value) {
@@ -53,7 +54,7 @@ class rex_var_media extends rex_var {
 	public function setSliceValues($REX_ACTION, $slice_id) {
 		$slice = sly_Service_Factory::getSliceService()->findById($slice_id);
 
-		foreach (array('REX_MEDIA', 'REX_MEDIALIST') as $type) {
+		foreach (array('SLY_MEDIA', 'SLY_MEDIALIST') as $type) {
 			if (isset($REX_ACTION[$type])) {
 				foreach ($REX_ACTION[$type] as $key => $value) {
 					$slice->addValue($type, $key, $value);
@@ -143,7 +144,7 @@ class rex_var_media extends rex_var {
 				unset($args['category']);
 			}
 
-			$replace = $this->getMedialistButton($id, $value, $category, $args);
+			$replace = $this->getMedialistWidget($id, $value, $category, $args);
 			$replace = $this->handleGlobalWidgetParams($var, $args, $replace);
 			$content = str_replace($var.'['.$param_str.']', $replace, $content);
 		}
@@ -215,7 +216,7 @@ class rex_var_media extends rex_var {
 		// TODO: Build something like $widget->setRootCat($category);
 
 		$files  = array_filter(explode(',', $value));
-		$widget = new sly_Form_Widget_MediaList('MEDIALIST['.$id.']', null, $medialistarray, $id);
+		$widget = new sly_Form_Widget_MediaList('MEDIALIST['.$id.']', null, $files, $id);
 		$widget = '<div class="rex-widget">'.$widget->render().'</div>';
 
 		return $widget;
