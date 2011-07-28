@@ -11,12 +11,12 @@
  * Sonstige Funktionen
  *
  * @package redaxo4
- 
+
  */
 
 /**
  *
- * @deprecated use sly_Util_Message::message
+ * @deprecated use sly_Helper_Message::message
  */
 function rex_message($message, $cssClass, $sorroundTag) {
 	$return = '<div class="sly-message '.$cssClass.'"><'.$sorroundTag.'>';
@@ -31,7 +31,7 @@ function rex_message($message, $cssClass, $sorroundTag) {
 
 /**
  *
- * @deprecated use sly_Util_Message::info
+ * @deprecated use sly_Helper_Message::info
  */
 function rex_info($message, $cssClass = null, $sorroundTag = null) {
 	if (!$cssClass)    $cssClass    = 'sly-info';
@@ -41,7 +41,7 @@ function rex_info($message, $cssClass = null, $sorroundTag = null) {
 
 /**
  *
- * @deprecated use sly_Util_Message::warn
+ * @deprecated use sly_Helper_Message::warn
  */
 function rex_warning($message, $cssClass = null, $sorroundTag = null) {
 	if (!$cssClass)    $cssClass    = 'sly-warn';
