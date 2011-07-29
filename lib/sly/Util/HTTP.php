@@ -105,7 +105,7 @@ class sly_Util_HTTP {
 	/**
 	 * @return boolean
 	 */
-	public function isSecure() {
+	public static function isSecure() {
 		return
 			(isset($_SERVER['HTTPS']) && (strtolower($_SERVER['HTTPS']) === 'on' || $_SERVER['HTTPS'] == 1)) ||
 			(isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && strtolower($_SERVER['HTTP_X_FORWARDED_PROTO']) === 'https');
