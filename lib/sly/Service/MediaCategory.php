@@ -82,6 +82,12 @@ class sly_Service_MediaCategory extends sly_Service_Model_Base_Id {
 	}
 
 	public function add($title, sly_Model_MediaCategory $parent = null) {
+		$title = trim($title);
+
+		if (strlen($title) === 0) {
+			throw new sly_Exception(t('mediacat_title_cannot_be_empty'));
+		}
+
 		$category = new sly_Model_MediaCategory();
 		$category->setName($title);
 		$category->setRevision(0);
@@ -100,6 +106,10 @@ class sly_Service_MediaCategory extends sly_Service_Model_Base_Id {
 	}
 
 	public function update(sly_Model_MediaCategory $cat) {
+		if (strlen($cat->getName()) === 0) {
+			throw new sly_Exception(t('mediacat_title_cannot_be_empty'));
+		}
+
 		$category->setUpdateColumns();
 
 		// ensure valid path & save it
