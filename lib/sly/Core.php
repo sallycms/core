@@ -60,7 +60,7 @@ class sly_Core {
 		$instance = self::getInstance();
 
 		if (!isset($instance->curClang)) {
-			$instance->curClang = sly_request('clang', 'rex-clang-id', self::getDefaultLanguageId());
+			$instance->curClang = sly_request('clang', 'rex-clang-id', self::getDefaultClangId());
 		}
 
 		return $instance->curClang;
@@ -206,7 +206,7 @@ class sly_Core {
 		return (int) self::config()->get('NOTFOUND_ARTICLE_ID');
 	}
 
-	public static function getDefaultLanguageId() {
+	public static function getDefaultClangId() {
 		return (int) self::config()->get('DEFAULT_CLANG_ID');
 	}
 
@@ -225,11 +225,11 @@ class sly_Core {
 	public static function getTimezone() {
 		return self::config()->get('TIMEZONE');
 	}
-	
+
 	public static function getFilePerm() {
 		return (int) self::config()->get('FILEPERM');
 	}
-	
+
 	public static function getDirPerm() {
 		return (int) self::config()->get('DIRPERM');
 	}

@@ -51,7 +51,7 @@ class sly_Util_Navigation {
 		$this->useHTMLSpecialchars = $useHTMLSpecialchars;
 		$this->activeArticleId     = (is_null($activeArticleId)) ? sly_Core::getCurrentArticleId() : $activeArticleId;
 		$this->startArticleId      = sly_Core::getSiteStartArticleId();
-		$this->isStartClang        = sly_Core::getDefaultLanguageId() == sly_Core::getCurrentClang();
+		$this->isStartClang        = sly_Core::getDefaultClangId() == sly_Core::getCurrentClang();
 
 		$baseCategories            = (is_null($baseCategories)) ? sly_Util_Category::getRootCategories(true) : $baseCategories;
 		$this->generateNavigation($baseCategories, $fullNavigation);
