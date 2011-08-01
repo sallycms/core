@@ -1,0 +1,14 @@
+SETUP: true
+INSTNAME: sly20100511212501
+CACHING_STRATEGY: "BabelCache_Blackhole"
+DATABASE:
+  DRIVER: mysql
+  HOST: localhost
+  LOGIN: sally
+  PASSWORD: ''
+  NAME: sally_base
+  PERSISTENT: false
+  TABLE_PREFIX: sly_
+PERM: ["mediapool[]"]
+EXTPERM: ["advancedMode[]", "moveSlice[]", "copyContent[]", "moveArticle[]", "copyArticle[]", "moveCategory[]", "publishArticle[]", "publishCategory[]", "article2startpage[]", "changearttype[]"]
+EXTRAPERM: ["editContentOnly[]"]
