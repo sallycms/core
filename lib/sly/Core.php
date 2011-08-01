@@ -226,12 +226,12 @@ class sly_Core {
 		return self::config()->get('TIMEZONE');
 	}
 
-	public static function getFilePerm() {
-		return (int) self::config()->get('FILEPERM');
+	public static function getFilePerm($default = 0777) {
+		return (int) self::config()->get('FILEPERM', $default);
 	}
 
-	public static function getDirPerm() {
-		return (int) self::config()->get('DIRPERM');
+	public static function getDirPerm($default = 0777) {
+		return (int) self::config()->get('DIRPERM', $default);
 	}
 
 	public static function getI18N() {
