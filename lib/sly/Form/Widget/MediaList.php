@@ -51,6 +51,8 @@ class sly_Form_Widget_MediaList extends sly_Form_ElementBase implements sly_Form
 	 * @return array  a list of filenames
 	 */
 	public function getDisplayValue() {
-		return $this->getDisplayValueHelper('string', true);
+		$files = $this->getDisplayValueHelper('string', false);
+		if ($files === null) return array();
+		return is_array($files) ? $files : explode(',', $files);
 	}
 }
