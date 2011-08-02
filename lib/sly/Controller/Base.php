@@ -179,7 +179,7 @@ abstract class sly_Controller_Base {
 
 			$nav = sly_Core::getNavigation();
 
-			if (!$nav->hasPage($page) && !class_exists('sly_Controller_'.ucfirst($page))) {
+			if (empty($page) || !$nav->hasPage($page) || !class_exists('sly_Controller_'.ucfirst($page))) {
 				$page = sly_Service_Factory::getUserService()->getCurrentUser()->getStartpage();
 
 				if (is_null($page) || !$nav->hasPage($page)) {
