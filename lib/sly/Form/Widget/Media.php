@@ -70,7 +70,7 @@ class sly_Form_Widget_Media extends sly_Form_ElementBase implements sly_Form_IEl
 			$title = $medium->getTitle();
 			$value = $title ? $title : $filename;
 
-			if ($advanced) {
+			if ($advanced && $title) {
 				$value .= " ($filename)";
 			}
 		}
