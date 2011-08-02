@@ -70,7 +70,7 @@ class sly_Model_Article extends sly_Model_Base_Article {
 	public function printContent($slot = null) {
 		$ids = OOArticleSlice::getSliceIdsForSlot($this->getId(), $this->getClang(), $slot);
 		foreach ($ids as $id) {
-			print OOArticleSlice::getArticleSliceById($id)->printContent();
+			OOArticleSlice::getArticleSliceById($id)->printContent();
 		}
 	}
 
