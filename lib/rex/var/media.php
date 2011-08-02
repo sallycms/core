@@ -205,9 +205,8 @@ class rex_var_media extends rex_var {
 		// TODO: Build something like $widget->setRootCat($category);
 
 		$widget = new sly_Form_Widget_Media('MEDIA['.$id.']', null, $value, $id);
-		$widget = '<div class="rex-widget">'.$widget->render().'</div>';
 
-		return $widget;
+		return $widget->render();
 	}
 
 	/**
@@ -218,8 +217,7 @@ class rex_var_media extends rex_var {
 
 		$files  = array_filter(explode(',', $value));
 		$widget = new sly_Form_Widget_MediaList('MEDIALIST['.$id.']', null, $files, $id);
-		$widget = '<div class="rex-widget">'.$widget->render().'</div>';
 
-		return $widget;
+		return $widget->render();
 	}
 }

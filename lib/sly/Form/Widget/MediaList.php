@@ -28,7 +28,6 @@ class sly_Form_Widget_MediaList extends sly_Form_ElementBase implements sly_Form
 	 */
 	public function __construct($name, $label, $value, $id = null) {
 		parent::__construct($name, $label, $value, $id);
-		$this->setAttribute('class', 'rex-form-select');
 	}
 
 	/**

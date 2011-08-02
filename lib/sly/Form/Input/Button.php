@@ -37,7 +37,6 @@ class sly_Form_Input_Button extends sly_Form_Input_Base {
 	 * @return string  the XHTML code
 	 */
 	public function render() {
-		$this->addClass('rex-form-text');
 		$attributeString = $this->getAttributeString();
 		return '<input '.$attributeString.' />';
 	}
