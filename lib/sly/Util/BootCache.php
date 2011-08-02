@@ -63,14 +63,14 @@ class sly_Util_BootCache {
 			unlink($target);
 		}
 
+		file_put_contents($target, "<?php\n");
+
 		foreach (self::$classes as $class) {
 			$filename = sly_Loader::findClass($class);
 			if (!$filename) continue;
 
-			$code = file_get_contents($filename);
-			$code = trim($code);
-
-			file_put_contents($target, $code."\n\n?>", FILE_APPEND);
+			$code = self::getCode($filename);
+			file_put_contents($target, $code."\n", FILE_APPEND);
 		}
 
 		// add functions
@@ -85,10 +85,48 @@ class sly_Util_BootCache {
 		);
 
 		foreach ($functionFiles as $fctFile) {
-			$code = file_get_contents(SLY_COREFOLDER.'/'.$fctFile);
-			$code = trim($code);
-
-			file_put_contents($target, $code."\n\n?>", FILE_APPEND);
+			$code = self::getCode(SLY_COREFOLDER.'/'.$fctFile);
+			file_put_contents($target, $code."\n", FILE_APPEND);
 		}
+	}
+
+	private static function getCode($filename) {
+		$code   = file_get_contents($filename);
+		$result = trim($code);
+
+		// remove comments and collapse whitespace into single spaces
+
+		if (function_exists('token_get_all')) {
+			$tokens = token_get_all($code);
+			$result = '';
+
+			foreach ($tokens as $token) {
+				if (is_string($token)) {
+					$result .= $token;
+				}
+				else {
+					list($id, $text) = $token;
+
+					switch ($id) {
+						case T_COMMENT:
+						case T_DOC_COMMENT:
+							break;
+
+						case T_WHITESPACE:
+							$result .= ' ';
+							break;
+
+						default:
+							$result .= $text;
+							break;
+					}
+				}
+			}
+		}
+
+		// remove starting php tag
+		$result = preg_replace('#^<\?(php)?#is', '', $result);
+
+		return trim($result);
 	}
 }
