@@ -90,9 +90,9 @@ class sly_Form_Widget_Link extends sly_Form_ElementBase implements sly_Form_IEle
 
 		if ($article) {
 			$title = $article->getName();
-			$value = $title ? $title : $filename;
+			$value = $title ? $title : t('unnamed_article');
 
-			if ($advanced) {
+			if ($advanced || !$title) {
 				$value .= " [$articleID]";
 			}
 		}
