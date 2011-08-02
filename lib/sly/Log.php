@@ -19,18 +19,18 @@
  * @ingroup core
  */
 class sly_Log {
-	protected $filename;    ///< string  the current target file
-	protected $format;      ///< string  the line format to use
-	protected $maxFiles;
-	protected $maxSize;
-	protected $enableRotation;
+	protected $filename;        ///< string   the current target file
+	protected $format;          ///< string   the line format to use
+	protected $maxFiles;        ///< int      how many rotated files should be kept
+	protected $maxSize;         ///< int      how large a single file may become
+	protected $enableRotation;  ///< boolean  whether or not to use log rotation
 
-	private static $instances = array();
-	private static $targetDir = null;
+	private static $instances = array(); ///< array   list of instances (one per log file)
+	private static $targetDir = null;    ///< string  path for new log instances
 
-	const LEVEL_INFO    = 0;
-	const LEVEL_WARNING = 1;
-	const LEVEL_ERROR   = 2;
+	const LEVEL_INFO    = 0; ///< int
+	const LEVEL_WARNING = 1; ///< int
+	const LEVEL_ERROR   = 2; ///< int
 
 	const FORMAT_SIMPLE   = '[%date% %time%] %typename%: %message%';
 	const FORMAT_EXTENDED = '[%date% %time%] %typename%: %message% (IP: %ip%, Hostname: %hostname%)';
@@ -42,8 +42,9 @@ class sly_Log {
 	 * This sets where the newly created logfiles will be placed. Pass a directory
 	 * (will automatically be converted to an absolute path).
 	 *
-	 * @param  string $dir  the directory
-	 * @return string       the new directory which is being used from then on
+	 * @throws sly_Exception  if the directory does not exist and could not be created
+	 * @param  string $dir    the directory
+	 * @return string         the new directory which is being used from then on
 	 */
 	public static function setLogDirectory($dir) {
 		if (!sly_Util_Directory::create($dir)) {
@@ -302,6 +303,10 @@ class sly_Log {
 		return $this->filename;
 	}
 
+	/**
+	 * @param int $maxSize   max number of files to keep
+	 * @param int $maxFiles  max filesize
+	 */
 	public function enableRotation($maxSize = 1048576, $maxFiles = 10) {
 		$this->enableRotation = true;
 		$this->maxFiles       = $maxFiles < 1 ? 1 : (int) $maxFiles;
@@ -312,18 +317,31 @@ class sly_Log {
 		$this->enableRotation = false;
 	}
 
+	/**
+	 * @return int  the number of files to be kept
+	 */
 	public function getMaxFiles() {
 		return $this->maxFiles;
 	}
 
+	/**
+	 * @return int  the maximum filesize of one log file
+	 */
 	public function getMaxSize() {
 		return $this->maxSize;
 	}
 
+	/**
+	 * @return boolean  whether or not rotation is enabled
+	 */
 	public function isRotating() {
 		return $this->enableRotation;
 	}
 
+	/**
+	 * @param  string $line  line to write to the logfile
+	 * @return boolean       true if written successfully, else false
+	 */
 	protected function write($line) {
 		if (!file_exists($this->filename)) {
 			@touch($this->filename);
@@ -334,6 +352,12 @@ class sly_Log {
 		return file_put_contents($this->filename, $line."\n", FILE_APPEND) > 0;
 	}
 
+	/**
+	 * @param  string $line      the line to work on
+	 * @param  string $typename  'Error', 'Info' and so on
+	 * @param  int    $depth     current stack depth (for getting the caller, when required)
+	 * @return string            the line with replaced placeholders
+	 */
 	protected function replacePlaceholders($line, $typename, $depth) {
 		$ip   = empty($_SERVER['REMOTE_ADDR']) ? '<not set>' : $_SERVER['REMOTE_ADDR'];
 		$line = str_replace('%ip%', $ip, $line);
@@ -362,6 +386,10 @@ class sly_Log {
 		return $line;
 	}
 
+	/**
+	 * @param  int $depth  current stack depth (for getting the caller, when required)
+	 * @return array       the stack as a nicely formatted array
+	 */
 	protected function getCaller($depth) {
 		$trace = array_slice(debug_backtrace(), $depth);
 
@@ -455,8 +483,8 @@ class sly_Log {
 	}
 
 	/**
-	 * @param  string $filename
-	 * @return NULL|string
+	 * @param  string $filename  the filename to iterate
+	 * @return null|string       the new filename or null if the file should be deleted
 	 */
 	private function getIteratedFilename($filename) {
 		$logfile = $this->filename;
@@ -479,15 +507,15 @@ class sly_Log {
 	}
 
 	/**
-	 * @param  string $i
-	 * @return string
+	 * @param  int $i  file index
+	 * @return string  padded file index
 	 */
 	private function getFileNum($i) {
 		return str_pad($i, strlen($this->maxFiles), '0', STR_PAD_LEFT);
 	}
 
 	/**
-	 * @param string $filename
+	 * @param string $filename  the file to compress
 	 */
 	private function compressLogfile($filename) {
 		if (!function_exists('gzencode')) return;

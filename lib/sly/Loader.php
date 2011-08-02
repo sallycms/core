@@ -12,14 +12,14 @@
  * @ingroup core
  */
 class sly_Loader {
-	protected static $loadPaths       = array();
-	protected static $counter         = 0;
-	protected static $pathHash        = 0;
-	protected static $pathCache       = array();
-	protected static $enablePathCache = false;
+	protected static $loadPaths       = array();  ///< array
+	protected static $counter         = 0;        ///< int
+	protected static $pathHash        = 0;        ///< int
+	protected static $pathCache       = array();  ///< array
+	protected static $enablePathCache = false;    ///< boolean
 
 	/**
-	 * @param boolean $flag
+	 * @param boolean $flag  whether to use the path cache or not
 	 */
 	public static function enablePathCache($flag = true) {
 		self::$enablePathCache = (boolean) $flag;
@@ -27,8 +27,8 @@ class sly_Loader {
 	}
 
 	/**
-	 * @param string $path
-	 * @param string $hiddenPrefix
+	 * @param string $path          new absolute directory path to a class collection
+	 * @param string $hiddenPrefix  a prefix to remove from class names before matching this directory
 	 */
 	public static function addLoadPath($path, $hiddenPrefix = '') {
 		$path = realpath($path);
@@ -75,8 +75,8 @@ class sly_Loader {
 	}
 
 	/**
-	 * @param  string $className
-	 * @return boolean|string
+	 * @param  string $className  class to load
+	 * @return boolean            true if the class was loaded, else false
 	 */
 	public static function loadClass($className) {
 		/*if (class_exists($className, false)) {
@@ -112,7 +112,7 @@ class sly_Loader {
 			}
 
 			++self::$counter;
-			return $fullPath;
+			return true;
 		}
 
 		$dispatcher = sly_Core::dispatcher();
@@ -126,6 +126,10 @@ class sly_Loader {
 		return false;
 	}
 
+	/**
+	 * @param  string $className  class to find
+	 * @return mixed              the full path to the class file (string) or false
+	 */
 	public static function findClass($className) {
 		$upper = strtoupper($className);
 
@@ -155,21 +159,21 @@ class sly_Loader {
 	}
 
 	/**
-	 * @return int
+	 * @return int  number of loaded classes
 	 */
 	public static function getClassCount() {
 		return self::$counter;
 	}
 
 	/**
-	 * @return string
+	 * @return string  path to the current cache file
 	 */
 	public static function getCacheFile() {
 		return self::getCacheDir().'/'.self::$pathHash.'.php';
 	}
 
 	/**
-	 * @return string
+	 * @return string  path to cache directory
 	 */
 	public static function getCacheDir() {
 		static $dir = null;
@@ -198,8 +202,8 @@ class sly_Loader {
 	}
 
 	/**
-	 * @param  array $params
-	 * @return mixed
+	 * @param  array $params  event parameters
+	 * @return mixed          the event's subject
 	 */
 	public static function clearCache($params = array()) {
 		$dir   = new sly_Util_Directory(self::getCacheDir());

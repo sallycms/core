@@ -9,27 +9,28 @@
  */
 
 /**
+ * System Configuration
+ *
  * @ingroup core
  */
 class sly_Configuration {
+	const STORE_PROJECT         = 1; ///< int
+	const STORE_LOCAL           = 2; ///< int
+	const STORE_LOCAL_DEFAULT   = 3; ///< int
+	const STORE_STATIC          = 4; ///< int
+	const STORE_PROJECT_DEFAULT = 5; ///< int
 
-	const STORE_PROJECT         = 1;
-	const STORE_LOCAL           = 2;
-	const STORE_LOCAL_DEFAULT   = 3;
-	const STORE_STATIC          = 4;
-	const STORE_PROJECT_DEFAULT = 5;
+	private $mode              = array(); ///< array
+	private $loadedConfigFiles = array(); ///< array
 
-	private $mode              = array();
-	private $loadedConfigFiles = array();
+	private $staticConfig;  ///< sly_Util_Array
+	private $localConfig;   ///< sly_Util_Array
+	private $projectConfig; ///< sly_Util_Array
 
-	private $staticConfig;
-	private $localConfig;
-	private $projectConfig;
+	private $localConfigModified   = false; ///< boolean
+	private $projectConfigModified = false; ///< boolean
 
-	private $localConfigModified   = false;
-	private $projectConfigModified = false;
-
-	private static $instance;
+	private static $instance; ///< sly_Configuration
 
 	private function __construct() {
 		$this->staticConfig  = new sly_Util_Array();
@@ -42,10 +43,12 @@ class sly_Configuration {
 	 */
 	public static function getInstance() {
 		if (!self::$instance) self::$instance = new self();
-
 		return self::$instance;
 	}
 
+	/**
+	 * @return string  the directory where the config is stored
+	 */
 	protected function getConfigDir() {
 		$dir = SLY_DATAFOLDER.DIRECTORY_SEPARATOR.'config';
 
@@ -56,10 +59,16 @@ class sly_Configuration {
 		return $dir;
 	}
 
+	/**
+	 * @return string  the full path to the local config file
+	 */
 	protected function getLocalConfigFile() {
 		return $this->getConfigDir().DIRECTORY_SEPARATOR.'sly_local.yml';
 	}
 
+	/**
+	 * @return string  the full path to the project config file
+	 */
 	public function getProjectConfigFile() {
 		return $this->getConfigDir().DIRECTORY_SEPARATOR.'sly_project.yml';
 	}
@@ -74,18 +83,45 @@ class sly_Configuration {
 		}
 	}
 
+	/**
+	 * @throws sly_Exception      when something is fucked up (file not found, bad parameters, ...)
+	 * @param  string  $filename  the file to load
+	 * @param  boolean $force     force reloading the config or not
+	 * @param  string  $key       where to mount the loaded config
+	 * @return mixed              false when an error occured, else the loaded configuration (most likely an array)
+	 */
 	public function loadProject($filename, $force = false, $key = '/') {
 		return $this->loadInternal($filename, self::STORE_PROJECT_DEFAULT, $force, $key);
 	}
 
+	/**
+	 * @throws sly_Exception      when something is fucked up (file not found, bad parameters, ...)
+	 * @param  string $filename  the file to load
+	 * @param  string $key       where to mount the loaded config
+	 * @return mixed             false when an error occured, else the loaded configuration (most likely an array)
+	 */
 	public function loadStatic($filename, $key = '/') {
 		return $this->loadInternal($filename, self::STORE_STATIC, false, $key);
 	}
 
+	/**
+	 * @throws sly_Exception      when something is fucked up (file not found, bad parameters, ...)
+	 * @param  string  $filename  the file to load
+	 * @param  boolean $force     force reloading the config or not
+	 * @param  string  $key       where to mount the loaded config
+	 * @return mixed              false when an error occured, else the loaded configuration (most likely an array)
+	 */
 	public function loadLocalDefaults($filename, $force = false, $key = '/') {
 		return $this->loadInternal($filename, self::STORE_LOCAL_DEFAULT, $force, $key);
 	}
 
+	/**
+	 * @throws sly_Exception      when something is fucked up (file not found, bad parameters, ...)
+	 * @param  string  $filename  the file to load
+	 * @param  boolean $force     force reloading the config or not
+	 * @param  string  $key       where to mount the loaded config
+	 * @return mixed              false when an error occured, else the loaded configuration (most likely an array)
+	 */
 	public function loadProjectDefaults($filename, $force = false, $key = '/') {
 		return $this->loadInternal($filename, self::STORE_PROJECT_DEFAULT, $force, $key);
 	}
@@ -108,6 +144,14 @@ class sly_Configuration {
 		}
 	}
 
+	/**
+	 * @throws sly_Exception      when something is fucked up (file not found, bad parameters, ...)
+	 * @param  string  $filename  the file to load
+	 * @param  int     $mode      the mode in which the file should be loaded
+	 * @param  boolean $force     force reloading the config or not
+	 * @param  string  $key       where to mount the loaded config
+	 * @return mixed              false when an error occured, else the loaded configuration (most likely an array)
+	 */
 	protected function loadInternal($filename, $mode, $force = false, $key = '/') {
 		if ($mode != self::STORE_LOCAL_DEFAULT && $mode != self::STORE_STATIC && $mode != self::STORE_PROJECT_DEFAULT) {
 			throw new sly_Exception('Konfigurationsdateien können nur mit STORE_STATIC, STORE_LOCAL_DEFAULT oder STORE_PROJECT_DEFAULT geladen werden.');
@@ -140,6 +184,11 @@ class sly_Configuration {
 		return $config;
 	}
 
+	/**
+	 * @param  string $key      the key to load
+	 * @param  mixed  $default  value to return when $key was not found
+	 * @return mixed            the found value or $default
+	 */
 	public function get($key, $default = null) {
 		$found = false;
 
@@ -159,35 +208,83 @@ class sly_Configuration {
 		return array_replace_recursive($s[1], $l[1], $p[1]);
 	}
 
+	/**
+	 * @param  string $key  the key to check
+	 * @return boolean      true if found, else false
+	 */
 	public function has($key) {
 		return $this->projectConfig->has($key) || $this->localConfig->has($key) || $this->staticConfig->has($key);
 	}
 
+	/**
+	 * @param string $key  the key to remove
+	 */
 	public function remove($key) {
 		$this->localConfig->remove($key);
 		$this->projectConfig->remove($key);
 	}
 
+	/**
+	 * @throws sly_Exception  if the key is invalid or has the wrong mode
+	 * @param  string $key    the key to set the value to
+	 * @param  mixed  $value  the new value
+	 * @return mixed          the set value or false if an error occured
+	 */
 	public function setStatic($key, $value) {
 		return $this->setInternal($key, $value, self::STORE_STATIC);
 	}
 
+	/**
+	 * @throws sly_Exception  if the key is invalid or has the wrong mode
+	 * @param  string $key    the key to set the value to
+	 * @param  mixed  $value  the new value
+	 * @return mixed          the set value or false if an error occured
+	 */
 	public function setLocal($key, $value) {
 		return $this->setInternal($key, $value, self::STORE_LOCAL);
 	}
 
+	/**
+	 * @throws sly_Exception   if the key is invalid or has the wrong mode
+	 * @param  string  $key    the key to set the value to
+	 * @param  mixed   $value  the new value
+	 * @param  boolean $force  force reloading the config or not
+	 * @return mixed           the set value or false if an error occured
+	 */
 	public function setLocalDefault($key, $value, $force = false) {
 		return $this->setInternal($key, $value, self::STORE_LOCAL_DEFAULT, $force);
 	}
 
+	/**
+	 * @throws sly_Exception   if the key is invalid or has the wrong mode
+	 * @param  string  $key    the key to set the value to
+	 * @param  mixed   $value  the new value
+	 * @param  boolean $force  force reloading the config or not
+	 * @return mixed           the set value or false if an error occured
+	 */
 	public function setProjectDefault($key, $value, $force = false) {
 		return $this->setInternal($key, $value, self::STORE_PROJECT_DEFAULT, $force);
 	}
 
+	/**
+	 * @throws sly_Exception  if the key is invalid or has the wrong mode
+	 * @param  string $key    the key to set the value to
+	 * @param  mixed  $value  the new value
+	 * @param  int    $mode   one of the classes MODE constants
+	 * @return mixed          the set value or false if an error occured
+	 */
 	public function set($key, $value, $mode = self::STORE_PROJECT) {
 		return $this->setInternal($key, $value, $mode);
 	}
 
+	/**
+	 * @throws sly_Exception   if the key is invalid or has the wrong mode
+	 * @param  string  $key    the key to set the value to
+	 * @param  mixed   $value  the new value
+	 * @param  int     $mode   one of the classes MODE constants
+	 * @param  boolean $force  force reloading the config or not
+	 * @return mixed           the set value or false if an error occured
+	 */
 	protected function setInternal($key, $value, $mode, $force = false) {
 		if (is_null($key) || strlen($key) === 0) {
 			throw new sly_Exception('Key '.$key.' ist nicht erlaubt!');
@@ -235,6 +332,11 @@ class sly_Configuration {
 		return $this->projectConfig->set($key, $value);
 	}
 
+	/**
+	 * @throws sly_Exception  if the mode is wrong
+	 * @param  string $key    the key to set the mode of
+	 * @param  int    $mode   one of the classes MODE constants
+	 */
 	protected function setMode($key, $mode) {
 		if ($mode == self::STORE_LOCAL_DEFAULT) $mode = self::STORE_LOCAL;
 		if ($this->checkMode($key, $mode)) return;
@@ -245,11 +347,20 @@ class sly_Configuration {
 		$this->mode[$key] = $mode;
 	}
 
+	/**
+	 * @param  string $key  the key to look for
+	 * @return mixed        the found mode (int) or null if the key does not exist
+	 */
 	protected function getMode($key) {
 		if (!isset($this->mode[$key])) return null;
 		return $this->mode[$key];
 	}
 
+	/**
+	 * @param  string $key   the key to look for
+	 * @param  int    $mode  one of the classes MODE constants
+	 * @return boolean       if the mode matches or the key has no mode yet
+	 */
 	protected function checkMode($key, $mode) {
 		if ($mode == self::STORE_LOCAL_DEFAULT) $mode = self::STORE_LOCAL;
 		return !isset($this->mode[$key]) || $this->mode[$key] == $mode;

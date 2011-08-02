@@ -42,18 +42,31 @@ class sly_Authorisation {
 		}
 	}
 
+	/**
+	 * @return array  list of permissions
+	 */
 	public static function getRights() {
 		return self::getRightsHelper('perm');
 	}
 
+	/**
+	 * @return array  list of permissions
+	 */
 	public static function getExtendedRights() {
 		return self::getRightsHelper('extperm');
 	}
 
+	/**
+	 * @return array  list of permissions
+	 */
 	public static function getExtraRights() {
 		return self::getRightsHelper('extraperm');
 	}
 
+	/**
+	 * @param  string $key  one of 'perm', 'extperm' or 'extraperm'
+	 * @return array        list of permissions
+	 */
 	protected static function getRightsHelper($key) {
 		static $cache = array();
 

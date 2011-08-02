@@ -12,24 +12,24 @@
  * @ingroup core
  */
 class sly_Core {
-	private static $instance;
-	private $cache;
-	private $curClang;
-	private $curArticleId;
-	private $varTypes;
-	private $layout;
-	private $navigation;
-	private $i18n;
-	private $errorHandler;
+	private static $instance;  ///< sly_Core
+	private $cache;            ///< BabelCache_Interface
+	private $curClang;         ///< int
+	private $curArticleId;     ///< int
+	private $varTypes;         ///< array
+	private $layout;           ///< sly_Layout
+	private $navigation;       ///< sly_Layout_Navigation_Sally
+	private $i18n;             ///< sly_I18N
+	private $errorHandler;     ///< sly_ErrorHandler
 
 	private function __construct() {
 		$this->cache = sly_Cache::factory();
 	}
 
 	/**
-	 * Gibt die Instanz des Core Objekts als Singleton zurück
+	 * Get the single core instance
 	 *
-	 * @return sly_Core  Die singleton Core Instanz
+	 * @return sly_Core  the singleton
 	 */
 	public static function getInstance() {
 		if (!self::$instance) self::$instance = new self();
@@ -37,16 +37,26 @@ class sly_Core {
 	}
 
 	/**
-	 * Gibt die angemeldete Cache-Instanz zurück.
+	 * The the global caching instance
 	 *
-	 * @return BabelCache_Interface  Cache-Instanz
+	 * @return BabelCache_Interface  caching instance
 	 */
 	public static function cache() {
 		return self::getInstance()->cache;
 	}
 
+	/**
+	 * @param int $clangId  the new clang
+	 */
 	public static function setCurrentClang($clangId) {
 		self::getInstance()->curClang = (int) $clangId;
+	}
+
+	/**
+	 * @param int $articleId  the new article ID
+	 */
+	public static function setCurrentArticleId($articleId) {
+		self::getInstance()->curArticleId = (int) $articleId;
 	}
 
 	/**
@@ -74,10 +84,6 @@ class sly_Core {
 	public static function getCurrentLanguage() {
 		$clang = sly_Core::getCurrentClang();
 		return sly_Service_Factory::getLanguageService()->findById($clang);
-	}
-
-	public static function setCurrentArticleId($articleId) {
-		self::getInstance()->curArticleId = (int) $articleId;
 	}
 
 	/**
@@ -121,9 +127,9 @@ class sly_Core {
 	}
 
 	/**
-	 * API Methode um Variabletypen zu setzen.
+	 * Register a new var class
 	 *
-	 * @param string $varType  Klassenname des Variablentyps
+	 * @param string $varType  class name of the new variable
 	 */
 	public static function registerVarType($varType) {
 		self::getInstance()->varTypes[] = $varType;
@@ -132,7 +138,8 @@ class sly_Core {
 	/**
 	 * Gibt immer eine Liste von Instanzen der Variablentypen zurück
 	 *
-	 * @return array
+	 * @throws sly_Exception  if one of the registered classes does not inherit rex_var
+	 * @return array          list of rex_var instances
 	 */
 	public static function getVarTypes() {
 		$instance = self::getInstance();
@@ -151,24 +158,24 @@ class sly_Core {
 	}
 
 	/**
-	 * @return sly_Configuration
+	 * @return sly_Configuration  the system configuration
 	 */
 	public static function config() {
 		return sly_Configuration::getInstance();
 	}
 
 	/**
-	 * @return sly_Event_Dispatcher
+	 * @return sly_Event_Dispatcher  the event dispatcher
 	 */
 	public static function dispatcher() {
 		return sly_Event_Dispatcher::getInstance();
 	}
 
 	/**
-	 * gibt ein sly_Layout Instanz zurück
+	 * Get the current layout instance
 	 *
-	 * @param  string $type
-	 * @return sly_Layout
+	 * @param  string $type  the type of layout (only used when first instantiating the layout)
+	 * @return sly_Layout    the layout instance
 	 */
 	public static function getLayout($type = 'XHTML') {
 		$instance = self::getInstance();
@@ -184,60 +191,102 @@ class sly_Core {
 		return $instance->layout;
 	}
 
+	/**
+	 * @return boolean  true if backend, else false
+	 */
 	public static function isBackend() {
 		return defined('IS_SALLY_BACKEND') && IS_SALLY_BACKEND == true;
 	}
 
+	/**
+	 * @return boolean  true if developer mode, else false
+	 */
 	public static function isDeveloperMode() {
 		static $var = null;
 		if ($var === null) $var = (boolean) self::config()->get('DEVELOPER_MODE');
 		return $var;
 	}
 
+	/**
+	 * @return string  the project name
+	 */
 	public static function getProjectName() {
 		return self::config()->get('PROJECTNAME');
 	}
 
+	/**
+	 * @return int  the project homepage ID (start article)
+	 */
 	public static function getSiteStartArticleId() {
 		return (int) self::config()->get('START_ARTICLE_ID');
 	}
 
+	/**
+	 * @return int  the not-found article's ID
+	 */
 	public static function getNotFoundArticleId() {
 		return (int) self::config()->get('NOTFOUND_ARTICLE_ID');
 	}
 
+	/**
+	 * @return int  the default clang ID
+	 */
 	public static function getDefaultClangId() {
 		return (int) self::config()->get('DEFAULT_CLANG_ID');
 	}
 
+	/**
+	 * @return string  the default (backend) locale
+	 */
 	public static function getDefaultLocale() {
 		return self::config()->get('DEFAULT_LOCALE');
 	}
 
+	/**
+	 * @return string  the default article type
+	 */
 	public static function getDefaultArticleType() {
 		return self::config()->get('DEFAULT_ARTICLE_TYPE');
 	}
 
+	/**
+	 * @return string  the class name of the global caching strategy
+	 */
 	public static function getCachingStrategy() {
 		return self::config()->get('CACHING_STRATEGY');
 	}
 
+	/**
+	 * @return string  the timezone's name
+	 */
 	public static function getTimezone() {
 		return self::config()->get('TIMEZONE');
 	}
 
+	/**
+	 * @return int  permissions for files
+	 */
 	public static function getFilePerm($default = 0777) {
 		return (int) self::config()->get('FILEPERM', $default);
 	}
 
+	/**
+	 * @return int  permissions for directory
+	 */
 	public static function getDirPerm($default = 0777) {
 		return (int) self::config()->get('DIRPERM', $default);
 	}
 
+	/**
+	 * @return sly_I18N  the global i18n instance
+	 */
 	public static function getI18N() {
 		return self::getInstance()->i18n;
 	}
 
+	/**
+	 * @param sly_I18N $i18n  the new translation object
+	 */
 	public static function setI18N(sly_I18N $i18n) {
 		self::getInstance()->i18n = $i18n;
 	}
@@ -245,7 +294,7 @@ class sly_Core {
 	/**
 	 * Get persistent registry instance
 	 *
-	 * @return sly_Registry_Persistent
+	 * @return sly_Registry_Persistent  the registry singleton
 	 */
 	public static function getPersistentRegistry() {
 		return sly_Registry_Persistent::getInstance();
@@ -254,12 +303,16 @@ class sly_Core {
 	/**
 	 * Get temporary registry instance
 	 *
-	 * @return sly_Registry_Temp
+	 * @return sly_Registry_Temp  the registry singleton
 	 */
 	public static function getTempRegistry() {
 		return sly_Registry_Temp::getInstance();
 	}
 
+	/**
+	 * @param  string $pattern  the pattern (X = major version, Y = minor version, Z = minor version)
+	 * @return string           the pattern with replaced version numbers
+	 */
 	public static function getVersion($pattern = 'X.Y.Z') {
 		static $version = null;
 
@@ -332,10 +385,16 @@ class sly_Core {
 		$dispatcher->notify('SLY_LISTENERS_REGISTERED');
 	}
 
+	/**
+	 * @param sly_ErrorHandler $errorHandler  the new error handler instance
+	 */
 	public static function setErrorHandler(sly_ErrorHandler $errorHandler) {
 		self::getInstance()->errorHandler = $errorHandler;
 	}
 
+	/**
+	 * @return sly_ErrorHandler  the current error handler
+	 */
 	public static function getErrorHandler() {
 		return self::getInstance()->errorHandler;
 	}

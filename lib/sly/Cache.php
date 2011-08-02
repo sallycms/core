@@ -9,11 +9,13 @@
  */
 
 /**
+ * Caching wrapper
+ *
  * @ingroup cache
  */
 class sly_Cache extends BabelCache_Factory {
 	private static $cachingStrategy = null;   ///< string
-	private static $instance        = null;
+	private static $instance        = null;   ///< sly_Cache
 
 	private static $cacheImpls = array(
 		'BabelCache_APC'          => 'APC',
@@ -25,10 +27,10 @@ class sly_Cache extends BabelCache_Factory {
 		'BabelCache_Memory'       => 'Memory',
 		'BabelCache_XCache'       => 'XCache',
 		'BabelCache_ZendServer'   => 'ZendServer'
-	);
+	); ///< array
 
 	/**
-	 * @return array  [className: title, className: title]
+	 * @return array  list of implementations ({className: title, className: title})
 	 */
 	public static function getAvailableCacheImpls() {
 		$result = array();
@@ -62,8 +64,8 @@ class sly_Cache extends BabelCache_Factory {
 	}
 
 	/**
-	 * @param  string $forceCache
-	 * @return BabelCache_Interface
+	 * @param  string $forceCache    overwrites the configured strategy
+	 * @return BabelCache_Interface  the caching instance to use
 	 */
 	public static function factory($forceCache = null) {
 		if (self::$cachingStrategy === null) {
@@ -110,7 +112,9 @@ class sly_Cache extends BabelCache_Factory {
 	}
 
 	/**
-	 * @see BabelCache::generateKey()
+	 * @see    BabelCache::generateKey()
+	 * @param  mixed $vars  dummy parameter, this method can be called with as many arguments as you like
+	 * @return string       a sanatized string encoding all the given arguments
 	 */
 	public static function generateKey($vars) {
 		$vars = func_get_args();
@@ -125,10 +129,16 @@ class sly_Cache extends BabelCache_Factory {
 		return self::$instance;
 	}
 
+	/**
+	 * @return string  the cache prefix (to avoid collisions between projects using the same cache)
+	 */
 	protected function getPrefix() {
 		return sly_Core::config()->get('INSTNAME');
 	}
 
+	/**
+	 * @return string  the directory to store the filesystem cache
+	 */
 	protected function getCacheDirectory() {
 		return sly_Util_Directory::join(SLY_DYNFOLDER, 'internal', 'sally', 'fscache');
 	}
