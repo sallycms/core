@@ -16,6 +16,7 @@ $text = $texts[rand(0, count($texts) - 1)];
 	h1, p { font-family:Calibri; }
 	#horizon { background-color:transparent; position:absolute; top:50%; left:0px; width:100%; margin-top:-100px; text-align:center; min-width:700px; }
 	#wrapper { margin:0px auto; background-color:#fff; position:relative; text-align:left; width:700px; height:100px; }
+	.beast { position:fixed; right: 3px; bottom: 3px; }
 	</style>
 </head>
 <body>
@@ -25,5 +26,8 @@ $text = $texts[rand(0, count($texts) - 1)];
 		<p>Es trat ein interner Fehler beim Verarbeiten Ihrer Anfrage auf. Bitte versuchen Sie es später noch einmal.</p>
 	</div>
 </div>
+<!-- Illustration provided by The Oatmeal -->
+<?php $beast = base64_encode(file_get_contents(dirname(__FILE__).'/beast.png')); ?>
+<img src="data:image/png;base64,<?= $beast ?>" alt="" class="beast" />
 </body>
 </html>
