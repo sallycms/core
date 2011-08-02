@@ -214,9 +214,8 @@ class rex_var_link extends rex_var {
 	public function getLinkWidget($id, $article_id, $category = '') {
 		// TODO: Build something like $widget->setRootCat($category);
 		$widget = new sly_Form_Widget_Link(self::LINK.'['.$id.']', null, $article_id, $id);
-		$widget = '<div class="rex-widget">'.$widget->render().'</div>';
 
-		return $widget;
+		return $widget->render();
 	}
 
 	/**
@@ -226,8 +225,7 @@ class rex_var_link extends rex_var {
 		// TODO: Build something like $widget->setRootCat($category);
 		$articles = explode(',', $value);
 		$widget   = new sly_Form_Widget_LinkList(self::LINKLIST.'['.$id.']', null, $articles, $id);
-		$widget   = '<div class="rex-widget">'.$widget->render().'</div>';
-
-		return $widget;
+		
+		return $widget->render();
 	}
 }
