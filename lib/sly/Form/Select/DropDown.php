@@ -62,7 +62,6 @@ class sly_Form_Select_DropDown extends sly_Form_Select_Base implements sly_Form_
 	 * @return string  the outer class
 	 */
 	public function getOuterClass() {
-		$this->addOuterClass('rex-form-select');
 		return $this->outerClass;
 	}
 }

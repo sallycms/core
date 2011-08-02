@@ -11,11 +11,11 @@
 $id = !empty($this->id) ? ' id="'.$this->id.'"' : '';
 ?>
 <div style="margin-bottom:1em">
-	<div class="rex-form">
+	<div class="sly-form">
 		<form method="<?= strtolower($this->method) ?>" action="<?= sly_html($this->action) ?>"<?= $id ?>>
 			<? foreach ($this->fieldsets as $i => $fieldset): ?>
 			<fieldset class="rex-form-col-1">
-				<legend class="rex-lgnd"><?= sly_html($fieldset['title']) ?></legend>
+				<legend><?= sly_html($fieldset['title']) ?></legend>
 				<div class="rex-form-wrapper">
 
 				<?php
