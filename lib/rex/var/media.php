@@ -38,9 +38,10 @@ class rex_var_media extends rex_var {
 
 	public function getDatabaseValues($slice_id) {
 		$service = sly_Service_Factory::getSliceValueService();
-		$data = array();
+		$data    = array();
+
 		foreach (array('MEDIA', 'MEDIALIST') as $type) {
-			$type  = 'SLY_'.$type;
+			$type   = 'SLY_'.$type;
 			$values = $service->find(array('slice_id' => $slice_id, 'type' => $type));
 
 			foreach ($values as $value) {
@@ -107,7 +108,7 @@ class rex_var_media extends rex_var {
 	 * MediaWidget für die Eingabe
 	 */
 	public function matchMediaWidget($REX_ACTION, $content) {
-		$var = self::MEDIAWIDGET;
+		$var     = self::MEDIAWIDGET;
 		$matches = $this->getVarParams($content, self::MEDIAWIDGET);
 
 		foreach ($matches as $match) {
@@ -129,7 +130,7 @@ class rex_var_media extends rex_var {
 	 * MediaListWidget für die Eingabe
 	 */
 	public function matchMediaListWidget($REX_ACTION, $content) {
-		$var = self::MEDIALISTWIDGET;
+		$var     = self::MEDIALISTWIDGET;
 		$matches = $this->getVarParams($content, $var);
 
 		foreach ($matches as $match) {
@@ -161,7 +162,7 @@ class rex_var_media extends rex_var {
 		foreach ($matches as $match) {
 			list ($param_str, $args) = $match;
 			list ($id, $args) = $this->extractArg('id', $args, 0);
-			
+
 			$value = isset($REX_ACTION[$var][$id]) ? strval($REX_ACTION[$var][$id]) : '';
 
 			// Mimetype ausgeben
