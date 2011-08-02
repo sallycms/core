@@ -119,16 +119,3 @@ function rex_deleteArticle($id) {
 	$return['message'] = t('category_doesnt_exist');
 	return $return;
 }
-
-/**
- * Kopiert eine Ordner von $srcdir nach $dstdir
- *
- * @deprecated
- * @param  string $srcdir    Zu kopierendes Verzeichnis
- * @param  string $dstdir    Zielpfad
- * @return bool              true bei Erfolg, false bei Fehler
- */
-function rex_copyDir($srcdir, $dstdir) {
-	$srcdir = new sly_Util_Directory($srcdir);
-	return $srcdir->copyTo($dstdir);
-}

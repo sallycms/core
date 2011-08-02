@@ -645,7 +645,9 @@ abstract class sly_Service_AddOn_Base {
 
 		if (!is_dir($assetsDir)) return true;
 
-		if (!rex_copyDir($assetsDir, $target)) {
+		$dir = new sly_Util_Directory($assetsDir);
+
+		if (!$dir->copyTo($target)) {
 			return t('install_cant_copy_files');
 		}
 
