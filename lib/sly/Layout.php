@@ -382,6 +382,8 @@ abstract class sly_Layout extends sly_Viewable {
 	 * Prints the closing body and html tags.
 	 */
 	public function printFooter() {
+		$this->printJavaScriptFiles();
+		$this->printJavaScript();
 		print '</body></html>';
 	}
 
