@@ -18,7 +18,7 @@ class sly_Core {
 	private $curArticleId;     ///< int
 	private $varTypes;         ///< array
 	private $layout;           ///< sly_Layout
-	private $navigation;       ///< sly_Layout_Navigation_Sally
+	private $navigation;       ///< sly_Layout_Navigation_Backend
 	private $i18n;             ///< sly_I18N
 	private $errorHandler;     ///< sly_ErrorHandler
 
@@ -333,13 +333,13 @@ class sly_Core {
 	/**
 	 * Returns the backend navigation
 	 *
-	 * @return sly_Layout_Navigation_Sally  the navigation object used for the backend menu
+	 * @return sly_Layout_Navigation_Backend  the navigation object used for the backend menu
 	 */
 	public static function getNavigation() {
 		$instance = self::getInstance();
 
 		if (!isset($instance->navigation)) {
-			$instance->navigation = new sly_Layout_Navigation_Sally();
+			$instance->navigation = new sly_Layout_Navigation_Backend();
 		}
 
 		return $instance->navigation;
