@@ -28,7 +28,6 @@ class sly_Form_Widget_Media extends sly_Form_ElementBase implements sly_Form_IEl
 	 */
 	public function __construct($name, $label, $value, $id = null) {
 		parent::__construct($name, $label, $value, $id);
-		$this->setAttribute('class', 'rex-form-text');
 	}
 
 	/**

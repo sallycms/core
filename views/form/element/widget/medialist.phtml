@@ -24,9 +24,9 @@ foreach ($files as $filename) {
 }
 
 ?>
-<span class="sly-widget sly-medialist">
+<span class="sly-widget sly-medialist<?= isset($this->attributes['class']) ? ' '.sly_html($this->attributes['class']) : '' ?>">
 	<input type="hidden" name="<?= $name ?>" id="<?= $id ?>" value="<?= sly_html(implode(',', $values)) ?>" />
-	<select size="8" class="<?= $this->attributes['class'] ?>">
+	<select size="8">
 		<? foreach ($list as $element): ?>
 		<option value="<?= sly_html($element[0]) ?>"><?= sly_html($element[1]) ?></option>
 		<? endforeach ?>

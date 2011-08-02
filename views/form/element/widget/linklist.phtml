@@ -8,6 +8,8 @@
  * http://www.opensource.org/licenses/mit-license.php
  */
 
+$name = sly_html($this->getName());
+$id   = sly_html($this->getID());
 $articles = sly_makeArray($this->getDisplayValue());
 $articles = array_filter($articles);
 $values   = array();
@@ -21,13 +23,10 @@ foreach ($articles as $articleID) {
 	$list[]   = array($articleID, $fullName);
 }
 
-$name = sly_html($this->getName());
-$id   = sly_html($this->getID());
-
 ?>
-<span class="sly-widget sly-linklist">
+<span class="sly-widget sly-linklist<?= isset($this->attributes['class']) ? ' '.sly_html($this->attributes['class']) : '' ?>">
 	<input type="hidden" name="<?= $name ?>" id="<?= $id ?>" value="<?= sly_html(implode(',', $values)) ?>" />
-	<select size="8" class="<?= $this->attributes['class'] ?>">
+	<select size="8" class="">
 		<? foreach ($list as $element): ?>
 		<option value="<?= sly_html($element[0]) ?>"><?= sly_html($element[1]) ?></option>
 		<? endforeach ?>
