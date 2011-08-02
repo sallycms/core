@@ -17,7 +17,7 @@
  * @ingroup redaxo
  */
 class rex_var_link extends rex_var {
-	
+
 	const LINK           = 'SLY_LINK';
 	const LINKURL        = 'SLY_LINK_URL';
 	const LINKLIST       = 'SLY_LINKLIST';
@@ -25,8 +25,10 @@ class rex_var_link extends rex_var {
 	const LINKLISTWIDGET = 'SLY_LINKLIST_WIDGET';
 
 	public function getRequestValues($REX_ACTION) {
-		foreach (array(self::LINK, self::LINKLIST) as $type) {
+		foreach (array('LINK', 'LINKLIST') as $type) {
 			$link = sly_requestArray($type, 'string');
+			$type = 'SLY_'.$type;
+
 			foreach ($link as $key => $value) {
 				$REX_ACTION[$type][$key] = $value;
 			}
@@ -37,9 +39,11 @@ class rex_var_link extends rex_var {
 
 	public function getDatabaseValues($slice_id) {
 		$service = sly_Service_Factory::getSliceValueService();
-		$data = array();
+		$data    = array();
+
 		foreach (array(self::LINK, self::LINKLIST) as $type) {
 			$values = $service->find(array('slice_id' => $slice_id, 'type' => $type));
+
 			foreach ($values as $value) {
 				$data[$type][$value->getFinder()] = $value->getValue();
 			}
