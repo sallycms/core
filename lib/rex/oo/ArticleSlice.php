@@ -161,14 +161,14 @@ class OOArticleSlice {
 	 * @return OOArticleSlice
 	 */
 	public function getNextSlice() {
-		return self::_getSliceWhere('prior > '.$this->_prior.' AND slot = "'.mysql_real_escape_string($this->_slot).'" AND clang = '.$this->_clang.' AND article_id = '.$this->_article_id.' AND clang = '.$this->_clang.' LIMIT 1 ORDER BY prior ASC');
+		return self::_getSliceWhere('prior > '.$this->_prior.' AND slot = "'.mysql_real_escape_string($this->_slot).'" AND clang = '.$this->_clang.' AND article_id = '.$this->_article_id.' AND clang = '.$this->_clang.' ORDER BY prior ASC LIMIT 1');
 	}
 
 	/**
 	 * @return OOArticleSlice
 	 */
 	public function getPreviousSlice() {
-		return self::_getSliceWhere('prior < '.$this->_prior.' AND slot = "'.mysql_real_escape_string($this->_slot).'" AND clang = '.$this->_clang.' AND article_id = '.$this->_article_id.' AND clang = '.$this->_clang.' LIMIT 1 ORDER BY prior DESC');
+		return self::_getSliceWhere('prior < '.$this->_prior.' AND slot = "'.mysql_real_escape_string($this->_slot).'" AND clang = '.$this->_clang.' AND article_id = '.$this->_article_id.' AND clang = '.$this->_clang.' ORDER BY prior DESC LIMIT 1');
 	}
 
 	/**
