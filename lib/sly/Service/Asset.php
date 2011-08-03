@@ -202,7 +202,20 @@ class sly_Service_Asset {
 
 		if (empty($errors)) {
 			// redirect so that Apache can set content-type and various other headers
-			header('Location: '.$_SERVER['REQUEST_URI']);
+			$protocol = sly_Util_HTTP::isSecure() ? 'https' : 'http';
+			$host     = sly_Util_HTTP::getHost();
+			$uri      = $_SERVER['REQUEST_URI'];
+
+			// HTTP 1.0 states that clients should detect redirect loops. Unfortunately,
+			// IE7 and 8 take this a bit too serious and won't perform *any* redirects to
+			// inline elements (JS/CSS) when the URL is the same as the original request
+			// URI. To make it work, we have to syntactically change the URL. And that's
+			// what the anchor is used for. Since the IE will (correctly) strip the
+			// anchor before re-fetching the asset, this works perfectly.
+
+			$greeting = '#please-ie-do-this-redirect';
+
+			header('Location: '.$protocol.'://'.$host.$uri.$greeting);
 		}
 		else {
 			header('Content-Type: text/plain; charset=UTF-8');
