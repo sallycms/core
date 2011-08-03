@@ -177,15 +177,13 @@ abstract class sly_Controller_Base {
 			// Erst normale Startseite, dann User-Startseite, dann System-Startseite und
 			// zuletzt auf die Profilseite zurückfallen.
 
-			$nav = sly_Core::getNavigation();
-
-			if (empty($page) || !$nav->hasPage($page) || !class_exists('sly_Controller_'.ucfirst($page))) {
+			if (empty($page) || !self::isPageAvailable($page)) {
 				$page = sly_Service_Factory::getUserService()->getCurrentUser()->getStartpage();
 
-				if (is_null($page) || !$nav->hasPage($page)) {
+				if (is_null($page) || !self::isPageAvailable($page)) {
 					$page = strtolower($config->get('START_PAGE'));
 
-					if (!$nav->hasPage($page)) {
+					if (!self::isPageAvailable($page)) {
 						$page = 'profile';
 					}
 				}
@@ -196,6 +194,10 @@ abstract class sly_Controller_Base {
 		}
 
 		return self::$currentPage;
+	}
+	
+	protected static function isPageAvailable($page) {
+		return class_exists('sly_Controller_'.ucfirst($page));
 	}
 
 	public static function setCurrentPage($page) {
