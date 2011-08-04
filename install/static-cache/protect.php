@@ -1,13 +1,8 @@
 <?php
 
-// get client encoding
+// get client encoding (attention: use the one set by htaccess for mod_headers awareness)
 
-$enc = 'plain';
-
-if (!empty($_SERVER['HTTP_ACCEPT_ENCODING'])) {
-	if (stripos($_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip') !== false) $enc = 'gzip';
-	elseif (stripos($_SERVER['HTTP_ACCEPT_ENCODING'], 'deflate') !== false) $enc = 'deflate';
-}
+$enc = trim($_SERVER['HTTP_ENCODING_CACHEDIR'], '/');
 
 // check file
 
