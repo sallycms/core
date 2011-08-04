@@ -168,12 +168,6 @@ abstract class sly_Controller_Base {
 			$config = sly_Core::config();
 			$page   = strtolower(self::getPageParam());
 
-			// do not allow any access to setup controller when SETUP=false
-
-			if ($config->get('SETUP') !== true && $page == 'setup') {
-				$page = 'profile';
-			}
-
 			// Erst normale Startseite, dann User-Startseite, dann System-Startseite und
 			// zuletzt auf die Profilseite zurückfallen.
 
