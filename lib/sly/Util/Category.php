@@ -67,7 +67,6 @@ class sly_Util_Category {
 	 */
 	public static function hasPermissionOnCategory(sly_Model_User $user, $categoryId) {
 		if ($user->isAdmin() || $user->hasRight('csw[0]')) return true;
-		if ($user->hasRight('editContentOnly[]')) return false;
 
 		$cat = sly_Util_Category::findById($categoryId);
 
