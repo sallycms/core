@@ -56,8 +56,21 @@ class sly_Util_HTTP {
 	}
 
 	public static function getBaseUrl($addScriptPath = false) {
-		$baseURL = 'http'.(!empty($_SERVER['HTTPS']) ? 's' : '').'://'.self::getHost().($addScriptPath ? str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'])) : '');
-		return rtrim($baseURL, '/');
+		$protocol = self::isSecure() ? 'https': 'http';
+		$host     = self::getHost();
+		$path     = '';
+
+		if ($addScriptPath) {
+			$path = dirname($_SERVER['SCRIPT_NAME']); // '/foo' or '/foo/sally/backend'
+
+			if (IS_SALLY_BACKEND) {
+				$path = dirname(dirname($path));
+			}
+
+			$path = str_replace('\\', '/', $path);
+		}
+
+		return rtrim(sprintf('%s://%s%s', $protocol, $host, $path), '/');
 	}
 
 	/**
