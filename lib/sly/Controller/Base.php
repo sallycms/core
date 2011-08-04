@@ -184,7 +184,7 @@ abstract class sly_Controller_Base {
 			}
 
 			$_REQUEST[self::PAGEPARAM] = $page;
-			self::$currentPage         = $page;
+			self::setCurrentPage($page);
 		}
 
 		return self::$currentPage;
@@ -204,6 +204,8 @@ abstract class sly_Controller_Base {
 	public static function setCurrentPage($page) {
 		if (self::$currentPage === null) {
 			self::$currentPage = $page;
+			// notify addOns about the page to be rendered
+			sly_Core::dispatcher()->notify('PAGE_CHECKED', self::$currentPage);
 			return true;
 		}
 		else {
