@@ -285,6 +285,13 @@ class sly_Core {
 	}
 
 	/**
+	 * @return sring  the database table prefix
+	 */
+	public static function getTablePrefix() {
+		return self::config()->get('DATABASE/TABLE_PREFIX');
+	}
+
+	/**
 	 * @return sly_I18N  the global i18n instance
 	 */
 	public static function getI18N() {
