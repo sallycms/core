@@ -12,20 +12,20 @@
  * @ingroup table
  */
 class sly_Table extends sly_Viewable {
-	protected $id;
-	protected $columns;
-	protected $isEmpty;
-	protected $emptyNotice;
-	protected $enableSorting;
-	protected $enableSearching;
-	protected $enableDragAndDrop;
-	protected $dragAndDropHandler;
-	protected $totalElements;
-	protected $caption;
+	protected $id;                  ///< string
+	protected $columns;             ///< array
+	protected $isEmpty;             ///< boolean
+	protected $emptyNotice;         ///< string
+	protected $enableSorting;       ///< boolean
+	protected $enableSearching;     ///< boolean
+	protected $enableDragAndDrop;   ///< boolean
+	protected $dragAndDropHandler;  ///< boolean
+	protected $totalElements;       ///< int
+	protected $caption;             ///< string
 
-	private $content;
+	private $content;               ///< string
 
-	protected static $perPage = 30;
+	protected static $perPage = 30; ///< int
 
 	/**
 	 * @param string $id
@@ -78,13 +78,17 @@ class sly_Table extends sly_Viewable {
 	}
 
 	/**
-	 * @param int $totalElements  leave this to null to disable the pager
+	 * @param  int $totalElements  leave this to null to disable the pager
+	 * @return string              the rendered header
 	 */
 	protected function renderHeader($totalElements = null) {
 		$this->totalElements = $totalElements;
 		return $this->renderView('header.phtml', compact('totalElements'));
 	}
 
+	/**
+	 * @return string  the rendered footer
+	 */
 	protected function renderFooter() {
 		return $this->renderView('footer.phtml');
 	}
@@ -98,7 +102,8 @@ class sly_Table extends sly_Viewable {
 	}
 
 	/**
-	 * @return string
+	 * @param  int $totalElements  leave this to null to disable the pager
+	 * @return string              the rendered content
 	 */
 	public function render($totalElements = null) {
 		ob_start();
@@ -109,14 +114,17 @@ class sly_Table extends sly_Viewable {
 	}
 
 	/**
-	 * @param boolean $enable
+	 * @param boolean $isEmpty
 	 */
 	public function setIsEmpty($isEmpty) {
 		$this->isEmpty = (bool) $isEmpty;
 	}
 
-	public function setCaption($string) {
-		if (is_string($string)) $this->caption = $string;
+	/**
+	 * @param string $caption
+	 */
+	public function setCaption($caption) {
+		$this->caption = $caption;
 	}
 
 	/**
@@ -129,14 +137,14 @@ class sly_Table extends sly_Viewable {
 	/**
 	 * @param boolean $enable
 	 */
-	public function enableSorting($enable) {
+	public function enableSorting($enable = true) {
 		$this->enableSorting = (bool) $enable;
 	}
 
 	/**
 	 * @param boolean $enable
 	 */
-	public function enableDragAndDrop($enable) {
+	public function enableDragAndDrop($enable = true) {
 		$this->enableDragAndDrop = (bool) $enable;
 	}
 
@@ -157,7 +165,7 @@ class sly_Table extends sly_Viewable {
 	/**
 	 * @param boolean $enable
 	 */
-	public function enableSearching($enable) {
+	public function enableSearching($enable = true) {
 		$this->enableSearching = (bool) $enable;
 	}
 
@@ -274,6 +282,11 @@ class sly_Table extends sly_Viewable {
 		return array('sortby' => $sortby, 'direction' => $direction);
 	}
 
+	/**
+	 * @throws sly_Exception
+	 * @param  string $file
+	 * @return string
+	 */
 	protected function getViewFile($file) {
 		$full = SLY_COREFOLDER.'/views/table/'.$file;
 		if (file_exists($full)) return $full;

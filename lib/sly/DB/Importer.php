@@ -12,27 +12,34 @@
  * @ingroup database
  */
 class sly_DB_Importer {
-	protected $filename;
-	protected $returnValues;
-	protected $dump;
+	protected $filename;     ///< string
+	protected $returnValues; ///< array
+	protected $dump;         ///< sly_DB_Dump
 
 	public function __construct() {
 		$this->reset();
 	}
 
+	/**
+	 * @param string $filename
+	 */
 	protected function reset($filename = '') {
 		$this->returnValues['state']   = false;
 		$this->returnValues['message'] = '';
 
 		if (empty($filename) || substr($filename, -4) != '.sql') {
 			$this->returnValues['message'] = t('importer_no_import_file_chosen_or_wrong_version');
-			return $this->returnValues;
+			return;
 		}
 
 		$this->dump     = null;
 		$this->filename = $filename;
 	}
 
+	/**
+	 * @param  string $filename
+	 * @return array             array with state and message keys
+	 */
 	public function import($filename) {
 		$this->reset($filename);
 
@@ -69,7 +76,8 @@ class sly_DB_Importer {
 
 		try {
 			$this->checkForUserTable();
-		} catch(sly_DB_PDO_Exception $e) {
+		}
+		catch(sly_DB_PDO_Exception $e) {
 			$error = $e->getMessage();
 		}
 
@@ -83,6 +91,9 @@ class sly_DB_Importer {
 		return $this->returnValues;
 	}
 
+	/**
+	 * @return boolean
+	 */
 	protected function prepareImport() {
 		try {
 			$this->dump = new sly_DB_Dump($this->filename);
@@ -97,6 +108,9 @@ class sly_DB_Importer {
 		}
 	}
 
+	/**
+	 * @throws sly_Exception  when the versions don't match
+	 */
 	protected function checkVersion() {
 		$dumpVersion = $this->dump->getVersion();
 		$thisVersion = sly_Core::getVersion('X.Y');
@@ -107,6 +121,9 @@ class sly_DB_Importer {
 		}
 	}
 
+	/**
+	 * @throws sly_Exception  when no prefix was found
+	 */
 	protected function checkPrefix() {
 		$prefix = $this->dump->getPrefix();
 
@@ -116,16 +133,19 @@ class sly_DB_Importer {
 		}
 	}
 
+	/**
+	 * @return array  list of errors
+	 */
 	protected function executeQueries() {
 		$queries = $this->dump->getQueries();
-
-		$sql   = sly_DB_Persistence::getInstance();
-		$error = array();
+		$sql     = sly_DB_Persistence::getInstance();
+		$error   = array();
 
 		foreach ($queries as $qry) {
 			try {
 				$sql->exec($qry);
-			} catch (sly_DB_PDO_Exception $e) {
+			}
+			catch (sly_DB_PDO_Exception $e) {
 				$error[] = $e->getMessage();
 			}
 		}
@@ -133,6 +153,9 @@ class sly_DB_Importer {
 		return $error;
 	}
 
+	/**
+	 * @return mixed  sly_DB_Persistence when user table was created, else true
+	 */
 	protected function checkForUserTable() {
 		$prefix   = sly_Core::config()->get('DATABASE/TABLE_PREFIX');
 		$hasTable = sly_DB_Persistence::getInstance()->listTables($prefix.'user');
@@ -149,6 +172,10 @@ class sly_DB_Importer {
 		return true;
 	}
 
+	/**
+	 * @param  string $msg
+	 * @return string
+	 */
 	protected function regenerateCache($msg) {
 		$msg = sly_Core::dispatcher()->filter('SLY_DB_IMPORTER_AFTER', $msg, array(
 			'dump'     => $this->dump,

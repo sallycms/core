@@ -16,13 +16,18 @@
  * @ingroup database
  */
 class sly_DB_PDO_Connection {
+	private static $instances = array(); ///< array
 
-	private static $instances = array();
+	private $driver       = null;  ///< string
+	private $pdo          = null;  ///< PDO
+	private $transrunning = false; ///< boolean
 
-	private $driver;
-	private $pdo;
-	private $transrunning = false;
-
+	/**
+	 * @param string $driver
+	 * @param string $dsn
+	 * @param string $login
+	 * @param string $password
+	 */
 	private function __construct($driver, $dsn, $login, $password) {
 		$this->driver = $driver;
 		$this->pdo    = new PDO($dsn, $login, $password);
@@ -32,7 +37,12 @@ class sly_DB_PDO_Connection {
 	}
 
 	/**
-	 *
+	 * @throws sly_DB_PDO_Exception
+	 * @param  string $driver
+	 * @param  string $host
+	 * @param  string $login
+	 * @param  string $password
+	 * @param  string $database
 	 * @return sly_DB_PDO_Connection instance
 	 */
 	public static function getInstance($driver, $host, $login, $password, $database) {
@@ -62,17 +72,22 @@ class sly_DB_PDO_Connection {
 	}
 
 	/**
-	 *
 	 * @return PDO instance
 	 */
 	public function getPDO() {
 		return $this->pdo;
 	}
 
+	/**
+	 * @return boolean
+	 */
 	public function isTransRunning() {
 		return $this->transrunning;
 	}
 
+	/**
+	 * @param boolean $bool
+	 */
 	public function setTransRunning($bool) {
 		$this->transrunning = $bool;
 	}

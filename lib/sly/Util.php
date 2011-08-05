@@ -16,10 +16,12 @@ class sly_Util {
 	 * array in the second parameter. The parameters will be extracted to
 	 * variables.
 	 *
-	 * @param array $params    Template variables as an associative array of parameters
+	 * @param array $name    template name
+	 * @param array $params  template variables as an associative array of parameters
 	 */
 	public static function includeTemplate($name, $params = array()) {
 		$service = sly_Service_Factory::getTemplateService();
+
 		if ($service instanceof sly_Service_Template) {
 			$service->includeFile($name, $params);
 		}

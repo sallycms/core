@@ -37,7 +37,7 @@ class sly_Core {
 	}
 
 	/**
-	 * The the global caching instance
+	 * Get the global caching instance
 	 *
 	 * @return BabelCache_Interface  caching instance
 	 */
