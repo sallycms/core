@@ -28,7 +28,7 @@ abstract class sly_Controller_Base {
 	const SUBPAGEPARAM = 'subpage'; ///< string  the request param that contains the subpage
 	const ACTIONPARAM  = 'func';    ///< string  the request param that contains the action
 
-	private static $currentPage = null;
+	private static $currentPage = null;  ///< string  the current page
 
 	protected $content_type = null; ///< string  the content type
 	protected $charset      = null; ///< string  the character set
@@ -108,7 +108,7 @@ abstract class sly_Controller_Base {
 
 		if ($content_type) {
 			header('Content-Type: '.$content_type);
-			$layout = sly_Core::getLayout('Sally');
+			$layout = sly_Core::getLayout('Backend');
 			$layout->addHttpMeta('Content-Type', $content_type);
 		}
 	}
@@ -195,7 +195,7 @@ abstract class sly_Controller_Base {
 
 		return self::$currentPage;
 	}
-	
+
 	protected static function isPageAvailable($page) {
 		return class_exists('sly_Controller_'.ucfirst($page));
 	}
