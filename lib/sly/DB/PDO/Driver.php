@@ -12,13 +12,19 @@
  * @ingroup database
  */
 abstract class sly_DB_PDO_Driver {
-	protected $host;
-	protected $login;
-	protected $password;
-	protected $database;
+	protected $host;     ///< string
+	protected $login;    ///< string
+	protected $password; ///< string
+	protected $database; ///< string
 
-	public static $drivers = array('mysql', 'oci', 'pgsql', 'sqlite');
+	public static $drivers = array('mysql', 'oci', 'pgsql', 'sqlite'); ///< array
 
+	/**
+	 * @param string $host
+	 * @param string $login
+	 * @param string $password
+	 * @param string $database
+	 */
 	public function __construct($host, $login, $password, $database) {
 		$this->host     = $host;
 		$this->login    = $login;
@@ -26,9 +32,15 @@ abstract class sly_DB_PDO_Driver {
 		$this->database = $database;
 	}
 
+	/**
+	 * @return array
+	 */
 	public static function getAvailable() {
 		return array_intersect(self::$drivers, PDO::getAvailableDrivers());
 	}
 
+	/**
+	 * @return string
+	 */
 	abstract public function getDSN();
 }

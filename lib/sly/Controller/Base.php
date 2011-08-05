@@ -196,10 +196,17 @@ abstract class sly_Controller_Base {
 		return self::$currentPage;
 	}
 
+	/**
+	 * @return boolean  whether or not the controller exists
+	 */
 	protected static function isPageAvailable($page) {
 		return class_exists('sly_Controller_'.ucfirst($page));
 	}
 
+	/**
+	 * @param  string $page
+	 * @return boolean       true when set, else false (if set before)
+	 */
 	public static function setCurrentPage($page) {
 		if (self::$currentPage === null) {
 			self::$currentPage = $page;
@@ -224,7 +231,7 @@ abstract class sly_Controller_Base {
 	 *
 	 * @param  string $forcePage     use this if you want to get a specific controller, regardless of the request
 	 * @param  string $forceSubpage  use this if you want to get a specific controller, regardless of the request
-	 * @return sly_Controller_Base   the controller instance
+	 * @return sly_Controller_Base   the controller instance (or null if not found)
 	 */
 	public static function factory($forcePage = null, $forceSubpage = null) {
 		$config  = sly_Core::config();

@@ -16,11 +16,18 @@ abstract class sly_Viewable {
 	 * @return string
 	 */
 	abstract public function render();
+
+	/**
+	 * @throws sly_Exception
+	 * @param  string $file
+	 * @return string
+	 */
 	abstract protected function getViewFile($file);
 
 	/**
-	 * @param string $filename
-	 * @param array  $params
+	 * @param  string $filename
+	 * @param  array  $params
+	 * @return string
 	 */
 	protected function renderView($filename, $params = array()) {
 		// Die Parameternamen $params und $filename sind zu kurz, als dass

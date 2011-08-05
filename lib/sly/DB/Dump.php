@@ -201,7 +201,7 @@ class sly_DB_Dump {
 	 * regex.
 	 *
 	 * @param  string  the regex to find (must contain at least one group)
-	 * @return string  the first group, if found, else false
+	 * @return mixed   the first group (string), if found, else false
 	 */
 	protected function findHeader($regex) {
 		foreach ($this->headers as $header) {
