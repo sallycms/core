@@ -19,12 +19,15 @@
  * @ingroup database
  */
 class sly_DB_PDO_Expression {
-	const ParameterMarker = '?';
+	const ParameterMarker = '?'; ///< string
 
-	private $expressions;
-	private $values = array();
-	private $connection;
+	private $expressions;       ///< array
+	private $values = array();  ///< array
+	private $connection;        ///< PDO
 
+	/**
+	 * @param mixed $expressions
+	 */
 	public function __construct($expressions = null /* [, $values ... ] */) {
 		$values = null;
 
@@ -34,7 +37,7 @@ class sly_DB_PDO_Expression {
 		}
 
 		if ($expressions != '') {
-			if (!$values) $values = array_slice(func_get_args(),1);
+			if (!$values) $values = array_slice(func_get_args(), 1);
 
 			$this->values      = $values;
 			$this->expressions = $expressions;
@@ -42,8 +45,14 @@ class sly_DB_PDO_Expression {
 	}
 
 	/**
-	 * Bind a value to the specific one based index. There must be a bind marker
-	 * for each value bound or to_s() will throw an exception.
+	 * Bind a value to the specific one based index.
+	 *
+	 * There must be a bind marker for each value bound or to_s() will throw an
+	 * exception.
+	 *
+	 * @throws sly_DB_PDO_Expression_Exception
+	 * @param  int   $parameter_number
+	 * @param  mixed $value
 	 */
 	public function bind($parameter_number, $value) {
 		if ($parameter_number <= 0) {
@@ -53,12 +62,17 @@ class sly_DB_PDO_Expression {
 		$this->values[$parameter_number-1] = $value;
 	}
 
+	/**
+	 * @param array $values
+	 */
 	public function bind_values($values) {
 		$this->values = $values;
 	}
 
 	/**
 	 * Returns all the values currently bound.
+	 *
+	 * @return array
 	 */
 	public function values() {
 		return $this->values;
@@ -66,6 +80,8 @@ class sly_DB_PDO_Expression {
 
 	/**
 	 * Returns the connection object.
+	 *
+	 * @return PDO
 	 */
 	public function get_connection() {
 		return $this->connection;
@@ -75,13 +91,19 @@ class sly_DB_PDO_Expression {
 	 * Sets the connection object. It is highly recommended to set this so we can
 	 * use the adapter's native escaping mechanism.
 	 *
-	 * @param string $connection a Connection instance
+	 * @param PDO $connection  a PDO instance
 	 */
 	public function set_connection($connection) {
 		$this->connection = $connection;
 	}
 
-	public function to_s($substitute=false, &$options=null) {
+	/**
+	 * @throws sly_DB_PDO_Expression_Exception
+	 * @param  boolean $substitute
+	 * @param  array   $options
+	 * @return string
+	 */
+	public function to_s($substitute = false, &$options = null) {
 		if (!$options) $options = array();
 
 		$values = array_key_exists('values', $options) ? $options['values'] : $this->values;
@@ -114,6 +136,11 @@ class sly_DB_PDO_Expression {
 		return $ret;
 	}
 
+	/**
+	 * @param  array  $hash
+	 * @param  string $glue
+	 * @return array
+	 */
 	private function build_sql_from_hash(&$hash, $glue) {
 		$sql = $g = '';
 
@@ -127,6 +154,13 @@ class sly_DB_PDO_Expression {
 		return array($sql, array_values($hash));
 	}
 
+	/**
+	 * @param  array   $values
+	 * @param  boolean $substitute
+	 * @param  int     $pos
+	 * @param  int     $parameter_index
+	 * @return string
+	 */
 	private function substitute(&$values, $substitute, $pos, $parameter_index) {
 		$value = $values[$parameter_index];
 
@@ -151,14 +185,22 @@ class sly_DB_PDO_Expression {
 		return $this->expressions[$pos];
 	}
 
+	/**
+	 * @param  mixed $value
+	 * @return string
+	 */
 	private function stringify_value($value) {
 		if (is_null($value)) return 'NULL';
 		return is_string($value) ? $this->quote_string($value) : $value;
 	}
 
+	/**
+	 * @param  string $value
+	 * @return string
+	 */
 	private function quote_string($value) {
 		if ($this->connection) {
-			return "'".$this->connection->escape($value)."'";
+			return $this->connection->quote($value);
 		}
 
 		return "'".str_replace("'", "''", $value)."'";

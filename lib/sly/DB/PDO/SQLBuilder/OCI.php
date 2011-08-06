@@ -12,6 +12,12 @@
  * @ingroup database
  */
 class sly_DB_PDO_SQLBuilder_OCI extends sly_DB_PDO_SQLBuilder {
+	/**
+	 * @param  string $sql
+	 * @param  int    $offset
+	 * @param  int    $limit
+	 * @return string
+	 */
 	public function build_limit($sql, $offset = 0, $limit = -1) {
 		$offset = intval($offset);
 		$limit  = intval($limit);
@@ -32,6 +38,9 @@ class sly_DB_PDO_SQLBuilder_OCI extends sly_DB_PDO_SQLBuilder {
 		return $sql;
 	}
 
+	/**
+	 * @return string
+	 */
 	public function build_list_tables() {
 		// http://www.orafaq.com/forum/t/127009/0/
 		return 'SELECT * FROM user_tables';
