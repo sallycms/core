@@ -192,7 +192,7 @@ abstract class sly_Service_AddOn_Base {
 			}
 		}
 		else {
-			return $this->I18N('addon_has_no_sally_version_info');
+			return $this->I18N('has_no_sally_version_info');
 		}
 
 		// include install.inc.php if available
