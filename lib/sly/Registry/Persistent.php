@@ -12,11 +12,11 @@
  * @ingroup registry
  */
 class sly_Registry_Persistent implements sly_Registry_Registry {
+	private static $instance; ///< sly_Registry_Persistent
 
-	private static $instance;
-	private $store;
-	private $pdo;
-	private $prefix;
+	private $store;  ///< sly_Util_Array
+	private $pdo;    ///< sly_DB_PDO_Persistence
+	private $prefix; ///< string
 
 	private function __construct() {
 		$this->store  = new sly_Util_Array();
@@ -24,11 +24,19 @@ class sly_Registry_Persistent implements sly_Registry_Registry {
 		$this->prefix = sly_Core::config()->get('DATABASE/TABLE_PREFIX');
 	}
 
+	/**
+	 * @return sly_Registry_Persistent
+	 */
 	public static function getInstance() {
 		if (empty(self::$instance)) self::$instance = new self();
 		return self::$instance;
 	}
 
+	/**
+	 * @param  string $key
+	 * @param  mixed  $value
+	 * @return mixed
+	 */
 	public function set($key, $value) {
 		$qry = 'REPLACE INTO '.$this->prefix.'registry (`name`, `value`) VALUES (?,?)';
 		$this->pdo->query($qry, array($key, serialize($value)));
@@ -36,6 +44,11 @@ class sly_Registry_Persistent implements sly_Registry_Registry {
 		return $this->store->set($key, $value);
 	}
 
+	/**
+	 * @param  string $key
+	 * @param  mixed  $default
+	 * @return mixed
+	 */
 	public function get($key, $default = null) {
 		if ($this->has($key)) {
 			return $this->store->get($key);
@@ -45,6 +58,10 @@ class sly_Registry_Persistent implements sly_Registry_Registry {
 		return $default;
 	}
 
+	/**
+	 * @param  string $key
+	 * @return boolean
+	 */
 	public function has($key) {
 		if ($this->store->has($key)) return true;
 
@@ -59,11 +76,18 @@ class sly_Registry_Persistent implements sly_Registry_Registry {
 		return false;
 	}
 
+	/**
+	 * @param  string $key
+	 * @return boolean
+	 */
 	public function remove($key) {
 		$this->pdo->delete('registry', array('name' => $key));
 		return $this->store->remove($key);
 	}
 
+	/**
+	 * @param string $key
+	 */
 	public function flush($key = '*') {
 		$pattern = str_replace(array('*', '?'), array('%', '_'), $key);
 		$table   = $this->prefix.'registry';
@@ -72,6 +96,10 @@ class sly_Registry_Persistent implements sly_Registry_Registry {
 		$this->store = new sly_Util_Array();
 	}
 
+	/**
+	 * @param  string $key
+	 * @return mixed
+	 */
 	protected function getValue($key) {
 		return $this->pdo->magicFetch('registry', 'value', array('name' => $key));
 	}
