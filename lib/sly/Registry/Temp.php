@@ -12,32 +12,51 @@
  * @ingroup registry
  */
 class sly_Registry_Temp implements sly_Registry_Registry {
+	private static $instance; ///< sly_Registry_Temp
 
-	private static $instance;
-
-	private $store;
+	private $store; ///< sly_Util_Array
 
 	private function __construct() {
 		$this->store = new sly_Util_Array();
 	}
 
+	/**
+	 * @return sly_Registry_Temp
+	 */
 	public static function getInstance() {
 		if (empty(self::$instance)) self::$instance = new self();
 		return self::$instance;
 	}
 
+	/**
+	 * @param  string $key
+	 * @param  mixed  $value
+	 * @return mixed
+	 */
 	public function set($key, $value) {
 		return $this->store->set($key, $value);
 	}
 
+	/**
+	 * @param  string $key
+	 * @return mixed
+	 */
 	public function get($key) {
 		return $this->store->get($key);
 	}
 
+	/**
+	 * @param  string $key
+	 * @return boolean
+	 */
 	public function has($key) {
 		return $this->store->has($key);
 	}
 
+	/**
+	 * @param  string $key
+	 * @return boolean
+	 */
 	public function remove($key) {
 		return $this->store->remove($key);
 	}
