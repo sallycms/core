@@ -13,18 +13,31 @@
  * @ingroup service
  */
 class sly_Service_Article extends sly_Service_Model_Base {
-	protected $tablename = 'article';
+	protected $tablename = 'article'; ///< string
 
+	/**
+	 * @param  array $params
+	 * @return sly_Model_Article
+	 */
 	protected function makeInstance(array $params) {
 		return new sly_Model_Article($params);
 	}
 
+	/**
+	 * @param  sly_Model_Article $article
+	 * @return sly_Model_Article
+	 */
 	protected function update(sly_Model_Article $article) {
 		$persistence = sly_DB_Persistence::getInstance();
 		$persistence->update($this->getTableName(), $article->toHash(), $article->getPKHash());
 		return $article;
 	}
 
+	/**
+	 * @param  int $id
+	 * @param  int $clang
+	 * @return sly_Model_Article
+	 */
 	public function findById($id, $clang = null) {
 		if ($clang === null || $clang === false) $clang = sly_Core::getCurrentClang();
 
@@ -48,6 +61,14 @@ class sly_Service_Article extends sly_Service_Model_Base {
 		return $article;
 	}
 
+	/**
+	 * @throws sly_Exception
+	 * @param  int    $categoryID
+	 * @param  string $name
+	 * @param  int    $status
+	 * @param  int    $position
+	 * @return int
+	 */
 	public function add($categoryID, $name, $status, $position = -1) {
 		$db       = sly_DB_Persistence::getInstance();
 		$parentID = (int) $categoryID;
@@ -171,6 +192,14 @@ class sly_Service_Article extends sly_Service_Model_Base {
 		return $newID;
 	}
 
+	/**
+	 * @throws sly_Exception
+	 * @param  int    $articleID
+	 * @param  int    $clangID
+	 * @param  string $name
+	 * @param  int    $position
+	 * @return boolean
+	 */
 	public function edit($articleID, $clangID, $name, $position = false) {
 		$articleID = (int) $articleID;
 		$clangID   = (int) $clangID;
@@ -237,6 +266,11 @@ class sly_Service_Article extends sly_Service_Model_Base {
 		return true;
 	}
 
+	/**
+	 * @throws sly_Exception
+	 * @param  int    $articleID
+	 * @return boolean
+	 */
 	public function delete($articleID) {
 		$articleID = (int) $articleID;
 		$db        = sly_DB_Persistence::getInstance();
@@ -286,6 +320,11 @@ class sly_Service_Article extends sly_Service_Model_Base {
 		return true;
 	}
 
+	/**
+	 * @param  sly_Model_Article $article
+	 * @param  int               $newStatus
+	 * @return boolean
+	 */
 	public function changeStatus(sly_Model_Article $article, $newStatus = null) {
 		$stati     = $this->getStati();
 		$re_id     = $article->getParentId();
@@ -322,6 +361,9 @@ class sly_Service_Article extends sly_Service_Model_Base {
 		return true;
 	}
 
+	/**
+	 * @return array
+	 */
 	public function getStati() {
 		static $stati;
 
@@ -338,6 +380,12 @@ class sly_Service_Article extends sly_Service_Model_Base {
 		return $stati;
 	}
 
+	/**
+	 * @param  int     $categoryId
+	 * @param  boolean $ignore_offlines
+	 * @param  int     $clangId
+	 * @return array
+	 */
 	public function findArticlesByCategory($categoryId, $ignore_offlines = false, $clangId = null) {
 		if ($clangId === false || $clangId === null) {
 			$clangId = sly_Core::getCurrentClang();
@@ -380,6 +428,11 @@ class sly_Service_Article extends sly_Service_Model_Base {
 		return $artlist;
 	}
 
+	/**
+	 * @param  sly_Model_Article $article
+	 * @param  string            $type
+	 * @return boolean
+	 */
 	public function setType(sly_Model_Article $article, $type) {
 		$oldType   = $article->getType();
 		$langs     = sly_Util_Language::findAll(true);
@@ -406,6 +459,10 @@ class sly_Service_Article extends sly_Service_Model_Base {
 		return true;
 	}
 
+	/**
+	 * @param sly_Model_Article $article
+	 * @param sly_Model_User    $user
+	 */
 	public function touch(sly_Model_Article $article, sly_Model_User $user) {
 		$article->setUpdatedate(time());
 		$article->setUpdateuser($user->getLogin());

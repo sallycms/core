@@ -14,11 +14,18 @@
  * @author zozi
  */
 abstract class sly_Service_Model_Base_Id extends sly_Service_Model_Base {
-
+	/**
+	 * @param  int $id
+	 * @return sly_Model_Base
+	 */
 	public function findById($id) {
 		return $this->findOne(array('id' => (int) $id));
 	}
 
+	/**
+	 * @param  sly_Model_Base $model
+	 * @return sly_Model_Base
+	 */
 	public function save(sly_Model_Base $model) {
 		$persistence = sly_DB_Persistence::getInstance();
 
@@ -34,6 +41,10 @@ abstract class sly_Service_Model_Base_Id extends sly_Service_Model_Base {
 		return $model;
 	}
 
+	/**
+	 * @param  array $params
+	 * @return sly_Model_Base
+	 */
 	public function create($params) {
 		if (isset($params['id'])) unset($params['id']);
 		$model = $this->makeInstance($params);

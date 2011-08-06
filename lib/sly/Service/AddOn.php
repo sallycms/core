@@ -17,12 +17,21 @@
  * @ingroup service
  */
 class sly_Service_AddOn extends sly_Service_AddOn_Base {
+	/**
+	 * @param  string $addonName
+	 * @return string
+	 */
 	public function baseFolder($addonName) {
 		$dir = SLY_ADDONFOLDER.DIRECTORY_SEPARATOR;
 		if (!empty($addonName)) $dir .= $addonName.DIRECTORY_SEPARATOR;
 		return $dir;
 	}
 
+	/**
+	 * @param  string $type
+	 * @param  string $addonName
+	 * @return string
+	 */
 	protected function dynFolder($type, $addonName) {
 		$config = sly_Core::config();
 		$dir    = SLY_DYNFOLDER.DIRECTORY_SEPARATOR.$type.DIRECTORY_SEPARATOR.$addonName;
@@ -31,17 +40,24 @@ class sly_Service_AddOn extends sly_Service_AddOn_Base {
 		return $dir;
 	}
 
+	/**
+	 * @param  string  $time
+	 * @param  string  $type
+	 * @param  string  $addonName
+	 * @param  boolean $state
+	 * @return mixed
+	 */
 	protected function extend($time, $type, $addonName, $state) {
 		return sly_Core::dispatcher()->filter('SLY_ADDON_'.$time.'_'.$type, $state, array('addon' => $addonName));
 	}
 
 	/**
-	 * Setzt eine Eigenschaft des Addons.
+	 * Setzt eine Eigenschaft des AddOns.
 	 *
-	 * @param  string $addon     Name des Addons
-	 * @param  string $property  Name der Eigenschaft
-	 * @param  mixed  $property  Wert der Eigenschaft
-	 * @return mixed             der gesetzte Wert
+	 * @param  string $addonName  Name des AddOns
+	 * @param  string $property   Name der Eigenschaft
+	 * @param  mixed  $value      Wert der Eigenschaft
+	 * @return mixed              der gesetzte Wert
 	 */
 	public function setProperty($addonName, $property, $value) {
 		return sly_Core::config()->set('ADDON/'.$addonName.'/'.$property, $value);
@@ -50,21 +66,21 @@ class sly_Service_AddOn extends sly_Service_AddOn_Base {
 	/**
 	 * Gibt eine Eigenschaft des AddOns zurück.
 	 *
-	 * @param  string $addonName  Name des Addons
+	 * @param  string $addonName  Name des AddOns
 	 * @param  string $property   Name der Eigenschaft
 	 * @param  mixed  $default    Rückgabewert, falls die Eigenschaft nicht gefunden wurde
-	 * @return string             Wert der Eigenschaft des Addons
+	 * @return mixed              Wert der Eigenschaft des AddOns
 	 */
 	public function getProperty($addonName, $property, $default = null) {
 		return sly_Core::config()->get('ADDON/'.$addonName.'/'.$property, $default);
 	}
 
 	/**
-	 * Gibt ein Array aller registrierten Addons zurück.
+	 * Gibt ein Array aller registrierten AddOns zurück.
 	 *
 	 * Ein Addon ist registriert, wenn es dem System bekannt ist (addons.yaml).
 	 *
-	 * @return array  Array aller registrierten Addons
+	 * @return array  Array aller registrierten AddOns
 	 */
 	public function getRegisteredAddons() {
 		$data = sly_Core::config()->get('ADDON');
@@ -78,7 +94,7 @@ class sly_Service_AddOn extends sly_Service_AddOn_Base {
 	 *
 	 * Ein Addon ist verfügbar, wenn es installiert und aktiviert ist.
 	 *
-	 * @return array  Array der verfügbaren Addons
+	 * @return array  Array der verfügbaren AddOns
 	 */
 	public function getAvailableAddons() {
 		$avail = array();
@@ -91,23 +107,34 @@ class sly_Service_AddOn extends sly_Service_AddOn_Base {
 		return $avail;
 	}
 
+	/**
+	 * @param  string $addonName
+	 * @return null
+	 */
 	public function loadAddon($addonName) {
 		return $this->load($addonName);
 	}
 
+	/**
+	 * @return string
+	 */
 	protected function getI18NPrefix() {
 		return 'addon_';
 	}
 
-	protected function getVersionKey($addon) {
-		return 'addons/'.$addon;
+	/**
+	 * @param  string $addonName
+	 * @return string
+	 */
+	protected function getVersionKey($addonName) {
+		return 'addons/'.$addonName;
 	}
 
 	/**
 	 * Returns the path in config object
 	 *
-	 * @param  mixed $component  addOn as string, plugin as array
-	 * @return string            a path like "ADDON/x"
+	 * @param  string $addonName
+	 * @return string             a path like "ADDON/x"
 	 */
 	protected function getConfPath($addonName) {
 		return 'ADDON/'.$addonName;

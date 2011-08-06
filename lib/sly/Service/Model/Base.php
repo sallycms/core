@@ -12,21 +12,42 @@
  * @ingroup service
  */
 abstract class sly_Service_Model_Base {
-	protected $tablename;
-	protected $hasCascade = false;
+	protected $tablename;          ///< string
+	protected $hasCascade = false; ///< boolean
 
+	/**
+	 * @param  array $array
+	 * @return sly_Model_Base
+	 */
 	protected abstract function makeInstance(array $params);
 
+	/**
+	 * @return string
+	 */
 	protected function getTableName() {
 		return $this->tablename;
 	}
 
+	/**
+	 * @param  array  $where
+	 * @param  string $having
+	 * @return sly_Model_Base
+	 */
 	public function findOne($where = null, $having = null) {
 		$res = $this->find($where, null, null, null, 1, $having);
 		if (count($res) == 1) return $res[0];
 		return null;
 	}
 
+	/**
+	 * @param  array  $where
+	 * @param  string $group
+	 * @param  string $order
+	 * @param  int    $offset
+	 * @param  int    $limit
+	 * @param  string $having
+	 * @return array
+	 */
 	public function find($where = null, $group = null, $order = null, $offset = null, $limit = null, $having = null) {
 		$return      = array();
 		$persistence = sly_DB_Persistence::getInstance();
@@ -39,15 +60,21 @@ abstract class sly_Service_Model_Base {
 		return $return;
 	}
 
+	/**
+	 * @param  mixed $where
+	 * @return int
+	 */
 	public function delete($where) {
-		if($this->hasCascade) {
+		if ($this->hasCascade) {
 			$models = $this->find($where);
-			foreach($models as $model) {
-				foreach($model->getDeleteCascades() as $cascadeModel => $foreign_key) {
+
+			foreach ($models as $model) {
+				foreach ($model->getDeleteCascades() as $cascadeModel => $foreign_key) {
 					sly_Service_Factory::getService($cascadeModel)->delete($foreign_key);
 				}
 			}
 		}
+
 		$persistence = sly_DB_Persistence::getInstance();
 		return $persistence->delete($this->getTableName(), $where);
 	}

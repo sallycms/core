@@ -15,14 +15,59 @@
 abstract class sly_Service_AddOn_Base {
 	protected static $loaded = array(); ///< array  list of loaded addOns and plugins for depedency aware loading
 
+	/**
+	 * @param  mixed $component
+	 * @return string
+	 */
 	abstract public function baseFolder($component);
+
+	/**
+	 * @param  mixed  $component
+	 * @param  string $property
+	 * @param  mixed  $value
+	 * @return mixed
+	 */
 	abstract public function setProperty($component, $property, $value);
+
+	/**
+	 * @param  mixed  $component
+	 * @param  string $property
+	 * @param  mixed  $default
+	 * @return mixed
+	 */
 	abstract public function getProperty($component, $property, $default = null);
 
+	/**
+	 * @param  string $type
+	 * @param  mixed  $component
+	 * @return string
+	 */
 	abstract protected function dynFolder($type, $component);
+
+	/**
+	 * @param  string  $time
+	 * @param  string  $type
+	 * @param  mixed   $component
+	 * @param  boolean $state
+	 * @return mixed
+	 */
 	abstract protected function extend($time, $type, $component, $state);
+
+	/**
+	 * @return string
+	 */
 	abstract protected function getI18NPrefix();
+
+	/**
+	 * @param  mixed $component
+	 * @return string
+	 */
 	abstract protected function getVersionKey($component);
+
+	/**
+	 * @param  mixed $component
+	 * @return string
+	 */
 	abstract protected function getConfPath($component);
 
 	/**
@@ -64,6 +109,9 @@ abstract class sly_Service_AddOn_Base {
 		}
 	}
 
+	/**
+	 * @param mixed $component
+	 */
 	public function loadStatic($component) {
 		$config     = sly_Core::config();
 		$staticFile = $this->baseFolder($component).'static.yml';
@@ -140,7 +188,9 @@ abstract class sly_Service_AddOn_Base {
 	/**
 	 * Install a component
 	 *
-	 * @param $component  addOn as string, plugin as array
+	 * @param  mixed   $component    addOn as string, plugin as array
+	 * @param  boolean $installDump
+	 * @return mixed                 message or true if successful
 	 */
 	public function install($component, $installDump = true) {
 		$baseDir       = $this->baseFolder($component);
@@ -247,7 +297,8 @@ abstract class sly_Service_AddOn_Base {
 	/**
 	 * Uninstall a component
 	 *
-	 * @param $component  addOn as string, plugin as array
+	 * @param  $component  addOn as string, plugin as array
+	 * @return mixed       message or true if successful
 	 */
 	public function uninstall($component) {
 		$baseDir       = $this->baseFolder($component);
@@ -627,6 +678,10 @@ abstract class sly_Service_AddOn_Base {
 		}
 	}
 
+	/**
+	 * @param  string $file
+	 * @return mixed         error message (string) or true
+	 */
 	private function installDump($file) {
 		try {
 			$dump = new sly_DB_Dump($file);
@@ -643,6 +698,10 @@ abstract class sly_Service_AddOn_Base {
 		return true;
 	}
 
+	/**
+	 * @param  mixed $component
+	 * @return mixed             true if OK, else error message (string)
+	 */
 	private function checkDependencies($component) {
 		$requires      = sly_makeArray($this->getProperty($component, 'requires'));
 		$aService      = sly_Service_Factory::getAddOnService();
@@ -746,6 +805,9 @@ abstract class sly_Service_AddOn_Base {
 		return empty($dependency) ? false : reset($dependency);
 	}
 
+	/**
+	 * @param mixed $component
+	 */
 	protected function load($component) {
 		$addonService  = sly_Service_Factory::getAddOnService();
 		$pluginService = sly_Service_Factory::getPluginService();
