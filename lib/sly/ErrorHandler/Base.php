@@ -21,7 +21,7 @@ abstract class sly_ErrorHandler_Base {
 		E_USER_WARNING      => E_WARNING,
 		E_USER_NOTICE       => E_NOTICE,
 		E_USER_DEPRECATED   => E_DEPRECATED
-	);
+	); ///< array
 
 	public static $codes = array(
 		E_ERROR             => 'Error',
@@ -35,13 +35,17 @@ abstract class sly_ErrorHandler_Base {
 		E_USER_WARNING      => 'User Warning',
 		E_USER_NOTICE       => 'User Notice',
 		E_USER_DEPRECATED   => 'User Deprecated'
-	);
+	); ///< array
 
 	public function uninit() {
 		restore_exception_handler();
 		restore_error_handler();
 	}
 
+	/**
+	 * @param  string $file
+	 * @return string
+	 */
 	protected function getRelativeFilename($file) {
 		if (strpos($file, "eval()'d code")) {
 			return "eval()'d code";

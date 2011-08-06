@@ -1,5 +1,4 @@
 <?php
-
 /*
  * Copyright (c) 2011, webvariants GbR, http://www.webvariants.de
  *
@@ -14,13 +13,11 @@
  * @ingroup model
  */
 class sly_Model_Language extends sly_Model_Base_Id {
-
-	protected $name = '';
-	protected $locale = '';
-	protected $_attributes = array('name' => 'string', 'locale' => 'string');
+	protected $name        = '';                                              ///< string
+	protected $locale      = '';                                              ///< string
+	protected $_attributes = array('name' => 'string', 'locale' => 'string'); ///< array
 
 	/**
-	 *
 	 * @return string
 	 */
 	public function getName() {
@@ -28,7 +25,6 @@ class sly_Model_Language extends sly_Model_Base_Id {
 	}
 
 	/**
-	 *
 	 * @return string
 	 */
 	public function getLocale() {
@@ -36,7 +32,6 @@ class sly_Model_Language extends sly_Model_Base_Id {
 	}
 
 	/**
-	 *
 	 * @param string $name
 	 */
 	public function setName($name) {
@@ -44,7 +39,6 @@ class sly_Model_Language extends sly_Model_Base_Id {
 	}
 
 	/**
-	 *
 	 * @param string $locale
 	 */
 	public function setLocale($locale) {

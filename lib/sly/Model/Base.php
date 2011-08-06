@@ -1,5 +1,4 @@
 <?php
-
 /*
  * Copyright (c) 2011, webvariants GbR, http://www.webvariants.de
  *
@@ -16,11 +15,13 @@
  * @ingroup model
  */
 abstract class sly_Model_Base {
+	protected $_pk;         ///< array
+	protected $_attributes; ///< array
+	protected $_values;     ///< array
 
-	protected $_pk;
-	protected $_attributes;
-	protected $_values;
-
+	/**
+	 * @param array $params
+	 */
 	public function __construct($params = array()) {
 		foreach ($this->_pk as $name => $type) {
 			if (isset($params[$name])) {
@@ -45,14 +46,23 @@ abstract class sly_Model_Base {
 		}
 	}
 
+	/**
+	 * @return array
+	 */
 	public function toHash() {
 		return $this->attrsToHash($this->_attributes);
 	}
 
+	/**
+	 * @return array
+	 */
 	public function getPKHash() {
 		return $this->attrsToHash($this->_pk);
 	}
 
+	/**
+	 * @param sly_Model_User $user
+	 */
 	public function setUpdateColumns($user = null) {
 		if (!$user) {
 			$user = sly_Util_User::getCurrentUser()->getLogin();
@@ -62,6 +72,9 @@ abstract class sly_Model_Base {
 		$this->setUpdateUser($user);
 	}
 
+	/**
+	 * @param sly_Model_User $user
+	 */
 	public function setCreateColumns($user = null) {
 		if (!$user) {
 			$user = sly_Util_User::getCurrentUser()->getLogin();
@@ -72,14 +85,23 @@ abstract class sly_Model_Base {
 		$this->setUpdateColumns($user);
 	}
 
+	/**
+	 * @param  array $attrs
+	 * @return array
+	 */
 	protected function attrsToHash($attrs) {
 		$data = array();
+
 		foreach ($attrs as $name => $type) {
 			$data[$name] = $this->$name;
 		}
+
 		return $data;
 	}
 
+	/**
+	 * @return array
+	 */
 	public function getDeleteCascades() {
 		$cascade = array();
 		if (!isset($this->_hasMany))
@@ -94,37 +116,51 @@ abstract class sly_Model_Base {
 		return $cascade;
 	}
 
+	/**
+	 * @param  string $model
+	 * @return array
+	 */
 	private function getForeignKeyForHasMany($model) {
 		$fk = $this->_hasMany[$model]['foreign_key'];
 
 		foreach ($fk as $column => $value) {
 			$fk[$column] = $this->$value;
 		}
+
 		return $fk;
 	}
 
+	/**
+	 * @param  string $key
+	 * @param  mixed  $default
+	 * @return mixed
+	 */
 	public function getExtendedValue($key, $default = null) {
 		return isset($this->_values[$key]) ? $this->_values[$key] : $default;
 	}
 
+	/**
+	 * @throws sly_Exception
+	 * @param  string $method
+	 * @param  array  $arguments
+	 * @return mixed
+	 */
 	public function __call($method, $arguments) {
-
 		if (isset($this->_hasMany) && is_array($this->_hasMany)) {
 			foreach ($this->_hasMany as $model => $config) {
-				if ($method == 'get' . $model . 's') {
+				if ($method == 'get'.$model.'s') {
 					return sly_Service_Factory::getService($model)->find($this->getForeignKeyForHasMany($model));
 				}
 			}
 		}
 
-		$event = strtoupper(get_class($this) . '_' . $method);
+		$event      = strtoupper(get_class($this).'_'.$method);
 		$dispatcher = sly_Core::dispatcher();
 
 		if (!$dispatcher->hasListeners($event)) {
-			throw new sly_Exception('Call to undefined function ' . $method . '()');
+			throw new sly_Exception('Call to undefined function '.$method.'()');
 		}
 
 		return $dispatcher->filter($event, null, array('method' => $method, 'arguments' => $arguments, 'object' => $this));
 	}
-
 }

@@ -12,42 +12,62 @@
  * Business Model Klasse für Slices
  *
  * @author  zozi@webvariants.de
- *
- * @method getSliceValues()
- *
  * @ingroup model
  */
 class sly_Model_Slice extends sly_Model_Base_Id {
-	protected $module;
-	protected $_attributes = array('module' => 'string');
-	protected $_hasMany    = array('SliceValue' => array('delete_cascade' => true, 'foreign_key' => array('slice_id' => 'id')));
+	protected $module; ///< string
 
-	public function getModule()        { return $this->module; }
-	public function setModule($module) { $this->module = $module; }
+	protected $_attributes = array('module' => 'string');                                                                        ///< array
+	protected $_hasMany    = array('SliceValue' => array('delete_cascade' => true, 'foreign_key' => array('slice_id' => 'id'))); ///< array
 
+	/**
+	 * @return string
+	 */
+	public function getModule() {
+		return $this->module;
+	}
+
+	/**
+	 * @param string $module
+	 */
+	public function setModule($module) {
+		$this->module = $module;
+	}
+
+	/**
+	 * @param  string $type
+	 * @param  string $finder
+	 * @param  string $value
+	 * @return sly_Model_SliceValue
+	 */
 	public function addValue($type, $finder, $value = null) {
 		$service = sly_Service_Factory::getSliceValueService();
 		return $service->create(array('slice_id' => $this->getId(), 'type' => $type, 'finder' => $finder, 'value' => $value));
 	}
 
 	/**
-	 *
-	 * @param string $type
-	 * @param string $finder
-	 *
-	 * @return Model_SliceValue
+	 * @param  string $type
+	 * @param  string $finder
+	 * @return sly_Model_SliceValue
 	 */
 	public function getValue($type, $finder) {
 		$service    = sly_Service_Factory::getSliceValueService();
 		$sliceValue = $service->findBySliceTypeFinder(array('slice_id' => $this->getId(), 'type' => $type, 'finder' => $finder));
+
 		return $sliceValue;
 	}
 
+	/**
+	 * @return int
+	 */
 	public function flushValues() {
 		$service = sly_Service_Factory::getSliceValueService();
 		return $service->delete(array('slice_id' => $this->getId()));
 	}
 
+	/**
+	 * @return string
+	 */
 	public function getOutput() {
 		$service  = sly_Service_Factory::getModuleService();
 		$filename = $service->getOutputFilename($this->getModule());
@@ -61,6 +81,9 @@ class sly_Model_Slice extends sly_Model_Base_Id {
 		return $output;
 	}
 
+	/**
+	 * @return string
+	 */
 	public function getInput() {
 		$service  = sly_Service_Factory::getModuleService();
 		$filename = $service->getInputFilename($this->getModule());

@@ -1,5 +1,4 @@
 <?php
-
 /*
  * Copyright (c) 2011, webvariants GbR, http://www.webvariants.de
  *
@@ -15,25 +14,25 @@
  * @author christoph@webvariants.de
  */
 class sly_Model_Base_Article extends sly_Model_Base {
+	protected $id;          ///< int
+	protected $updateuser;  ///< string
+	protected $status;      ///< int
+	protected $name;        ///< string
+	protected $catprior;    ///< int
+	protected $createdate;  ///< int
+	protected $clang;       ///< int
+	protected $re_id;       ///< int
+	protected $prior;       ///< int
+	protected $catname;     ///< string
+	protected $startpage;   ///< int
+	protected $updatedate;  ///< int
+	protected $createuser;  ///< string
+	protected $attributes;  ///< string
+	protected $path;        ///< string
+	protected $type;        ///< string
+	protected $revision;    ///< int
 
-	protected $id;
-	protected $updateuser;
-	protected $status;
-	protected $name;
-	protected $catprior;
-	protected $createdate;
-	protected $clang;
-	protected $re_id;
-	protected $prior;
-	protected $catname;
-	protected $startpage;
-	protected $updatedate;
-	protected $createuser;
-	protected $attributes;
-	protected $path;
-	protected $type;
-	protected $revision;
-	protected $_pk = array('id' => 'int', 'clang' => 'int');
+	protected $_pk = array('id' => 'int', 'clang' => 'int'); ///< array
 	protected $_attributes = array(
 		'updateuser' => 'string', 'status' => 'int', 'name' => 'string',
 		'catprior' => 'int', 'createdate' => 'int',
@@ -41,146 +40,247 @@ class sly_Model_Base_Article extends sly_Model_Base {
 		'catname' => 'string', 'startpage' => 'int', 'updatedate' => 'int',
 		'createuser' => 'string', 'attributes' => 'string', 'path' => 'string',
 		'type' => 'string', 'revision' => 'int'
-	);
+	); ///< array
 
+	/**
+	 * @return int
+	 */
 	public function getId() {
 		return $this->id;
 	}
 
+	/**
+	 * @return string
+	 */
 	public function getUpdateuser() {
 		return $this->updateuser;
 	}
 
+	/**
+	 * @return int
+	 */
 	public function getStatus() {
 		return $this->status;
 	}
 
+	/**
+	 * @return string
+	 */
 	public function getName() {
 		return $this->name;
 	}
 
+	/**
+	 * @return int
+	 */
 	public function getCatprior() {
 		return $this->catprior;
 	}
 
+	/**
+	 * @return int
+	 */
 	public function getCreatedate() {
 		return $this->createdate;
 	}
 
+	/**
+	 * @return int
+	 */
 	public function getClang() {
 		return $this->clang;
 	}
 
+	/**
+	 * @return int
+	 */
 	public function getParentId() {
 		return $this->re_id;
 	}
 
+	/**
+	 * @return int
+	 */
 	public function getPrior() {
 		return $this->prior;
 	}
 
+	/**
+	 * @return string
+	 */
 	public function getCatname() {
 		return $this->catname;
 	}
 
+	/**
+	 * @return int
+	 */
 	public function getStartpage() {
 		return $this->startpage;
 	}
 
+	/**
+	 * @return int
+	 */
 	public function getUpdatedate() {
 		return $this->updatedate;
 	}
 
+	/**
+	 * @return string
+	 */
 	public function getCreateuser() {
 		return $this->createuser;
 	}
 
+	/**
+	 * @return string
+	 */
 	public function getAttributes() {
 		return $this->attributes;
 	}
 
+	/**
+	 * @return string
+	 */
 	public function getPath() {
 		return $this->path;
 	}
 
+	/**
+	 * @return string
+	 */
 	public function getType() {
 		return $this->type;
 	}
 
+	/**
+	 * @return int
+	 */
 	public function getRevision() {
 		return $this->revision;
 	}
 
+	/**
+	 * @param int $id
+	 */
 	public function setId($id) {
-		$this->id = intval($id);
+		$this->id = (int) $id;
 	}
 
+	/**
+	 * @param string $updateuser
+	 */
 	public function setUpdateuser($updateuser) {
 		$this->updateuser = $updateuser;
 	}
 
+	/**
+	 * @param int $status
+	 */
 	public function setStatus($status) {
-		$this->status = $status;
+		$this->status = (int) $status;
 	}
 
+	/**
+	 * @param string $name
+	 */
 	public function setName($name) {
 		$this->name = $name;
 	}
 
+	/**
+	 * @param int $catprior
+	 */
 	public function setCatprior($catprior) {
-		$this->catprior = $catprior;
+		$this->catprior = (int) $catprior;
 	}
 
+	/**
+	 * @param int $createdate
+	 */
 	public function setCreatedate($createdate) {
-		$this->createdate = $createdate;
+		$this->createdate = (int) $createdate;
 	}
 
+	/**
+	 * @param int $clang
+	 */
 	public function setClang($clang) {
-		$this->clang = $clang;
+		$this->clang = (int) $clang;
 	}
 
+	/**
+	 * @param int $re_id
+	 */
 	public function setParentId($re_id) {
-		$this->re_id = $re_id;
+		$this->re_id = (int) $re_id;
 	}
 
+	/**
+	 * @param int $prior
+	 */
 	public function setPrior($prior) {
-		$this->prior = $prior;
+		$this->prior = (int) $prior;
 	}
 
+	/**
+	 * @param string $catname
+	 */
 	public function setCatname($catname) {
 		$this->catname = $catname;
 	}
 
+	/**
+	 * @param int $startpage
+	 */
 	public function setStartpage($startpage) {
-		$this->startpage = $startpage;
+		$this->startpage = (int) $startpage;
 	}
 
+	/**
+	 * @param int $updatedate
+	 */
 	public function setUpdatedate($updatedate) {
-		$this->updatedate = $updatedate;
+		$this->updatedate = (int) $updatedate;
 	}
 
+	/**
+	 * @param string $createuser
+	 */
 	public function setCreateuser($createuser) {
 		$this->createuser = $createuser;
 	}
 
+	/**
+	 * @param string $attributes
+	 */
 	public function setAttributes($attributes) {
 		$this->attributes = $attributes;
 	}
 
+	/**
+	 * @param string $path
+	 */
 	public function setPath($path) {
 		$this->path = $path;
 	}
 
+	/**
+	 * @param string $type
+	 */
 	public function setType($type) {
 		$this->type = $type;
 	}
 
+	/**
+	 * @param int $revision
+	 */
 	public function setRevision($revision) {
-		$this->revision = $revision;
+		$this->revision = (int) $revision;
 	}
 
 	/**
-	 *
 	 * @return boolean
 	 */
 	public function isOnline() {
@@ -188,7 +288,6 @@ class sly_Model_Base_Article extends sly_Model_Base {
 	}
 
 	/**
-	 *
 	 * @return boolean
 	 */
 	public function isOffline() {
@@ -198,7 +297,7 @@ class sly_Model_Base_Article extends sly_Model_Base {
 	/**
 	 * return the url
 	 *
-	 * @param  array   $params
+	 * @param  mixed   $params
 	 * @param  string  $divider
 	 * @param  boolean $disableCache
 	 * @return string
@@ -247,7 +346,6 @@ class sly_Model_Base_Article extends sly_Model_Base {
 	}
 
 	/**
-	 *
 	 * @return array
 	 */
 	public function getParentTree() {
@@ -259,14 +357,15 @@ class sly_Model_Base_Article extends sly_Model_Base {
 		if ($this->getStartpage() == 1) {
 			$explode[] = $this->getId();
 		}
+
 		foreach ($explode as $var) {
 			$return[] = sly_Util_Category::findById($var, $this->getClang());
 		}
+
 		return $return;
 	}
 
 	/**
-	 *
 	 * @param  sly_Model_Base_Article $anObj
 	 * @return boolean
 	 */

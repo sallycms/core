@@ -1,5 +1,4 @@
 <?php
-
 /*
  * Copyright (c) 2011, webvariants GbR, http://www.webvariants.de
  *
@@ -15,7 +14,6 @@
  * @author christoph@webvariants.de
  */
 class sly_Model_Category extends sly_Model_Base_Article {
-
 	/**
 	 * return the catname
 	 *
@@ -27,7 +25,7 @@ class sly_Model_Category extends sly_Model_Base_Article {
 
 	/**
 	 * return the startarticle of this category
-	 * 
+	 *
 	 * @return sly_Model_Article
 	 */
 	public function getStartArticle() {
@@ -35,10 +33,10 @@ class sly_Model_Category extends sly_Model_Base_Article {
 	}
 
 	/**
-	 * return all articles of this category 
-	 * 
+	 * return all articles of this category
+	 *
 	 * @param  boolean $ignore_offlines
-	 * @return array 
+	 * @return array
 	 */
 	public function getArticles($ignore_offlines = false) {
 		return sly_Util_Article::findByCategory($this->getId(), $ignore_offlines, $this->getClang());
@@ -48,7 +46,7 @@ class sly_Model_Category extends sly_Model_Base_Article {
 	 * get the parent category
 	 *
 	 * @param  int $clang
-	 * @return sly_Model_Category 
+	 * @return sly_Model_Category
 	 */
 	public function getParent($clang = null) {
 		return sly_Util_Category::findById($this->getParentId(), $clang);
@@ -56,7 +54,7 @@ class sly_Model_Category extends sly_Model_Base_Article {
 
 	/**
 	 * return true if this is an ancestor of the given category
-	 * 
+	 *
 	 * @param  sly_Model_Category $other_cat
 	 * @return boolean
 	 */
@@ -65,23 +63,20 @@ class sly_Model_Category extends sly_Model_Base_Article {
 	}
 
 	/**
-	 *
 	 * @param  sly_Model_Category $other_cat
-	 * @return boolean 
+	 * @return boolean
 	 */
 	public function isParent(sly_Model_Category $other_cat) {
 		return $this->getId() == $other_cat->getParentId();
 	}
-	
+
 	/**
-	 *
 	 * @param  boolean $ignore_offlines
 	 * @param  int     $clang
-	 * @return array 
+	 * @return array
 	 */
 	public function getChildren($ignore_offlines = false, $clang = null) {
 		if ($clang === null) $clang = $this->getClang();
 		return sly_Util_Category::findByParentId($this->getId(), $ignore_offlines, $clang);
 	}
-
 }

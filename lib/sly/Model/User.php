@@ -15,31 +15,34 @@
  * @ingroup model
  */
 class sly_Model_User extends sly_Model_Base_Id {
-	protected $name;
-	protected $description;
-	protected $login;
-	protected $psw;
-	protected $status; // TODO: Ist in der Datenbank noch ein VARCHAR...
-	protected $rights;
-	protected $createuser;
-	protected $updateuser;
-	protected $createdate;
-	protected $updatedate;
-	protected $lasttrydate;
-	protected $timezone;
-	protected $revision;
+	protected $name;          ///< string
+	protected $description;   ///< string
+	protected $login;         ///< string
+	protected $psw;           ///< string
+	protected $status;        ///< int
+	protected $rights;        ///< string
+	protected $createuser;    ///< string
+	protected $updateuser;    ///< string
+	protected $createdate;    ///< int
+	protected $updatedate;    ///< int
+	protected $lasttrydate;   ///< int
+	protected $timezone;      ///< string
+	protected $revision;      ///< int
 
-	protected $startpage;
-	protected $backendLocale;
-	protected $rightsArray;
+	protected $startpage;     ///< string
+	protected $backendLocale; ///< string
+	protected $rightsArray;   ///< string
 
 	protected $_attributes = array(
 		'name' => 'string', 'description' => 'string', 'login' => 'string', 'psw' => 'string',
 		'status' => 'int', 'rights' => 'string', 'updateuser' => 'string',
 		'updatedate' => 'int', 'createuser' => 'string', 'createdate' => 'int', 'lasttrydate' => 'int',
 		'timezone' => 'string', 'revision' => 'int'
-	);
+	); ///< array
 
+	/**
+	 * @param array $params
+	 */
 	public function __construct($params = array()) {
 		parent::__construct($params);
 		$this->evalRights();
@@ -66,9 +69,9 @@ class sly_Model_User extends sly_Model_Base_Id {
 		}
 	}
 
-	public function setName($name)               { $this->name        = $name;         }
-	public function setDescription($description) { $this->description = $description;  }
-	public function setLogin($login)             { $this->login       = $login;        }
+	public function setName($name)               { $this->name        = $name;        } ///< @param string $name
+	public function setDescription($description) { $this->description = $description; } ///< @param string $description
+	public function setLogin($login)             { $this->login       = $login;       } ///< @param string $login
 
 	/**
 	 * Sets a password into the user model.
@@ -90,31 +93,34 @@ class sly_Model_User extends sly_Model_Base_Id {
 		$this->psw = $psw;
 	}
 
-	public function setStatus($status)           { $this->status      = (int) $status; }
-	public function setCreateDate($createdate)   { $this->createdate  = $createdate;   }
-	public function setUpdateDate($updatedate)   { $this->updatedate  = $updatedate;   }
-	public function setCreateUser($createuser)   { $this->createuser  = $createuser;   }
-	public function setUpdateUser($updateuser)   { $this->updateuser  = $updateuser;   }
-	public function setLastTryDate($lasttrydate) { $this->lasttrydate = $lasttrydate;  }
-	public function setTimeZone($timezone)       { $this->timezone    = $timezone;     }
-	public function setRevision($revision)       { $this->revision    = $revision;     }
+	public function setStatus($status)           { $this->status      = (int) $status;      } ///< @param int    $status
+	public function setCreateDate($createdate)   { $this->createdate  = (int) $createdate;  } ///< @param int    $createdate
+	public function setUpdateDate($updatedate)   { $this->updatedate  = (int) $updatedate;  } ///< @param int    $updatedate
+	public function setCreateUser($createuser)   { $this->createuser  = $createuser;        } ///< @param string $createuser
+	public function setUpdateUser($updateuser)   { $this->updateuser  = $updateuser;        } ///< @param string $updateuser
+	public function setLastTryDate($lasttrydate) { $this->lasttrydate = (int) $lasttrydate; } ///< @param int    $lasttrydate
+	public function setTimeZone($timezone)       { $this->timezone    = $timezone;          } ///< @param string $timezone
+	public function setRevision($revision)       { $this->revision    = (int) $revision;    } ///< @param int    $revision
 
-	public function getName()        { return $this->name;        }
-	public function getDescription() { return $this->description; }
-	public function getLogin()       { return $this->login;       }
-	public function getPassword()    { return $this->psw;         }
-	public function getStatus()      { return $this->status;      }
-	public function getRights()      { return $this->rights;      }
-	public function getCreateDate()  { return $this->createdate;  }
-	public function getUpdateDate()  { return $this->updatedate;  }
-	public function getCreateUser()  { return $this->createuser;  }
-	public function getUpdateUser()  { return $this->updateuser;  }
-	public function getLastTryDate() { return $this->lasttrydate; }
-	public function getTimeZone()    { return $this->timezone;    }
-	public function getRevision()    { return $this->revision;    }
+	public function getName()        { return $this->name;        } ///< @return string
+	public function getDescription() { return $this->description; } ///< @return string
+	public function getLogin()       { return $this->login;       } ///< @return string
+	public function getPassword()    { return $this->psw;         } ///< @return string
+	public function getStatus()      { return $this->status;      } ///< @return int
+	public function getRights()      { return $this->rights;      } ///< @return string
+	public function getCreateDate()  { return $this->createdate;  } ///< @return int
+	public function getUpdateDate()  { return $this->updatedate;  } ///< @return int
+	public function getCreateUser()  { return $this->createuser;  } ///< @return string
+	public function getUpdateUser()  { return $this->updateuser;  } ///< @return string
+	public function getLastTryDate() { return $this->lasttrydate; } ///< @return int
+	public function getTimeZone()    { return $this->timezone;    } ///< @return string
+	public function getRevision()    { return $this->revision;    } ///< @return int
 
 	// Wenn Rechte gesetzt werden, müssen wir etwas mehr arbeiten.
 
+	/**
+	 * @param string $rights
+	 */
 	public function setRights($rights) {
 		$this->rights = '#'.trim($rights, '#').'#';
 		$this->evalRights();
@@ -122,42 +128,71 @@ class sly_Model_User extends sly_Model_Base_Id {
 
 	// Hilfsfunktionen für abgeleitete Attribute
 
-	public function getStartPage()     { return $this->startpage;     }
-	public function getBackendLocale() { return $this->backendLocale; }
-	public function isAdmin()          { return $this->isAdmin;       }
+	public function getStartPage()     { return $this->startpage;     } ///< @return string
+	public function getBackendLocale() { return $this->backendLocale; } ///< @return string
+	public function isAdmin()          { return $this->isAdmin;       } ///< @return boolean
 
+	/**
+	 * @return array
+	 */
 	public function getAllowedCategories() {
 		preg_match_all('/#csw\[(\d+)\]/', $this->getRights(), $matches);
 		return isset($matches[1]) ? $matches[1] : array();
 	}
 
+	/**
+	 * @return array
+	 */
 	public function getAllowedMediaCategories() {
 		preg_match_all('/#media\[(\d+)\]/', $this->getRights(), $matches);
 		return isset($matches[1]) ? $matches[1] : array();
 	}
 
+	/**
+	 * @return array
+	 */
 	public function getAllowedModules() {
 		preg_match_all('/#module\[(.+?)\]/', $this->getRights(), $matches);
 		return isset($matches[1]) ? $matches[1] : array();
 	}
 
+	/**
+	 * @return array
+	 */
 	public function getAllowedCLangs() {
 		preg_match_all('/#clang\[(\d+)\]/', $this->getRights(), $matches);
 		return isset($matches[1]) ? $matches[1] : array();
 	}
 
+	/**
+	 * @return array
+	 */
 	public function getRightsAsArray() {
 		return $this->rightsArray;
 	}
 
+	/**
+	 * @param  string $right
+	 * @return boolean
+	 */
 	public function hasRight($right) {
 		return in_array($right, $this->rightsArray);
 	}
 
+	/**
+	 * @deprecated use hasRight() instead
+	 *
+	 * @param  string $right
+	 * @return boolean
+	 */
 	public function hasPerm($right) {
 		return $this->hasRight($right);
 	}
 
+	/**
+	 * @param string  $right
+	 * @param boolean $switch
+	 */
 	public function toggleRight($right, $switch = true) {
 		$right = trim($right, '#');
 
@@ -178,15 +213,25 @@ class sly_Model_User extends sly_Model_Base_Id {
 
 	// Misc
 
+	/**
+	 * @return int
+	 */
 	public function delete() {
 		return sly_Service_Factory::getUserService()->delete(array('id' => $this->id));
 	}
 
+	/**
+	 * @param  int $categoryID
+	 * @return boolean
+	 */
 	public function hasCategoryRight($categoryID) {
 		$categoryID = (int) $categoryID;
 		return $this->isAdmin() || $this->hasRight('csw[0]') || $this->hasRight('csr['.$categoryID.']') || $this->hasRight('csw['.$categoryID.']');
 	}
 
+	/**
+	 * @return boolean
+	 */
 	public function hasStructureRight() {
 		return $this->isAdmin() || strpos($this->rights, '#csw[') !== false || strpos($this->rights, '#csr[') !== false;
 	}

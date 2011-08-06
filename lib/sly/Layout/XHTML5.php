@@ -12,12 +12,18 @@
  * @ingroup layout
  */
 class sly_Layout_XHTML5 extends sly_Layout_XHTML {
-	protected $manifest;
+	protected $manifest; ///< string
 
+	/**
+	 * @param string $manifest
+	 */
 	public function setManifest($manifest) {
 		$this->manifest = $manifest;
 	}
 
+	/**
+	 * @param boolean $isTransitional  true or false, it's your choice
+	 */
 	public function setTransitional($isTransitional = true) {
 		trigger_error('Cannot set transitional on XHTML5 layout.', E_USER_NOTICE);
 	}
