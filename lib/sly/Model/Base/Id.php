@@ -15,11 +15,22 @@
  * @ingroup model
  */
 abstract class sly_Model_Base_Id extends sly_Model_Base {
-	const NEW_ID = -1;
+	const NEW_ID = -1; ///< int
 
-	protected $_pk = array('id' => 'int');
-	protected $id  = self::NEW_ID;
+	protected $_pk = array('id' => 'int'); ///< array
+	protected $id  = self::NEW_ID;         ///< int
 
-	public function getId()    { return $this->id;      }
-	public function setId($id) { $this->id = (int) $id; }
+	/**
+	 * @return int
+	 */
+	public function getId() {
+		return $this->id;
+	}
+
+	/**
+	 * @param int $id
+	 */
+	public function setId($id) {
+		$this->id = (int) $id;
+	}
 }

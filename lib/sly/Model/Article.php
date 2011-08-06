@@ -1,5 +1,4 @@
 <?php
-
 /*
  * Copyright (c) 2011, webvariants GbR, http://www.webvariants.de
  *
@@ -15,13 +14,16 @@
  * @author christoph@webvariants.de
  */
 class sly_Model_Article extends sly_Model_Base_Article {
-
+	/**
+	 * @return boolean
+	 */
 	public function isStartArticle() {
 		return $this->getStartpage() == 1;
 	}
 
 	/**
 	 * returns the category id
+	 *
 	 * @return int
 	 */
 	public function getCategoryId() {
@@ -43,20 +45,25 @@ class sly_Model_Article extends sly_Model_Base_Article {
 	public function hasType() {
 		return !empty($this->type);
 	}
-	
+
+	/**
+	 * @return boolean
+	 */
 	public function hasTemplate() {
-		if($this->hasType()) {
-			$templateName = $this->getTemplateName(); 
+		if ($this->hasType()) {
+			$templateName    = $this->getTemplateName();
 			$templateService = sly_Service_Factory::getTemplateService();
+
 			return !empty($templateName) && $templateService->exists($templateName);
 		}
-		return false; 
+
+		return false;
 	}
 
 	/**
 	 * returns the template name of the template associated with the articletype of this article
 	 *
-	 * @return string the template name
+	 * @return string  the template name
 	 */
 	public function getTemplateName() {
 		return sly_Service_Factory::getArticleTypeService()->getTemplate($this->type);
@@ -69,6 +76,7 @@ class sly_Model_Article extends sly_Model_Base_Article {
 	 */
 	public function printContent($slot = null) {
 		$ids = OOArticleSlice::getSliceIdsForSlot($this->getId(), $this->getClang(), $slot);
+
 		foreach ($ids as $id) {
 			OOArticleSlice::getArticleSliceById($id)->printContent();
 		}
@@ -78,7 +86,8 @@ class sly_Model_Article extends sly_Model_Base_Article {
 	 * returns the articlecontent for a given slot, or if empty for all slots
 	 *
 	 * @deprecated use getContent() instead
-	 * @param string $slot
+	 *
+	 * @param  string $slot
 	 * @return string
 	 */
 	public function getArticle($slot = null) {
@@ -88,7 +97,7 @@ class sly_Model_Article extends sly_Model_Base_Article {
 	/**
 	 * returns the articlecontent for a given slot, or if empty for all slots
 	 *
-	 * @param string $slot
+	 * @param  string $slot
 	 * @return string
 	 */
 	public function getContent($slot = null) {

@@ -91,6 +91,9 @@ class sly_Layout_XHTML extends sly_Layout {
 		$this->printHeadElements("\t".'<meta http-equiv="%s" content="%s" />'."\n", $this->httpMetas);
 	}
 
+	/**
+	 * @param array $attributes
+	 */
 	protected function printLink($attributes) {
 		print "\t".'<link '.sly_Util_HTML::buildAttributeString($attributes)."/>\n";
 	}
@@ -99,6 +102,10 @@ class sly_Layout_XHTML extends sly_Layout {
 		print $this->renderView('layout/xhtml/head.phtml');
 	}
 
+	/**
+	 * @param string $format
+	 * @param array  $data
+	 */
 	private function printHeadElements($format, $data) {
 		foreach ($data as $key => $value) {
 			printf($format, sly_html(trim($key)), sly_html(trim($value)));
