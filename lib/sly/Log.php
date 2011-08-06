@@ -348,7 +348,10 @@ class sly_Log {
 			@chmod($this->filename, sly_Core::getFilePerm());
 		}
 
-		$this->rotate();
+		if ($this->enableRotation) {
+			$this->rotate();
+		}
+
 		return file_put_contents($this->filename, $line."\n", FILE_APPEND) > 0;
 	}
 
