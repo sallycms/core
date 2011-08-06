@@ -49,6 +49,7 @@ class sly_ErrorHandler_Production extends sly_ErrorHandler_Base implements sly_E
 		// in errors like E_STRICT. See PHP Bug #54054 for details.
 		$this->log = sly_Log::getInstance('errors');
 		$this->log->setFormat('[%date% %time%] %message%');
+		$this->log->enableRotation(self::MAX_LOGFILE_SIZE, self::MAX_LOGFILES);
 	}
 
 	/**
