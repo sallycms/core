@@ -15,12 +15,15 @@
  * @ingroup service
  */
 class sly_Service_ArticleType {
-	private $data;
+	private $data; ///< array
 
 	public function __construct() {
 		$this->data = (array) sly_Core::config()->get('ARTICLE_TYPES');
 	}
 
+	/**
+	 * @return array
+	 */
 	public function getArticleTypes() {
 		$types = array();
 		foreach (array_keys($this->data) as $name) {
@@ -29,20 +32,40 @@ class sly_Service_ArticleType {
 		return $types;
 	}
 
+	/**
+	 * @param  string $articleType
+	 * @param  string $property
+	 * @param  mixed  $default
+	 * @return mixed
+	 */
 	protected function get($articleType, $property, $default = '') {
 		$this->exists($articleType, true);
 		return isset($this->data[$articleType][$property]) ? $this->data[$articleType][$property] : $default;
 	}
 
+	/**
+	 * @param  string $articleType
+	 * @return string
+	 */
 	public function getTitle($articleType) {
 		$title = $this->get($articleType, 'title');
 		return empty($title) ? $articleType : $title;
 	}
 
+	/**
+	 * @param  string $articleType
+	 * @return string
+	 */
 	public function getTemplate($articleType) {
 		return $this->get($articleType, 'template');
 	}
 
+	/**
+	 * @throws sly_Exception
+	 * @param  string  $articleType
+	 * @param  boolean $throwException
+	 * @return boolean
+	 */
 	public function exists($articleType, $throwException = false) {
 		if (!array_key_exists($articleType, $this->data)) {
 			if ($throwException) {
