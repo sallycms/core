@@ -14,30 +14,28 @@
  * @ingroup database
  */
 abstract class sly_DB_PDO_SQLBuilder {
-	private $connection;
-	private $operation = 'SELECT';
-	private $table;
-	private $select = '*';
-	private $joins;
-	private $order;
-	private $limit;
-	private $offset;
-	private $group;
-	private $having;
+	private $connection;           ///< PDO
+	private $operation = 'SELECT'; ///< string
+	private $table;                ///< string
+	private $select = '*';         ///< string
+	private $joins;                ///< string
+	private $order;                ///< string
+	private $limit;                ///< int
+	private $offset;               ///< int
+	private $group;                ///< string
+	private $having;               ///< string
 
 	// for where
-	private $where;
-	private $where_values = array();
+	private $where;                  ///< array
+	private $where_values = array(); ///< array
 
-	private $data;
+	private $data; ///< array
 
 	/**
 	 * Constructicon.
 	 *
-	 * @param Connection $connection A database connection object
-	 * @param string $table Name of a table
-	 * @return SQLBuilder
-	 * @throws ActiveRecordException if connection was invalid
+	 * @param PDO    $connection  A database connection object
+	 * @param string $table       Name of a table
 	 */
 	public function __construct(PDO $connection, $table) {
 		$this->connection	= $connection;
@@ -56,11 +54,11 @@ abstract class sly_DB_PDO_SQLBuilder {
 	/**
 	 * Returns the SQL string.
 	 *
-	 * @see __toString
+	 * @see    __toString()
 	 * @return string
 	 */
 	public function to_s() {
-		$func = 'build_' . strtolower($this->operation);
+		$func = 'build_'.strtolower($this->operation);
 		return $this->$func();
 	}
 
@@ -81,51 +79,90 @@ abstract class sly_DB_PDO_SQLBuilder {
 		return sly_Util_Array::flatten($ret);
 	}
 
+	/**
+	 * @return array
+	 */
 	public function get_where_values() {
 		return $this->where_values;
 	}
 
+	/**
+	 * @return sly_DB_PDO_SQLBuilder this
+	 */
 	public function where(/* (conditions, values) || (hash) */) {
 		$this->apply_where_conditions(func_get_args());
 		return $this;
 	}
 
+	/**
+	 * @param  string $order
+	 * @return sly_DB_PDO_SQLBuilder this
+	 */
 	public function order($order) {
 		$this->order = $order;
 		return $this;
 	}
 
+	/**
+	 * @param  string $group
+	 * @return sly_DB_PDO_SQLBuilder this
+	 */
 	public function group($group) {
 		$this->group = $group;
 		return $this;
 	}
 
+	/**
+	 * @param  string $having
+	 * @return sly_DB_PDO_SQLBuilder this
+	 */
 	public function having($having) {
 		$this->having = $having;
 		return $this;
 	}
 
+	/**
+	 * @param  int $limit
+	 * @return sly_DB_PDO_SQLBuilder this
+	 */
 	public function limit($limit) {
 		$this->limit = intval($limit);
 		return $this;
 	}
 
+	/**
+	 * @param  int $offset
+	 * @return sly_DB_PDO_SQLBuilder this
+	 */
 	public function offset($offset) {
 		$this->offset = intval($offset);
 		return $this;
 	}
 
+	/**
+	 * @param  string $select
+	 * @return sly_DB_PDO_SQLBuilder this
+	 */
 	public function select($select) {
 		$this->operation = 'SELECT';
 		$this->select = $select;
 		return $this;
 	}
 
+	/**
+	 * @param  string $joins
+	 * @return sly_DB_PDO_SQLBuilder this
+	 */
 	public function joins($joins) {
 		$this->joins = $joins;
 		return $this;
 	}
 
+	/**
+	 * @throws Exception
+	 * @param  array $hash
+	 * @return sly_DB_PDO_SQLBuilder this
+	 */
 	public function insert($hash) {
 		if (!sly_Util_Array::isAssoc($hash)) throw new Exception('Inserting requires a hash.');
 
@@ -135,6 +172,11 @@ abstract class sly_DB_PDO_SQLBuilder {
 		return $this;
 	}
 
+	/**
+	 * @throws Exception
+	 * @param  array $hash
+	 * @return sly_DB_PDO_SQLBuilder this
+	 */
 	public function update($hash) {
 		if (!sly_Util_Array::isAssoc($hash)) throw new Exception('Updating requires a hash.');
 
@@ -144,12 +186,18 @@ abstract class sly_DB_PDO_SQLBuilder {
 		return $this;
 	}
 
+	/**
+	 * @return sly_DB_PDO_SQLBuilder this
+	 */
 	public function delete() {
 		$this->operation = 'DELETE';
 		$this->apply_where_conditions(func_get_args());
 		return $this;
 	}
 
+	/**
+	 * @return sly_DB_PDO_SQLBuilder this
+	 */
 	public function list_tables() {
 		$this->operation = 'LIST_TABLES';
 		return $this;
@@ -157,6 +205,9 @@ abstract class sly_DB_PDO_SQLBuilder {
 
 	/**
 	 * Reverses an order clause.
+	 *
+	 * @param  string $order
+	 * @return string
 	 */
 	public static function reverse_order($order) {
 		if (!trim($order)) return $order;
@@ -194,7 +245,7 @@ abstract class sly_DB_PDO_SQLBuilder {
 	public static function create_conditions_from_underscored_string($name, &$values = array(), &$map = null) {
 		if (!$name) return null;
 
-		$parts      = preg_split('/(_and_|_or_)/i',$name,-1,PREG_SPLIT_DELIM_CAPTURE);
+		$parts      = preg_split('/(_and_|_or_)/i', $name, -1, PREG_SPLIT_DELIM_CAPTURE);
 		$num_values = count($values);
 		$conditions = array('');
 
@@ -228,13 +279,13 @@ abstract class sly_DB_PDO_SQLBuilder {
 	/**
 	 * Like create_conditions_from_underscored_string but returns a hash of name => value array instead.
 	 *
-	 * @param  string $name  A string containing attribute names connected with _and_ or _or_
-	 * @param  array  $args  Array of values for each attribute in $name
-	 * @param  array  $map   A hash of "mapped_column_name" => "real_column_name"
-	 * @return array         A hash of array(name => value, ...)
+	 * @param  string $name    A string containing attribute names connected with _and_ or _or_
+	 * @param  array  $values  Array of values for each attribute in $name
+	 * @param  array  $map     A hash of "mapped_column_name" => "real_column_name"
+	 * @return array           A hash of array(name => value, ...)
 	 */
 	public static function create_hash_from_underscored_string($name, &$values = array(), &$map = null) {
-		$parts = preg_split('/(_and_|_or_)/i',$name);
+		$parts = preg_split('/(_and_|_or_)/i', $name);
 		$hash  = array();
 
 		for ($i = 0, $n = count($parts); $i < $n; ++$i) {
@@ -246,6 +297,9 @@ abstract class sly_DB_PDO_SQLBuilder {
 		return $hash;
 	}
 
+	/**
+	 * @param array $args
+	 */
 	protected function apply_where_conditions($args) {
 		$num_args = count($args);
 
@@ -276,12 +330,18 @@ abstract class sly_DB_PDO_SQLBuilder {
 		}
 	}
 
+	/**
+	 * @return string
+	 */
 	protected function build_delete() {
 		$sql = "DELETE FROM $this->table";
 		if ($this->where) $sql .= " WHERE $this->where";
 		return $sql;
 	}
 
+	/**
+	 * @return string
+	 */
 	protected function build_insert() {
 		$keys = implode(',', array_keys($this->data));
 		$e    = new sly_DB_PDO_Expression("INSERT INTO $this->table ($keys) VALUES (?)", array_values($this->data));
@@ -290,6 +350,9 @@ abstract class sly_DB_PDO_SQLBuilder {
 		return $e->to_s();
 	}
 
+	/**
+	 * @return string
+	 */
 	protected function build_select() {
 		$sql = "SELECT $this->select FROM $this->table";
 
@@ -306,6 +369,9 @@ abstract class sly_DB_PDO_SQLBuilder {
 		return $sql;
 	}
 
+	/**
+	 * @return string
+	 */
 	protected function build_update() {
 		$fields = array_keys($this->data);
 		$sql    = "UPDATE $this->table SET ".implode(' = ?, ', $fields).' = ?';
@@ -317,6 +383,16 @@ abstract class sly_DB_PDO_SQLBuilder {
 		return $sql;
 	}
 
+	/**
+	 * @param  string $sql
+	 * @param  int    $offset
+	 * @param  int    $limit
+	 * @return string
+	 */
 	protected abstract function build_limit($sql, $offset = 0, $limit = -1);
+
+	/**
+	 * @return string
+	 */
 	protected abstract function build_list_tables();
 }

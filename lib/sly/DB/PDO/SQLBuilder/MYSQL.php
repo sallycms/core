@@ -12,6 +12,12 @@
  * @ingroup database
  */
 class sly_DB_PDO_SQLBuilder_MYSQL extends sly_DB_PDO_SQLBuilder {
+	/**
+	 * @param  string $sql
+	 * @param  int    $offset
+	 * @param  int    $limit
+	 * @return string
+	 */
 	public function build_limit($sql, $offset = 0, $limit = -1) {
 		$offset = abs((int) $offset);
 		$limit  = (int) $limit;
@@ -20,6 +26,9 @@ class sly_DB_PDO_SQLBuilder_MYSQL extends sly_DB_PDO_SQLBuilder {
 		return "$sql LIMIT $offset, $limit";
 	}
 
+	/**
+	 * @return string
+	 */
 	public function build_list_tables() {
 		return 'SHOW TABLES';
 	}
