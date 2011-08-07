@@ -21,6 +21,13 @@
  * @param string            $environment  die Umgebung aus der der Inhalt gesendet wird (frontend/backend)
  */
 function rex_send_article($article, $content, $environment) {
+	// if no content is given, close all buffer and collect the output
+
+	if ($content === null) {
+		$content = '';
+		while (ob_get_level()) $content = ob_get_clean().$content;
+	}
+
 	$content = sly_Core::dispatcher()->filter('OUTPUT_FILTER', $content, compact('environment'));
 
 	// keine Manipulation der Ausgaben ab hier
