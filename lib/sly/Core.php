@@ -346,17 +346,11 @@ class sly_Core {
 
 	/**
 	 * Returns the backend navigation
-	 *
+	 * @deprecated
 	 * @return sly_Layout_Navigation_Backend  the navigation object used for the backend menu
 	 */
 	public static function getNavigation() {
-		$instance = self::getInstance();
-
-		if (!isset($instance->navigation)) {
-			$instance->navigation = new sly_Layout_Navigation_Backend();
-		}
-
-		return $instance->navigation;
+		return self::getLayout('Backend')->getNavigation();
 	}
 
 	/**
