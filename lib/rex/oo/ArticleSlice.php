@@ -184,8 +184,8 @@ class OOArticleSlice {
 		if (!file_exists($slice_content_file)) {
 			$slice = $this->getSlice();
 			$slice_content = $slice->getOutput();
-			$slice_content = self::replaceLinks($content);
-			$slice_content = $this->replaceGlobals($content);
+			$slice_content = self::replaceLinks($slice_content);
+			$slice_content = $this->replaceGlobals($slice_content);
 
 			if (!file_put_contents($slice_content_file, $slice_content)) {
 				return t('slice_could_not_be_generated').' '.t('check_rights_in_directory').SLY_DYNFOLDER.'/internal/sally/articles/';
