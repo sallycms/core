@@ -10,7 +10,7 @@
 
 $char        = chr(97 + $column);
 $outerClass  = array('rex-form-col-'.$char, $element->getOuterClass());
-$help        = $element->getHelpText() ? '<span class="rex-form-notice">'.nl2br(rex_translate($element->getHelpText())).'</span>' : '';
+$help        = $element->getHelpText() ? '<span class="sly-form-helptext">'.nl2br(rex_translate($element->getHelpText())).'</span>' : '';
 $isContainer = $element->isContainer();
 $label       = $element->getLabel();
 $label       = empty($label) ? '&nbsp;' : rex_translate($label).':';
