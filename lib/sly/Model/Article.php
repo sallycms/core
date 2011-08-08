@@ -85,18 +85,6 @@ class sly_Model_Article extends sly_Model_Base_Article {
 	/**
 	 * returns the articlecontent for a given slot, or if empty for all slots
 	 *
-	 * @deprecated use getContent() instead
-	 *
-	 * @param  string $slot
-	 * @return string
-	 */
-	public function getArticle($slot = null) {
-		return $this->getContent($slot);
-	}
-
-	/**
-	 * returns the articlecontent for a given slot, or if empty for all slots
-	 *
 	 * @param  string $slot
 	 * @return string
 	 */
