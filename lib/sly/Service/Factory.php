@@ -12,15 +12,14 @@
  * @ingroup service
  */
 abstract class sly_Service_Factory {
-
-	private static $services = array();
+	private static $services = array(); ///< array
 
 	/**
-	 * Return a instance on a Service
+	 * Return a instance of a service
 	 *
-	 * @param string $modelName
-	 *
-	 * @return sly_Service_Base an implementation of sly_Service_Model_Base
+	 * @throws sly_Exception      if service could not be found
+	 * @param  string $modelName  service name (like 'Category' or 'User')
+	 * @return sly_Service_Base   an implementation of sly_Service_Base
 	 */
 	public static function getService($modelName) {
 		if (!isset(self::$services[$modelName])){
@@ -95,7 +94,6 @@ abstract class sly_Service_Factory {
 	}
 
 	/**
-	 *
 	 * @return sly_Service_Category
 	 */
 	public static function getCategoryService() {

@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright (c) 2010, webvariants GbR, http://www.webvariants.de
+ * Copyright (c) 2011, webvariants GbR, http://www.webvariants.de
  *
  * This file is released under the terms of the MIT license. You can find the
  * complete text in the attached LICENSE file or online at:
@@ -12,19 +12,18 @@
  * @author Dave
  */
 class sly_Service_Asset {
+	const CACHE_DIR = 'public/sally/static-cache';  ///< string
+	const TEMP_DIR  = 'internal/sally/temp';        ///< string
 
-	const CACHE_DIR = 'public/sally/static-cache';
-	const TEMP_DIR  = 'internal/sally/temp';
+	const EVENT_PROCESS_ASSET        = 'SLY_CACHE_PROCESS_ASSET';        ///< string
+	const EVENT_REVALIDATE_ASSETS    = 'SLY_CACHE_REVALIDATE_ASSETS';    ///< string
+	const EVENT_GET_PROTECTED_ASSETS = 'SLY_CACHE_GET_PROTECTED_ASSETS'; ///< string
+	const EVENT_IS_PROTECTED_ASSET   = 'SLY_CACHE_IS_PROTECTED_ASSET';   ///< string
 
-	const EVENT_PROCESS_ASSET        = 'SLY_CACHE_PROCESS_ASSET';
-	const EVENT_REVALIDATE_ASSETS    = 'SLY_CACHE_REVALIDATE_ASSETS';
-	const EVENT_GET_PROTECTED_ASSETS = 'SLY_CACHE_GET_PROTECTED_ASSETS';
-	const EVENT_IS_PROTECTED_ASSET   = 'SLY_CACHE_IS_PROTECTED_ASSET';
+	const ACCESS_PUBLIC    = 'public';     ///< string
+	const ACCESS_PROTECTED = 'protected';  ///< string
 
-	const ACCESS_PUBLIC    = 'public';
-	const ACCESS_PROTECTED = 'protected';
-
-	private $forceGen = true;
+	private $forceGen = true; ///< boolean
 
 	public function __construct() {
 		$this->initCache();
@@ -34,10 +33,16 @@ class sly_Service_Asset {
 		$dispatcher->register('ALL_GENERATED', array(__CLASS__, 'clearCache'));
 	}
 
+	/**
+	 * @param boolean $force
+	 */
 	public function setForceGeneration($force = true) {
 		$this->forceGen = (boolean) $force;
 	}
 
+	/**
+	 * @return string
+	 */
 	private function getPreferredClientEncoding() {
 		static $enc;
 
@@ -57,6 +62,9 @@ class sly_Service_Asset {
 		return $enc;
 	}
 
+	/**
+	 * @return string
+	 */
 	private function getPreferredCacheDir() {
 		$enc = $this->getPreferredClientEncoding();
 		return $enc === false ? 'plain' : $enc;
@@ -111,7 +119,7 @@ class sly_Service_Asset {
 		if (empty($file)) {
 			if (isset($_GET['sly_asset'])) {
 				header('HTTP/1.0 400 Bad Request');
-				die();
+				die;
 			}
 			return;
 		}
@@ -129,7 +137,7 @@ class sly_Service_Asset {
 		$isProtected = $dispatcher->filter(self::EVENT_IS_PROTECTED_ASSET, false, compact('file'));
 		$access      = $isProtected ? self::ACCESS_PROTECTED : self::ACCESS_PUBLIC;
 
-		// "/../data/dyn/public/sally/static-cache/[access]/gzip/assets/css/main.css"
+		// "/../sally/data/dyn/public/sally/static-cache/[access]/gzip/assets/css/main.css"
 		$cacheFile = $this->getCacheFile($file, $access);
 
 		if (!file_exists($cacheFile) || $this->forceGen) {
@@ -145,18 +153,33 @@ class sly_Service_Asset {
 			$this->generateCacheFile($tmpFile, $cacheFile);
 		}
 
-		$this->printCacheFile($cacheFile);
+		$this->redirectToCacheFile($cacheFile);
 	}
 
+	/**
+	 * @param  string $access
+	 * @param  string $encoding
+	 * @return string
+	 */
 	protected function getCacheDir($access = self::ACCESS_PUBLIC, $encoding = null) {
 		$encoding = $encoding === null ? $this->getPreferredCacheDir() : $encoding;
 		return sly_Util_Directory::join(SLY_DYNFOLDER, self::CACHE_DIR, $access, $encoding);
 	}
 
+	/**
+	 * @param  string $file
+	 * @param  string $access
+	 * @param  string $encoding
+	 * @return string
+	 */
 	protected function getCacheFile($file = null, $access = self::ACCESS_PUBLIC, $encoding = null) {
 		return sly_Util_Directory::join($this->getCacheDir($access, $encoding), $file);
 	}
 
+	/**
+	 * @param string $file
+	 * @param string $cacheFile
+	 */
 	protected function generateCacheFile($file, $cacheFile) {
 		// TODO: eeeh, eeeh, eeeh: the '@' sucks
 		if (!is_dir(dirname($cacheFile))) @mkdir(dirname($cacheFile), sly_Core::getDirPerm(), true);
@@ -197,7 +220,10 @@ class sly_Service_Asset {
 		}
 	}
 
-	protected function printCacheFile($file) {
+	/**
+	 * @param string $file
+	 */
+	protected function redirectToCacheFile($file) {
 		$errors = ob_get_clean();
 
 		if (empty($errors)) {
@@ -226,6 +252,10 @@ class sly_Service_Asset {
 		die;
 	}
 
+	/**
+	 * @param  array $params
+	 * @return string
+	 */
 	public function processScaffold($params) {
 		$file = $params['subject'];
 
@@ -282,6 +312,10 @@ class sly_Service_Asset {
 		sly_Util_Directory::createHttpProtected($dir.'/'.self::ACCESS_PROTECTED);
 	}
 
+	/**
+	 * @param  string $dir
+	 * @return string
+	 */
 	private static function getJumper($dir) {
 		static $jumper = null;
 
@@ -293,6 +327,10 @@ class sly_Service_Asset {
 		return $jumper;
 	}
 
+	/**
+	 * @param  array $params
+	 * @return mixed          the subject (if given) or true
+	 */
 	public static function clearCache(array $params) {
 		$me  = new self();
 		$dir = $me->getCacheDir('', '');
@@ -330,4 +368,3 @@ class sly_Service_Asset {
 		return isset($params['subject']) ? $params['subject'] : true;
 	}
 }
-

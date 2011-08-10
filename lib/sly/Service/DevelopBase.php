@@ -18,9 +18,9 @@
  */
 abstract class sly_Service_DevelopBase {
 
-	private $data;
-	private $lastRefreshTime;
-	protected $conditionEvaluators = array();
+	private $data;                            ///< array
+	private $lastRefreshTime;                 ///< int
+	protected $conditionEvaluators = array(); ///< array
 
 	/**
 	 * Get a list of files for this type of items
@@ -44,7 +44,7 @@ abstract class sly_Service_DevelopBase {
 	/**
 	 * Gets the folder where the development files can be found
 	 *
-	 * @return string  Folder path
+	 * @return string  folder path
 	 */
 	public function getFolder() {
 		$dir = sly_Util_Directory::join(SLY_DEVELOPFOLDER, $this->getClassIdentifier());
@@ -68,15 +68,15 @@ abstract class sly_Service_DevelopBase {
 		$refresh = $force || $this->needsRefresh();
 		if (!$refresh) return true;
 
-		$files = $this->getFiles();
-		$newData = array();
-		$oldData = $this->getData();
+		$files    = $this->getFiles();
+		$newData  = array();
+		$oldData  = $this->getData();
 		$modified = false;
 
 		foreach ($files as $file) {
 			$basename = basename($file);
-			$mtime = filemtime($file);
-			$type = $this->getFileType($basename);
+			$mtime    = filemtime($file);
+			$type     = $this->getFileType($basename);
 
 			// Wenn sich die Datei nicht geändert hat, können wir die bekannten
 			// Daten einfach 1:1 übernehmen.
@@ -147,26 +147,30 @@ abstract class sly_Service_DevelopBase {
 	 * (e.g. when required parameters are missing or when the
 	 * syntax contains errors)
 	 *
-	 * @param  string  $name     Name of the develoment file
-	 * @param  array   $params   Array with parameters parsed from the file
-	 * @param  array   $newData  Array with the parameters of all previous iterated files
+	 * @param  string $name      Name of the develoment file
+	 * @param  array  $params    Array with parameters parsed from the file
+	 * @param  array  $newData   Array with the parameters of all previous iterated files
+	 * @param  string $filename
+	 * @param  string $type
 	 * @return boolean           true, when the parameters are valid. false for invalid.
 	 */
 	protected function areParamsValid($name, $params, $newData, $filename, $type) {
 		$result = true;
 
 		if ($name === null) {
-			trigger_error($filename . ' has no internal name and cannot be loaded.', E_USER_WARNING);
+			trigger_error($filename.' has no internal name and cannot be loaded.', E_USER_WARNING);
 			$result = false;
 		}
+
 		/*
-		  if (isset($newData[$name][$type])) {
-		  trigger_error($filename.' has no unique name. (type: '.$type.')', E_USER_WARNING);
-		  $result = false;
-		  }
-		 */
+		if (isset($newData[$name][$type])) {
+			trigger_error($filename.' has no unique name. (type: '.$type.')', E_USER_WARNING);
+			$result = false;
+		}
+		*/
+
 		if (preg_match('#[^a-z0-9_.-]#i', $name)) {
-			trigger_error('The name ' . $name . ' contains invalid characters.', E_USER_WARNING);
+			trigger_error('The name '.$name.' contains invalid characters.', E_USER_WARNING);
 			$result = false;
 		}
 
@@ -180,24 +184,27 @@ abstract class sly_Service_DevelopBase {
 	 */
 	protected function getData() {
 		if (!isset($this->data)) {
-			$this->data = sly_Core::config()->get($this->getClassIdentifier() . '/data', array());
+			$this->data = sly_Core::config()->get($this->getClassIdentifier().'/data', array());
 		}
 
 		return $this->data;
 	}
 
+	/**
+	 * @param array $data
+	 */
 	protected function setData($data) {
-		sly_Core::config()->set($this->getClassIdentifier() . '/data', $data);
+		sly_Core::config()->set($this->getClassIdentifier().'/data', $data);
 		$this->data = $data;
 	}
 
 	/**
 	 * Find a development file by attribute
 	 *
-	 * @param  string  $attribute  The attribute name
-	 * @param  string  $value      The attribute value
-	 * @param  string  $type       The filetype if necessary (default: null)
-	 * @return string              Element name
+	 * @param  string $attribute  attribute name
+	 * @param  string $value      attribute value
+	 * @param  string $type       filetype if necessary (default: null)
+	 * @return string             element name or false if not found
 	 */
 	public function find($attribute, $value, $type = null) {
 		$data = $this->getData();
@@ -215,31 +222,32 @@ abstract class sly_Service_DevelopBase {
 	/**
 	 * Checks, when the data was refreshed last time
 	 *
-	 * @return int  Refresh timestamp
+	 * @return int  refresh timestamp
 	 */
 	protected function getLastRefreshTime() {
 		if (!isset($this->lastRefreshTime)) {
-			$this->lastRefreshTime = sly_Core::config()->get($this->getClassIdentifier() . '/last_refresh', 0);
+			$this->lastRefreshTime = sly_Core::config()->get($this->getClassIdentifier().'/last_refresh', 0);
 		}
+
 		return $this->lastRefreshTime;
 	}
 
 	/**
 	 * Reset the refresh time
 	 *
-	 * @param int $time  The new timestamp. Leave this null for the current timestamp time();
+	 * @param int $time  the new timestamp. Leave this null for the current timestamp time();
 	 */
 	protected function resetRefreshTime($time = null) {
 		if ($time === null) $time = time();
-		sly_Core::config()->set($this->getClassIdentifier() . '/last_refresh', $time);
+		sly_Core::config()->set($this->getClassIdentifier().'/last_refresh', $time);
 		$this->lastRefreshTime = $time;
 	}
 
 	/**
 	 * Checks, if an item exists
 	 *
-	 * @param  string  $name  The name of the item
-	 * @return boolean        true, if the item exists
+	 * @param  string $name  the name of the item
+	 * @return boolean       true, if the item exists
 	 */
 	public function exists($name) {
 		$data = $this->getData();
@@ -249,7 +257,7 @@ abstract class sly_Service_DevelopBase {
 	/**
 	 * Get an array with all known files.
 	 *
-	 * @return array  Array with known files
+	 * @return array  array with known files
 	 */
 	public function getKnownFiles() {
 		$known = array();
@@ -274,13 +282,13 @@ abstract class sly_Service_DevelopBase {
 	 * returns an array with all user defined parameters. User parameters may
 	 * also be fetched directly by giving the name of the parameter.
 	 *
+	 * @throws sly_Exception      When the resource with the given name is not available
 	 * @param  string  $name      Name of the item
 	 * @param  string  $key       Key of the desired parameter. null gets all. (default: null)
 	 * @param  string  $default   Default value, if the desired parameter is not set (default: null)
 	 * @param  string  $type      Filetype if necessary (default: null)
 	 * @param  string  $filename  A special Filename to get a parameter from
 	 * @return mixed              array with all user defined parameters or string with the desired parameter
-	 * @throws sly_Exception      When the resource with the given name is not available
 	 */
 	public function get($name, $key = null, $default = null, $type = null, $filename = null) {
 		if ($key == 'name') return $name;
@@ -288,7 +296,7 @@ abstract class sly_Service_DevelopBase {
 		$data = $this->getData();
 
 		if (!isset($data[$name])) {
-			throw new sly_Exception('The development resource "' . $name . '" is not available.');
+			throw new sly_Exception('The development resource "'.$name.'" is not available.');
 		}
 
 		if ($type !== null && !isset($data[$name][$type])) {
@@ -324,9 +332,9 @@ abstract class sly_Service_DevelopBase {
 	/**
 	 * Gets the content of a file
 	 *
-	 * @param  string  $filename  Type if necessary (default: null)
-	 * @return string             Content of the file
-	 * @throws sly_Exception      When file does not exist.
+	 * @throws sly_Exception     When file does not exist.
+	 * @param  string $filename  Type if necessary (default: null)
+	 * @return string            Content of the file
 	 */
 	public function getContent($filename) {
 		$filename = sly_Util_Directory::join($this->getFolder(), $filename);
@@ -338,10 +346,10 @@ abstract class sly_Service_DevelopBase {
 	 * Uses the registered filter functions to reduce the set of filenames
 	 * by configurable conditions.
 	 *
-	 * @param  string        $name Name of the item
-	 * @param  string        $type realm of the item
-	 * @return string        One filename of all files for name and type
-	 * @throws sly_Exception When all files are filtered
+	 * @throws sly_Exception  When all files are filtered
+	 * @param  string $name   Name of the item
+	 * @param  string $type   realm of the item
+	 * @return string         One filename of all files for name and type
 	 */
 	protected function filterByCondition($name, $type) {
 		$data      = $this->getData();
@@ -407,7 +415,8 @@ abstract class sly_Service_DevelopBase {
 
 	/**
 	 * registeres a filter function for develop items
-	 * @param string $param the @sly param this filter depends on
+	 *
+	 * @param string   $param      the @sly param this filter depends on
 	 * @param callable $evaluator  A callable method to filter items
 	 */
 	public function registerConditionEvaluator($param, $evaluator) {

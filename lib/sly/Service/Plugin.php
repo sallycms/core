@@ -13,6 +13,10 @@
  * @ingroup service
  */
 class sly_Service_Plugin extends sly_Service_AddOn_Base {
+	/**
+	 * @param  mixed $plugin  an array(addon, plugin) or only the plugin name
+	 * @return string
+	 */
 	public function baseFolder($plugin) {
 		if (!is_array($plugin)) {
 			list($addon, $pluginName) = array($plugin, '');
@@ -31,6 +35,11 @@ class sly_Service_Plugin extends sly_Service_AddOn_Base {
 		return $dir;
 	}
 
+	/**
+	 * @param  string $type
+	 * @param  array  $plugin
+	 * @return string
+	 */
 	protected function dynFolder($type, $plugin) {
 		list($addon, $pluginName) = $plugin;
 
@@ -41,6 +50,13 @@ class sly_Service_Plugin extends sly_Service_AddOn_Base {
 		return $dir;
 	}
 
+	/**
+	 * @param  string  $time
+	 * @param  string  $type
+	 * @param  array   $plugin
+	 * @param  boolean $state
+	 * @return mixed
+	 */
 	protected function extend($time, $type, $plugin, $state) {
 		list($addon, $pluginName) = $plugin;
 		return sly_Core::dispatcher()->filter('SLY_PLUGIN_'.$time.'_'.$type, $state, array('addon' => $addon, 'plugin' => $pluginName));
@@ -51,7 +67,7 @@ class sly_Service_Plugin extends sly_Service_AddOn_Base {
 	 *
 	 * @param  array  $plugin    Plugin als array(addon, plugin)
 	 * @param  string $property  Name der Eigenschaft
-	 * @param  mixed  $property  Wert der Eigenschaft
+	 * @param  mixed  $value     Wert der Eigenschaft
 	 * @return mixed             der gesetzte Wert
 	 */
 	public function setProperty($plugin, $property, $value) {
@@ -122,14 +138,25 @@ class sly_Service_Plugin extends sly_Service_AddOn_Base {
 		return $avail;
 	}
 
+	/**
+	 * @param  array $plugin
+	 * @return null
+	 */
 	public function loadPlugin($plugin) {
 		return $this->load($plugin);
 	}
 
+	/**
+	 * @return string
+	 */
 	protected function getI18NPrefix() {
 		return 'plugin_';
 	}
 
+	/**
+	 * @param  array $plugin
+	 * @return string
+	 */
 	protected function getVersionKey($plugin) {
 		return 'plugins/'.implode('_', $plugin);
 	}

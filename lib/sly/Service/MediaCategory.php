@@ -15,15 +15,23 @@
  * @ingroup service
  */
 class sly_Service_MediaCategory extends sly_Service_Model_Base_Id {
-	protected $tablename = 'file_category';
+	protected $tablename = 'file_category'; ///< string
 
-	const ERR_CAT_HAS_MEDIA   = 1;
-	const ERR_CAT_HAS_SUBCATS = 2;
+	const ERR_CAT_HAS_MEDIA   = 1; ///< int
+	const ERR_CAT_HAS_SUBCATS = 2; ///< int
 
+	/**
+	 * @param  array $params
+	 * @return sly_Model_MediaCategory
+	 */
 	protected function makeInstance(array $params) {
 		return new sly_Model_MediaCategory($params);
 	}
 
+	/**
+	 * @param  int $id
+	 * @return sly_Model_MediaCategory
+	 */
 	public function findById($id) {
 		$id = (int) $id;
 
@@ -44,10 +52,18 @@ class sly_Service_MediaCategory extends sly_Service_Model_Base_Id {
 		return $cat;
 	}
 
+	/**
+	 * @param  string $name
+	 * @return array
+	 */
 	public function findByName($name) {
 		return $this->findBy('byname_'.$name, array('name' => $name), 'id');
 	}
 
+	/**
+	 * @param  int $id
+	 * @return array
+	 */
 	public function findByParentId($id) {
 		$id = (int) $id;
 
@@ -58,6 +74,12 @@ class sly_Service_MediaCategory extends sly_Service_Model_Base_Id {
 		return $this->findBy($id, array('re_id' => $id), 'name');
 	}
 
+	/**
+	 * @param  string $cacheKey
+	 * @param  array  $where
+	 * @param  string $sortBy
+	 * @return array
+	 */
 	protected function findBy($cacheKey, $where, $sortBy) {
 		$namespace = 'sly.mediacat.list';
 		$list      = sly_Core::cache()->get($namespace, $cacheKey, null);
@@ -81,6 +103,12 @@ class sly_Service_MediaCategory extends sly_Service_Model_Base_Id {
 		return $objlist;
 	}
 
+	/**
+	 * @throws sly_Exception
+	 * @param  string                  $title
+	 * @param  sly_Model_MediaCategory $parent
+	 * @return sly_Model_MediaCategory
+	 */
 	public function add($title, sly_Model_MediaCategory $parent = null) {
 		$title = trim($title);
 
@@ -105,6 +133,10 @@ class sly_Service_MediaCategory extends sly_Service_Model_Base_Id {
 		return $category;
 	}
 
+	/**
+	 * @throws sly_Exception
+	 * @param  sly_Model_MediaCategory $cat
+	 */
 	public function update(sly_Model_MediaCategory $cat) {
 		if (strlen($cat->getName()) === 0) {
 			throw new sly_Exception(t('mediacat_title_cannot_be_empty'));
@@ -123,6 +155,11 @@ class sly_Service_MediaCategory extends sly_Service_Model_Base_Id {
 		sly_Core::dispatcher()->notify('SLY_MEDIACAT_UPDATED', $category);
 	}
 
+	/**
+	 * @throws sly_Exception
+	 * @param  int     $catID
+	 * @param  boolean $force
+	 */
 	public function delete($catID, $force = false) {
 		$cat = $this->findById($catID);
 
@@ -169,6 +206,10 @@ class sly_Service_MediaCategory extends sly_Service_Model_Base_Id {
 		sly_Core::dispatcher()->notify('SLY_MEDIACAT_DELETED', $cat);
 	}
 
+	/**
+	 * @param sly_Model_MediaCategory $cat
+	 * @param sly_Model_MediaCategory $parent
+	 */
 	protected function setPath(sly_Model_MediaCategory $cat, sly_Model_MediaCategory $parent = null) {
 		if ($parent) {
 			$parentID = $parent->getId();
