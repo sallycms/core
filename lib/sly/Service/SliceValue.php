@@ -15,12 +15,22 @@
  * @ingroup service
  */
 class sly_Service_SliceValue extends sly_Service_Model_Base_Id {
-	protected $tablename = 'slice_value';
+	protected $tablename = 'slice_value'; ///< string
 
+	/**
+	 * @param  array $params
+	 * @return sly_Model_SliceValue
+	 */
 	protected function makeInstance(array $params) {
 		return new sly_Model_SliceValue($params);
 	}
 
+	/**
+	 * @param  int    $slice_id
+	 * @param  string $type
+	 * @param  string $finder
+	 * @return sly_Model_SliceValue
+	 */
 	public function findBySliceTypeFinder($slice_id, $type, $finder) {
 		$where = array('slice_id' => $slice_id, 'type' => $type, 'finder' => $finder);
 		$res   = $this->find($where);

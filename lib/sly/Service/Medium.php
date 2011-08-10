@@ -15,12 +15,20 @@
  * @ingroup service
  */
 class sly_Service_Medium extends sly_Service_Model_Base_Id {
-	protected $tablename = 'file';
+	protected $tablename = 'file'; ///< string
 
+	/**
+	 * @param  array $params
+	 * @return sly_Model_Medium
+	 */
 	protected function makeInstance(array $params) {
 		return new sly_Model_Medium($params);
 	}
 
+	/**
+	 * @param  int $id
+	 * @return sly_Model_Medium
+	 */
 	public function findById($id) {
 		$id = (int) $id;
 
@@ -41,6 +49,10 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id {
 		return $medium;
 	}
 
+	/**
+	 * @param  string $filename
+	 * @return sly_Model_Medium
+	 */
 	public function findByFilename($filename) {
 		$hash = md5($filename);
 		$id   = sly_Core::cache()->get('sly.medium', $hash, null);
@@ -59,6 +71,10 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id {
 		return $this->findById($id);
 	}
 
+	/**
+	 * @param  string $extension
+	 * @return array
+	 */
 	public function findMediaByExtension($extension) {
 		$namespace = 'sly.medium.list';
 		$list      = sly_Core::cache()->get($namespace, $extension, null);
@@ -82,6 +98,10 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id {
 		return $objlist;
 	}
 
+	/**
+	 * @param  int $categoryId
+	 * @return array
+	 */
 	public function findMediaByCategory($categoryId) {
 		$categoryId = (int) $categoryId;
 		$namespace  = 'sly.medium.list';
@@ -107,6 +127,16 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id {
 		return $objlist;
 	}
 
+	/**
+	 * @throws sly_Exception
+	 * @param  string $filename
+	 * @param  string $title
+	 * @param  string $title
+	 * @param  int    $categoryID
+	 * @param  string $mimetype
+	 * @param  string $originalName
+	 * @return sly_Model_Medium
+	 */
 	public function add($filename, $title, $categoryID, $mimetype = null, $originalName = null) {
 		// check file itself
 
@@ -156,6 +186,9 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id {
 		return $file;
 	}
 
+	/**
+	 * @param sly_Model_Medium $medium
+	 */
 	public function update(sly_Model_Medium $medium) {
 		// store data
 		$medium->setUpdateColumns();
@@ -166,6 +199,11 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id {
 		sly_Core::dispatcher()->notify('SLY_MEDIA_UPDATED', $medium);
 	}
 
+	/**
+	 * @throws sly_Exception
+	 * @param  int $mediumID
+	 * @return boolean
+	 */
 	public function delete($mediumID) {
 		$medium = $this->findById($mediumID);
 

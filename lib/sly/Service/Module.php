@@ -15,23 +15,42 @@
  * @ingroup service
  */
 class sly_Service_Module extends sly_Service_DevelopBase {
-
+	/**
+	 * @param  string $filename
+	 * @return boolean
+	 */
 	protected function isFileValid($filename) {
 		return preg_match('#\.(input|output)\.php$#i', $filename);
 	}
 
+	/**
+	 * @return string
+	 */
 	protected function getClassIdentifier() {
 		return 'modules';
 	}
 
+	/**
+	 * @param  string $filename
+	 * @return string
+	 */
 	protected function getFileType($filename = '') {
 		return substr($filename, -10) == '.input.php' ? 'input' : 'output';
 	}
 
+	/**
+	 * @return array
+	 */
 	public function getFileTypes() {
 		return array('input', 'output');
 	}
 
+	/**
+	 * @param  string $filename
+	 * @param  int    $mtime
+	 * @param  array  $data
+	 * @return array
+	 */
 	protected function buildData($filename, $mtime, $data) {
 		$result = array(
 			'filename'  => $filename,
@@ -46,9 +65,14 @@ class sly_Service_Module extends sly_Service_DevelopBase {
 		return $result;
 	}
 
+	/**
+	 * @param string $name
+	 * @param string $filename
+	 */
 	protected function flush($name = null, $filename = null) {
-		$sql = sly_DB_Persistence::getInstance();
+		$sql   = sly_DB_Persistence::getInstance();
 		$where = $name === null ? null : array('module' => $name);
+
 		$sql->select('slice', 'id', $where);
 
 		foreach ($sql as $row) {
@@ -59,7 +83,7 @@ class sly_Service_Module extends sly_Service_DevelopBase {
 	/**
 	 * Get available modules from the service
 	 *
-	 * @return array  Array of modules
+	 * @return array  array of modules
 	 */
 	public function getModules() {
 		$result = array();
@@ -74,8 +98,8 @@ class sly_Service_Module extends sly_Service_DevelopBase {
 	/**
 	 * Get the title of a module
 	 *
-	 * @param  string  $name  Unique module name
-	 * @return string         The title of the module
+	 * @param  string $name  unique module name
+	 * @return string        title of the module
 	 */
 	public function getTitle($name) {
 		return $this->get($name, 'title', '');
@@ -84,8 +108,8 @@ class sly_Service_Module extends sly_Service_DevelopBase {
 	/**
 	 * Get the available actions for this module
 	 *
-	 * @param  string  $name  Unique module name
-	 * @return array          Array of action names
+	 * @param  string $name  unique module name
+	 * @return array         array of action names
 	 */
 	public function getActions($name) {
 		return sly_makeArray($this->get($name, 'actions', array()));
@@ -94,8 +118,8 @@ class sly_Service_Module extends sly_Service_DevelopBase {
 	/**
 	 * Get the filename of the modules input file
 	 *
-	 * @param  string  $name  Unique module name
-	 * @return string         The filename of the input file
+	 * @param  string $name  unique module name
+	 * @return string        the filename of the input file
 	 */
 	public function getInputFilename($name) {
 		return $this->get($name, 'filename', null, 'input');
@@ -104,8 +128,8 @@ class sly_Service_Module extends sly_Service_DevelopBase {
 	/**
 	 * Get the filename of the modules output file
 	 *
-	 * @param  string  $name  Unique module name
-	 * @return string         The filename of the output file
+	 * @param  string $name  unique module name
+	 * @return string        the filename of the output file
 	 */
 	public function getOutputFilename($name) {
 		return $this->filterByCondition($name, 'output');
@@ -116,8 +140,8 @@ class sly_Service_Module extends sly_Service_DevelopBase {
 	 *
 	 * This list is NOT affected by constraints made in template configuration.
 	 *
-	 * @param  string  $name  Unique module name
-	 * @return string         List of templates
+	 * @param  string $name  unique module name
+	 * @return string        list of templates
 	 */
 	public function getTemplates($name) {
 		static $templates;
@@ -132,16 +156,17 @@ class sly_Service_Module extends sly_Service_DevelopBase {
 	/**
 	 * Checks, if a module may be used with a given template
 	 *
-	 * @param  string  $name          Unique module name
-	 * @param  string  $templateName  Unique template name
-	 * @return boolean                true, when the module may be used in the given template
+	 * @param  string $name          unique module name
+	 * @param  string $templateName  unique template name
+	 * @return boolean               true, when the module may be used in the given template
 	 */
 	public function hasTemplate($name, $templateName) {
 		$templates = self::getTemplates($name);
-		if(!empty($templates))
+
+		if (!empty($templates)) {
 			return in_array($templateName, $templates);
+		}
 
 		return true;
 	}
-
 }

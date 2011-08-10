@@ -13,23 +13,37 @@
  * @ingroup service
  */
 class sly_Service_Category extends sly_Service_Model_Base {
-	protected $tablename = 'article';
+	protected $tablename = 'article'; ///< string
 
+	/**
+	 * @param  array $params
+	 * @return sly_Model_Category
+	 */
 	protected function makeInstance(array $params) {
 		return new sly_Model_Category($params);
 	}
 
+	/**
+	 * @param  sly_Model_Category $cat
+	 * @return sly_Model_Category
+	 */
 	protected function update(sly_Model_Category $cat) {
 		$persistence = sly_DB_Persistence::getInstance();
 		$persistence->update($this->getTableName(), $cat->toHash(), $cat->getPKHash());
 		return $cat;
 	}
 
+	/**
+	 * @param  int $id
+	 * @param  int $clang
+	 * @return sly_Model_Category
+	 */
 	public function findById($id, $clang = null) {
 		if ($clang === null || $clang === false) $clang = sly_Core::getCurrentClang();
 
-		$key     = $id.'_'.$clang;
+		$key      = $id.'_'.$clang;
 		$category = sly_Core::cache()->get('sly.category', $key, null);
+
 		if ($category === null) {
 			$category = $this->findOne(array('id' => (int) $id, 'clang' => $clang));
 
@@ -37,9 +51,19 @@ class sly_Service_Category extends sly_Service_Model_Base {
 				sly_Core::cache()->set('sly.category', $key, $category);
 			}
 		}
+
 		return $category;
 	}
 
+	/**
+	 * @param  mixed  $where
+	 * @param  string $group
+	 * @param  string $order
+	 * @param  int    $offset
+	 * @param  int    $limit
+	 * @param  string $having
+	 * @return array
+	 */
 	public function find($where = null, $group = null, $order = null, $offset = null, $limit = null, $having = null) {
 		if (is_array($where)) {
 			$where['startpage'] = 1;
@@ -51,6 +75,14 @@ class sly_Service_Category extends sly_Service_Model_Base {
 		return parent::find($where, $group, $order, $offset, $limit, $having);
 	}
 
+	/**
+	 * @throws sly_Exception
+	 * @param  int    $parentID
+	 * @param  string $name
+	 * @param  int    $status
+	 * @param  int    $position
+	 * @return int
+	 */
 	public function add($parentID, $name, $status = 0, $position = -1) {
 		$db       = sly_DB_Persistence::getInstance();
 		$parentID = (int) $parentID;
@@ -173,6 +205,14 @@ class sly_Service_Category extends sly_Service_Model_Base {
 		return $newID;
 	}
 
+	/**
+	 * @throws sly_Exception
+	 * @param  int    $categoryID
+	 * @param  int    $clangID
+	 * @param  string $name
+	 * @param  mixed  $position
+	 * @return boolean
+	 */
 	public function edit($categoryID, $clangID, $name, $position = false) {
 		$categoryID = (int) $categoryID;
 		$clangID    = (int) $clangID;
@@ -249,6 +289,11 @@ class sly_Service_Category extends sly_Service_Model_Base {
 		return true;
 	}
 
+	/**
+	 * @throws sly_Exception
+	 * @param  int $categoryID
+	 * @return boolean
+	 */
 	public function delete($categoryID) {
 		$categoryID = (int) $categoryID;
 		$db         = sly_DB_Persistence::getInstance();
@@ -298,7 +343,6 @@ class sly_Service_Category extends sly_Service_Model_Base {
 		$return = rex_deleteArticle($categoryID);
 		if (!$return['state']) throw new sly_Exception($return['message']);
 
-
 		// Event auslösen
 		$dispatcher = sly_Core::dispatcher();
 		$dispatcher->notify('SLY_CAT_DELETED', $cat);
@@ -306,6 +350,13 @@ class sly_Service_Category extends sly_Service_Model_Base {
 		return true;
 	}
 
+	/**
+	 * @throws sly_Exception
+	 * @param  int $categoryID
+	 * @param  int $clangID
+	 * @param  int $newStatus
+	 * @return boolean
+	 */
 	public function changeStatus($categoryID, $clangID, $newStatus = null) {
 		$categoryID = (int) $categoryID;
 		$clangID    = (int) $clangID;
@@ -349,6 +400,9 @@ class sly_Service_Category extends sly_Service_Model_Base {
 		return true;
 	}
 
+	/**
+	 * @return array
+	 */
 	public function getStati() {
 		static $stati;
 

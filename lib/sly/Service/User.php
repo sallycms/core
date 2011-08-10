@@ -15,13 +15,21 @@
  * @ingroup service
  */
 class sly_Service_User extends sly_Service_Model_Base_Id {
-	private static $currentUser = false;
-	protected $tablename = 'user';
+	private static $currentUser = false; ///< mixed
+	protected $tablename = 'user'; ///< string
 
+	/**
+	 * @param  array $params
+	 * @return sly_Model_User
+	 */
 	protected function makeInstance(array $params) {
 		return new sly_Model_User($params);
 	}
 
+	/**
+	 * @param  array $params
+	 * @return sly_Model_User
+	 */
 	public function create($params) {
 		$model = $this->makeInstance($params);
 		if (isset($params['psw'])) $model->setPassword($params['psw']);
@@ -31,6 +39,7 @@ class sly_Service_User extends sly_Service_Model_Base_Id {
 	/**
 	 * return user object with login
 	 *
+	 * @param  string $login
 	 * @return sly_Model_User
 	 */
 	public function findByLogin($login) {
@@ -55,6 +64,11 @@ class sly_Service_User extends sly_Service_Model_Base_Id {
 		return self::$currentUser;
 	}
 
+	/**
+	 * @param  string $login
+	 * @param  string $password
+	 * @return boolean
+	 */
 	public function login($login, $password) {
 		$user    = $this->findByLogin($login);
 		$loginOK = false;
@@ -86,9 +100,9 @@ class sly_Service_User extends sly_Service_Model_Base_Id {
 	/**
 	 * Checks if the given password matches to the users password
 	 *
-	 * @param  sly_Model_User  $user      The user object
-	 * @param  string          $password  Password to check
-	 * @return boolean                    true if the passwords match, otherwise false.
+	 * @param  sly_Model_User $user      The user object
+	 * @param  string         $password  Password to check
+	 * @return boolean                   true if the passwords match, otherwise false.
 	 */
 	public function checkPassword(sly_Model_User $user, $password) {
 		return sly_Util_User::getPasswordHash($user, $password) == $user->getPassword();

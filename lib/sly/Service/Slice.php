@@ -15,9 +15,13 @@
  * @ingroup service
  */
 class sly_Service_Slice extends sly_Service_Model_Base_Id {
-	protected $tablename  = 'slice';
-	protected $hasCascade = true;
+	protected $tablename  = 'slice'; ///< string
+	protected $hasCascade = true;    ///< boolean
 
+	/**
+	 * @param  array $params
+	 * @return sly_Model_Slice
+	 */
 	protected function makeInstance(array $params) {
 		return new sly_Model_Slice($params);
 	}
@@ -25,6 +29,7 @@ class sly_Service_Slice extends sly_Service_Model_Base_Id {
 	/**
 	 * Kopiert einen Slice und seine Values
 	 *
+	 * @param  sly_Model_Slice $slice
 	 * @return sly_Model_Slice
 	 */
 	public function copy(sly_Model_Slice $slice) {

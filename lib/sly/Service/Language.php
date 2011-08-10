@@ -13,18 +13,30 @@
  * @ingroup service
  */
 class sly_Service_Language extends sly_Service_Model_Base_Id {
+	protected $tablename = 'clang'; ///< string
 
-	protected $tablename = 'clang';
-
+	/**
+	 * @param  array $params
+	 * @return sly_Model_Language
+	 */
 	protected function makeInstance(array $params) {
 		return new sly_Model_Language($params);
 	}
 
+	/**
+	 * @param  sly_Model_Base $model
+	 * @return sly_Model_Base
+	 */
 	public function save(sly_Model_Base $model) {
 		sly_Core::cache()->delete('sly.language', 'all');
 		return parent::save($model);
 	}
 
+	/**
+	 * @throws Exception           if something goes wrong
+	 * @param  array $params
+	 * @return sly_Model_Language
+	 */
 	public function create($params) {
 		$langs = sly_Util_Language::findAll();
 		$sql   = sly_DB_Persistence::getInstance();
@@ -61,6 +73,10 @@ class sly_Service_Language extends sly_Service_Model_Base_Id {
 		return $newLanguage;
 	}
 
+	/**
+	 * @param  array $where
+	 * @return int
+	 */
 	public function delete($where) {
 		$db = sly_DB_Persistence::getInstance();
 
