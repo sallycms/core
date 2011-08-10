@@ -24,6 +24,11 @@ class sly_Util_String {
 		return false;
 	}
 
+	/**
+	 * @param  string $haystack
+	 * @param  string $needle
+	 * @return boolean
+	 */
 	public static function startsWith($haystack, $needle) {
 		$haystack = (string) $haystack;
 		$needle   = (string) $needle;
@@ -33,6 +38,11 @@ class sly_Util_String {
 		return strstr($haystack, $needle) == $haystack;
 	}
 
+	/**
+	 * @param  string $haystack
+	 * @param  string $needle
+	 * @return boolean
+	 */
 	public static function endsWith($haystack, $needle) {
 		$haystack = (string) $haystack;
 		$needle   = (string) $needle;
@@ -42,6 +52,10 @@ class sly_Util_String {
 		return substr($haystack, -strlen($needle)) == $needle;
 	}
 
+	/**
+	 * @param  string $string
+	 * @return string
+	 */
 	public static function strToUpper($string) {
 		if (is_string($string)) {
 			$string = str_replace('ß', 'ss', $string);
@@ -51,6 +65,10 @@ class sly_Util_String {
 		return $string;
 	}
 
+	/**
+	 * @param  string $text
+	 * @return string
+	 */
 	public static function replaceUmlauts($text) {
 		static $specials = array(
 			array('Ä', 'ä',  'á', 'à', 'é', 'è', 'Ö',  'ö',  'Ü' , 'ü' , 'ß', '&', 'ç'),
@@ -60,12 +78,24 @@ class sly_Util_String {
 		return str_replace($specials[0], $specials[1], $text);
 	}
 
+	/**
+	 * Format a number according to the current locale
+	 *
+	 * @param  numeric $number
+	 * @param  int     $decimals
+	 * @return string
+	 */
 	public static function formatNumber($number, $decimals = -1) {
 		$locale   = localeconv();
 		$decimals = $decimals < 0 ? $locale['frac_digits'] : $decimals;
 		return number_format($number, $decimals, $locale['decimal_point'], $locale['thousands_sep']);
 	}
 
+	/**
+	 * @param  string $format
+	 * @param  mixed  $timestamp  UNIX timestamp or datetime string (YYYY-MM-DD HH:MM:SS)
+	 * @return string
+	 */
 	public static function formatStrftime($format, $timestamp = null) {
 		if ($timestamp === null) $timestamp = time();
 		elseif (!self::isInteger($timestamp)) $timestamp = strtotime($timestamp);
@@ -83,24 +113,40 @@ class sly_Util_String {
 		return $str;
 	}
 
+	/**
+	 * @param  mixed $timestamp  UNIX timestamp or datetime string (YYYY-MM-DD HH:MM:SS)
+	 * @return string
+	 */
 	public static function formatDate($timestamp = null) {
 		return self::formatStrftime(t('dateformat'), $timestamp);
 	}
 
+	/**
+	 * @param  mixed $timestamp  UNIX timestamp or datetime string (YYYY-MM-DD HH:MM:SS)
+	 * @return string
+	 */
 	public static function formatTime($timestamp = null) {
 		return self::formatStrftime(t('timeformat'), $timestamp);
 	}
 
+	/**
+	 * @param  mixed $timestamp  UNIX timestamp or datetime string (YYYY-MM-DD HH:MM:SS)
+	 * @return string
+	 */
 	public static function formatDatetime($timestamp = null) {
 		return self::formatStrftime(t('datetimeformat'), $timestamp);
 	}
 
 	/**
-	 * Die folgende Funktion schneidet einen Text nach der einer bestimmten Anzahl
-	 * von Zeichen ab und hängt ... an, falls etwas abgeschnitten wurde.
+	 * Cut text to a maximum length
 	 *
-	 * @param  $text
-	 * @param  $maxLength
+	 * Die folgende Funktion schneidet einen Text nach der einer bestimmten
+	 * Anzahl von Zeichen ab und hängt $suffix an, falls etwas abgeschnitten
+	 * wurde.
+	 *
+	 * @param  string $text
+	 * @param  int    $maxLength
+	 * @param  string $suffix
 	 * @return string
 	 */
 	public static function cutText($text, $maxLength, $suffix = '...') {
@@ -119,29 +165,31 @@ class sly_Util_String {
 
 		return $return;
 	}
+
 	/**
 	 * shortens a filename to a max lenght and leaves an optional suffix
 	 * prior to the extension
 	 *
-	 * @param string $name          filename to be shorten
-	 * @param int    $maxLength     maximum string length
-	 * @param int    $suffixLength  length of last characters
-	 * @return string  returns false on error
+	 * @param  string $name          filename to be shorten
+	 * @param  int    $maxLength     maximum string length
+	 * @param  int    $suffixLength  length of last characters
+	 * @return string                returns false on error
 	 */
 	public static function shortenFilename($name, $maxLength, $suffixLength = 3) {
-		if (!is_string($name) || !$name || !is_int($maxLength) || $maxLength < 1
-			|| !is_int($suffixLength) || $suffixLength < 0 ) {
-
+		if (empty($name) || $maxLength < 1 || $suffixLength < 0) {
 			return false;
 		}
+
 		$pos = strrpos($name, '.');
 		if ($pos === false || $pos <= $maxLength) return $name;
 
-		$shortname  = substr($name, 0, min($maxLength - $suffixLength, $pos));
+		$shortname = substr($name, 0, min($maxLength - $suffixLength, $pos));
+
 		if ($maxLength - $suffixLength < $pos) {
 			if ($suffixLength > 0) $shortname .= '…';
 			$shortname .= substr($name, $pos - $suffixLength, 3);
 		}
+
 		$shortname .= substr($name, $pos);
 
 		return $shortname;
@@ -159,23 +207,30 @@ class sly_Util_String {
 	 *
 	 * Die letzte Einheit ist ein Yottabyte.
 	 *
-	 * @param  int $size  die Dateigröße in Byte
-	 * @return string     die Dateigröße im Format "X.YY _B" oder "< 1 KB"
+	 * @param  int    $size       die Dateigröße in Byte
+	 * @param  int    $precision
+	 * @param  string $unit
+	 * @return string             die Dateigröße im Format "X.YY _B" oder "< 1 KB"
 	 */
-	public static function formatFilesize($size, $precision=2, $unit='Bytes') {
+	public static function formatFilesize($size, $precision = 2, $unit = 'Bytes') {
 		// Wir teilen in die Funktion immer durch 999 anstatt durch 1024, damit
 		// als Größenangaben nicht "1023 KB", sondern "0,99 MB" errechnet werden.
 		// Das ist benutzerfreundlicher.
+
 		if ($size < 999) {
 			return $size.' '.$unit;
 		}
-		$unitPrefixes = array('K','M','G','T','P','E','Z','Y');
+
+		$unitPrefixes = array('K', 'M', 'G', 'T', 'P', 'E', 'Z', 'Y');
+
 		while ($size > 999 && !empty($unitPrefixes)) {
 			$size /= 1024.0;
 			$unitPrefix = array_shift($unitPrefixes);
 		}
+
 		return self::formatNumber($size, $precision).' '.$unitPrefix.$unit;
 	}
+
 	/**
 	 * Führt eine Liste zusammen
 	 *
@@ -197,6 +252,12 @@ class sly_Util_String {
 		}
 	}
 
+	/**
+	 * @param  int    $maxLen
+	 * @param  int    $minLen
+	 * @param  string $charset
+	 * @return string
+	 */
 	public static function getRandomString($maxLen = 5, $minLen = 1, $charset = null) {
 		if ($minLen > $maxLen) {
 			list($minLen, $maxLen) = array($maxLen, $minLen);
@@ -214,6 +275,10 @@ class sly_Util_String {
 		return str_shuffle($s);
 	}
 
+	/**
+	 * @param  int $seconds
+	 * @return string
+	 */
 	public static function secondsToAbsTime($seconds) {
 		$time    = '';
 		$days    = 0;
@@ -231,11 +296,22 @@ class sly_Util_String {
 		return $time;
 	}
 
+	/**
+	 * @todo   mark as deprecated in 0.6, since it offers no advantage over if (preg_match())...
+	 *
+	 * @param  string $pattern
+	 * @param  string $subject
+	 * @return boolean
+	 */
 	public static function preg_startsWith($pattern, $subject) {
 		preg_match($pattern, $subject, $treffer);
 		return !empty($treffer);
 	}
-	
+
+	/**
+	 * @param  string $text
+	 * @return string
+	 */
 	public static function escapePHP($text) {
 		return str_replace(array('<?', '?>'), array('&lt;?', '?&gt;'), $text);
 	}
