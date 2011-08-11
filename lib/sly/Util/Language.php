@@ -54,8 +54,8 @@ class sly_Util_Language {
 	public static function isMultilingual() {
 		return count(self::findAll()) > 1;
 	}
-	
+
 	public static function hasPermissionOnLanguage(sly_Model_User $user, $clangID) {
-		return $user->isAdmin() || $user->hasRight('clang[all]') || $user->hasRight('clang['.$languageId.']');
+		return $user->isAdmin() || $user->hasRight('clang[all]') || $user->hasRight('clang['.$clangID.']');
 	}
 }
