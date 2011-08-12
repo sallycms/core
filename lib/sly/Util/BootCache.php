@@ -24,7 +24,14 @@ class sly_Util_BootCache {
 		}
 
 		// add current cache instance
-		self::addClass(get_class(sly_Core::cache()));
+		$cacheClass = get_class(sly_Core::cache());
+
+		// TODO: Remove this dependency hack with a more elegant solution (Reflection?)
+		if ($cacheClass === 'BabelCache_Memcached') {
+			self::addClass('BabelCache_Memcache');
+		}
+
+		self::addClass($cacheClass);
 	}
 
 	public static function recreate($environment) {
