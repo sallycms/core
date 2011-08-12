@@ -38,7 +38,7 @@ class sly_Service_ArticleType {
 	 * @param  mixed  $default
 	 * @return mixed
 	 */
-	protected function get($articleType, $property, $default = '') {
+	public function get($articleType, $property, $default = '') {
 		$this->exists($articleType, true);
 		return isset($this->data[$articleType][$property]) ? $this->data[$articleType][$property] : $default;
 	}
