@@ -9,26 +9,55 @@
  */
 
 class sly_Util_Cache {
+	/**
+	 * @param  string $namespace
+	 * @param  string $key
+	 * @param  mixed  $value
+	 * @return mixed
+	 */
 	public static function set($namespace, $key, $value) {
 		return sly_Core::cache()->set($namespace, $key, $value);
 	}
 
+	/**
+	 * @param  string $namespace
+	 * @param  string $key
+	 * @param  mixed  $default
+	 * @return mixed
+	 */
 	public static function get($namespace, $key, $default = null) {
 		return sly_Core::cache()->get($namespace, $key, $default);
 	}
 
+	/**
+	 * @param  string $namespace
+	 * @param  string $key
+	 * @return boolean
+	 */
 	public static function delete($namespace, $key) {
 		return sly_Core::cache()->delete($namespace, $key);
 	}
 
+	/**
+	 * @param  string $namespace
+	 * @param  string $key
+	 * @return boolean
+	 */
 	public static function exists($namespace, $key) {
 		return sly_Core::cache()->exists($namespace, $key);
 	}
 
+	/**
+	 * @param  string $namespace
+	 * @return boolean
+	 */
 	public static function flush($namespace) {
 		return sly_Core::cache()->flush($namespace, true);
 	}
 
+	/**
+	 * @return boolean
+	 */
 	public static function registerListener() {
 		if (!file_exists(self::getConfigFile())) {
 			return false;
@@ -55,6 +84,10 @@ class sly_Util_Cache {
 		return true;
 	}
 
+	/**
+	 * @param  array $params
+	 * @return mixed
+	 */
 	public static function listener(array $params) {
 		$config = self::getConfig();
 		$event  = $params['event'];
@@ -68,10 +101,16 @@ class sly_Util_Cache {
 		return $params['subject'];
 	}
 
+	/**
+	 * @return string
+	 */
 	public static function getConfigFile() {
 		return SLY_DEVELOPFOLDER.'/caches.yml';
 	}
 
+	/**
+	 * @return array
+	 */
 	public static function getConfig() {
 		return sly_Util_YAML::load(self::getConfigFile());
 	}

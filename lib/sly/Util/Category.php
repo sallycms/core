@@ -14,7 +14,6 @@
  * @author zozi@webvariants.de
  */
 class sly_Util_Category {
-
 	/**
 	 * checks wheter a category exists or not
 	 *
@@ -26,7 +25,6 @@ class sly_Util_Category {
 	}
 
 	/**
-	 *
 	 * @param sly_Model_Category $category
 	 * @return boolean
 	 */
@@ -35,7 +33,6 @@ class sly_Util_Category {
 	}
 
 	/**
-	 *
 	 * @param  int $categoryId
 	 * @param  int $clang
 	 * @return sly_Model_Category
@@ -45,7 +42,6 @@ class sly_Util_Category {
 	}
 
 	/**
-	 *
 	 * @param  int     $parentId
 	 * @param  boolean $ignore_offlines
 	 * @param  int     $clang
@@ -56,7 +52,6 @@ class sly_Util_Category {
 	}
 
 	/**
-	 *
 	 * @param  boolean $ignore_offlines
 	 * @param  int $clang
 	 * @return array
@@ -65,6 +60,11 @@ class sly_Util_Category {
 		return self::findByParentId(0, $ignore_offlines, $clang);
 	}
 
+	/**
+	 * @param  sly_Model_User $user
+	 * @param  int            $categoryId
+	 * @return boolean
+	 */
 	public static function hasPermissionOnCategory(sly_Model_User $user, $categoryId) {
 		if ($user->isAdmin() || $user->hasRight('csw[0]')) return true;
 		if ($user->hasRight('editContentOnly[]')) return false;
@@ -78,5 +78,4 @@ class sly_Util_Category {
 
 		return false;
 	}
-
 }

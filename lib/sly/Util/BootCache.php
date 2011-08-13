@@ -12,8 +12,11 @@
  * @ingroup util
  */
 class sly_Util_BootCache {
-	protected static $classes = array();
+	protected static $classes = array(); ///< array
 
+	/**
+	 * @param string $environment
+	 */
 	public static function init($environment) {
 		// add core classes
 		$list = sly_Util_YAML::load(SLY_COREFOLDER.'/config/bootcache.yml');
@@ -34,6 +37,9 @@ class sly_Util_BootCache {
 		self::addClass($cacheClass);
 	}
 
+	/**
+	 * @param string $environment
+	 */
 	public static function recreate($environment) {
 		// when in developer mode, only remove a possibly existing cache file
 
@@ -54,15 +60,25 @@ class sly_Util_BootCache {
 		self::createCacheFile($environment);
 	}
 
+	/**
+	 * @param string $className
+	 */
 	public static function addClass($className) {
 		self::$classes[] = $className;
 		self::$classes   = array_unique(self::$classes);
 	}
 
+	/**
+	 * @param  string $environment
+	 * @return string
+	 */
 	public static function getCacheFile($environment) {
 		return SLY_DYNFOLDER.'/internal/sally/bootcache.'.$environment.'.php';
 	}
 
+	/**
+	 * @param string $environment
+	 */
 	public static function createCacheFile($environment) {
 		$target = self::getCacheFile($environment);
 
@@ -97,6 +113,10 @@ class sly_Util_BootCache {
 		}
 	}
 
+	/**
+	 * @param  string $filename
+	 * @return string
+	 */
 	private static function getCode($filename) {
 		$code   = file_get_contents($filename);
 		$result = trim($code);
