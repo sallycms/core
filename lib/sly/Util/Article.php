@@ -14,7 +14,6 @@
  * @author zozi@webvariants.de
  */
 class sly_Util_Article {
-
 	/**
 	 * checks wheter an article exists or not
 	 *
@@ -26,7 +25,6 @@ class sly_Util_Article {
 	}
 
 	/**
-	 *
 	 * @param  mixed $article
 	 * @return boolean
 	 */
@@ -35,7 +33,6 @@ class sly_Util_Article {
 	}
 
 	/**
-	 *
 	 * @param  int $articleId
 	 * @param  int $clang
 	 * @return sly_Model_Article
@@ -45,7 +42,6 @@ class sly_Util_Article {
 	}
 
 	/**
-	 *
 	 * @param  int $clang
 	 * @return sly_Model_Article
 	 */
@@ -54,7 +50,6 @@ class sly_Util_Article {
 	}
 
 	/**
-	 *
 	 * @param  int     $categoryId
 	 * @param  boolean $ignore_offlines
 	 * @param  int     $clangId
@@ -65,7 +60,6 @@ class sly_Util_Article {
 	}
 
 	/**
-	 *
 	 * @param  boolean $ignore_offlines
 	 * @param  int     $clang
 	 * @return array
@@ -75,7 +69,6 @@ class sly_Util_Article {
 	}
 
 	/**
-	 *
 	 * @param  sly_Model_Article $article
 	 * @return boolean
 	 */
@@ -84,7 +77,6 @@ class sly_Util_Article {
 	}
 
 	/**
-	 *
 	 * @param  sly_Model_Article $article
 	 * @return boolean
 	 */

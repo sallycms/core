@@ -12,8 +12,12 @@
  * @ingroup util
  */
 class sly_Util_Directory {
-	protected $directory;
+	protected $directory; ///< string
 
+	/**
+	 * @param string  $directory
+	 * @param boolean $createIfNeeded
+	 */
 	public function __construct($directory, $createIfNeeded = false) {
 		$directory = str_replace(array('/', '\\'), DIRECTORY_SEPARATOR, $directory);
 		$directory = rtrim($directory, DIRECTORY_SEPARATOR);
@@ -25,6 +29,11 @@ class sly_Util_Directory {
 		$this->directory = $directory;
 	}
 
+	/**
+	 * @param  string $path
+	 * @param  int    $perm
+	 * @return mixed
+	 */
 	public static function create($path, $perm = null) {
 		$path = self::normalize($path);
 		$perm = $perm === null ? sly_Core::getDirPerm() : (int) $perm;
@@ -58,10 +67,21 @@ class sly_Util_Directory {
 		return $path;
 	}
 
+	/**
+	 * @return boolean
+	 */
 	public function exists() {
 		return is_dir($this->directory);
 	}
 
+	/**
+	 * @param  boolean $files
+	 * @param  boolean $directories
+	 * @param  boolean $dotFiles
+	 * @param  boolean $absolute
+	 * @param  string  $sortFunction
+	 * @return array
+	 */
 	public function listPlain($files = true, $directories = true, $dotFiles = false, $absolute = false, $sortFunction = 'natsort') {
 		if (!$files && !$directories) return array();
 		if (!is_dir($this->directory)) return false;
@@ -93,6 +113,11 @@ class sly_Util_Directory {
 		return $list;
 	}
 
+	/**
+	 * @param  boolean $dotFiles
+	 * @param  boolean $absolute
+	 * @return array
+	 */
 	public function listRecursive($dotFiles = false, $absolute = false) {
 		if (!is_dir($this->directory)) return false;
 		// use the realpath of the directory to normalize the filenames
@@ -120,6 +145,10 @@ class sly_Util_Directory {
 		return $list;
 	}
 
+	/**
+	 * @param  boolean $force
+	 * @return boolean
+	 */
 	public function delete($force = false) {
 		if (!$this->exists()) return true;
 
@@ -135,6 +164,10 @@ class sly_Util_Directory {
 		return $retval;
 	}
 
+	/**
+	 * @param  boolean $recursive
+	 * @return boolean
+	 */
 	public function deleteFiles($recursive = false) {
 		if ($this->exists()) {
 			$level = error_reporting(0);
@@ -207,11 +240,18 @@ class sly_Util_Directory {
 		return true;
 	}
 
+	/**
+	 * @return string
+	 */
 	public function __toString() {
 		$dir = realpath($this->directory);
 		return $dir ? $dir : $this->directory.' (not existing)';
 	}
 
+	/**
+	 * @param  string $paths
+	 * @return string
+	 */
 	public static function join($paths) {
 		$paths = func_get_args();
 		$isAbs = $paths[0][0] == '/' || $paths[0][0] == '\\';
@@ -228,6 +268,10 @@ class sly_Util_Directory {
 		return ($isAbs ? DIRECTORY_SEPARATOR : '').implode(DIRECTORY_SEPARATOR, $paths);
 	}
 
+	/**
+	 * @param  string $path
+	 * @return string
+	 */
 	public static function normalize($path) {
 		static $s = DIRECTORY_SEPARATOR;
 		static $p = null;
@@ -247,6 +291,11 @@ class sly_Util_Directory {
 		return implode($s, $parts);
 	}
 
+	/**
+	 * @param  string $path
+	 * @param  string $base
+	 * @return string
+	 */
 	public static function getRelative($path, $base = null) {
 		if ($base === null) $base = SLY_BASE;
 		$path = self::normalize(realpath($path));
@@ -259,6 +308,10 @@ class sly_Util_Directory {
 		return substr($path, strlen($base) +1);
 	}
 
+	/**
+	 * @param  string $path
+	 * @return boolean
+	 */
 	public static function createHttpProtected($path) {
 		$status = self::create($path);
 		if ($status && !file_exists($path.'/.htaccess')) {

@@ -12,13 +12,21 @@
  * @ingroup util
  */
 class sly_Util_Array {
+	private $array = array(); ///< array
 
-	private $array = array();
-
+	/**
+	 * @param array $data
+	 */
 	public function __construct($data = array()) {
 		$this->array = $data;
 	}
 
+	/**
+	 * @throws sly_Exception
+	 * @param  string $key
+	 * @param  mixed  $value
+	 * @return mixed
+	 */
 	public function set($key, $value) {
 		$key = trim($key, '/');
 
@@ -48,6 +56,11 @@ class sly_Util_Array {
 		return $value;
 	}
 
+	/**
+	 * @param  string $key
+	 * @param  mixed  $default
+	 * @return mixed
+	 */
 	public function get($key, $default = null) {
 		$key = trim($key, '/');
 
@@ -75,6 +88,10 @@ class sly_Util_Array {
 		return $res;
 	}
 
+	/**
+	 * @param  string $key
+	 * @return boolean
+	 */
 	public function has($key) {
 		$key = trim($key, '/');
 
@@ -96,14 +113,18 @@ class sly_Util_Array {
 
 		return $res;
 	}
-	
+
+	/**
+	 * @param  string $key
+	 * @param  mixed  $default
+	 * @return array
+	 */
 	public function hasget($key, $default = null) {
 		$key = trim($key, '/');
 
 		if (empty($key)) return array(true, $this->array);
+		if (array_key_exists($key, $this->array)) array(true, $this->array[$key]);
 
-		if(array_key_exists($key, $this->array)) array(true, $this->array[$key]);
-		
 		$path = self::getPath($key);
 		$res  = $this->array;
 
@@ -118,6 +139,10 @@ class sly_Util_Array {
 		return array(true, $res);
 	}
 
+	/**
+	 * @param  string $key
+	 * @return boolean
+	 */
 	public function remove($key) {
 		$key = trim($key, '/');
 
@@ -144,10 +169,19 @@ class sly_Util_Array {
 		return true;
 	}
 
+	/**
+	 * @param  array $array
+	 * @return boolean
+	 */
 	public function hasMergeCollision($array) {
 		return $this->hasMergeCollisionRecursive($this->array, $array);
 	}
 
+	/**
+	 * @param  array $array
+	 * @param  array $array1
+	 * @return boolean
+	 */
 	private function hasMergeCollisionRecursive($array, $array1) {
 		foreach ($array1 as $key => $value) {
 			if (is_array($value) && isset($array[$key]) && is_array($array[$key])) {
@@ -157,14 +191,23 @@ class sly_Util_Array {
 				if ($array[$key] != $value) return false;
 			}
 		}
+
 		return true;
 	}
 
+	/**
+	 * @todo  mark as deprecated in 0.6, it's not used anywhere
+	 * @param array $array
+	 */
 	public function merge($array) {
 		if (!is_array($array)) return false;
 		$this->array = array_replace_recursive($this->array, $array);
 	}
 
+	/**
+	 * @param  string $key
+	 * @return array
+	 */
 	protected static function getPath($key) {
 		return explode('/', $key);
 	}
@@ -182,9 +225,9 @@ class sly_Util_Array {
 	/**
 	 * Returns true, when the predicate matches at least one element of the array.
 	 *
-	 * @param  string $predicate  The predicate (callback function as a string)
-	 * @param  array  $array      Array to search in
-	 * @return boolean            true, when the predicate matches at least once
+	 * @param  callback $predicate  The predicate (callback function)
+	 * @param  array    $array      Array to search in
+	 * @return boolean              true, when the predicate matches at least once
 	 */
 	public static function any($predicate, $array) {
 		foreach ($array as $element) if ($predicate($element)) return true;
@@ -194,9 +237,9 @@ class sly_Util_Array {
 	/**
 	 * Returns true, when the predicate matches ALL elements of the array.
 	 *
-	 * @param  string $predicate  The predicate (callback function as a string)
-	 * @param  array  $array      Array to search in
-	 * @return boolean            true, when the predicate matches all
+	 * @param  callback $predicate  The predicate (callback function)
+	 * @param  array    $array      Array to search in
+	 * @return boolean              true, when the predicate matches all
 	 */
 	public static function all($predicate, $array) {
 		foreach ($array as $element) if (!$predicate($element)) return false;
@@ -206,9 +249,9 @@ class sly_Util_Array {
 	/**
 	 * Returns true, when the predicate matches at least one key of the array.
 	 *
-	 * @param  string $predicate  The predicate (callback function as a string)
-	 * @param  array  $array      Array to search in
-	 * @return boolean            true, when the predicate matches at least one key
+	 * @param  callback $predicate  The predicate (callback function)
+	 * @param  array    $array      Array to search in
+	 * @return boolean              true, when the predicate matches at least one key
 	 */
 	public static function anyKey($predicate, $array) {
 		return self::any($predicate, array_keys($array));
@@ -217,8 +260,8 @@ class sly_Util_Array {
 	/**
 	 * Checks, if an array is multidimensional
 	 *
-	 * @param  array    $array  The array to check
-	 * @return boolean          true, when the array is multidimensional
+	 * @param  array $array  The array to check
+	 * @return boolean       true, when the array is multidimensional
 	 */
 	public static function isMultiDim($array) {
 		return self::any('is_array', $array);
@@ -229,7 +272,7 @@ class sly_Util_Array {
 	 *
 	 * @see    http://snippets.dzone.com/posts/show/4660
 	 *
-	 * @param  array    $array  The array to flatten
+	 * @param  array $array  The array to flatten
 	 * @return array
 	 */
 	public static function flatten(array $array) {
