@@ -49,14 +49,30 @@ class sly_Util_ParamParser {
 			return false;
 		}
 
-		$content      = $match[1];
+		$content      = trim($match[1]);
 		$this->params = array();
 
-		preg_match_all('#^\s*\*\s*@sly +(.*?) +(.*?)\s*$#im', $content, $matches, PREG_SET_ORDER);
+		// add a pseudo tage to make the regex easier
+		$content .= ' * @sly';
+
+		preg_match_all('/
+			\*\s*@sly             # match the beginning of a tag, like "* @sly"
+			\s+(.*?)              # a bit of whitespace, followed by the tag name
+			\s+(.*?)              # a bit of whitespace and the actual content
+			(?=(\s*\*\s*)?@sly)   # the content ends with the next "@sly"
+			                      # which can be preceeded by " * "
+			/ixs', $content, $matches, PREG_SET_ORDER
+		);
 
 		foreach ($matches as $match) {
 			$key   = trim($match[1]);
 			$value = trim($match[2]);
+
+			// if we got a multiline value, replace the " *     " at the beginning of each line
+			$value = preg_replace('/^\s*\*\s*/m', '', $value);
+
+			// and lastly replace the newlines with spaces
+			$value = str_replace("\n", ' ', $value);
 
 			try {
 				$value = sfYamlInline::load($value);
