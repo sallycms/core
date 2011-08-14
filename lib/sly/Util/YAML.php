@@ -12,6 +12,10 @@
  * @ingroup util
  */
 class sly_Util_YAML {
+	/**
+	 * @throws sly_Exception
+	 * @return string
+	 */
 	protected static function getCacheDir() {
 		$dir  = SLY_DYNFOLDER.'/internal/sally/yaml-cache';
 		$perm = sly_Core::getDirPerm(0755); // give default value in case YAML has not yet been loaded
@@ -23,6 +27,10 @@ class sly_Util_YAML {
 		return $dir;
 	}
 
+	/**
+	 * @param  string $filename
+	 * @return string
+	 */
 	public static function getCacheFile($filename) {
 		$dir      = self::getCacheDir();
 		$filename = realpath($filename);
@@ -42,6 +50,11 @@ class sly_Util_YAML {
 		return $dir.DIRECTORY_SEPARATOR.str_replace(DIRECTORY_SEPARATOR, '_', $filename).'.php';
 	}
 
+	/**
+	 * @param  string $origfile
+	 * @param  string $cachefile
+	 * @return boolean
+	 */
 	public static function isCacheValid($origfile, $cachefile) {
 		return file_exists($cachefile) && filemtime($origfile) < filemtime($cachefile);
 	}
@@ -49,11 +62,11 @@ class sly_Util_YAML {
 	/**
 	 * Cached loading of a YAML file
 	 *
-	 * @param  string $filename      Path to YAML file
-	 * @param  boolean $forceCached  always return cached version (if it exists)
-	 * @return mixed                 parsed content
 	 * @throws sly_Exception
 	 * @throws InvalidArgumentException
+	 * @param  string  $filename     Path to YAML file
+	 * @param  boolean $forceCached  always return cached version (if it exists)
+	 * @return mixed                 parsed content
 	 */
 	public static function load($filename, $forceCached = false) {
 		if (empty($filename) || !is_string($filename)) throw new sly_Exception('Keine Datei angegeben.');
@@ -93,6 +106,10 @@ class sly_Util_YAML {
 		return $config;
 	}
 
+	/**
+	 * @param string $filename
+	 * @param mixed  $data
+	 */
 	public static function dump($filename, $data) {
 		$data   = sfYaml::dump($data, 5);
 		$exists = file_exists($filename);
