@@ -12,8 +12,13 @@
  * @ingroup util
  */
 class sly_Util_Password {
-	const ITERATIONS = 100;
+	const ITERATIONS = 100; ///< int
 
+	/**
+	 * @param  string $password
+	 * @param  array  $salts
+	 * @return string
+	 */
 	public static function hash($password, $salts = array()) {
 		$password = self::iteratedHash($password);
 
@@ -31,6 +36,10 @@ class sly_Util_Password {
 		return $password;
 	}
 
+	/**
+	 * @param  string $input
+	 * @return string
+	 */
 	protected static function iteratedHash($input) {
 		for ($i = 0; $i < self::ITERATIONS; ++$i) $input = sha1($input);
 		return $input;

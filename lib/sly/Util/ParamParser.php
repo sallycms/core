@@ -12,9 +12,13 @@
  * @ingroup util
  */
 class sly_Util_ParamParser {
-	protected $file;
-	protected $params;
+	protected $file;   ///< string
+	protected $params; ///< array
 
+	/**
+	 * @throws sly_Exception
+	 * @param  string $filename
+	 */
 	public function __construct($filename) {
 		if (!file_exists($filename)) {
 			throw new sly_Exception('Datei nicht gefunden: '.$filename);
@@ -24,12 +28,20 @@ class sly_Util_ParamParser {
 		$this->params = null;
 	}
 
+	/**
+	 * @param  string $key
+	 * @param  mixed  $default
+	 * @return mixed
+	 */
 	public function get($key = null, $default = false) {
 		$this->getParams();
 		if ($key === null) return $this->params;
 		return isset($this->params[$key]) ? $this->params[$key] : $default;
 	}
 
+	/**
+	 * @return array
+	 */
 	protected function getParams() {
 		if ($this->params === null) {
 			$this->parseFile();
@@ -38,6 +50,9 @@ class sly_Util_ParamParser {
 		return $this->params;
 	}
 
+	/**
+	 * @return boolean
+	 */
 	protected function parseFile() {
 		$contents = file_get_contents($this->file);
 		$match    = array();
