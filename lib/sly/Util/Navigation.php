@@ -29,15 +29,14 @@
  * @ingroup util
  */
 class sly_Util_Navigation {
-
-	protected $activePathIds;
-	protected $activePathCategories;
-	protected $naviString;
-	protected $maxDepth;
-	protected $useHTMLSpecialchars;
-	protected $activeArticleId;
-	protected $startArticleId;
-	protected $isStartClang;
+	protected $activePathIds;        ///< array
+	protected $activePathCategories; ///< array
+	protected $naviString;           ///< string
+	protected $maxDepth;             ///< int
+	protected $useHTMLSpecialchars;  ///< boolean
+	protected $activeArticleId;      ///< int
+	protected $startArticleId;       ///< int
+	protected $isStartClang;         ///< boolean
 
 	/**
 	 * @param int     $depth
@@ -49,11 +48,11 @@ class sly_Util_Navigation {
 	public function __construct($depth = 1, $fullNavigation = false, $useHTMLSpecialchars = true, $baseCategories = null, $activeArticleId = null) {
 		$this->maxDepth            = $depth;
 		$this->useHTMLSpecialchars = $useHTMLSpecialchars;
-		$this->activeArticleId     = (is_null($activeArticleId)) ? sly_Core::getCurrentArticleId() : $activeArticleId;
+		$this->activeArticleId     = is_null($activeArticleId) ? sly_Core::getCurrentArticleId() : $activeArticleId;
 		$this->startArticleId      = sly_Core::getSiteStartArticleId();
 		$this->isStartClang        = sly_Core::getDefaultClangId() == sly_Core::getCurrentClang();
 
-		$baseCategories            = (is_null($baseCategories)) ? sly_Util_Category::getRootCategories(true) : $baseCategories;
+		$baseCategories = is_null($baseCategories) ? sly_Util_Category::getRootCategories(true) : $baseCategories;
 		$this->generateNavigation($baseCategories, $fullNavigation);
 	}
 
@@ -115,8 +114,8 @@ class sly_Util_Navigation {
 				$this->activePathCategories[] = $category;
 			}
 
-			if (($isActive || $all) && $currentLevel +1 <= $maxDepth) {
-				$children = $category->getChildren(true);
+			if (($isActive || $all) && $currentLevel+1 <= $maxDepth) {
+				$children           = $category->getChildren(true);
 				$childrenHTMLString = $this->walkCategories($children, $all, $maxDepth, $currentLevel+1);
 			}
 			else {
