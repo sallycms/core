@@ -9,10 +9,9 @@
  */
 
 class sly_Util_Slice {
-	
 	/**
 	 * clears the filecache for a slice
-	 * 
+	 *
 	 * @param int $slice_id
 	 */
 	public static function clearSliceCache($slice_id) {
@@ -21,10 +20,8 @@ class sly_Util_Slice {
 		$cachefiles = glob($cachedir.$slice_id.'-*.slice.php');
 
 		if (is_array($cachefiles)) {
-			foreach ($cachefiles as $filename) {
-				@unlink($filename);
-			}
+			@array_map('unlink', $cachefiles);
 		}
-	}	
+	}
 }
 

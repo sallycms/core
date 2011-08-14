@@ -12,7 +12,7 @@
  * @ingroup util
  */
 class sly_Util_Session {
-	private static $uniqueInstallationId;
+	private static $uniqueInstallationId; ///< string
 
 	/**
 	 * Start a session if it is not already started
@@ -34,24 +34,24 @@ class sly_Util_Session {
 	/**
 	 * Gets the value of a session var casted to $type.
 	 *
-	 * @param string $key the key where to find the var in superglobal aray $_SESSION
-	 * @param string $type the type to cast to
-	 * @param mixed  $default ther default value to return if session var is empty
-	 *
-	 * @return mixed $value casted to $type
+	 * @param  string $key      the key where to find the var in superglobal aray $_SESSION
+	 * @param  string $type     the type to cast to
+	 * @param  mixed  $default  their default value to return if session var is empty
+	 * @return mixed            $value casted to $type
 	 */
 	public static function get($key, $type = '', $default = '') {
 		/**
 		 * FIXME: can we really put this under MIT license? ist some sort of copy
-		 * of redaxo code
-		 *
+		 * of REDAXO code
 		 */
-		if (isset($_SESSION[self::getUID()][$key]))
+
+		if (isset($_SESSION[self::getUID()][$key])) {
 			return _rex_cast_var($_SESSION[self::getUID()][$key], $type, $default, 'found', false);
+		}
 
-		if ($default === '')
+		if ($default === '') {
 			return _rex_cast_var($default, $type, $default, 'default', false);
-
+		}
 
 		return $default;
 	}
@@ -60,7 +60,7 @@ class sly_Util_Session {
 	 * Sets the value of a session var
 	 *
 	 * @param string $key
-	 * @param mixed $value
+	 * @param mixed  $value
 	 */
 	public static function set($key, $value) {
 		$_SESSION[self::getUID()][$key] = $value;
@@ -76,7 +76,7 @@ class sly_Util_Session {
 	}
 
 	/**
-	 * Session fixation
+	 * Prevent session fixation
 	 */
 	public static function regenerate_id() {
 		if (version_compare(phpversion(), '5.1.0', '>=')) {
@@ -93,8 +93,9 @@ class sly_Util_Session {
 	 * @return string
 	 */
 	private static function getUID() {
-		if (!self::$uniqueInstallationId)
+		if (!self::$uniqueInstallationId) {
 			self::$uniqueInstallationId = sly_Core::config()->get('INSTNAME');
+		}
 
 		return self::$uniqueInstallationId;
 	}

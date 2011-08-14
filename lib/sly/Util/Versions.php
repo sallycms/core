@@ -12,10 +12,19 @@
  * @ingroup util
  */
 class sly_Util_Versions {
+	/**
+	 * @param  string $component
+	 * @return string
+	 */
 	public static function get($component) {
 		return sly_Core::config()->get('versions/'.$component, false);
 	}
 
+	/**
+	 * @param  string $component
+	 * @param  string $version
+	 * @return string
+	 */
 	public static function set($component, $version) {
 		return sly_Core::config()->set('versions/'.$component, $version);
 	}

@@ -14,10 +14,10 @@ class sly_Util_User {
 	 *
 	 * The given user must have set at least the createdate
 	 *
-	 * @param  sly_Model_User  $user      The user object
-	 * @param  string          $password  The plain password string
-	 * @return string                     The hashed password
-	 * @throws sly_Exception   When createdate is empty
+	 * @throws sly_Exception             When createdate is empty
+	 * @param  sly_Model_User $user      The user object
+	 * @param  string         $password  The plain password string
+	 * @return string                    The hashed password
 	 */
 	public static function getPasswordHash(sly_Model_User $user, $password) {
 		$createdate = $user->getCreateDate();
@@ -26,7 +26,7 @@ class sly_Util_User {
 	}
 
 	/**
-	 * return current loggedin user
+	 * return currently logged-in user
 	 *
 	 * @return sly_Model_User
 	 */
