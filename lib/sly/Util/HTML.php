@@ -15,7 +15,6 @@ class sly_Util_HTML {
 	/**
 	 * Builds an attribute part for a tag and returns it as a string.
 	 *
-	 *
 	 * @param  array  $attributes  Associative array of attribute values, where key is the attribute name and value is the attribute value.
 	 *                             e.g. array('src' => 'picture.png', alt='my picture')
 	 * @param  array  $force       Array of attributes that should be added, even if they are empty.
@@ -36,6 +35,12 @@ class sly_Util_HTML {
 		return implode(' ', $attributes);
 	}
 
+	/**
+	 * @param  string $target
+	 * @param  string $text
+	 * @param  string $class
+	 * @return string
+	 */
 	public static function getSpriteLink($target, $text, $class) {
 		if (empty($target)) {
 			$span = array('class' => 'sly-sprite sly-sprite-'.$class);
@@ -56,6 +61,9 @@ class sly_Util_HTML {
 		print ob_get_clean();
 	}
 
+	/**
+	 * @param string $content
+	 */
 	public static function printJavaScript($content) {
 		self::startJavaScript();
 		print $content;
@@ -72,16 +80,27 @@ class sly_Util_HTML {
 		self::endJavaScript();
 	}
 
+	/**
+	 * @param string $content
+	 */
 	public static function onDOMReady($content) {
 		self::startOnDOMReady();
 		print $content;
 		self::endOnDOMReady();
 	}
 
+	/**
+	 * @param  mixed $value
+	 * @return boolean
+	 */
 	public static function isAttribute($value) {
 		return $value !== false && strlen(trim($value)) > 0;
 	}
 
+	/**
+	 * @param string $value
+	 * @param string $key
+	 */
 	public static function concatValues(&$value, $key) {
 		$value = strtolower(trim($key)).'="'.sly_html(trim($value)).'"';
 	}

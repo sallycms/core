@@ -12,6 +12,10 @@
  * @ingroup util
  */
 class sly_Util_Language {
+	/**
+	 * @param  boolean $keysOnly
+	 * @return array
+	 */
 	public static function findAll($keysOnly = false) {
 		$cache     = sly_Core::cache();
 		$languages = $cache->get('sly.language', 'all', null);
@@ -30,6 +34,10 @@ class sly_Util_Language {
 		return $keysOnly ? array_keys($languages) : $languages;
 	}
 
+	/**
+	 * @param  int $languageID
+	 * @return boolean
+	 */
 	public static function exists($languageID) {
 		$languages  = self::findAll();
 		$languageID = (int) $languageID;
@@ -37,6 +45,10 @@ class sly_Util_Language {
 		return isset($languages[$languageID]);
 	}
 
+	/**
+	 * @param  int $languageID
+	 * @return string
+	 */
 	public static function getLocale($languageID = null) {
 		if ($languageID === null) {
 			$languageID = sly_Core::getCurrentClang();
@@ -51,10 +63,18 @@ class sly_Util_Language {
 		return $language->getLocale();
 	}
 
+	/**
+	 * @return boolean
+	 */
 	public static function isMultilingual() {
 		return count(self::findAll()) > 1;
 	}
 
+	/**
+	 * @param  sly_Model_User $user
+	 * @param  int            $clangID
+	 * @return boolean
+	 */
 	public static function hasPermissionOnLanguage(sly_Model_User $user, $clangID) {
 		return $user->isAdmin() || $user->hasRight('clang[all]') || $user->hasRight('clang['.$clangID.']');
 	}

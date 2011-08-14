@@ -14,9 +14,9 @@
  * @author Christoph
  */
 class sly_Util_Medium {
-	const ERR_TYPE_MISMATCH    = 1;
-	const ERR_INVALID_FILEDATA = 2;
-	const ERR_UPLOAD_FAILED    = 3;
+	const ERR_TYPE_MISMATCH    = 1; ///< int
+	const ERR_INVALID_FILEDATA = 2; ///< int
+	const ERR_UPLOAD_FAILED    = 3; ///< int
 
 	/**
 	 * checks wheter a medium exists or not
@@ -29,7 +29,6 @@ class sly_Util_Medium {
 	}
 
 	/**
-	 *
 	 * @param  mixed $medium
 	 * @return boolean
 	 */
@@ -38,7 +37,6 @@ class sly_Util_Medium {
 	}
 
 	/**
-	 *
 	 * @param  int $mediumId
 	 * @return sly_Model_Medium
 	 */
@@ -47,7 +45,6 @@ class sly_Util_Medium {
 	}
 
 	/**
-	 *
 	 * @param  string $filename
 	 * @return sly_Model_Medium
 	 */
@@ -56,7 +53,6 @@ class sly_Util_Medium {
 	}
 
 	/**
-	 *
 	 * @param  int $categoryId
 	 * @return array
 	 */
@@ -65,7 +61,6 @@ class sly_Util_Medium {
 	}
 
 	/**
-	 *
 	 * @param  string $extension
 	 * @return array
 	 */
@@ -73,6 +68,14 @@ class sly_Util_Medium {
 		return sly_Service_Factory::getMediumService()->findMediaByExtension($extension);
 	}
 
+	/**
+	 * @throws sly_Exception
+	 * @param  array            $fileData
+	 * @param  int              $categoryID
+	 * @param  string           $title
+	 * @param  sly_Model_Medium $mediumToReplace
+	 * @return sly_Model_Medium
+	 */
 	public static function upload(array $fileData, $categoryID, $title, sly_Model_Medium $mediumToReplace = null) {
 		// check file data
 
@@ -143,6 +146,11 @@ class sly_Util_Medium {
 		return $file;
 	}
 
+	/**
+	 * @param  string  $filename
+	 * @param  boolean $doSubindexing
+	 * @return string
+	 */
 	public static function createFilename($filename, $doSubindexing = true) {
 		$filename    = self::correctEncoding($filename);
 		$newFilename = strtolower($filename);
@@ -185,12 +193,20 @@ class sly_Util_Medium {
 		return $newFilename;
 	}
 
+	/**
+	 * @param  string $filename
+	 * @return string
+	 */
 	public static function correctEncoding($filename) {
 		$enc = mb_detect_encoding($filename, 'Windows-1252, ISO-8859-1, ISO-8859-2, UTF-8');
 		if ($enc != 'UTF-8') $filename = mb_convert_encoding($filename, 'UTF-8', $enc);
 		return $filename;
 	}
 
+	/**
+	 * @param  string $filename
+	 * @return string
+	 */
 	public static function getMimetype($filename) {
 		$size = @getimagesize($filename);
 

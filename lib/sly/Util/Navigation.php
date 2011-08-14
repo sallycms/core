@@ -92,29 +92,34 @@ class sly_Util_Navigation {
 	/**
 	 * gets the navigationstring for a level
 	 *
-	 * @param array   $categories
-	 * @param boolean $all
-	 * @param int     $maxDepth
-	 * @param int     $currentLevel
+	 * @param  array   $categories
+	 * @param  boolean $all
+	 * @param  int     $maxDepth
+	 * @param  int     $currentLevel
 	 * @return string
 	 */
 	protected function walkCategories($categories, $all, $maxDepth, $currentLevel = 1) {
 		$categories = $this->filterCategories($categories);
+
 		if (empty($categories) || ($currentLevel > $maxDepth)) {
 			return '';
 		}
+
 		$lastnum      = count($categories) -1;
 		$resultString = '';
+
 		foreach ($categories as $num => $category) {
 			$isActive = $this->isLevelActive($category);
 
 			if ($isActive) {
 				$this->activePathCategories[] = $category;
 			}
+
 			if (($isActive || $all) && $currentLevel +1 <= $maxDepth) {
 				$children = $category->getChildren(true);
 				$childrenHTMLString = $this->walkCategories($children, $all, $maxDepth, $currentLevel+1);
-			}else {
+			}
+			else {
 				$childrenHTMLString = '';
 			}
 
@@ -122,21 +127,22 @@ class sly_Util_Navigation {
 			$resultString .= $this->getHTMLForCategory($category, $childrenHTMLString, $currentLevel, $isActive, $isLast, $num);
 		}
 
-		if(!empty($resultString)) {
+		if (!empty($resultString)) {
 			$resultString = '<ul class="nav'.$currentLevel.'">'.$resultString.'</ul>';
 		}
+
 		return $resultString;
 	}
 
 	/**
 	 * Return the list item html for one category
 	 *
-	 * @param sly_Model_Category $category
-	 * @param string     $childrenHTMLString
-	 * @param int        $currentLevel
-	 * @param boolean    $isActive
-	 * @param boolean    $isLast
-	 * @param int        $position
+	 * @param  sly_Model_Category $category
+	 * @param  string             $childrenHTMLString
+	 * @param  int                $currentLevel
+	 * @param  boolean            $isActive
+	 * @param  boolean            $isLast
+	 * @param  int                $position
 	 * @return string
 	 */
 	protected function getHTMLForCategory(sly_Model_Category $category, $childrenHTMLString, $currentLevel, $isActive, $isLast, $position) {
@@ -150,13 +156,13 @@ class sly_Util_Navigation {
 	/**
 	 * Return the list item html for one categorydata set
 	 *
-	 * @param string  $text
-	 * @param string  $url
-	 * @param string  $childrenHTMLString
-	 * @param boolean $isActive
-	 * @param boolean $isLast
-	 * @param boolean $isActiveLeave
-	 * @param int     $position
+	 * @param  string  $text
+	 * @param  string  $url
+	 * @param  string  $childrenHTMLString
+	 * @param  boolean $isActive
+	 * @param  boolean $isLast
+	 * @param  boolean $isActiveLeaf
+	 * @param  int     $position
 	 * @return string
 	 */
 	protected function getHTMLForCategoryData($text, $url, $childrenHTMLString, $isActive, $isLast, $isActiveLeaf, $position) {
@@ -171,7 +177,7 @@ class sly_Util_Navigation {
 	 * return true if the category is the current category,
 	 * of if it is parent of the current.
 	 *
-	 * @param sly_Model_Category $category
+	 * @param  sly_Model_Category $category
 	 * @return boolean
 	 */
 	protected function isLevelActive(sly_Model_Category $category) {
@@ -181,7 +187,7 @@ class sly_Util_Navigation {
 	/**
 	 * return true when the category is the active article
 	 *
-	 * @param sly_Model_Category $category
+	 * @param  sly_Model_Category $category
 	 * @return boolean
 	 */
 	protected function isActiveLeaf(sly_Model_Category $category) {
@@ -191,7 +197,7 @@ class sly_Util_Navigation {
 	/**
 	 * filters a list of categories and returns the filtered list
 	 *
-	 * @param array $categories
+	 * @param  array $categories
 	 * @return array
 	 */
 	protected function filterCategories($categories) {
@@ -201,13 +207,14 @@ class sly_Util_Navigation {
 	/**
 	 * returns the url for a category
 	 *
-	 * @param sly_Model_Category $category
+	 * @param  sly_Model_Category $category
 	 * @return string
 	 */
 	protected function getCategoryUrl(sly_Model_Category $category) {
 		if ($this->isStartClang && $this->startArticleId == $category->getId()) {
 			return './';
-		}else {
+		}
+		else {
 			return $category->getUrl();
 		}
 	}
@@ -215,7 +222,7 @@ class sly_Util_Navigation {
 	/**
 	 * returns the link text for a category
 	 *
-	 * @param sly_Model_Category $category
+	 * @param  sly_Model_Category $category
 	 * @return string
 	 */
 	protected function getCategoryText(sly_Model_Category $category) {
@@ -227,7 +234,7 @@ class sly_Util_Navigation {
 	/**
 	 * return the name of the active category in the given level
 	 *
-	 * @param int $level
+	 * @param  int $level
 	 * @return string
 	 */
 	protected function getActiveCategoryForLevel($level) {
@@ -258,7 +265,7 @@ class sly_Util_Navigation {
 		$path = array();
 		for ($i = 0 + $offset; $i <= $this->maxDepth; $i++) {
 			$levelObject = $this->getActiveCategoryForLevel($i);
-			if(is_null($levelObject)) break;
+			if (is_null($levelObject)) break;
 
 			$levelName = $this->getCategoryText($levelObject);
 			if ($clickable) {
@@ -269,6 +276,9 @@ class sly_Util_Navigation {
 		return implode($separator, $path);
 	}
 
+	/**
+	 * @return string
+	 */
 	public function __toString() {
 		return $this->getNavigationHTMLString();
 	}
