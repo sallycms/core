@@ -12,25 +12,34 @@
  * @ingroup util
  */
 class sly_Util_Pager {
-	const FIRST_ACTIVE   = -1;
-	const FIRST_INACTIVE = -2;
-	const PREV_ACTIVE    = -3;
-	const PREV_INACTIVE  = -4;
-	const NEXT_ACTIVE    = -5;
-	const NEXT_INACTIVE  = -6;
-	const LAST_ACTIVE    = -7;
-	const LAST_INACTIVE  = -8;
-	const ELLIPSIS_LEFT  = -9;
-	const ELLIPSIS_RIGHT = -10;
+	const FIRST_ACTIVE   = -1;  ///< int
+	const FIRST_INACTIVE = -2;  ///< int
+	const PREV_ACTIVE    = -3;  ///< int
+	const PREV_INACTIVE  = -4;  ///< int
+	const NEXT_ACTIVE    = -5;  ///< int
+	const NEXT_INACTIVE  = -6;  ///< int
+	const LAST_ACTIVE    = -7;  ///< int
+	const LAST_INACTIVE  = -8;  ///< int
+	const ELLIPSIS_LEFT  = -9;  ///< int
+	const ELLIPSIS_RIGHT = -10; ///< int
 
-	protected $currentPage;
-	protected $totalElements;
-	protected $perPage;
-	protected $maxLinks;
-	protected $linksLeftRight;
-	protected $linksOnEnd;
-	private $pages;
+	protected $currentPage;     ///< int
+	protected $totalElements;   ///< int
+	protected $perPage;         ///< int
+	protected $maxLinks;        ///< int
+	protected $linksLeftRight;  ///< int
+	protected $linksOnEnd;      ///< int
 
+	private $pages; ///< int
+
+	/**
+	 * @param int $currentPage
+	 * @param int $totalElements
+	 * @param int $perPage
+	 * @param int $maxLinks
+	 * @param int $linksLeftRight
+	 * @param int $linksOnEnds
+	 */
 	public function __construct($currentPage, $totalElements, $perPage = 10, $maxLinks = 10, $linksLeftRight = 2, $linksOnEnds = 2) {
 		$this->currentPage    = abs((int) $currentPage);
 		$this->totalElements  = abs((int) $totalElements);
@@ -46,6 +55,9 @@ class sly_Util_Pager {
 		if ($this->maxLinks < 5) $this->maxLinks = 5;
 	}
 
+	/**
+	 * @return array
+	 */
 	public function getPaginationData() {
 		$result = array();
 
@@ -103,6 +115,13 @@ class sly_Util_Pager {
 		return $result;
 	}
 
+	/**
+	 * @param  array  $getParams
+	 * @param  string $pageParamName
+	 * @param  string $filename
+	 * @param  array  $specialSymbols
+	 * @return array
+	 */
 	public function getRawLinks($getParams = array(), $pageParamName = 'p', $filename = 'index.php', $specialSymbols = array()) {
 		// Standardwerte für die Spezialsymbole
 
@@ -207,6 +226,13 @@ class sly_Util_Pager {
 		return $links;
 	}
 
+	/**
+	 * @param  array  $getParams
+	 * @param  string $pageParamName
+	 * @param  string $filename
+	 * @param  array  $specialSymbols
+	 * @return string
+	 */
 	public function getHTMLString($getParams = array(), $pageParamName = 'p', $filename = 'index.php', $specialSymbols = array()) {
 		$links = $this->getRawLinks($getParams, $pageParamName, $filename, $specialSymbols);
 
@@ -228,6 +254,14 @@ class sly_Util_Pager {
 		return "\n".implode("\n", $links)."\n";
 	}
 
+	/**
+	 * @param  string $tag
+	 * @param  array  $getParams
+	 * @param  string $pageParamName
+	 * @param  string $filename
+	 * @param  array  $specialSymbols
+	 * @return string
+	 */
 	public function getHTMLList($tag = 'ul', $getParams = array(), $pageParamName = 'p', $filename = 'index.php', $specialSymbols = array()) {
 		$links  = $this->getRawLinks($getParams, $pageParamName, $filename, $specialSymbols);
 		$result = "\n<$tag class=\"pager\">";
@@ -248,6 +282,9 @@ class sly_Util_Pager {
 		return $result;
 	}
 
+	/**
+	 * @return array
+	 */
 	public function getCurrentElements() {
 		$elements = array();
 		$base     = $this->currentPage * $this->perPage;
@@ -257,6 +294,13 @@ class sly_Util_Pager {
 		return $elements;
 	}
 
+	/**
+	 * @param  string $filename
+	 * @param  array  $getParams
+	 * @param  string $pageParamName
+	 * @param  int    $page
+	 * @return string
+	 */
 	protected function getURL($filename, $getParams = array(), $pageParamName = 'p', $page = 0) {
 		$link = $filename;
 		if ($page > 0) $getParams[$pageParamName] = $page;
@@ -265,6 +309,10 @@ class sly_Util_Pager {
 		return $link;
 	}
 
+	/**
+	 * @param  int $code
+	 * @return boolean
+	 */
 	public static function isEllipsis($code) {
 		return $code == self::ELLIPSIS_LEFT || $code == self::ELLIPSIS_RIGHT;
 	}
