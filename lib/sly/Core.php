@@ -22,6 +22,13 @@ class sly_Core {
 	private $i18n;             ///< sly_I18N
 	private $errorHandler;     ///< sly_ErrorHandler
 
+	// Use the following constants when you don't have access to the real
+	// config values (i.e. when in setup mode). They should map the values
+	// in sallyStatic.yml.
+
+	const DEFAULT_FILEPERM = 0777; ///< int
+	const DEFAULT_DIRPERM  = 0664; ///< int
+
 	private function __construct() {
 		$this->cache = sly_Cache::factory();
 	}
