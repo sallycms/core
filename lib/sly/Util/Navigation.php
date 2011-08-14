@@ -86,7 +86,7 @@ class sly_Util_Navigation {
 	 * @return string
 	 */
 	protected function getNavigationHash() {
-		return $md5($this->getNavigationHTMLString());
+		return md5($this->getNavigationHTMLString());
 	}
 
 	/**
