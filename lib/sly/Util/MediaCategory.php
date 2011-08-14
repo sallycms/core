@@ -25,7 +25,6 @@ class sly_Util_MediaCategory {
 	}
 
 	/**
-	 *
 	 * @param  mixed $category
 	 * @return boolean
 	 */
@@ -34,7 +33,6 @@ class sly_Util_MediaCategory {
 	}
 
 	/**
-	 *
 	 * @param  int $categoryId
 	 * @return sly_Model_MediaCategory
 	 */
@@ -43,7 +41,6 @@ class sly_Util_MediaCategory {
 	}
 
 	/**
-	 *
 	 * @param  int $name
 	 * @return array
 	 */
@@ -52,7 +49,6 @@ class sly_Util_MediaCategory {
 	}
 
 	/**
-	 *
 	 * @param  int $parentId
 	 * @return array
 	 */
@@ -61,7 +57,6 @@ class sly_Util_MediaCategory {
 	}
 
 	/**
-	 *
 	 * @return array
 	 */
 	public static function getRootCategories() {

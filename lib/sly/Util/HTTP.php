@@ -12,6 +12,12 @@
  * @ingroup util
  */
 class sly_Util_HTTP {
+	/**
+	 * @param mixed  $target      URL, article ID or article model
+	 * @param array  $parameters
+	 * @param string $noticeText
+	 * @param int    $status
+	 */
 	public static function redirect($target, $parameters = array(), $noticeText = '', $status = 301) {
 		$targetUrl = '';
 
@@ -37,6 +43,13 @@ class sly_Util_HTTP {
 		exit($noticeText);
 	}
 
+	/**
+	 * @param  mixed  $targetArticle  article ID or article model
+	 * @param  int    $clang
+	 * @param  array  $parameters
+	 * @param  string $divider
+	 * @return string
+	 */
 	public static function getAbsoluteUrl($targetArticle, $clang = false, $parameters = array(), $divider = '&amp;') {
 		$articleUrl = self::getUrl($targetArticle, $clang, $parameters, $divider);
 
@@ -48,6 +61,13 @@ class sly_Util_HTTP {
 		return $baseURL.'/'.$articleUrl;
 	}
 
+	/**
+	 * @param  mixed  $targetArticle  article ID or article model
+	 * @param  int    $clang
+	 * @param  array  $parameters
+	 * @param  string $divider
+	 * @return string
+	 */
 	public static function getUrl($targetArticle, $clang = null, $parameters = array(), $divider = '&amp;') {
 		$articleID = self::resolveArticle($targetArticle);
 		$article   = sly_Util_Article::findById($articleID, $clang);
@@ -55,6 +75,10 @@ class sly_Util_HTTP {
 		return $article->getUrl($parameters, $divider);
 	}
 
+	/**
+	 * @param  boolean $addScriptPath
+	 * @return string
+	 */
 	public static function getBaseUrl($addScriptPath = false) {
 		$protocol = self::isSecure() ? 'https': 'http';
 		$host     = self::getHost();
@@ -93,7 +117,7 @@ class sly_Util_HTTP {
 	 *
 	 * @param  mixed  $params   array or string
 	 * @param  string $divider  only used if $params is array
-	 * @return string  the host or an empty string if none found
+	 * @return string           the host or an empty string if none found
 	 */
 	public static function queryString($params, $divider = '&amp;') {
 		if (!empty($params)) {
@@ -106,6 +130,9 @@ class sly_Util_HTTP {
 		}
 	}
 
+	/**
+	 * @return string
+	 */
 	public static function getHost() {
 		if (isset($_SERVER['HTTP_X_FORWARDED_HOST']))   return $_SERVER['HTTP_X_FORWARDED_HOST'];
 		if (isset($_SERVER['HTTP_HOST']))               return $_SERVER['HTTP_HOST'];
