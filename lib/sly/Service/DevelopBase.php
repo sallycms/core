@@ -211,6 +211,8 @@ abstract class sly_Service_DevelopBase {
 		$type = $type === null ? $this->getFileType() : $type;
 
 		foreach (array_keys($data) as $name) {
+			if (!isset($data[$name][$type])) continue;
+
 			foreach ($data[$name][$type] as $file) {
 				if (isset($file[$attribute]) && $file[$attribute] == $value) return $name;
 			}
