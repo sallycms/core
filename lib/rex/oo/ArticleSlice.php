@@ -275,11 +275,11 @@ class OOArticleSlice {
 		return sly_Service_Factory::getSliceService()->findById($this->getSliceId());
 	}
 
-	public function getValue($index)     { return $this->getRexVarValue('REX_VALUE', $index);     }
-	public function getLink($index)      { return $this->getRexVarValue('REX_LINK', $index);      }
-	public function getLinkList($index)  { return $this->getRexVarValue('REX_LINKLIST', $index);  }
-	public function getMedia($index)     { return $this->getRexVarValue('REX_MEDIA', $index);     }
-	public function getMediaList($index) { return $this->getRexVarValue('REX_MEDIALIST', $index); }
+	public function getValue($index)     { return $this->getRexVarValue('SLY_VALUE', $index);     }
+	public function getLink($index)      { return $this->getRexVarValue('SLY_LINK', $index);      }
+	public function getLinkList($index)  { return $this->getRexVarValue('SLY_LINKLIST', $index);  }
+	public function getMedia($index)     { return $this->getRexVarValue('SLY_MEDIA', $index);     }
+	public function getMediaList($index) { return $this->getRexVarValue('SLY_MEDIALIST', $index); }
 
 	public function getLinkUrl($index) {
 		$article = sly_Util_Article::findById($this->getLink($index));
@@ -302,7 +302,7 @@ class OOArticleSlice {
 			'POSITION',
 			'CREATE_USER_LOGIN'
 		);
-		
+
 		$replace = array(
 			$this->getArticleId(),
 			$this->getClang(),
@@ -313,7 +313,7 @@ class OOArticleSlice {
 			$this->getPrior(),
 			$this->getCreateuser()
 		);
-		
+
 		return str_replace($search, $replace, $content);
 	}
 
@@ -352,6 +352,6 @@ class OOArticleSlice {
 
 	protected function getRexVarValue($type, $key) {
 		$value = sly_Service_Factory::getSliceValueService()->findBySliceTypeFinder($this->getSliceId(), $type, $key);
-		return $value;
+		return $value ? $value->getValue() : null;
 	}
 }

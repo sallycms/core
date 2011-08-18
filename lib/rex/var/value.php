@@ -21,19 +21,21 @@ class rex_var_value extends rex_var {
 	const HTML_VALUE = 'SLY_HTML_VALUE';
 	const PHP_VALUE  = 'SLY_PHP_VALUE';
 	const IS_VALUE   = 'SLY_IS_VALUE';
-	
+
 	public function getRequestValues($REX_ACTION) {
 		$values = sly_requestArray('VALUE', 'string');
 
 		foreach ($values as $key => $value) {
 			$REX_ACTION[self::VALUE][$key] = $value;
 		}
+
 		return $REX_ACTION;
 	}
 
 	public function getDatabaseValues($slice_id) {
 		$values = sly_Service_Factory::getSliceValueService()->find(array('slice_id' => $slice_id, 'type' => 'SLY_VALUE'));
-		$data = array();
+		$data   = array();
+
 		foreach ($values as $value) {
 			$data[self::VALUE][$value->getFinder()] = $value->getValue();
 		}
