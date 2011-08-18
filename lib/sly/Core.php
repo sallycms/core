@@ -26,8 +26,8 @@ class sly_Core {
 	// config values (i.e. when in setup mode). They should map the values
 	// in sallyStatic.yml.
 
-	const DEFAULT_FILEPERM = 0777; ///< int
-	const DEFAULT_DIRPERM  = 0664; ///< int
+	const DEFAULT_FILEPERM = 0664; ///< int
+	const DEFAULT_DIRPERM  = 0777; ///< int
 
 	private function __construct() {
 		$this->cache = sly_Cache::factory();
