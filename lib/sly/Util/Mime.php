@@ -30,7 +30,7 @@ class sly_Util_Mime {
 
 		// fallback to a generic type
 		else {
-			$types = sly_Util_YAML::load(SLY_INCLUDE_PATH.'/config/mimetypes.yml');
+			$types = sly_Util_YAML::load(SLY_COREFOLDER.'/config/mimetypes.yml');
 			$ext   = strtolower(substr(strrchr($filename, '.'), 1));
 			$type  = isset($types[$ext]) ? $types[$ext] : 'application/octet-stream';
 		}
