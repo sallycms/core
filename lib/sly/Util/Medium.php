@@ -210,28 +210,14 @@ class sly_Util_Medium {
 	public static function getMimetype($filename) {
 		$size = @getimagesize($filename);
 
-		// finfo:             PHP >= 5.3, PECL fileinfo
-		// mime_content_type: PHP >= 4.3 (deprecated)
-
 		// if it's an image, we know the type
 		if (isset($size['mime'])) {
 			$mimetype = $size['mime'];
 		}
 
-		// or else try the new, recommended way
-		elseif (function_exists('finfo_file')) {
-			$finfo    = finfo_open(FILEINFO_MIME_TYPE);
-			$mimetype = finfo_file($finfo, $filename);
-		}
-
-		// argh, let's see if this old one exists
-		elseif (function_exists('mime_content_type')) {
-			$mimetype = mime_content_type($filename);
-		}
-
 		// fallback to a generic type
 		else {
-			$mimetype = 'application/octet-stream';
+			$mimetype = sly_Util_Mime::getType($filename);
 		}
 
 		return $mimetype;
