@@ -155,6 +155,7 @@ class sly_Service_Asset {
 			}
 
 			$this->generateCacheFile($tmpFile, $cacheFile);
+			$file = $tmpFile;
 		}
 
 		$this->printCacheFile($file, $cacheFile);
