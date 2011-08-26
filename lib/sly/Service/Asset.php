@@ -157,7 +157,7 @@ class sly_Service_Asset {
 			$this->generateCacheFile($tmpFile, $cacheFile);
 		}
 
-		$this->redirectToCacheFile($cacheFile);
+		$this->printCacheFile($file, $cacheFile);
 	}
 
 	/**
@@ -224,10 +224,7 @@ class sly_Service_Asset {
 		}
 	}
 
-	/**
-	 * @param string $file
-	 */
-	protected function redirectToCacheFile($file) {
+	protected function printCacheFile($origFile, $file) {
 		$errors = ob_get_clean();
 		error_reporting(0);
 
@@ -240,32 +237,18 @@ class sly_Service_Asset {
 		}
 
 		if (empty($errors)) {
-			// has to match to whatever types we're accepting in .htaccess
-
-			$contentTypes = array(
-				'css'  => 'text/css; charset=UTF-8',
-				'js'   => 'text/javascript; charset=UTF-8',
-				'jpg'  => 'image/jpeg',
-				'png'  => 'image/png',
-				'gif'  => 'image/gif',
-				'webp' => 'image/webp',
-				'jpeg' => 'image/jpeg',
-				'swf'  => 'application/x-shockwave-flash',
-				'ico'  => 'image/x-icon',
-				'pdf'  => 'application/pdf'
-			);
-
-			// send headers
-
+			$type         = sly_Util_Mime::getType($origFile);
 			$cacheControl = sly_Core::config()->get('ASSETS_CACHE_CONTROL', 'max-age=29030401');
-			$ext          = strtolower(substr(strrchr($file, '.'), 1));
-			$type         = isset($contentTypes[$ext]) ? $contentTypes[$ext] : 'application/octet-stream';
 			$enc          = $this->getPreferredClientEncoding();
+
+			list($main, $sub) = explode('/', $type);
+			if ($main === 'text') $type .= '; charset=UTF-8';
 
 			header('HTTP/1.1 200 OK');
 			header('Last-Modified: '.date('r', time()));
 			header('Cache-Control: '.$cacheControl);
 			header('Content-Type: '.$type);
+			header('Content-Length: '.filesize($file));
 
 			switch ($enc) {
 				case 'plain':
@@ -274,7 +257,6 @@ class sly_Service_Asset {
 				case 'deflate':
 				case 'gzip':
 					header('Content-Encoding: '.$enc);
-					header('Content-Length: '.filesize($file));
 					break;
 
 //				case 'mops': ?
