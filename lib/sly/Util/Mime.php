@@ -17,6 +17,16 @@ class sly_Util_Mime {
 			throw new sly_Exception('Cannot get mimetype of non-existing file '.$filename.'.');
 		}
 
+		/*
+		Using the new, fancy finfo extension can lead to serious problems on poorly-
+		configured server (or Windows boxes). The extension will either just report
+		false (which is fine, we could fallback to our list) or wrongly report data
+		(e.g. 'text/plain' for .css files, in which cases falling back would not work).
+		So to avoid this headache, we always use the prebuilt list of mimetypes and
+		all is well.
+
+		$type = null;
+
 		// try the new, recommended way
 		if (function_exists('finfo_file')) {
 			$finfo = finfo_open(FILEINFO_MIME_TYPE);
@@ -27,13 +37,12 @@ class sly_Util_Mime {
 		elseif (function_exists('mime_content_type')) {
 			$type = mime_content_type($filename);
 		}
+		*/
 
-		// fallback to a generic type
-		else {
-			$types = sly_Util_YAML::load(SLY_COREFOLDER.'/config/mimetypes.yml');
-			$ext   = strtolower(substr(strrchr($filename, '.'), 1));
-			$type  = isset($types[$ext]) ? $types[$ext] : 'application/octet-stream';
-		}
+		// fallback to prebuilt list
+		$types = sly_Util_YAML::load(SLY_INCLUDE_PATH.'/config/mimetypes.yml');
+		$ext   = strtolower(substr(strrchr($filename, '.'), 1));
+		$type  = isset($types[$ext]) ? $types[$ext] : 'application/octet-stream';
 
 		return $type;
 	}
