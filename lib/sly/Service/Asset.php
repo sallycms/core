@@ -90,6 +90,10 @@ class sly_Service_Asset {
 					$cacheFile = $this->getCacheFile($file, $access, $encoding);
 					$realfile  = SLY_BASE.'/'.$file;
 
+					if (!file_exists($cacheFile)) {
+						continue;
+					}
+
 					// if original file is missing, ask listeners
 					if (!file_exists($realfile)) {
 						$translated = $dispatcher->filter(self::EVENT_REVALIDATE_ASSETS, array($file));
@@ -141,7 +145,7 @@ class sly_Service_Asset {
 		$cacheFile = $this->getCacheFile($file, $access);
 
 		if (!file_exists($cacheFile) || $this->forceGen) {
-			// lete listeners process the file
+			// let listeners process the file
 			$tmpFile = $dispatcher->filter(self::EVENT_PROCESS_ASSET, $file);
 
 			// now we can check if a listener has generated a valid file
@@ -225,22 +229,65 @@ class sly_Service_Asset {
 	 */
 	protected function redirectToCacheFile($file) {
 		$errors = ob_get_clean();
+		error_reporting(0);
 
 		if (empty($errors)) {
-			// redirect so that Apache can set content-type and various other headers
-			$protocol = sly_Util_HTTP::isSecure() ? 'https' : 'http';
-			$host     = sly_Util_HTTP::getHost();
-			$uri      = $_SERVER['REQUEST_URI'];
+			$fp = fopen($file, 'rb');
 
-			// HTTP 1.0 states that clients should detect redirect loops. Unfortunately,
-			// IE takes this a bit too serious and won't perform *any* redirects, when
-			// the redirect URL is the same as the original request URI. To make it work,
-			// we have to syntactically change the URL.
+			if (!$fp) {
+				$errors = 'Cannot open file.';
+			}
+		}
 
-			$sep   = strpos($uri, '?') !== false ? '&' : '?';
-			$param = 'sly-force-reload';
+		if (empty($errors)) {
+			// has to match to whatever types we're accepting in .htaccess
 
-			header('Location: '.$protocol.'://'.$host.$uri.$sep.$param);
+			$contentTypes = array(
+				'css'  => 'text/css; charset=UTF-8',
+				'js'   => 'text/javascript; charset=UTF-8',
+				'jpg'  => 'image/jpeg',
+				'png'  => 'image/png',
+				'gif'  => 'image/gif',
+				'webp' => 'image/webp',
+				'jpeg' => 'image/jpeg',
+				'swf'  => 'application/x-shockwave-flash',
+				'ico'  => 'image/x-icon',
+				'pdf'  => 'application/pdf'
+			);
+
+			// send headers
+
+			$cacheControl = sly_Core::config()->get('ASSETS_CACHE_CONTROL', 'max-age=29030401');
+			$ext          = strtolower(substr(strrchr($file, '.'), 1));
+			$type         = isset($contentTypes[$ext]) ? $contentTypes[$ext] : 'application/octet-stream';
+			$enc          = $this->getPreferredClientEncoding();
+
+			header('HTTP/1.1 200 OK');
+			header('Last-Modified: '.date('r', time()));
+			header('Cache-Control: '.$cacheControl);
+			header('Content-Type: '.$type);
+
+			switch ($enc) {
+				case 'plain':
+					break;
+
+				case 'deflate':
+				case 'gzip':
+					header('Content-Encoding: '.$enc);
+					header('Content-Length: '.filesize($file));
+					break;
+
+//				case 'mops': ?
+			}
+
+			// stream the file
+
+			while (!feof($fp)) {
+				print fread($fp, 65536);
+				flush();
+			}
+
+			fclose($fp);
 		}
 		else {
 			header('Content-Type: text/plain; charset=UTF-8');
@@ -280,13 +327,6 @@ class sly_Service_Asset {
 
 		if (!file_exists($htaccess)) {
 			copy($install.'.htaccess', $htaccess);
-		}
-
-		$cache_php = sly_Util_Directory::join($dir, 'cache.php');
-
-		if (!file_exists($cache_php)) {
-			$jumper = self::getJumper($dir);
-			file_put_contents($cache_php, "<?php chdir('$jumper'); include 'index.php';");
 		}
 
 		$protect_php = sly_Util_Directory::join($dir, 'protect.php');
