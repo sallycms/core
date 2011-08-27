@@ -18,15 +18,25 @@ class sly_Util_Template {
 	 * A unlimited number of variabled can be given to the templates
 	 * through an associated array array('varname' => 'value' ...)
 	 * 
-	 * @param type $templateName
-	 * @param type $params 
+	 * @param string $name   The name param if the Template
+	 * @param array  $params Template variables as an associative array of parameters
 	 */
-	public static function render($templateName, $params) {
+	public static function render($name, $params = array()) {
 		try {
 			sly_Service_Factory::getTemplateService()->includeFile($templateName, $params);
 		}
-		catch(sly_Exception $e) {
+		catch(sly_Service_Template_Exception $e) {
 			print $e->getMessage();
 		}
+	}
+	
+	/**
+	 * Checks if a template exists.
+	 * 
+	 * @param  string $name
+	 * @return boolean 
+	 */
+	public static function exists($name) {
+		return sly_Service_Factory::getTemplateService()->exists($name); 
 	}
 }

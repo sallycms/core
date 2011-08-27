@@ -175,11 +175,29 @@ class OOArticleSlice {
 	 * @return string the content of the slice
 	 */
 	public function getOutput() {
-		$slice = $this->getSlice();
-		$content = $slice->getOutput();
-		$content = self::replaceLinks($content);
-		$content = $this->replaceGlobals($content);
+		$cachedir = SLY_DYNFOLDER.'/internal/sally/article_slice/';
+		sly_Util_Directory::create($cachedir);
+		$modulefile = sly_Service_Factory::getModuleService()->getOutputFilename($this->getModule());
 
+		$slice_content_file = $cachedir.$this->getSliceId().'-'.md5($modulefile).'.slice.php';
+
+		if (!file_exists($slice_content_file)) {
+			$slice = $this->getSlice();
+			$slice_content = $slice->getOutput();
+			$slice_content = self::replaceLinks($content);
+			$slice_content = $this->replaceGlobals($content);
+
+			if (!file_put_contents($slice_content_file, $slice_content)) {
+				return t('slice_could_not_be_generated').' '.t('check_rights_in_directory').SLY_DYNFOLDER.'/internal/sally/articles/';
+			}
+		}
+
+		if (file_exists($slice_content_file)) {
+			ob_start();
+			$this->includeContentFile($slice_content_file);
+			$content = ob_get_clean();
+		}
+		
 		return $content;
 	}
 
@@ -190,26 +208,13 @@ class OOArticleSlice {
 		return $content;
 	}
 
+	/**
+	 * @deprecated
+	 */
 	public function printContent() {
-		$cachedir = SLY_DYNFOLDER.'/internal/sally/article_slice/';
-		sly_Util_Directory::create($cachedir);
-		$modulefile = sly_Service_Factory::getModuleService()->getOutputFilename($this->getModule());
-
-		$slice_content_file = $cachedir.$this->getSliceId().'-'.md5($modulefile).'.slice.php';
-
-		if (!file_exists($slice_content_file)) {
-			$slice_content = $this->getOutput();
-
-			if (!file_put_contents($slice_content_file, $slice_content)) {
-				return t('slice_could_not_be_generated').' '.t('check_rights_in_directory').SLY_DYNFOLDER.'/internal/sally/articles/';
-			}
-		}
-
-		if (file_exists($slice_content_file)) {
-			$this->includeContentFile($slice_content_file);
-		}
+		print $this->getOutput();
 	}
-
+	
 	private function includeContentFile($slice_content_file) {
 		if (file_exists($slice_content_file)) {
 			$article = $this->getArticle();

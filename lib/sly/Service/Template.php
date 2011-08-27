@@ -118,14 +118,14 @@ class sly_Service_Template extends sly_Service_DevelopBase {
 	/**
 	 * Get the cache folder where template cache-files are stored
 	 *
-	 * @throws sly_Exception  When no cache folder is available and could not be created
-	 * @return string         the cache directory
+	 * @throws sly_Service_Template_Exception  When no cache folder is available and could not be created
+	 * @return string                          the cache directory
 	 */
 	public function getCacheFolder() {
 		$dir = sly_Util_Directory::join(SLY_DYNFOLDER, 'internal/sally', $this->getClassIdentifier());
 
 		if (!is_dir($dir) && !@mkdir($dir, sly_Core::getDirPerm(), true)) {
-			throw new sly_Exception('Konnte Cache-Verzeichnis '.$dir.' nicht erstellen.');
+			throw new sly_Service_Template_Exception('Konnte Cache-Verzeichnis '.$dir.' nicht erstellen.');
 		}
 
 		return $dir;
@@ -134,13 +134,13 @@ class sly_Service_Template extends sly_Service_DevelopBase {
 	/**
 	 * Generate the template cache-file for a template
 	 *
-	 * @throws sly_Exception  When the given template does ot exist
-	 * @param  string $name   Unique template name
-	 * @return string         the template file name
+	 * @throws sly_Service_Template_Exception  When the given template does ot exist
+	 * @param  string $name                    Unique template name
+	 * @return string                          the template file name
 	 */
 	public function getGenerated($name) {
 		if (!$this->exists($name)) {
-			throw new sly_Exception("Template '$name' does not exist.");
+			throw new sly_Service_Template_Exception("Template '$name' does not exist.");
 		}
 
 		$filename     = $this->filterByCondition($name, $this->getFileType());

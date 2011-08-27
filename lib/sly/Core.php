@@ -18,7 +18,6 @@ class sly_Core {
 	private $curArticleId;     ///< int
 	private $varTypes;         ///< array
 	private $layout;           ///< sly_Layout
-	private $navigation;       ///< sly_Layout_Navigation_Backend
 	private $i18n;             ///< sly_I18N
 	private $errorHandler;     ///< sly_ErrorHandler
 
