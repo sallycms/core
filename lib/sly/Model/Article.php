@@ -78,7 +78,7 @@ class sly_Model_Article extends sly_Model_Base_Article {
 		$ids = OOArticleSlice::getSliceIdsForSlot($this->getId(), $this->getClang(), $slot);
 
 		foreach ($ids as $id) {
-			OOArticleSlice::getArticleSliceById($id)->printContent();
+			OOArticleSlice::getArticleSliceById($id)->getOutput();
 		}
 	}
 
@@ -100,17 +100,15 @@ class sly_Model_Article extends sly_Model_Base_Article {
 	 * @return string
 	 */
 	public function getArticleTemplate() {
-		$tplserv = sly_Service_Factory::getTemplateService();
-
-		if ($this->hasType() && $tplserv->exists($this->getTemplateName())) {
+		if ($this->hasType()) {
 			$params['article'] = $this;
 			ob_start();
 			ob_implicit_flush(0);
-			$tplserv->includeFile($this->getTemplateName(), $params);
+			sly_Util_Template::render($this->getTemplateName(), $params);
 			$content = ob_get_clean();
 		}
 		else {
-			$content = 'No article type or template given.';
+			$content = 'No article type given.';
 		}
 
 		return $content;
