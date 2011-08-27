@@ -224,7 +224,11 @@ class sly_Service_Asset {
 				copy($file, $cacheFile);
 		}
 	}
-
+	
+	/**
+	 * @param string $origFile
+	 * @param string $file
+	 */
 	protected function printCacheFile($origFile, $file) {
 		$errors = ob_get_clean();
 		error_reporting(0);
