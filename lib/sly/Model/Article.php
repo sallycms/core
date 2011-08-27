@@ -73,13 +73,10 @@ class sly_Model_Article extends sly_Model_Base_Article {
 	 * prints the articlecontent for a given slot, or if empty for all slots
 	 *
 	 * @param string $slot
+	 * @deprecated you should print $this->getContent by yourselves
 	 */
 	public function printContent($slot = null) {
-		$ids = OOArticleSlice::getSliceIdsForSlot($this->getId(), $this->getClang(), $slot);
-
-		foreach ($ids as $id) {
-			OOArticleSlice::getArticleSliceById($id)->getOutput();
-		}
+		print $this->getContent();
 	}
 
 	/**
@@ -89,9 +86,12 @@ class sly_Model_Article extends sly_Model_Base_Article {
 	 * @return string
 	 */
 	public function getContent($slot = null) {
-		ob_start();
-		$this->printContent($slot);
-		return ob_get_clean();
+		$content = '';
+		$ids = OOArticleSlice::getSliceIdsForSlot($this->getId(), $this->getClang(), $slot);
+		foreach ($ids as $id) {
+			$content .= OOArticleSlice::getArticleSliceById($id)->getOutput();
+		}
+		return $content;
 	}
 
 	/**

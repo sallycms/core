@@ -23,7 +23,7 @@ class sly_Util_Template {
 	 */
 	public static function render($name, $params = array()) {
 		try {
-			sly_Service_Factory::getTemplateService()->includeFile($templateName, $params);
+			sly_Service_Factory::getTemplateService()->includeFile($name, $params);
 		}
 		catch(sly_Service_Template_Exception $e) {
 			print $e->getMessage();
