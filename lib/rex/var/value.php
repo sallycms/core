@@ -12,6 +12,7 @@
  * SLY_HTML_VALUE[1],
  * SLY_PHP_VALUE[1],
  * SLY_IS_VALUE[1]
+ * SLY_VALUE_VAR[1]
  *
  * @ingroup redaxo
  */
@@ -21,11 +22,13 @@ class rex_var_value extends rex_var {
 	const HTML_VALUE = 'SLY_HTML_VALUE';
 	const PHP_VALUE  = 'SLY_PHP_VALUE';
 	const IS_VALUE   = 'SLY_IS_VALUE';
+	const VALUE_VAR  = 'SLY_VALUE_VAR';
 
-	public function getRequestValues($REX_ACTION) {
-		$values = sly_requestArray('VALUE', 'string');
+	public function getRequestValues($REX_ACTION = array()) {
+		$values = sly_request('VALUE', 'array');
 
 		foreach ($values as $key => $value) {
+			$value = var_export($value, true);
 			$REX_ACTION[self::VALUE][$key] = $value;
 		}
 
@@ -60,10 +63,11 @@ class rex_var_value extends rex_var {
 	}
 
 	public function getOutput($REX_ACTION, $content) {
-		$content = $this->matchValue($REX_ACTION, $content, true);
+		$content = $this->matchValue($REX_ACTION, $content);
 		$content = $this->matchHtmlValue($REX_ACTION, $content);
 		$content = $this->matchIsValue($REX_ACTION, $content);
 		$content = $this->matchPhpValue($REX_ACTION, $content);
+		$content = $this->matchVarValue($REX_ACTION, $content);
 
 		return $content;
 	}
@@ -71,52 +75,59 @@ class rex_var_value extends rex_var {
 	/**
 	 * Wert für die Ausgabe
 	 */
-	private function _matchValue($REX_ACTION, $content, $var, $escape = false, $nl2br = false, $stripPHP = false, $booleanize = false) {
+	private function _matchValue($REX_ACTION, $content, $var, $escape = true, $nl2br = true, $escapePHP = true, $booleanize = false, $asPHPVar = false) {
 		$matches = $this->getVarParams($content, $var);
 
 		foreach ($matches as $match) {
 			list ($param_str, $args) = $match;
 			list ($id, $args) = $this->extractArg('id', $args, 0);
 
-			$replace = isset($REX_ACTION[self::VALUE][$id]) ? strval($REX_ACTION[self::VALUE][$id]) : '';
+			$value = isset($REX_ACTION[self::VALUE][$id]) ? strval($REX_ACTION[self::VALUE][$id]) : '';
+
+			if (!$asPHPVar) {
+				//strip possible Quotes from string values
+				$value = preg_replace("#^('*)(.*?)\\1$#si", '$2', $value);
+				$value = stripslashes($value);
+			}
 
 			if ($booleanize) {
-				$replace = empty($replace);
+				$value = var_export(empty($value), true);
 			}
-			else {
-				if ($escape) {
-					$replace = htmlspecialchars($replace, ENT_QUOTES, 'UTF-8');
-				}
-
-				if ($nl2br) {
-					$replace = nl2br($replace);
-				}
-
-				if ($stripPHP) {
-					$replace = sly_Util_String::escapePHP($replace);
-				}
-
-				$replace = $this->handleGlobalVarParams($var, $args, $replace);
-				$content = str_replace($var.'['.$param_str.']', $replace, $content);
+			if ($escape) {
+				$value = htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
 			}
+
+			if ($nl2br) {
+				$value = nl2br($value);
+			}
+
+			if ($escapePHP) {
+				$value = sly_Util_String::escapePHP($value);
+			}
+
+			$replace = $this->handleGlobalVarParams($var, $args, $value);
+			$content = str_replace($var.'['.$param_str.']', $value, $content);
 		}
 
 		return $content;
 	}
 
-	public function matchValue($slice_id, $content, $nl2br = false) {
-		return $this->_matchValue($slice_id, $content, self::VALUE, true, $nl2br);
+	public function matchValue($values, $content) {
+		return $this->_matchValue($values, $content, self::VALUE);
 	}
 
-	private function matchHtmlValue($slice_id, $content) {
-		return $this->_matchValue($slice_id, $content, self::HTML_VALUE, false, false, true);
+	private function matchHtmlValue($values, $content) {
+		return $this->_matchValue($values, $content, self::HTML_VALUE, false, false, true);
 	}
 
-	private function matchPhpValue($slice_id, $content) {
-		return $this->_matchValue($slice_id, $content, self::PHP_VALUE, false, false, false);
+	private function matchPhpValue($values, $content) {
+		return $this->_matchValue($values, $content, self::PHP_VALUE, false, false, false);
 	}
 
-	private function matchIsValue($slice_id, $content) {
-		return $this->_matchValue($slice_id, $content, self::IS_VALUE, false, false, false, true);
+	private function matchIsValue($values, $content) {
+		return $this->_matchValue($values, $content, self::IS_VALUE, false, false, false, true);
+	}
+	private function matchVarValue($values, $content) {
+		return $this->_matchValue($values, $content, self::VALUE_VAR, false, false, false, false, true);
 	}
 }

@@ -27,7 +27,7 @@ abstract class rex_var {
 	 * Zum füllen des $REX_ACTION Arrays aus den Input Formularwerten
 	 * @return REX_ACTION Array
 	 */
-	public function getRequestValues($REX_ACTION) {
+	public function getRequestValues($REX_ACTION = array()) {
 		return $REX_ACTION;
 	}
 
