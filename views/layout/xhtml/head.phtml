@@ -22,7 +22,7 @@ if ($this->isTransitional):
 	sly_Core::dispatcher()->notify('PAGE_HEADER', '');
 
 	if ($this->favIcon !== null) {
-		print "\n\t<link href=\"$this->favIcon\" rel=\"shortcut icon\" type=\"image/x-icon\" />\n";
+		$this->addLink('shortcut icon', $this->favIcon, 'image/x-icon');
 	}
 
 	$this->printHttpMetas();
