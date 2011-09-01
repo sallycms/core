@@ -62,7 +62,7 @@ class sly_Layout_XHTML extends sly_Layout {
 	 * This method generates a normal <script> tag containing the inline JS.
 	 */
 	protected function printJavaScriptConcrete() {
-		print "\t".'<script type="text/javascript">/*<![CDATA[*/'.trim($this->javaScriptCode).'/*]]>*/</script>';
+		print "\t".'<script type="text/javascript">/*<![CDATA[*/'.trim($this->javaScriptCode).'/*]]>*/</script>'."\n";
 	}
 
 	protected function printJavaScriptFilesConcrete() {
@@ -74,7 +74,7 @@ class sly_Layout_XHTML extends sly_Layout {
 			}
 
 			if ($isConditional) print '<!--[if '.strtoupper(substr($group, 3)).']>'."\n";
-			print "\t".'<script type="text/javascript" src="'.join('"></script>'."\n".'<script type="text/javascript" src="' , $files).'"></script>'."\n";
+			print "\t".'<script type="text/javascript" src="'.join('"></script>'."\n\t".'<script type="text/javascript" src="' , $files).'"></script>'."\n";
 			if ($isConditional) print '<![endif]-->'."\n";
 		}
 	}
