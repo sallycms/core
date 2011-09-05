@@ -15,6 +15,6 @@ MEDIAPOOL:
 ASSETS_CACHE_CONTROL: 'max-age=29030401'
 ASSETS_DIRECTORIES:
   - assets
-  - data/mediapool
-  - data/dyn/public
-  - sally/media
+  - sally/data/mediapool
+  - sally/data/dyn/public
+  - sally/backend/assets/
