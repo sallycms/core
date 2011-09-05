@@ -11,5 +11,10 @@ FALLBACK_CACHING_STRATEGY: BabelCache_Filesystem
 RELOGINDELAY: 2
 START_PAGE: structure
 MEDIAPOOL:
-  BLOCKED_EXTENSIONS: [.php, .php3, .php4, .php5, .php6, .phtml, .pl, .asp, .aspx, .cfm, .jsp]
+  BLOCKED_EXTENSIONS: [.php, .php3, .php4, .php5, .php6, .phtml, .pl, .asp, .aspx, .cfm, .jsp, .htaccess]
 ASSETS_CACHE_CONTROL: 'max-age=29030401'
+ASSETS_DIRECTORIES:
+  - assets
+  - data/mediapool
+  - data/dyn/public
+  - sally/media
