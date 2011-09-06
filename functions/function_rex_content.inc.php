@@ -236,7 +236,6 @@ function rex_copyContent($from_id, $to_id, $from_clang = 0, $to_clang = 0, $from
 			'prior'      => $article_slice->getPrior(),
 			'slice_id'   => $slice->getId(),
 			'article_id' => $to_id,
-			'module'     => $slice->getModule(),
 			'revision'   => 0,
 			'createdate' => time(),
 			'createuser' => $login
