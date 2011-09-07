@@ -18,7 +18,7 @@ $this->surroundingHTML = '';
 ob_start();
 
 if (!sly_Table::isDragAndDropMode() && $hasPager) {
-	$pager = new sly_Util_Pager($currentPage, $this->totalElements, self::$perPage);
+	$pager = new sly_Util_Pager($currentPage, $this->totalElements, sly_Table::$perPage);
 	$pager = $pager->getHTMLString($_GET, 'p_'.$tableID);
 
 	print '<p class="sly-table-extras-pager">'.t('pages').': '.$pager.'</p>';
