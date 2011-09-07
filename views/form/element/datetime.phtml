@@ -72,8 +72,8 @@ if (!$registry->has('sly.form.datetime.links')) {
 	$layout->addJavaScriptFile($path.'jqueryui.effects.min.js');
 
 	if ($this->withTime()) {
-		$layout->addJavaScriptFile($path.'jqueryui.mouse.min.js');
 		$layout->addJavaScriptFile($path.'jqueryui.widget.min.js');
+		$layout->addJavaScriptFile($path.'jqueryui.mouse.min.js');
 		$layout->addJavaScriptFile($path.'jqueryui.slider.min.js');
 		$layout->addJavaScriptFile($path.'jquery.timepicker.min.js');
 	}
