@@ -315,4 +315,13 @@ class sly_Util_String {
 	public static function escapePHP($text) {
 		return str_replace(array('<?', '?>'), array('&lt;?', '?&gt;'), $text);
 	}
+
+	/**
+	 * @param  string $filename
+	 * @return string
+	 */
+	public static function getFileExtension($filename) {
+		$lastDotPos = strrpos($filename, '.');
+		return $lastDotPos === false ? '' : substr($filename, $lastDotPos + 1);
+	}
 }
