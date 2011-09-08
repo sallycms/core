@@ -327,16 +327,17 @@ class sly_Util_String {
 
 	/**
 	 * @param  mixed $value
-	 * @return string        a human readable representation of $value
+	 * @param  array $options  list of options for representations
+	 * @return string          a human readable representation of $value
 	 */
-	public function stringify($value) {
+	public static function stringify($value, array $options = array()) {
 		switch (gettype($value)) {
 			case 'integer':
 				$value = $value;
 				break;
 
 			case 'string':
-				$value = '"'.$value.'"';
+				$value = empty($options['quote']) ? $value : '"'.$value.'"';
 				break;
 
 			case 'boolean':
