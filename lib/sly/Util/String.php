@@ -324,4 +324,46 @@ class sly_Util_String {
 		$lastDotPos = strrpos($filename, '.');
 		return $lastDotPos === false ? '' : substr($filename, $lastDotPos + 1);
 	}
+
+	/**
+	 * @param  mixed $value
+	 * @return string        a human readable representation of $value
+	 */
+	public function stringify($value) {
+		switch (gettype($value)) {
+			case 'integer':
+				$value = $value;
+				break;
+
+			case 'string':
+				$value = '"'.$value.'"';
+				break;
+
+			case 'boolean':
+				$value = $value ? 'true' : 'false';
+				break;
+
+			case 'double':
+				$value = str_replace('.', ',', round($value, 8));
+				break;
+
+			case 'array':
+			case 'object':
+				$value = print_r($value, true);
+				break;
+
+			case 'NULL':
+				$value = 'null';
+				break;
+
+			case 'resource':
+			default:
+				ob_start();
+				var_dump($value);
+				$value = ob_get_clean();
+				break;
+		}
+
+		return $value;
+	}
 }
