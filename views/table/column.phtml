@@ -12,28 +12,35 @@ if (!isset($this->htmlAttributes['class'])) {
 	$this->htmlAttributes['class'] = '';
 }
 
-$isRexIcon = strpos($this->htmlAttributes['class'], 'sly-icon') !== false;
-$link      = '';
+$isIcon = strpos($this->htmlAttributes['class'], 'sly-icon') !== false;
+$left   = '';
+$right  = '';
 
-if (!$isRexIcon && $table->isSorting() && !$table->hasDragAndDrop() && !empty($this->sortkey)) {
-	$params = array_map('stripslashes', $_GET);
-	unset($params['sortby'], $params['direction']);
+if (!$isIcon && $table->isSorting() && !$table->hasDragAndDrop() && !empty($this->sortkey)) {
+	$params = $_GET;
+	$id     = $table->getID();
+	unset($params[$id.'_sortby'], $params[$id.'_direction']);
 
-	$params['sortby'] = $this->sortkey;
+	$params[$id.'_sortby'] = $this->sortkey;
 
 	switch ($this->direction) {
 		case 'asc':
-			$params['direction'] = 'desc';
-			$link = ' <a href="index.php?'.http_build_query($params, '', '&amp;').'"><img src="assets/ascending.png" alt="" title="'.t('sort_asc').'" /></a>';
+			$params[$id.'_direction'] = 'desc';
+			$left  = '<a href="index.php?'.http_build_query($params, '', '&amp;').'" class="sort asc" title="'.t('sort_asc').'">';
+			$right = '</a>';
 			break;
+
 		case 'desc':
-			$params['direction'] = 'asc';
-			$link = ' <a href="index.php?'.http_build_query($params, '', '&amp;').'"><img src="assets/descending.png" alt="" title="'.t('sort_desc').'" /></a>';
+			$params[$id.'_direction'] = 'asc';
+			$left  = '<a href="index.php?'.http_build_query($params, '', '&amp;').'" class="sort desc" title="'.t('sort_desc').'">';
+			$right = '</a>';
 			break;
+
 		case 'none':
 		default:
-			$params['direction'] = 'asc';
-			$link = ' <a href="index.php?'.http_build_query($params, '', '&amp;').'"><img src="assets/nosort.png" alt="" title="'.t('sort_none').'" /></a>';
+			$params[$id.'_direction'] = 'asc';
+			$left  = '<a href="index.php?'.http_build_query($params, '', '&amp;').'" class="sort nosort" title="'.t('sort_none').'">';
+			$right = '</a>';
 			break;
 	}
 
@@ -42,5 +49,8 @@ if (!$isRexIcon && $table->isSorting() && !$table->hasDragAndDrop() && !empty($t
 
 $this->htmlAttributes['class'] .= ' sly-col-'.chr(97 + $index);
 
+$attribs = sly_Util_HTML::buildAttributeString($this->htmlAttributes);
+$content = $left.$this->content.$right;
+
 ?>
-<th <?= sly_Util_HTML::buildAttributeString($this->htmlAttributes) ?>><?= $this->content.$link ?></th>
+<th <?= $attribs ?>><?= $content ?></th>

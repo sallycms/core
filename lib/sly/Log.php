@@ -127,13 +127,14 @@ class sly_Log {
 	 *
 	 * This method is just a wrapper for log() called with sly_log::LEVEL_INFO.
 	 *
-	 * @param  string $text   the text to log
-	 * @param  int    $depth  the steps that should be skipped in the stacktrace
-	 *                        when finding the caller method.
-	 * @return boolean        true if writing to the log was successful, else false
+	 * @param  string $text     the text to log
+	 * @param  int    $depth    the steps that should be skipped in the stacktrace
+	 *                          when finding the caller method.
+	 * @param  array  $context  additional values for custom placeholders
+	 * @return boolean          true if writing to the log was successful, else false
 	 */
-	public function info($text, $depth = 1) {
-		return $this->log(self::LEVEL_INFO, $text, $depth + 1);
+	public function info($text, $depth = 1, array $context = array()) {
+		return $this->log(self::LEVEL_INFO, $text, $depth + 1, $context);
 	}
 
 	/**
@@ -142,13 +143,14 @@ class sly_Log {
 	 * This method is just a wrapper for log() called with
 	 * sly_log::LEVEL_WARNING.
 	 *
-	 * @param  string $text   the text to log
-	 * @param  int    $depth  the steps that should be skipped in the stacktrace
-	 *                        when finding the caller method.
-	 * @return boolean        true if writing to the log was successful, else false
+	 * @param  string $text     the text to log
+	 * @param  int    $depth    the steps that should be skipped in the stacktrace
+	 *                          when finding the caller method.
+	 * @param  array  $context  additional values for custom placeholders
+	 * @return boolean          true if writing to the log was successful, else false
 	 */
-	public function warning($text, $depth = 1) {
-		return $this->log(self::LEVEL_WARNING, $text, $depth + 1);
+	public function warning($text, $depth = 1, array $context = array()) {
+		return $this->log(self::LEVEL_WARNING, $text, $depth + 1, $context);
 	}
 
 	/**
@@ -156,13 +158,14 @@ class sly_Log {
 	 *
 	 * This method is just a wrapper for log() called with sly_log::LEVEL_ERROR.
 	 *
-	 * @param  string $text   the text to log
-	 * @param  int    $depth  the steps that should be skipped in the stacktrace
-	 *                        when finding the caller method.
-	 * @return boolean        true if writing to the log was successful, else false
+	 * @param  string $text     the text to log
+	 * @param  int    $depth    the steps that should be skipped in the stacktrace
+	 *                          when finding the caller method.
+	 * @param  array  $context  additional values for custom placeholders
+	 * @return boolean          true if writing to the log was successful, else false
 	 */
-	public function error($text, $depth = 1) {
-		return $this->log(self::LEVEL_ERROR, $text, $depth + 1);
+	public function error($text, $depth = 1, array $context = array()) {
+		return $this->log(self::LEVEL_ERROR, $text, $depth + 1, $context);
 	}
 
 	/**
@@ -184,24 +187,25 @@ class sly_Log {
 	 * @param  string $message  the text to log
 	 * @param  int    $depth    the steps that should be skipped in the
 	 *                          stacktrace when finding the caller method.
+	 * @param  array  $context  additional values for custom placeholders
 	 * @return boolean          true if writing to the log was successful, else false
 	 */
-	public function log($level, $message, $depth = 1) {
+	public function log($level, $message, $depth = 1, array $context = array()) {
 		if ($level != self::LEVEL_INFO && $level != self::LEVEL_ERROR && $level != self::LEVEL_WARNING) {
 			throw new sly_Exception('Unbekannter Nachrichtentyp: '.$level);
 		}
 
 		switch ($level) {
 			case self::LEVEL_ERROR:
-				$line = $this->replacePlaceholders($this->format, 'Error', $depth);
+				$line = $this->replacePlaceholders($this->format, 'Error', $depth, $context);
 				break;
 
 			case self::LEVEL_WARNING:
-				$line = $this->replacePlaceholders($this->format, 'Warning', $depth);
+				$line = $this->replacePlaceholders($this->format, 'Warning', $depth, $context);
 				break;
 
 			case self::LEVEL_INFO:
-				$line = $this->replacePlaceholders($this->format, 'Info', $depth);
+				$line = $this->replacePlaceholders($this->format, 'Info', $depth, $context);
 				break;
 		}
 
@@ -230,46 +234,17 @@ class sly_Log {
 	 *                             like "print_r" or your own function.
 	 * @param  int    $depth       the steps that should be skipped in the
 	 *                             stacktrace when finding the caller method.
+	 * @param  array  $context     additional values for custom placeholders
 	 * @return boolean             true if writing to the log was successful, else false
 	 */
-	public function dump($name, $value, $displayFct = null, $depth = 1) {
-		$line = $this->replacePlaceholders($this->format, 'Dump', $depth);
+	public function dump($name, $value, $displayFct = null, $depth = 1, array $context = array()) {
+		$line = $this->replacePlaceholders($this->format, 'Dump', $depth, $context);
 
 		if ($displayFct) {
 			$value = $displayFct($value);
 		}
 		else {
-			switch (gettype($value)) {
-				case 'integer':
-					$value = $value;
-					break;
-
-				case 'string':
-					$value = '"'.$value.'"';
-					break;
-
-				case 'boolean':
-					$value = $value ? 'true' : 'false';
-					break;
-
-				case 'double':
-					$value = str_replace('.', ',', round($value, 8));
-					break;
-
-				case 'array':
-				case 'object':
-					$value = print_r($value, true);
-					break;
-
-				case 'NULL':
-					$value = 'null';
-					break;
-
-				case 'resource':
-				default:
-					$value = var_dump($value);
-					break;
-			}
+			$value = sly_Util_String::stringify($value);
 		}
 
 		$line = str_replace('%message%', '$'.$name.' = '.$value, $line);
@@ -339,6 +314,13 @@ class sly_Log {
 	}
 
 	/**
+	 * @return boolean  true if written successfully, else false
+	 */
+	public function emptyLine() {
+		return $this->write('');
+	}
+
+	/**
 	 * @param  string $line  line to write to the logfile
 	 * @return boolean       true if written successfully, else false
 	 */
@@ -359,17 +341,18 @@ class sly_Log {
 	 * @param  string $line      the line to work on
 	 * @param  string $typename  'Error', 'Info' and so on
 	 * @param  int    $depth     current stack depth (for getting the caller, when required)
+	 * @param  array  $context   additional values for custom placeholders
 	 * @return string            the line with replaced placeholders
 	 */
-	protected function replacePlaceholders($line, $typename, $depth) {
-		$ip   = empty($_SERVER['REMOTE_ADDR']) ? '<not set>' : $_SERVER['REMOTE_ADDR'];
+	protected function replacePlaceholders($line, $typename, $depth, array $context = array()) {
+		$ip   = isset($context['ip']) ? $context['ip'] : (empty($_SERVER['REMOTE_ADDR']) ? '<not set>' : $_SERVER['REMOTE_ADDR']);
 		$line = str_replace('%ip%', $ip, $line);
-		$line = str_replace('%date%', strftime('%Y-%m-%d'), $line);
-		$line = str_replace('%time%', strftime('%H:%M:%S'), $line);
+		$line = str_replace('%date%', isset($context['date']) ? $context['date'] : strftime('%Y-%m-%d'), $line);
+		$line = str_replace('%time%', isset($context['time']) ? $context['time'] : strftime('%H:%M:%S'), $line);
 		$line = str_replace('%typename%', $typename, $line);
 
 		if (strpos($line, '%hostname%') !== false) {
-			$host = empty($_SERVER['REMOTE_ADDR']) ? 'N/A' : gethostbyaddr($_SERVER['REMOTE_ADDR']);
+			$host = isset($context['hostname']) ? $context['hostname'] : (empty($_SERVER['REMOTE_ADDR']) ? 'N/A' : gethostbyaddr($_SERVER['REMOTE_ADDR']));
 			$line = str_replace('%hostname%', $host, $line);
 		}
 
@@ -384,6 +367,14 @@ class sly_Log {
 			else {
 				$line = str_replace('%caller%', $caller['caller'], $line);
 			}
+		}
+
+		// replace custom placeholders
+		$exclude = array('ip', 'date', 'time', 'hostname');
+
+		foreach ($context as $key => $value) {
+			if (in_array($key, $exclude)) continue;
+			$line = str_replace('%'.$key.'%', sly_Util_String::stringify($value), $line);
 		}
 
 		return $line;
