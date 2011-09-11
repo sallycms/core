@@ -53,6 +53,13 @@ class sly_Table extends sly_Viewable {
 	}
 
 	/**
+	 * @return string
+	 */
+	public function getID() {
+		return $this->id;
+	}
+
+	/**
 	 * @return boolean
 	 */
 	public static function isDragAndDropMode() {
@@ -188,7 +195,7 @@ class sly_Table extends sly_Viewable {
 	 * @return string
 	 */
 	public function getSortKey($default = null) {
-		return sly_get('sortby', 'string', $default);
+		return sly_get($this->id.'_sortby', 'string', $default);
 	}
 
 	/**
@@ -196,7 +203,7 @@ class sly_Table extends sly_Viewable {
 	 * @return string
 	 */
 	public function getDirection($default = 'asc') {
-		return sly_get('direction', 'string', $default);
+		return sly_get($this->id.'_direction', 'string', $default);
 	}
 
 	/**
@@ -267,13 +274,21 @@ class sly_Table extends sly_Viewable {
 	}
 
 	/**
+	 * @param  string $tableName
 	 * @param  string $defaultColumn
 	 * @param  array  $enabledColumns
 	 * @return array
 	 */
-	public static function getSortingParameters($defaultColumn, $enabledColumns = array()) {
-		$sortby    = sly_get('sortby', 'string', $defaultColumn);
-		$direction = strtolower(sly_get('direction', 'string', 'asc')) == 'desc' ? 'DESC' : 'ASC';
+	public static function getSortingParameters($tableName, $defaultColumn, $enabledColumns = array()) {
+		// support the old interface: get($defaultColumn, $enabledColumns)
+		if (empty($enabledColumns) && is_array($defaultColumn)) {
+			$enabledColumns = $defaultColumn;
+			$defaultColumn  = $tableName;
+			$tableName      = 'table';
+		}
+
+		$sortby    = sly_get($tableName.'_sortby', 'string', $defaultColumn);
+		$direction = strtolower(sly_get($tableName.'_direction', 'string', 'asc')) == 'desc' ? 'DESC' : 'ASC';
 
 		if (!in_array($sortby, $enabledColumns)) {
 			$sortby = $defaultColumn;

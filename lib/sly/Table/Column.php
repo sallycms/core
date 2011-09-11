@@ -32,13 +32,6 @@ class sly_Table_Column extends sly_Viewable {
 		$this->width          = $width;
 		$this->sortkey        = $sortkey;
 		$this->htmlAttributes = $htmlAttributes;
-
-		if (sly_get('sortby', 'string') == $sortkey) {
-			$this->direction = sly_get('direction', 'string') == 'desc' ? 'desc' : 'asc';
-		}
-		else {
-			$this->direction = 'none';
-		}
 	}
 
 	/**
@@ -68,6 +61,15 @@ class sly_Table_Column extends sly_Viewable {
 	public function render() {
 		if (!empty($this->width)) {
 			$this->htmlAttributes['style'] = 'width:'.$this->width;
+		}
+
+		$id = $this->table->getID();
+
+		if (sly_get($id.'_sortby', 'string') === $this->sortkey) {
+			$this->direction = sly_get($id.'_direction', 'string') == 'desc' ? 'desc' : 'asc';
+		}
+		else {
+			$this->direction = 'none';
 		}
 
 		return $this->renderView('column.phtml', array('table' => $this->table, 'index' => $this->idx));
