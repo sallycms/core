@@ -142,17 +142,17 @@ class sly_Service_MediaCategory extends sly_Service_Model_Base_Id {
 			throw new sly_Exception(t('mediacat_title_cannot_be_empty'));
 		}
 
-		$category->setUpdateColumns();
+		$cat->setUpdateColumns();
 
 		// ensure valid path & save it
 		$this->setPath($cat, $cat->getParent());
-		$this->save($category);
+		$this->save($cat);
 
 		// update cache
-		sly_Core::cache()->flush('sly.mediacat.list');
+		sly_Core::cache()->flush('sly.mediacat');
 
 		// notify system
-		sly_Core::dispatcher()->notify('SLY_MEDIACAT_UPDATED', $category);
+		sly_Core::dispatcher()->notify('SLY_MEDIACAT_UPDATED', $cat);
 	}
 
 	/**

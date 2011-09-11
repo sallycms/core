@@ -152,41 +152,33 @@ class sly_Util_Medium {
 	 * @return string
 	 */
 	public static function createFilename($filename, $doSubindexing = true) {
-		$filename    = self::correctEncoding($filename);
-		$newFilename = strtolower($filename);
-		$newFilename = str_replace(array('ä','ö', 'ü', 'ß'), array('ae', 'oe', 'ue', 'ss'), $newFilename);
-		$newFilename = preg_replace('#[^a-z0-9.+-]#i', '_', $newFilename);
-		$lastDotPos  = strrpos($newFilename, '.');
-		$fileLength  = strlen($newFilename);
+		$filename  = strtolower(self::correctEncoding($filename));
+		$filename  = str_replace(array('ä','ö', 'ü', 'ß'), array('ae', 'oe', 'ue', 'ss'), $filename);
+		$filename  = preg_replace('#[^a-z0-9.+-]#i', '_', $filename);
+		$extension = sly_Util_String::getFileExtension($filename);
 
-		// split up extension
+		if ($extension) {
+			$filename  = substr($filename, 0, -(strlen($extension)+1));
+			$extension = '.'.$extension;
 
-		if ($lastDotPos !== false) {
-			$newName = substr($newFilename, 0, $lastDotPos);
-			$newExt  = substr($newFilename, $lastDotPos);
-		}
-		else {
-			$newName = $newFilename;
-			$newExt  = '';
-		}
+			// check for disallowed extensions (broken by design...)
 
-		// check for disallowed extensions (broken by design...)
+			$blocked = sly_Core::config()->get('MEDIAPOOL/BLOCKED_EXTENSIONS');
 
-		$blocked = sly_Core::config()->get('MEDIAPOOL/BLOCKED_EXTENSIONS');
-
-		if (in_array($newExt, $blocked)) {
-			$newName .= $newExt;
-			$newExt   = '.txt';
+			if (in_array($extension, $blocked)) {
+				$filename .= $extension;
+				$extension = '.txt';
+			}
 		}
 
-		$newFilename = $newName.$newExt;
+		$newFilename = $filename.$extension;
 
 		if ($doSubindexing) {
 			// increment filename suffix until an unique one was found
 
 			if (file_exists(SLY_MEDIAFOLDER.'/'.$newFilename)) {
-				for ($cnt = 1; file_exists(SLY_MEDIAFOLDER.'/'.$newName.'_'.$cnt.$newExt); ++$cnt);
-				$newFilename = $newName.'_'.$cnt.$newExt;
+				for ($cnt = 1; file_exists(SLY_MEDIAFOLDER.'/'.$filename.'_'.$cnt.$extension); ++$cnt);
+				$newFilename = $filename.'_'.$cnt.$extension;
 			}
 		}
 

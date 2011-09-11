@@ -118,6 +118,24 @@ class sly_Service_Asset {
 		}
 	}
 
+	protected function normalizePath($path) {
+		$path = sly_Util_Directory::normalize($path);
+		$path = str_replace('..', '', $path);
+		$path = str_replace(DIRECTORY_SEPARATOR, '/', sly_Util_Directory::normalize($path));
+		$path = str_replace('./', '/', $path);
+		$path = str_replace(DIRECTORY_SEPARATOR, '/', sly_Util_Directory::normalize($path));
+
+		if (empty($path)) {
+			return '';
+		}
+
+		if ($path[0] === '/') {
+			$path = substr($path, 1);
+		}
+
+		return $path;
+	}
+
 	public function process() {
 		$file = sly_get('sly_asset', 'string');
 		if (empty($file)) {
@@ -131,11 +149,40 @@ class sly_Service_Asset {
 		while (ob_get_level()) ob_end_clean();
 		ob_start();
 
-		// only process allowed files
-		if (sly_Util_String::endsWith($file, '.php') || sly_Util_String::endsWith($file, 'htaccess')) {
+		// check if the file can be streamed
+
+		$blocked = sly_Core::config()->get('MEDIAPOOL/BLOCKED_EXTENSIONS');
+		$ok      = true;
+
+		foreach ($blocked as $ext) {
+			if (sly_Util_String::endsWith($file, $ext)) {
+				$ok = false;
+				break;
+			}
+		}
+
+		if ($ok) {
+			$normalized = $this->normalizePath($file);
+			$ok         = strpos($normalized, '/') === false; // allow files in root directory (favicon)
+
+			if (!$ok) {
+				$allowed = sly_Core::config()->get('ASSETS_DIRECTORIES');
+
+				foreach ($allowed as $path) {
+					if (sly_Util_String::startsWith($file, $path)) {
+						$ok = true;
+						break;
+					}
+				}
+			}
+		}
+
+		if (!$ok) {
 			header('HTTP/1.0 403 Forbidden');
 			die;
 		}
+
+		// do the work
 
 		$dispatcher  = sly_Core::dispatcher();
 		$isProtected = $dispatcher->filter(self::EVENT_IS_PROTECTED_ASSET, false, compact('file'));
@@ -149,7 +196,7 @@ class sly_Service_Asset {
 			$tmpFile = $dispatcher->filter(self::EVENT_PROCESS_ASSET, $file);
 
 			// now we can check if a listener has generated a valid file
-			if (!file_exists($tmpFile)) {
+			if (!is_file($tmpFile)) {
 				header('HTTP/1.0 404 Not Found');
 				die;
 			}
