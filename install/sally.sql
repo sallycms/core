@@ -1,4 +1,4 @@
-## Sally Database Dump Version 0.5
+## Sally Database Dump Version 0.6
 ## Prefix sly_
 
 CREATE TABLE `sly_article` (
