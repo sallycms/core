@@ -23,7 +23,7 @@ class sly_Util_Requirements {
 		$version = $this->numPHPVersion();
 		$current = $this->versionValue($version);
 		$best    = $this->versionValue('5.3');
-		$ok      = $this->versionValue('5.1');
+		$ok      = $this->versionValue('5.2');
 
 		return $this->result($version, $current >= $best ? self::OK : ($current >= $ok ? self::WARNING : self::FAILED));
 	}
