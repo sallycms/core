@@ -73,7 +73,7 @@ class sly_Service_User extends sly_Service_Model_Base_Id {
 		$user    = $this->findByLogin($login);
 		$loginOK = false;
 
-		if ($user) {
+		if ($user instanceof sly_Model_User) {
 			$loginOK = $user->getLastTryDate() < time()-sly_Core::config()->get('RELOGINDELAY')
 					&& $user->getStatus() == 1
 					&& $this->checkPassword($user, $password);
