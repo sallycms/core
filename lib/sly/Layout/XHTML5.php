@@ -13,12 +13,21 @@
  */
 class sly_Layout_XHTML5 extends sly_Layout_XHTML {
 	protected $manifest; ///< string
+	protected $language; ///< string
 
 	/**
 	 * @param string $manifest
 	 */
 	public function setManifest($manifest) {
 		$this->manifest = $manifest;
+	}
+	
+	/**
+	 * the short locale (de,en,fr...)
+	 * @param string $language 
+	 */
+	public function setLanguage($language) {
+		$this->language = $language;
 	}
 
 	/**
