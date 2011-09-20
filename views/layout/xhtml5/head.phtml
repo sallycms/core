@@ -10,8 +10,7 @@
 ?>
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml"
-  xml:lang="<?= I18NUtils::getLocale('shortLocale') ?>"
-  lang="<?= I18NUtils::getLocale('shortLocale') ?>"
+  <?= !empty($this->language) ? ' xml:lang="'.$this->language.'" lang="'.$this->language.'"' : '' ?>
   <?= !empty($this->manifest) ? ' manifest="'.$this->manifest.'"' : '' ?>>
 <head>
 	<title><?= sly_html(trim($this->title)) ?></title>
