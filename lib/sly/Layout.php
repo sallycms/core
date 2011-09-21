@@ -200,6 +200,32 @@ abstract class sly_Layout extends sly_Viewable {
 	}
 
 	/**
+	 * Get body attribute(s)
+	 *
+	 * @param  string $name  the attribute name or null for 'all'
+	 * @return mixed         either an array or a string
+	 */
+	public function getBodyAttr($name = null) {
+		return ($name && isset($this->bodyAttrs[$name])) ? $this->bodyAttrs[$name] : $this->bodyAttrs;
+	}
+
+	/**
+	 * Appends a class name to the body
+	 *
+	 * @param string $class  a single or multiple classes as a string (like 'foo bar')
+	 */
+	public function appendBodyClass($class) {
+		$classes = $this->getBodyAttr('class');
+		$classes = $classes ? explode(' ', $classes) : array();
+
+		foreach (explode(' ', $class) as $cl) {
+			$classes[] = $cl;
+		}
+
+		$this->setBodyAttr('class', implode(' ', array_unique($classes)));
+	}
+
+	/**
 	 * Add meta tag
 	 *
 	 * Adds a regular meta tag to the page header.
