@@ -233,6 +233,8 @@ class sly_Service_Asset {
 	 * @param string $cacheFile
 	 */
 	protected function generateCacheFile($file, $cacheFile) {
+		clearstatcache();
+
 		// TODO: eeeh, eeeh, eeeh: the '@' sucks
 		if (!is_dir(dirname($cacheFile))) @mkdir(dirname($cacheFile), sly_Core::getDirPerm(), true);
 
