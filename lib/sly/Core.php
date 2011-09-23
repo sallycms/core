@@ -372,7 +372,6 @@ class sly_Core {
 
 	public static function registerCoreVarTypes() {
 		self::registerVarType('rex_var_article');
-		self::registerVarType('rex_var_category');
 		self::registerVarType('rex_var_template');
 		self::registerVarType('rex_var_value');
 		self::registerVarType('rex_var_link');
