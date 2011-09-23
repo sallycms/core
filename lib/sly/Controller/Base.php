@@ -250,6 +250,8 @@ abstract class sly_Controller_Base {
 		if (class_exists($name)) {
 			return new $name($name);
 		}
+		
+		throw new sly_Controller_Exception(t('unknown_page'), 404);
 
 		return null;
 	}
@@ -271,7 +273,7 @@ abstract class sly_Controller_Base {
 		}
 
 		if ($this->checkPermission() !== true) {
-			throw new sly_Authorisation_Exception(t('page_not_allowed', $this->action, get_class($this)));
+			throw new sly_Authorisation_Exception(t('page_not_allowed', $this->action, get_class($this)), 403);
 		}
 
 		$method = $this->action;
