@@ -35,7 +35,7 @@ CREATE TABLE `sly_article_slice` (
   `updateuser` VARCHAR(255) NOT NULL,
   `revision` INT(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
-  KEY `find_article` (`article_id`, `clang`)
+  INDEX `find_article` (`article_id`, `clang`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 CREATE TABLE `sly_clang` (
@@ -64,7 +64,7 @@ CREATE TABLE `sly_file` (
   `updateuser` VARCHAR(255) NOT NULL,
   `revision` INT(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
-  KEY `filename` (`filename`(255))
+  INDEX `filename` (`filename`(255))
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 CREATE TABLE `sly_file_category` (
@@ -112,7 +112,7 @@ CREATE TABLE `sly_slice_value` (
   `finder` VARCHAR(50) NOT NULL,
   `value` text,
   PRIMARY KEY (`id`),
-  KEY `slice_id` (`slice_id`)
+  INDEX `slice_id` (`slice_id`) USING HASH
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 CREATE TABLE `sly_registry` (
