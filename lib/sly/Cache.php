@@ -72,7 +72,7 @@ class sly_Cache extends BabelCache_Factory {
 			self::$cachingStrategy = self::getStrategy();
 		}
 
-		if (SLY_IS_TESTING) {
+		if (SLY_IS_TESTING && (!defined('SLY_TESTING_USE_CACHE') || !SLY_TESTING_USE_CACHE)) {
 			$forceCache = 'BabelCache_Blackhole';
 		}
 
