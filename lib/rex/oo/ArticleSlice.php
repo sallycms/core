@@ -42,7 +42,7 @@ class OOArticleSlice {
 		$this->_clang      = (int) $clang;
 		$this->_slot       = $slot;
 		$this->_slice_id   = (int) $slice_id;
-		$this->_prior   = (int) $prior;
+		$this->_prior      = (int) $prior;
 
 		$this->_createdate = (int) $createdate;
 		$this->_updatedate = (int) $updatedate;
