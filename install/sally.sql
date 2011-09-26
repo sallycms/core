@@ -112,7 +112,7 @@ CREATE TABLE `sly_slice_value` (
   `finder` VARCHAR(50) NOT NULL,
   `value` text,
   PRIMARY KEY (`id`),
-  INDEX `slice_id` (`slice_id`) USING HASH
+  INDEX `slice_id` (`slice_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 CREATE TABLE `sly_registry` (
