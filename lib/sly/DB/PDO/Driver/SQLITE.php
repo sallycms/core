@@ -29,6 +29,6 @@ class sly_DB_PDO_Driver_SQLITE extends sly_DB_PDO_Driver {
 	 * @throws sly_DB_PDO_Exception  always
 	 */
 	public function getCreateDatabaseSQL($name) {
-		throw new sly_DB_PDO_Exception('Creating databases by SQL is not meaningful in SQLite.')
+		throw new sly_DB_PDO_Exception('Creating databases by SQL is not meaningful in SQLite.');
 	}
 }
