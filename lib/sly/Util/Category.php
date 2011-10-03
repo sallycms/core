@@ -72,7 +72,7 @@ class sly_Util_Category {
 		$cat = sly_Util_Category::findById($categoryId);
 
 		while ($cat) {
-			if ($user->hasRight('csw['.$categoryId.']')) return true;
+			if ($user->hasRight('csw['.$cat->getId().']')) return true;
 			$cat = $cat->getParent();
 		}
 
