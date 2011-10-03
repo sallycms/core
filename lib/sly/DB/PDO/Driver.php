@@ -43,4 +43,10 @@ abstract class sly_DB_PDO_Driver {
 	 * @return string
 	 */
 	abstract public function getDSN();
+
+	/**
+	 * @param  string $name  the database name
+	 * @return string
+	 */
+	abstract public function getCreateDatabaseSQL($name);
 }

@@ -22,4 +22,13 @@ class sly_DB_PDO_Driver_SQLITE extends sly_DB_PDO_Driver {
 		$format = empty($this->database) ? 'sqlite::memory:' : 'sqlite:%s';
 		return sprintf($format, $dbFile);
 	}
+
+	/**
+	 * @throws sly_DB_PDO_Exception  always
+	 * @param  string $name          the database name
+	 * @throws sly_DB_PDO_Exception  always
+	 */
+	public function getCreateDatabaseSQL($name) {
+		throw new sly_DB_PDO_Exception('Creating databases by SQL is not meaningful in SQLite.')
+	}
 }

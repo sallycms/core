@@ -19,4 +19,14 @@ class sly_DB_PDO_Driver_OCI extends sly_DB_PDO_Driver {
 		$format = empty($this->database) ? 'oci:host=%s' : 'oci:host=%s;dbname=%s';
 		return sprintf($format, $this->host, $this->database);
 	}
+
+	/**
+	 * @throws sly_DB_PDO_Exception  always (not yet implemented)
+	 * @param  string $name          the database name
+	 * @return string
+	 */
+	public function getCreateDatabaseSQL($name) {
+		// http://www.dba-oracle.com/oracle_create_database.htm
+		throw new sly_DB_Exception('Not yet implemented, too complex.')
+	}
 }

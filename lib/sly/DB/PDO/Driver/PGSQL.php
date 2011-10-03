@@ -19,4 +19,12 @@ class sly_DB_PDO_Driver_PGSQL extends sly_DB_PDO_Driver {
 		$format = empty($this->database) ? 'pgsql:host=%s' : 'pgsql:host=%s;dbname=%s';
 		return sprintf($format, $this->host, $this->database);
 	}
+
+	/**
+	 * @param  string $name  the database name
+	 * @return string
+	 */
+	public function getCreateDatabaseSQL($name) {
+		return 'CREATE DATABASE `'.$name.'` WITH ENCODING \'UNICODE\'';
+	}
 }
