@@ -22,19 +22,18 @@ class sly_Authorisation {
 	}
 
 	/**
-	 * @param  mixed $userId
-	 * @param  mixed $context
-	 * @param  mixed $permission
-	 * @param  mixed $objectId
+	 * @param  int $userId
+	 * @param  string $context
+	 * @param  mixed $value
 	 * @return boolean
 	 */
-	public static function hasPermission($userId, $context, $permission, $objectId = null) {
+	public static function hasPermission($userId, $context, $value = true) {
 		if (!self::$provider) {
 			return true;
 		}
 
 		try {
-			return $provider->hasPermission($userId, $context, $permission, $objectId);
+			return $provider->hasPermission($userId, $token, $value);
 		}
 		catch (Exception $e) {
 			trigger_error('An error occured in authorisationprovider, for security reasons permission was denied.', E_USER_WARNING);
