@@ -16,8 +16,9 @@ class sly_DB_PDO_Driver_OCI extends sly_DB_PDO_Driver {
 	 * @return string
 	 */
 	public function getDSN() {
-		$format = empty($this->database) ? 'oci:host=%s' : 'oci:host=%s;dbname=%s';
-		return sprintf($format, $this->host, $this->database);
+		$dsn = 'oci:host='.$this->host;
+		if(!empty($this->database)) $dsn .=';dbname='.$this->database;
+		return $dsn;
 	}
 
 	/**

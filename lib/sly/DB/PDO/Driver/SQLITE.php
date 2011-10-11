@@ -17,10 +17,11 @@ class sly_DB_PDO_Driver_SQLITE extends sly_DB_PDO_Driver {
 	 * @return string
 	 */
 	public function getDSN() {
+		if(empty($this->database)) return 'sqlite::memory:';
+
 		$dbFile = sly_Util_Directory::join(SLY_DYNFOLDER, 'internal'.DIRECTORY_SEPARATOR.'sally'.DIRECTORY_SEPARATOR.'sqlite', preg_replace('#[^a-z0-9-_.,]#i', '_', $this->database).'.sq3');
 		if (!is_dir(dirname($dbFile)) && !@mkdir(dirname($dbFile), sly_Core::getDirPerm(), true)) throw new sly_DB_PDO_Exception('Konnte Datenverzeichnis für Datenbank '.$this->database.' nicht erzeugen.');
-		$format = empty($this->database) ? 'sqlite::memory:' : 'sqlite:%s';
-		return sprintf($format, $dbFile);
+		return 'sqlite:'.$dbFile;
 	}
 
 	/**
