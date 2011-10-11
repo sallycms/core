@@ -272,14 +272,14 @@ class sly_Core {
 	/**
 	 * @return int  permissions for files
 	 */
-	public static function getFilePerm($default = 0777) {
+	public static function getFilePerm($default = self::DEFAULT_FILEPERM) {
 		return (int) self::config()->get('FILEPERM', $default);
 	}
 
 	/**
 	 * @return int  permissions for directory
 	 */
-	public static function getDirPerm($default = 0777) {
+	public static function getDirPerm($default = self::DEFAULT_DIRPERM) {
 		return (int) self::config()->get('DIRPERM', $default);
 	}
 
