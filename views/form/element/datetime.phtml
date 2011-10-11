@@ -9,7 +9,7 @@
  */
 
 /**
- * Folgende Datentypen sind möglich:
+ * Folgende Datentypen sind mÃ¶glich:
  *
  * string => strtotime($value)    (alles, was PHP als Zeitangabe versteht)
  * int    => intval($value)       (UNIX-Timestamp)
@@ -45,7 +45,7 @@ $formatJS   = str_replace(
 	$formatJS);
 
 // Datum und Zeit als HTML5-Attribut ablegen, damit wir die RFC-konforme Version
-// per JavaScript setzen können.
+// per JavaScript setzen kÃ¶nnen.
 
 $attrs['data-date']     = strftime('%Y-%m-%d', $value);
 $attrs['data-datetime'] = strftime('%Y-%m-%dT%H:%M:%S', $value);
@@ -83,31 +83,31 @@ if (!$registry->has('sly.form.datetime.links')) {
 
 // Die userLang dient dazu, dass PHP auch ohne korrekt gesetztes Locale das
 // Datum richtig parsen kann.
-
+$jsvarname = 'element'.sly_html($name);
 ?>
 
 <script type="text/javascript">
-var element = $('#<?= sly_html($name) ?>');
+var <?= $jsvarname ?> = $('#<?= sly_html($name) ?>');
 <? if ($this->withTime()): ?>
 
 if (!Modernizr.inputtypes['datetime-local']) {
 	$(function() {
-		element.datetime({dateFormat: '<?= addslashes($formatJS) ?>', userLang: '<?= $locale ?>'});
+		<?= $jsvarname ?>.datetime({dateFormat: '<?= addslashes($formatJS) ?>', userLang: '<?= $locale ?>'});
 	});
 }
 else {
-	element.val(element.data('datetime')).attr('step', 'any');
+	<?= $jsvarname ?>.val(<?= $jsvarname ?>.data('datetime')).attr('step', 'any');
 }
 
 <? else: ?>
 
 if (!Modernizr.inputtypes.date) {
 	$(function() {
-		element.datepicker({dateFormat: '<?= addslashes($formatJS) ?>'});
+		<?= $jsvarname ?>.datepicker({dateFormat: '<?= addslashes($formatJS) ?>'});
 	});
 }
 else {
-	element.val(element.data('date')).attr('step', 'any');
+	<?= $jsvarname ?>.val(<?= $jsvarname ?>.data('date')).attr('step', 'any');
 }
 
 <? endif ?>
