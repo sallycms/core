@@ -16,8 +16,9 @@ class sly_DB_PDO_Driver_MYSQL extends sly_DB_PDO_Driver {
 	 * @return string
 	 */
 	public function getDSN() {
-		$format = empty($this->database) ? 'mysql:host=%s' : 'mysql:host=%s;dbname=%s';
-		return sprintf($format, $this->host, $this->database);
+		$dsn = 'mysql:host='.$this->host;
+		if(!empty($this->database)) $dsn .=';dbname='.$this->database;
+		return $dsn;
 	}
 
 	/**
