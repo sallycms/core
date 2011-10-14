@@ -282,7 +282,7 @@ abstract class sly_Service_AddOn_Base {
 
 		$globalsFile = $this->baseFolder($component).'globals.yml';
 
-		if (file_exists($globalsFile)) {
+		if (!$this->isAvailable($component) && file_exists($globalsFile)) {
 			sly_Core::config()->loadStatic($globalsFile);
 		}
 
