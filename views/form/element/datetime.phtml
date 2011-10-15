@@ -58,10 +58,11 @@ $attrs['value'] = $value === null ? '' : sly_Util_String::formatStrftime($datefo
 
 print '<input '.sly_Util_HTML::buildAttributeString($attrs).' />';
 
-$registry = sly_Core::getTempRegistry();
-$locale   = t('htmllang');
+$registry  = sly_Core::getTempRegistry();
+$locale    = t('htmllang');
+$hasNative = sly_Helper_Modernizr::hasInputtype($attrs['type']);
 
-if (!$registry->has('sly.form.datetime.links')) {
+if (!$hasNative && !$registry->has('sly.form.datetime.links')) {
 	$path   = 'assets/js/';
 	$layout = sly_Core::getLayout();
 
@@ -87,28 +88,16 @@ $jsvarname = 'element'.sly_html($name);
 ?>
 
 <script type="text/javascript">
-var <?= $jsvarname ?> = $('#<?= sly_html($name) ?>');
-<? if ($this->withTime()): ?>
+(function($) {
+	var <?= $jsvarname ?> = $('#<?= sly_html($name) ?>');
 
-if (!Modernizr.inputtypes['datetime-local']) {
+	<? if ($hasNative): ?>
+	<?= $jsvarname ?>.val(<?= $jsvarname ?>.data('<?= $this->withTime() ? 'datetime' : 'date' ?>')).attr('step', 'any');
+	sly.addDatepickerToggler(<?= $jsvarname ?>, <?= $value === null ? 0 : 1 ?>);
+	<? else: ?>
 	$(function() {
-		<?= $jsvarname ?>.datetime({dateFormat: '<?= addslashes($formatJS) ?>', userLang: '<?= $locale ?>'});
+		<?= $jsvarname ?>.<?= $this->withTime() ? 'datetime' : 'datepicker' ?>({dateFormat: '<?= addslashes($formatJS) ?>', userLang: '<?= $locale ?>'});
 	});
-}
-else {
-	<?= $jsvarname ?>.val(<?= $jsvarname ?>.data('datetime')).attr('step', 'any');
-}
-
-<? else: ?>
-
-if (!Modernizr.inputtypes.date) {
-	$(function() {
-		<?= $jsvarname ?>.datepicker({dateFormat: '<?= addslashes($formatJS) ?>'});
-	});
-}
-else {
-	<?= $jsvarname ?>.val(<?= $jsvarname ?>.data('date')).attr('step', 'any');
-}
-
-<? endif ?>
+	<? endif ?>
+})(jQuery);
 </script>
