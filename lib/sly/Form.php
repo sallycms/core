@@ -285,6 +285,34 @@ class sly_Form extends sly_Form_Base {
 	}
 
 	/**
+	 * Get all fieldsets
+	 *
+	 * @return array  list of all fieldsets
+	 */
+	public function getFieldsets() {
+		return $this->fieldsets;
+	}
+
+	/**
+	 * Get all fieldsets
+	 *
+	 * @return array  list of all fieldsets
+	 */
+	public function findElementByName($name) {
+		foreach ($this->fieldsets as $fieldset) {
+			foreach ($fieldset->getRows() as $row) {
+				foreach ($row as $element) {
+					if ($element instanceof sly_Form_ElementBase && $element->getName() === $name) {
+						return $element;
+					}
+				}
+			}
+		}
+
+		return null;
+	}
+
+	/**
 	 * Add a new class to the form
 	 *
 	 * This method will add a CSS class to the form tag. You can give mutliple
