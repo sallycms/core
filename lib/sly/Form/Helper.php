@@ -150,7 +150,7 @@ abstract class sly_Form_Helper {
 	private static function isAdmin() {
 		if (!self::$user) return false;
 
-		$isAdmin = self::$user->hasRight('admin[]');
+		$isAdmin = self::$user->isAdmin();
 
 		switch (self::$type) {
 			case 'media':     $isAdmin |= self::$user->hasRight('media[0]'); break;
