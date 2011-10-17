@@ -12,12 +12,12 @@
  * @ingroup authorisation
  */
 interface sly_Authorisation_Provider {
+
 	/**
 	 * @param  int    $userId
-	 * @param  string $operation
-	 * @param  string $permission
+	 * @param  string $token
 	 * @param  int    $objectId
 	 * @return boolean
 	 */
-	public function hasPermission($userId, $operation, $permission, $objectId = null);
+	public function hasPermission($userId, $token, $value = true);
 }
