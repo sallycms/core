@@ -37,6 +37,18 @@ class sly_Service_User extends sly_Service_Model_Base_Id {
 	}
 
 	/**
+	 *
+	 * @param sly_Model_User $user
+	 * @return sly_Model_User $user
+	 */
+	public function save(sly_Model_Base $user) {
+		$event = ($user->getId() == sly_Model_Base_Id::NEW_ID) ? 'SLY_USER_ADDED' : 'SLY_USER_EDITED';
+		$user = parent::save($user);
+		sly_Core::dispatcher()->notify($event, $user);
+		return $user;
+	}
+
+	/**
 	 * return user object with login
 	 *
 	 * @param  string $login
