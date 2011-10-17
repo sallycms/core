@@ -48,6 +48,12 @@ class sly_Service_User extends sly_Service_Model_Base_Id {
 		return $user;
 	}
 
+	public function delete($where) {
+		$retval = parent::delete($where);
+		sly_Core::dispatcher()->notify('SLY_USER_DELETED', $where['id']);
+		return $retval;
+	}
+
 	/**
 	 * return user object with login
 	 *
