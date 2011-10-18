@@ -176,7 +176,21 @@ class sly_Model_User extends sly_Model_Base_Id {
 	 * @return boolean
 	 */
 	public function hasRight($right) {
-		return in_array($right, $this->rightsArray);
+		static $objectrights = null;
+		if(sly_Authorisation::hasProvider()) {
+			if(is_null($objectrights)) $objectrights = sly_Authorisation::getObjectRights();
+			preg_match('/(.*)\[(.*)\]/', $right, $matches);
+			if(in_array($matches[1], $objectrights)) {
+				$right = $matches[1];
+				$value = $matches[2];
+			}else {
+				$value = true;
+			}
+			return sly_Authorisation::hasPermission($this->getId(), $right, $value);
+
+		}else {
+			return in_array($right, $this->rightsArray);
+		}
 	}
 
 	/**
@@ -233,6 +247,9 @@ class sly_Model_User extends sly_Model_Base_Id {
 	 * @return boolean
 	 */
 	public function hasStructureRight() {
+		if(sly_Authorisation::hasProvider()) {
+			return $this->isAdmin() || $this->hasRight('csw[0]') || $this->hasRight('csr[0]');
+		}
 		return $this->isAdmin() || strpos($this->rights, '#csw[') !== false || strpos($this->rights, '#csr[') !== false;
 	}
 }
