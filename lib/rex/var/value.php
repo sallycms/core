@@ -28,7 +28,6 @@ class rex_var_value extends rex_var {
 		$values = sly_request('VALUE', 'array');
 
 		foreach ($values as $key => $value) {
-			$value = var_export($value, true);
 			$REX_ACTION[self::VALUE][$key] = $value;
 		}
 
@@ -50,7 +49,7 @@ class rex_var_value extends rex_var {
 		$slice = sly_Service_Factory::getSliceService()->findById($slice_id);
 		if (isset($REX_ACTION[self::VALUE])) {
 			foreach ($REX_ACTION[self::VALUE] as $key => $value){
-				$slice->addValue(self::VALUE, $key, $value);
+				$slice->addValue(self::VALUE, $key, var_export($value, true));
 			}
 		}
 	}
