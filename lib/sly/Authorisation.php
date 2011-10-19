@@ -47,7 +47,7 @@ class sly_Authorisation {
 			return $provider->hasPermission($userId, $token, $value);
 		}
 		catch (Exception $e) {
-			trigger_error('An error occured in authorisationprovider, for security reasons permission was denied.', E_USER_WARNING);
+			trigger_error('An error occured in authorisationprovider, for security reasons permission was denied. Error: '.$e->getMessage(), E_USER_WARNING);
 			return false;
 		}
 	}
