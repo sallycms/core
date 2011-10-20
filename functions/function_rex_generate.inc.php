@@ -15,6 +15,8 @@
  * Löscht den vollständigen Artikel-Cache.
  */
 function rex_generateAll() {
+	clearstatcache();
+
 	foreach (array('article_slice', 'templates') as $dir) {
 		$obj = new sly_Util_Directory(SLY_DYNFOLDER.'/internal/sally/'.$dir);
 		$obj->deleteFiles();
