@@ -20,7 +20,8 @@ abstract class sly_ErrorHandler_Base {
 		E_USER_ERROR        => E_ERROR,
 		E_USER_WARNING      => E_WARNING,
 		E_USER_NOTICE       => E_NOTICE,
-		E_USER_DEPRECATED   => E_DEPRECATED
+		E_USER_DEPRECATED   => E_DEPRECATED,
+		E_COMPILE_ERROR     => E_ERROR
 	); ///< array
 
 	public static $codes = array(
@@ -34,7 +35,8 @@ abstract class sly_ErrorHandler_Base {
 		E_USER_ERROR        => 'User Error',
 		E_USER_WARNING      => 'User Warning',
 		E_USER_NOTICE       => 'User Notice',
-		E_USER_DEPRECATED   => 'User Deprecated'
+		E_USER_DEPRECATED   => 'User Deprecated',
+		E_COMPILE_ERROR     => 'Compile Error'
 	); ///< array
 
 	public function uninit() {
