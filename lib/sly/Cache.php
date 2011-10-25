@@ -18,15 +18,17 @@ class sly_Cache extends BabelCache_Factory {
 	private static $instance        = null;   ///< sly_Cache
 
 	private static $cacheImpls = array(
-		'BabelCache_APC'          => 'APC',
-		'BabelCache_Blackhole'    => 'Blackhole',
-		'BabelCache_Filesystem'   => 'Filesystem',
-		'BabelCache_eAccelerator' => 'eAccelerator',
-		'BabelCache_Memcache'     => 'Memcache',
-		'BabelCache_Memcached'    => 'Memcached',
-		'BabelCache_Memory'       => 'Memory',
-		'BabelCache_XCache'       => 'XCache',
-		'BabelCache_ZendServer'   => 'ZendServer'
+		'BabelCache_APC'              => 'APC',
+		'BabelCache_Blackhole'        => 'Blackhole',
+		'BabelCache_Filesystem'       => 'Filesystem',
+		'BabelCache_Filesystem_Plain' => 'Filesystem (plain)',
+		'BabelCache_eAccelerator'     => 'eAccelerator',
+		'BabelCache_Memcache'         => 'Memcache',
+		'BabelCache_Memcached'        => 'Memcached',
+		'BabelCache_Memory'           => 'Memory',
+		'BabelCache_SQLite'           => 'SQLite',
+		'BabelCache_XCache'           => 'XCache',
+		'BabelCache_ZendServer'       => 'ZendServer'
 	); ///< array
 
 	/**
@@ -141,5 +143,13 @@ class sly_Cache extends BabelCache_Factory {
 	 */
 	protected function getCacheDirectory() {
 		return sly_Util_Directory::join(SLY_DYNFOLDER, 'internal', 'sally', 'fscache');
+	}
+
+	/**
+	 * @return PDO
+	 */
+	protected function getSQLiteConnection() {
+		$db = sly_Util_Directory::join(SLY_DYNFOLDER, 'internal', 'sally', 'cache.sqlite');
+		return BabelCache_SQLite::connect($db);
 	}
 }
