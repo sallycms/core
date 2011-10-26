@@ -160,6 +160,15 @@ class sly_Model_User extends sly_Model_Base_Id {
 	 * @return array
 	 */
 	public function getAllowedCLangs() {
+		if(sly_Authorisation::hasProvider()) {
+			$allowedLanguages = array();
+			foreach(sly_Util_Language::findAll(true) as $language) {
+				if(sly_Authorisation::hasPermission($this->getId(), 'clang', $language)) {
+					$allowedLanguages[] = $language;
+				}
+			}
+			return $allowedLanguages;
+		}
 		preg_match_all('/#clang\[(\d+)\]/', $this->getRights(), $matches);
 		return isset($matches[1]) ? $matches[1] : array();
 	}
@@ -183,6 +192,7 @@ class sly_Model_User extends sly_Model_Base_Id {
 			if(in_array($matches[1], $objectrights)) {
 				$right = $matches[1];
 				$value = $matches[2];
+				if(is_numeric($value)) $value = (int) $value;
 			}else {
 				$value = true;
 			}
@@ -248,7 +258,7 @@ class sly_Model_User extends sly_Model_Base_Id {
 	 */
 	public function hasStructureRight() {
 		if(sly_Authorisation::hasProvider()) {
-			return $this->isAdmin() || $this->hasRight('csw[0]') || $this->hasRight('csr[0]');
+			return $this->isAdmin() || sly_Authorisation::hasPermission($this->getId(), 'csw', 0) || sly_Authorisation::hasPermission($this->getId(), 'csr', 0);
 		}
 		return $this->isAdmin() || strpos($this->rights, '#csw[') !== false || strpos($this->rights, '#csr[') !== false;
 	}
