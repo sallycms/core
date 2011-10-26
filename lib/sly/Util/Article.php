@@ -83,4 +83,45 @@ class sly_Util_Article {
 	public static function isNotFoundArticle(sly_Model_Article $article) {
 		return $article->getId() == sly_Core::getNotFoundArticleId();
 	}
+
+	public static function canReadArticle(sly_Model_User $user, $articleId) {
+		if ($user->isAdmin() || $user->hasRight('csr['.$articleId.']')) return true;
+		if(!sly_Authorisation::hasProvider()) {
+			if($articleId === 0) {
+				return true;
+			}
+		}
+		/*if(!sly_Authorisation::hasProvider()) {
+			$cat = sly_Util_Article::findById($articleId)->getCategory();
+			while ($cat) {
+				if ($user->hasRight('csw['.$cat->getId().']')) return true;
+				$cat = $cat->getParent();
+			}
+		}*/
+
+		return false;
+	}
+
+	public static function canEditArticle(sly_Model_User $user, $articleId) {
+		if ($user->hasRight('editContentOnly[]')) return false;
+		return self::canEditContent($user, $articleId);
+	}
+
+	public static function canEditContent(sly_Model_User $user, $articleId) {
+		if ($user->isAdmin() || $user->hasRight('csw[0]')) return true;
+
+		if(sly_Authorisation::hasProvider()) {
+			return sly_Authorisation::hasPermission($user->getId(), 'csw', $articleId);
+		} else {
+			if(sly_Util_Article::exists($articleId)) {
+				$cat = sly_Util_Article::findById($articleId)->getCategory();
+				while ($cat) {
+					if ($user->hasRight('csw['.$cat->getId().']')) return true;
+					$cat = $cat->getParent();
+				}
+			}
+		}
+
+		return false;
+	}
 }
