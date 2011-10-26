@@ -245,21 +245,12 @@ class sly_Model_User extends sly_Model_Base_Id {
 	}
 
 	/**
-	 * @param  int $categoryID
-	 * @return boolean
-	 */
-	public function hasCategoryRight($categoryID) {
-		$categoryID = (int) $categoryID;
-		return $this->isAdmin() || $this->hasRight('csw[0]') || $this->hasRight('csr['.$categoryID.']') || $this->hasRight('csw['.$categoryID.']');
-	}
-
-	/**
 	 * @return boolean
 	 */
 	public function hasStructureRight() {
 		if(sly_Authorisation::hasProvider()) {
-			return $this->isAdmin() || sly_Authorisation::hasPermission($this->getId(), 'csw', 0) || sly_Authorisation::hasPermission($this->getId(), 'csr', 0);
+			return $this->isAdmin() || sly_Util_Article::canReadArticle($this, 0);
 		}
-		return $this->isAdmin() || strpos($this->rights, '#csw[') !== false || strpos($this->rights, '#csr[') !== false;
+		return $this->isAdmin() || strpos($this->rights, '#csw[') !== false;
 	}
 }
