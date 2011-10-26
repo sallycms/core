@@ -219,6 +219,7 @@ class sly_Service_Article extends sly_Service_Model_Base {
 		$this->update($article);
 
 		// Cache sicherheitshalber schon einmal leeren
+		$cache->delete('sly.category', $articleID.'_'.$clangID);
 		$cache->delete('sly.article', $articleID.'_'.$clangID);
 
 		// Kategorie verschieben, wenn nötig
