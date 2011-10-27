@@ -16,6 +16,10 @@ if ($this->isTransitional):
 <?php endif ?>
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head><?php
+	if (!empty($this->base)) {
+		print "\n\t<base href=\"".$this->base."\" />";
+	}
+
 	print "\n\t<title>".sly_html(trim($this->title))."</title>\n";
 
 	// notify old listeners
