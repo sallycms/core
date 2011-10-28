@@ -36,15 +36,14 @@ class sly_Authorisation {
 	 * @param  mixed $value
 	 * @return boolean
 	 */
-	public static function hasPermission($userId, $context, $value = true) {
+	public static function hasPermission($userId, $token, $value = true) {
 		if (!self::$provider) {
 			$user = sly_Service_Factory::getUserService()->findById($userId);
-			if($user && $user->isAdmin()) return true;
-			return false;
+			return $user && $user->isAdmin();
 		}
 
 		try {
-			return $provider->hasPermission($userId, $token, $value);
+			return self::$provider->hasPermission($userId, $token, $value);
 		}
 		catch (Exception $e) {
 			trigger_error('An error occured in authorisationprovider, for security reasons permission was denied. Error: '.$e->getMessage(), E_USER_WARNING);
