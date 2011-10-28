@@ -37,6 +37,7 @@ if ($value !== null) {
 
 // JavaScript-Version
 
+$hasNative  = sly_Helper_Modernizr::hasInputtype($attrs['type']);
 $dateformat = '%d.%m.%Y'; // t('dateformat');
 $formatJS   = $dateformat;
 $formatJS   = str_replace(
@@ -51,16 +52,15 @@ $attrs['data-date']     = strftime('%Y-%m-%d', $value);
 $attrs['data-datetime'] = strftime('%Y-%m-%dT%H:%M:%S', $value);
 
 $attrs['class'] = 'rex-form-text';
-$attrs['type']  = $this->withTime() ? 'datetime-local' : 'date';
+$attrs['type']  = $hasNative ? ($this->withTime() ? 'datetime-local' : 'date') : 'text';
 $attrs['name']  = $name;
 $attrs['id']    = $attrs['name'];
 $attrs['value'] = $value === null ? '' : sly_Util_String::formatStrftime($dateformat.($this->withTime() ? ' %H:%M' : ''), $value);
 
 print '<input '.sly_Util_HTML::buildAttributeString($attrs).' />';
 
-$registry  = sly_Core::getTempRegistry();
-$locale    = t('htmllang');
-$hasNative = sly_Helper_Modernizr::hasInputtype($attrs['type']);
+$registry = sly_Core::getTempRegistry();
+$locale   = t('htmllang');
 
 if (!$hasNative && !$registry->has('sly.form.datetime.links')) {
 	$path   = 'assets/js/';
