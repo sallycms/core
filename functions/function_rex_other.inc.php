@@ -15,41 +15,6 @@
  */
 
 /**
- *
- * @deprecated use sly_Helper_Message::message
- */
-function rex_message($message, $cssClass, $sorroundTag) {
-	$return = '<div class="sly-message '.$cssClass.'"><'.$sorroundTag.'>';
-
-	if ($sorroundTag != 'p') $return .= '<p>';
-	$return .= '<span>'. $message .'</span>';
-	if ($sorroundTag != 'p') $return .= '</p>';
-
-	$return .= '</'.$sorroundTag.'></div>';
-	return $return;
-}
-
-/**
- *
- * @deprecated use sly_Helper_Message::info
- */
-function rex_info($message, $cssClass = null, $sorroundTag = null) {
-	if (!$cssClass)    $cssClass    = 'sly-info';
-	if (!$sorroundTag) $sorroundTag = 'div';
-	return rex_message($message, $cssClass, $sorroundTag);
-}
-
-/**
- *
- * @deprecated use sly_Helper_Message::warn
- */
-function rex_warning($message, $cssClass = null, $sorroundTag = null) {
-	if (!$cssClass)    $cssClass    = 'sly-warn';
-	if (!$sorroundTag) $sorroundTag = 'div';
-	return rex_message($message, $cssClass, $sorroundTag);
-}
-
-/**
  * Übersetzt den text $text, falls dieser mit dem prefix "translate:" beginnt.
  *
  * @param  string    $text     der zu übersetzende Text
