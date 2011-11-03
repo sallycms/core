@@ -31,6 +31,7 @@ abstract class sly_Layout extends sly_Viewable {
 	protected $metas           = array();  ///< array
 	protected $links           = array();  ///< array
 	protected $content         = '';       ///< string
+	protected $base            = '';       ///< string
 
 	/**
 	 * Open a new buffer
@@ -99,6 +100,15 @@ abstract class sly_Layout extends sly_Viewable {
 	 */
 	public function setFavIcon($iconPath) {
 		$this->favIcon = trim($iconPath);
+	}
+
+	/**
+	 * Set the base URI
+	 *
+	 * @param string $base  the base URI
+	 */
+	public function setBase($base) {
+		$this->base = trim($base);
 	}
 
 	/**
@@ -197,6 +207,32 @@ abstract class sly_Layout extends sly_Viewable {
 		else {
 			$this->bodyAttrs[$name] = $value;
 		}
+	}
+
+	/**
+	 * Get body attribute(s)
+	 *
+	 * @param  string $name  the attribute name or null for 'all'
+	 * @return mixed         either an array or a string
+	 */
+	public function getBodyAttr($name = null) {
+		return ($name && isset($this->bodyAttrs[$name])) ? $this->bodyAttrs[$name] : $this->bodyAttrs;
+	}
+
+	/**
+	 * Appends a class name to the body
+	 *
+	 * @param string $class  a single or multiple classes as a string (like 'foo bar')
+	 */
+	public function appendBodyClass($class) {
+		$classes = $this->getBodyAttr('class');
+		$classes = $classes ? explode(' ', $classes) : array();
+
+		foreach (explode(' ', $class) as $cl) {
+			$classes[] = $cl;
+		}
+
+		$this->setBodyAttr('class', implode(' ', array_unique($classes)));
 	}
 
 	/**

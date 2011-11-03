@@ -22,21 +22,31 @@ class sly_Authorisation {
 	}
 
 	/**
+	 * checks if a sly_Authorisation_Provider is already set
+	 *
+	 * @return boolean
+	 */
+	public static function hasProvider() {
+		return !is_null(self::$provider);
+	}
+
+	/**
 	 * @param  int $userId
 	 * @param  string $context
 	 * @param  mixed $value
 	 * @return boolean
 	 */
-	public static function hasPermission($userId, $context, $value = true) {
+	public static function hasPermission($userId, $token, $value = true) {
 		if (!self::$provider) {
-			return true;
+			$user = sly_Service_Factory::getUserService()->findById($userId);
+			return $user && $user->isAdmin();
 		}
 
 		try {
-			return $provider->hasPermission($userId, $token, $value);
+			return self::$provider->hasPermission($userId, $token, $value);
 		}
 		catch (Exception $e) {
-			trigger_error('An error occured in authorisationprovider, for security reasons permission was denied.', E_USER_WARNING);
+			trigger_error('An error occured in authorisationprovider, for security reasons permission was denied. Error: '.$e->getMessage(), E_USER_WARNING);
 			return false;
 		}
 	}
@@ -60,6 +70,10 @@ class sly_Authorisation {
 	 */
 	public static function getExtraRights() {
 		return self::getRightsHelper('extraperm');
+	}
+
+	public static function getObjectRights() {
+		return self::getRightsHelper('objectperm');
 	}
 
 	/**

@@ -171,4 +171,11 @@ class sly_Service_Plugin extends sly_Service_AddOn_Base {
 		list($addon, $name) = $plugin;
 		return 'ADDON/'.$addon.'/plugins/'.$name;
 	}
+
+	public function exists($plugin) {
+		$base = $this->baseFolder($plugin);
+		if(!is_dir($base)) return false;
+		if(!file_exists($base.'config.inc.php')) return false;
+		return true;
+	}
 }

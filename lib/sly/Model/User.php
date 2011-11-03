@@ -160,6 +160,15 @@ class sly_Model_User extends sly_Model_Base_Id {
 	 * @return array
 	 */
 	public function getAllowedCLangs() {
+		if(sly_Authorisation::hasProvider()) {
+			$allowedLanguages = array();
+			foreach(sly_Util_Language::findAll(true) as $language) {
+				if(sly_Authorisation::hasPermission($this->getId(), 'clang', $language)) {
+					$allowedLanguages[] = $language;
+				}
+			}
+			return $allowedLanguages;
+		}
 		preg_match_all('/#clang\[(\d+)\]/', $this->getRights(), $matches);
 		return isset($matches[1]) ? $matches[1] : array();
 	}
@@ -176,7 +185,22 @@ class sly_Model_User extends sly_Model_Base_Id {
 	 * @return boolean
 	 */
 	public function hasRight($right) {
-		return in_array($right, $this->rightsArray);
+		static $objectrights = null;
+		if(sly_Authorisation::hasProvider()) {
+			if(is_null($objectrights)) $objectrights = sly_Authorisation::getObjectRights();
+			preg_match('/(.*)\[(.*)\]/', $right, $matches);
+			if(in_array($matches[1], $objectrights)) {
+				$right = $matches[1];
+				$value = $matches[2];
+				if(is_numeric($value)) $value = (int) $value;
+			}else {
+				$value = true;
+			}
+			return sly_Authorisation::hasPermission($this->getId(), $right, $value);
+
+		}else {
+			return in_array($right, $this->rightsArray);
+		}
 	}
 
 	/**
@@ -221,18 +245,12 @@ class sly_Model_User extends sly_Model_Base_Id {
 	}
 
 	/**
-	 * @param  int $categoryID
-	 * @return boolean
-	 */
-	public function hasCategoryRight($categoryID) {
-		$categoryID = (int) $categoryID;
-		return $this->isAdmin() || $this->hasRight('csw[0]') || $this->hasRight('csr['.$categoryID.']') || $this->hasRight('csw['.$categoryID.']');
-	}
-
-	/**
 	 * @return boolean
 	 */
 	public function hasStructureRight() {
-		return $this->isAdmin() || strpos($this->rights, '#csw[') !== false || strpos($this->rights, '#csr[') !== false;
+		if(sly_Authorisation::hasProvider()) {
+			return $this->isAdmin() || sly_Util_Article::canReadArticle($this, 0);
+		}
+		return $this->isAdmin() || strpos($this->rights, '#csw[') !== false;
 	}
 }
