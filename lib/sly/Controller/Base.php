@@ -183,13 +183,13 @@ abstract class sly_Controller_Base {
 	protected static function isPageAvailable($pageparam) {
 		return class_exists(self::getPageClassName($pageparam));
 	}
-	
+
 	/**
 	 * return classname for &page=whatever
 	 * It will return sly_Controller_Specials for &page=specials
 	 * and sly_Controller_Specials_Languages for &page=specials_languages
-	 *  
-	 * @param string $pageparam 
+	 *
+	 * @param string $pageparam
 	 * @return string
 	 */
 	protected static function getPageClassName($pageparam) {
@@ -222,9 +222,9 @@ abstract class sly_Controller_Base {
 	 * Creates the controller instance
 	 *
 	 * This method will construct the controller instance. It consists of the
-	 * current page. The param to control this is ?page and looks like 
-	 * page(_subpage)(_subsubpage) The class name will look like 
-	 * 'sly_Controller_[Page](_[Subpage])(_[Subsubpage])', having the first 
+	 * current page. The param to control this is ?page and looks like
+	 * page(_subpage)(_subsubpage) The class name will look like
+	 * 'sly_Controller_[Page](_[Subpage])(_[Subsubpage])', having the first
 	 * character of a part in uppercase and the rest in
 	 * lowercase.
 	 *
@@ -249,7 +249,7 @@ abstract class sly_Controller_Base {
 		if (class_exists($name)) {
 			return new $name($name);
 		}
-		
+
 		throw new sly_Controller_Exception(t('unknown_page'), 404);
 
 		return null;
