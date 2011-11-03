@@ -159,7 +159,8 @@ abstract class sly_Controller_Base {
 			// zuletzt auf die Profilseite zurückfallen.
 
 			if (empty($page) || !self::isPageAvailable($page)) {
-				$page = sly_Service_Factory::getUserService()->getCurrentUser()->getStartpage();
+				$user = sly_Service_Factory::getUserService()->getCurrentUser();
+				$page = $user ? $user->getStartpage() : null;
 
 				if (is_null($page) || !self::isPageAvailable($page)) {
 					$page = strtolower($config->get('START_PAGE'));
@@ -236,7 +237,7 @@ abstract class sly_Controller_Base {
 	 */
 	public static function factory($forcePage = null, $forceSubpage = null) {
 		$config  = sly_Core::config();
-		$page    = $forcePage === null    ? self::getPage() : $forcePage;
+		$page    = $forcePage === null ? self::getPage() : $forcePage;
 		$name    = 'sly_Controller_'.ucfirst($page);
 
 		if (class_exists($name)) {
