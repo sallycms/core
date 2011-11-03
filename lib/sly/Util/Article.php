@@ -83,4 +83,51 @@ class sly_Util_Article {
 	public static function isNotFoundArticle(sly_Model_Article $article) {
 		return $article->getId() == sly_Core::getNotFoundArticleId();
 	}
+
+	public static function canReadArticle(sly_Model_User $user, $articleId) {
+		static $canReadCache;
+		if(!isset($canReadCache[$articleId])) {
+			$canReadCache[$articleId] = false;
+
+			if(self::canEditContent($user, $articleId)) $canReadCache[$articleId] = true;
+
+			//check all children for write rights
+			$article = self::findById($articleId);
+			if ($article) {
+				$path = $article->getPath().$article->getId().'|%';
+			} else {
+				$path = '|%';
+			}
+			$query  = sly_DB_Persistence::getInstance();
+			$prefix = sly_Core::config()->get('DATABASE/TABLE_PREFIX');
+			$query->query('SELECT DISTINCT id FROM '.$prefix.'article WHERE path LIKE ?', array($path));
+			foreach($query as $row) {
+				if(self::canEditContent($user, (int) $row['id'])) $canReadCache[$articleId] = true;
+			}
+		}
+		return $canReadCache[$articleId];
+	}
+
+	public static function canEditArticle(sly_Model_User $user, $articleId) {
+		if ($user->hasRight('editContentOnly[]')) return false;
+		return self::canEditContent($user, $articleId);
+	}
+
+	public static function canEditContent(sly_Model_User $user, $articleId) {
+		if ($user->isAdmin() || $user->hasRight('csw[0]')) return true;
+
+		if(sly_Authorisation::hasProvider()) {
+			return sly_Authorisation::hasPermission($user->getId(), 'csw', $articleId);
+		} else {
+			if(sly_Util_Article::exists($articleId)) {
+				$cat = sly_Util_Article::findById($articleId)->getCategory();
+				while ($cat) {
+					if ($user->hasRight('csw['.$cat->getId().']')) return true;
+					$cat = $cat->getParent();
+				}
+			}
+		}
+
+		return false;
+	}
 }
