@@ -139,4 +139,11 @@ class sly_Service_AddOn extends sly_Service_AddOn_Base {
 	protected function getConfPath($addonName) {
 		return 'ADDON/'.$addonName;
 	}
+
+	public function exists($addon) {
+		$base = $this->baseFolder($addon);
+		if(!is_dir($base)) return false;
+		if(!file_exists($base.'config.inc.php')) return false;
+		return true;
+	}
 }

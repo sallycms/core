@@ -12,7 +12,7 @@
  * @ingroup authorisation
  */
 interface sly_Authorisation_Provider {
-	
+
 	/**
 	 * @param  int    $userId
 	 * @param  string $token

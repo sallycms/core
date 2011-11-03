@@ -62,6 +62,8 @@ $caches = array(
 	'ZendServer',
 	'Memory',
 	'Filesystem',
+	'Filesystem_Plain',
+	'SQLite'
 );
 
 foreach ($caches as $cache) {

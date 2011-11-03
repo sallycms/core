@@ -71,6 +71,12 @@ abstract class sly_Service_AddOn_Base {
 	abstract protected function getConfPath($component);
 
 	/**
+	 * @param  mixed $component
+	 * @return boolean
+	 */
+	abstract protected function exists($component);
+
+	/**
 	 * Include file
 	 *
 	 * This prevents the included file from messing with the variables of the
@@ -276,7 +282,7 @@ abstract class sly_Service_AddOn_Base {
 
 		$globalsFile = $this->baseFolder($component).'globals.yml';
 
-		if (file_exists($globalsFile)) {
+		if (!$this->isAvailable($component) && file_exists($globalsFile)) {
 			sly_Core::config()->loadStatic($globalsFile);
 		}
 
@@ -811,13 +817,19 @@ abstract class sly_Service_AddOn_Base {
 	 * @param mixed $component
 	 */
 	protected function load($component) {
-		$addonService  = sly_Service_Factory::getAddOnService();
-		$pluginService = sly_Service_Factory::getPluginService();
 		$compAsString  = is_array($component) ? implode('/', $component) : $component;
 
 		if (in_array($compAsString, self::$loaded)) {
 			return true;
 		}
+
+		if(!$this->exists($component)) {
+			trigger_error('Component '.$compAsString.' does not exists.', E_USER_WARNING);
+			return false;
+		}
+
+		$addonService  = sly_Service_Factory::getAddOnService();
+		$pluginService = sly_Service_Factory::getPluginService();
 
 		$this->loadConfig($component);
 

@@ -60,21 +60,4 @@ class sly_Util_Category {
 		return self::findByParentId(0, $ignore_offlines, $clang);
 	}
 
-	/**
-	 * @param  sly_Model_User $user
-	 * @param  int            $categoryId
-	 * @return boolean
-	 */
-	public static function hasPermissionOnCategory(sly_Model_User $user, $categoryId) {
-		if ($user->isAdmin() || $user->hasRight('csw[0]')) return true;
-
-		$cat = sly_Util_Category::findById($categoryId);
-
-		while ($cat) {
-			if ($user->hasRight('csw['.$categoryId.']')) return true;
-			$cat = $cat->getParent();
-		}
-
-		return false;
-	}
 }

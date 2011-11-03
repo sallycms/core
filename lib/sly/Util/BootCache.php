@@ -29,9 +29,13 @@ class sly_Util_BootCache {
 		// add current cache instance
 		$cacheClass = get_class(sly_Core::cache());
 
-		// TODO: Remove this dependency hack with a more elegant solution (Reflection?)
+		// TODO: Remove these dependency hacks with a more elegant solution (Reflection?)
 		if ($cacheClass === 'BabelCache_Memcached') {
 			self::addClass('BabelCache_Memcache');
+		}
+
+		if ($cacheClass === 'BabelCache_Filesystem_Plain') {
+			self::addClass('BabelCache_Filesystem');
 		}
 
 		self::addClass($cacheClass);
