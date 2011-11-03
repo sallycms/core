@@ -192,12 +192,16 @@ class sly_Service_Asset {
 		$cacheFile = $this->getCacheFile($file, $access);
 
 		if (!file_exists($cacheFile) || $this->forceGen) {
-			// let listeners process the file
-			$tmpFile = $dispatcher->filter(self::EVENT_PROCESS_ASSET, $file);
+			try {
+				// let listeners process the file
+				$tmpFile = $dispatcher->filter(self::EVENT_PROCESS_ASSET, $file);
 
-			// now we can check if a listener has generated a valid file
-			if (!is_file($tmpFile)) {
-				header('HTTP/1.0 404 Not Found');
+				// now we can check if a listener has generated a valid file
+				if (!is_file($tmpFile)) throw new Exception('Not Found', 404);
+			}
+			catch (Exception $e) {
+				$code = $e->getCode();
+				header('HTTP/1.0 '.($code ? $code : 500));
 				die;
 			}
 
@@ -337,13 +341,13 @@ class sly_Service_Asset {
 	public function processScaffold($params) {
 		$file = $params['subject'];
 
-		if (sly_Util_String::endsWith($file, '.css')) {
+		if (sly_Util_String::endsWith($file, '.css') && file_exists(SLY_BASE.'/'.$file)) {
 			$css = sly_Util_Scaffold::process($file);
 
 			$tmpFile = sly_Util_Directory::join(SLY_DYNFOLDER, self::TEMP_DIR, md5($css).'.css');
 			if (!file_exists(dirname($tmpFile))) mkdir(dirname($tmpFile), sly_Core::getDirPerm(), true);
-			file_put_contents($tmpFile, $css);
 
+			file_put_contents($tmpFile, $css);
 			return $tmpFile;
 		}
 
