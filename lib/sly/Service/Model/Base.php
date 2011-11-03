@@ -78,4 +78,21 @@ abstract class sly_Service_Model_Base {
 		$persistence = sly_DB_Persistence::getInstance();
 		return $persistence->delete($this->getTableName(), $where);
 	}
+
+	/**
+	 * @param  array  $where
+	 * @param  string $group
+	 * @return array
+	 */
+	public function count($where = null, $group = null) {
+		$count       = array();
+		$persistence = sly_DB_Persistence::getInstance();
+		$persistence->select($this->getTableName(), 'COUNT(*)', $where, $group);
+
+		foreach ($persistence as $row) {
+			$count = reset($row);
+		}
+
+		return $count;
+	}
 }

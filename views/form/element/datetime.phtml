@@ -9,7 +9,7 @@
  */
 
 /**
- * Folgende Datentypen sind möglich:
+ * Folgende Datentypen sind mÃ¶glich:
  *
  * string => strtotime($value)    (alles, was PHP als Zeitangabe versteht)
  * int    => intval($value)       (UNIX-Timestamp)
@@ -37,6 +37,7 @@ if ($value !== null) {
 
 // JavaScript-Version
 
+$hasNative  = sly_Helper_Modernizr::hasInputtype($attrs['type']);
 $dateformat = '%d.%m.%Y'; // t('dateformat');
 $formatJS   = $dateformat;
 $formatJS   = str_replace(
@@ -45,13 +46,13 @@ $formatJS   = str_replace(
 	$formatJS);
 
 // Datum und Zeit als HTML5-Attribut ablegen, damit wir die RFC-konforme Version
-// per JavaScript setzen können.
+// per JavaScript setzen kÃ¶nnen.
 
 $attrs['data-date']     = strftime('%Y-%m-%d', $value);
 $attrs['data-datetime'] = strftime('%Y-%m-%dT%H:%M:%S', $value);
 
 $attrs['class'] = 'rex-form-text';
-$attrs['type']  = $this->withTime() ? 'datetime-local' : 'date';
+$attrs['type']  = $hasNative ? ($this->withTime() ? 'datetime-local' : 'date') : 'text';
 $attrs['name']  = $name;
 $attrs['id']    = $attrs['name'];
 $attrs['value'] = $value === null ? '' : sly_Util_String::formatStrftime($dateformat.($this->withTime() ? ' %H:%M' : ''), $value);
@@ -61,7 +62,7 @@ print '<input '.sly_Util_HTML::buildAttributeString($attrs).' />';
 $registry = sly_Core::getTempRegistry();
 $locale   = t('htmllang');
 
-if (!$registry->has('sly.form.datetime.links')) {
+if (!$hasNative && !$registry->has('sly.form.datetime.links')) {
 	$path   = 'assets/js/';
 	$layout = sly_Core::getLayout();
 
@@ -83,32 +84,20 @@ if (!$registry->has('sly.form.datetime.links')) {
 
 // Die userLang dient dazu, dass PHP auch ohne korrekt gesetztes Locale das
 // Datum richtig parsen kann.
-
+$jsvarname = 'element'.sly_html($name);
 ?>
 
 <script type="text/javascript">
-var element = $('#<?= sly_html($name) ?>');
-<? if ($this->withTime()): ?>
+(function($) {
+	var <?= $jsvarname ?> = $('#<?= sly_html($name) ?>');
 
-if (!Modernizr.inputtypes['datetime-local']) {
+	<? if ($hasNative): ?>
+	<?= $jsvarname ?>.val(<?= $jsvarname ?>.data('<?= $this->withTime() ? 'datetime' : 'date' ?>')).attr('step', 'any');
+	sly.addDatepickerToggler(<?= $jsvarname ?>, <?= $value === null ? 0 : 1 ?>);
+	<? else: ?>
 	$(function() {
-		element.datetime({dateFormat: '<?= addslashes($formatJS) ?>', userLang: '<?= $locale ?>'});
+		<?= $jsvarname ?>.<?= $this->withTime() ? 'datetime' : 'datepicker' ?>({dateFormat: '<?= addslashes($formatJS) ?>', userLang: '<?= $locale ?>'});
 	});
-}
-else {
-	element.val(element.data('datetime')).attr('step', 'any');
-}
-
-<? else: ?>
-
-if (!Modernizr.inputtypes.date) {
-	$(function() {
-		element.datepicker({dateFormat: '<?= addslashes($formatJS) ?>'});
-	});
-}
-else {
-	element.val(element.data('date')).attr('step', 'any');
-}
-
-<? endif ?>
+	<? endif ?>
+})(jQuery);
 </script>

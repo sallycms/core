@@ -19,6 +19,7 @@
  */
 class sly_Layout_XHTML extends sly_Layout {
 	protected $isTransitional = false; ///< boolean  transitional flag
+	protected $language; ///< string
 
 	/**
 	 * Set the page to be transitional
@@ -29,6 +30,15 @@ class sly_Layout_XHTML extends sly_Layout {
 	 */
 	public function setTransitional($isTransitional = true) {
 		$this->isTransitional = (boolean) $isTransitional;
+	}
+
+	/**
+	 * Set the document language
+	 *
+	 * @param string $language  the short locale (de, en, fr, ...)
+	 */
+	public function setLanguage($language) {
+		$this->language = $language;
 	}
 
 	/**

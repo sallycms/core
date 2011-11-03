@@ -55,7 +55,6 @@ class OOArticleSlice {
 	 * @return OOArticleSlice
 	 */
 	public static function getArticleSliceById($id, $revision = 0) {
-
 		$namespace = 'sly.slice';
 		$id        = (int) $id;
 		$revision  = (int) $revision;
@@ -74,17 +73,22 @@ class OOArticleSlice {
 		$cache    = sly_Cache::factory();
 		$cachekey = sly_Cache::generateKey('slice_ids_for_slot', $article_id, $clang, $slot);
 		$ids      = $cache->get(self::CACHE_NS, $cachekey);
-		if(is_null($ids)) {
+
+		if (is_null($ids)) {
 			$ids = array();
 			$sql = sly_DB_Persistence::getInstance();
 			$where = array('article_id' => $article_id, 'clang' => $clang);
-			if(!is_null($slot)) {
+
+			if (!is_null($slot)) {
 				$where['slot'] = $slot;
 			}
+
 			$sql->select('article_slice', 'id', $where, null, 'slot, prior ASC');
-			foreach($sql as $row){
+
+			foreach ($sql as $row) {
 				$ids[] = $row['id'];
 			}
+
 			$cache->set(self::CACHE_NS, $cachekey, $ids);
 
 			sly_Core::dispatcher()->notify('CLANG_ARTICLE_GENERATED', '', array(
@@ -92,6 +96,7 @@ class OOArticleSlice {
 				'clang'   => $clang
 			));
 		}
+
 		return $ids;
 	}
 
@@ -124,7 +129,7 @@ class OOArticleSlice {
 		$revision  = (int) $revision;
 
 		return self::_getSliceWhere(
-			'a.article_id = '.$articleID.' AND a.clang = '.$clang.' AND a.slot = '. sly_DB_PDO_Persistence::getInstance()->quote($slot) .' AND '.
+			'a.article_id = '.$articleID.' AND a.clang = '.$clang.' AND a.slot = '.sly_DB_PDO_Persistence::getInstance()->quote($slot).' AND '.
 			'((a.prior = 0  AND a.id = b.id) '.
 			'OR (b.slot != a.slot AND b.id = a.prior)) '.
 			'AND a.revision = '.$revision.' AND b.revision = '.$revision,
@@ -146,10 +151,10 @@ class OOArticleSlice {
 		$articleID = (int) $articleID;
 		$clang     = (int) $clang;
 		$revision  = (int) $revision;
-		$module    = mysql_real_escape_string($module);
+		$module    = sly_DB_PDO_Persistence::getInstance()->quote($module);
 
 		return self::_getSliceWhere(
-			'article_id = '.$articleID.' AND clang = '.$clang.' AND module = "'.$module.'" AND revision = '.$revision,
+			'article_id = '.$articleID.' AND clang = '.$clang.' AND module = '.$module.' AND revision = '.$revision,
 			array()
 		);
 	}
@@ -161,14 +166,14 @@ class OOArticleSlice {
 	 * @return OOArticleSlice
 	 */
 	public function getNextSlice() {
-		return self::_getSliceWhere('prior > '.$this->_prior.' AND slot = "'.mysql_real_escape_string($this->_slot).'" AND clang = '.$this->_clang.' AND article_id = '.$this->_article_id.' AND clang = '.$this->_clang.' ORDER BY prior ASC LIMIT 1');
+		return self::_getSliceWhere('prior > '.$this->_prior.' AND slot = '.sly_DB_PDO_Persistence::getInstance()->quote($this->_slot).' AND clang = '.$this->_clang.' AND article_id = '.$this->_article_id.' AND clang = '.$this->_clang.' ORDER BY prior ASC LIMIT 1');
 	}
 
 	/**
 	 * @return OOArticleSlice
 	 */
 	public function getPreviousSlice() {
-		return self::_getSliceWhere('prior < '.$this->_prior.' AND slot = "'.mysql_real_escape_string($this->_slot).'" AND clang = '.$this->_clang.' AND article_id = '.$this->_article_id.' AND clang = '.$this->_clang.' ORDER BY prior DESC LIMIT 1');
+		return self::_getSliceWhere('prior < '.$this->_prior.' AND slot = '.sly_DB_PDO_Persistence::getInstance()->quote($this->_slot).' AND clang = '.$this->_clang.' AND article_id = '.$this->_article_id.' AND clang = '.$this->_clang.' ORDER BY prior DESC LIMIT 1');
 	}
 
 	/**
