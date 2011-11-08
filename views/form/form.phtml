@@ -19,10 +19,10 @@ $attributes = array(
 ?>
 
 <div class="sly-form">
-	<? if (!$omitFormTag): ?>
+	<?php if (!$omitFormTag): ?>
 	<form <?= sly_Util_HTML::buildAttributeString($attributes) ?>>
-	<? endif ?>
-		<? if (!empty($this->hiddenValues)): ?>
+	<?php endif ?>
+		<?php if (!empty($this->hiddenValues)): ?>
 		<div>
 			<?php
 			foreach ($this->hiddenValues as $name => $value) {
@@ -32,7 +32,7 @@ $attributes = array(
 			}
 			?>
 		</div>
-		<? endif ?>
+		<?php endif ?>
 
 		<?php
 		$hasButtonBar = $this->submitButton || $this->resetButton || $this->applyButton || $this->deleteButton;
@@ -47,13 +47,13 @@ $attributes = array(
 			print $fieldset->render();
 		}
 		?>
-	<? if (!$omitFormTag): ?>
+	<?php if (!$omitFormTag): ?>
 	</form>
-	<? endif ?>
+	<?php endif ?>
 </div>
 
 <? if (!empty($this->focussedElement)): ?>
 <script type="text/javascript">
 $('#<?= $this->focussedElement ?>').focus();
 </script>
-<? endif ?>
+<?php endif ?>

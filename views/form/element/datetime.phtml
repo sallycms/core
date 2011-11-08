@@ -91,13 +91,13 @@ $jsvarname = 'element'.sly_html($name);
 (function($) {
 	var <?= $jsvarname ?> = $('#<?= sly_html($name) ?>');
 
-	<? if ($hasNative): ?>
+	<?php if ($hasNative): ?>
 	<?= $jsvarname ?>.val(<?= $jsvarname ?>.data('<?= $this->withTime() ? 'datetime' : 'date' ?>')).attr('step', 'any');
 	sly.addDatepickerToggler(<?= $jsvarname ?>, <?= $value === null ? 0 : 1 ?>);
-	<? else: ?>
+	<?php else: ?>
 	$(function() {
 		<?= $jsvarname ?>.<?= $this->withTime() ? 'datetime' : 'datepicker' ?>({dateFormat: '<?= addslashes($formatJS) ?>', userLang: '<?= $locale ?>'});
 	});
-	<? endif ?>
+	<?php endif ?>
 })(jQuery);
 </script>
