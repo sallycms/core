@@ -52,8 +52,6 @@ $id = !empty($this->id) ? ' id="'.$this->id.'"' : '';
 	</div>
 </div>
 
-<?php if (!empty($this->focussedElement)): ?>
-<script type="text/javascript">
-$('#<?= $this->focussedElement ?>').focus();
-</script>
-<?php endif ?>
+<?php if (!empty($this->focussedElement)) {
+	sly_Core::getLayout()->addJavaScript("$('#".$this->focussedElement."').focus();");
+}
