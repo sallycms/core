@@ -195,16 +195,6 @@ class sly_Model_User extends sly_Model_Base_Id {
 	}
 
 	/**
-	 * @deprecated use hasRight() instead
-	 *
-	 * @param  string $right
-	 * @return boolean
-	 */
-	public function hasPerm($right) {
-		return $this->hasRight($right);
-	}
-
-	/**
 	 * @param string  $right
 	 * @param boolean $switch
 	 */
