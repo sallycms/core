@@ -86,7 +86,8 @@ class sly_Util_Article {
 
 	public static function canReadArticle(sly_Model_User $user, $articleId) {
 		static $canReadCache;
-		if(!isset($canReadCache[$articleId])) {
+
+		if (!isset($canReadCache[$articleId])) {
 			$canReadCache[$articleId] = false;
 
 			if(self::canEditContent($user, $articleId)) $canReadCache[$articleId] = true;
@@ -109,7 +110,7 @@ class sly_Util_Article {
 	}
 
 	public static function canEditArticle(sly_Model_User $user, $articleId) {
-		if ($user->hasRight('editContentOnly[]')) return false;
+		if (!$user->isAdmin() && $user->hasRight('editContentOnly[]')) return false;
 		return self::canEditContent($user, $articleId);
 	}
 
