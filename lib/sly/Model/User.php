@@ -160,17 +160,13 @@ class sly_Model_User extends sly_Model_Base_Id {
 	 * @return array
 	 */
 	public function getAllowedCLangs() {
-		if(sly_Authorisation::hasProvider()) {
-			$allowedLanguages = array();
-			foreach(sly_Util_Language::findAll(true) as $language) {
-				if(sly_Authorisation::hasPermission($this->getId(), 'clang', $language)) {
-					$allowedLanguages[] = $language;
-				}
+		$allowedLanguages = array();
+		foreach(sly_Util_Language::findAll(true) as $language) {
+			if(sly_Authorisation::hasPermission($this->getId(), 'clang', $language)) {
+				$allowedLanguages[] = $language;
 			}
-			return $allowedLanguages;
 		}
-		preg_match_all('/#clang\[(\d+)\]/', $this->getRights(), $matches);
-		return isset($matches[1]) ? $matches[1] : array();
+		return $allowedLanguages;
 	}
 
 	/**
@@ -186,21 +182,16 @@ class sly_Model_User extends sly_Model_Base_Id {
 	 */
 	public function hasRight($right) {
 		static $objectrights = null;
-		if(sly_Authorisation::hasProvider()) {
-			if(is_null($objectrights)) $objectrights = sly_Authorisation::getObjectRights();
-			preg_match('/(.*)\[(.*)\]/', $right, $matches);
-			if(in_array($matches[1], $objectrights)) {
-				$right = $matches[1];
-				$value = $matches[2];
-				if(is_numeric($value)) $value = (int) $value;
-			}else {
-				$value = true;
-			}
-			return sly_Authorisation::hasPermission($this->getId(), $right, $value);
-
+		if(is_null($objectrights)) $objectrights = sly_Authorisation::getObjectRights();
+		preg_match('/(.*)\[(.*)\]/', $right, $matches);
+		if(in_array($matches[1], $objectrights)) {
+			$right = $matches[1];
+			$value = $matches[2];
+			if(is_numeric($value)) $value = (int) $value;
 		}else {
-			return in_array($right, $this->rightsArray);
+			$value = true;
 		}
+		return sly_Authorisation::hasPermission($this->getId(), $right, $value);
 	}
 
 	/**
@@ -248,9 +239,6 @@ class sly_Model_User extends sly_Model_Base_Id {
 	 * @return boolean
 	 */
 	public function hasStructureRight() {
-		if(sly_Authorisation::hasProvider()) {
-			return $this->isAdmin() || sly_Util_Article::canReadArticle($this, 0);
-		}
-		return $this->isAdmin() || strpos($this->rights, '#csw[') !== false;
+		return $this->isAdmin() || sly_Util_Article::canReadArticle($this, 0);
 	}
 }
