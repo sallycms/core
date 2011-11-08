@@ -13,7 +13,7 @@ $id = !empty($this->id) ? ' id="'.$this->id.'"' : '';
 <div style="margin-bottom:1em">
 	<div class="sly-form">
 		<form method="<?= strtolower($this->method) ?>" action="<?= sly_html($this->action) ?>"<?= $id ?>>
-			<? foreach ($this->fieldsets as $i => $fieldset): ?>
+			<?php foreach ($this->fieldsets as $i => $fieldset): ?>
 			<fieldset class="rex-form-col-1">
 				<legend><?= sly_html($fieldset['title']) ?></legend>
 				<div class="rex-form-wrapper">
@@ -47,13 +47,13 @@ $id = !empty($this->id) ? ' id="'.$this->id.'"' : '';
 
 				</div>
 			</fieldset>
-			<? endforeach ?>
+			<?php endforeach ?>
 		</form>
 	</div>
 </div>
 
-<? if (!empty($this->focussedElement)): ?>
+<?php if (!empty($this->focussedElement)): ?>
 <script type="text/javascript">
 $('#<?= $this->focussedElement ?>').focus();
 </script>
-<? endif ?>
+<?php endif ?>
