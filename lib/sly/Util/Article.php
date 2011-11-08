@@ -116,18 +116,6 @@ class sly_Util_Article {
 	public static function canEditContent(sly_Model_User $user, $articleId) {
 		if ($user->isAdmin() || $user->hasRight('csw[0]')) return true;
 
-		if(sly_Authorisation::hasProvider()) {
-			return sly_Authorisation::hasPermission($user->getId(), 'csw', $articleId);
-		} else {
-			if(sly_Util_Article::exists($articleId)) {
-				$cat = sly_Util_Article::findById($articleId)->getCategory();
-				while ($cat) {
-					if ($user->hasRight('csw['.$cat->getId().']')) return true;
-					$cat = $cat->getParent();
-				}
-			}
-		}
-
-		return false;
+		return sly_Authorisation::hasPermission($user->getId(), 'csw', $articleId);
 	}
 }
