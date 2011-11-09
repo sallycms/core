@@ -169,6 +169,7 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id {
 		$file->setCategoryId((int) $categoryID);
 		$file->setRevision(0); // totally useless...
 		$file->setReFileId(0); // even more useless
+		$file->setAttributes('');
 		$file->setCreateColumns();
 
 		if ($size) {
