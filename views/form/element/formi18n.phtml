@@ -8,7 +8,14 @@
  * http://www.opensource.org/licenses/mit-license.php
  */
 
-$id = !empty($this->id) ? ' id="'.$this->id.'"' : '';
+$nativeFocus = sly_Helper_Modernizr::hasInput('autofocus');
+$id          = !empty($this->id) ? ' id="'.$this->id.'"' : '';
+
+if (!empty($this->focussedElement) && $nativeFocus) {
+	$el = $this->findElementByID($this->focussedElement);
+	if ($el) $el->setAttribute('autofocus', 'autofocus');
+}
+
 ?>
 <div style="margin-bottom:1em">
 	<div class="sly-form">
@@ -52,7 +59,7 @@ $id = !empty($this->id) ? ' id="'.$this->id.'"' : '';
 	</div>
 </div>
 
-<?php if (!empty($this->focussedElement)): ?>
+<?php if (!empty($this->focussedElement) && !$nativeFocus): ?>
 <script type="text/javascript">
 document.getElementById('<?= $this->focussedElement ?>').focus();
 </script>
