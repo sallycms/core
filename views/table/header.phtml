@@ -67,13 +67,10 @@ print $this->surroundingHTML;
 ?>
 
 <table id="<?= $this->id ?>" class="sly-table">
-	<caption>
-		<!-- sort für runde Ecken -->
-		<?= $this->caption ? '<span>'.sly_html($this->caption).'</span>' : '' ?>
-	</caption>
+	<caption><?= $this->caption ? '<span>'.sly_html($this->caption).'</span>' : '' ?></caption>
 	<thead>
 		<tr class="nodrop nodrag">
-			<?
+			<?php
 			foreach ($this->columns as $idx => $col) {
 				$col->setTable($this);
 				$col->setIndex($idx);
