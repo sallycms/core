@@ -126,7 +126,7 @@ class sly_Service_Article extends sly_Service_Model_Base {
 		$cache = sly_Core::cache();
 
 		foreach (sly_Util_Language::findAll(true) as $clangID) {
-			$db->select('article', 'id', 'prior > '.$position.' AND startpage = 0 AND clang = '.$clangID.' AND re_id = '.$parentID);
+			$db->select('article', 'id', 'prior >= '.$position.' AND startpage = 0 AND clang = '.$clangID.' AND re_id = '.$parentID);
 
 			foreach ($db as $row) {
 				$cache->delete('sly.article', $row['id'].'_'.$clangID);
@@ -142,8 +142,7 @@ class sly_Service_Article extends sly_Service_Model_Base {
 
 		$db->query(
 			'UPDATE '.$prefix.'article SET prior = prior + 1 '.
-			'WHERE ((re_id = '.$parentID.' AND catprior = 0) OR id = '.$parentID.') AND prior >= '.$position.' '.
-			'ORDER BY prior ASC'
+			'WHERE ((re_id = '.$parentID.' AND catprior = 0) OR id = '.$parentID.') AND prior >= '.$position
 		);
 
 		// Artikel in allen Sprachen anlegen
@@ -274,9 +273,18 @@ class sly_Service_Article extends sly_Service_Model_Base {
 	 */
 	public function delete($articleID) {
 		$articleID = (int) $articleID;
-		$db        = sly_DB_Persistence::getInstance();
-		$cache     = sly_Core::cache();
-		$article   = $this->findById($articleID);
+
+		if ($articleID == sly_Core::getSiteStartArticleId()) {
+			throw new sly_Exception(t('cant_delete_sitestartarticle'));
+		}
+
+		if ($articleID == sly_Core::getNotFoundArticleId()) {
+			throw new sly_Exception(t('cant_delete_notfoundarticle'));
+		}
+
+		$db      = sly_DB_Persistence::getInstance();
+		$cache   = sly_Core::cache();
+		$article = $this->findById($articleID);
 
 		// Prüfen ob der Artikel existiert
 		if ($article === null) {
@@ -284,7 +292,7 @@ class sly_Service_Article extends sly_Service_Model_Base {
 		}
 
 		// Nachbarartikel neu positionieren
-		$parent = $article->getParentId();
+		$parent = $article->getCategoryId();
 		$prefix = sly_Core::config()->get('DATABASE/TABLE_PREFIX');
 
 		foreach (sly_Util_Language::findAll(true) as $clangID) {
@@ -294,12 +302,7 @@ class sly_Service_Article extends sly_Service_Model_Base {
 
 			$db->query('UPDATE '.$prefix.'article SET prior = prior - 1 WHERE '.$where);
 
-			$cache->delete('sly.article', $articleID.'_'.$clangID);
-			$cache->delete('sly.category', $articleID.'_'.$clangID);
-			$cache->delete('sly.article.list', $parent.'_'.$clangID.'_0');
-			$cache->delete('sly.category.list', $parent.'_'.$clangID.'_0');
-			$cache->delete('sly.article.list', $parent.'_'.$clangID.'_1');
-			$cache->delete('sly.category.list', $parent.'_'.$clangID.'_1');
+			$this->deleteCache($parent, $clangID);
 
 			// Cache leeren
 			$db->select('article', 'id', $where);
@@ -311,8 +314,9 @@ class sly_Service_Article extends sly_Service_Model_Base {
 		}
 
 		// Artikel löschen
-		$return = rex_deleteArticle($articleID);
-		if (!$return['state']) throw new sly_Exception($return['message']);
+		$sql = sly_DB_Persistence::getInstance();
+		$sql->delete('article', array('id' => $articleID));
+		$sql->delete('article_slice', array('article_id' => $articleID));
 
 		// Event auslösen
 		$dispatcher = sly_Core::dispatcher();
@@ -468,5 +472,25 @@ class sly_Service_Article extends sly_Service_Model_Base {
 		$article->setUpdatedate(time());
 		$article->setUpdateuser($user->getLogin());
 		$this->update($article);
+	}
+
+	/**
+	 * @param int $id     article ID
+	 * @param int $clang  language ID (give null to delete in all languages)
+	 */
+	public function deleteCache($id, $clang = null) {
+		$cache = sly_Core::cache();
+
+		foreach (sly_Util_Language::findAll(true) as $_clang) {
+			if ($clang !== null && $clang != $_clang) {
+				continue;
+			}
+
+			$cache->delete('sly.article', $id.'_'.$_clang);
+			$cache->delete('sly.article.list', $id.'_'.$_clang.'_0');
+			$cache->delete('sly.article.list', $id.'_'.$_clang.'_1');
+			$cache->delete('sly.category.list', $id.'_'.$_clang.'_0');
+			$cache->delete('sly.category.list', $id.'_'.$_clang.'_1');
+		}
 	}
 }

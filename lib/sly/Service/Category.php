@@ -149,8 +149,7 @@ class sly_Service_Category extends sly_Service_Model_Base {
 
 		$db->query(
 			'UPDATE '.$prefix.'article SET catprior = catprior + 1 '.
-			'WHERE re_id = '.$parentID.' AND catprior <> 0 AND catprior >= '.$position.' '.
-			'ORDER BY catprior ASC'
+			'WHERE re_id = '.$parentID.' AND catprior <> 0 AND catprior >= '.$position
 		);
 
 		// Kategorie in allen Sprachen anlegen
@@ -240,9 +239,10 @@ class sly_Service_Category extends sly_Service_Model_Base {
 
 		// Kinder abrufen, um für jedes Kind den Cache zu leeren.
 		$db->select('article', 'id', $where);
+		$service = sly_Service_Factory::getArticleService();
 
 		foreach ($db as $child) {
-			rex_deleteCacheArticle($child['id'], $clangID);
+			$service->deleteCache($child['id'], $clangID);
 		}
 
 		// Kategorie verschieben, wenn nötig
@@ -300,12 +300,12 @@ class sly_Service_Category extends sly_Service_Model_Base {
 		$cache      = sly_Core::cache();
 		$cat        = $this->findById($categoryID);
 
-		// Prüfen ob die Kategorie existiert
+		// does this category exist?
 		if ($cat === null) {
 			throw new sly_Exception(t('category_doesnt_exist'));
 		}
 
-		// Prüfen ob die Kategorie noch Kinder (Kategorien oder Artikel) besitzt
+		// check if this category still has children (both articles and categories)
 		$where    = array('re_id' => $categoryID);
 		$children = $db->magicFetch('article', 'COUNT(*)', $where);
 
@@ -313,13 +313,21 @@ class sly_Service_Category extends sly_Service_Model_Base {
 			throw new sly_Exception('Category has still content and therefore cannot be deleted.');
 		}
 
-		// Nachbarkategorien neu positionieren
+		// prefetch catpriors
+		foreach (sly_Util_Language::findAll(true) as $clangID) {
+			$catpriors[$clangID] = $this->findById($categoryID, $clangID)->getCatprior();
+		}
+
+		// remove the start article of this category
+		$service = sly_Service_Factory::getArticleService();
+		$service->delete($categoryID);
+
+		// re-position neighbour categories
 		$parent = $cat->getParentId();
 		$prefix = sly_Core::config()->get('DATABASE/TABLE_PREFIX');
 
 		foreach (sly_Util_Language::findAll(true) as $clangID) {
-			$iCat     = $this->findById($categoryID, $clangID);
-			$catprior = $iCat->getCatprior();
+			$catprior = $catpriors[$clangID];
 
 			$db->query(
 				'UPDATE '.$prefix.'article SET catprior = catprior - 1 '.
@@ -327,11 +335,7 @@ class sly_Service_Category extends sly_Service_Model_Base {
 				'AND catprior <> 0 AND clang = '.$clangID
 			);
 
-			$cache->delete('sly.category', $categoryID.'_'.$clangID);
-			$cache->delete('sly.category.list', $parent.'_'.$clangID.'_0');
-			$cache->delete('sly.category.list', $parent.'_'.$clangID.'_1');
-
-			// Cache leeren
+			// delete cache entries
 			$db->select('article', 'id', 're_id = '.$parent.' AND catprior >= '.$catprior.' AND clang = '.$clangID);
 
 			foreach ($db as $row) {
@@ -339,11 +343,7 @@ class sly_Service_Category extends sly_Service_Model_Base {
 			}
 		}
 
-		// Kategorie löschen
-		$return = rex_deleteArticle($categoryID);
-		if (!$return['state']) throw new sly_Exception($return['message']);
-
-		// Event auslösen
+		// fire event
 		$dispatcher = sly_Core::dispatcher();
 		$dispatcher->notify('SLY_CAT_DELETED', $cat);
 
@@ -383,15 +383,12 @@ class sly_Service_Category extends sly_Service_Model_Base {
 		$this->update($cat);
 
 		// Cache leeren
-		rex_deleteCacheArticle($categoryID, $clangID);
+		sly_Service_Factory::getArticleService()->deleteCache($categoryID, $clangID);
 
 		$cache = sly_Core::cache();
 		$cache->delete('sly.category', $categoryID.'_'.$clangID);
-		$cache->delete('sly.article', $categoryID.'_'.$clangID);
 		$cache->delete('sly.category.list', $re_id.'_'.$clangID.'_0');
-		$cache->delete('sly.article.list', $categoryID.'_'.$clangID.'_0');
 		$cache->delete('sly.category.list', $re_id.'_'.$clangID.'_1');
-		$cache->delete('sly.article.list', $categoryID.'_'.$clangID.'_1');
 
 		// Event auslösen
 		$dispatcher = sly_Core::dispatcher();
