@@ -54,6 +54,6 @@ $attributes = array(
 
 <? if (!empty($this->focussedElement)): ?>
 <script type="text/javascript">
-$('#<?= $this->focussedElement ?>').focus();
+document.getElementById('<?= $this->focussedElement ?>').focus();
 </script>
 <?php endif ?>
