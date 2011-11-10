@@ -103,10 +103,8 @@ class OOArticleSlice {
 	/**
 	 * Return the first slice for an article.
 	 *
-	 * This can then be used to iterate over all the
-	 * slices in the order as they appear using the
-	 * getNextSlice() function.
-	 * Returns an OOArticleSlice object
+	 * This can then be used to iterate over all the slices in the order as they
+	 * appear using the getNextSlice() function.
 	 *
 	 * @param  int     $articleID  The article id
 	 * @param  string  $slot       The slot (if null, the first defined slot will be used)
@@ -260,22 +258,25 @@ class OOArticleSlice {
 		return sly_Util_Article::findById($this->getArticleId());
 	}
 
-	public function getArticleId()  { return $this->_article_id;             }
-	public function getClang()      { return $this->_clang;                  }
-	public function getSlot()       { return $this->_slot;                   }
-	public function getRevision()   { return $this->_revision;               }
+	public function getArticleId()  { return $this->_article_id; }
+	public function getClang()      { return $this->_clang;      }
+	public function getSlot()       { return $this->_slot;       }
+	public function getRevision()   { return $this->_revision;   }
+	public function getId()         { return $this->_id;         }
+	public function getPrior()      { return $this->_prior;      }
+	public function getSliceId()    { return $this->_slice_id;   }
+	public function getCreatedate() { return $this->_createdate; }
+	public function getUpdatedate() { return $this->_updatedate; }
+	public function getCreateuser() { return $this->_createuser; }
+	public function getUpdateuser() { return $this->_updateuser; }
+
 	/**
 	 * @deprecated
 	 * @return string
 	 */
-	public function getModule()     { return $this->getSlice()->getModule(); }
-	public function getId()         { return $this->_id;                     }
-	public function getPrior()      { return $this->_prior;                  }
-	public function getSliceId()    { return $this->_slice_id;               }
-	public function getCreatedate() { return $this->_createdate;             }
-	public function getUpdatedate() { return $this->_updatedate;             }
-	public function getCreateuser() { return $this->_createuser;             }
-	public function getUpdateuser() { return $this->_updateuser;             }
+	public function getModule() {
+		return $this->getSlice()->getModule();
+	}
 
 	/**
 	 *

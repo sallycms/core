@@ -413,4 +413,25 @@ class sly_Core {
 	public static function getCurrentPage() {
 		return self::isBackend() ? sly_Controller_Base::getPage() : null;
 	}
+
+	/**
+	 * Clears the complete system cache
+	 */
+	public static function clearCache() {
+		clearstatcache();
+
+		$obj = new sly_Util_Directory(SLY_DYNFOLDER.'/internal/sally/article_slice');
+		$obj->deleteFiles();
+
+		$obj = new sly_Util_Directory(SLY_DYNFOLDER.'/internal/sally/templates');
+		$obj->deleteFiles();
+
+		self::cache()->flush('sly', true);
+
+		// create bootcache
+		sly_Util_BootCache::recreate('frontend');
+		sly_Util_BootCache::recreate('backend');
+
+		return self::dispatcher()->filter('ALL_GENERATED', t('delete_cache_message'));
+	}
 }
