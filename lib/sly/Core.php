@@ -416,6 +416,8 @@ class sly_Core {
 
 	/**
 	 * Clears the complete system cache
+	 *
+	 * @return string  the info messages (collected from all listeners)
 	 */
 	public static function clearCache() {
 		clearstatcache();
@@ -426,12 +428,19 @@ class sly_Core {
 		$obj = new sly_Util_Directory(SLY_DYNFOLDER.'/internal/sally/templates');
 		$obj->deleteFiles();
 
+		// clear loader cache
+		sly_Loader::clearCache();
+
+		// clear our own data caches
 		self::cache()->flush('sly', true);
+
+		// clear asset cache
+		sly_Service_Factory::getAssetService()->clearCache();
 
 		// create bootcache
 		sly_Util_BootCache::recreate('frontend');
 		sly_Util_BootCache::recreate('backend');
 
-		return self::dispatcher()->filter('ALL_GENERATED', t('delete_cache_message'));
+		return self::dispatcher()->filter('SLY_CACHE_CLEARED', t('delete_cache_message'));
 	}
 }
