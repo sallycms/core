@@ -53,13 +53,12 @@ class sly_Service_Module extends sly_Service_DevelopBase {
 	 */
 	protected function buildData($filename, $mtime, $data) {
 		$result = array(
-			'filename'  => $filename,
-			'title'     => isset($data['title']) ? $data['title'] : $data['name'],
-			'actions'   => isset($data['actions']) ? $data['actions'] : array(),
-			'templates' => isset($data['templates']) ? $data['templates'] : 'all',
-			'mtime'     => $mtime
+			'filename' => $filename,
+			'title'    => isset($data['title']) ? $data['title'] : $data['name'],
+			'mtime'    => $mtime
 		);
-		unset($data['name'], $data['title'], $data['actions']);
+
+		unset($data['name'], $data['title']);
 		$result['params'] = $data;
 
 		return $result;
@@ -106,16 +105,6 @@ class sly_Service_Module extends sly_Service_DevelopBase {
 	}
 
 	/**
-	 * Get the available actions for this module
-	 *
-	 * @param  string $name  unique module name
-	 * @return array         array of action names
-	 */
-	public function getActions($name) {
-		return sly_makeArray($this->get($name, 'actions', array()));
-	}
-
-	/**
 	 * Get the filename of the modules input file
 	 *
 	 * @param  string $name  unique module name
@@ -133,40 +122,5 @@ class sly_Service_Module extends sly_Service_DevelopBase {
 	 */
 	public function getOutputFilename($name) {
 		return $this->filterByCondition($name, 'output');
-	}
-
-	/**
-	 * Get a list of templates where this module may be used
-	 *
-	 * This list is NOT affected by constraints made in template configuration.
-	 *
-	 * @param  string $name  unique module name
-	 * @return string        list of templates
-	 */
-	public function getTemplates($name) {
-		static $templates;
-		if (!isset($templates[$name])) {
-			$t = $this->get($name, 'templates');
-			if ($t === 'all') $t = array_keys(sly_Service_Factory::getTemplateService()->getTemplates());
-			$templates[$name] = sly_makeArray($t);
-		}
-		return $templates[$name];
-	}
-
-	/**
-	 * Checks, if a module may be used with a given template
-	 *
-	 * @param  string $name          unique module name
-	 * @param  string $templateName  unique template name
-	 * @return boolean               true, when the module may be used in the given template
-	 */
-	public function hasTemplate($name, $templateName) {
-		$templates = $this->getTemplates($name);
-
-		if (!empty($templates)) {
-			return in_array($templateName, $templates);
-		}
-
-		return true;
 	}
 }
