@@ -36,6 +36,3 @@ if (!$cacheExists) {
 	require_once SLY_COREFOLDER.'/functions/function_rex_other.inc.php';
 	require_once SLY_COREFOLDER.'/functions/function_rex_generate.inc.php';
 }
-
-// register sly_Loader for cache clearing
-sly_Core::dispatcher()->register('ALL_GENERATED', array('sly_Loader', 'clearCache'));

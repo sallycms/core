@@ -30,7 +30,6 @@ class sly_Service_Asset {
 
 		$dispatcher = sly_Core::dispatcher();
 		$dispatcher->register(self::EVENT_PROCESS_ASSET, array($this, 'processScaffold'));
-		$dispatcher->register('ALL_GENERATED', array(__CLASS__, 'clearCache'));
 	}
 
 	/**
@@ -277,7 +276,7 @@ class sly_Service_Asset {
 				copy($file, $cacheFile);
 		}
 	}
-	
+
 	/**
 	 * @param string $origFile
 	 * @param string $file
