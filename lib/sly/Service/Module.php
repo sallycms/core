@@ -161,7 +161,7 @@ class sly_Service_Module extends sly_Service_DevelopBase {
 	 * @return boolean               true, when the module may be used in the given template
 	 */
 	public function hasTemplate($name, $templateName) {
-		$templates = self::getTemplates($name);
+		$templates = $this->getTemplates($name);
 
 		if (!empty($templates)) {
 			return in_array($templateName, $templates);
