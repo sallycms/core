@@ -105,7 +105,7 @@ class sly_Service_Language extends sly_Service_Model_Base_Id {
 			));
 		}
 
-		rex_generateAll();
+		sly_Core::clearCache();
 		return $res;
 	}
 }
