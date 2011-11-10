@@ -15,7 +15,8 @@
  * @ingroup service
  */
 class sly_Service_Template extends sly_Service_DevelopBase {
-	const DEFAULT_TYPE = 'default'; ///< string
+	const DEFAULT_TYPE     = 'default'; ///< string
+	const VIRTUAL_ALL_SLOT = '_ALL_';   ///< string
 
 	private static $defaultSlots = array('default' => ''); ///< array
 
@@ -257,26 +258,33 @@ class sly_Service_Template extends sly_Service_DevelopBase {
 	public function getModules($name, $slot = null) {
 		$moduleService = sly_Service_Factory::getModuleService();
 		$modules       = sly_makeArray($this->get($name, 'modules'));
-		$slots         = $this->getSlots($name);
 		$result        = array();
 
 		// check if slot is valid
-		if (isset($slot) || self::hasSlot($name, $slot)) {
+		if ($slot === null || $this->hasSlot($name, $slot)) {
 			$allModules = array_keys($moduleService->getModules());
 
-			// find modules for this template
+			// if there is no spec at all, allow all available modules
 			if (empty($modules)) {
 				$modules = $allModules;
 			}
+
+			// if there is a complex spec, we have to look a bit closer
+			// $modules = {slotName: [mod,mod,mod], slotName: [mod,mod]
 			elseif ($this->isModulesDefComplex($modules)) {
+				// if the slot has not been specified, allow all modules
 				if (!array_key_exists($slot, $modules)) {
 					$modules = $allModules;
 				}
+
+				// check the list
 				else {
 					$tmp = array();
+					$all = self::VIRTUAL_ALL_SLOT;
 
 					foreach ($modules as $key => $value) {
-						if ($slot === null || $slot === $key || ($key === '_ALL_' && !self::hasSlot($name, '_ALL_'))) {
+						// $key = 'slotName', $value = [mod,mod,...]
+						if ($slot === null || $slot === $key || ($key === $all && !$this->hasSlot($name, $all))) {
 							$value = sly_makeArray($value);
 							$tmp   = array_merge($tmp, array_values($value));
 						}
