@@ -405,11 +405,7 @@ class sly_Service_Asset {
 		return $jumper;
 	}
 
-	/**
-	 * @param  array $params
-	 * @return mixed          the subject (if given) or true
-	 */
-	public static function clearCache(array $params) {
+	public static function clearCache() {
 		$me  = new self();
 		$dir = $me->getCacheDir('', '');
 
@@ -442,7 +438,5 @@ class sly_Service_Asset {
 			file_put_contents($dir.'/'.$access.'/gzip/.htaccess', $htaccess[$access.'_gzip']);
 			file_put_contents($dir.'/'.$access.'/deflate/.htaccess', $htaccess[$access.'_deflate']);
 		}
-
-		return isset($params['subject']) ? $params['subject'] : true;
 	}
 }
