@@ -26,10 +26,16 @@ print "Hallo Welt!";
  * @sly test_array   [foo, bar, 34, true]
  * @sly test_hash    {name: blub, second: 34}
  * @sly test_string  Dies ist nur ein kleiner String. Nichts besonderes.
- *
- * Hier folgt weiterer Text.
+ * Hier
+ *   folgt
+        weiterer
+ *  Text.
  *
  * @sly second_group reached!
+ *
+ * Dieser Text sollte nicht mehr Teil von second_group sein.
+ *
+ * Der hier auch nicht mehr.
  *
  */
 
@@ -70,7 +76,7 @@ TESTFILE;
 			'test_double'  => 194.234,
 			'test_array'   => array('foo', 'bar', 34, true),
 			'test_hash'    => array('name' => 'blub', 'second' => 34),
-			'test_string'  => 'Dies ist nur ein kleiner String. Nichts besonderes.',
+			'test_string'  => 'Dies ist nur ein kleiner String. Nichts besonderes. Hier folgt weiterer Text.',
 			'second_group' => 'reached!'
 		);
 
