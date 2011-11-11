@@ -1,1 +1,1 @@
-phpunit --bootstrap bootstrap.php tests
+phpunit --bootstrap bootstrap.php --tap tests
