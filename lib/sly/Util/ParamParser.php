@@ -67,7 +67,10 @@ class sly_Util_ParamParser {
 		$content      = trim($match[1]);
 		$this->params = array();
 
-		// add a pseudo tage to make the regex easier
+		// remove incomplete tags
+		$content = preg_replace('/^\s*\*\s*@sly[ \t]*$/m', '', $content);
+
+		// add a pseudo tag to make the regex easier
 		$content .= ' * @sly';
 
 		preg_match_all('/
@@ -83,8 +86,17 @@ class sly_Util_ParamParser {
 			$key   = trim($match[1]);
 			$value = trim($match[2]);
 
+			// Did we match an incomplete tag?
+			if ($key === '' || $key === '*') {
+				continue;
+			}
+
 			// if we got a multiline value, replace the " *     " at the beginning of each line
-			$value = preg_replace('/^\s*\*\s*/m', '', $value);
+			$value = preg_replace('/^\s*(\*[ \t]*)?/m', '', $value);
+
+			// remove everything after a blank line
+			$value = explode("\n\n", $value, 2);
+			$value = reset($value);
 
 			// and lastly replace the newlines with spaces
 			$value = str_replace("\n", ' ', $value);
