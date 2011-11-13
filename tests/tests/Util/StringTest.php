@@ -86,4 +86,20 @@ class sly_Util_StringTest extends PHPUnit_Framework_TestCase {
 
 		$this->assertNotEquals(sly_Util_String::getRandomString(5, 10), sly_Util_String::getRandomString(5, 10));
 	}
+
+	/**
+	 * @dataProvider getFileExtensionProvider
+	 */
+	public function testGetFileExtension($filename, $expected) {
+		$this->assertEquals($expected, sly_Util_String::getFileExtension($filename));
+	}
+
+	public function getFileExtensionProvider() {
+		return array(
+			array('', ''), array('foo', ''), array('foo.', ''),
+			array('foo.bar', 'bar'), array('.htaccess', 'htaccess'),
+			array('foo.1', '1'), array('foo.bar.xYz', 'xYz'),
+			array('foo.0', '0')
+		);
+	}
 }

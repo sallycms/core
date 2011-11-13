@@ -58,7 +58,6 @@ class sly_Form_Fieldset extends sly_Viewable {
 	 * @return boolean             always true
 	 */
 	public function addRow(array $row) {
-		$row = sly_makeArray($row);
 
 		if ($this->columns > 1 && $this->isMultilingual($row)) {
 			throw new sly_Form_Exception('Mehrsprachige Elemente können nicht in mehrspaltige Fieldsets eingefügt werden.');

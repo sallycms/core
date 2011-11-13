@@ -86,7 +86,8 @@ class sly_Util_Article {
 
 	public static function canReadArticle(sly_Model_User $user, $articleId) {
 		static $canReadCache;
-		if(!isset($canReadCache[$articleId])) {
+
+		if (!isset($canReadCache[$articleId])) {
 			$canReadCache[$articleId] = false;
 
 			if(self::canEditContent($user, $articleId)) $canReadCache[$articleId] = true;
@@ -109,25 +110,13 @@ class sly_Util_Article {
 	}
 
 	public static function canEditArticle(sly_Model_User $user, $articleId) {
-		if ($user->hasRight('editContentOnly[]')) return false;
+		if (!$user->isAdmin() && $user->hasRight('editContentOnly[]')) return false;
 		return self::canEditContent($user, $articleId);
 	}
 
 	public static function canEditContent(sly_Model_User $user, $articleId) {
 		if ($user->isAdmin() || $user->hasRight('csw[0]')) return true;
 
-		if(sly_Authorisation::hasProvider()) {
-			return sly_Authorisation::hasPermission($user->getId(), 'csw', $articleId);
-		} else {
-			if(sly_Util_Article::exists($articleId)) {
-				$cat = sly_Util_Article::findById($articleId)->getCategory();
-				while ($cat) {
-					if ($user->hasRight('csw['.$cat->getId().']')) return true;
-					$cat = $cat->getParent();
-				}
-			}
-		}
-
-		return false;
+		return sly_Authorisation::hasPermission($user->getId(), 'csw', $articleId);
 	}
 }

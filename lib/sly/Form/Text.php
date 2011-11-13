@@ -72,7 +72,7 @@ class sly_Form_Text extends sly_Form_ElementBase implements sly_Form_IElement {
 	 * @return string  the outer class
 	 */
 	public function getOuterClass() {
-		$this->addOuterClass('rex-form-read');
+		$this->addOuterClass('sly-form-read');
 		return $this->outerClass;
 	}
 

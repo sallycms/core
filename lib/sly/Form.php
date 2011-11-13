@@ -294,16 +294,39 @@ class sly_Form extends sly_Form_Base {
 	}
 
 	/**
-	 * Get all fieldsets
+	 * Get element by name
 	 *
-	 * @return array  list of all fieldsets
+	 * @param  string $name          the element's name
+	 * @return sly_Form_ElementBase  the found element or null
 	 */
 	public function findElementByName($name) {
+		return $this->findElement('name', $name);
+	}
+
+	/**
+	 * Get element by ID
+	 *
+	 * @param  string $name          the element's ID
+	 * @return sly_Form_ElementBase  the found element or null
+	 */
+	public function findElementByID($id) {
+		return $this->findElement('id', $id);
+	}
+
+	/**
+	 * Get element by name
+	 *
+	 * @param  string $criterium     'id' or 'name'
+	 * @param  string $value         the value to find
+	 * @return sly_Form_ElementBase  the found element or null
+	 */
+	protected function findElement($criterium, $value) {
 		foreach ($this->fieldsets as $fieldset) {
 			foreach ($fieldset->getRows() as $row) {
 				foreach ($row as $element) {
-					if ($element instanceof sly_Form_ElementBase && $element->getName() === $name) {
-						return $element;
+					if ($element instanceof sly_Form_ElementBase) {
+						if ($criterium === 'name' && $element->getName() === $value) return $element;
+						if ($criterium === 'id'   && $element->getID() === $value)   return $element;
 					}
 				}
 			}

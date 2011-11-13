@@ -66,9 +66,9 @@ class sly_Util_Cache {
 		$config     = self::getConfig();
 		$listener   = array(__CLASS__, 'listener');
 		$dispatcher = sly_Core::dispatcher();
-		$registered = array('ALL_GENERATED');
+		$registered = array('SLY_CACHE_CLEARED');
 
-		$dispatcher->register('ALL_GENERATED', $listener);
+		$dispatcher->register('SLY_CACHE_CLEARED', $listener);
 
 		foreach ($config as $namespace => $events) {
 			$events = sly_makeArray($events);
@@ -93,7 +93,7 @@ class sly_Util_Cache {
 		$event  = $params['event'];
 
 		foreach ($config as $namespace => $events) {
-			if ($event === 'ALL_GENERATED' || in_array($event, $events)) {
+			if ($event === 'SLY_CACHE_CLEARED' || in_array($event, $events)) {
 				self::flush($namespace);
 			}
 		}

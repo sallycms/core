@@ -18,7 +18,6 @@ class sly_Core {
 	private $curArticleId;     ///< int
 	private $varTypes;         ///< array
 	private $layout;           ///< sly_Layout
-	private $navigation;       ///< sly_Layout_Navigation_Backend
 	private $i18n;             ///< sly_I18N
 	private $errorHandler;     ///< sly_ErrorHandler
 
@@ -273,15 +272,22 @@ class sly_Core {
 	/**
 	 * @return int  permissions for files
 	 */
-	public static function getFilePerm($default = 0777) {
+	public static function getFilePerm($default = self::DEFAULT_FILEPERM) {
 		return (int) self::config()->get('FILEPERM', $default);
 	}
 
 	/**
 	 * @return int  permissions for directory
 	 */
-	public static function getDirPerm($default = 0777) {
+	public static function getDirPerm($default = self::DEFAULT_DIRPERM) {
 		return (int) self::config()->get('DIRPERM', $default);
+	}
+
+	/**
+	 * @return sring  the database table prefix
+	 */
+	public static function getTablePrefix() {
+		return self::config()->get('DATABASE/TABLE_PREFIX');
 	}
 
 	/**
@@ -339,17 +345,11 @@ class sly_Core {
 
 	/**
 	 * Returns the backend navigation
-	 *
+	 * @deprecated
 	 * @return sly_Layout_Navigation_Backend  the navigation object used for the backend menu
 	 */
 	public static function getNavigation() {
-		$instance = self::getInstance();
-
-		if (!isset($instance->navigation)) {
-			$instance->navigation = new sly_Layout_Navigation_Backend();
-		}
-
-		return $instance->navigation;
+		return self::getLayout('Backend')->getNavigation();
 	}
 
 	/**
@@ -372,7 +372,6 @@ class sly_Core {
 
 	public static function registerCoreVarTypes() {
 		self::registerVarType('rex_var_article');
-		self::registerVarType('rex_var_category');
 		self::registerVarType('rex_var_template');
 		self::registerVarType('rex_var_value');
 		self::registerVarType('rex_var_link');
@@ -413,5 +412,35 @@ class sly_Core {
 	 */
 	public static function getCurrentPage() {
 		return self::isBackend() ? sly_Controller_Base::getPage() : null;
+	}
+
+	/**
+	 * Clears the complete system cache
+	 *
+	 * @return string  the info messages (collected from all listeners)
+	 */
+	public static function clearCache() {
+		clearstatcache();
+
+		$obj = new sly_Util_Directory(SLY_DYNFOLDER.'/internal/sally/article_slice');
+		$obj->deleteFiles();
+
+		$obj = new sly_Util_Directory(SLY_DYNFOLDER.'/internal/sally/templates');
+		$obj->deleteFiles();
+
+		// clear loader cache
+		sly_Loader::clearCache();
+
+		// clear our own data caches
+		self::cache()->flush('sly', true);
+
+		// clear asset cache
+		sly_Service_Factory::getAssetService()->clearCache();
+
+		// create bootcache
+		sly_Util_BootCache::recreate('frontend');
+		sly_Util_BootCache::recreate('backend');
+
+		return self::dispatcher()->filter('SLY_CACHE_CLEARED', t('delete_cache_message'));
 	}
 }

@@ -39,11 +39,7 @@ class sly_ErrorHandler_Production extends sly_ErrorHandler_Base implements sly_E
 
 		set_exception_handler(array($this, 'handleException'));
 		set_error_handler(array($this, 'handleError'));
-
-		// PHP >= 5.2
-		if (function_exists('error_get_last')) {
-			register_shutdown_function(array($this, 'shutdownFunction'));
-		}
+		register_shutdown_function(array($this, 'shutdownFunction'));
 
 		// Init the sly_Log instance so we don't fail when loading classes result
 		// in errors like E_STRICT. See PHP Bug #54054 for details.

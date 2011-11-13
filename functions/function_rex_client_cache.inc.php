@@ -63,7 +63,6 @@ function rex_send_content($content, $lastModified, $etag, $environment) {
 	$config  = sly_Core::config();
 	$lastMod = $config->get('USE_LAST_MODIFIED');
 	$useEtag = $config->get('USE_ETAG');
-	$md5     = $config->get('USE_MD5');
 
 	if ($lastMod === true || $lastMod == $environment) {
 		rex_send_last_modified($lastModified);

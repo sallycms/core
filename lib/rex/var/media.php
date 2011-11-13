@@ -23,7 +23,7 @@ class rex_var_media extends rex_var {
 	const MEDIAWIDGET     = 'SLY_MEDIA_WIDGET';
 	const MEDIALISTWIDGET = 'SLY_MEDIALIST_WIDGET';
 
-	public function getRequestValues($REX_ACTION) {
+	public function getRequestValues($REX_ACTION = array()) {
 		foreach (array('MEDIA', 'MEDIALIST') as $type) {
 			$media = sly_request($type, 'array');
 			$type  = 'SLY_'.$type;
