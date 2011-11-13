@@ -37,8 +37,7 @@ if (ini_get('register_globals')) {
 	unset($superglobals, $key, $keys);
 }
 
-// So, jetzt haben wir eine saubere Grundlage für unsere Aufgaben.
-
+// define constants for system wide important paths
 define('SLY_BASE',          realpath(dirname(__FILE__).'/../../'));
 define('SLY_SALLYFOLDER',   SLY_BASE.DIRECTORY_SEPARATOR.'sally');
 define('SLY_COREFOLDER',    SLY_SALLYFOLDER.DIRECTORY_SEPARATOR.'core');
@@ -53,17 +52,33 @@ define('SLY_ADDONFOLDER',   SLY_SALLYFOLDER.DIRECTORY_SEPARATOR.'addons');
 if (!defined('E_DEPRECATED'))      define('E_DEPRECATED',      8192);  // PHP 5.3
 if (!defined('E_USER_DEPRECATED')) define('E_USER_DEPRECATED', 16384); // PHP 5.3
 
-// Loader initialisieren
-
+// init loader
 require_once SLY_COREFOLDER.'/loader.php';
 
-// Kernkonfiguration laden
+// load core config (be extra careful because this is the first attempt to write
+// to the filesystem on new installations)
+try {
+	$config = sly_Core::config();
+	$config->loadStatic(SLY_COREFOLDER.'/config/sallyStatic.yml');
+	$config->loadLocalConfig();
+	$config->loadProjectConfig();
+	$config->loadDevelop();
+}
+catch (sly_Util_DirectoryException $e) {
+	$dir = sly_html($e->getDirectory());
 
-$config = sly_Core::config();
-$config->loadStatic(SLY_COREFOLDER.'/config/sallyStatic.yml');
-$config->loadLocalConfig();
-$config->loadProjectConfig();
-$config->loadDevelop();
+	header('Content-Type: text/html; charset=UTF-8');
+	die(
+		'Could not create data directory in <strong>'.$dir.'</strong>.<br />'.
+		'Please check your filesystem permissions and ensure that PHP is allowed<br />'.
+		'to write in <strong>'.SLY_DATAFOLDER.'</strong>. In most cases this can<br />'.
+		'be fixed by creating the directory via FTP and chmodding it to <strong>0777</strong>.'
+	);
+}
+catch (Exception $e) {
+	header('Content-Type: text/plain; charset=UTF-8');
+	die('Could not load core configuration: '.$e->getMessage());
+}
 
 // init basic error handling
 $errorHandler = sly_Core::isDeveloperMode() ? new sly_ErrorHandler_Development() : new sly_ErrorHandler_Production();

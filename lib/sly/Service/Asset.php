@@ -237,11 +237,10 @@ class sly_Service_Asset {
 	 */
 	protected function generateCacheFile($file, $cacheFile) {
 		clearstatcache();
+		sly_Util_Directory::create(dirname($cacheFile), $this->getDirPerm());
 
-		// TODO: eeeh, eeeh, eeeh: the '@' sucks
-		if (!is_dir(dirname($cacheFile))) @mkdir(dirname($cacheFile), sly_Core::getDirPerm(), true);
-
-		$enc = $this->getPreferredClientEncoding();
+		$enc   = $this->getPreferredClientEncoding();
+		$level = error_reporting(0);
 
 		switch ($enc) {
 			case 'gzip':
@@ -275,6 +274,12 @@ class sly_Service_Asset {
 			default:
 				copy($file, $cacheFile);
 		}
+
+		if (file_exists($cacheFile)) {
+			chmod($cacheFile, $this->getFilePerm());
+		}
+
+		error_reporting($level);
 	}
 
 	/**
@@ -345,12 +350,15 @@ class sly_Service_Asset {
 		$file = $params['subject'];
 
 		if (sly_Util_String::endsWith($file, '.css') && file_exists(SLY_BASE.'/'.$file)) {
-			$css = sly_Util_Scaffold::process($file);
+			$css     = sly_Util_Scaffold::process($file);
+			$dir     = SLY_DYNFOLDER.'/'.self::TEMP_DIR;
+			$tmpFile = $dir.'/.css';
 
-			$tmpFile = sly_Util_Directory::join(SLY_DYNFOLDER, self::TEMP_DIR, md5($css).'.css');
-			if (!file_exists(dirname($tmpFile))) mkdir(dirname($tmpFile), sly_Core::getDirPerm(), true);
+			sly_Util_Directory::create($dir, $this->getDirPerm());
 
 			file_put_contents($tmpFile, $css);
+			chmod($tmpFile, $this->getFilePerm());
+
 			return $tmpFile;
 		}
 
@@ -358,17 +366,21 @@ class sly_Service_Asset {
 	}
 
 	private function initCache() {
-		$dir = sly_Util_Directory::join(SLY_DYNFOLDER, self::CACHE_DIR);
-		if (!is_dir($dir)) mkdir($dir, sly_Core::getDirPerm(), true);
+		$dirPerm  = $this->getDirPerm();
+		$filePerm = $this->getFilePerm();
+		$dir      = SLY_DYNFOLDER.'/'.self::CACHE_DIR;
+
+		sly_Util_Directory::create($dir, $dirPerm);
 
 		$install  = SLY_COREFOLDER.'/install/static-cache/';
-		$htaccess = sly_Util_Directory::join($dir, '.htaccess');
+		$htaccess = $dir.'/.htaccess';
 
 		if (!file_exists($htaccess)) {
 			copy($install.'.htaccess', $htaccess);
+			chmod($htaccess, $filePerm);
 		}
 
-		$protect_php = sly_Util_Directory::join($dir, 'protect.php');
+		$protect_php = $dir.'/protect.php';
 
 		if (!file_exists($protect_php)) {
 			$jumper   = self::getJumper($dir);
@@ -376,15 +388,27 @@ class sly_Service_Asset {
 			$contents = str_replace('___JUMPER___', $jumper, $contents);
 
 			file_put_contents($protect_php, $contents);
+			chmod($protect_php, $filePerm);
 		}
 
 		foreach (array(self::ACCESS_PUBLIC, self::ACCESS_PROTECTED) as $access) {
-			sly_Util_Directory::create($dir.'/'.$access.'/gzip');
-			sly_Util_Directory::create($dir.'/'.$access.'/deflate');
-			sly_Util_Directory::create($dir.'/'.$access.'/plain');
+			sly_Util_Directory::create($dir.'/'.$access.'/gzip', $dirPerm);
+			sly_Util_Directory::create($dir.'/'.$access.'/deflate', $dirPerm);
+			sly_Util_Directory::create($dir.'/'.$access.'/plain', $dirPerm);
 
-			if (!file_exists($dir.'/'.$access.'/gzip/.htaccess'))    copy($install.'gzip.htaccess',    $dir.'/'.$access.'/gzip/.htaccess');
-			if (!file_exists($dir.'/'.$access.'/deflate/.htaccess')) copy($install.'deflate.htaccess', $dir.'/'.$access.'/deflate/.htaccess');
+			$file = $dir.'/'.$access.'/gzip/.htaccess';
+
+			if (!file_exists($file)) {
+				copy($install.'gzip.htaccess', $file);
+				chmod($file, $filePerm);
+			}
+
+			$file = $dir.'/'.$access.'/deflate/.htaccess';
+
+			if (!file_exists($file)) {
+				copy($install.'deflate.htaccess', $file);
+				chmod($file, $filePerm);
+			}
 		}
 
 		sly_Util_Directory::createHttpProtected($dir.'/'.self::ACCESS_PROTECTED);
@@ -438,5 +462,13 @@ class sly_Service_Asset {
 			file_put_contents($dir.'/'.$access.'/gzip/.htaccess', $htaccess[$access.'_gzip']);
 			file_put_contents($dir.'/'.$access.'/deflate/.htaccess', $htaccess[$access.'_deflate']);
 		}
+	}
+
+	private function getFilePerm() {
+		return sly_Core::getFilePerm(sly_Core::DEFAULT_FILEPERM);
+	}
+
+	private function getDirPerm() {
+		return sly_Core::getDirPerm(sly_Core::DEFAULT_DIRPERM);
 	}
 }

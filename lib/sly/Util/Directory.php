@@ -32,39 +32,55 @@ class sly_Util_Directory {
 	/**
 	 * @param  string $path
 	 * @param  int    $perm
+	 * @param  bool   $throwException
 	 * @return mixed
 	 */
-	public static function create($path, $perm = null) {
+	public static function create($path, $perm = null, $throwException = false) {
 		$path = self::normalize($path);
 		$perm = $perm === null ? sly_Core::getDirPerm() : (int) $perm;
+		$full = $path;
 
 		if (!is_dir($path)) {
-			if (!mkdir($path, $perm, true)) {
-				return false;
-			}
-
-			// chmod all path components on their own!
-			// FIXME: do not chmod previously existing folders, concept of this
-			// function is not that good
-
-			$base = '.';
-			$s    = DIRECTORY_SEPARATOR;
-			$p    = $path;
+			$s = DIRECTORY_SEPARATOR;
+			$p = null;
 
 			if (sly_Util_String::startsWith($path, SLY_BASE)) {
-				$base = SLY_BASE;
-				$p    = trim(substr($path, strlen(SLY_BASE)), $s);
+				$p    = SLY_BASE;
+				$path = trim(substr($path, strlen(SLY_BASE)), $s);
 			}
 
-			foreach (explode($s, $p) as $component) {
-				chmod($base.$s.$component, $perm);
-				$base .= $s.$component;
+			$parts = explode($s, $path);
+			$level = error_reporting(0);
+
+			foreach ($parts as $part) {
+				$p = $p === null ? $part : $p.$s.$part;
+
+				// $part can be empty if $path was UNIX style absolute
+				// '/var/bar' => ['', 'var', 'bar']
+				if (strlen($part) === 0 || is_dir($p)) continue;
+
+				// try to create the directory
+				if (!mkdir($p)) {
+					error_reporting($level);
+					clearstatcache();
+
+					if ($throwException) {
+						throw new sly_Util_DirectoryException($p);
+					}
+					else {
+						trigger_error('mkdir('.$p.') failed.', E_USER_WARNING);
+						return false;
+					}
+				}
+
+				chmod($p, $perm);
 			}
 
+			error_reporting($level);
 			clearstatcache();
 		}
 
-		return $path;
+		return $full;
 	}
 
 	/**
@@ -314,10 +330,16 @@ class sly_Util_Directory {
 	 */
 	public static function createHttpProtected($path) {
 		$status = self::create($path);
+
 		if ($status && !file_exists($path.'/.htaccess')) {
 			$htaccess = "order deny,allow\ndeny from all";
 			$status   = @file_put_contents($path.'/.htaccess', $htaccess) > 0;
+
+			if ($status) {
+				chmod($path.'/.htaccess', sly_Core::getFilePerm());
+			}
 		}
+
 		return $status;
 	}
 }
