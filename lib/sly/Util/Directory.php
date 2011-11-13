@@ -38,6 +38,7 @@ class sly_Util_Directory {
 	public static function create($path, $perm = null, $throwException = false) {
 		$path = self::normalize($path);
 		$perm = $perm === null ? sly_Core::getDirPerm() : (int) $perm;
+		$full = $path;
 
 		if (!is_dir($path)) {
 			$s = DIRECTORY_SEPARATOR;
@@ -61,6 +62,7 @@ class sly_Util_Directory {
 				// try to create the directory
 				if (!mkdir($p)) {
 					error_reporting($level);
+					clearstatcache();
 
 					if ($throwException) {
 						throw new sly_Util_DirectoryException($p);
@@ -78,7 +80,7 @@ class sly_Util_Directory {
 			clearstatcache();
 		}
 
-		return $path;
+		return $full;
 	}
 
 	/**
@@ -328,10 +330,16 @@ class sly_Util_Directory {
 	 */
 	public static function createHttpProtected($path) {
 		$status = self::create($path);
+
 		if ($status && !file_exists($path.'/.htaccess')) {
 			$htaccess = "order deny,allow\ndeny from all";
 			$status   = @file_put_contents($path.'/.htaccess', $htaccess) > 0;
+
+			if ($status) {
+				chmod($path.'/.htaccess', sly_Core::getFilePerm());
+			}
 		}
+
 		return $status;
 	}
 }
