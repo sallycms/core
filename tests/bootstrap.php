@@ -17,3 +17,4 @@ define('SLY_TESTING_ROOT', $sallyRoot);
 require SLY_TESTING_ROOT.'/sally/backend/index.php';
 
 sly_Loader::addLoadPath(dirname(__FILE__).'/tests', 'sly_');
+require_once SLY_COREFOLDER.'/functions/function_rex_content.inc.php';
