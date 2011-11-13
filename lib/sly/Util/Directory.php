@@ -39,26 +39,23 @@ class sly_Util_Directory {
 		$perm = $perm === null ? sly_Core::getDirPerm() : (int) $perm;
 
 		if (!is_dir($path)) {
-			if (!mkdir($path, $perm, true)) {
-				return false;
-			}
+			$s     = DIRECTORY_SEPARATOR;
+			$parts = explode($s, $path);
+			$p     = null;
 
-			// chmod all path components on their own!
-			// FIXME: do not chmod previously existing folders, concept of this
-			// function is not that good
+			foreach ($parts as $part) {
+				$p = $p === null ? $part : $p.$s.$part;
 
-			$base = '.';
-			$s    = DIRECTORY_SEPARATOR;
-			$p    = $path;
+				// $part can be empty if $path was UNIX style absolute
+				// '/var/bar' => ['', 'var', 'bar']
+				if (strlen($part) === 0 || is_dir($p)) continue;
 
-			if (sly_Util_String::startsWith($path, SLY_BASE)) {
-				$base = SLY_BASE;
-				$p    = trim(substr($path, strlen(SLY_BASE)), $s);
-			}
+				// try to create the directory
+				if (!mkdir($p)) {
+					return false;
+				}
 
-			foreach (explode($s, $p) as $component) {
-				chmod($base.$s.$component, $perm);
-				$base .= $s.$component;
+				chmod($p, $perm);
 			}
 
 			clearstatcache();
