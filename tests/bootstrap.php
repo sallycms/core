@@ -15,3 +15,5 @@ $sallyRoot = realpath(dirname(__FILE__).'/../../');
 define('SLY_TESTING_ROOT', $sallyRoot);
 
 require SLY_TESTING_ROOT.'/sally/backend/index.php';
+
+sly_Loader::addLoadPath(dirname(__FILE__).'/tests', 'sly_');
