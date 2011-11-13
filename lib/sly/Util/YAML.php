@@ -20,11 +20,7 @@ class sly_Util_YAML {
 		$dir  = SLY_DYNFOLDER.'/internal/sally/yaml-cache';
 		$perm = sly_Core::getDirPerm(sly_Core::DEFAULT_DIRPERM); // give default value in case YAML has not yet been loaded
 
-		if (!sly_Util_Directory::create($dir, $perm)) {
-			throw new sly_Exception('Cache-Verzeichnis '.$dir.' konnte nicht erzeugt werden.');
-		}
-
-		return $dir;
+		return sly_Util_Directory::create($dir, $perm, true);
 	}
 
 	/**

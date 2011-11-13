@@ -32,16 +32,24 @@ class sly_Util_Directory {
 	/**
 	 * @param  string $path
 	 * @param  int    $perm
+	 * @param  bool   $throwException
 	 * @return mixed
 	 */
-	public static function create($path, $perm = null) {
+	public static function create($path, $perm = null, $throwException = false) {
 		$path = self::normalize($path);
 		$perm = $perm === null ? sly_Core::getDirPerm() : (int) $perm;
 
 		if (!is_dir($path)) {
-			$s     = DIRECTORY_SEPARATOR;
+			$s = DIRECTORY_SEPARATOR;
+			$p = null;
+
+			if (sly_Util_String::startsWith($path, SLY_BASE)) {
+				$p    = SLY_BASE;
+				$path = trim(substr($path, strlen(SLY_BASE)), $s);
+			}
+
 			$parts = explode($s, $path);
-			$p     = null;
+			$level = error_reporting(0);
 
 			foreach ($parts as $part) {
 				$p = $p === null ? $part : $p.$s.$part;
@@ -52,12 +60,21 @@ class sly_Util_Directory {
 
 				// try to create the directory
 				if (!mkdir($p)) {
-					return false;
+					error_reporting($level);
+
+					if ($throwException) {
+						throw new sly_Util_DirectoryException($p);
+					}
+					else {
+						trigger_error('mkdir('.$p.') failed.', E_USER_WARNING);
+						return false;
+					}
 				}
 
 				chmod($p, $perm);
 			}
 
+			error_reporting($level);
 			clearstatcache();
 		}
 
