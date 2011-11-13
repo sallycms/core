@@ -29,6 +29,7 @@ class sly_Service_LanguageTest extends sly_DatabaseTest {
 
 		$langs = sly_Util_Language::findAll();
 		$this->assertEquals(3, count($langs));
+		$this->assertTrue(sly_Util_Language::exists($lang->getId()));
 	}
 
 	/**
@@ -51,11 +52,13 @@ class sly_Service_LanguageTest extends sly_DatabaseTest {
 	public function testDelete() {
 		$service = $this->getService();
 		$lang    = $service->create(array('name' => 'test', 'locale' => 'xx_YY'));
+		$id      = $lang->getId();
 
-		$service->delete(array('id' => $lang->getId()));
-		$this->assertNull($service->findById($lang->getId()));
+		$service->delete(array('id' => $id));
+		$this->assertNull($service->findById($id));
 
 		$langs = sly_Util_Language::findAll();
 		$this->assertEquals(2, count($langs));
+		$this->assertFalse(sly_Util_Language::exists($id));
 	}
 }

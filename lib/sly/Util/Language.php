@@ -16,14 +16,16 @@ class sly_Util_Language {
 	/**
 	 * @param  int $articleId
 	 * @param  int $clang
-	 * @return sly_Model_Article
+	 * @return sly_Model_Language
 	 */
 	public static function findById($languageID) {
 		$languages  = self::findAll();
 		$languageID = (int) $languageID;
-		if(isset($languages[$languageID])) {
+
+		if (isset($languages[$languageID])) {
 			return $languages[$languageID];
 		}
+
 		return null;
 	}
 
