@@ -8,23 +8,23 @@
  * http://www.opensource.org/licenses/mit-license.php
  */
 
-abstract class sly_Service_CategoryBase extends sly_StructureTest {
+abstract class sly_Service_ArticleBase extends sly_StructureTest {
 	protected function getService() {
 		static $service = null;
-		if (!$service) $service = sly_Service_Factory::getCategoryService();
+		if (!$service) $service = sly_Service_Factory::getArticleService();
 		return $service;
 	}
 
 	protected function assertPosition($id, $pos, $clang = 1) {
 		$service = $this->getService();
-		$cat     = $service->findById($id, $clang);
-		$msg     = 'Position of category '.$id.' should be '.$pos.'.';
+		$art     = $service->findById($id, $clang);
+		$msg     = 'Position of article '.$id.' should be '.$pos.'.';
 
-		$this->assertEquals($pos, $cat->getCatprior(), $msg);
+		$this->assertEquals($pos, $art->getPrior(), $msg);
 	}
 
 	protected function move($id, $to, $clang = 1) {
 		$cat = $this->getService()->findById($id, $clang);
-		$this->getService()->edit($id, $clang, $cat->getCatname(), $to);
+		$this->getService()->edit($id, $clang, $cat->getName(), $to);
 	}
 }

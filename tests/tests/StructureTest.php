@@ -28,4 +28,59 @@ abstract class sly_StructureTest extends sly_DatabaseTest {
 		$conf->set('START_ARTICLE_ID', self::$origStart);
 		$conf->set('NOTFOUND_ARTICLE_ID', self::$origNotFound);
 	}
+
+	protected function parseTree($tree) {
+		$tree = preg_replace('/([0-9]+)</', '"\1":{', $tree);
+		$tree = str_replace('>', '}', $tree);
+		$tree = preg_replace('/(^|(?<=[{,]))\s*([0-9]+)\s*(?=([},]|$))/', '"\2":[]', $tree);
+
+		return json_decode('{"0":{'.$tree.'}}', true);
+	}
+
+	protected function assertPositions(array $expected, $clang = 1) {
+		foreach ($expected as $idx => $id) {
+			if ($id === null) continue;
+			$this->assertPosition($id, $idx + 1, $clang);
+		}
+	}
+
+	protected function moves($moves, $clang = 1) {
+		$moves = json_decode($moves, true);
+
+		foreach ($moves as $move) {
+			$this->move($move[0], $move[1], $clang);
+		}
+	}
+
+	protected function makeMove($id, $to, array $expected, $clang = 1) {
+		$this->move($id, $to, $clang);
+		$this->assertPositions($expected, $clang);
+	}
+
+	protected function assertTree($tree, $clang = 1, $parent = 0) {
+		$tree    = is_string($tree) ? $this->parseTree($tree) : $tree;
+		$pos     = 1;
+		$service = $this->getService();
+
+		// $tree = array(1 => array(2 => array(3)))
+		foreach ($tree as $elemID => $children) {
+			if ($elemID > 0) {
+				$elem = $service->findById($elemID, $clang);
+				$msg  = 'Parent of element '.$elemID.' should be '.$parent.'.';
+
+				$this->assertEquals($parent, $elem->getParentId(), $msg);
+				$this->assertPosition($elemID, $pos, $clang);
+
+				++$pos;
+			}
+
+			if (!empty($children)) {
+				$this->assertTree($children, $clang, $elemID);
+			}
+		}
+	}
+
+	abstract protected function move($id, $to, $clang = 1);
+	abstract protected function assertPosition($id, $pos, $clang = 1);
+	abstract protected function getService();
 }
