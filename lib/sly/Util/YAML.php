@@ -83,12 +83,15 @@ class sly_Util_YAML {
 			flock($handle, LOCK_UN);
 			fclose($handle);
 		}
+
 		// get content from yaml file
 		else {
-			//lock the source
+			// lock the source
 			$handle = fopen($filename, 'r');
 			flock($handle, LOCK_SH);
+
 			$config = sfYaml::load($filename);
+
 			// release lock again
 			flock($handle, LOCK_UN);
 			fclose($handle);

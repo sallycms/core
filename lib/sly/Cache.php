@@ -103,8 +103,8 @@ class sly_Cache extends BabelCache_Factory {
 		}
 
 		if ($cachingStrategy === 'BabelCache_Filesystem') {
-			BabelCache_Filesystem::setDirPermissions(sly_Core::getDirPerm());
-			BabelCache_Filesystem::setFilePermissions(sly_Core::getFilePerm());
+			BabelCache_Filesystem::setDirPermissions(sly_Core::getDirPerm(sly_Core::DEFAULT_DIRPERM));
+			BabelCache_Filesystem::setFilePermissions(sly_Core::getFilePerm(sly_Core::DEFAULT_FILEPERM));
 		}
 
 		return self::getInstance()->getCache($cachingStrategy);
@@ -142,7 +142,8 @@ class sly_Cache extends BabelCache_Factory {
 	 * @return string  the directory to store the filesystem cache
 	 */
 	protected function getCacheDirectory() {
-		return sly_Util_Directory::join(SLY_DYNFOLDER, 'internal', 'sally', 'fscache');
+		$dir = sly_Util_Directory::join(SLY_DYNFOLDER, 'internal', 'sally', 'fscache');
+		return sly_Util_Directory::create($dir, sly_Core::getDirPerm(sly_Core::DEFAULT_DIRPERM));
 	}
 
 	/**
@@ -150,6 +151,12 @@ class sly_Cache extends BabelCache_Factory {
 	 */
 	protected function getSQLiteConnection() {
 		$db = sly_Util_Directory::join(SLY_DYNFOLDER, 'internal', 'sally', 'cache.sqlite');
+
+		if (!file_exists($db)) {
+			touch($db);
+			chmod($db, sly_Core::getFilePerm(sly_Core::DEFAULT_FILEPERM));
+		}
+
 		return BabelCache_SQLite::connect($db);
 	}
 }
