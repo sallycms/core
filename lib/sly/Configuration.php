@@ -26,6 +26,7 @@ class sly_Configuration {
 	private $staticConfig;  ///< sly_Util_Array
 	private $localConfig;   ///< sly_Util_Array
 	private $projectConfig; ///< sly_Util_Array
+	private $cache;          ///< sly_Util_Array
 
 	private $localConfigModified   = false; ///< boolean
 	private $projectConfigModified = false; ///< boolean
@@ -36,6 +37,7 @@ class sly_Configuration {
 		$this->staticConfig  = new sly_Util_Array();
 		$this->localConfig   = new sly_Util_Array();
 		$this->projectConfig = new sly_Util_Array();
+		$this->cache         = null;
 	}
 
 	/**
@@ -132,6 +134,7 @@ class sly_Configuration {
 		if (file_exists($filename)) {
 			$config = sly_Util_YAML::load($filename);
 			$this->localConfig = new sly_Util_Array($config);
+			$this->cache = null;
 		}
 	}
 
@@ -141,6 +144,7 @@ class sly_Configuration {
 		if (file_exists($filename)) {
 			$config = sly_Util_YAML::load($filename);
 			$this->projectConfig = new sly_Util_Array($config);
+			$this->cache = null;
 		}
 	}
 
@@ -190,22 +194,11 @@ class sly_Configuration {
 	 * @return mixed            the found value or $default
 	 */
 	public function get($key, $default = null) {
-		$found = false;
-
-		$p = $this->projectConfig->hasget($key, array());
-		if (!is_array($p[1])) return $p[1];
-		$found = $found || $p[0];
-
-		$l = $this->localConfig->hasget($key, array());
-		if (!is_array($l[1])) return $l[1];
-		$found = $found || $l[0];
-
-		$s = $this->staticConfig->hasget($key, array());
-		if (!is_array($s[1])) return $s[1];
-		$found = $found || $s[0];
-
-		if (!$found) return $default;
-		return array_replace_recursive($s[1], $l[1], $p[1]);
+		if($this->cache == null) {
+			$this->cache = array_replace_recursive($this->staticConfig->get('/', array()), $this->localConfig->get('/', array()), $this->projectConfig->get('/', array()));
+			$this->cache = new sly_Util_Array($this->cache);
+		}
+		return $this->cache->get($key, $default);
 	}
 
 	/**
@@ -331,6 +324,7 @@ class sly_Configuration {
 
 		// case: sly_Configuration::STORE_PROJECT
 		$this->projectConfigModified = true;
+		$this->cache = null;
 		return $this->projectConfig->set($key, $value);
 	}
 
