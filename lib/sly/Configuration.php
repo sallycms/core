@@ -285,6 +285,8 @@ class sly_Configuration {
 			throw new sly_Exception('Key '.$key.' ist nicht erlaubt!');
 		}
 
+		$this->cache = null;
+
 		if (!empty($value) && sly_Util_Array::isAssoc($value)) {
 			foreach ($value as $ikey => $val) {
 				$currentPath = trim($key.'/'.$ikey, '/');
@@ -324,7 +326,6 @@ class sly_Configuration {
 
 		// case: sly_Configuration::STORE_PROJECT
 		$this->projectConfigModified = true;
-		$this->cache = null;
 		return $this->projectConfig->set($key, $value);
 	}
 
