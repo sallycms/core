@@ -37,7 +37,8 @@ if ($value !== null) {
 
 // JavaScript-Version
 
-$hasNative  = sly_Helper_Modernizr::hasInputtype($attrs['type']);
+$type       = $this->withTime() ? 'datetime-local' : 'date';
+$hasNative  = sly_Helper_Modernizr::hasInputtype($type);
 $dateformat = '%d.%m.%Y'; // t('dateformat');
 $formatJS   = $dateformat;
 $formatJS   = str_replace(
@@ -51,8 +52,8 @@ $formatJS   = str_replace(
 $attrs['data-date']     = strftime('%Y-%m-%d', $value);
 $attrs['data-datetime'] = strftime('%Y-%m-%dT%H:%M:%S', $value);
 
-$attrs['class'] = 'rex-form-text';
-$attrs['type']  = $hasNative ? ($this->withTime() ? 'datetime-local' : 'date') : 'text';
+$attrs['class'] = 'rex-form-text sly-form-'.$type;
+$attrs['type']  = $hasNative ? $type : 'text';
 $attrs['name']  = $name;
 $attrs['id']    = $attrs['name'];
 $attrs['value'] = $value === null ? '' : sly_Util_String::formatStrftime($dateformat.($this->withTime() ? ' %H:%M' : ''), $value);
