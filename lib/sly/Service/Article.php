@@ -327,10 +327,10 @@ class sly_Service_Article extends sly_Service_Model_Base {
 
 	/**
 	 *
-	 * @param type $articleID
-	 * @param type $clangID
-	 * @param type $newStatus
-	 * @return type boolean
+	 * @param int $articleID
+	 * @param int $clangID
+	 * @param int $newStatus
+	 * @return  boolean
 	 */
 	public function changeStatus($articleID, $clangID, $newStatus = null) {
 		$articleID = (int) $articleID;
