@@ -38,20 +38,20 @@ class sly_Service_Article extends sly_Service_Model_Base {
 	 * @param  int $clang
 	 * @return sly_Model_Article
 	 */
-	public function findById($id, $clang = null) {
-		if ($clang === null || $clang === false) $clang = sly_Core::getCurrentClang();
+	public function findById($articleID, $clangID = null) {
+		if ($clangID === null || $clangID === false) $clangID = sly_Core::getCurrentClang();
 
-		$id = (int) $id;
+		$articleID = (int) $articleID;
 
-		if ($id === 0) {
+		if ($articleID === 0) {
 			return null;
 		}
 
-		$key     = $id.'_'.$clang;
+		$key     = $articleID.'_'.$clangID;
 		$article = sly_Core::cache()->get('sly.article', $key, null);
 
 		if ($article === null) {
-			$article = $this->findOne(array('id' => $id, 'clang' => $clang));
+			$article = $this->findOne(array('id' => $articleID, 'clang' => $clangID));
 
 			if ($article !== null) {
 				sly_Core::cache()->set('sly.article', $key, $article);
@@ -326,11 +326,16 @@ class sly_Service_Article extends sly_Service_Model_Base {
 	}
 
 	/**
-	 * @param  sly_Model_Article $article
-	 * @param  int               $newStatus
-	 * @return boolean
+	 *
+	 * @param type $articleID
+	 * @param type $clangID
+	 * @param type $newStatus
+	 * @return type boolean
 	 */
-	public function changeStatus(sly_Model_Article $article, $newStatus = null) {
+	public function changeStatus($articleID, $clangID, $newStatus = null) {
+		$articleID = (int) $articleID;
+		$clangID   = (int) $clangID;
+		$article   = $this->findById($articleID, $clangID);
 		$stati     = $this->getStati();
 		$re_id     = $article->getParentId();
 		$clang     = $article->getClang();

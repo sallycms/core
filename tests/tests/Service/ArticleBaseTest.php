@@ -59,10 +59,10 @@ class sly_Service_ArticleBaseTest extends sly_Service_ArticleBase {
 		$service = $this->getService();
 		$id      = $service->add(0, 'tmp', 1, -1);
 
-		$this->assertTrue($service->findById($id)->isOnline());
-		$service->changeStatus($service->findById($id), 0);
-		$this->assertFalse($service->findById($id)->isOnline());
-		$service->changeStatus($service->findById($id), 1);
-		$this->assertTrue($service->findById($id)->isOnline());
+		$this->assertTrue($service->findById($id, 1)->isOnline());
+		$service->changeStatus($id, 1, 0);
+		$this->assertFalse($service->findById($id, 1)->isOnline());
+		$service->changeStatus($id, 1, 1);
+		$this->assertTrue($service->findById($id, 1)->isOnline());
 	}
 }
