@@ -1,0 +1,35 @@
+<?php
+/*
+ * Copyright (c) 2011, webvariants GbR, http://www.webvariants.de
+ *
+ * This file is released under the terms of the MIT license. You can find the
+ * complete text in the attached LICENSE file or online at:
+ *
+ * http://www.opensource.org/licenses/mit-license.php
+ */
+
+$name     = sly_html($this->getName());
+$id       = sly_html($this->getID());
+$filename = $this->getDisplayValue();
+$value    = sly_Form_Widget_Media::getFullName($filename);
+
+if ($value === '') {
+	$filename = '';
+}
+
+?>
+
+<span class="sly-widget sly-media<?= isset($this->attributes['class']) ? ' '.sly_html($this->attributes['class']) : '' ?>">
+	<input rel="value" type="hidden" name="<?= $name ?>" id="<?= $id ?>" value="<?= sly_html($filename) ?>" />
+	<input rel="name" type="text" value="<?= sly_html($value) ?>" readonly="readonly" />
+
+	<span class="sly-icons">
+		<a href="#" rel="open" title="<?= t('var_media_open') ?>"></a>
+	</span>
+	<span class="sly-icons">
+		<a href="#" rel="add" title="<?= t('var_media_new') ?>"></a>
+	</span>
+	<span class="sly-icons">
+		<a href="#" rel="delete" title="<?= t('var_media_remove') ?>"></a>
+	</span>
+</span>
