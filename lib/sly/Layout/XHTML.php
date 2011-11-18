@@ -47,7 +47,7 @@ class sly_Layout_XHTML extends sly_Layout {
 	 * This method generates a normal <style> tag containing the inline CSS.
 	 */
 	protected function printCSSConcrete() {
-		print "\t<style type=\"text/css\">$this->cssCode\n</style>\n";
+		print "\t<style type=\"text/css\">$this->cssCode</style>\n";
 	}
 
 	protected function printCSSFilesConcrete() {
