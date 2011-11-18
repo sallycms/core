@@ -25,7 +25,7 @@ class BabelCache_SQLite extends BabelCache implements BabelCache_Interface {
 	/**
 	 * Constructor
 	 *
-	 * @param string $connection  the already established connection
+	 * @param PDO $connection  the already established connection
 	 */
 	public function __construct(PDO $connection) {
 		$this->pdo = $connection;
@@ -45,7 +45,7 @@ class BabelCache_SQLite extends BabelCache implements BabelCache_Interface {
 	 * Connect to a database
 	 *
 	 * @param  string $databaseFile  full path to the database file
-	 * @return PDO
+	 * @return PDO                   the database connection instance
 	 */
 	public static function connect($databaseFile) {
 		return new PDO('sqlite:'.$databaseFile, null, null, array(
@@ -61,7 +61,7 @@ class BabelCache_SQLite extends BabelCache implements BabelCache_Interface {
 	protected function getStatement($key) {
 		$where   = '"namespace" = :namespace AND "keyhash" = :hash';
 		$queries = array(
-			'insert'  => 'INSERT INTO "babelcache" ("namespace", "keyhash", "payload") VALUES (:namespace,:hash,:payload)',
+			'insert'  => 'INSERT OR IGNORE INTO "babelcache" ("namespace", "keyhash", "payload") VALUES (:namespace,:hash,:payload)',
 			'replace' => 'INSERT OR REPLACE INTO "babelcache" ("namespace", "keyhash", "payload") VALUES (:namespace,:hash,:payload)',
 			'select'  => 'SELECT "payload" FROM "babelcache" WHERE '.$where,
 			'delete'  => 'DELETE FROM "babelcache" WHERE '.$where,
@@ -81,21 +81,11 @@ class BabelCache_SQLite extends BabelCache implements BabelCache_Interface {
 	}
 
 	public function lock($namespace, $key, $duration = 1) {
-		$this->begin();
-
-		// lock already exists
-		if ($this->isLocked($namespace, $key)) {
-			return false;
-		}
-
-		// insert lock
 		$stmt = $this->getStatement('insert');
 		$stmt->execute(array('namespace' => $namespace, 'hash' => 'lock:'.sha1($key), 'payload' => ''));
 		$stmt->closeCursor();
 
-		// finished
-		$this->commit();
-		return true;
+		return $stmt->rowCount() > 0;
 	}
 
 	public function unlock($namespace, $key) {
