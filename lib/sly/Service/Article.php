@@ -434,6 +434,46 @@ class sly_Service_Article extends sly_Service_Model_Base {
 	}
 
 	/**
+	 * @param  string  $type
+	 * @param  boolean $ignore_offlines
+	 * @param  int     $clangId
+	 * @return array
+	 */
+	public function findArticlesByType($type, $ignore_offlines = false, $clangId = null) {
+		if ($clangId === false || $clangId === null) {
+			$clangId = sly_Core::getCurrentClang();
+		}
+
+		$type    = trim($type);
+		$clangId = (int) $clangId;
+
+		$namespace = 'sly.article.list';
+		$key       = $type.'_'.$clangId.'_'.($ignore_offlines ? '1' : '0');
+		$alist     = sly_Core::cache()->get($namespace, $key, null);
+
+		if ($alist === null) {
+			$alist = array();
+			$sql   = sly_DB_Persistence::getInstance();
+			$where = array('type' => $type, 'clang' => $clangId, 'startpage' => 0);
+
+			if ($ignore_offlines) $where['status'] = 1;
+
+			$sql->select($this->tablename, 'id', $where, null, 'prior,name');
+			foreach ($sql as $row) $alist[] = (int) $row['id'];
+
+			sly_Core::cache()->set($namespace, $key, $alist);
+		}
+
+		$artlist = array();
+
+		foreach ($alist as $id) {
+			$artlist[] = $this->findById($id, $clangId);
+		}
+
+		return $artlist;
+	}
+
+	/**
 	 * @param  sly_Model_Article $article
 	 * @param  string            $type
 	 * @return boolean
