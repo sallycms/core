@@ -24,7 +24,7 @@ class rex_var_link extends rex_var {
 	const LINKWIDGET     = 'SLY_LINK_WIDGET';
 	const LINKLISTWIDGET = 'SLY_LINKLIST_WIDGET';
 
-	public function getRequestValues($REX_ACTION) {
+	public function getRequestValues($REX_ACTION = array()) {
 		foreach (array('LINK', 'LINKLIST') as $type) {
 			$link = sly_requestArray($type, 'string');
 			$type = 'SLY_'.$type;

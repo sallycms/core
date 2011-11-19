@@ -8,9 +8,10 @@
  * http://www.opensource.org/licenses/mit-license.php
  */
 
-// Magic Quotes entfernen, wenn vorhanden
+// remove magic quotes (function is deprecated as of PHP 5.4, so we either
+// have to check the PHP version or suppress the E_DEPRECATED warning)
 
-if (get_magic_quotes_gpc()) {
+if (@get_magic_quotes_gpc()) {
 	function stripslashes_ref(&$value) {
 		$value = stripslashes($value);
 	}
@@ -48,9 +49,8 @@ define('SLY_ADDONFOLDER',   SLY_SALLYFOLDER.DIRECTORY_SEPARATOR.'addons');
 
 // define these PHP 5.3 constants here so that they can be used in YAML files
 // (if someone really decides to put PHP code in their config files).
-if (!defined('E_RECOVERABLE_ERROR')) define('E_RECOVERABLE_ERROR', 4096);  // PHP 5.2
-if (!defined('E_DEPRECATED'))        define('E_DEPRECATED',        8192);  // PHP 5.3
-if (!defined('E_USER_DEPRECATED'))   define('E_USER_DEPRECATED',   16384); // PHP 5.3
+if (!defined('E_DEPRECATED'))      define('E_DEPRECATED',      8192);  // PHP 5.3
+if (!defined('E_USER_DEPRECATED')) define('E_USER_DEPRECATED', 16384); // PHP 5.3
 
 // init loader
 require_once SLY_COREFOLDER.'/loader.php';

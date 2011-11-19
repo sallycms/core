@@ -196,20 +196,17 @@ class sly_Util_Array {
 	}
 
 	/**
-	 * @todo  mark as deprecated in 0.6, it's not used anywhere
-	 * @param array $array
-	 */
-	public function merge($array) {
-		if (!is_array($array)) return false;
-		$this->array = array_replace_recursive($this->array, $array);
-	}
-
-	/**
 	 * @param  string $key
 	 * @return array
 	 */
 	protected static function getPath($key) {
-		return explode('/', $key);
+		$parts = explode('/', $key);
+
+		foreach ($parts as $idx => $part) {
+			if ($part === '') unset($parts[$idx]);
+		}
+
+		return array_values($parts);
 	}
 
 	/**

@@ -1,1 +1,2 @@
-phpunit --bootstrap bootstrap.php tests
+@echo off
+phpunit --bootstrap bootstrap.php %* tests
