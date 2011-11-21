@@ -323,28 +323,23 @@ class OOArticleSlice {
 	}
 
 	private static function replaceLinks($content) {
-		// Hier beachten, dass man auch ein Zeichen nach dem jeweiligen Link mitmatched,
-		// damit beim ersetzen von z.b. redaxo://11 nicht auch innerhalb von redaxo://112
-		// ersetzt wird
-		// siehe dazu: http://forum.redaxo.de/ftopic7563.html
+		preg_match_all('#(?:redaxo|sally)://([0-9]+)(?:-([0-9]+))?/?#', $content, $matches, PREG_OFFSET_CAPTURE | PREG_SET_ORDER);
 
-		// -- preg match redaxo://[ARTICLEID]-[CLANG] --
-		preg_match_all('@(?:redaxo|sally)://([0-9]*)\-([0-9]*)(.){1}/?@im', $content, $matches, PREG_SET_ORDER);
+		$skew = 0;
 
 		foreach ($matches as $match) {
-			if (empty($match)) continue;
-			$replace = self::getReplacementLink($match[1], $match[2]);
-			$content = str_replace($match[0], $replace, $content);
-		}
+			$complete = $match[0];
+			$length   = strlen($complete[0]);
+			$offset   = $complete[1];
+			$id       = (int) $match[1][0];
+			$clang    = isset($match[2]) ? (int) $match[2][0] : null;
+			$repl     = self::getReplacementLink($id, $clang);
 
-		// -- preg match redaxo://[ARTICLEID] --
+			// replace the match
+			$content = substr_replace($content, $repl, $offset + $skew, $length);
 
-		preg_match_all('@(?:redaxo|sally)://([0-9]*)(.){1}/?@im', $content, $matches, PREG_SET_ORDER);
-
-		foreach ($matches as $match) {
-			if (empty($match)) continue;
-			$replace = self::getReplacementLink($match[1], false);
-			$content = str_replace($match[0], $replace, $content);
+			// ensure the next replacements get the correct offset
+			$skew += strlen($repl) - $length;
 		}
 
 		return $content;
