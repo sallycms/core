@@ -42,6 +42,7 @@ static:
   - sly_Model_Article
 frontend: []
 backend:
+  - sly_Layout_Backend
   - sly_Layout_Navigation_Backend
   - sly_Layout_Navigation_Group
   - sly_Layout_Navigation_Page
