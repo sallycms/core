@@ -12,25 +12,6 @@
  */
 
 /**
- * Prüft, ob ein Modul für ein bestimmtes Slice im System bekannt ist.
- *
- * @return boolean  true oder ... false
- * @deprecated
- * @see slys_Util_ArticleSlice
- */
-function rex_slice_module_exists($sliceID) {
-	$sliceID = (int) $sliceID;
-	$slice   = OOArticleSlice::getArticleSliceById($sliceID);
-
-	if (is_null($slice)) {
-		return false;
-	}
-
-	$module = $slice->getModule();
-	return sly_Service_Factory::getModuleService()->exists($module) ? $module : false;
-}
-
-/**
  * Konvertiert einen Artikel zum Startartikel der eigenen Kategorie
  *
  * @param  int $neu_id  Artikel ID des Artikels, der Startartikel werden soll
