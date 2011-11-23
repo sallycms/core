@@ -119,4 +119,9 @@ class sly_Util_Article {
 
 		return sly_Authorisation::hasPermission($user->getId(), 'csw', $articleId);
 	}
+
+	public static function getUrl($articleId, $clang = null, $params = array()) {
+		$article = self::findById($articleId, $clang);
+		return $article ? $article->getUrl($params) : '';
+	}
 }
