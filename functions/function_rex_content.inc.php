@@ -12,97 +12,6 @@
  */
 
 /**
- * Verschiebt einen Slice nach oben
- *
- * @param  int $slice_id  ID des Slices
- * @param  int $clang     ID der Sprache
- * @return array          ein Array welches den Status sowie eine Fehlermeldung beinhaltet
- */
-function rex_moveSliceUp($slice_id, $clang) {
-	return rex_moveSlice($slice_id, $clang, 'up');
-}
-
-/**
- * Verschiebt einen Slice nach unten
- *
- * @param  int $slice_id  ID des Slices
- * @param  int $clang     ID der Sprache
- * @return array          ein Array welches den Status sowie eine Fehlermeldung beinhaltet
- */
-function rex_moveSliceDown($slice_id, $clang) {
-	return rex_moveSlice($slice_id, $clang, 'down');
-}
-
-/**
- * Verschiebt einen Slice
- *
- * @param  int    $slice_id   ID des Slices
- * @param  int    $clang      ID der Sprache
- * @param  string $direction  Richtung in die verschoben werden soll
- * @return array              ein Array welches den Status sowie eine Fehlermeldung beinhaltet
- */
-function rex_moveSlice($slice_id, $clang, $direction) {
-	$slice_id = (int) $slice_id;
-	$clang    = (int) $clang;
-
-	if (!in_array($direction, array('up', 'down'))) {
-		throw new sly_Exception('rex_moveSlice: Unsupported direction "'.$direction.'"!', E_USER_ERROR);
-	}
-
-	// slot beachten
-	// verschieben / vertauschen
-	// article regenerieren.
-
-	$success = false;
-	$message = t('slice_moved_error');
-
-	// Slice finden
-
-	$articleSlice = OOArticleSlice::getArticleSliceById($slice_id);
-
-	if ($articleSlice) {
-		$sql        = sly_DB_Persistence::getInstance();
-		$article_id = (int) $articleSlice->getArticleId();
-		$prior      = (int) $articleSlice->getPrior();
-		$slot       = $articleSlice->getSlot();
-		$newprior   = $direction == 'up' ? $prior - 1 : $prior + 1;
-		$sliceCount = $sql->magicFetch('article_slice', 'COUNT(*)', array('article_id' => $article_id, 'clang' => $clang, 'slot' => $slot));
-
-		if ($newprior > -1 && $newprior < $sliceCount) {
-			$sql->update('article_slice', array('prior' => $prior), array('article_id' => $article_id, 'clang' => $clang, 'slot' => $slot, 'prior' => $newprior));
-			$sql->update('article_slice', array('prior' => $newprior), array('id' => $slice_id));
-
-			$message = t('slice_moved');
-			$success = true;
-
-			// Flush slice cache
-			sly_Core::cache()->flush(OOArticleSlice::CACHE_NS);
-
-			// notify system
-			sly_Core::dispatcher()->notify('SLY_SLICE_MOVED', $articleSlice, array(
-				'clang'     => $clang,
-				'direction' => $direction,
-				'oldprior'  => $prior,
-				'newprior'  => $newprior
-			));
-		}
-	}
-
-	return array($success, $message);
-}
-
-/**
- * Löscht einen Slice
- *
- * @param  int $article_slice_id  ID des Slices
- * @return boolean        true bei Erfolg, sonst false
- * @deprecated
- */
-function rex_deleteArticleSlice($article_slice_id) {
-	return sly_Util_ArticleSlice::deleteById($article_slice_id);
-}
-
-/**
  * Prüft, ob ein Modul für ein bestimmtes Slice im System bekannt ist.
  *
  * @return boolean  true oder ... false
@@ -207,39 +116,41 @@ function rex_article2startpage($neu_id) {
  * @param  int $from_re_sliceid  ID des Slices, bei dem begonnen werden soll
  * @return boolean               true bei Erfolg, sonst false
  */
-function rex_copyContent($from_id, $to_id, $from_clang = 0, $to_clang = 0, $from_re_sliceid = 0, $revision = 0) {
+function rex_copyContent($from_id, $to_id, $from_clang = 0, $to_clang = 0, $revision = 0) {
 	$from_clang      = (int) $from_clang;
 	$to_clang        = (int) $to_clang;
 	$from_id         = (int) $from_id;
 	$to_id           = (int) $to_id;
-	$from_re_sliceid = (int) $from_re_sliceid;
 	$revision        = (int) $revision;
 
 	if ($from_id == $to_id && $from_clang == $to_clang) {
 		return false;
 	}
 
-	$sliceIds = OOArticleSlice::getSliceIdsForSlot($from_id, $from_clang);
-	$service  = sly_Service_Factory::getSliceService();
-	$sql      = sly_DB_Persistence::getInstance();
-	$login    = sly_Util_User::getCurrentUser()->getLogin();
+	$sliceService        = sly_Service_Factory::getSliceService();
+	$articleSliceService = sly_Service_Factory::getArticleSliceService();
+	$articleSlices       = $articleSliceService->find(array('article_id' => $from_id, 'clang' => $from_clang, 'revision' => $revision));
+	$sql                 = sly_DB_Persistence::getInstance();
+	$login               = sly_Util_User::getCurrentUser()->getLogin();
 
-	foreach ($sliceIds as $sliceId) {
-		$article_slice = OOArticleSlice::getArticleSliceById($sliceId);
+	foreach ($articleSlices as $articleSlice) {
+		$sql->beginTransaction();
+		$slice = $articleSlice->getSlice();
+		$slice = $sliceService->copy($slice);
 
-		$slice = $service->findById($article_slice->getSliceId());
-		$slice = $service->copy($slice);
-
-		$sql->insert('article_slice', array(
+		$articleSliceService->create(array(
 			'clang'      => $to_clang,
-			'slot'       => $article_slice->getSlot(),
-			'prior'      => $article_slice->getPrior(),
+			'slot'       => $articleSlice->getSlot(),
+			'prior'      => $articleSlice->getPrior(),
 			'slice_id'   => $slice->getId(),
 			'article_id' => $to_id,
 			'revision'   => 0,
 			'createdate' => time(),
-			'createuser' => $login
+			'createuser' => $login,
+			'updatedate' => time(),
+			'updateuser' => $login
 		));
+		$sql->commit();
 	}
 
 	// notify system
@@ -248,11 +159,9 @@ function rex_copyContent($from_id, $to_id, $from_clang = 0, $to_clang = 0, $from
 		'from_clang'  => $from_id,
 		'to_id'       => $to_id,
 		'to_clang'    => $to_clang,
-		'start_slice' => $from_re_sliceid
 	));
 
 	sly_Service_Factory::getArticleService()->deleteCache($to_id, $to_clang);
-	sly_Core::cache()->flush(OOArticleSlice::CACHE_NS);
 
 	return true;
 }

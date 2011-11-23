@@ -9,7 +9,7 @@
  */
 
 /**
- * Business Model Klasse für Slices
+ * Business Model for Slices
  *
  * @author  zozi@webvariants.de
  * @ingroup model
@@ -17,7 +17,7 @@
 class sly_Model_Slice extends sly_Model_Base_Id {
 	protected $module; ///< string
 
-	protected $_attributes = array('module' => 'string');                                                                        ///< array
+	protected $_attributes = array('module' => 'string'); ///< array
 	protected $_hasMany    = array('SliceValue' => array('delete_cascade' => true, 'foreign_key' => array('slice_id' => 'id'))); ///< array
 
 	/**
@@ -78,17 +78,73 @@ class sly_Model_Slice extends sly_Model_Base_Id {
 			$output = $var->getOutput($data, $output);
 		}
 
+		$output = $this->replaceLinks($output);
+		$output = $this->replacePseudoConstants($output);
+
 		return $output;
 	}
 
 	/**
+	 * returns the input form for this slice
+	 *
 	 * @return string
 	 */
 	public function getInput() {
 		$service  = sly_Service_Factory::getModuleService();
 		$filename = $service->getInputFilename($this->getModule());
 		$output   = $service->getContent($filename);
+		$output   = $this->replacePseudoConstants($output);
 
 		return $output;
+	}
+
+	/**
+	 * Replaces sally://ARTICLEID and sally://ARTICLEID-CLANGID in
+	 * the slice content by article http URLs.
+	 *
+	 * @param string $content
+	 * @return string
+	 */
+	protected function replaceLinks($content) {
+		// -- preg match sally://[ARTICLEID]-[CLANG] --
+		preg_match_all('@(?:sally)://([0-9]*)\-([0-9]*)(.){1}/?@im', $content, $matches, PREG_SET_ORDER);
+
+		foreach ($matches as $match) {
+			if (empty($match)) continue;
+			$replace = sly_Util_Article::getUrl($match[1], $match[2]);
+			$content = str_replace($match[0], $replace, $content);
+		}
+
+		// -- preg match sally://[ARTICLEID] --
+		preg_match_all('@(?:sally)://([0-9]*)(.){1}/?@im', $content, $matches, PREG_SET_ORDER);
+
+		foreach ($matches as $match) {
+			if (empty($match)) continue;
+			$replace = sly_Util_Article::getUrl($match[1]);
+			$content = str_replace($match[0], $replace, $content);
+		}
+
+		return $content;
+	}
+
+	/**
+	 * replace some pseude constants that can be used in slices
+	 *
+	 * @staticvar array  $search
+	 * @param     string $content
+	 * @return    string the content with replaces strings
+	 */
+	private function replacePseudoConstants($content) {
+		static $search = array(
+			'MODULE_NAME',
+			'SLICE_ID'
+		);
+
+		$replace = array(
+			$this->getModule(),
+			$this->getId()
+		);
+
+		return str_replace($search, $replace, $content);
 	}
 }

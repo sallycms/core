@@ -87,10 +87,14 @@ class sly_Model_Article extends sly_Model_Base_Article {
 	 */
 	public function getContent($slot = null) {
 		$content = '';
-		$ids = OOArticleSlice::getSliceIdsForSlot($this->getId(), $this->getClang(), $slot);
-		foreach ($ids as $id) {
-			$content .= OOArticleSlice::getArticleSliceById($id)->getOutput();
+		$where = array('article_id' => $this->getId(), 'clang' => $this->getClang());
+		if($slot !== null) $where['slot'] = $slot;
+
+		$slices = sly_Service_Factory::getArticleSliceService()->find($where, null, 'prior ASC');
+		foreach($slices as $slice) {
+			$content .= $slice->getOutput();
 		}
+
 		return $content;
 	}
 
