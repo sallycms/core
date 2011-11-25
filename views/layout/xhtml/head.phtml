@@ -33,8 +33,8 @@ if ($this->isTransitional):
 	$this->printMetas();
 	$this->printLinks();
 	$this->printCSSFiles();
-	$this->printJavaScriptFiles();
+	if (!$this->scriptsAtBottom) $this->printJavaScriptFiles();
 	$this->printCSS();
-	$this->printJavaScript();
+	if (!$this->scriptsAtBottom) $this->printJavaScript();
 ?></head>
 <body<?php print $this->printBodyAttrs() ?>>

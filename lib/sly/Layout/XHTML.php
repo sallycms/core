@@ -18,8 +18,9 @@
  * @author  Zozi
  */
 class sly_Layout_XHTML extends sly_Layout {
-	protected $isTransitional = false; ///< boolean  transitional flag
-	protected $language; ///< string
+	protected $isTransitional = false;  ///< boolean  transitional flag
+	protected $language;                ///< string
+	protected $scriptsAtBottom = false; ///< boolean
 
 	/**
 	 * Set the page to be transitional
@@ -39,6 +40,15 @@ class sly_Layout_XHTML extends sly_Layout {
 	 */
 	public function setLanguage($language) {
 		$this->language = $language;
+	}
+
+	/**
+	 * Toggle whether JS code/files will be put before the closing body tag
+	 *
+	 * @param boolean $switch  toggle the feature on or off
+	 */
+	public function putJavaScriptAtBottom($switch = true) {
+		$this->scriptsAtBottom = (boolean) $switch;
 	}
 
 	/**
@@ -110,6 +120,20 @@ class sly_Layout_XHTML extends sly_Layout {
 
 	public function printHeader() {
 		print $this->renderView('layout/xhtml/head.phtml');
+	}
+
+	/**
+	 * Print the footer
+	 *
+	 * Prints the closing body and html tags.
+	 */
+	public function printFooter() {
+		if ($this->scriptsAtBottom) {
+			$this->printJavaScriptFiles();
+			$this->printJavaScript();
+		}
+
+		print '</body></html>';
 	}
 
 	/**
