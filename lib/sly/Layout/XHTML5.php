@@ -13,12 +13,20 @@
  */
 class sly_Layout_XHTML5 extends sly_Layout_XHTML {
 	protected $manifest; ///< string
+	protected $charset;  ///< string
 
 	/**
 	 * @param string $manifest
 	 */
 	public function setManifest($manifest) {
 		$this->manifest = $manifest;
+	}
+
+	/**
+	 * @param string $charset
+	 */
+	public function setCharset($charset) {
+		$this->charset = strtolower($charset);
 	}
 
 	/**
