@@ -90,7 +90,7 @@ class sly_Service_ArticleType {
 	public function getModules($articleType, $slot = null) {
 		$moduleService   = sly_Service_Factory::getModuleService();
 		$templateService = sly_Service_Factory::getTemplateService();
-		$modules         = sly_makeArray($this->get($articleType, 'modules'));
+		$modules         = sly_makeArray($this->get($articleType, 'modules', array()));
 		$template        = $this->getTemplate($articleType);
 		$result          = array();
 

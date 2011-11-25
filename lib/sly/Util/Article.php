@@ -55,8 +55,18 @@ class sly_Util_Article {
 	 * @param  int     $clangId
 	 * @return array
 	 */
-	public static function findByCategory($categoryId, $ignore_offlines = false, $clangId = false) {
+	public static function findByCategory($categoryId, $ignore_offlines = false, $clangId = null) {
 		return sly_Service_Factory::getArticleService()->findArticlesByCategory($categoryId, $ignore_offlines, $clangId);
+	}
+
+	/**
+	 * @param  string  $type
+	 * @param  boolean $ignore_offlines
+	 * @param  int     $clangId
+	 * @return array
+	 */
+	public static function findByType($type, $ignore_offlines = false, $clangId = null) {
+		return sly_Service_Factory::getArticleService()->findArticlesByType($type, $ignore_offlines, $clangId);
 	}
 
 	/**
