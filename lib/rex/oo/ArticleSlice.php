@@ -103,10 +103,8 @@ class OOArticleSlice {
 	/**
 	 * Return the first slice for an article.
 	 *
-	 * This can then be used to iterate over all the
-	 * slices in the order as they appear using the
-	 * getNextSlice() function.
-	 * Returns an OOArticleSlice object
+	 * This can then be used to iterate over all the slices in the order as they
+	 * appear using the getNextSlice() function.
 	 *
 	 * @param  int     $articleID  The article id
 	 * @param  string  $slot       The slot (if null, the first defined slot will be used)
@@ -180,10 +178,28 @@ class OOArticleSlice {
 	 * @return string the content of the slice
 	 */
 	public function getOutput() {
-		$slice = $this->getSlice();
-		$content = $slice->getOutput();
-		$content = self::replaceLinks($content);
-		$content = $this->replaceGlobals($content);
+		$cachedir = SLY_DYNFOLDER.'/internal/sally/article_slice/';
+		sly_Util_Directory::create($cachedir);
+		$modulefile = sly_Service_Factory::getModuleService()->getOutputFilename($this->getModule());
+
+		$slice_content_file = $cachedir.$this->getSliceId().'-'.md5($modulefile).'.slice.php';
+
+		if (!file_exists($slice_content_file)) {
+			$slice = $this->getSlice();
+			$slice_content = $slice->getOutput();
+			$slice_content = self::replaceLinks($slice_content);
+			$slice_content = $this->replaceGlobals($slice_content);
+
+			if (!file_put_contents($slice_content_file, $slice_content)) {
+				return t('slice_could_not_be_generated').' '.t('check_rights_in_directory').SLY_DYNFOLDER.'/internal/sally/articles/';
+			}
+		}
+
+		if (file_exists($slice_content_file)) {
+			ob_start();
+			$this->includeContentFile($slice_content_file);
+			$content = ob_get_clean();
+		}
 
 		return $content;
 	}
@@ -195,24 +211,11 @@ class OOArticleSlice {
 		return $content;
 	}
 
+	/**
+	 * @deprecated
+	 */
 	public function printContent() {
-		$cachedir = SLY_DYNFOLDER.'/internal/sally/article_slice/';
-		sly_Util_Directory::create($cachedir);
-		$modulefile = sly_Service_Factory::getModuleService()->getOutputFilename($this->getModule());
-
-		$slice_content_file = $cachedir.$this->getSliceId().'-'.md5($modulefile).'.slice.php';
-
-		if (!file_exists($slice_content_file)) {
-			$slice_content = $this->getOutput();
-
-			if (!file_put_contents($slice_content_file, $slice_content)) {
-				return t('slice_could_not_be_generated').' '.t('check_rights_in_directory').SLY_DYNFOLDER.'/internal/sally/articles/';
-			}
-		}
-
-		if (file_exists($slice_content_file)) {
-			$this->includeContentFile($slice_content_file);
-		}
+		print $this->getOutput();
 	}
 
 	private function includeContentFile($slice_content_file) {
@@ -255,22 +258,25 @@ class OOArticleSlice {
 		return sly_Util_Article::findById($this->getArticleId());
 	}
 
-	public function getArticleId()  { return $this->_article_id;             }
-	public function getClang()      { return $this->_clang;                  }
-	public function getSlot()       { return $this->_slot;                   }
-	public function getRevision()   { return $this->_revision;               }
+	public function getArticleId()  { return $this->_article_id; }
+	public function getClang()      { return $this->_clang;      }
+	public function getSlot()       { return $this->_slot;       }
+	public function getRevision()   { return $this->_revision;   }
+	public function getId()         { return $this->_id;         }
+	public function getPrior()      { return $this->_prior;      }
+	public function getSliceId()    { return $this->_slice_id;   }
+	public function getCreatedate() { return $this->_createdate; }
+	public function getUpdatedate() { return $this->_updatedate; }
+	public function getCreateuser() { return $this->_createuser; }
+	public function getUpdateuser() { return $this->_updateuser; }
+
 	/**
 	 * @deprecated
 	 * @return string
 	 */
-	public function getModule()     { return $this->getSlice()->getModule(); }
-	public function getId()         { return $this->_id;                     }
-	public function getPrior()      { return $this->_prior;                  }
-	public function getSliceId()    { return $this->_slice_id;               }
-	public function getCreatedate() { return $this->_createdate;             }
-	public function getUpdatedate() { return $this->_updatedate;             }
-	public function getCreateuser() { return $this->_createuser;             }
-	public function getUpdateuser() { return $this->_updateuser;             }
+	public function getModule() {
+		return $this->getSlice()->getModule();
+	}
 
 	/**
 	 *
@@ -329,7 +335,7 @@ class OOArticleSlice {
 		// siehe dazu: http://forum.redaxo.de/ftopic7563.html
 
 		// -- preg match redaxo://[ARTICLEID]-[CLANG] --
-		preg_match_all('@(?:redaxo|sally)://([0-9]*)\-([0-9]*)(.){1}/?@im', $content, $matches, PREG_SET_ORDER);
+		preg_match_all('@(?:sally)://([0-9]*)\-([0-9]*)(.){1}/?@im', $content, $matches, PREG_SET_ORDER);
 
 		foreach ($matches as $match) {
 			if (empty($match)) continue;
@@ -339,7 +345,7 @@ class OOArticleSlice {
 
 		// -- preg match redaxo://[ARTICLEID] --
 
-		preg_match_all('@(?:redaxo|sally)://([0-9]*)(.){1}/?@im', $content, $matches, PREG_SET_ORDER);
+		preg_match_all('@(?:sally)://([0-9]*)(.){1}/?@im', $content, $matches, PREG_SET_ORDER);
 
 		foreach ($matches as $match) {
 			if (empty($match)) continue;

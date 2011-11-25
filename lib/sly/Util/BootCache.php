@@ -107,8 +107,7 @@ class sly_Util_BootCache {
 			'lib/functions.php',
 			'functions/function_rex_globals.inc.php',
 			'functions/function_rex_client_cache.inc.php',
-			'functions/function_rex_other.inc.php',
-			'functions/function_rex_generate.inc.php'
+			'functions/function_rex_other.inc.php'
 		);
 
 		foreach ($functionFiles as $fctFile) {

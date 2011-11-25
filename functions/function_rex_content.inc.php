@@ -251,7 +251,7 @@ function rex_copyContent($from_id, $to_id, $from_clang = 0, $to_clang = 0, $from
 		'start_slice' => $from_re_sliceid
 	));
 
-	rex_deleteCacheArticle($to_id, $to_clang);
+	sly_Service_Factory::getArticleService()->deleteCache($to_id, $to_clang);
 	sly_Core::cache()->flush(OOArticleSlice::CACHE_NS);
 
 	return true;
@@ -341,10 +341,10 @@ function rex_copyArticle($id, $target) {
 	}
 
 	// Caches des Artikels löschen, in allen Sprachen
-	// rex_deleteCacheArticle($id);
+	// sly_Service_Factory::getArticleService()->deleteCache($id);
 
 	// Caches der Kategorien löschen, da sich darin befindliche Artikel geändert haben
-	rex_deleteCacheArticle($target);
+	sly_Service_Factory::getArticleService()->deleteCache($target);
 
 	return $new_id;
 }
@@ -522,7 +522,8 @@ function rex_moveCategory($from_cat, $to_cat) {
 	$cache->flush('sly.category', true);
 
 	// generiere Artikel neu - ohne neue Inhaltsgenerierung
-	foreach (array_keys($toDelete) as $id) rex_deleteCacheArticle($id);
+	$service = sly_Service_Factory::getArticleService();
+	foreach (array_keys($toDelete) as $id) $service->deleteCache($id);
 
 	// notify system
 	$dispatcher = sly_Core::dispatcher();

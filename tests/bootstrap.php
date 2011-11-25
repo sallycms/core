@@ -11,7 +11,10 @@
 define('SLY_IS_TESTING', true);     ///< boolean  für Testläufe muss hier true stehen.
 define('SLY_TESTING_USER_ID', 1);   ///< int      die ID des Users, der eingeloggt sein soll
 
-$sallyRoot = realpath(dirname(__FILE__).'/../');
+$sallyRoot = realpath(dirname(__FILE__).'/../../');
 define('SLY_TESTING_ROOT', $sallyRoot);
 
-require SLY_TESTING_ROOT.'/sally/index.php';
+require SLY_TESTING_ROOT.'/sally/backend/index.php';
+
+sly_Loader::addLoadPath(dirname(__FILE__).'/tests', 'sly_');
+require_once SLY_COREFOLDER.'/functions/function_rex_content.inc.php';

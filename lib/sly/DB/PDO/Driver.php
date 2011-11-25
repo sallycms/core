@@ -26,10 +26,10 @@ abstract class sly_DB_PDO_Driver {
 	 * @param string $database
 	 */
 	public function __construct($host, $login, $password, $database) {
-		$this->host     = $host;
-		$this->login    = $login;
-		$this->password = $password;
-		$this->database = $database;
+		$this->host     = (string)$host;
+		$this->login    = (string)$login;
+		$this->password = (string)$password;
+		$this->database = (string)$database;
 	}
 
 	/**
@@ -43,4 +43,10 @@ abstract class sly_DB_PDO_Driver {
 	 * @return string
 	 */
 	abstract public function getDSN();
+
+	/**
+	 * @param  string $name  the database name
+	 * @return string
+	 */
+	abstract public function getCreateDatabaseSQL($name);
 }
