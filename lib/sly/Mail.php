@@ -201,6 +201,7 @@ class sly_Mail implements sly_Mail_Interface {
 	 * @return string       the Base64 encoded string, marked with the current charset
 	 */
 	public function encode($str) {
+		if (!preg_match('#[^a-zA-Z0-9_+-]#', $str)) return $str;
 		return '=?'.strtoupper($this->charset).'?B?'.base64_encode($str).'?=';
 	}
 
