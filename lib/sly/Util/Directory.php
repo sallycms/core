@@ -37,50 +37,31 @@ class sly_Util_Directory {
 	 */
 	public static function create($path, $perm = null, $throwException = false) {
 		$path = self::normalize($path);
-		$perm = $perm === null ? sly_Core::getDirPerm() : (int) $perm;
-		$full = $path;
 
 		if (!is_dir($path)) {
-			$s = DIRECTORY_SEPARATOR;
-			$p = null;
+			$base = dirname($path);
+			$perm = $perm === null ? sly_Core::getDirPerm() : (int) $perm;
 
-			if (sly_Util_String::startsWith($path, SLY_BASE)) {
-				$p    = SLY_BASE;
-				$path = trim(substr($path, strlen(SLY_BASE)), $s);
+			// create base path (walking recursively from the end to SLY_BASE, basically)
+			if (!self::create($base, $perm, $throwException)) return false;
+
+			// try to create the directory
+			if (@mkdir($path)) {
+				@chmod($path, $perm);
+				clearstatcache();
 			}
-
-			$parts = explode($s, $path);
-			$level = error_reporting(0);
-
-			foreach ($parts as $part) {
-				$p = $p === null ? $part : $p.$s.$part;
-
-				// $part can be empty if $path was UNIX style absolute
-				// '/var/bar' => ['', 'var', 'bar']
-				if (strlen($part) === 0 || is_dir($p)) continue;
-
-				// try to create the directory
-				if (!mkdir($p)) {
-					error_reporting($level);
-					clearstatcache();
-
-					if ($throwException) {
-						throw new sly_Util_DirectoryException($p);
-					}
-					else {
-						trigger_error('mkdir('.$p.') failed.', E_USER_WARNING);
-						return false;
-					}
+			else {
+				if ($throwException) {
+					throw new sly_Util_DirectoryException($path);
 				}
-
-				chmod($p, $perm);
+				else {
+					trigger_error('mkdir('.$path.') failed.', E_USER_WARNING);
+					return false;
+				}
 			}
-
-			error_reporting($level);
-			clearstatcache();
 		}
 
-		return $full;
+		return $path;
 	}
 
 	/**

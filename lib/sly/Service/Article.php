@@ -454,7 +454,7 @@ class sly_Service_Article extends sly_Service_Model_Base {
 
 		$namespace = 'sly.article.list';
 		$key       = $type.'_'.$clangId.'_'.($ignore_offlines ? '1' : '0');
-		$alist     = sly_Core::cache()->get($namespace, $key, null);
+		$alist     = null; // sly_Core::cache()->get($namespace, $key, null);
 
 		if ($alist === null) {
 			$alist = array();
@@ -466,7 +466,8 @@ class sly_Service_Article extends sly_Service_Model_Base {
 			$sql->select($this->tablename, 'id', $where, null, 'prior,name');
 			foreach ($sql as $row) $alist[] = (int) $row['id'];
 
-			sly_Core::cache()->set($namespace, $key, $alist);
+			// don't cache this list for now, as we wouldn't clear it appropriatly
+			// sly_Core::cache()->set($namespace, $key, $alist);
 		}
 
 		$artlist = array();
