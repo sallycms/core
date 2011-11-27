@@ -97,7 +97,7 @@ class sly_Configuration {
 	}
 
 	/**
-	 * @throws sly_Exception      when something is fucked up (file not found, bad parameters, ...)
+	 * @throws sly_Exception     when something is fucked up (file not found, bad parameters, ...)
 	 * @param  string $filename  the file to load
 	 * @param  string $key       where to mount the loaded config
 	 * @return mixed             false when an error occured, else the loaded configuration (most likely an array)
