@@ -106,22 +106,23 @@ class sly_Model_Slice extends sly_Model_Base_Id {
 	 * @return string
 	 */
 	protected function replaceLinks($content) {
-		// -- preg match sally://[ARTICLEID]-[CLANG] --
-		preg_match_all('@(?:sally)://([0-9]*)\-([0-9]*)(.){1}/?@im', $content, $matches, PREG_SET_ORDER);
+		preg_match_all('#(?:redaxo|sally)://([0-9]+)(?:-([0-9]+))?/?#', $content, $matches, PREG_OFFSET_CAPTURE | PREG_SET_ORDER);
+
+		$skew = 0;
 
 		foreach ($matches as $match) {
-			if (empty($match)) continue;
-			$replace = sly_Util_Article::getUrl($match[1], $match[2]);
-			$content = str_replace($match[0], $replace, $content);
-		}
+			$complete = $match[0];
+			$length   = strlen($complete[0]);
+			$offset   = $complete[1];
+			$id       = (int) $match[1][0];
+			$clang    = isset($match[2]) ? (int) $match[2][0] : null;
+			$repl     = sly_Util_Article::getUrl($id, $clang);
 
-		// -- preg match sally://[ARTICLEID] --
-		preg_match_all('@(?:sally)://([0-9]*)(.){1}/?@im', $content, $matches, PREG_SET_ORDER);
+			// replace the match
+			$content = substr_replace($content, $repl, $offset + $skew, $length);
 
-		foreach ($matches as $match) {
-			if (empty($match)) continue;
-			$replace = sly_Util_Article::getUrl($match[1]);
-			$content = str_replace($match[0], $replace, $content);
+			// ensure the next replacements get the correct offset
+			$skew += strlen($repl) - $length;
 		}
 
 		return $content;
