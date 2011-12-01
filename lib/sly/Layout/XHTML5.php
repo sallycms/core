@@ -12,8 +12,8 @@
  * @ingroup layout
  */
 class sly_Layout_XHTML5 extends sly_Layout_XHTML {
-	protected $manifest; ///< string
-	protected $charset;  ///< string
+	protected $manifest;           ///< string
+	protected $charset = 'utf-8';  ///< string
 
 	/**
 	 * @param string $manifest
