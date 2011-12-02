@@ -1,2 +1,2 @@
-@echo off
-phpunit --bootstrap bootstrap.php %* tests
+call phpunit --strict --bootstrap bootstrap.php %* tests
+php cleanup.php
