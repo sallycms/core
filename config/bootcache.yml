@@ -13,6 +13,7 @@ static:
   - sly_ErrorHandler
   - sly_ErrorHandler_Base
   - sly_ErrorHandler_Production
+  - sly_Log
   - BabelCache
   - BabelCache_Interface
   - BabelCache_Factory
