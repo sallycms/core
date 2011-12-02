@@ -17,22 +17,25 @@
 class sly_DB_PDO_Connection {
 	private static $instances = array(); ///< array
 
-	private $driver       = null;  ///< string
+	private $driver       = null;  ///< sly_DB_PDO_Driver
 	private $pdo          = null;  ///< PDO
 	private $transrunning = false; ///< boolean
 
 	/**
-	 * @param string $driver
-	 * @param string $dsn
-	 * @param string $login
-	 * @param string $password
+	 * @param sly_DB_PDO_Driver $driver
+	 * @param string            $dsn
+	 * @param string            $login
+	 * @param string            $password
 	 */
-	private function __construct($driver, $dsn, $login, $password) {
+	private function __construct(sly_DB_PDO_Driver $driver, $dsn, $login, $password) {
 		$this->driver = $driver;
-		$this->pdo    = new PDO($dsn, $login, $password);
+		$this->pdo    = new PDO($dsn, $login, $password, $driver->getPDOOptions());
 
 		$this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-		$this->pdo->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, true);
+
+		foreach ($driver->getPDOAttributes() as $key => $value) {
+			$this->pdo->setAttribute($key, $value);
+		}
 	}
 
 	/**
@@ -55,7 +58,7 @@ class sly_DB_PDO_Connection {
 
 		if (empty(self::$instances[$dsn])) {
 			try {
-				self::$instances[$dsn] = new self($driver, $dsn, $login, $password);
+				self::$instances[$dsn] = new self($driverObj, $dsn, $login, $password);
 			}
 			catch (PDOException $e) {
 				if (version_compare(PHP_VERSION, '5.3.0', '>=')) {
