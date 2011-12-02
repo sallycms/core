@@ -35,6 +35,20 @@ abstract class sly_DB_PDO_Driver {
 	/**
 	 * @return array
 	 */
+	public function getPDOOptions() {
+		return array();
+	}
+
+	/**
+	 * @return array
+	 */
+	public function getPDOAttributes() {
+		return array();
+	}
+
+	/**
+	 * @return array
+	 */
 	public static function getAvailable() {
 		return array_intersect(self::$drivers, PDO::getAvailableDrivers());
 	}
