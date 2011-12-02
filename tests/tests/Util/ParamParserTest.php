@@ -116,11 +116,10 @@ TESTFILE;
 		$this->assertFalse($parser->get('test_boolean'));
 	}
 
-	/**
-	 * @expectedException PHPUnit_Framework_Error
-	 */
 	public function testInvalidValue() {
 		$parser = new sly_Util_ParamParser(dirname(__FILE__).'/template2.php');
-		$parser->get();
+		$params = array('test_invalid' => '{foo:}');
+
+		$this->assertEquals($params, $parser->get());
 	}
 }
