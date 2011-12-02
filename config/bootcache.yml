@@ -10,8 +10,9 @@ static:
   - sly_Util_YAML
   - sly_Util_Directory
   - sly_Util_String
-  - sly_ErrorHandler_Base
   - sly_ErrorHandler
+  - sly_ErrorHandler_Base
+  - sly_ErrorHandler_Production
   - BabelCache
   - BabelCache_Interface
   - BabelCache_Factory
@@ -20,9 +21,7 @@ static:
   - sly_DB_PDO_Persistence
   - sly_DB_PDO_Connection
   - sly_DB_PDO_Driver
-  - sly_DB_PDO_Driver_MYSQL
   - sly_DB_PDO_SQLBuilder
-  - sly_DB_PDO_SQLBuilder_MYSQL
   - sly_DB_PDO_Expression
   - sly_Cache
   - sly_Util_Cache
@@ -42,7 +41,16 @@ static:
   - sly_Model_Article
 frontend: []
 backend:
+  - sly_Viewable
+  - sly_Layout
+  - sly_Layout_XHTML
   - sly_Layout_Backend
   - sly_Layout_Navigation_Backend
   - sly_Layout_Navigation_Group
   - sly_Layout_Navigation_Page
+  - sly_Layout_Navigation_Subpage
+  - sly_Util_Session
+  - sly_Service_Model_Base_Id
+  - sly_Service_User
+  - sly_Util_User
+  - sly_Controller_Base
