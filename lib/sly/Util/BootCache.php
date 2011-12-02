@@ -29,6 +29,13 @@ class sly_Util_BootCache {
 		// add current cache instance
 		$cacheClass = get_class(sly_Core::cache());
 
+		// add current database driver
+		$driver = sly_Core::config()->get('DATABASE/DRIVER');
+		$driver = strtoupper($driver);
+
+		self::addClass('sly_DB_PDO_Driver_'.$driver);
+		self::addClass('sly_DB_PDO_SQLBuilder_'.$driver);
+
 		// TODO: Remove these dependency hacks with a more elegant solution (Reflection?)
 		if ($cacheClass === 'BabelCache_Memcached') {
 			self::addClass('BabelCache_Memcache');
