@@ -1,0 +1,31 @@
+SETUP: false
+INSTNAME: sly59f008fea53fb4447830
+CACHING_STRATEGY: BabelCache_Blackhole
+DATABASE:
+  DRIVER: mysql
+  HOST: localhost
+  LOGIN: develop
+  PASSWORD: develop
+  NAME: sally_base
+  PERSISTENT: false
+  TABLE_PREFIX: sly_
+PERM:
+  - 'mediapool'
+EXTPERM:
+  - 'advancedMode'
+  - 'moveSlice'
+  - 'copyContent'
+  - 'moveArticle'
+  - 'copyArticle'
+  - 'moveCategory'
+  - 'publishArticle'
+  - 'publishCategory'
+  - 'article2startpage'
+  - 'changearttype'
+EXTRAPERM:
+  - 'editContentOnly'
+OBJECTPERM:
+  - clang
+  - csw
+  - media
+  - module
