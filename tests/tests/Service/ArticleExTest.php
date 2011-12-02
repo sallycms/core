@@ -76,4 +76,17 @@ class sly_Service_ArticleExTest extends sly_Service_ArticleBase {
 			array(1, false, 1, array(1)), array(1, true, 1, array(1)), array(1, true, 2, array())
 		);
 	}
+
+	public function testTouch() {
+		$service = $this->getService();
+		$article = $service->findById(1);
+		$user    = sly_Service_Factory::getUserService()->findById(1);
+
+		$service->touch($article, $user);
+
+		$article = $service->findById(1);
+
+		$this->assertEquals(time(), $article->getUpdatedate());
+		$this->assertEquals($user->getLogin(), $article->getUpdateuser());
+	}
 }
