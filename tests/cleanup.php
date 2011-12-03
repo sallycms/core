@@ -21,27 +21,3 @@ foreach (array('local', 'project') as $conf) {
 		@unlink($backupFile);
 	}
 }
-
-$developDir = $sallyRoot.'/develop';
-
-if (is_dir($developDir.'_tmp')) {
-	if (is_dir($developDir)) {
-		// cleanup a possibly generated develop directory
-		$iterator = new RecursiveDirectoryIterator($developDir);
-		$iterator = new RecursiveIteratorIterator($iterator, RecursiveIteratorIterator::CHILD_FIRST);
-
-		foreach ($iterator as $file) {
-			$path = $file->getPathname();
-			$base = basename($path);
-
-			if ($base === '.' || $base === '..') continue;
-			$file->isDir() ? rmdir($path) : unlink($path);
-		}
-
-		rmdir($developDir);
-		unset($iterator);
-	}
-
-	// and finally rename the original one
-	rename($developDir.'_tmp', $developDir);
-}
