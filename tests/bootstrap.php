@@ -8,11 +8,19 @@
  * http://www.opensource.org/licenses/mit-license.php
  */
 
-$sallyRoot = realpath(dirname(__FILE__).'/../../');
+$here      = dirname(__FILE__);
+$sallyRoot = realpath($here.'/../../');
 
-define('SLY_IS_TESTING', true);
+define('SLY_IS_TESTING',      true);
 define('SLY_TESTING_USER_ID', 1);
-define('SLY_TESTING_ROOT', $sallyRoot);
+define('SLY_TESTING_ROOT',    $sallyRoot);
+define('SLY_SALLYFOLDER',     $sallyRoot.'/sally');
+define('SLY_DEVELOPFOLDER',   $here.'/develop');
+define('SLY_MEDIAFOLDER',     $here.'/mediapool');
+define('SLY_ADDONFOLDER',     $here.'/addons');
+
+if (!is_dir(SLY_MEDIAFOLDER)) mkdir(SLY_MEDIAFOLDER);
+if (!is_dir(SLY_ADDONFOLDER)) mkdir(SLY_ADDONFOLDER);
 
 // prepare our own config files
 foreach (array('local', 'project') as $conf) {
@@ -26,11 +34,6 @@ foreach (array('local', 'project') as $conf) {
 
 	copy($testFile, $liveFile);
 }
-
-// make sure develop contents doesn't distract us
-// (mainly useful on installations that are also used for developing and not just for testing)
-$developDir = $sallyRoot.'/develop';
-if (is_dir($developDir)) rename($developDir, $developDir.'_tmp');
 
 // boot Sally
 require SLY_TESTING_ROOT.'/sally/backend/index.php';
