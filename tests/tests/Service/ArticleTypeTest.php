@@ -17,9 +17,9 @@ class sly_Service_ArticleTypeTest extends PHPUnit_Framework_TestCase {
 
 	public function testGetArticleTypes() {
 		$types    = $this->getService()->getArticleTypes();
-		$expected = array('default' => 'Standard', 'special' => 'Special');
+		$expected = array('default' => 'Standard', 'special' => 'Special', 'test' => 'Test');
 
-		$this->assertCount(2, $types);
+		$this->assertCount(3, $types);
 		$this->assertEquals($expected, $types);
 	}
 
@@ -59,5 +59,48 @@ class sly_Service_ArticleTypeTest extends PHPUnit_Framework_TestCase {
 	 */
 	public function testExistsException() {
 		$this->getService()->exists('nonexisting', true);
+	}
+
+	/**
+	 * @dataProvider getModulesProvider
+	 */
+	public function testGetModules($type, $slot, $expected) {
+		$expected = $expected === array() ? array(): array_combine($expected, $expected); // build key=>title list
+		$modules  = $this->getService()->getModules($type, $slot);
+
+		$this->assertEquals($expected, $modules);
+	}
+
+	public function getModulesProvider() {
+		return array(
+			array('default', 'main',   array('test1', 'test2')),
+			array('default', 'test',   array('test2')),
+			array('special', null,     array('test1', 'test2')),
+			array('special', 'main',   array('test1', 'test2')),
+			array('special', 'test',   array('test1', 'test2')),
+			array('special', 'noslot', array()),
+			array('test',    null,     array('test1')),
+			array('test',    'main',   array('test1'))
+		);
+	}
+
+	/**
+	 * @dataProvider hasModuleProvider
+	 * @depends      testGetModules
+	 */
+	public function testHasModule($type, $slot, $module, $expected) {
+		$result = $this->getService()->hasModule($type, $module, $slot);
+		$this->assertEquals($expected, $result);
+	}
+
+	public function hasModuleProvider() {
+		return array(
+			array('default', 'main',   'test1', true),
+			array('default', 'main',   'test2', true),
+			array('default', 'test',   'test1', false),
+			array('default', 'test',   'test2', true),
+			array('special', 'noslot', 'test1', false),
+			array('special', 'noslot', 'nonexistingmodule', false)
+		);
 	}
 }
