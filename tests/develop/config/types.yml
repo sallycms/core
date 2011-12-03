@@ -2,7 +2,14 @@ ARTICLE_TYPES:
    default:
       title: Standard
       template: standard
+      modules: {test: [test2, nonexisting]}
    special:
       title: Special
       template: standard
       testprop: [1, 2]
+      modules: []
+   test:
+      title: Test
+      template: standard
+      testprop: [1, 2]
+      modules: [test1]
