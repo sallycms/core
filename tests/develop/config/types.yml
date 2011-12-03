@@ -1,0 +1,8 @@
+ARTICLE_TYPES:
+   default:
+      title: Standard
+      template: standard
+   special:
+      title: Special
+      template: standard
+      testprop: [1, 2]
