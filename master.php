@@ -38,14 +38,22 @@ if (ini_get('register_globals')) {
 }
 
 // define constants for system wide important paths
-define('SLY_BASE',          realpath(dirname(__FILE__).'/../../'));
-define('SLY_SALLYFOLDER',   SLY_BASE.DIRECTORY_SEPARATOR.'sally');
-define('SLY_COREFOLDER',    SLY_SALLYFOLDER.DIRECTORY_SEPARATOR.'core');
-define('SLY_DATAFOLDER',    SLY_SALLYFOLDER.DIRECTORY_SEPARATOR.'data');
-define('SLY_DYNFOLDER',     SLY_DATAFOLDER.DIRECTORY_SEPARATOR.'dyn');
-define('SLY_MEDIAFOLDER',   SLY_DATAFOLDER.DIRECTORY_SEPARATOR.'mediapool');
-define('SLY_DEVELOPFOLDER', SLY_BASE.DIRECTORY_SEPARATOR.'develop');
-define('SLY_ADDONFOLDER',   SLY_SALLYFOLDER.DIRECTORY_SEPARATOR.'addons');
+define('SLY_BASE', realpath(dirname(__FILE__).'/../../'));
+
+// the unit tests have their own paths
+if (!SLY_IS_TESTING) {
+	define('SLY_SALLYFOLDER',   SLY_BASE.DIRECTORY_SEPARATOR.'sally');
+	define('SLY_DEVELOPFOLDER', SLY_BASE.DIRECTORY_SEPARATOR.'develop');
+}
+
+define('SLY_COREFOLDER', SLY_SALLYFOLDER.DIRECTORY_SEPARATOR.'core');
+define('SLY_DATAFOLDER', SLY_SALLYFOLDER.DIRECTORY_SEPARATOR.'data');
+define('SLY_DYNFOLDER',  SLY_DATAFOLDER.DIRECTORY_SEPARATOR.'dyn');
+
+if (!SLY_IS_TESTING) {
+	define('SLY_MEDIAFOLDER', SLY_DATAFOLDER.DIRECTORY_SEPARATOR.'mediapool');
+	define('SLY_ADDONFOLDER', SLY_SALLYFOLDER.DIRECTORY_SEPARATOR.'addons');
+}
 
 // define these PHP 5.3 constants here so that they can be used in YAML files
 // (if someone really decides to put PHP code in their config files).
