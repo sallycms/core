@@ -76,7 +76,7 @@ class sly_Configuration {
 	}
 
 	public function loadDevelop() {
-		$dir = new sly_Util_Directory(SLY_BASE.DIRECTORY_SEPARATOR.'develop'.DIRECTORY_SEPARATOR.'config');
+		$dir = new sly_Util_Directory(SLY_DEVELOPFOLDER.DIRECTORY_SEPARATOR.'config');
 
 		if ($dir->exists()) {
 			foreach ($dir->listPlain() as $file) {
