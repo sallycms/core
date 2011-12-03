@@ -89,4 +89,54 @@ class sly_Service_ArticleExTest extends sly_Service_ArticleBase {
 		$this->assertEquals(time(), $article->getUpdatedate());
 		$this->assertEquals($user->getLogin(), $article->getUpdateuser());
 	}
+
+	public function testSetType() {
+		$service = $this->getService();
+		$article = $service->findById(6);
+
+		$service->setType($article, 'special');
+
+		// type must be the same in all languages
+		foreach (array(1, 2) as $clang) {
+			$article = $service->findById(6, $clang);
+			$this->assertEquals('special', $article->getType());
+		}
+	}
+
+	public function testFindByType() {
+		$service = $this->getService();
+		$this->assertEmpty($service->findArticlesByType('special'));
+
+		// make two articles special articles
+
+		$service->setType($service->findById(6), 'special');
+		$service->setType($service->findById(7), 'special');
+		$result = $service->findArticlesByType('special');
+
+		$this->assertCount(2, $result);
+
+		foreach (array(6, 7) as $idx => $artId) {
+			$article = $service->findById($artId);
+			$this->assertEquals($article, $result[$idx]);
+		}
+
+		// set one of them offline
+
+		$service->changeStatus(6, 1, 0);
+		$result = $service->findArticlesByType('special');
+
+		$this->assertCount(2, $result);
+
+		foreach (array(6, 7) as $idx => $artId) {
+			$article = $service->findById($artId);
+			$this->assertEquals($article, $result[$idx]);
+		}
+
+		// when ignoring offline articles, don't expect the 6
+
+		$result = $service->findArticlesByType('special', true);
+
+		$this->assertCount(1, $result);
+		$this->assertEquals($service->findById(7), $result[0]);
+	}
 }
