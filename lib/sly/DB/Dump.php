@@ -279,39 +279,35 @@ class sly_DB_Dump {
 		$offset    = 0;
 		$parse     = '[\'`"]|/\\*|-- |#'; //! ` and # not everywhere
 		$query     = $this->content;
+		$stack     = '';
 
 		while ($query !== '') {
-			if (!$offset && preg_match("~^$space*DELIMITER\\s+(.+)~i", $query, $match)) {
-				$delimiter = $match[1];
-				$query     = substr($query, strlen($match[0]));
+			preg_match('('.preg_quote($delimiter)."|$parse|\$)", $query, $match, PREG_OFFSET_CAPTURE, $offset); // should always match
+
+			$found  = $match[0][0];
+			$offset = $match[0][1] + strlen($found);
+
+			if (!$found && rtrim($query) === '') {
+				break;
 			}
-			else {
-				preg_match('('.preg_quote($delimiter)."|$parse|\$)", $query, $match, PREG_OFFSET_CAPTURE, $offset); // should always match
 
-				$found  = $match[0][0];
-				$offset = $match[0][1] + strlen($found);
+			if ($found && $found !== $delimiter) { // find matching quote or comment end
+				while (preg_match('(' . ($found == '/*' ? '\\*/' : ($found == '[' ? ']' : (preg_match('~^(-- |#)~', $found) ? "\n" : preg_quote($found) . "|\\\\."))) . '|$)s', $query, $match, PREG_OFFSET_CAPTURE, $offset)) { //! respect sql_mode NO_BACKSLASH_ESCAPES
+					$s      = $match[0][0];
+					$offset = $match[0][1] + strlen($s);
 
-				if (!$found && rtrim($query) === '') {
-					break;
-				}
-
-				if ($found && $found !== $delimiter) { // find matching quote or comment end
-					while (preg_match('(' . ($found == '/*' ? '\\*/' : ($found == '[' ? ']' : (preg_match('~^(-- |#)~', $found) ? "\n" : preg_quote($found) . "|\\\\."))) . '|$)s', $query, $match, PREG_OFFSET_CAPTURE, $offset)) { //! respect sql_mode NO_BACKSLASH_ESCAPES
-						$s      = $match[0][0];
-						$offset = $match[0][1] + strlen($s);
-
-						if ($s[0] != "\\") {
-							break;
-						}
+					if ($s[0] != "\\") {
+						break;
 					}
 				}
-				else { // end of a query
-					$q      = substr($query, 0, $match[0][1]);
-					$query  = substr($query, $offset);
-					$offset = 0;
+			}
+			else { // end of a query
+				$q      = substr($query, 0, $match[0][1]);
+				$query  = substr($query, $offset);
+				$offset = 0;
 
-					$this->queries[] = trim($q);
-				}
+				$q = trim($q);
+				if (strlen($q) > 0) $this->queries[] = $q;
 			}
 		}
 	}
