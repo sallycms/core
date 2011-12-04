@@ -28,20 +28,28 @@ class sly_DB_DumpTest extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
+	 * @expectedException sly_Exception
+	 */
+	public function testConstructor() {
+		new sly_DB_Dump('nonexisting.sql');
+	}
+
+	/**
 	 * @dataProvider dumpProvider
 	 */
-	public function testGetProperties($dump, $version, $prefix) {
+	public function testGetProperties($dump, $version, $prefix, $count) {
 		$d = new sly_DB_Dump(dirname(__FILE__).'/'.$dump);
 		$this->assertEquals($version, $d->getVersion());
 		$this->assertEquals($prefix, $d->getPrefix());
+		$this->assertCount($count, $d->getHeaders());
 	}
 
 	public function dumpProvider() {
 		return array(
-			array('dumpA.sql', '0.6', 'foo_'),
-			array('dumpB.sql', '1', false),
-			array('dumpC.sql', false, false),
-			array('dumpD.sql', '0.6', '')
+			array('dumpA.sql', '0.6', 'foo_', 2),
+			array('dumpB.sql', '1', false, 1),
+			array('dumpC.sql', false, false, 0),
+			array('dumpD.sql', '0.6', '', 2)
 		);
 	}
 }
