@@ -274,7 +274,6 @@ class sly_DB_Dump {
 	 * @license Apache License, Version 2.0
 	 */
 	protected function readQueries() {
-		$space     = "(?:\\s|/\\*.*\\*/|(?:#|-- )[^\n]*\n|--\n)";
 		$delimiter = ';';
 		$offset    = 0;
 		$parse     = '[\'`"]|/\\*|-- |#'; //! ` and # not everywhere
