@@ -14,6 +14,8 @@
 class sly_Core {
 	private static $instance;  ///< sly_Core
 	private $cache;            ///< BabelCache_Interface
+	private $configuration;    ///< sly_Configuration
+	private $dispatcher;       ///< sly_Event_Dispatcher
 	private $curClang;         ///< int
 	private $curArticleId;     ///< int
 	private $varTypes;         ///< array
@@ -29,7 +31,8 @@ class sly_Core {
 	const DEFAULT_DIRPERM  = 0777; ///< int
 
 	private function __construct() {
-		$this->cache = sly_Cache::factory();
+		$this->configuration = new sly_Configuration();
+		$this->dispatcher    = new sly_Event_Dispatcher();
 	}
 
 	/**
@@ -48,7 +51,12 @@ class sly_Core {
 	 * @return BabelCache_Interface  caching instance
 	 */
 	public static function cache() {
-		return self::getInstance()->cache;
+		// Because sly_Cache depends on self::config() being available, we cannot
+		// init the cache in sly_Core->__construct().
+
+		$inst = self::getInstance();
+		if (!$inst->cache) $inst->cache = sly_Cache::factory();
+		return $inst->cache;
 	}
 
 	/**
@@ -167,14 +175,14 @@ class sly_Core {
 	 * @return sly_Configuration  the system configuration
 	 */
 	public static function config() {
-		return sly_Configuration::getInstance();
+		return self::getInstance()->configuration;
 	}
 
 	/**
 	 * @return sly_Event_Dispatcher  the event dispatcher
 	 */
 	public static function dispatcher() {
-		return sly_Event_Dispatcher::getInstance();
+		return self::getInstance()->dispatcher;
 	}
 
 	/**
