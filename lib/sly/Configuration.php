@@ -31,9 +31,7 @@ class sly_Configuration {
 	private $localConfigModified   = false; ///< boolean
 	private $projectConfigModified = false; ///< boolean
 
-	private static $instance; ///< sly_Configuration
-
-	private function __construct() {
+	public function __construct() {
 		$this->staticConfig  = new sly_Util_Array();
 		$this->localConfig   = new sly_Util_Array();
 		$this->projectConfig = new sly_Util_Array();
@@ -41,23 +39,18 @@ class sly_Configuration {
 	}
 
 	/**
-	 * @return sly_Configuration
-	 */
-	public static function getInstance() {
-		if (!self::$instance) self::$instance = new self();
-		return self::$instance;
-	}
-
-	/**
 	 * @return string  the directory where the config is stored
 	 */
 	protected function getConfigDir() {
+		static $protected = false;
+
 		$dir = SLY_DATAFOLDER.DIRECTORY_SEPARATOR.'config';
 
-		if (!sly_Util_Directory::createHttpProtected($dir)) {
+		if (!$protected && !sly_Util_Directory::createHttpProtected($dir)) {
 			throw new sly_Exception('Config-Verzeichnis '.$dir.' konnte nicht erzeugt werden.');
 		}
 
+		$protected = true;
 		return $dir;
 	}
 

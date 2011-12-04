@@ -23,24 +23,13 @@
  * @ingroup event
  */
 class sly_Event_Dispatcher {
-	private $listeners;         ///< array                 list of listeners
-	private static $instance;   ///< sly_Event_Dispatcher  the current dispatcher instance
+	private $listeners; ///< array  list of listeners
 
 	/**
 	 * Constructor
 	 */
-	private function __construct() {
+	public function __construct() {
 		$this->listeners = array();
-	}
-
-	/**
-	 * Singleton access
-	 *
-	 * @return sly_Event_Dispatcher  the instance
-	 */
-	public static function getInstance() {
-		if (empty(self::$instance)) self::$instance = new self();
-		return self::$instance;
 	}
 
 	/**
