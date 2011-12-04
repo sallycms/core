@@ -61,4 +61,18 @@ class sly_Service_LanguageTest extends sly_DatabaseTest {
 		$this->assertEquals(2, count($langs));
 		$this->assertFalse(sly_Util_Language::exists($id));
 	}
+
+	/**
+	 * @depends testAdd
+	 */
+	public function testDuplicatesArticles() {
+		$service  = $this->getService();
+		$aService = sly_Service_Factory::getArticleService();
+		$articles = count($aService->find()) / 2; // there are two languages in sally-demopage
+		$lang     = $service->create(array('name' => 'test', 'locale' => 'xx_YY'));
+		$id       = $lang->getId();
+
+		$this->assertCount(3*$articles, $aService->find());
+		$this->assertInstanceOf('sly_Model_Article', $aService->findById(6, $id));
+	}
 }
