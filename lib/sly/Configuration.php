@@ -22,11 +22,12 @@ class sly_Configuration {
 
 	private $mode              = array(); ///< array
 	private $loadedConfigFiles = array(); ///< array
+	private $resultCache       = array();
 
 	private $staticConfig;  ///< sly_Util_Array
 	private $localConfig;   ///< sly_Util_Array
 	private $projectConfig; ///< sly_Util_Array
-	private $cache;          ///< sly_Util_Array
+	private $cache;         ///< sly_Util_Array
 
 	private $localConfigModified   = false; ///< boolean
 	private $projectConfigModified = false; ///< boolean
@@ -36,6 +37,10 @@ class sly_Configuration {
 		$this->localConfig   = new sly_Util_Array();
 		$this->projectConfig = new sly_Util_Array();
 		$this->cache         = null;
+	}
+
+	public function __destruct() {
+		$this->flush();
 	}
 
 	/**
@@ -187,11 +192,23 @@ class sly_Configuration {
 	 * @return mixed            the found value or $default
 	 */
 	public function get($key, $default = null) {
-		if($this->cache == null) {
+		if ($this->cache === null) {
+			// invalidate result cache
+			$this->resultCache = array();
+
+			// build merged config cache
 			$this->cache = array_replace_recursive($this->staticConfig->get('/', array()), $this->localConfig->get('/', array()), $this->projectConfig->get('/', array()));
 			$this->cache = new sly_Util_Array($this->cache);
 		}
-		return $this->cache->get($key, $default);
+
+		if (array_key_exists($key, $this->resultCache)) {
+			return $this->resultCache[$key];
+		}
+
+		$val = $this->cache->get($key, $default);
+		$this->resultCache[$key] = $val;
+
+		return $val;
 	}
 
 	/**
@@ -364,9 +381,5 @@ class sly_Configuration {
 		if ($this->projectConfigModified) {
 			sly_Util_YAML::dump($this->getProjectConfigFile(), $this->projectConfig->get(null));
 		}
-	}
-
-	public function __destruct() {
-		$this->flush();
 	}
 }
