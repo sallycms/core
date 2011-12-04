@@ -60,11 +60,36 @@ print \$x + 5;
 TESTFILE;
 
 		file_put_contents($filename, $testfile);
+
+		$filename = dirname(__FILE__).'/template3.php';
+		$testfile = "<?php\nprint 'Hallo Welt!';";
+
+		file_put_contents($filename, $testfile);
+
+		$filename = dirname(__FILE__).'/template4.php';
+		$testfile = <<<TESTFILE
+<?php
+
+print "Hallo Welt!";
+
+/**
+ * @sly test foo
+ * @sly
+ * @sly foo test
+ */
+
+\$x = 4;
+print \$x + 5;
+TESTFILE;
+
+		file_put_contents($filename, $testfile);
 	}
 
 	public static function tearDownAfterClass() {
 		unlink(dirname(__FILE__).'/template1.php');
 		unlink(dirname(__FILE__).'/template2.php');
+		unlink(dirname(__FILE__).'/template3.php');
+		unlink(dirname(__FILE__).'/template4.php');
 	}
 
 	public function testParsing() {
@@ -85,6 +110,13 @@ TESTFILE;
 		$this->assertSame('mydefault', $parser->get('missing', 'mydefault'));
 
 		return $parser;
+	}
+
+	public function testEmpty() {
+		$filename = dirname(__FILE__).'/template3.php';
+		$parser   = new sly_Util_ParamParser($filename);
+
+		$this->assertEquals(array(), $parser->get());
 	}
 
 	/**
@@ -124,5 +156,19 @@ TESTFILE;
 		$params = array('test_invalid' => '{foo:}');
 
 		$this->assertEquals($params, $parser->get());
+	}
+
+	public function testInvalidTag() {
+		$parser = new sly_Util_ParamParser(dirname(__FILE__).'/template4.php');
+		$params = array('test' => 'foo', 'foo' => 'test');
+
+		$this->assertEquals($params, $parser->get());
+	}
+
+	/**
+	 * @expectedException sly_Exception
+	 */
+	public function testMissingFile() {
+		new sly_Util_ParamParser('nonexisting.php');
 	}
 }

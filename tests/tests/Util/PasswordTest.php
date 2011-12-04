@@ -30,6 +30,10 @@ class sly_Util_PasswordTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals(40, strlen(sly_Util_Password::hash('test')));
 	}
 
+	public function testVariableArguments() {
+		$this->assertEquals(sly_Util_Password::hash('foo', 'bar', 'baz'), sly_Util_Password::hash('foo', array('bar', 'baz')));
+	}
+
 	/**
 	 * @dataProvider emptyProvider
 	 */
