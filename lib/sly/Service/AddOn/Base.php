@@ -169,20 +169,23 @@ abstract class sly_Service_AddOn_Base {
 	 */
 	public function getSupportPageEx($component) {
 		$supportPage = $this->getSupportPage($component, '');
+		$author      = $this->getAuthor($component);
 
 		if ($supportPage) {
 			$supportPages = sly_makeArray($supportPage);
 			$links        = array();
 
-			foreach ($supportPages as $page) {
+			foreach ($supportPages as $idx => $page) {
 				$infos = parse_url($page);
 				if (!isset($infos['host'])) $infos = parse_url('http://'.$page);
 				if (!isset($infos['host'])) continue;
 
 				$page = sprintf('%s://%s%s', $infos['scheme'], $infos['host'], isset($infos['path']) ? $infos['path'] : '');
 				$host = substr($infos['host'], 0, 4) == 'www.' ? substr($infos['host'], 4) : $infos['host'];
+				$name = $idx === 0 && !empty($author) ? $author : $host;
+				$name = sly_Util_String::cutText($name, 40);
 
-				$links[] = '<a href="'.sly_html($page).'" class="sly-blank">'.sly_html($host).'</a>';
+				$links[] = '<a href="'.sly_html($page).'" class="sly-blank">'.sly_html($name).'</a>';
 			}
 
 			$supportPage = implode(', ', $links);
