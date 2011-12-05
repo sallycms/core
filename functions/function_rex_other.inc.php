@@ -11,7 +11,6 @@
  * Sonstige Funktionen
  *
  * @package redaxo4
-
  */
 
 /**
@@ -29,7 +28,7 @@ function rex_translate($text, sly_I18N $i18n = null, $as_html = true) {
 		if (!$i18n) {
 			$i18n = sly_Core::getI18N();
 		}
-		$text = $i18n->msg(substr($text, strlen($transKey)));
+		$text = $i18n->msg(mb_substr($text, mb_strlen($transKey)));
 	}
 
 	return $as_html ? sly_html($text) : $text;

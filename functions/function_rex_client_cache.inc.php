@@ -75,7 +75,7 @@ function rex_send_content($content, $lastModified, $etag, $environment) {
 	if (!sly_ini_get('zlib.output_compression')) {
 		if (ob_start('ob_gzhandler') === false) {
 			// manually send content length if everything fails
-			header('Content-Length: '.strlen($content));
+			header('Content-Length: '.mb_strlen($content));
 		}
 	}
 
