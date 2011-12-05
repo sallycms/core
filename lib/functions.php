@@ -82,10 +82,6 @@ function sly_requestArray($name, $types, $default = array()) {
 		sly_postArray($name, $types, $default) : sly_getArray($name, $types, $default);
 }
 
-function sly_isEmpty($var) {
-	return empty($var);
-}
-
 function sly_html($string) {
 	return htmlspecialchars($string, ENT_QUOTES, 'UTF-8');
 }
@@ -218,6 +214,7 @@ function sly_ini_get($key, $default = null) {
 		case 'true':
 			$res = true;
 			break;
+
 		case 'off':
 		case 'no':
 		case 'false':
