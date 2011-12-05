@@ -33,9 +33,9 @@ class sly_Util_String {
 		$haystack = (string) $haystack;
 		$needle   = (string) $needle;
 
-		if (strlen($needle) > strlen($haystack)) return false;
-		if ($haystack == $needle || strlen($needle) == 0) return true;
-		return strstr($haystack, $needle) == $haystack;
+		if (mb_strlen($needle) > mb_strlen($haystack)) return false;
+		if ($haystack == $needle || mb_strlen($needle) == 0) return true;
+		return mb_strstr($haystack, $needle) == $haystack;
 	}
 
 	/**
@@ -47,9 +47,9 @@ class sly_Util_String {
 		$haystack = (string) $haystack;
 		$needle   = (string) $needle;
 
-		if (strlen($needle) > strlen($haystack)) return false;
-		if ($haystack == $needle || strlen($needle) == 0) return true;
-		return substr($haystack, -strlen($needle)) == $needle;
+		if (mb_strlen($needle) > mb_strlen($haystack)) return false;
+		if ($haystack == $needle || mb_strlen($needle) == 0) return true;
+		return mb_substr($haystack, -mb_strlen($needle)) == $needle;
 	}
 
 	/**
@@ -103,7 +103,7 @@ class sly_Util_String {
 		$str = strftime($format, $timestamp);
 
 		// Windows systems do not support UTF-8 locales, so we try to fix this
-		// by manually converting the string. THis should only happen on dev
+		// by manually converting the string. This should only happen on dev
 		// machines, so don't worry about performance.
 
 		if (PHP_OS === 'WINNT' && function_exists('iconv')) {
@@ -157,9 +157,9 @@ class sly_Util_String {
 		$text = strip_tags($text);
 		$text = str_replace('##BR##', '<br />', $text);
 
-		$return = substr($text, 0, $maxLength);
+		$return = mb_substr($text, 0, $maxLength);
 
-		if (strlen($text) > $maxLength) {
+		if (mb_strlen($text) > $maxLength) {
 			$return .= $suffix;
 		}
 
@@ -176,21 +176,21 @@ class sly_Util_String {
 	 * @return string                returns false on error
 	 */
 	public static function shortenFilename($name, $maxLength, $suffixLength = 3) {
-		if (empty($name) || $maxLength < 1 || $suffixLength < 0) {
+		if (mb_strlen($name) === 0 || $maxLength < 1 || $suffixLength < 0) {
 			return false;
 		}
 
-		$pos = strrpos($name, '.');
+		$pos = mb_strrpos($name, '.');
 		if ($pos === false || $pos <= $maxLength) return $name;
 
-		$shortname = substr($name, 0, min($maxLength - $suffixLength, $pos));
+		$shortname = mb_substr($name, 0, min($maxLength - $suffixLength, $pos));
 
 		if ($maxLength - $suffixLength < $pos) {
 			if ($suffixLength > 0) $shortname .= '…';
-			$shortname .= substr($name, $pos - $suffixLength, 3);
+			$shortname .= mb_substr($name, $pos - $suffixLength, 3);
 		}
 
-		$shortname .= substr($name, $pos);
+		$shortname .= mb_substr($name, $pos);
 
 		return $shortname;
 	}
@@ -297,18 +297,6 @@ class sly_Util_String {
 	}
 
 	/**
-	 * @todo   mark as deprecated in 0.6, since it offers no advantage over if (preg_match())...
-	 *
-	 * @param  string $pattern
-	 * @param  string $subject
-	 * @return boolean
-	 */
-	public static function preg_startsWith($pattern, $subject) {
-		preg_match($pattern, $subject, $treffer);
-		return !empty($treffer);
-	}
-
-	/**
 	 * @param  string $text
 	 * @return string
 	 */
@@ -321,8 +309,8 @@ class sly_Util_String {
 	 * @return string
 	 */
 	public static function getFileExtension($filename) {
-		$lastDotPos = strrpos($filename, '.');
-		return $lastDotPos === false ? '' : substr($filename, $lastDotPos + 1);
+		$lastDotPos = mb_strrpos($filename, '.');
+		return $lastDotPos === false ? '' : mb_substr($filename, $lastDotPos + 1);
 	}
 
 	/**
