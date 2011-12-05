@@ -149,6 +149,12 @@ abstract class sly_Service_AddOn_Base {
 	 */
 	public function add($component) {
 		$this->setProperty($component, 'install', false);
+		$this->setProperty($component, 'status', false);
+
+		// only add plugins key on addOns
+		if (!is_array($component)) {
+			$this->setProperty($component, 'plugins', array());
+		}
 	}
 
 	/**
@@ -896,6 +902,8 @@ abstract class sly_Service_AddOn_Base {
 	 * @return mixed              value or default
 	 */
 	private function readConfigValue($component, $key, $default = null) {
+		static $cache = array();
+
 		// To make this method work on components that are not yet installed or
 		// activated, we have to get their static.yml's content on our own. The
 		// project config at this point already contains 'empty' information for
@@ -905,8 +913,19 @@ abstract class sly_Service_AddOn_Base {
 			return $this->getProperty($component, $key, $default);
 		}
 
-		$file   = $this->baseFolder($component).'static.yml';
-		$config = file_exists($file) ? sly_Util_YAML::load($file) : array();
+		$file = $this->baseFolder($component).'static.yml';
+		if (!file_exists($file)) return $default;
+
+		$mtime  = filemtime($file);
+		$config = array();
+
+		if (!isset($cache[$file.$mtime])) {
+			$config              = sly_Util_YAML::load($file);
+			$cache[$file.$mtime] = $config;
+		}
+		else {
+			$config = $cache[$file.$mtime];
+		}
 
 		return isset($config[$key]) ? $config[$key] : $default;
 	}

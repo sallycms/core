@@ -210,17 +210,7 @@ class sly_Util_Array {
 	 * @return array
 	 */
 	protected static function getPath($key) {
-		$parts   = explode('/', $key);
-		$changes = false;
-
-		foreach ($parts as $idx => $part) {
-			if ($part === '') {
-				unset($parts[$idx]);
-				$changes = true;
-			}
-		}
-
-		return $changes ? array_values($parts) : $parts;
+		return explode('/', trim($key, '/'));
 	}
 
 	/**

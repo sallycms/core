@@ -125,7 +125,7 @@ class sly_Configuration {
 		return $this->loadInternal($filename, self::STORE_PROJECT_DEFAULT, $force, $key);
 	}
 
-	public function loadLocalConfig(){
+	public function loadLocalConfig() {
 		$filename = $this->getLocalConfigFile();
 
 		if (file_exists($filename)) {
@@ -135,7 +135,7 @@ class sly_Configuration {
 		}
 	}
 
-	public function loadProjectConfig(){
+	public function loadProjectConfig() {
 		$filename = $this->getProjectConfigFile();
 
 		if (file_exists($filename)) {
