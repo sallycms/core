@@ -19,17 +19,17 @@ if ($value === '') {
 
 ?>
 
-<span class="sly-widget sly-media<?= isset($this->attributes['class']) ? ' '.sly_html($this->attributes['class']) : '' ?>">
-	<input rel="value" type="hidden" name="<?= $name ?>" id="<?= $id ?>" value="<?= sly_html($filename) ?>" />
-	<input rel="name" type="text" value="<?= sly_html($value) ?>" readonly="readonly" />
+<span class="sly-widget sly-media<?php echo isset($this->attributes['class']) ? ' '.sly_html($this->attributes['class']) : '' ?>">
+	<input rel="value" type="hidden" name="<?php echo $name ?>" id="<?php echo $id ?>" value="<?php echo sly_html($filename) ?>" />
+	<input rel="name" type="text" value="<?php echo sly_html($value) ?>" readonly="readonly" />
 
 	<span class="sly-icons">
-		<a href="#" rel="open" title="<?= t('var_media_open') ?>"></a>
+		<a href="#" rel="open" title="<?php echo t('var_media_open') ?>"></a>
 	</span>
 	<span class="sly-icons">
-		<a href="#" rel="add" title="<?= t('var_media_new') ?>"></a>
+		<a href="#" rel="add" title="<?php echo t('var_media_new') ?>"></a>
 	</span>
 	<span class="sly-icons">
-		<a href="#" rel="delete" title="<?= t('var_media_remove') ?>"></a>
+		<a href="#" rel="delete" title="<?php echo t('var_media_remove') ?>"></a>
 	</span>
 </span>

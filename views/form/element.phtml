@@ -29,10 +29,10 @@ if ($isContainer) {
 }
 else {
 	?>
-	<p class="<?= implode(' ', $outerClass) ?>">
-		<label for="<?= $element->getID() ?>"><?= $label ?></label>
-		<?= $element->render() ?>
-		<?= $help ?>
+	<p class="<?php echo implode(' ', $outerClass) ?>">
+		<label for="<?php echo $element->getID() ?>"><?php echo $label ?></label>
+		<?php echo $element->render() ?>
+		<?php echo $help ?>
 	</p>
 	<?php
 }

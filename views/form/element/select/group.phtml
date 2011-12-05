@@ -8,7 +8,7 @@
  * http://www.opensource.org/licenses/mit-license.php
  */
 ?>
-<span class="sly-select-<?= $type ?>-list sly-select-group" id="<?= sly_html($this->getID()) ?>">
+<span class="sly-select-<?php echo $type ?>-list sly-select-group" id="<?php echo sly_html($this->getID()) ?>">
 	<?php
 	$selected  = sly_makeArray($this->getDisplayValue());
 	$elementID = $this->getID();
@@ -35,7 +35,7 @@
 
 <?php if ($type == 'checkbox'): ?>
 <span class="sly-select-checkbox-list sly-form-helptext">
-	<a rel="all" href="#"><?= t('select_all') ?></a> |
-	<a rel="none" href="#"><?= t('select_none') ?></a>
+	<a rel="all" href="#"><?php echo t('select_all') ?></a> |
+	<a rel="none" href="#"><?php echo t('select_none') ?></a>
 </span>
 <?php endif ?>

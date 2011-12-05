@@ -24,24 +24,24 @@ foreach ($files as $filename) {
 }
 
 ?>
-<span class="sly-widget sly-medialist<?= isset($this->attributes['class']) ? ' '.sly_html($this->attributes['class']) : '' ?>">
-	<input type="hidden" name="<?= $name ?>" id="<?= $id ?>" value="<?= sly_html(implode(',', $values)) ?>" />
+<span class="sly-widget sly-medialist<?php echo isset($this->attributes['class']) ? ' '.sly_html($this->attributes['class']) : '' ?>">
+	<input type="hidden" name="<?php echo $name ?>" id="<?php echo $id ?>" value="<?php echo sly_html(implode(',', $values)) ?>" />
 	<select size="8">
 		<?php foreach ($list as $element): ?>
-		<option value="<?= sly_html($element[0]) ?>"><?= sly_html($element[1]) ?></option>
+		<option value="<?php echo sly_html($element[0]) ?>"><?php echo sly_html($element[1]) ?></option>
 		<?php endforeach ?>
 	</select>
 
 	<span class="sly-icons move">
-		<a href="#" rel="top" title="<?= t('var_medialist_move_top') ?>"></a>
-		<a href="#" rel="up" title="<?= t('var_medialist_move_up') ?>"></a>
-		<a href="#" rel="down" title="<?= t('var_medialist_move_down') ?>"></a>
-		<a href="#" rel="bottom" title="<?= t('var_medialist_move_bottom') ?>" style="margin-right:2em"></a>
+		<a href="#" rel="top" title="<?php echo t('var_medialist_move_top') ?>"></a>
+		<a href="#" rel="up" title="<?php echo t('var_medialist_move_up') ?>"></a>
+		<a href="#" rel="down" title="<?php echo t('var_medialist_move_down') ?>"></a>
+		<a href="#" rel="bottom" title="<?php echo t('var_medialist_move_bottom') ?>" style="margin-right:2em"></a>
 	</span>
 
 	<span class="sly-icons edit">
-		<a href="#" rel="open" title="<?= t('var_media_open') ?>"></a>
-		<a href="#" rel="add" title="<?= t('var_media_new') ?>"></a>
-		<a href="#" rel="delete" title="<?= t('var_media_remove') ?>"></a>
+		<a href="#" rel="open" title="<?php echo t('var_media_open') ?>"></a>
+		<a href="#" rel="add" title="<?php echo t('var_media_new') ?>"></a>
+		<a href="#" rel="delete" title="<?php echo t('var_media_remove') ?>"></a>
 	</span>
 </span>

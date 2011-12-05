@@ -26,7 +26,7 @@ if (!empty($this->focussedElement) && $nativeFocus) {
 
 <div class="sly-form">
 	<?php if (!$omitFormTag): ?>
-	<form <?= sly_Util_HTML::buildAttributeString($attributes) ?>>
+	<form <?php echo sly_Util_HTML::buildAttributeString($attributes) ?>>
 	<?php endif ?>
 		<?php if (!empty($this->hiddenValues)): ?>
 		<div>
@@ -60,6 +60,6 @@ if (!empty($this->focussedElement) && $nativeFocus) {
 
 <?php if (!empty($this->focussedElement) && !$nativeFocus): ?>
 <script type="text/javascript">
-document.getElementById('<?= $this->focussedElement ?>').focus();
+document.getElementById('<?php echo $this->focussedElement ?>').focus();
 </script>
 <?php endif ?>

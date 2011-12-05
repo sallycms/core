@@ -23,14 +23,14 @@ else {
 
 ?>
 
-<span class="sly-widget sly-link<?= isset($this->attributes['class']) ? ' '.sly_html($this->attributes['class']) : '' ?>" data-catid="<?= $category ?>">
-	<input rel="value" type="hidden" name="<?= $name ?>" id="<?= $id ?>" value="<?= sly_html($artID) ?>" />
-	<input rel="name" type="text" value="<?= sly_html($value) ?>" readonly="readonly" />
+<span class="sly-widget sly-link<?php echo isset($this->attributes['class']) ? ' '.sly_html($this->attributes['class']) : '' ?>" data-catid="<?php echo $category ?>">
+	<input rel="value" type="hidden" name="<?php echo $name ?>" id="<?php echo $id ?>" value="<?php echo sly_html($artID) ?>" />
+	<input rel="name" type="text" value="<?php echo sly_html($value) ?>" readonly="readonly" />
 
 	<span class="sly-icons">
-		<a href="#" rel="open" title="<?= t('open_linkmap') ?>"></a>
+		<a href="#" rel="open" title="<?php echo t('open_linkmap') ?>"></a>
 	</span>
 	<span class="sly-icons">
-		<a href="#" rel="delete" title="<?= t('remove_link') ?>"></a>
+		<a href="#" rel="delete" title="<?php echo t('remove_link') ?>"></a>
 	</span>
 </span>

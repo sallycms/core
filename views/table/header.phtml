@@ -66,8 +66,8 @@ print $this->surroundingHTML;
 
 ?>
 
-<table id="<?= $this->id ?>" class="sly-table">
-	<caption><?= $this->caption ? '<span>'.sly_html($this->caption).'</span>' : '' ?></caption>
+<table id="<?php echo $this->id ?>" class="sly-table">
+	<caption><?php echo $this->caption ? '<span>'.sly_html($this->caption).'</span>' : '' ?></caption>
 	<thead>
 		<tr class="nodrop nodrag">
 			<?php

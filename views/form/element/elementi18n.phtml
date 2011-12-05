@@ -26,11 +26,11 @@ if ($isContainer) {
 }
 else {
 	?>
-	<div class="rex-form-row<?= $isLast ? ' last' : '' ?>">
-		<p<?= $outerClass ?>>
-			<label for="<?= $element->getID() ?>"><?= $label ?></label>
-			<?= $element->render() ?>
-			<?= $help ?>
+	<div class="rex-form-row<?php echo $isLast ? ' last' : '' ?>">
+		<p<?php echo $outerClass ?>>
+			<label for="<?php echo $element->getID() ?>"><?php echo $label ?></label>
+			<?php echo $element->render() ?>
+			<?php echo $help ?>
 		</p>
 	</div>
 	<?php

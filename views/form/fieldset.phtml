@@ -12,8 +12,8 @@ $id = $this->id ? ' id="'.sly_html($this->id).'"' : '';
 
 ?>
 
-<fieldset class="rex-form-col-<?= $this->columns ?> sly-num<?= ($this->num-1) ?>"<?= $id ?>>
-	<legend><?= sly_html(rex_translate($this->legend)) ?></legend>
+<fieldset class="rex-form-col-<?php echo $this->columns ?> sly-num<?php echo ($this->num-1) ?>"<?php echo $id ?>>
+	<legend><?php echo sly_html(rex_translate($this->legend)) ?></legend>
 	<div class="rex-form-wrapper">
 		<?php
 

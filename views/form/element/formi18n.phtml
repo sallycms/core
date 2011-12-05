@@ -19,10 +19,10 @@ if (!empty($this->focussedElement) && $nativeFocus) {
 ?>
 <div style="margin-bottom:1em">
 	<div class="sly-form">
-		<form method="<?= strtolower($this->method) ?>" action="<?= sly_html($this->action) ?>"<?= $id ?>>
+		<form method="<?php echo strtolower($this->method) ?>" action="<?php echo sly_html($this->action) ?>"<?php echo $id ?>>
 			<?php foreach ($this->fieldsets as $i => $fieldset): ?>
 			<fieldset class="rex-form-col-1">
-				<legend><?= sly_html($fieldset['title']) ?></legend>
+				<legend><?php echo sly_html($fieldset['title']) ?></legend>
 				<div class="rex-form-wrapper">
 
 				<?php
@@ -61,6 +61,6 @@ if (!empty($this->focussedElement) && $nativeFocus) {
 
 <?php if (!empty($this->focussedElement) && !$nativeFocus): ?>
 <script type="text/javascript">
-document.getElementById('<?= $this->focussedElement ?>').focus();
+document.getElementById('<?php echo $this->focussedElement ?>').focus();
 </script>
 <?php endif ?>
