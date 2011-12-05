@@ -22,7 +22,7 @@ if (@get_magic_quotes_gpc()) {
 	array_walk_recursive($_REQUEST, 'stripslashes_ref');
 }
 
-// Register Globals entfernen
+// remove all globals
 
 if (ini_get('register_globals')) {
 	$superglobals = array('_GET', '_POST', '_REQUEST', '_ENV', '_FILES', '_SESSION', '_COOKIE', '_SERVER');
@@ -36,6 +36,9 @@ if (ini_get('register_globals')) {
 
 	unset($superglobals, $key, $keys);
 }
+
+// we're using UTF-8 everywhere
+mb_internal_encoding('UTF-8');
 
 // define constants for system wide important paths
 define('SLY_BASE', realpath(dirname(__FILE__).'/../../'));
