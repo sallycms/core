@@ -98,11 +98,11 @@ function rex_article2startpage($neu_id) {
  * @return boolean               true bei Erfolg, sonst false
  */
 function rex_copyContent($from_id, $to_id, $from_clang = 0, $to_clang = 0, $revision = 0) {
-	$from_clang      = (int) $from_clang;
-	$to_clang        = (int) $to_clang;
-	$from_id         = (int) $from_id;
-	$to_id           = (int) $to_id;
-	$revision        = (int) $revision;
+	$from_clang = (int) $from_clang;
+	$to_clang   = (int) $to_clang;
+	$from_id    = (int) $from_id;
+	$to_id      = (int) $to_id;
+	$revision   = (int) $revision;
 
 	if ($from_id == $to_id && $from_clang == $to_clang) {
 		return false;
@@ -256,7 +256,7 @@ function rex_moveArticle($id, $target) {
 
 	$target = (int) $target;
 
-	if($target !== 0 && !sly_Util_Category::exists($target)) return false;
+	if ($target !== 0 && !sly_Util_Category::exists($target)) return false;
 
 	$source = (int) $article->getCategoryId();
 
