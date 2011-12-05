@@ -22,7 +22,6 @@ class sly_Configuration {
 
 	private $mode              = array(); ///< array
 	private $loadedConfigFiles = array(); ///< array
-	private $resultCache       = array();
 
 	private $staticConfig;  ///< sly_Util_Array
 	private $localConfig;   ///< sly_Util_Array
@@ -193,22 +192,12 @@ class sly_Configuration {
 	 */
 	public function get($key, $default = null) {
 		if ($this->cache === null) {
-			// invalidate result cache
-			$this->resultCache = array();
-
 			// build merged config cache
 			$this->cache = array_replace_recursive($this->staticConfig->get('/', array()), $this->localConfig->get('/', array()), $this->projectConfig->get('/', array()));
 			$this->cache = new sly_Util_Array($this->cache);
 		}
 
-		if (array_key_exists($key, $this->resultCache)) {
-			return $this->resultCache[$key];
-		}
-
-		$val = $this->cache->get($key, $default);
-		$this->resultCache[$key] = $val;
-
-		return $val;
+		return $this->cache->get($key, $default);
 	}
 
 	/**
