@@ -14,7 +14,7 @@ $realfile = realpath('protected/'.$enc.'/'.$file);   // path or false
 $index    = dirname(realpath(__FILE__));             // /var/www/home/cust/sally/data/dyn/public/sally/static-cache/
 
 // append '/' if missing
-if ($index[strlen($index)-1] === DIRECTORY_SEPARATOR) {
+if ($index[mb_strlen($index)-1] === DIRECTORY_SEPARATOR) {
 	$index .= DIRECTORY_SEPARATOR;
 }
 
@@ -25,7 +25,7 @@ if ($realfile === false) {
 }
 
 // file outside of cache dir?
-if (substr($realfile, 0, strlen($index)) !== $index) {
+if (mb_substr($realfile, 0, mb_strlen($index)) !== $index) {
 	header('HTTP/1.0 403 Forbidden');
 	die;
 }
@@ -53,8 +53,8 @@ if (!$allowAccess) {
 }
 
 $file  = basename(FILE);
-$pos   = strrpos($file, '.');
-$ext   = strtolower($pos === false ? $file : substr($file, $pos + 1));
+$pos   = mb_strrpos($file, '.');
+$ext   = strtolower($pos === false ? $file : mb_substr($file, $pos + 1));
 $types = array(
 	'css'  => 'text/css',
 	'js'   => 'text/javascript',
