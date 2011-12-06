@@ -12,7 +12,6 @@ DATABASE:
 PERM:
   - 'mediapool'
 EXTPERM:
-  - 'advancedMode'
   - 'moveSlice'
   - 'copyContent'
   - 'moveArticle'
