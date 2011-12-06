@@ -19,5 +19,5 @@ interface sly_Authorisation_Provider {
 	 * @param  int    $objectId
 	 * @return boolean
 	 */
-	public function hasPermission($userId, $token, $value = true);
+	public function hasPermission($userId, $destination, $token, $value = true);
 }
