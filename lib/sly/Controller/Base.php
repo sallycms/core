@@ -107,8 +107,11 @@ abstract class sly_Controller_Base {
 
 		if ($content_type) {
 			header('Content-Type: '.$content_type);
+		}
+
+		if ($this->charset) {
 			$layout = sly_Core::getLayout('Backend');
-			$layout->addHttpMeta('Content-Type', $content_type);
+			$layout->setCharset($this->charset);
 		}
 	}
 
