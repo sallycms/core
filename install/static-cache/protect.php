@@ -11,7 +11,7 @@ define('FILE', $file);
 define('ENC', $enc);
 
 $realfile = realpath('protected/'.$enc.'/'.$file);   // path or false
-$index    = dirname(realpath(__FILE__));             // /var/www/home/cust/sally/data/dyn/public/sally/static-cache/
+$index    = dirname(realpath(__FILE__));             // /var/www/home/cust/data/dyn/public/sally/static-cache/
 
 // append '/' if missing
 if ($index[mb_strlen($index)-1] === DIRECTORY_SEPARATOR) {
