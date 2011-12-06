@@ -1,0 +1,36 @@
+<?php
+/*
+ * Copyright (c) 2011, webvariants GbR, http://www.webvariants.de
+ *
+ * This file is released under the terms of the MIT license. You can find the
+ * complete text in the attached LICENSE file or online at:
+ *
+ * http://www.opensource.org/licenses/mit-license.php
+ */
+
+$artID    = $this->getDisplayValue();
+$category = 0;
+$value    = sly_Form_Widget_Link::getFullName($artID);
+$name     = sly_html($this->getName());
+$id       = sly_html($this->getID());
+
+if ($value === '') {
+	$artID = '';
+}
+else {
+	$category = sly_Util_Article::findById($artID)->getCategoryId();
+}
+
+?>
+
+<span class="sly-widget sly-link<?= isset($this->attributes['class']) ? ' '.sly_html($this->attributes['class']) : '' ?>" data-catid="<?= $category ?>">
+	<input rel="value" type="hidden" name="<?= $name ?>" id="<?= $id ?>" value="<?= sly_html($artID) ?>" />
+	<input rel="name" type="text" value="<?= sly_html($value) ?>" readonly="readonly" />
+
+	<span class="sly-icons">
+		<a href="#" rel="open"><img src="assets/file_open.png" title="<?= t('open_linkmap') ?>" alt="" /></a>
+	</span>
+	<span class="sly-icons">
+		<a href="#" rel="delete"><img src="assets/file_del.png" title="<?= t('remove_link') ?>" alt="" /></a>
+	</span>
+</span>
