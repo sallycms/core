@@ -257,7 +257,7 @@ abstract class sly_Layout extends sly_Viewable {
 	 * @param string $content  content attribute of the tag
 	 */
 	public function addHttpMeta($name, $content) {
-		$this->httpMetas[trim($name)] =trim($content);
+		$this->httpMetas[trim($name)] = trim($content);
 	}
 
 	/**
