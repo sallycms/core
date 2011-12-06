@@ -349,7 +349,7 @@ class sly_Service_Asset {
 		if (sly_Util_String::endsWith($file, '.css') && file_exists(SLY_BASE.'/'.$file)) {
 			$css     = sly_Util_Scaffold::process($file);
 			$dir     = SLY_DYNFOLDER.'/'.self::TEMP_DIR;
-			$tmpFile = $dir.'/.css';
+			$tmpFile = $dir.'/'.md5($file).'.css';
 
 			sly_Util_Directory::create($dir, $this->getDirPerm());
 
