@@ -187,7 +187,7 @@ class sly_Service_Asset {
 		$isProtected = $dispatcher->filter(self::EVENT_IS_PROTECTED_ASSET, false, compact('file'));
 		$access      = $isProtected ? self::ACCESS_PROTECTED : self::ACCESS_PUBLIC;
 
-		// "/../sally/data/dyn/public/sally/static-cache/[access]/gzip/assets/css/main.css"
+		// "/../data/dyn/public/sally/static-cache/[access]/gzip/assets/css/main.css"
 		$cacheFile = $this->getCacheFile($file, $access);
 
 		if (!file_exists($cacheFile) || $this->forceGen) {

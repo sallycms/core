@@ -9,7 +9,7 @@
  */
 
 $sallyRoot  = realpath(dirname(__FILE__).'/../../');
-$configRoot = $sallyRoot.'/sally/data/config/';
+$configRoot = $sallyRoot.'/data/config/';
 
 foreach (array('local', 'project') as $conf) {
 	$liveFile   = $configRoot.'sly_'.$conf.'.yml';
