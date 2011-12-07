@@ -9,7 +9,3 @@ DATABASE:
   NAME: sally_base
   PERSISTENT: false
   TABLE_PREFIX: sly_
-PERM: ["mediapool"]
-EXTPERM: ["moveSlice", "copyContent", "moveArticle", "copyArticle", "moveCategory", "publishArticle", "publishCategory", "article2startpage", "changearttype"]
-EXTRAPERM: ["editContentOnly"]
-OBJECTPERM: ["clang", "csw", "media", "module"]
