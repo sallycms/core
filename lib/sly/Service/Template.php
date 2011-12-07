@@ -120,12 +120,7 @@ class sly_Service_Template extends sly_Service_DevelopBase {
 	 */
 	public function getCacheFolder() {
 		$dir = sly_Util_Directory::join(SLY_DYNFOLDER, 'internal/sally', $this->getClassIdentifier());
-
-		if (!is_dir($dir) && !@mkdir($dir, sly_Core::getDirPerm(), true)) {
-			throw new sly_Service_Template_Exception('Konnte Cache-Verzeichnis '.$dir.' nicht erstellen.');
-		}
-
-		return $dir;
+		return sly_Util_Directory::create($dir, null, true);
 	}
 
 	/**
