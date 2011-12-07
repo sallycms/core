@@ -465,10 +465,10 @@ class sly_Service_Asset {
 	}
 
 	private function getFilePerm() {
-		return sly_Core::getFilePerm(sly_Core::DEFAULT_FILEPERM);
+		return sly_Core::getFilePerm();
 	}
 
 	private function getDirPerm() {
-		return sly_Core::getDirPerm(sly_Core::DEFAULT_DIRPERM);
+		return sly_Core::getDirPerm();
 	}
 }
