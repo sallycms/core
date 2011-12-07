@@ -77,13 +77,6 @@ class sly_Form_Widget_Link extends sly_Form_ElementBase implements sly_Form_IEle
 	}
 
 	public static function getFullName($articleID) {
-		static $advanced = null;
-
-		if ($advanced === null) {
-			$user     = sly_Util_User::getCurrentUser();
-			$advanced = $user ? $user->hasRight('advancedMode[]') : false;
-		}
-
 		$article = sly_Util_Article::findById($articleID);
 		$value   = '';
 
@@ -91,7 +84,7 @@ class sly_Form_Widget_Link extends sly_Form_ElementBase implements sly_Form_IEle
 			$title = $article->getName();
 			$value = $title ? $title : t('unnamed_article');
 
-			if ($advanced || !$title) {
+			if (mb_strlen($title) === 0) {
 				$value .= " [$articleID]";
 			}
 		}

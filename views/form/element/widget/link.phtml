@@ -24,13 +24,13 @@ else {
 ?>
 
 <span class="sly-widget sly-link<?php echo isset($this->attributes['class']) ? ' '.sly_html($this->attributes['class']) : '' ?>" data-catid="<?php echo $category ?>">
-	<input rel="value" type="hidden" name="<?php echo $name ?>" id="<?php echo $id ?>" value="<?php echo sly_html($artID) ?>" />
-	<input rel="name" type="text" value="<?php echo sly_html($value) ?>" readonly="readonly" />
+	<input class="value" type="hidden" name="<?php echo $name ?>" value="<?php echo sly_html($artID) ?>" />
+	<input class="name" type="text" id="<?php echo $id ?>" value="<?php echo sly_html($value) ?>" readonly="readonly" />
 
 	<span class="sly-icons">
-		<a href="#" rel="open" title="<?php echo t('open_linkmap') ?>"></a>
+		<a href="#" class="fct-open" title="<?php echo t('open_linkmap') ?>"></a>
 	</span>
 	<span class="sly-icons">
-		<a href="#" rel="delete" title="<?php echo t('remove_link') ?>"></a>
+		<a href="#" class="fct-delete" title="<?php echo t('remove_link') ?>"></a>
 	</span>
 </span>

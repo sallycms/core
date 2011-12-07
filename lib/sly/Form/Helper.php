@@ -109,7 +109,7 @@ abstract class sly_Form_Helper {
 	 * Helper function
 	 *
 	 * This method implements the tree walking algorithm used for both selects.
-	 * It pays attention to the advancedMode[] and csw[] permissions.
+	 * It pays attention to the csw[] permissions.
 	 *
 	 * @param mixed $category  the current category (media or structure)
 	 * @param int   $depth     current depth (to indent <option> elements)
@@ -119,14 +119,6 @@ abstract class sly_Form_Helper {
 
 		if (self::canSeeCategory($category)) {
 			$name = $category->getName();
-			$user = sly_Util_User::getCurrentUser();
-
-			// Die Anzeige hängt immer vom aktuellen Benutzer ab.
-
-			if ($user->hasRight('advancedMode[]')) {
-				$name .= ' ['.$category->getId().']';
-			}
-
 			self::$select->addValue($category->getId(), str_repeat(' ', $depth*2).$name);
 		}
 
