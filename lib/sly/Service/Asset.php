@@ -150,7 +150,7 @@ class sly_Service_Asset {
 
 		// check if the file can be streamed
 
-		$blocked = sly_Core::config()->get('MEDIAPOOL/BLOCKED_EXTENSIONS');
+		$blocked = sly_Core::config()->get('BLOCKED_EXTENSIONS');
 		$ok      = true;
 
 		foreach ($blocked as $ext) {
