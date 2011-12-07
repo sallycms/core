@@ -103,8 +103,8 @@ class sly_Cache extends BabelCache_Factory {
 		}
 
 		if ($cachingStrategy === 'BabelCache_Filesystem') {
-			BabelCache_Filesystem::setDirPermissions(sly_Core::getDirPerm(sly_Core::DEFAULT_DIRPERM));
-			BabelCache_Filesystem::setFilePermissions(sly_Core::getFilePerm(sly_Core::DEFAULT_FILEPERM));
+			BabelCache_Filesystem::setDirPermissions(sly_Core::getDirPerm());
+			BabelCache_Filesystem::setFilePermissions(sly_Core::getFilePerm());
 		}
 
 		return self::getInstance()->getCache($cachingStrategy);
@@ -143,7 +143,7 @@ class sly_Cache extends BabelCache_Factory {
 	 */
 	protected function getCacheDirectory() {
 		$dir = sly_Util_Directory::join(SLY_DYNFOLDER, 'internal', 'sally', 'fscache');
-		return sly_Util_Directory::create($dir, sly_Core::getDirPerm(sly_Core::DEFAULT_DIRPERM));
+		return sly_Util_Directory::create($dir);
 	}
 
 	/**
@@ -154,7 +154,7 @@ class sly_Cache extends BabelCache_Factory {
 
 		if (!file_exists($db)) {
 			touch($db);
-			chmod($db, sly_Core::getFilePerm(sly_Core::DEFAULT_FILEPERM));
+			chmod($db, sly_Core::getFilePerm());
 		}
 
 		return BabelCache_SQLite::connect($db);
