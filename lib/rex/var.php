@@ -134,14 +134,7 @@ abstract class rex_var {
 		$match  = $this->matchVar($content, $varname);
 
 		foreach ($match as $param_str) {
-			$args   = array();
-			$params = rex_split_string($param_str);
-
-			foreach ($params as $name => $value) {
-				$args = $this->handleDefaultParam($varname, $args, $name, $value);
-			}
-
-			$result[] = array($param_str, $args);
+			$result[] = array($param_str, array());
 		}
 
 		return $result;
@@ -152,7 +145,7 @@ abstract class rex_var {
 	 * Gibt die Parameter der Treffer (Text der Variable zwischen den []) als Array zur�ck.
 	 */
 	private function matchVar($content, $varname) {
-		$hasVars = preg_match_all('/'.preg_quote($varname, '/').'\[([^\]]*)\]/ms', $content, $matches); 
+		$hasVars = preg_match_all('/'.preg_quote($varname, '/').'\[([^\]]*)\]/ms', $content, $matches);
 		return $hasVars ? $matches[1] : array();
 	}
 

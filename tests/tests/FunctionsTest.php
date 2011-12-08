@@ -18,10 +18,6 @@ class sly_FunctionsTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals(sly_makeArray(array(1,2,3)), array(1,2,3));
 	}
 
-	public function testRexSplitString() {
-		$this->assertEquals(array('a', 'b c', 'de', 'f g ', 'bla'), rex_split_string('a "b c" de \'f g \' bla'));
-	}
-
 	public function testRexParamString() {
 		$this->assertEquals('&foo=bar', sly_Util_HTTP::queryString(array('foo' => 'bar'), '&'));
 		$this->assertEquals('&foo=%C3%9F%24', sly_Util_HTTP::queryString(array('foo' => 'ß$'), '&'));
