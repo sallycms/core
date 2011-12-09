@@ -149,6 +149,12 @@ abstract class sly_Service_AddOn_Base {
 	 */
 	public function add($component) {
 		$this->setProperty($component, 'install', false);
+		$this->setProperty($component, 'status', false);
+
+		// only add plugins key on addOns
+		if (!is_array($component)) {
+			$this->setProperty($component, 'plugins', array());
+		}
 	}
 
 	/**
@@ -169,20 +175,23 @@ abstract class sly_Service_AddOn_Base {
 	 */
 	public function getSupportPageEx($component) {
 		$supportPage = $this->getSupportPage($component, '');
+		$author      = $this->getAuthor($component);
 
 		if ($supportPage) {
 			$supportPages = sly_makeArray($supportPage);
 			$links        = array();
 
-			foreach ($supportPages as $page) {
+			foreach ($supportPages as $idx => $page) {
 				$infos = parse_url($page);
 				if (!isset($infos['host'])) $infos = parse_url('http://'.$page);
 				if (!isset($infos['host'])) continue;
 
 				$page = sprintf('%s://%s%s', $infos['scheme'], $infos['host'], isset($infos['path']) ? $infos['path'] : '');
 				$host = substr($infos['host'], 0, 4) == 'www.' ? substr($infos['host'], 4) : $infos['host'];
+				$name = $idx === 0 && !empty($author) ? $author : $host;
+				$name = sly_Util_String::cutText($name, 40);
 
-				$links[] = '<a href="'.sly_html($page).'" class="sly-blank">'.sly_html($host).'</a>';
+				$links[] = '<a href="'.sly_html($page).'" class="sly-blank">'.sly_html($name).'</a>';
 			}
 
 			$supportPage = implode(', ', $links);
@@ -225,7 +234,7 @@ abstract class sly_Service_AddOn_Base {
 			$this->loadStatic($component); // static.yml
 		}
 
-		$msg = $this->checkDependencies($component);
+		$msg = $this->checkRequirements($component);
 
 		if ($msg !== true) {
 			return $msg;
@@ -236,14 +245,7 @@ abstract class sly_Service_AddOn_Base {
 		$sallyVersions = $this->getProperty($component, 'sally');
 
 		if (!empty($sallyVersions)) {
-			$sallyVersions = sly_makeArray($sallyVersions);
-			$versionOK     = false;
-
-			foreach ($sallyVersions as $version) {
-				$versionOK |= $this->checkVersion($version);
-			}
-
-			if (!$versionOK) {
+			if (!$this->isCompatible($component)) {
 				return $this->I18N('sally_incompatible', sly_Core::getVersion('X.Y.Z'));
 			}
 		}
@@ -403,9 +405,9 @@ abstract class sly_Service_AddOn_Base {
 		// We can't use the service to get the list of required addOns since the
 		// static.yml has not yet been loaded.
 
-		$this->loadStatic($component);
+		@$this->loadStatic($component);
 
-		$msg = $this->checkDependencies($component);
+		$msg = $this->checkRequirements($component);
 
 		if ($msg !== true) {
 			return $msg;
@@ -575,7 +577,7 @@ abstract class sly_Service_AddOn_Base {
 	 * @return mixed             the author as given in static.yml
 	 */
 	public function getAuthor($component, $default = null) {
-		return $this->getProperty($component, 'author', $default);
+		return $this->readConfigValue($component, 'author', $default);
 	}
 
 	/**
@@ -586,7 +588,7 @@ abstract class sly_Service_AddOn_Base {
 	 * @return mixed             the support page as given in static.yml
 	 */
 	public function getSupportPage($component, $default = null) {
-		return $this->getProperty($component, 'supportpage', $default);
+		return $this->readConfigValue($component, 'supportpage', $default);
 	}
 
 	/**
@@ -601,7 +603,7 @@ abstract class sly_Service_AddOn_Base {
 	 * @return string            the version
 	 */
 	public function getVersion($component, $default = null) {
-		$version     = $this->getProperty($component, 'version', null);
+		$version     = $this->readConfigValue($component, 'version', null);
 		$baseFolder  = $this->baseFolder($component);
 		$versionFile = $baseFolder.'/version';
 
@@ -651,7 +653,9 @@ abstract class sly_Service_AddOn_Base {
 
 		if (!is_dir($assetsDir)) return true;
 
-		if (!rex_copyDir($assetsDir, $target)) {
+		$dir = new sly_Util_Directory($assetsDir);
+
+		if (!$dir->copyTo($target)) {
 			return t('install_cant_copy_files');
 		}
 
@@ -708,8 +712,8 @@ abstract class sly_Service_AddOn_Base {
 	 * @param  mixed $component
 	 * @return mixed             true if OK, else error message (string)
 	 */
-	private function checkDependencies($component) {
-		$requires      = sly_makeArray($this->getProperty($component, 'requires'));
+	private function checkRequirements($component) {
+		$requires      = $this->getRequirements($component);
 		$aService      = sly_Service_Factory::getAddOnService();
 		$pService      = sly_Service_Factory::getPluginService();
 		$componentName = is_array($component) ? implode('/', $component) : $component;
@@ -762,42 +766,35 @@ abstract class sly_Service_AddOn_Base {
 		$result        = array();
 		$compAsString  = is_array($component) ? implode('/', $component) : $component;
 
-		if (!$this->isAvailable($component)) {
-			$this->loadConfig($component);
-		}
-
 		foreach ($addons as $addon) {
 			// don't check yourself
 			if ($compAsString === $addon) continue;
 
-			$requires = sly_makeArray($this->getProperty($addon, 'requires'));
+			$requires = $addonService->getRequirements($addon);
 			$inArray  = in_array($compAsString, $requires);
+			$visible  = !$onlyMissing || !$addonService->isActivated($addon);
 
-			if ($inArray && $onlyFirst) {
-				return array($addon);
-			}
-
-			if (!$onlyMissing || $inArray) {
+			if ($visible && $inArray) {
+				if ($onlyFirst) return array($addon);
 				$result[] = $addon;
 			}
 
 			$plugins = $pluginService->getAvailablePlugins($addon);
 
 			foreach ($plugins as $plugin) {
-				$requires = sly_makeArray($pluginService->getProperty(array($addon, $plugin), 'requires'));
+				$pComp    = array($addon, $plugin);
+				$requires = $pluginService->getRequirements($pComp);
 				$inArray  = in_array($compAsString, $requires);
+				$visible  = !$onlyMissing || !$pluginService->isActivated($pComp);
 
-				if ($inArray && $onlyFirst) {
-					return array(array($addon, $plugin));
-				}
-
-				if (!$onlyMissing || $inArray) {
-					$result[] = array($addon, $plugin);
+				if ($visible && $inArray) {
+					if ($onlyFirst) return array($pComp);
+					$result[] = $pComp;
 				}
 			}
 		}
 
-		return $onlyFirst ? reset($result) : $result;
+		return $onlyFirst ? (empty($result) ? '' : reset($result)) : $result;
 	}
 
 	/**
@@ -807,12 +804,49 @@ abstract class sly_Service_AddOn_Base {
 	 * @return mixed             false if not required, else the first found dependency
 	 */
 	public function isRequired($component) {
-		$dependency = $this->dependencyHelper($component, true, true);
+		$dependency = $this->dependencyHelper($component, false, true);
 		return empty($dependency) ? false : reset($dependency);
 	}
 
 	/**
-	 * @param mixed $component
+	 * Return a list of required addOns / plugins
+	 *
+	 * @param  mixed $component  addOn as string, plugin as array
+	 * @return array             list of required components
+	 */
+	public function getRequirements($component) {
+		return sly_makeArray($this->readConfigValue($component, 'requires'));
+	}
+
+	/**
+	 * Return a list of Sally versions the component is compatible with
+	 *
+	 * @param  mixed $component  addOn as string, plugin as array
+	 * @return array             list of sally versions
+	 */
+	public function getRequiredSallyVersions($component) {
+		return sly_makeArray($this->readConfigValue($component, 'sally'));
+	}
+
+	/**
+	 * Check if a component is compatible with this Sally version
+	 *
+	 * @param  mixed $component  addOn as string, plugin as array
+	 * @return boolean           true if compatible, else false
+	 */
+	public function isCompatible($component) {
+		$sallyVersions = $this->getRequiredSallyVersions($component);
+		$versionOK     = false;
+
+		foreach ($sallyVersions as $version) {
+			$versionOK |= $this->checkVersion($version);
+		}
+
+		return (boolean) $versionOK;
+	}
+
+	/**
+	 * @param mixed $component  addOn as string, plugin as array
 	 */
 	protected function load($component) {
 		$compAsString  = is_array($component) ? implode('/', $component) : $component;
@@ -857,5 +891,42 @@ abstract class sly_Service_AddOn_Base {
 
 			self::$loaded[] = $compAsString;
 		}
+	}
+
+	/**
+	 * Read a config value directly (without using the config system)
+	 *
+	 * @param  mixed  $component  addOn as string, plugin as array
+	 * @param  string $key        array key
+	 * @param  mixed  $default    value if key is not set
+	 * @return mixed              value or default
+	 */
+	private function readConfigValue($component, $key, $default = null) {
+		static $cache = array();
+
+		// To make this method work on components that are not yet installed or
+		// activated, we have to get their static.yml's content on our own. The
+		// project config at this point already contains 'empty' information for
+		// the component and would not the static.yml via loadStatic().
+
+		if ($this->isAvailable($component)) {
+			return $this->getProperty($component, $key, $default);
+		}
+
+		$file = $this->baseFolder($component).'static.yml';
+		if (!file_exists($file)) return $default;
+
+		$mtime  = filemtime($file);
+		$config = array();
+
+		if (!isset($cache[$file.$mtime])) {
+			$config              = sly_Util_YAML::load($file);
+			$cache[$file.$mtime] = $config;
+		}
+		else {
+			$config = $cache[$file.$mtime];
+		}
+
+		return isset($config[$key]) ? $config[$key] : $default;
 	}
 }

@@ -73,25 +73,10 @@ class sly_Model_Article extends sly_Model_Base_Article {
 	 * prints the articlecontent for a given slot, or if empty for all slots
 	 *
 	 * @param string $slot
+	 * @deprecated you should print $this->getContent by yourselves
 	 */
 	public function printContent($slot = null) {
-		$ids = OOArticleSlice::getSliceIdsForSlot($this->getId(), $this->getClang(), $slot);
-
-		foreach ($ids as $id) {
-			OOArticleSlice::getArticleSliceById($id)->printContent();
-		}
-	}
-
-	/**
-	 * returns the articlecontent for a given slot, or if empty for all slots
-	 *
-	 * @deprecated use getContent() instead
-	 *
-	 * @param  string $slot
-	 * @return string
-	 */
-	public function getArticle($slot = null) {
-		return $this->getContent($slot);
+		print $this->getContent();
 	}
 
 	/**
@@ -101,9 +86,16 @@ class sly_Model_Article extends sly_Model_Base_Article {
 	 * @return string
 	 */
 	public function getContent($slot = null) {
-		ob_start();
-		$this->printContent($slot);
-		return ob_get_clean();
+		$content = '';
+		$where = array('article_id' => $this->getId(), 'clang' => $this->getClang());
+		if($slot !== null) $where['slot'] = $slot;
+
+		$slices = sly_Service_Factory::getArticleSliceService()->find($where, null, 'prior ASC');
+		foreach($slices as $slice) {
+			$content .= $slice->getOutput();
+		}
+
+		return $content;
 	}
 
 	/**
@@ -112,17 +104,15 @@ class sly_Model_Article extends sly_Model_Base_Article {
 	 * @return string
 	 */
 	public function getArticleTemplate() {
-		$tplserv = sly_Service_Factory::getTemplateService();
-
-		if ($this->hasType() && $tplserv->exists($this->getTemplateName())) {
+		if ($this->hasType()) {
 			$params['article'] = $this;
 			ob_start();
 			ob_implicit_flush(0);
-			$tplserv->includeFile($this->getTemplateName(), $params);
+			sly_Util_Template::render($this->getTemplateName(), $params);
 			$content = ob_get_clean();
 		}
 		else {
-			$content = 'No article type or template given.';
+			$content = 'No article type given.';
 		}
 
 		return $content;

@@ -163,7 +163,7 @@ class sly_Util_Medium {
 
 			// check for disallowed extensions (broken by design...)
 
-			$blocked = sly_Core::config()->get('MEDIAPOOL/BLOCKED_EXTENSIONS');
+			$blocked = sly_Core::config()->get('BLOCKED_EXTENSIONS');
 
 			if (in_array($extension, $blocked)) {
 				$filename .= $extension;

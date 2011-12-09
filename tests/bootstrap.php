@@ -8,10 +8,36 @@
  * http://www.opensource.org/licenses/mit-license.php
  */
 
-define('SLY_IS_TESTING', true);     ///< boolean  für Testläufe muss hier true stehen.
-define('SLY_TESTING_USER_ID', 1);   ///< int      die ID des Users, der eingeloggt sein soll
+$here      = dirname(__FILE__);
+$sallyRoot = realpath($here.'/../../');
 
-$sallyRoot = realpath(dirname(__FILE__).'/../');
-define('SLY_TESTING_ROOT', $sallyRoot);
+define('SLY_IS_TESTING',      true);
+define('SLY_TESTING_USER_ID', 1);
+define('SLY_TESTING_ROOT',    $sallyRoot);
+define('SLY_SALLYFOLDER',     $sallyRoot.'/sally');
+define('SLY_DEVELOPFOLDER',   $here.'/develop');
+define('SLY_MEDIAFOLDER',     $here.'/mediapool');
+define('SLY_ADDONFOLDER',     $here.'/addons');
 
-require SLY_TESTING_ROOT.'/sally/index.php';
+if (!is_dir(SLY_MEDIAFOLDER)) mkdir(SLY_MEDIAFOLDER);
+if (!is_dir(SLY_ADDONFOLDER)) mkdir(SLY_ADDONFOLDER);
+
+// prepare our own config files
+foreach (array('local', 'project') as $conf) {
+	$liveFile   = $sallyRoot.'/data/config/sly_'.$conf.'.yml';
+	$backupFile = $sallyRoot.'/data/config/sly_'.$conf.'.yml.bak';
+	$testFile   = $sallyRoot.'/sally/tests/config/sly_'.$conf.'.yml';
+
+	if (file_exists($liveFile)) {
+		rename($liveFile, $backupFile);
+	}
+
+	copy($testFile, $liveFile);
+}
+
+// boot Sally
+require SLY_TESTING_ROOT.'/sally/backend/index.php';
+
+// make tests autoloadable
+sly_Loader::addLoadPath(dirname(__FILE__).'/tests', 'sly_');
+require_once SLY_COREFOLDER.'/functions/function_rex_content.inc.php';

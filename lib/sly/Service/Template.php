@@ -59,14 +59,11 @@ class sly_Service_Template extends sly_Service_DevelopBase {
 		$result = array(
 			'filename' => $filename,
 			'title'    => isset($data['title']) ? $data['title'] : $data['name'],
-			'class'    => isset($data['class']) ? $data['class'] : null,
-			'active'   => isset($data['active']) ? $data['active'] : false,
-			'slots'    => sly_makeArray(isset($data['slots']) ? $data['slots'] : self::$defaultSlots),
-			'modules'  => isset($data['modules']) ? $data['modules'] : array(),
+			'slots'    => isset($data['slots']) ? sly_makeArray($data['slots']) : self::$defaultSlots,
 			'mtime'    => $mtime
 		);
 
-		unset($data['name'], $data['title'], $data['class'], $data['active'], $data['slots'], $data['modules']);
+		unset($data['name'], $data['title'], $data['slots']);
 		$result['params'] = $data;
 
 		return $result;
@@ -100,7 +97,7 @@ class sly_Service_Template extends sly_Service_DevelopBase {
 	 * the from this class will be returned. If class is null, all templates
 	 * will be returned.
 	 *
-	 * @param  string $class  The class to filter. (default: null - no filtering)
+	 * @param  string $class  The class to filter (default: null - no filtering)
 	 * @return array          List of templates of the form: array('NAME' => 'TITLE', ...)
 	 */
 	public function getTemplates($class = null) {
@@ -118,29 +115,24 @@ class sly_Service_Template extends sly_Service_DevelopBase {
 	/**
 	 * Get the cache folder where template cache-files are stored
 	 *
-	 * @throws sly_Exception  When no cache folder is available and could not be created
-	 * @return string         the cache directory
+	 * @throws sly_Service_Template_Exception  When no cache folder is available and could not be created
+	 * @return string                          the cache directory
 	 */
 	public function getCacheFolder() {
 		$dir = sly_Util_Directory::join(SLY_DYNFOLDER, 'internal/sally', $this->getClassIdentifier());
-
-		if (!is_dir($dir) && !@mkdir($dir, sly_Core::getDirPerm(), true)) {
-			throw new sly_Exception('Konnte Cache-Verzeichnis '.$dir.' nicht erstellen.');
-		}
-
-		return $dir;
+		return sly_Util_Directory::create($dir, null, true);
 	}
 
 	/**
 	 * Generate the template cache-file for a template
 	 *
-	 * @throws sly_Exception  When the given template does ot exist
-	 * @param  string $name   Unique template name
-	 * @return string         the template file name
+	 * @throws sly_Service_Template_Exception  When the given template does ot exist
+	 * @param  string $name                    Unique template name
+	 * @return string                          the template file name
 	 */
 	public function getGenerated($name) {
 		if (!$this->exists($name)) {
-			throw new sly_Exception("Template '$name' does not exist.");
+			throw new sly_Service_Template_Exception("Template '$name' does not exist.");
 		}
 
 		$filename     = $this->filterByCondition($name, $this->getFileType());
@@ -245,82 +237,6 @@ class sly_Service_Template extends sly_Service_DevelopBase {
 	}
 
 	/**
-	 * Get the valid modules for the given template and slot
-	 *
-	 * The modules are filtered by the constraints that are made in the
-	 * template configuration AND the module configuration.
-	 *
-	 * @param  string $name  Template name
-	 * @param  string $slot  Slot identifier
-	 * @return array         Array of module names
-	 */
-	public function getModules($name, $slot = null) {
-		$moduleService = sly_Service_Factory::getModuleService();
-		$modules       = sly_makeArray($this->get($name, 'modules'));
-		$slots         = $this->getSlots($name);
-		$result        = array();
-
-		// check if slot is valid
-		if (isset($slot) || self::hasSlot($name, $slot)) {
-			$allModules = array_keys($moduleService->getModules());
-
-			// find modules for this template
-			if (empty($modules)) {
-				$modules = $allModules;
-			}
-			elseif ($this->isModulesDefComplex($modules)) {
-				if (!array_key_exists($slot, $modules)) {
-					$modules = $allModules;
-				}
-				else {
-					$tmp = array();
-
-					foreach ($modules as $key => $value) {
-						if ($slot === null || $slot === $key || ($key === '_ALL_' && !self::hasSlot($name, '_ALL_'))) {
-							$value = sly_makeArray($value);
-							$tmp   = array_merge($tmp, array_values($value));
-						}
-					}
-
-					$modules = $tmp;
-				}
-			}
-
-			// filter modules by their constraints
-			foreach ($modules as $module) {
-				if ($moduleService->exists($module) && $moduleService->hasTemplate($module, $name)) {
-					$result[$module] = $moduleService->getTitle($module);
-				}
-			}
-		}
-
-		return $result;
-	}
-
-	/**
-	 * Checks, if the modules definitions are complex in the template
-	 *
-	 * complex: {slot1: wymeditor, slot2: [module1, module2]}
-	 * simple:  [wymeditor, module1]
-	 *
-	 * @param  array $modules  Array of modules parsed from the template
-	 * @return boolean         true, when the definition is complex
-	 */
-	private function isModulesDefComplex($modules) {
-		return sly_Util_Array::isAssoc($modules) || sly_Util_Array::isMultiDim($modules);
-	}
-
-	/**
-	 * Checks, if the given template is active
-	 *
-	 * @param  string $name  Unique template name
-	 * @return boolean       true, if the template is active
-	 */
-	public function isActive($name) {
-		return (boolean) $this->get($name, 'active', false);
-	}
-
-	/**
 	 * Get the filename of the template
 	 *
 	 * @param  string $name  Unique template name
@@ -328,21 +244,6 @@ class sly_Service_Template extends sly_Service_DevelopBase {
 	 */
 	public function getFilename($name) {
 		return $this->get($name, 'filename');
-	}
-
-	/**
-	 * Checks, if the template has a specific module
-	 *
-	 * @param  string $name    Unique template name
-	 * @param  string $module  Module name to check
-	 * @param  string $slot    The template slot to check
-	 * @return boolean         true, when the module is allowed in the given template and slot
-	 */
-	public function hasModule($name, $module, $slot = null) {
-		if (!$this->exists($name)) return false;
-
-		$modules = $this->getModules($name, $slot);
-		return array_key_exists($module, $modules);
 	}
 
 	/**

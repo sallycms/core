@@ -55,13 +55,6 @@ class sly_Form_Widget_Media extends sly_Form_ElementBase implements sly_Form_IEl
 	}
 
 	public static function getFullName($filename) {
-		static $advanced = null;
-
-		if ($advanced === null) {
-			$user     = sly_Util_User::getCurrentUser();
-			$advanced = $user ? $user->hasRight('advancedMode[]') : false;
-		}
-
 		$medium = sly_Util_Medium::findByFilename($filename);
 		$value  = '';
 
@@ -69,7 +62,7 @@ class sly_Form_Widget_Media extends sly_Form_ElementBase implements sly_Form_IEl
 			$title = $medium->getTitle();
 			$value = $title ? $title : $filename;
 
-			if ($advanced && $title) {
+			if (mb_strlen($title) > 0) {
 				$value .= " ($filename)";
 			}
 		}

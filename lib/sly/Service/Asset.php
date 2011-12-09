@@ -30,7 +30,6 @@ class sly_Service_Asset {
 
 		$dispatcher = sly_Core::dispatcher();
 		$dispatcher->register(self::EVENT_PROCESS_ASSET, array($this, 'processScaffold'));
-		$dispatcher->register('ALL_GENERATED', array(__CLASS__, 'clearCache'));
 	}
 
 	/**
@@ -151,7 +150,7 @@ class sly_Service_Asset {
 
 		// check if the file can be streamed
 
-		$blocked = sly_Core::config()->get('MEDIAPOOL/BLOCKED_EXTENSIONS');
+		$blocked = sly_Core::config()->get('BLOCKED_EXTENSIONS');
 		$ok      = true;
 
 		foreach ($blocked as $ext) {
@@ -188,7 +187,7 @@ class sly_Service_Asset {
 		$isProtected = $dispatcher->filter(self::EVENT_IS_PROTECTED_ASSET, false, compact('file'));
 		$access      = $isProtected ? self::ACCESS_PROTECTED : self::ACCESS_PUBLIC;
 
-		// "/../sally/data/dyn/public/sally/static-cache/[access]/gzip/assets/css/main.css"
+		// "/../data/dyn/public/sally/static-cache/[access]/gzip/assets/css/main.css"
 		$cacheFile = $this->getCacheFile($file, $access);
 
 		if (!file_exists($cacheFile) || $this->forceGen) {
@@ -283,6 +282,10 @@ class sly_Service_Asset {
 		error_reporting($level);
 	}
 
+	/**
+	 * @param string $origFile
+	 * @param string $file
+	 */
 	protected function printCacheFile($origFile, $file) {
 		$errors = ob_get_clean();
 		error_reporting(0);
@@ -426,11 +429,7 @@ class sly_Service_Asset {
 		return $jumper;
 	}
 
-	/**
-	 * @param  array $params
-	 * @return mixed          the subject (if given) or true
-	 */
-	public static function clearCache(array $params) {
+	public static function clearCache() {
 		$me  = new self();
 		$dir = $me->getCacheDir('', '');
 
@@ -463,15 +462,13 @@ class sly_Service_Asset {
 			file_put_contents($dir.'/'.$access.'/gzip/.htaccess', $htaccess[$access.'_gzip']);
 			file_put_contents($dir.'/'.$access.'/deflate/.htaccess', $htaccess[$access.'_deflate']);
 		}
-
-		return isset($params['subject']) ? $params['subject'] : true;
 	}
 
 	private function getFilePerm() {
-		return sly_Core::getFilePerm(sly_Core::DEFAULT_FILEPERM);
+		return sly_Core::getFilePerm();
 	}
 
 	private function getDirPerm() {
-		return sly_Core::getDirPerm(sly_Core::DEFAULT_DIRPERM);
+		return sly_Core::getDirPerm();
 	}
 }

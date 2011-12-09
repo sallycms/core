@@ -229,7 +229,7 @@ class sly_Util_Directory {
 				if ($recursion === false) return false;
 			}
 			elseif (is_file($src)) {
-				if (copy($src, $dst)) chmod($dst, sly_Core::getFilePerm(sly_Core::DEFAULT_FILEPERM));
+				if (copy($src, $dst)) chmod($dst, sly_Core::getFilePerm());
 				else return false;
 			}
 		}

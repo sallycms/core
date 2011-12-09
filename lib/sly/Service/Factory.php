@@ -134,4 +134,11 @@ abstract class sly_Service_Factory {
 	public static function getMediaCategoryService() {
 		return self::getService('MediaCategory');
 	}
+
+	/**
+	 * @return sly_Service_ArticleSlice  The articleslice service instance
+	 */
+	public static function getArticleSliceService() {
+		return self::getService('ArticleSlice');
+	}
 }

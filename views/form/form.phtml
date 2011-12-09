@@ -8,7 +8,8 @@
  * http://www.opensource.org/licenses/mit-license.php
  */
 
-$attributes = array(
+$nativeFocus = sly_Helper_Modernizr::hasInput('autofocus');
+$attributes  = array(
 	'class'   => implode(' ', $this->classes),
 	'method'  => strtolower($this->method),
 	'action'  => $this->action,
@@ -16,13 +17,18 @@ $attributes = array(
 	'enctype' => $this->enctype
 );
 
+if (!empty($this->focussedElement) && $nativeFocus) {
+	$el = $this->findElementByID($this->focussedElement);
+	if ($el) $el->setAttribute('autofocus', 'autofocus');
+}
+
 ?>
 
 <div class="sly-form">
-	<? if (!$omitFormTag): ?>
-	<form <?= sly_Util_HTML::buildAttributeString($attributes) ?>>
-	<? endif ?>
-		<? if (!empty($this->hiddenValues)): ?>
+	<?php if (!$omitFormTag): ?>
+	<form <?php echo sly_Util_HTML::buildAttributeString($attributes) ?>>
+	<?php endif ?>
+		<?php if (!empty($this->hiddenValues)): ?>
 		<div>
 			<?php
 			foreach ($this->hiddenValues as $name => $value) {
@@ -32,7 +38,7 @@ $attributes = array(
 			}
 			?>
 		</div>
-		<? endif ?>
+		<?php endif ?>
 
 		<?php
 		$hasButtonBar = $this->submitButton || $this->resetButton || $this->applyButton || $this->deleteButton;
@@ -47,13 +53,13 @@ $attributes = array(
 			print $fieldset->render();
 		}
 		?>
-	<? if (!$omitFormTag): ?>
+	<?php if (!$omitFormTag): ?>
 	</form>
-	<? endif ?>
+	<?php endif ?>
 </div>
 
-<? if (!empty($this->focussedElement)): ?>
+<?php if (!empty($this->focussedElement) && !$nativeFocus): ?>
 <script type="text/javascript">
-$('#<?= $this->focussedElement ?>').focus();
+document.getElementById('<?php echo $this->focussedElement ?>').focus();
 </script>
-<? endif ?>
+<?php endif ?>

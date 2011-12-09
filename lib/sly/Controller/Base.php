@@ -25,7 +25,6 @@
  */
 abstract class sly_Controller_Base {
 	const PAGEPARAM    = 'page';    ///< string  the request param that contains the page
-	const SUBPAGEPARAM = 'subpage'; ///< string  the request param that contains the subpage
 	const ACTIONPARAM  = 'func';    ///< string  the request param that contains the action
 
 	private static $currentPage = null;  ///< string  the current page
@@ -108,8 +107,11 @@ abstract class sly_Controller_Base {
 
 		if ($content_type) {
 			header('Content-Type: '.$content_type);
+		}
+
+		if ($this->charset) {
 			$layout = sly_Core::getLayout('Backend');
-			$layout->addHttpMeta('Content-Type', $content_type);
+			$layout->setCharset($this->charset);
 		}
 	}
 
@@ -123,18 +125,6 @@ abstract class sly_Controller_Base {
 	 */
 	public static function getPageParam($default = '') {
 		return sly_request(self::PAGEPARAM, 'string', $default);
-	}
-
-	/**
-	 * Get the subpage param
-	 *
-	 * Reads the subpage param from the $_REQUEST array and returns it.
-	 *
-	 * @param  string $default  default value if param is not present
-	 * @return string           the subpage param
-	 */
-	public static function getSubpageParam($default = '') {
-		return sly_request(self::SUBPAGEPARAM, 'string', $default);
 	}
 
 	/**
@@ -168,17 +158,12 @@ abstract class sly_Controller_Base {
 			$config = sly_Core::config();
 			$page   = strtolower(self::getPageParam());
 
-			// do not allow any access to setup controller when SETUP=false
-
-			if ($config->get('SETUP') !== true && $page == 'setup') {
-				$page = 'profile';
-			}
-
 			// Erst normale Startseite, dann User-Startseite, dann System-Startseite und
 			// zuletzt auf die Profilseite zurückfallen.
 
 			if (empty($page) || !self::isPageAvailable($page)) {
-				$page = sly_Service_Factory::getUserService()->getCurrentUser()->getStartpage();
+				$user = sly_Service_Factory::getUserService()->getCurrentUser();
+				$page = $user ? $user->getStartpage() : null;
 
 				if (is_null($page) || !self::isPageAvailable($page)) {
 					$page = strtolower($config->get('START_PAGE'));
@@ -190,7 +175,7 @@ abstract class sly_Controller_Base {
 			}
 
 			$_REQUEST[self::PAGEPARAM] = $page;
-			self::$currentPage         = $page;
+			self::setCurrentPage($page);
 		}
 
 		return self::$currentPage;
@@ -199,8 +184,25 @@ abstract class sly_Controller_Base {
 	/**
 	 * @return boolean  whether or not the controller exists
 	 */
-	protected static function isPageAvailable($page) {
-		return class_exists('sly_Controller_'.ucfirst($page));
+	protected static function isPageAvailable($pageparam) {
+		return class_exists(self::getPageClassName($pageparam));
+	}
+
+	/**
+	 * return classname for &page=whatever
+	 * It will return sly_Controller_Specials for &page=specials
+	 * and sly_Controller_Specials_Languages for &page=specials_languages
+	 *
+	 * @param string $pageparam
+	 * @return string
+	 */
+	protected static function getPageClassName($pageparam) {
+		$className = 'sly_Controller';
+		$parts = explode('_', $pageparam);
+		foreach($parts as $part) {
+			$className .= '_'.ucfirst($part);
+		}
+		return $className;
 	}
 
 	/**
@@ -210,6 +212,8 @@ abstract class sly_Controller_Base {
 	public static function setCurrentPage($page) {
 		if (self::$currentPage === null) {
 			self::$currentPage = $page;
+			// notify addOns about the page to be rendered
+			sly_Core::dispatcher()->notify('PAGE_CHECKED', self::$currentPage);
 			return true;
 		}
 		else {
@@ -222,9 +226,10 @@ abstract class sly_Controller_Base {
 	 * Creates the controller instance
 	 *
 	 * This method will construct the controller instance. It consists of the
-	 * current page and subpage, whereas the subpage is only appended if it's not
-	 * 'index'. The class name will look like 'sly_Controller_[Page]_[Subpage]',
-	 * having the first character of both values in uppercase and the rest in
+	 * current page. The param to control this is ?page and looks like
+	 * page(_subpage)(_subsubpage) The class name will look like
+	 * 'sly_Controller_[Page](_[Subpage])(_[Subsubpage])', having the first
+	 * character of a part in uppercase and the rest in
 	 * lowercase.
 	 *
 	 * If the class could not be found, null is returned.
@@ -235,14 +240,8 @@ abstract class sly_Controller_Base {
 	 */
 	public static function factory($forcePage = null, $forceSubpage = null) {
 		$config  = sly_Core::config();
-		$page    = $forcePage === null    ? self::getPage() : $forcePage;
-		$subpage = $forceSubpage === null ? strtolower(self::getSubpageParam()) : $forceSubpage;
+		$page    = $forcePage === null ? self::getPage() : $forcePage;
 		$name    = 'sly_Controller_'.ucfirst($page);
-
-		// don't use empty() to allow subpages like '0'
-		if (strlen($subpage) > 0 && $subpage !== 'index') {
-			$name .= '_'.ucfirst($subpage);
-		}
 
 		if (class_exists($name)) {
 			return new $name($name);
@@ -254,6 +253,8 @@ abstract class sly_Controller_Base {
 		if (class_exists($name)) {
 			return new $name($name);
 		}
+
+		throw new sly_Controller_Exception(t('unknown_page'), 404);
 
 		return null;
 	}
@@ -275,7 +276,7 @@ abstract class sly_Controller_Base {
 		}
 
 		if ($this->checkPermission() !== true) {
-			throw new sly_Authorisation_Exception(t('page_not_allowed', $this->action, get_class($this)));
+			throw new sly_Authorisation_Exception(t('page_not_allowed', $this->action, get_class($this)), 403);
 		}
 
 		$method = $this->action;
