@@ -21,9 +21,20 @@ else {
 	$category = sly_Util_Article::findById($artID)->getCategoryId();
 }
 
+$typeFilter     = '';
+$categoryFilter = '';
+
+if (!empty($this->types)) {
+	$typeFilter = ' data-articletypes="'.sly_html(implode('|', $this->types)).'"';
+}
+
+if (!empty($this->categories)) {
+	$categoryFilter = ' data-categories="'.implode('|', $this->categories).'"';
+}
+
 ?>
 
-<span class="sly-widget sly-link<?php echo isset($this->attributes['class']) ? ' '.sly_html($this->attributes['class']) : '' ?>" data-catid="<?php echo $category ?>">
+<span class="sly-widget sly-link<?php echo isset($this->attributes['class']) ? ' '.sly_html($this->attributes['class']) : '' ?>" data-catid="<?php echo $category ?>"<?php echo $typeFilter.$categoryFilter ?>>
 	<input class="value" type="hidden" name="<?php echo $name ?>" value="<?php echo sly_html($artID) ?>" />
 	<input class="name" type="text" id="<?php echo $id ?>" value="<?php echo sly_html($value) ?>" readonly="readonly" />
 

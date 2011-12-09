@@ -69,7 +69,7 @@ class sly_Service_Category extends sly_Service_Model_Base {
 			$where['startpage'] = 1;
 		}
 		else {
-			$where = array('startpage' => 1);
+			$where = "($where) AND startpage = 1";
 		}
 
 		return parent::find($where, $group, $order, $offset, $limit, $having);
@@ -457,5 +457,21 @@ class sly_Service_Category extends sly_Service_Model_Base {
 		}
 
 		return $catlist;
+	}
+
+	/**
+	 * Selects a category and all children recursively
+	 *
+	 * @param  int $parentID   the sub-tree's root category or 0 for the whole tree
+	 * @return array           sorted list of category IDs
+	 */
+	public function findTree($parentID) {
+		$parentID = (int) $parentID;
+
+		if ($parentID === 0) {
+			return $this->find(array(), null, 'id', $asObjects);
+		}
+
+		return $this->find('id = '.$parentID.' OR path LIKE "%|'.$parentID.'|%"', null, 'id');
 	}
 }

@@ -9,16 +9,19 @@
  */
 
 /**
- * Media widget
+ * Link widget
  *
  * This element will render a special widget that allows the user to select
- * a file from the mediapool. The handled value is the file's name, not its ID.
+ * one article. The article will be returned without any language information,
+ * so only its ID is returned.
+ * Selection will be performed in the so-called 'linkmap', a special popup for
+ * browsing through the article structure.
  *
  * @ingroup form
  * @author  Christoph
  */
-abstract class sly_Form_Widget_MediaBase extends sly_Form_ElementBase {
-	protected $filetypes  = array();
+abstract class sly_Form_Widget_LinkBase extends sly_Form_ElementBase {
+	protected $types      = array();
 	protected $categories = array();
 
 	public function filterByCategories(array $cats, $recursive = false) {
@@ -26,7 +29,7 @@ abstract class sly_Form_Widget_MediaBase extends sly_Form_ElementBase {
 	}
 
 	public function filterByCategory($cat, $recursive = false) {
-		$catID = $cat instanceof sly_Model_MediaCategory ? $cat->getId() : (int) $cat;
+		$catID = $cat instanceof sly_Model_Category ? $cat->getId() : (int) $cat;
 
 		if (!$recursive) {
 			if (!in_array($catID, $this->categories)) {
@@ -34,11 +37,11 @@ abstract class sly_Form_Widget_MediaBase extends sly_Form_ElementBase {
 			}
 		}
 		else {
-			$serv = sly_Service_Factory::getMediaCategoryService();
-			$tree = $serv->findTree($catID, false);
+			$serv = sly_Service_Factory::getCategoryService();
+			$tree = $serv->findTree($catID);
 
-			foreach ($tree as $id) {
-				$this->categories[] = $id;
+			foreach ($tree as $cat) {
+				$this->categories[] = $cat->getId();
 			}
 
 			$this->categories = array_unique($this->categories);
@@ -47,20 +50,18 @@ abstract class sly_Form_Widget_MediaBase extends sly_Form_ElementBase {
 		return $this->categories;
 	}
 
-	public function filterByFiletypes(array $types) {
-		foreach ($types as $type) {
-			$this->filetypes[] = sly_Util_Mime::getType('tmp.'.ltrim($type, '.'));
-		}
+	public function filterByArticleTypes(array $types) {
+		foreach ($types as $type) $this->types[] = $type;
+		$this->types = array_unique($this->types);
 
-		$this->filetypes = array_unique($this->filetypes);
-		return $this->filetypes;
+		return $this->types;
 	}
 
 	public function clearCategoryFilter() {
 		$this->categories = array();
 	}
 
-	public function clearFiletypeFilter() {
-		$this->filetypes = array();
+	public function clearArticleTypeFilter() {
+		$this->types = array();
 	}
 }
