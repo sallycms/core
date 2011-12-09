@@ -17,9 +17,20 @@ if ($value === '') {
 	$filename = '';
 }
 
+$filetypeFilter = '';
+$categoryFilter = '';
+
+if (!empty($this->filetypes)) {
+	$filetypeFilter = ' data-filetypes="'.implode('|', $this->filetypes).'"';
+}
+
+if (!empty($this->categories)) {
+	$categoryFilter = ' data-categories="'.implode('|', $this->categories).'"';
+}
+
 ?>
 
-<span class="sly-widget sly-media<?php echo isset($this->attributes['class']) ? ' '.sly_html($this->attributes['class']) : '' ?>">
+<span class="sly-widget sly-media<?php echo isset($this->attributes['class']) ? ' '.sly_html($this->attributes['class']) : '' ?>"<?php echo $filetypeFilter.$categoryFilter ?>>
 	<input class="value" type="hidden" name="<?php echo $name ?>" value="<?php echo sly_html($filename) ?>" />
 	<input class="name" type="text" value="<?php echo sly_html($value) ?>" readonly="readonly" id="<?php echo $id ?>" />
 

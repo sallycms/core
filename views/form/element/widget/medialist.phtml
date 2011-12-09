@@ -23,8 +23,19 @@ foreach ($files as $filename) {
 	$list[]   = array($filename, $fullName);
 }
 
+$filetypeFilter = '';
+$categoryFilter = '';
+
+if (!empty($this->filetypes)) {
+	$filetypeFilter = ' data-filetypes="'.implode('|', $this->filetypes).'"';
+}
+
+if (!empty($this->categories)) {
+	$categoryFilter = ' data-categories="'.implode('|', $this->categories).'"';
+}
+
 ?>
-<span class="sly-widget sly-medialist<?php echo isset($this->attributes['class']) ? ' '.sly_html($this->attributes['class']) : '' ?>">
+<span class="sly-widget sly-medialist<?php echo isset($this->attributes['class']) ? ' '.sly_html($this->attributes['class']) : '' ?>"<?php echo $filetypeFilter.$categoryFilter ?>>
 	<input type="hidden" name="<?php echo $name ?>" value="<?php echo sly_html(implode(',', $values)) ?>" />
 	<select size="8" id="<?php echo $id ?>">
 		<?php foreach ($list as $element): ?>
