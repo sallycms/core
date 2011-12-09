@@ -75,12 +75,30 @@ class sly_Service_MediaCategory extends sly_Service_Model_Base_Id {
 	}
 
 	/**
-	 * @param  string $cacheKey
-	 * @param  array  $where
-	 * @param  string $sortBy
+	 * Selects a category and all children recursively
+	 *
+	 * @param  int     $parentID   the sub-tree's root category or 0 for the whole tree
+	 * @param  boolean $asObjects  set to false if you need the IDs only
+	 * @return array               sorted list of category IDs
+	 */
+	public function findTree($parentID, $asObjects = true) {
+		$parentID = (int) $parentID;
+
+		if ($parentID === 0) {
+			return $this->findBy('tree_0', '1', 'id', $asObjects);
+		}
+
+		return $this->findBy('tree_'.$parentID, 'id = '.$parentID.' OR path LIKE "%|'.$parentID.'|%"', 'id', $asObjects);
+	}
+
+	/**
+	 * @param  string  $cacheKey
+	 * @param  array   $where
+	 * @param  string  $sortBy
+	 * @param  boolean $asObjects  set to false if you need the IDs only
 	 * @return array
 	 */
-	protected function findBy($cacheKey, $where, $sortBy) {
+	protected function findBy($cacheKey, $where, $sortBy, $asObjects = true) {
 		$namespace = 'sly.mediacat.list';
 		$list      = sly_Core::cache()->get($namespace, $cacheKey, null);
 
@@ -92,6 +110,10 @@ class sly_Service_MediaCategory extends sly_Service_Model_Base_Id {
 			foreach ($sql as $row) $list[] = (int) $row['id'];
 
 			sly_Core::cache()->set($namespace, $cacheKey, $list);
+		}
+
+		if (!$asObjects) {
+			return $list;
 		}
 
 		$objlist = array();
