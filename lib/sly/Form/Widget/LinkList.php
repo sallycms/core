@@ -18,7 +18,7 @@
  * @ingroup form
  * @author  Christoph
  */
-class sly_Form_Widget_LinkList extends sly_Form_ElementBase implements sly_Form_IElement {
+class sly_Form_Widget_LinkList extends sly_Form_Widget_LinkBase implements sly_Form_IElement {
 	/**
 	 * Constructor
 	 *
