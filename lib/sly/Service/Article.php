@@ -482,6 +482,7 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 		$srcSlots   = $tplService->getSlots($source->getTemplateName());
 		$dstSlots   = $tplService->getSlots($dest->getTemplateName());
 		$where      = array('article_id' => $srcID, 'clang' => $srcClang, 'revision' => $revision);
+		$changes    = false;
 
 		foreach ($srcSlots as $srcSlot) {
 			// skip slots not present in the destination article
@@ -511,18 +512,22 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 				));
 
 				$sql->commit();
+
 				++$position;
+				$changes = true;
 			}
 		}
 
-		$this->deleteCache($dstID, $dstClang);
+		if ($changes) {
+			$this->deleteCache($dstID, $dstClang);
 
-		// notify system
-		sly_Core::dispatcher()->notify('SLY_ART_CONTENT_COPIED', null, array(
-			'from_id'     => $srcID,
-			'from_clang'  => $srcClang,
-			'to_id'       => $dstID,
-			'to_clang'    => $dstClang,
-		));
+			// notify system
+			sly_Core::dispatcher()->notify('SLY_ART_CONTENT_COPIED', null, array(
+				'from_id'     => $srcID,
+				'from_clang'  => $srcClang,
+				'to_id'       => $dstID,
+				'to_clang'    => $dstClang,
+			));
+		}
 	}
 }
