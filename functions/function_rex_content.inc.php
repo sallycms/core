@@ -12,66 +12,6 @@
  */
 
 /**
- * Kopiert die Inhalte eines Artikels in einen anderen Artikel
- *
- * @param  int $from_id          Artikel-ID des Artikels, aus dem kopiert werden (Quell Artikel-ID)
- * @param  int $to_id            Artikel-ID des Artikel, in den kopiert werden sollen (Ziel Artikel-ID)
- * @param  int $from_clang       Sprach-ID des Artikels, aus dem kopiert werden soll (Quell Sprach-ID)
- * @param  int $to_clang         Sprach-ID des Artikels, in den kopiert werden soll (Ziel Sprach-ID)
- * @param  int $from_re_sliceid  ID des Slices, bei dem begonnen werden soll
- * @return boolean               true bei Erfolg, sonst false
- */
-function rex_copyContent($from_id, $to_id, $from_clang = 0, $to_clang = 0, $revision = 0) {
-	$from_clang = (int) $from_clang;
-	$to_clang   = (int) $to_clang;
-	$from_id    = (int) $from_id;
-	$to_id      = (int) $to_id;
-	$revision   = (int) $revision;
-
-	if ($from_id == $to_id && $from_clang == $to_clang) {
-		return false;
-	}
-
-	$sliceService        = sly_Service_Factory::getSliceService();
-	$articleSliceService = sly_Service_Factory::getArticleSliceService();
-	$articleSlices       = $articleSliceService->find(array('article_id' => $from_id, 'clang' => $from_clang, 'revision' => $revision));
-	$sql                 = sly_DB_Persistence::getInstance();
-	$login               = sly_Util_User::getCurrentUser()->getLogin();
-
-	foreach ($articleSlices as $articleSlice) {
-		$sql->beginTransaction();
-		$slice = $articleSlice->getSlice();
-		$slice = $sliceService->copy($slice);
-
-		$articleSliceService->create(array(
-			'clang'      => $to_clang,
-			'slot'       => $articleSlice->getSlot(),
-			'prior'      => $articleSlice->getPrior(),
-			'slice_id'   => $slice->getId(),
-			'article_id' => $to_id,
-			'revision'   => 0,
-			'createdate' => time(),
-			'createuser' => $login,
-			'updatedate' => time(),
-			'updateuser' => $login
-		));
-		$sql->commit();
-	}
-
-	// notify system
-	sly_Core::dispatcher()->notify('SLY_ART_CONTENT_COPIED', null, array(
-		'from_id'     => $from_id,
-		'from_clang'  => $from_id,
-		'to_id'       => $to_id,
-		'to_clang'    => $to_clang,
-	));
-
-	sly_Service_Factory::getArticleService()->deleteCache($to_id, $to_clang);
-
-	return true;
-}
-
-/**
  * Verschieben einer Kategorie in eine andere
  *
  * @param  int $from_cat  Kategorie-ID der Kategorie, die verschoben werden soll (Quelle)
