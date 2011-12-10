@@ -8,7 +8,7 @@
  * http://www.opensource.org/licenses/mit-license.php
  */
 
-class sly_Service_CategoryBaseTest extends sly_Service_CategoryBase {
+class sly_Service_CategoryBaseTest extends sly_Service_CategoryTestBase {
 	protected function getDataSetName() {
 		return 'pristine-sally';
 	}
