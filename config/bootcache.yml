@@ -36,6 +36,7 @@ static:
   - sly_Service_Plugin
   - sly_Util_Article
   - sly_Service_Model_Base
+  - sly_Service_ArticleBase
   - sly_Service_Article
   - sly_Model_Base
   - sly_Model_Base_Article
@@ -45,6 +46,7 @@ backend:
   - sly_Viewable
   - sly_Layout
   - sly_Layout_XHTML
+  - sly_Layout_XHTML5
   - sly_Layout_Backend
   - sly_Layout_Navigation_Backend
   - sly_Layout_Navigation_Group
