@@ -345,9 +345,7 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 
 		// prepare infos
 
-		$sql  = sly_DB_Persistence::getInstance();
 		$pos  = $this->getMaxPrior($target) + 1;
-		$pre  = sly_Core::config()->get('DATABASE/TABLE_PREFIX');
 		$disp = sly_Core::dispatcher();
 
 		foreach (sly_Util_Language::findAll(true) as $clang) {
