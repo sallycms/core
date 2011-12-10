@@ -297,7 +297,7 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 			$this->deleteListCache();
 
 			// copy slices
-			rex_copyContent($id, $newID, $clang, $clang);
+			$this->copyContent($id, $newID, $clang, $clang);
 
 			// notify system
 			$disp->notify('SLY_ART_COPIED', $duplicate);
@@ -442,5 +442,87 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 		// notify system
 
 		sly_Core::dispatcher()->notify('SLY_ART_TO_STARTPAGE', $articleID, array('old_cat' => $oldCat));
+	}
+
+	/**
+	 * Copies an article's content to another article
+	 *
+	 * The copied slices are appended to each matching slot in the target
+	 * article. Slots not present in the target are simply skipped. Existing
+	 * content remains the same.
+	 *
+	 * @param int $srcID     source article ID
+	 * @param int $dstID     target article ID
+	 * @param int $srcClang  source clang
+	 * @param int $dstClang  target clang
+	 * @param int $revision  revision (unused)
+	 */
+	function copyContent($srcID, $dstID, $srcClang = 0, $dstClang = 0, $revision = 0) {
+		$srcClang = (int) $srcClang;
+		$dstClang = (int) $dstClang;
+		$srcID    = (int) $srcID;
+		$dstID    = (int) $dstID;
+		$revision = (int) $revision;
+
+		if ($srcID === $dstID && $srcClang === $dstClang) {
+			throw new sly_Exception('Cannot copy article into itself.');
+		}
+
+		$source = $this->findById($srcID, $srcClang);
+		$dest   = $this->findById($srcID, $srcClang);
+
+		// copy the slices by their slots
+
+		$sServ      = sly_Service_Factory::getSliceService();
+		$asServ     = sly_Service_Factory::getArticleSliceService();
+		$tplService = sly_Service_Factory::getTemplateService();
+		$sql        = sly_DB_Persistence::getInstance();
+		$user       = sly_Util_User::getCurrentUser();
+		$login      = $user ? $user->getLogin() : '';
+		$srcSlots   = $tplService->getSlots($source->getTemplateName());
+		$dstSlots   = $tplService->getSlots($dest->getTemplateName());
+		$where      = array('article_id' => $srcID, 'clang' => $srcClang, 'revision' => $revision);
+
+		foreach ($srcSlots as $srcSlot) {
+			// skip slots not present in the destination article
+			if (!in_array($srcSlot, $dstSlots)) continue;
+
+			$where['slot'] = $srcSlot;
+			$slices        = $asServ->find($where);
+			$position      = count($slices); // starts at 0
+
+			foreach ($slices as $articleSlice) {
+				$sql->beginTransaction();
+
+				$slice = $articleSlice->getSlice();
+				$slice = $sServ->copy($slice);
+
+				$asServ->create(array(
+					'clang'      => $dstClang,
+					'slot'       => $srcSlot,
+					'prior'      => $position,
+					'slice_id'   => $slice->getId(),
+					'article_id' => $dstID,
+					'revision'   => $revision,
+					'createdate' => time(),
+					'createuser' => $login,
+					'updatedate' => time(),
+					'updateuser' => $login
+				));
+
+				$sql->commit();
+				++$position;
+			}
+		}
+
+		$this->deleteCache($dstID, $dstClang);
+
+		// notify system
+		sly_Core::dispatcher()->notify('SLY_ART_CONTENT_COPIED', null, array(
+			'from_id'     => $srcID,
+			'from_clang'  => $srcClang,
+			'to_id'       => $dstID,
+			'to_clang'    => $dstClang,
+		));
 	}
 }
