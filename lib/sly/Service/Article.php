@@ -247,13 +247,18 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 	 * @return int          the new article's ID
 	 */
 	public function copy($id, $target) {
-		$id     = (int) $id;
-		$target = (int) $target;
+		$id      = (int) $id;
+		$target  = (int) $target;
+		$article = $this->findById($id);
 
 		// check article
 
-		if ($this->findById($id) === null) {
+		if ($article === null) {
 			throw new sly_Exception(t('no_such_article'));
+		}
+
+		if ($article->isStartArticle()) {
+			throw new sly_Exception('Use the category service to move categories.');
 		}
 
 		// check category
@@ -269,6 +274,7 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 		$sql   = sly_DB_Persistence::getInstance();
 		$pos   = $this->getMaxPrior($target) + 1;
 		$newID = $sql->magicFetch('article', 'MAX(id)') + 1;
+		$disp  = sly_Core::dispatcher();
 
 		// copy by language
 
@@ -294,9 +300,80 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 			rex_copyContent($id, $newID, $clang, $clang);
 
 			// notify system
-			sly_Core::dispatcher()->notify('SLY_ART_COPIED', $duplicate);
+			$disp->notify('SLY_ART_COPIED', $duplicate);
 		}
 
 		return $newID;
+	}
+
+	/**
+	 * Move an article
+	 *
+	 * The article will be placed at the end of the target category.
+	 *
+	 * @param int $id      article ID
+	 * @param int $target  target category ID
+	 */
+	public function move($id, $target) {
+		$id      = (int) $id;
+		$target  = (int) $target;
+		$article = $this->findById($id);
+
+		// check article
+
+		if ($article === null) {
+			throw new sly_Exception(t('no_such_article'));
+		}
+
+		if ($article->isStartArticle()) {
+			throw new sly_Exception('Use the category service to move categories.');
+		}
+
+		// check category
+
+		$cats = sly_Service_Factory::getCategoryService();
+
+		if ($target !== 0 && $cats->findById($target) === null) {
+			throw new sly_Exception(t('no_such_category'));
+		}
+
+		$source = (int) $article->getCategoryId();
+
+		if ($source === $target) {
+			throw new sly_Exception('Source and target category are the same.');
+		}
+
+		// prepare infos
+
+		$sql  = sly_DB_Persistence::getInstance();
+		$pos  = $this->getMaxPrior($target) + 1;
+		$pre  = sly_Core::config()->get('DATABASE/TABLE_PREFIX');
+		$disp = sly_Core::dispatcher();
+
+		foreach (sly_Util_Language::findAll(true) as $clang) {
+			$article = $this->findById($id, $clang);
+			$cat     = $target === 0 ? null : $cats->findById($target, $clang);
+			$moved   = clone $article;
+
+			$moved->setParentId($target);
+			$moved->setPath($cat ? $cat->getPath().$target.'|' : '|');
+			$moved->setCatname($cat ? $cat->getName() : '');
+			$moved->setStatus(0);
+			$moved->setPrior($pos);
+			$moved->setUpdateColumns();
+
+			// move article at the end of new category
+			$this->update($moved);
+
+			// re-number old category
+			$followers = $this->getFollowerQuery($source, $clang, $article->getPrior());
+			$this->moveObjects('-', $followers);
+
+			// notify system
+			$disp->notify('SLY_ART_MOVED', $id, array(
+				'clang'  => $clang,
+				'target' => $target
+			));
+		}
 	}
 }

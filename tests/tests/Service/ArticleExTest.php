@@ -49,10 +49,16 @@ class sly_Service_ArticleExTest extends sly_Service_ArticleTestBase {
 		);
 	}
 
-	public function testIllegalTreeMoves() {
-		$this->assertFalse(rex_moveArticle(1, 1), 'Do not allow to move category with article API.');
-		$this->assertFalse(rex_moveArticle(6, 0), 'Do not allow to move article into current position.');
-		$this->assertFalse(rex_moveArticle(1, 7), 'Do not allow to move article into non-existing category.');
+	/**
+	 * @dataProvider      illegalMoveProvider
+	 * @expectedException sly_Exception
+	 */
+	public function testIllegalTreeMoves($id, $target) {
+		$this->getService()->move($id, $target);
+	}
+
+	public function illegalMoveProvider() {
+		return array(array(1,1), array(6,0), array(1,7));
 	}
 
 	/**
@@ -194,5 +200,36 @@ class sly_Service_ArticleExTest extends sly_Service_ArticleTestBase {
 		$this->assertEquals(reset($arts)->getName(), end($arts)->getCatname());
 
 		$service->delete($newID);
+	}
+
+	public function testMove() {
+		$service  = $this->getService();
+		$articles = array(6,7,8);
+
+		////////////////////////////////////////////////////////////
+		// move one article to the first cat
+
+		$service->move(7, 1);
+		$this->assertPositions(array(6,8));
+		$this->assertPositions(array(1,7));
+
+		$art = $service->findById(7, 1);
+		$this->assertEquals($service->findById(1, 1)->getCatname(), $art->getCatname());
+		$this->assertEquals(2, $art->getPrior());
+
+		$this->assertCount(2, $service->findArticlesByCategory(0, false));
+		$this->assertCount(2, $service->findArticlesByCategory(1, false));
+		$this->assertCount(1, $service->findArticlesByCategory(1, true));
+
+		////////////////////////////////////////////////////////////
+		// move it back
+
+		$service->move(7, 0);
+		$this->assertPositions(array(6,8,7));
+		$this->assertPositions(array(1));
+
+		$this->assertCount(3, $service->findArticlesByCategory(0, false));
+		$this->assertCount(2, $service->findArticlesByCategory(0, true));
+		$this->assertCount(1, $service->findArticlesByCategory(1, false));
 	}
 }
