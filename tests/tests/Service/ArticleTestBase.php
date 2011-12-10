@@ -8,7 +8,7 @@
  * http://www.opensource.org/licenses/mit-license.php
  */
 
-abstract class sly_Service_ArticleBase extends sly_StructureTest {
+abstract class sly_Service_ArticleTestBase extends sly_StructureTest {
 	protected function getService() {
 		static $service = null;
 		if (!$service) $service = sly_Service_Factory::getArticleService();

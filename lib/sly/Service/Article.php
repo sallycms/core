@@ -12,8 +12,59 @@
  * @author  christoph@webvariants.de
  * @ingroup service
  */
-class sly_Service_Article extends sly_Service_Model_Base {
-	protected $tablename = 'article'; ///< string
+class sly_Service_Article extends sly_Service_ArticleBase {
+	/**
+	 * @return string
+	 */
+	protected function getModelType() {
+		return 'article';
+	}
+
+	protected function getSiblingQuery($categoryID, $clang = null) {
+		$categoryID = (int) $categoryID;
+		$where      = '((re_id = '.$categoryID.' AND startpage = 0) OR id = '.$categoryID.')';
+
+		if ($clang !== null) {
+			$clang = (int) $clang;
+			$where = "$where AND clang = $clang";
+		}
+
+		return $where;
+	}
+
+	protected function getMaxPrior($categoryID) {
+		$db     = sly_DB_Persistence::getInstance();
+		$where  = $this->getSiblingQuery($categoryID);
+		$maxPos = $db->magicFetch('article', 'MAX(prior)', $where);
+
+		return $maxPos;
+	}
+
+	protected function buildModel(array $params) {
+		if ($params['parent']) {
+			$cat     = $this->findById($params['parent'], $params['clang']);
+			$catname = $cat->getName();
+		}
+		else {
+			$catname = '';
+		}
+
+		return new sly_Model_Article(array(
+			        'id' => $params['id'],
+			     're_id' => $params['parent'],
+			      'name' => $params['name'],
+			   'catname' => $catname,
+			  'catprior' => 0,
+			'attributes' => '',
+			 'startpage' => 0,
+			     'prior' => $params['position'],
+			      'path' => $params['path'],
+			    'status' => $params['status'],
+			      'type' => $params['type'],
+			     'clang' => $params['clang'],
+			  'revision' => 0
+		));
+	}
 
 	/**
 	 * @param  array $params
@@ -24,41 +75,12 @@ class sly_Service_Article extends sly_Service_Model_Base {
 	}
 
 	/**
-	 * @param  sly_Model_Article $article
-	 * @return sly_Model_Article
-	 */
-	protected function update(sly_Model_Article $article) {
-		$persistence = sly_DB_Persistence::getInstance();
-		$persistence->update($this->getTableName(), $article->toHash(), $article->getPKHash());
-		return $article;
-	}
-
-	/**
-	 * @param  int $id
+	 * @param  int $articleID
 	 * @param  int $clang
 	 * @return sly_Model_Article
 	 */
 	public function findById($articleID, $clangID = null) {
-		if ($clangID === null || $clangID === false) $clangID = sly_Core::getCurrentClang();
-
-		$articleID = (int) $articleID;
-
-		if ($articleID === 0) {
-			return null;
-		}
-
-		$key     = $articleID.'_'.$clangID;
-		$article = sly_Core::cache()->get('sly.article', $key, null);
-
-		if ($article === null) {
-			$article = $this->findOne(array('id' => $articleID, 'clang' => $clangID));
-
-			if ($article !== null) {
-				sly_Core::cache()->set('sly.article', $key, $article);
-			}
-		}
-
-		return $article;
+		return parent::findById($articleID, $clangID);
 	}
 
 	/**
@@ -70,125 +92,7 @@ class sly_Service_Article extends sly_Service_Model_Base {
 	 * @return int
 	 */
 	public function add($categoryID, $name, $status, $position = -1) {
-		$db       = sly_DB_Persistence::getInstance();
-		$parentID = (int) $categoryID;
-		$position = (int) $position;
-		$status   = (int) $status;
-
-		// Parent validieren
-
-		if ($parentID !== 0 && !sly_Util_Category::exists($parentID)) {
-			throw new sly_Exception('Parent category does not exist.');
-		}
-
-		// Artikeltyp vom Startartikel der jeweiligen Sprache vererben
-		// Catname ermitteln
-
-		$types    = array();
-		$catnames = array();
-
-		if ($parentID !== 0) {
-			$db->select('article', 'clang, type', array('id' => $parentID, 'startpage' => 1));
-			foreach ($db as $row) {
-				$types[$row['clang']] = $row['type'];
-			}
-
-			$db->select('article', 'clang, catname', 'id = '.$parentID.' AND catprior <> 0 AND startpage = 1');
-			foreach ($db as $row) {
-				$catnames[$row['clang']] = $row['catname'];
-			}
-		}
-
-		// Position validieren
-
-		$where    = '((re_id = '.$parentID.' AND catprior = 0) OR (id = '.$parentID.'))';
-		$maxPos   = $db->magicFetch('article', 'MAX(prior)', $where) + 1;
-		$position = ($position <= 0 || $position > $maxPos) ? $maxPos : $position;
-
-		// Pfad ermitteln
-
-		if ($parentID !== 0) {
-			$path = $db->magicFetch('article', 'path', array('id' => $parentID, 'startpage' => 1));
-			$path = $path.$parentID.'|';
-		}
-		else {
-			$path = '|';
-		}
-
-		// Die ID ist für alle Sprachen gleich und entspricht einfach der aktuell
-		// höchsten plus 1.
-
-		$newID = $db->magicFetch('article', 'MAX(id)') + 1;
-
-		// Entferne alle Artikel aus dem Cache, die nach dem aktuellen kommen und
-		// daher ab Ende dieser Funktion eine neue Positionsangabe haben.
-
-		$cache = sly_Core::cache();
-
-		foreach (sly_Util_Language::findAll(true) as $clangID) {
-			$db->select('article', 'id', 'prior >= '.$position.' AND startpage = 0 AND clang = '.$clangID.' AND re_id = '.$parentID);
-
-			foreach ($db as $row) {
-				$cache->delete('sly.article', $row['id'].'_'.$clangID);
-			}
-		}
-
-		// Bevor wir die neuen Datensätze einfügen, machen wir in den sortierten
-		// Listen (je eine pro Sprache) Platz, indem wir alle Artikel, deren
-		// Priorität größergleich der Priorität des neuen Artikels ist, um eine
-		// Position nach unten schieben.
-
-		$prefix = sly_Core::config()->get('DATABASE/TABLE_PREFIX');
-
-		$db->query(
-			'UPDATE '.$prefix.'article SET prior = prior + 1 '.
-			'WHERE ((re_id = '.$parentID.' AND catprior = 0) OR id = '.$parentID.') AND prior >= '.$position
-		);
-
-		// Artikel in allen Sprachen anlegen
-
-		$defaultType = sly_Core::getDefaultArticleType();
-		$dispatcher  = sly_Core::dispatcher();
-
-		foreach (sly_Util_Language::findAll(true) as $clangID) {
-			$type    = !empty($types[$clangID]) ? $types[$clangID] : $defaultType;
-			$article = new sly_Model_Article(array(
-				        'id' => $newID,
-				     're_id' => $parentID,
-				      'name' => $name,
-				   'catname' => !empty($catnames[$clangID]) ? $catnames[$clangID] : '',
-				  'catprior' => 0,
-				'attributes' => '',
-				 'startpage' => 0,
-				     'prior' => $position,
-				      'path' => $path,
-				    'status' => $status ? 1 : 0,
-				      'type' => $type,
-				     'clang' => $clangID,
-				  'revision' => 0
-			));
-
-			$article->setUpdateColumns();
-			$article->setCreateColumns();
-			$db->insert($this->tablename, array_merge($article->getPKHash(), $article->toHash()));
-
-			$cache->delete('sly.article.list', $parentID.'_'.$clangID.'_0');
-			$cache->delete('sly.article.list', $parentID.'_'.$clangID.'_1');
-
-			// System benachrichtigen
-
-			$dispatcher->notify('SLY_ART_ADDED', $newID, array(
-				're_id'    => $parentID,
-				'clang'    => $clangID,
-				'name'     => $name,
-				'position' => $position,
-				'path'     => $path,
-				'status'   => $status,
-				'type'     => $type
-			));
-		}
-
-		return $newID;
+		return $this->addHelper($categoryID, $name, $status, $position);
 	}
 
 	/**
@@ -200,70 +104,7 @@ class sly_Service_Article extends sly_Service_Model_Base {
 	 * @return boolean
 	 */
 	public function edit($articleID, $clangID, $name, $position = false) {
-		$articleID = (int) $articleID;
-		$clangID   = (int) $clangID;
-		$db        = sly_DB_Persistence::getInstance();
-		$cache     = sly_Core::cache();
-
-		// Artikel validieren
-		$article = $this->findById($articleID, $clangID);
-
-		if ($article === null) {
-			throw new sly_Exception(t('no_such_article'));
-		}
-
-		// Artikel selbst updaten
-		$article->setName($name);
-		$article->setUpdateColumns();
-		$this->update($article);
-
-		// Cache sicherheitshalber schon einmal leeren
-		$cache->delete('sly.category', $articleID.'_'.$clangID);
-		$cache->delete('sly.article', $articleID.'_'.$clangID);
-
-		// Kategorie verschieben, wenn nötig
-		if ($position !== false && $position != $article->getPrior()) {
-			$parent = $article->getParentId();
-			$oldPrio  = $article->getPrior();
-			$position = (int) $position;
-
-			$where   = '((re_id = '.$parent.' AND catprior = 0) OR id = '.$parent.') AND clang = '.$clangID;
-			$maxPrio = $db->magicFetch('article', 'MAX(prior)', $where);
-			$newPrio = ($position <= 0 || $position > $maxPrio) ? $maxPrio : $position;
-
-			// Nur aktiv werden, wenn sich auch etwas geändert hat.
-			if ($newPrio != $oldPrio) {
-				$prefix      = sly_Core::config()->get('DATABASE/TABLE_PREFIX');
-				$relation    = $newPrio < $oldPrio ? '+' : '-';
-				list($a, $b) = $newPrio < $oldPrio ? array($newPrio, $oldPrio) : array($oldPrio, $newPrio);
-
-				// alle anderen entsprechend verschieben
-				$db->query(
-					'UPDATE '.$prefix.'article SET prior = prior '.$relation.' 1 '.
-					'WHERE prior BETWEEN '.$a.' AND '.$b.' AND '.$where
-				);
-
-				// eigene neue Position speichern
-				$article->setPrior($newPrio);
-				$this->update($article);
-
-				// alle Artikel in dieser Ebene aus dem Cache entfernen
-				$db->select('article', 'id', array('re_id' => $parent, 'clang' => $clangID, 'catprior' => 0));
-
-				foreach ($db as $row) {
-					$cache->delete('sly.article', $row['id'].'_'.$clangID);
-					$cache->delete('sly.category', $row['id'].'_'.$clangID);
-				}
-
-				$cache->delete('sly.article.list', $parent.'_'.$clangID.'_0');
-				$cache->delete('sly.article.list', $parent.'_'.$clangID.'_1');
-			}
-		}
-
-		$dispatcher = sly_Core::dispatcher();
-		$dispatcher->notify('SLY_ART_UPDATED', $article);
-
-		return true;
+		return $this->editHelper($articleID, $clangID, $name, $position);
 	}
 
 	/**
@@ -273,50 +114,33 @@ class sly_Service_Article extends sly_Service_Model_Base {
 	 */
 	public function delete($articleID) {
 		$articleID = (int) $articleID;
+		$this->checkForSpecialArticle($articleID);
 
-		if ($articleID == sly_Core::getSiteStartArticleId()) {
-			throw new sly_Exception(t('cant_delete_sitestartarticle'));
-		}
+		// check if article exists
 
-		if ($articleID == sly_Core::getNotFoundArticleId()) {
-			throw new sly_Exception(t('cant_delete_notfoundarticle'));
-		}
-
-		$db      = sly_DB_Persistence::getInstance();
-		$cache   = sly_Core::cache();
 		$article = $this->findById($articleID);
 
-		// Prüfen ob der Artikel existiert
 		if ($article === null) {
 			throw new sly_Exception(t('no_such_article'));
 		}
 
-		// Nachbarartikel neu positionieren
+		// re-position all following articles
+
 		$parent = $article->getCategoryId();
-		$prefix = sly_Core::config()->get('DATABASE/TABLE_PREFIX');
 
 		foreach (sly_Util_Language::findAll(true) as $clangID) {
-			$iArticle = $this->findById($articleID, $clangID);
-			$prior    = $iArticle->getPrior();
-			$where    = 'prior >= '.$prior.' AND re_id = '.$parent.' AND catprior = 0 AND clang = '.$clangID;
+			$prior     = $this->findById($articleID, $clangID)->getPrior();
+			$followers = $this->getFollowerQuery($parent, $clangID, $prior);
 
-			$db->query('UPDATE '.$prefix.'article SET prior = prior - 1 WHERE '.$where);
-
-			$this->deleteCache($parent, $clangID);
-
-			// Cache leeren
-			$db->select('article', 'id', $where);
-
-			foreach ($db as $row) {
-				$cache->delete('sly.article', $row['id'].'_'.$clangID);
-				$cache->delete('sly.category', $row['id'].'_'.$clangID);
-			}
+			$this->moveObjects('-', $followers);
 		}
 
 		// Artikel löschen
 		$sql = sly_DB_Persistence::getInstance();
 		$sql->delete('article', array('id' => $articleID));
 		$sql->delete('article_slice', array('article_id' => $articleID));
+
+		$this->deleteCache($articleID);
 
 		// Event auslösen
 		$dispatcher = sly_Core::dispatcher();
@@ -326,116 +150,13 @@ class sly_Service_Article extends sly_Service_Model_Base {
 	}
 
 	/**
-	 *
-	 * @param int $articleID
-	 * @param int $clangID
-	 * @param int $newStatus
-	 * @return  boolean
-	 */
-	public function changeStatus($articleID, $clangID, $newStatus = null) {
-		$articleID = (int) $articleID;
-		$clangID   = (int) $clangID;
-		$article   = $this->findById($articleID, $clangID);
-		$stati     = $this->getStati();
-		$re_id     = $article->getParentId();
-		$clang     = $article->getClang();
-		$oldStatus = $article->getStatus();
-
-		// Status wurde nicht von außen vorgegeben,
-		// => zyklisch auf den nächsten weiterschalten
-		if ($newStatus === null) {
-			$newStatus = ($oldStatus + 1) % count($stati);
-		}
-
-		// Artikel updaten
-		$article->setStatus($newStatus);
-		$article->setUpdateColumns();
-		$this->update($article);
-
-		// Cache leeren
-		$cache = sly_Core::cache();
-		$cache->delete('sly.article', $article->getId().'_'.$clang);
-		$cache->delete('sly.article.list', $re_id.'_'.$clang.'_0');
-		$cache->delete('sly.article.list', $re_id.'_'.$clang.'_1');
-
-		if ($article->isStartArticle()) {
-			$cache->delete('sly.category', $article->getId().'_'.$clang);
-			$cache->delete('sly.category.list', $re_id.'_'.$clang.'_0');
-			$cache->delete('sly.category.list', $re_id.'_'.$clang.'_1');
-		}
-
-		// Event auslösen
-		$dispatcher = sly_Core::dispatcher();
-		$dispatcher->notify('SLY_ART_STATUS', $article);
-
-		return true;
-	}
-
-	/**
-	 * @return array
-	 */
-	public function getStati() {
-		static $stati;
-
-		if (!$stati) {
-			$stati = array(
-				// Name, CSS-Klasse
-				array(t('status_offline'), 'rex-offline'),
-				array(t('status_online'),  'rex-online')
-			);
-
-			$stati = sly_Core::dispatcher()->filter('SLY_ART_STATUS_TYPES', $stati);
-		}
-
-		return $stati;
-	}
-
-	/**
 	 * @param  int     $categoryId
 	 * @param  boolean $ignore_offlines
 	 * @param  int     $clangId
 	 * @return array
 	 */
 	public function findArticlesByCategory($categoryId, $ignore_offlines = false, $clangId = null) {
-		if ($clangId === false || $clangId === null) {
-			$clangId = sly_Core::getCurrentClang();
-		}
-
-		$categoryId = (int) $categoryId;
-		$clangId    = (int) $clangId;
-
-		$namespace = 'sly.article.list';
-		$key       = $categoryId.'_'.$clangId.'_'.($ignore_offlines ? '1' : '0');
-		$alist     = sly_Core::cache()->get($namespace, $key, null);
-
-		if ($alist === null) {
-			$alist = array();
-			$sql   = sly_DB_Persistence::getInstance();
-			$where = array('re_id' => $categoryId, 'clang' => $clangId, 'startpage' => 0);
-
-			if ($ignore_offlines) $where['status'] = 1;
-
-			$sql->select($this->tablename, 'id', $where, null, 'prior,name');
-			foreach ($sql as $row) $alist[] = (int) $row['id'];
-
-			if ($categoryId !== 0) {
-				$category = sly_Service_Factory::getCategoryService()->findById($categoryId, $clangId);
-
-				if ($category && (!$ignore_offlines || ($ignore_offlines && $category->isOnline()))) {
-					array_unshift($alist, $category->getId());
-				}
-			}
-
-			sly_Core::cache()->set($namespace, $key, $alist);
-		}
-
-		$artlist = array();
-
-		foreach ($alist as $id) {
-			$artlist[] = $this->findById($id, $clangId);
-		}
-
-		return $artlist;
+		return $this->findElementsInCategory($categoryId, $ignore_offlines, $clangId);
 	}
 
 	/**
@@ -449,12 +170,11 @@ class sly_Service_Article extends sly_Service_Model_Base {
 			$clangId = sly_Core::getCurrentClang();
 		}
 
-		$type    = trim($type);
-		$clangId = (int) $clangId;
-
+		$type      = trim($type);
+		$clangId   = (int) $clangId;
 		$namespace = 'sly.article.list';
-		$key       = $type.'_'.$clangId.'_'.($ignore_offlines ? '1' : '0');
-		$alist     = null; // sly_Core::cache()->get($namespace, $key, null);
+		$key       = 'artsbytype_'.$type.'_'.$clangId.'_'.($ignore_offlines ? '1' : '0');
+		$alist     = sly_Core::cache()->get($namespace, $key, null);
 
 		if ($alist === null) {
 			$alist = array();
@@ -466,14 +186,14 @@ class sly_Service_Article extends sly_Service_Model_Base {
 			$sql->select($this->tablename, 'id', $where, null, 'prior,name');
 			foreach ($sql as $row) $alist[] = (int) $row['id'];
 
-			// don't cache this list for now, as we wouldn't clear it appropriatly
-			// sly_Core::cache()->set($namespace, $key, $alist);
+			sly_Core::cache()->set($namespace, $key, $alist);
 		}
 
 		$artlist = array();
 
 		foreach ($alist as $id) {
-			$artlist[] = $this->findById($id, $clangId);
+			$art = $this->findById($id, $clangId);
+			if ($art) $artlist[] = $art;
 		}
 
 		return $artlist;
@@ -492,18 +212,15 @@ class sly_Service_Article extends sly_Service_Model_Base {
 		foreach ($langs as $clangID) {
 			$article = sly_Util_Article::findById($articleID, $clangID);
 
-			// Artikel updaten
+			// update the article
+
 			$article->setType($type);
 			$article->setUpdateColumns();
 			$this->update($article);
-
-			// Cache leeren
-			$cache = sly_Core::cache();
-			$cache->delete('sly.article', $article->getId().'_'.$clangID);
-			$cache->delete('sly.category', $article->getId().'_'.$clangID);
 		}
 
-		// Event auslösen
+		// notify system
+
 		$dispatcher = sly_Core::dispatcher();
 		$dispatcher->notify('SLY_ART_TYPE', $article, array('old_type' => $oldType));
 
@@ -518,25 +235,5 @@ class sly_Service_Article extends sly_Service_Model_Base {
 		$article->setUpdatedate(time());
 		$article->setUpdateuser($user->getLogin());
 		$this->update($article);
-	}
-
-	/**
-	 * @param int $id     article ID
-	 * @param int $clang  language ID (give null to delete in all languages)
-	 */
-	public function deleteCache($id, $clang = null) {
-		$cache = sly_Core::cache();
-
-		foreach (sly_Util_Language::findAll(true) as $_clang) {
-			if ($clang !== null && $clang != $_clang) {
-				continue;
-			}
-
-			$cache->delete('sly.article', $id.'_'.$_clang);
-			$cache->delete('sly.article.list', $id.'_'.$_clang.'_0');
-			$cache->delete('sly.article.list', $id.'_'.$_clang.'_1');
-			$cache->delete('sly.category.list', $id.'_'.$_clang.'_0');
-			$cache->delete('sly.category.list', $id.'_'.$_clang.'_1');
-		}
 	}
 }

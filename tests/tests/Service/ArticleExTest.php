@@ -8,7 +8,7 @@
  * http://www.opensource.org/licenses/mit-license.php
  */
 
-class sly_Service_ArticleExTest extends sly_Service_ArticleBase {
+class sly_Service_ArticleExTest extends sly_Service_ArticleTestBase {
 	protected function getDataSetName() {
 		return 'sally-demopage';
 	}
@@ -82,11 +82,14 @@ class sly_Service_ArticleExTest extends sly_Service_ArticleBase {
 		$article = $service->findById(1);
 		$user    = sly_Service_Factory::getUserService()->findById(1);
 
+		$before = time();
 		$service->touch($article, $user);
+		$after = time();
 
 		$article = $service->findById(1);
 
-		$this->assertEquals(time(), $article->getUpdatedate());
+		$this->assertGreaterThanOrEqual($before, $article->getUpdatedate());
+		$this->assertLessThanOrEqual($after, $article->getUpdatedate());
 		$this->assertEquals($user->getLogin(), $article->getUpdateuser());
 	}
 
