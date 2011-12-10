@@ -236,4 +236,67 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 		$article->setUpdateuser($user->getLogin());
 		$this->update($article);
 	}
+
+	/**
+	 * Copy an article
+	 *
+	 * The article will be placed at the end of the target category.
+	 *
+	 * @param  int $id      article ID
+	 * @param  int $target  target category ID
+	 * @return int          the new article's ID
+	 */
+	public function copy($id, $target) {
+		$id     = (int) $id;
+		$target = (int) $target;
+
+		// check article
+
+		if ($this->findById($id) === null) {
+			throw new sly_Exception(t('no_such_article'));
+		}
+
+		// check category
+
+		$cats = sly_Service_Factory::getCategoryService();
+
+		if ($target !== 0 && $cats->findById($target) === null) {
+			throw new sly_Exception(t('no_such_category'));
+		}
+
+		// prepare infos
+
+		$sql   = sly_DB_Persistence::getInstance();
+		$pos   = $this->getMaxPrior($target) + 1;
+		$newID = $sql->magicFetch('article', 'MAX(id)') + 1;
+
+		// copy by language
+
+		foreach (sly_Util_Language::findAll(true) as $clang) {
+			$source    = $this->findById($id, $clang);
+			$cat       = $target === 0 ? null : $cats->findById($target, $clang);
+			$duplicate = clone $source;
+
+			$duplicate->setId($newID);
+			$duplicate->setParentId($target);
+			$duplicate->setCatname($cat ? $cat->getName() : '');
+			$duplicate->setPrior($pos);
+			$duplicate->setStatus(0);
+			$duplicate->setPath($cat ? ($cat->getPath().$target.'|') : '|');
+			$duplicate->setUpdateColumns();
+			$duplicate->setCreateColumns();
+
+			// store it
+			$sql->insert($this->tablename, array_merge($duplicate->getPKHash(), $duplicate->toHash()));
+			$this->deleteListCache();
+
+			// copy slices
+			rex_copyContent($id, $newID, $clang, $clang);
+
+			// notify system
+			sly_Core::dispatcher()->notify('SLY_ART_COPIED', $duplicate);
+		}
+
+		return $newID;
+	}
 }

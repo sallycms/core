@@ -142,4 +142,57 @@ class sly_Service_ArticleExTest extends sly_Service_ArticleTestBase {
 		$this->assertCount(1, $result);
 		$this->assertEquals($service->findById(7), $result[0]);
 	}
+
+	public function testCopy() {
+		$service  = $this->getService();
+		$articles = array(6,7,8);
+
+		////////////////////////////////////////////////////////////
+		// copy the article in it's own category (root)
+
+		$newID = $service->copy(6, 0);
+
+		$this->assertInternalType('int', $newID);
+
+		$arts = $service->findArticlesByCategory(0, true);
+		$this->assertCount(3, $arts);
+
+		foreach ($arts as $idx => $art) {
+			$this->assertEquals($articles[$idx], $art->getId());
+		}
+
+		$arts = $service->findArticlesByCategory(0, false);
+		$this->assertCount(4, $arts);
+		$last = array_pop($arts);
+
+		foreach ($arts as $idx => $art) {
+			$this->assertEquals($articles[$idx], $art->getId());
+		}
+
+		$this->assertEquals($newID, $last->getId());
+		$this->assertEquals(4, $last->getPrior());
+		$this->assertEquals('', $last->getCatname());
+
+		$arts = $service->findArticlesByCategory(0, false, 2);
+		$this->assertCount(4, $arts);
+
+		$service->delete($newID);
+
+		////////////////////////////////////////////////////////////
+		// copy the article in another category
+
+		$newID = $service->copy(6, 1);
+
+		$this->assertInternalType('int', $newID);
+
+		$arts = $service->findArticlesByCategory(1, true);
+		$this->assertCount(1, $arts);
+
+		$arts = $service->findArticlesByCategory(1, false);
+		$this->assertCount(2, $arts);
+		$this->assertEquals($newID, end($arts)->getId());
+		$this->assertEquals(reset($arts)->getName(), end($arts)->getCatname());
+
+		$service->delete($newID);
+	}
 }
