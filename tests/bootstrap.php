@@ -11,13 +11,14 @@
 $here      = dirname(__FILE__);
 $sallyRoot = realpath($here.'/../../');
 
-define('SLY_IS_TESTING',      true);
-define('SLY_TESTING_USER_ID', 1);
-define('SLY_TESTING_ROOT',    $sallyRoot);
-define('SLY_SALLYFOLDER',     $sallyRoot.'/sally');
-define('SLY_DEVELOPFOLDER',   $here.'/develop');
-define('SLY_MEDIAFOLDER',     $here.'/mediapool');
-define('SLY_ADDONFOLDER',     $here.'/addons');
+define('SLY_IS_TESTING',        true);
+define('SLY_TESTING_USER_ID',   1);
+define('SLY_TESTING_ROOT',      $sallyRoot);
+define('SLY_TESTING_USE_CACHE', true);
+define('SLY_SALLYFOLDER',       $sallyRoot.'/sally');
+define('SLY_DEVELOPFOLDER',     $here.'/develop');
+define('SLY_MEDIAFOLDER',       $here.'/mediapool');
+define('SLY_ADDONFOLDER',       $here.'/addons');
 
 if (!is_dir(SLY_MEDIAFOLDER)) mkdir(SLY_MEDIAFOLDER);
 if (!is_dir(SLY_ADDONFOLDER)) mkdir(SLY_ADDONFOLDER);
@@ -41,3 +42,6 @@ require SLY_TESTING_ROOT.'/sally/backend/index.php';
 // make tests autoloadable
 sly_Loader::addLoadPath(dirname(__FILE__).'/tests', 'sly_');
 require_once SLY_COREFOLDER.'/functions/function_rex_content.inc.php';
+
+// clear current cache
+sly_Core::cache()->flush('sly');

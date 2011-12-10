@@ -25,6 +25,11 @@ abstract class sly_DatabaseTest extends PHPUnit_Extensions_Database_TestCase {
 		return $this->createDefaultDBConnection($this->pdo, $data['NAME']);
 	}
 
+	public function setUp() {
+		parent::setUp();
+		sly_Core::cache()->flush('sly', true);
+	}
+
 	/**
 	 * @return PHPUnit_Extensions_Database_DataSet_IDataSet
 	 */
