@@ -374,4 +374,73 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 			));
 		}
 	}
+
+	/**
+	 * Converts an article to the it's own category start article
+	 *
+	 * The article will be converted to an category and all articles and
+	 * categories will be moved to be its children.
+	 *
+	 * @param int $articleID  article ID
+	 */
+	public function convertToStartArticle($articleID) {
+		$articleID = (int) $articleID;
+		$article   = $this->findById($articleID);
+
+		// check article
+
+		if ($article === null) {
+			throw new sly_Exception(t('no_such_article'));
+		}
+
+		if ($article->isStartArticle()) {
+			throw new sly_Exception('This article is already a start article.');
+		}
+
+		if ($article->getCategoryId() === 0) {
+			throw new sly_Exception('Cannot make a root article into a start article.');
+		}
+
+		// switch key params of old and new start articles in every language
+
+		$oldCat  = $article->getCategoryId();
+		$newPath = $article->getPath();
+		$params  = array('path', 'catname', 'startpage', 'catprior', 're_id');
+
+		foreach (sly_Util_Language::findAll(true) as $clang) {
+			$newStarter = $this->findById($articleID, $clang)->toHash();
+			$oldStarter = $this->findById($oldCat, $clang)->toHash();
+
+			foreach ($params as $param) {
+				$t = $newStarter[$param];
+				$newStarter[$param] = $oldStarter[$param];
+				$oldStarter[$param] = $t;
+			}
+
+			$oldStarter['clang'] = $clang;
+			$newStarter['clang'] = $clang;
+			$oldStarter['id']    = $oldCat;
+			$newStarter['id']    = $articleID;
+
+			$this->update(new sly_Model_Article($oldStarter));
+			$this->update(new sly_Model_Article($newStarter));
+		}
+
+		// switch parent id and adjust paths
+
+		$prefix = sly_Core::getTablePrefix();
+		$sql    = sly_DB_Persistence::getInstance();
+
+		$sql->update('article', array('re_id' => $articleID), array('re_id' => $oldCat));
+		$sql->query('UPDATE '.$prefix.'article SET path = REPLACE(path, "|'.$oldCat.'|", "|'.$articleID.'|") WHERE path LIKE "%|'.$oldCat.'|%"');
+
+		// clear cache
+
+		$this->clearCacheByQuery(array('re_id' => $articleID));
+		$this->deleteListCache();
+
+		// notify system
+
+		sly_Core::dispatcher()->notify('SLY_ART_TO_STARTPAGE', $articleID, array('old_cat' => $oldCat));
+	}
 }

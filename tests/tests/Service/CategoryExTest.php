@@ -102,7 +102,7 @@ class sly_Service_CategoryExTest extends sly_Service_CategoryTestBase {
 		rex_moveCategory(5, 2);
 
 		// current tree: 1<2<5>,3>,4
-		rex_article2startpage($b);
+		$service->convertToStartArticle($b);
 
 		$this->assertTree($b.'<2<5>,3>,4');
 
