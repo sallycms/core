@@ -72,25 +72,21 @@ function _rex_cast_var($var, $vartype, $default, $mode)
 		// ---------------- REDAXO types
 		case 'rex-article-id':
 			$var = (int) $var;
-			if ($mode == 'found') {
-				if (!sly_Util_Article::exists($var)) {
-					$var = (int) $default;
-				}
+			if ($mode === 'found' && !sly_Util_Article::exists($var)) {
+				$var = (int) $default;
 			}
 			break;
 
 		case 'rex-category-id':
 			$var = (int) $var;
-			if ($mode == 'found') {
-				if (!sly_Util_Category::isValid(sly_Util_Category::findById($var))) {
-					$var = (int) $default;
-				}
+			if ($mode === 'found' && !sly_Util_Category::isValid(sly_Util_Category::findById($var))) {
+				$var = (int) $default;
 			}
 			break;
 
 		case 'rex-clang-id':
 			$var = (int) $var;
-			if ($mode == 'found' && !sly_Util_Language::exists($var)) {
+			if ($mode === 'found' && !sly_Util_Language::exists($var)) {
 				$var = (int) $default;
 			}
 			break;
@@ -100,6 +96,10 @@ function _rex_cast_var($var, $vartype, $default, $mode)
 		case 'rex-mediacategory-id':
 		case 'rex-user-id':
 			// erstmal keine weitere validierung
+			// break
+
+		case 'int':
+		case 'integer':
 			$var = (int) $var;
 			break;
 
@@ -107,11 +107,6 @@ function _rex_cast_var($var, $vartype, $default, $mode)
 		case 'bool':
 		case 'boolean':
 			$var = (boolean) $var;
-			break;
-
-		case 'int':
-		case 'integer':
-			$var = (int) $var;
 			break;
 
 		case 'double':
