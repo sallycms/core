@@ -27,11 +27,11 @@
 function _rex_array_key_cast($haystack, $needle, $vartype, $default = '')
 {
 	if (array_key_exists($needle, $haystack)) {
-		return _rex_cast_var($haystack[$needle], $vartype, $default, 'found', $addslashes);
+		return _rex_cast_var($haystack[$needle], $vartype, $default, 'found');
 	}
 
 	if ($default === '') {
-		return _rex_cast_var($default, $vartype, $default, 'default', $addslashes);
+		return _rex_cast_var($default, $vartype, $default, 'default');
 	}
 
 	return $default;
@@ -96,7 +96,7 @@ function _rex_cast_var($var, $vartype, $default, $mode)
 		case 'rex-mediacategory-id':
 		case 'rex-user-id':
 			// erstmal keine weitere validierung
-			// break
+			// fallthrough
 
 		case 'int':
 		case 'integer':
