@@ -55,10 +55,11 @@ class sly_Service_CategoryExTest extends sly_Service_CategoryTestBase {
 	 * @dataProvider treeMovesProvider
 	 */
 	public function testTreeMoves($moves, $expected) {
-		$moves = json_decode($moves, true);
+		$moves   = json_decode($moves, true);
+		$service = sly_Service_Factory::getCategoryService();
 
 		foreach ($moves as $move) {
-			rex_moveCategory($move[0], $move[1]);
+			$service->move($move[0], $move[1]);
 		}
 
 		$this->assertTree($expected);
@@ -74,15 +75,24 @@ class sly_Service_CategoryExTest extends sly_Service_CategoryTestBase {
 	}
 
 	/**
-	 * @depends testTreeMoves
+	 * @depends           testTreeMoves
+	 * @dataProvider      illegalTreeMovesProvider
+	 * @expectedException sly_Exception
 	 */
-	public function testIllegalTreeMoves() {
-		rex_moveCategory(2, 1);
-		rex_moveCategory(3, 2);
+	public function testIllegalTreeMoves($from, $to) {
+		$service = sly_Service_Factory::getCategoryService();
+		$service->move(2, 1);
+		$service->move(3, 2);
 
-		$this->assertFalse(rex_moveCategory(1, 1), 'Do not allow to move category into itself (simple case).');
-		$this->assertFalse(rex_moveCategory(1, 3), 'Do not allow to move category into itself (recursion).');
-		$this->assertFalse(rex_moveCategory(1, 7), 'Do not allow to move into non-existing category.');
+		$service->move($from, $to);
+	}
+
+	public function illegalTreeMovesProvider() {
+		return array(
+			array(1, 1),
+			array(1, 3),
+			array(1, 7)
+		);
 	}
 
 	/**
@@ -90,16 +100,17 @@ class sly_Service_CategoryExTest extends sly_Service_CategoryTestBase {
 	 */
 	public function testArticle2Startpage() {
 		// create some articles
-		$service = sly_Service_Factory::getArticleService();
+		$service    = sly_Service_Factory::getArticleService();
+		$catService = sly_Service_Factory::getCategoryService();
 
 		$a = $service->add(1, 'test article 1', 1);
 		$b = $service->add(1, 'test article 2', 1); // our new startarticle
 		$c = $service->add(1, 'test article 3', 1);
 
 		// make sure some categories have to be relinked
-		rex_moveCategory(2, 1);
-		rex_moveCategory(3, 1);
-		rex_moveCategory(5, 2);
+		$catService->move(2, 1);
+		$catService->move(3, 1);
+		$catService->move(5, 2);
 
 		// current tree: 1<2<5>,3>,4
 		$service->convertToStartArticle($b);

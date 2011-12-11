@@ -41,7 +41,6 @@ require SLY_TESTING_ROOT.'/sally/backend/index.php';
 
 // make tests autoloadable
 sly_Loader::addLoadPath(dirname(__FILE__).'/tests', 'sly_');
-require_once SLY_COREFOLDER.'/functions/function_rex_content.inc.php';
 
 // clear current cache
 sly_Core::cache()->flush('sly');

@@ -189,15 +189,101 @@ class sly_Service_Category extends sly_Service_ArticleBase {
 	 * Selects a category and all children recursively
 	 *
 	 * @param  int $parentID   the sub-tree's root category or 0 for the whole tree
+	 * @param  int $clang      the language or null for the current one
 	 * @return array           sorted list of category IDs
 	 */
-	public function findTree($parentID) {
+	public function findTree($parentID, $clang = null) {
 		$parentID = (int) $parentID;
+		$clang    = $clang === null ? sly_Core::getCurrentClang() : (int) $clang;
 
 		if ($parentID === 0) {
-			return $this->find(array(), null, 'id', $asObjects);
+			return $this->find(array('clang' => $clang), null, 'id');
 		}
 
-		return $this->find('id = '.$parentID.' OR path LIKE "%|'.$parentID.'|%"', null, 'id');
+		return $this->find('clang = '.$clang.' AND (id = '.$parentID.' OR path LIKE "%|'.$parentID.'|%")', null, 'id');
+	}
+
+	/**
+	 * Moves a sub-tree to another category
+	 *
+	 * The sub-tree will be placed at the end of the target category.
+	 *
+	 * @param int $categoryID  ID of the category that should be moved
+	 * @param int $targetID    target category ID
+	 */
+	public function move($categoryID, $targetID) {
+		$categoryID = (int) $categoryID;
+		$targetID   = (int) $targetID;
+		$category   = $this->findById($categoryID);
+		$target     = $this->findById($targetID);
+
+		// check categories
+
+		if ($category === null) {
+			throw new sly_Exception(t('no_such_category'));
+		}
+
+		if ($targetID !== 0 && $target === null) {
+			throw new sly_Exception('The target category does not exist.');
+		}
+
+		if ($targetID !== 0 && $targetID === $categoryID) {
+			throw new sly_Exception('Cannot move a category into itself.');
+		}
+
+		// check self-include ($target may not be a child of $category)
+
+		if ($target && $category->isAncestor($target)) {
+			throw new sly_Exception('Cannot move a category inside one of its children.');
+		}
+
+		// prepare movement
+
+		$oldParent = $category->getParentId();
+		$languages = sly_Util_Language::findAll(true);
+		$newPrio   = $this->getMaxPrior($targetID) + 1;
+		$oldPath   = $category->getPath();
+		$newPath   = $target ? ($target->getPath().$targetID.'|') : '|';
+
+		// move the $category in each language by itself
+
+		foreach ($languages as $clang) {
+			$cat  = $this->findById($categoryID, $clang);
+			$prio = $cat->getCatprior();
+
+			$cat->setParentId($targetID);
+			$cat->setCatprior($newPrio);
+			$cat->setPath($newPath);
+
+			// update the cat itself
+			$this->update($cat);
+
+			// move all followers one position up
+			$followers = $this->getFollowerQuery($oldParent, $clang, $prio);
+			$this->moveObjects('-', $followers);
+		}
+
+		// update paths for all elements in the affected sub-tree
+
+		$from   = $oldPath.$categoryID.'|';
+		$to     = $newPath.$categoryID.'|';
+		$where  = 'path LIKE "'.$from.'%"';
+		$update = 'path = REPLACE(path, "'.$from.'", "'.$to.'")';
+		$sql    = sly_DB_Persistence::getInstance();
+		$prefix = sly_Core::getTablePrefix();
+
+		$sql->query('UPDATE '.$prefix.'article SET '.$update.' WHERE '.$where);
+		$this->clearCacheByQuery($where);
+
+		// notify system
+
+		$dispatcher = sly_Core::dispatcher();
+
+		foreach ($languages as $clang) {
+			$dispatcher->notify('SLY_CAT_MOVED', $categoryID, array(
+				'clang'  => $clang,
+				'target' => $targetID
+			));
+		}
 	}
 }
