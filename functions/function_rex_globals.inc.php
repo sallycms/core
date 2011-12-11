@@ -24,18 +24,8 @@
  *
  * @access private
  */
-function _rex_array_key_cast($haystack, $needle, $vartype, $default = '', $addslashes = true)
+function _rex_array_key_cast($haystack, $needle, $vartype, $default = '')
 {
-	if (!is_array($haystack)) {
-		trigger_error('Array expected for $haystack in _rex_array_key_cast()!', E_USER_ERROR);
-		exit();
-	}
-
-	if (!is_scalar($needle)) {
-		trigger_error('Scalar expected for $needle in _rex_array_key_cast()!', E_USER_ERROR);
-		exit();
-	}
-
 	if (array_key_exists($needle, $haystack)) {
 		return _rex_cast_var($haystack[$needle], $vartype, $default, 'found', $addslashes);
 	}
@@ -76,12 +66,8 @@ function _rex_array_key_cast($haystack, $needle, $vartype, $default = '', $addsl
  *
  * @access private
  */
-function _rex_cast_var($var, $vartype, $default, $mode, $addslashes = true)
+function _rex_cast_var($var, $vartype, $default, $mode)
 {
-	if (!is_string($vartype)) {
-		trigger_error('String expected for $vartype in _rex_cast_var()!', E_USER_ERROR);
-	}
-
 	switch ($vartype) {
 		// ---------------- REDAXO types
 		case 'rex-article-id':
@@ -128,34 +114,14 @@ function _rex_cast_var($var, $vartype, $default, $mode, $addslashes = true)
 			$var = (int) $var;
 			break;
 
-		case 'uint':
-		case 'uinteger':
-			$var = abs((int) $var);
-			break;
-
 		case 'double':
-			$var = (double) $var;
-			break;
-
-		case 'udouble':
-			$var = abs((double) $var);
-			break;
-
 		case 'float':
 		case 'real':
 			$var = (float) $var;
 			break;
 
-		case 'ufloat':
-		case 'ureal':
-			$var = abs((float) $var);
-			break;
-
 		case 'string':
-			// Alte REDAXO-AddOns verlassen sich auf die Magic Quotes, die aus
-			// dieser Funktion rauskommen sollten. Neue AddOns verwenden sly_*.
 			$var = trim((string) $var);
-			if ($addslashes) $var = addslashes($var);
 			break;
 
 		case 'object':
@@ -163,7 +129,7 @@ function _rex_cast_var($var, $vartype, $default, $mode, $addslashes = true)
 			break;
 
 		case 'array':
-			$var = empty($var) ? array() : (array) $var;
+			$var = sly_makeArray($var);
 			break;
 
 		// kein Cast, nichts tun
@@ -172,7 +138,7 @@ function _rex_cast_var($var, $vartype, $default, $mode, $addslashes = true)
 
 		// Typo?
 		default:
-			trigger_error('Unexpected vartype "'.$vartype.'" in _rex_cast_var()!', E_USER_ERROR);
+			throw new sly_Exception('Unexpected vartype "'.$vartype.'" in _rex_cast_var()!');
 	}
 
 	return $var;
