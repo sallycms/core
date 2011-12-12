@@ -26,8 +26,8 @@
 			'style'   => isset($this->attributes['style']) ? $this->attributes['style'] : ''
 		);
 
-		print '<input '.sly_Util_HTML::buildAttributeString($attr).' /> ';
-		print '<label for="'.$id.'" class="sly-inline">'.sly_html($value).'</label><br />';
+		print '<div><input '.sly_Util_HTML::buildAttributeString($attr).' /> ';
+		print '<label for="'.$id.'" class="sly-inline">'.sly_html($value).'</label></div>';
 		print "\n";
 	}
 	?>

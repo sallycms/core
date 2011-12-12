@@ -14,3 +14,9 @@ ASSETS_DIRECTORIES:
   - data/mediapool
   - data/dyn/public
   - sally/backend/assets/
+authorisation:
+  article:
+    title: 'translate:article'
+    list: 'sly_Authorisation_ArticleListProvider'
+    token:
+      read: 'translate:read'
