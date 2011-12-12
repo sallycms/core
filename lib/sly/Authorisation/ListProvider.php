@@ -11,14 +11,21 @@
 /**
  * @ingroup authorisation
  */
-interface sly_Authorisation_Provider {
+interface sly_Authorisation_ListProvider {
 
 	/**
-	 * @param  int    $userId
-	 * @param  sring  $destination
-	 * @param  string $token
-	 * @param  int    $objectId
-	 * @return boolean
+	 * returns all ids for objects
+	 *
+	 * return array
 	 */
-	public function hasPermission($userId, $destination, $token, $value = true);
+	public function getObjectIds();
+
+	/**
+	 * get the title of an object
+	 *
+	 * @param $id an object id
+	 * @return string
+	 */
+	public function getObjectTitle($id);
+
 }
