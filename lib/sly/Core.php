@@ -22,6 +22,7 @@ class sly_Core {
 	private $layout;           ///< sly_Layout
 	private $i18n;             ///< sly_I18N
 	private $errorHandler;     ///< sly_ErrorHandler
+	private $response;         ///< sly_Response
 
 	// Use the following constants when you don't have access to the real
 	// config values (i.e. when in setup mode). They should map the values
@@ -411,6 +412,29 @@ class sly_Core {
 	 */
 	public static function getErrorHandler() {
 		return self::getInstance()->errorHandler;
+	}
+
+	/**
+	 * @param sly_Response $errorHandler  the new response instance
+	 */
+	public static function setResponse(sly_Response $response) {
+		self::getInstance()->response = $response;
+	}
+
+	/**
+	 * @return sly_Response  the current response
+	 */
+	public static function getResponse() {
+		$instance = self::getInstance();
+
+		if (!$instance->response) {
+			$response = new sly_Response('', 200);
+			$response->setContentType('text/html', 'UTF-8');
+
+			$instance->response = $response;
+		}
+
+		return $instance->response;
 	}
 
 	/**
