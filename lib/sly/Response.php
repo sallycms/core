@@ -131,7 +131,7 @@ class sly_Response {
 		if ($this->headers->has('content-type')) {
 			$this->headers->set('content-type', 'text/html; charset='.$charset);
 		}
-		elseif ('text/' === substr($this->headers->get('content-type'), 0, 5) && false === strpos($this->headers->get('content-Type'), 'charset')) {
+		elseif ('text/' === substr($this->headers->get('content-type'), 0, 5) && false === strpos($this->headers->get('content-type'), 'charset')) {
 			// add the charset
 			$this->headers->set('content-type', $this->headers->get('content-type').'; charset='.$charset);
 		}
