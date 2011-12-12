@@ -55,9 +55,12 @@ function rex_send_article($article, $content, $environment) {
 	$etag    = substr(md5($content), 0, 12);
 	$lastMod = $config->get('USE_LAST_MODIFIED');
 	$useEtag = $config->get('USE_ETAG');
+	$check   = false;
 
-	if ($lastMod === true || $lastMod == $environment) $response->setLastModified($lastModified);
-	if ($useEtag === true || $useEtag == $environment) $response->setEtag($etag);
+	if ($lastMod === true || $lastMod == $environment) { $check = true; $response->setLastModified($lastModified); }
+	if ($useEtag === true || $useEtag == $environment) { $check = true; $response->setEtag($etag);                 }
+
+	if ($check) $response->isNotModified();
 
 	// and send it
 	$response->send();

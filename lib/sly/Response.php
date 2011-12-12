@@ -410,7 +410,7 @@ class sly_Response {
 	 *
 	 * @return boolean  true if not modified, else false
 	 */
-	public function isNotModified(Request $request) {
+	public function isNotModified() {
 		$notModified  = false;
 		$selfModified = $this->headers->get('last-modified');
 		$selfModified = $selfModified ? strtotime($this->headers->get('last-modified')) : null;
