@@ -17,7 +17,7 @@ class sly_Authorisation_ArticleListProvider implements sly_Authorisation_ListPro
 
 	private function initcache() {
 		if(!isset(self::$cache)) {
-			self::$cache = array();
+			self::$cache = array(0 => t('all'));
 			$query = sly_DB_Persistence::getInstance();
 			$query->select('article', 'id, name', array('clang' => sly_Core::config()->get('DEFAULT_CLANG_ID')));
 			foreach($query as $row) {

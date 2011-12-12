@@ -18,5 +18,3 @@ authorisation:
   article:
     title: 'translate:article'
     list: 'sly_Authorisation_ArticleListProvider'
-    token:
-      read: 'translate:read'
