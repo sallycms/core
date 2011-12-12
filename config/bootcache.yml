@@ -41,6 +41,7 @@ static:
   - sly_Model_Base
   - sly_Model_Base_Article
   - sly_Model_Article
+  - sly_Response
 frontend: []
 backend:
   - sly_Viewable
