@@ -249,7 +249,7 @@ class sly_Service_Article extends sly_Service_Model_Base {
 				$this->update($article);
 
 				// alle Artikel in dieser Ebene aus dem Cache entfernen
-				$db->select('article', 'id', array('re_id' => $parent, 'clang' => $clangID, 'catprior' => 0));
+				$db->select('article', 'id', $where);
 
 				foreach ($db as $row) {
 					$cache->delete('sly.article', $row['id'].'_'.$clangID);
