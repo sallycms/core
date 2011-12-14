@@ -31,7 +31,7 @@ class sly_Model_User extends sly_Model_Base_Id {
 
 	protected $startpage;     ///< string
 	protected $backendLocale; ///< string
-	protected $rightsArray;   ///< string
+	protected $isAdmin;       ///< boolean
 
 	protected $_attributes = array(
 		'name' => 'string', 'description' => 'string', 'login' => 'string', 'psw' => 'string',
@@ -51,12 +51,12 @@ class sly_Model_User extends sly_Model_Base_Id {
 	protected function evalRights() {
 		$config = sly_Core::config();
 
-		$this->rightsArray   = array_filter(explode('#', $this->getRights()));
+		$rightsArray   = array_filter(explode('#', $this->getRights()));
 		$this->startpage     = $config->get('START_PAGE');
 		$this->backendLocale = sly_Core::getDefaultLocale();
 		$this->isAdmin       = false;
 
-		foreach ($this->rightsArray as $right) {
+		foreach ($rightsArray as $right) {
 			if ($right == 'admin[]') {
 				$this->isAdmin = true;
 			}
@@ -170,50 +170,11 @@ class sly_Model_User extends sly_Model_Base_Id {
 	}
 
 	/**
-	 * @return array
-	 */
-	public function getRightsAsArray() {
-		return $this->rightsArray;
-	}
-
-	/**
 	 * @param  string $right
 	 * @return boolean
 	 */
-	public function hasRight($right) {
-		static $objectrights = null;
-		if(is_null($objectrights)) $objectrights = sly_Authorisation::getObjectRights();
-		preg_match('/(.*)\[(.*)\]/', $right, $matches);
-		if(in_array($matches[1], $objectrights)) {
-			$right = $matches[1];
-			$value = $matches[2];
-			if(is_numeric($value)) $value = (int) $value;
-		}else {
-			$value = true;
-		}
-		return sly_Authorisation::hasPermission($this->getId(), $right, $value);
-	}
-
-	/**
-	 * @param string  $right
-	 * @param boolean $switch
-	 */
-	public function toggleRight($right, $switch = true) {
-		$right = trim($right, '#');
-
-		foreach ($this->rightsArray as $idx => $iRight) {
-			if ($right == $iRight && !$switch) {
-				unset($this->rightsArray[$idx]);
-				break;
-			}
-		}
-
-		if ($switch) {
-			$this->rightsArray[] = $right;
-		}
-
-		$this->rightsArray = array_unique($this->rightsArray);
-		$this->setRights(implode('#', $this->rightsArray));
+	public function hasRight($context, $right, $value = true) {
+		return sly_Authorisation::hasPermission($this->getId(), $context, $right, $value);
 	}
 
 	// Misc
@@ -229,6 +190,6 @@ class sly_Model_User extends sly_Model_Base_Id {
 	 * @return boolean
 	 */
 	public function hasStructureRight() {
-		return $this->isAdmin() || sly_Util_Article::canReadArticle($this, 0);
+		return $this->isAdmin() || sly_Util_Category::canReadCategory($this, 0);
 	}
 }

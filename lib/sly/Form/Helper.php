@@ -146,7 +146,7 @@ abstract class sly_Form_Helper {
 
 		switch (self::$type) {
 			case 'media':     $isAdmin |= self::$user->hasRight('media[0]'); break;
-			case 'structure': $isAdmin |= self::$user->hasRight('csw[0]'); break;
+			case 'structure': $isAdmin |= sly_Util_Article::canEditArticle(self::$user, 0); break;
 		}
 
 		return $isAdmin;
@@ -168,7 +168,7 @@ abstract class sly_Form_Helper {
 				return self::$user->hasRight('media['.$category->getId().']');
 
 			case 'structure':
-				return sly_Util_Article::canReadArticle(self::$user, $category->getId());
+				return sly_Util_Category::canReadCategory(self::$user, $category->getId());
 
 			default:
 				return true;

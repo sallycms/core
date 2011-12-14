@@ -323,6 +323,10 @@ class sly_DB_PDO_Persistence extends sly_DB_Persistence {
 		return new $classname($this->connection->getPDO(), $table);
 	}
 
+	public function all() {
+		return $this->statement->fetchAll();
+	}
+
 
 	// =========================================================================
 	// ITERATOR-METHODEN
