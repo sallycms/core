@@ -11,14 +11,16 @@
 /**
  * @ingroup authorisation
  */
-interface sly_Authorisation_Provider {
+class sly_Authorisation_ModuleListProvider implements sly_Authorisation_ListProvider {
 
-	/**
-	 * @param  int    $userId
-	 * @param  sring  $context
-	 * @param  string $token
-	 * @param  int    $objectId
-	 * @return boolean
-	 */
-	public function hasPermission($userId, $context, $token, $value = true);
+	public function getObjectIds() {
+		return array_keys(sly_Service_Factory::getModuleService()->getModules());
+	}
+
+	public function getObjectTitle($id) {
+		return sly_Service_Factory::getModuleService()->getTitle($id);
+	}
+
 }
+
+?>
