@@ -170,6 +170,7 @@ class sly_Model_User extends sly_Model_Base_Id {
 	}
 
 	/**
+	 * @param  string $context
 	 * @param  string $right
 	 * @return boolean
 	 */
