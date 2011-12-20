@@ -32,7 +32,7 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 		return $where;
 	}
 
-	protected function getMaxPosition($categoryID) {
+	public function getMaxPosition($categoryID) {
 		$db     = sly_DB_Persistence::getInstance();
 		$where  = $this->getSiblingQuery($categoryID);
 		$maxPos = $db->magicFetch('article', 'MAX(pos)', $where);

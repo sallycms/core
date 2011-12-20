@@ -14,8 +14,9 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base {
 
 	abstract protected function getModelType();
 	abstract protected function getSiblingQuery($id, $clang = null);
-	abstract protected function getMaxPosition($id);
 	abstract protected function buildModel(array $params);
+
+	abstract public function getMaxPosition($id);
 
 	/**
 	 * @param  sly_Model_Base_Article $article
