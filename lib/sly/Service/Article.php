@@ -232,8 +232,7 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 	 * @param sly_Model_User    $user
 	 */
 	public function touch(sly_Model_Article $article, sly_Model_User $user) {
-		$article->setUpdatedate(time());
-		$article->setUpdateuser($user->getLogin());
+		$article->setUpdateColumns($user->getLogin());
 		$this->update($article);
 	}
 
@@ -285,7 +284,7 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 
 			$duplicate->setId($newID);
 			$duplicate->setParentId($target);
-			$duplicate->setCatname($cat ? $cat->getName() : '');
+			$duplicate->setCatName($cat ? $cat->getName() : '');
 			$duplicate->setPosition($pos);
 			$duplicate->setStatus(0);
 			$duplicate->setPath($cat ? ($cat->getPath().$target.'|') : '|');

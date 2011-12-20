@@ -278,7 +278,7 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base {
 		///////////////////////////////////////////////////////////////
 		// update the object itself
 
-		$isArticle ? $obj->setName($name) : $obj->setCatname($name);
+		$isArticle ? $obj->setName($name) : $obj->setCatName($name);
 
 		$obj->setUpdateColumns();
 		$this->update($obj);

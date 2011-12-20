@@ -28,7 +28,7 @@ class sly_Service_CategoryBaseTest extends sly_Service_CategoryTestBase {
 		$this->assertInstanceOf('sly_Model_Category', $cat);
 
 		$this->assertEquals('my "category"', $cat->getName());
-		$this->assertEquals('my "category"', $cat->getCatname());
+		$this->assertEquals('my "category"', $cat->getCatName());
 		$this->assertEquals(1, $cat->getPosition());
 		$this->assertEquals('|', $cat->getPath());
 		$this->assertEquals(0, $cat->getParentId());
@@ -43,7 +43,7 @@ class sly_Service_CategoryBaseTest extends sly_Service_CategoryTestBase {
 
 		$cat = $service->findById($id);
 		$this->assertEquals('new title', $cat->getName());
-		$this->assertEquals('new title', $cat->getCatname());
+		$this->assertEquals('new title', $cat->getCatName());
 	}
 
 	public function testDelete() {
