@@ -162,7 +162,7 @@ class sly_Model_User extends sly_Model_Base_Id {
 	public function getAllowedCLangs() {
 		$allowedLanguages = array();
 		foreach(sly_Util_Language::findAll(true) as $language) {
-			if(sly_Authorisation::hasPermission($this->getId(), 'clang', $language)) {
+			if($this->hasRight('language', 'access', $language)) {
 				$allowedLanguages[] = $language;
 			}
 		}

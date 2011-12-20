@@ -93,6 +93,6 @@ class sly_Util_Language {
 	 * @return boolean
 	 */
 	public static function hasPermissionOnLanguage(sly_Model_User $user, $clangID) {
-		return $user->isAdmin() || $user->hasRight('clang[all]') || $user->hasRight('clang['.$clangID.']');
+		return $user->isAdmin() || $user->hasRight('language', 'access', $clangID);
 	}
 }
