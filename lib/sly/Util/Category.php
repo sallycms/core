@@ -61,6 +61,7 @@ class sly_Util_Category {
 	}
 
 	public static function canReadCategory(sly_Model_User $user, $categoryId) {
+		if($user->isAdmin()) return true;
 		static $canReadCache;
 
 		if (!isset($canReadCache[$categoryId])) {
@@ -79,7 +80,10 @@ class sly_Util_Category {
 			$prefix = sly_Core::config()->get('DATABASE/TABLE_PREFIX');
 			$query->query('SELECT DISTINCT id FROM '.$prefix.'article WHERE path LIKE ?', array($path));
 			foreach($query as $row) {
-				if(sly_Util_Article::canEditContent($user, (int) $row['id'])) $canReadCache[$categoryId] = true;
+				if(sly_Util_Article::canEditContent($user, $row['id'])) {
+					$canReadCache[$categoryId] = true;
+					break;
+				}
 			}
 		}
 		return $canReadCache[$categoryId];
