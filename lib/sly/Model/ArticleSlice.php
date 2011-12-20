@@ -63,7 +63,7 @@ class sly_Model_ArticleSlice extends sly_Model_Base_Id {
 	 * @return int
 	 */
 	public function getPosition()   { return $this->pos;        }
-	
+
 	/**
 	 * @deprecated  since 0.6
 	 */
@@ -79,25 +79,25 @@ class sly_Model_ArticleSlice extends sly_Model_Base_Id {
 	 *
 	 * @return int
 	 */
-	public function getCreatedate() { return $this->createdate; }
+	public function getCreateDate() { return $this->createdate; }
 
 	/**
 	 *
 	 * @return int
 	 */
-	public function getUpdatedate() { return $this->updatedate; }
+	public function getUpdateDate() { return $this->updatedate; }
 
 	/**
 	 *
 	 * @return string
 	 */
-	public function getCreateuser() { return $this->createuser; }
+	public function getCreateUser() { return $this->createuser; }
 
 	/**
 	 *
 	 * @return int
 	 */
-	public function getUpdateuser() { return $this->updateuser; }
+	public function getUpdateUser() { return $this->updateuser; }
 
 	/**
 	 *
@@ -131,28 +131,28 @@ class sly_Model_ArticleSlice extends sly_Model_Base_Id {
 	/**
 	 * @param int $updatedate
 	 */
-	public function setUpdatedate($updatedate) {
+	public function setUpdateDate($updatedate) {
 		$this->updatedate = (int) $updatedate;
 	}
 
 	/**
 	 * @param string $updateuser
 	 */
-	public function setUpdateuser($updateuser) {
+	public function setUpdateUser($updateuser) {
 		$this->updateuser = $updateuser;
 	}
 
 	/**
 	 * @param int $createdate
 	 */
-	public function setCreatedate($createdate) {
+	public function setCreateDate($createdate) {
 		$this->createdate = (int) $createdate;
 	}
 
 	/**
 	 * @param string $createuser
 	 */
-	public function setCreateuser($createuser) {
+	public function setCreateUser($createuser) {
 		$this->createuser = $createuser;
 	}
 
@@ -281,7 +281,7 @@ class sly_Model_ArticleSlice extends sly_Model_Base_Id {
 			$this->getId(),
 			$this->getSlot(),
 			$this->getPosition(),
-			$this->getCreateuser()
+			$this->getCreateUser()
 		);
 
 		return str_replace($search, $replace, $content);

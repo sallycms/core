@@ -51,7 +51,7 @@ class sly_Model_Base_Article extends sly_Model_Base {
 	/**
 	 * @return string
 	 */
-	public function getUpdateuser() {
+	public function getUpdateUser() {
 		return $this->updateuser;
 	}
 
@@ -86,7 +86,7 @@ class sly_Model_Base_Article extends sly_Model_Base {
 	/**
 	 * @return int
 	 */
-	public function getCreatedate() {
+	public function getCreateDate() {
 		return $this->createdate;
 	}
 
@@ -121,7 +121,7 @@ class sly_Model_Base_Article extends sly_Model_Base {
 	/**
 	 * @return string
 	 */
-	public function getCatname() {
+	public function getCatName() {
 		return $this->catname;
 	}
 
@@ -135,14 +135,14 @@ class sly_Model_Base_Article extends sly_Model_Base {
 	/**
 	 * @return int
 	 */
-	public function getUpdatedate() {
+	public function getUpdateDate() {
 		return $this->updatedate;
 	}
 
 	/**
 	 * @return string
 	 */
-	public function getCreateuser() {
+	public function getCreateUser() {
 		return $this->createuser;
 	}
 
@@ -184,7 +184,7 @@ class sly_Model_Base_Article extends sly_Model_Base {
 	/**
 	 * @param string $updateuser
 	 */
-	public function setUpdateuser($updateuser) {
+	public function setUpdateUser($updateuser) {
 		$this->updateuser = $updateuser;
 	}
 
@@ -219,7 +219,7 @@ class sly_Model_Base_Article extends sly_Model_Base {
 	/**
 	 * @param int $createdate
 	 */
-	public function setCreatedate($createdate) {
+	public function setCreateDate($createdate) {
 		$this->createdate = (int) $createdate;
 	}
 
@@ -254,7 +254,7 @@ class sly_Model_Base_Article extends sly_Model_Base {
 	/**
 	 * @param string $catname
 	 */
-	public function setCatname($catname) {
+	public function setCatName($catname) {
 		$this->catname = $catname;
 	}
 
@@ -268,14 +268,14 @@ class sly_Model_Base_Article extends sly_Model_Base {
 	/**
 	 * @param int $updatedate
 	 */
-	public function setUpdatedate($updatedate) {
+	public function setUpdateDate($updatedate) {
 		$this->updatedate = (int) $updatedate;
 	}
 
 	/**
 	 * @param string $createuser
 	 */
-	public function setCreateuser($createuser) {
+	public function setCreateUser($createuser) {
 		$this->createuser = $createuser;
 	}
 

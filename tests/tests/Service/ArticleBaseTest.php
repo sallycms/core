@@ -28,7 +28,7 @@ class sly_Service_ArticleBaseTest extends sly_Service_ArticleTestBase {
 		$this->assertInstanceOf('sly_Model_Article', $art);
 
 		$this->assertEquals('my "article"', $art->getName());
-		$this->assertEquals('', $art->getCatname());
+		$this->assertEquals('', $art->getCatName());
 		$this->assertEquals(1, $art->getPosition());
 		$this->assertEquals('|', $art->getPath());
 		$this->assertEquals(0, $art->getParentId());
@@ -43,7 +43,7 @@ class sly_Service_ArticleBaseTest extends sly_Service_ArticleTestBase {
 
 		$art = $service->findById($id);
 		$this->assertEquals('new title', $art->getName());
-		$this->assertEquals('', $art->getCatname());
+		$this->assertEquals('', $art->getCatName());
 	}
 
 	public function testDelete() {

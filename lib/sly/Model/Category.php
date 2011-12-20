@@ -20,7 +20,7 @@ class sly_Model_Category extends sly_Model_Base_Article {
 	 * @return string
 	 */
 	public function getName() {
-		return $this->getCatname();
+		return $this->getCatName();
 	}
 
 	/**

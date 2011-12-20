@@ -94,9 +94,9 @@ class sly_Service_ArticleExTest extends sly_Service_ArticleTestBase {
 
 		$article = $service->findById(1);
 
-		$this->assertGreaterThanOrEqual($before, $article->getUpdatedate());
-		$this->assertLessThanOrEqual($after, $article->getUpdatedate());
-		$this->assertEquals($user->getLogin(), $article->getUpdateuser());
+		$this->assertGreaterThanOrEqual($before, $article->getUpdateDate());
+		$this->assertLessThanOrEqual($after, $article->getUpdateDate());
+		$this->assertEquals($user->getLogin(), $article->getUpdateUser());
 	}
 
 	public function testSetType() {
@@ -177,7 +177,7 @@ class sly_Service_ArticleExTest extends sly_Service_ArticleTestBase {
 
 		$this->assertEquals($newID, $last->getId());
 		$this->assertEquals(4, $last->getPosition());
-		$this->assertEquals('', $last->getCatname());
+		$this->assertEquals('', $last->getCatName());
 
 		$arts = $service->findArticlesByCategory(0, false, 2);
 		$this->assertCount(4, $arts);
@@ -197,7 +197,7 @@ class sly_Service_ArticleExTest extends sly_Service_ArticleTestBase {
 		$arts = $service->findArticlesByCategory(1, false);
 		$this->assertCount(2, $arts);
 		$this->assertEquals($newID, end($arts)->getId());
-		$this->assertEquals(reset($arts)->getName(), end($arts)->getCatname());
+		$this->assertEquals(reset($arts)->getName(), end($arts)->getCatName());
 
 		$service->delete($newID);
 	}
@@ -214,7 +214,7 @@ class sly_Service_ArticleExTest extends sly_Service_ArticleTestBase {
 		$this->assertPositions(array(1,7));
 
 		$art = $service->findById(7, 1);
-		$this->assertEquals($service->findById(1, 1)->getCatname(), $art->getCatname());
+		$this->assertEquals($service->findById(1, 1)->getCatName(), $art->getCatName());
 		$this->assertEquals(2, $art->getPosition());
 
 		$this->assertCount(2, $service->findArticlesByCategory(0, false));
