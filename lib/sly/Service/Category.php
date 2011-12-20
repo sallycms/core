@@ -38,7 +38,7 @@ class sly_Service_Category extends sly_Service_ArticleBase {
 		return implode(' AND ', array_values($where));
 	}
 
-	protected function getMaxPosition($parentID) {
+	public function getMaxPosition($parentID) {
 		$db     = sly_DB_Persistence::getInstance();
 		$where  = $this->getSiblingQuery($parentID);
 		$maxPos = $db->magicFetch('article', 'MAX(catpos)', $where);
