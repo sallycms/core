@@ -32,10 +32,10 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 		return $where;
 	}
 
-	protected function getMaxPrior($categoryID) {
+	protected function getMaxPosition($categoryID) {
 		$db     = sly_DB_Persistence::getInstance();
 		$where  = $this->getSiblingQuery($categoryID);
-		$maxPos = $db->magicFetch('article', 'MAX(prior)', $where);
+		$maxPos = $db->magicFetch('article', 'MAX(pos)', $where);
 
 		return $maxPos;
 	}
@@ -54,10 +54,10 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 			     're_id' => $params['parent'],
 			      'name' => $params['name'],
 			   'catname' => $catname,
-			  'catprior' => 0,
+			    'catpos' => 0,
 			'attributes' => '',
 			 'startpage' => 0,
-			     'prior' => $params['position'],
+			       'pos' => $params['position'],
 			      'path' => $params['path'],
 			    'status' => $params['status'],
 			      'type' => $params['type'],
@@ -129,8 +129,8 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 		$parent = $article->getCategoryId();
 
 		foreach (sly_Util_Language::findAll(true) as $clangID) {
-			$prior     = $this->findById($articleID, $clangID)->getPrior();
-			$followers = $this->getFollowerQuery($parent, $clangID, $prior);
+			$pos       = $this->findById($articleID, $clangID)->getPos();
+			$followers = $this->getFollowerQuery($parent, $clangID, $pos);
 
 			$this->moveObjects('-', $followers);
 		}
@@ -183,7 +183,7 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 
 			if ($ignore_offlines) $where['status'] = 1;
 
-			$sql->select($this->tablename, 'id', $where, null, 'prior,name');
+			$sql->select($this->tablename, 'id', $where, null, 'pos,name');
 			foreach ($sql as $row) $alist[] = (int) $row['id'];
 
 			sly_Core::cache()->set($namespace, $key, $alist);
@@ -272,7 +272,7 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 		// prepare infos
 
 		$sql   = sly_DB_Persistence::getInstance();
-		$pos   = $this->getMaxPrior($target) + 1;
+		$pos   = $this->getMaxPosition($target) + 1;
 		$newID = $sql->magicFetch('article', 'MAX(id)') + 1;
 		$disp  = sly_Core::dispatcher();
 
@@ -286,7 +286,7 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 			$duplicate->setId($newID);
 			$duplicate->setParentId($target);
 			$duplicate->setCatname($cat ? $cat->getName() : '');
-			$duplicate->setPrior($pos);
+			$duplicate->setPosition($pos);
 			$duplicate->setStatus(0);
 			$duplicate->setPath($cat ? ($cat->getPath().$target.'|') : '|');
 			$duplicate->setUpdateColumns();
@@ -345,7 +345,7 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 
 		// prepare infos
 
-		$pos  = $this->getMaxPrior($target) + 1;
+		$pos  = $this->getMaxPosition($target) + 1;
 		$disp = sly_Core::dispatcher();
 
 		foreach (sly_Util_Language::findAll(true) as $clang) {
@@ -355,16 +355,16 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 
 			$moved->setParentId($target);
 			$moved->setPath($cat ? $cat->getPath().$target.'|' : '|');
-			$moved->setCatname($cat ? $cat->getName() : '');
+			$moved->setCatName($cat ? $cat->getName() : '');
 			$moved->setStatus(0);
-			$moved->setPrior($pos);
+			$moved->setPosition($pos);
 			$moved->setUpdateColumns();
 
 			// move article at the end of new category
 			$this->update($moved);
 
 			// re-number old category
-			$followers = $this->getFollowerQuery($source, $clang, $article->getPrior());
+			$followers = $this->getFollowerQuery($source, $clang, $article->getPosition());
 			$this->moveObjects('-', $followers);
 
 			// notify system
@@ -405,7 +405,7 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 
 		$oldCat  = $article->getCategoryId();
 		$newPath = $article->getPath();
-		$params  = array('path', 'catname', 'startpage', 'catprior', 're_id');
+		$params  = array('path', 'catname', 'startpage', 'catpos', 're_id');
 
 		foreach (sly_Util_Language::findAll(true) as $clang) {
 			$newStarter = $this->findById($articleID, $clang)->toHash();
@@ -501,7 +501,7 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 				$asServ->create(array(
 					'clang'      => $dstClang,
 					'slot'       => $srcSlot,
-					'prior'      => $position,
+					'pos'        => $position,
 					'slice_id'   => $slice->getId(),
 					'article_id' => $dstID,
 					'revision'   => $revision,

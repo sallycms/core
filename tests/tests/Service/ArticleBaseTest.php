@@ -29,7 +29,7 @@ class sly_Service_ArticleBaseTest extends sly_Service_ArticleTestBase {
 
 		$this->assertEquals('my "article"', $art->getName());
 		$this->assertEquals('', $art->getCatname());
-		$this->assertEquals(1, $art->getPrior());
+		$this->assertEquals(1, $art->getPosition());
 		$this->assertEquals('|', $art->getPath());
 		$this->assertEquals(0, $art->getParentId());
 		$this->assertTrue($art->isOnline());

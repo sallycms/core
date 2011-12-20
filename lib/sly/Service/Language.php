@@ -47,10 +47,10 @@ class sly_Service_Language extends sly_Service_Model_Base_Id {
 			$newLanguage = parent::create($params);
 
 			$sql->query(str_replace('~', sly_Core::config()->get('DATABASE/TABLE_PREFIX'),
-				'INSERT INTO ~article (id,re_id,name,catname,catprior,attributes,'.
-				'startpage,prior,path,status,createdate,updatedate,type,clang,createuser,'.
+				'INSERT INTO ~article (id,re_id,name,catname,catpos,attributes,'.
+				'startpage,pos,path,status,createdate,updatedate,type,clang,createuser,'.
 				'updateuser,revision) '.
-				'SELECT id,re_id,name,catname,catprior,attributes,startpage,prior,path,0,createdate,'.
+				'SELECT id,re_id,name,catname,catpos,attributes,startpage,pos,path,0,createdate,'.
 				'updatedate,type,?,createuser,updateuser,revision '.
 				'FROM ~article WHERE clang = 1'),
 				array($newLanguage->getId())

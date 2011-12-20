@@ -20,7 +20,7 @@ abstract class sly_Service_ArticleTestBase extends sly_StructureTest {
 		$art     = $service->findById($id, $clang);
 		$msg     = 'Position of article '.$id.' should be '.$pos.'.';
 
-		$this->assertEquals($pos, $art->getPrior(), $msg);
+		$this->assertEquals($pos, $art->getPosition(), $msg);
 	}
 
 	protected function move($id, $to, $clang = 1) {

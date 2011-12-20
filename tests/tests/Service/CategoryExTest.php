@@ -117,10 +117,10 @@ class sly_Service_CategoryExTest extends sly_Service_CategoryTestBase {
 
 		$this->assertTree($b.'<2<5>,3>,4');
 
-		$this->assertEquals(1, $service->findById(1)->getPrior());
-		$this->assertEquals(2, $service->findById($a)->getPrior());
-		$this->assertEquals(3, $service->findById($b)->getPrior());
-		$this->assertEquals(4, $service->findById($c)->getPrior());
+		$this->assertEquals(1, $service->findById(1)->getPosition());
+		$this->assertEquals(2, $service->findById($a)->getPosition());
+		$this->assertEquals(3, $service->findById($b)->getPosition());
+		$this->assertEquals(4, $service->findById($c)->getPosition());
 	}
 
 	/**

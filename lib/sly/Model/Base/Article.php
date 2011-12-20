@@ -18,11 +18,11 @@ class sly_Model_Base_Article extends sly_Model_Base {
 	protected $updateuser;  ///< string
 	protected $status;      ///< int
 	protected $name;        ///< string
-	protected $catprior;    ///< int
+	protected $catpos;      ///< int
 	protected $createdate;  ///< int
 	protected $clang;       ///< int
 	protected $re_id;       ///< int
-	protected $prior;       ///< int
+	protected $pos;         ///< int
 	protected $catname;     ///< string
 	protected $startpage;   ///< int
 	protected $updatedate;  ///< int
@@ -35,8 +35,7 @@ class sly_Model_Base_Article extends sly_Model_Base {
 	protected $_pk = array('id' => 'int', 'clang' => 'int'); ///< array
 	protected $_attributes = array(
 		'updateuser' => 'string', 'status' => 'int', 'name' => 'string',
-		'catprior' => 'int', 'createdate' => 'int',
-		're_id' => 'int', 'prior' => 'int',
+		'catpos' => 'int', 'createdate' => 'int', 're_id' => 'int', 'pos' => 'int',
 		'catname' => 'string', 'startpage' => 'int', 'updatedate' => 'int',
 		'createuser' => 'string', 'attributes' => 'string', 'path' => 'string',
 		'type' => 'string', 'revision' => 'int'
@@ -73,8 +72,15 @@ class sly_Model_Base_Article extends sly_Model_Base {
 	/**
 	 * @return int
 	 */
-	public function getCatprior() {
-		return $this->catprior;
+	public function getCatPosition() {
+		return $this->catpos;
+	}
+
+	/**
+	 * @deprecated  since 0.6
+	 */
+	public function getCatPrior() {
+		return $this->catpos;
 	}
 
 	/**
@@ -101,8 +107,15 @@ class sly_Model_Base_Article extends sly_Model_Base {
 	/**
 	 * @return int
 	 */
+	public function getPosition() {
+		return $this->pos;
+	}
+
+	/**
+	 * @deprecated  since 0.6
+	 */
 	public function getPrior() {
-		return $this->prior;
+		return $this->pos;
 	}
 
 	/**
@@ -190,10 +203,17 @@ class sly_Model_Base_Article extends sly_Model_Base {
 	}
 
 	/**
-	 * @param int $catprior
+	 * @param int $position
 	 */
-	public function setCatprior($catprior) {
-		$this->catprior = (int) $catprior;
+	public function setCatPosition($position) {
+		$this->catpos = (int) $position;
+	}
+
+	/**
+	 * @deprecated  since 0.6
+	 */
+	public function setCatPrior($position) {
+		$this->catpos = (int) $position;
 	}
 
 	/**
@@ -218,10 +238,17 @@ class sly_Model_Base_Article extends sly_Model_Base {
 	}
 
 	/**
-	 * @param int $prior
+	 * @param int $position
 	 */
-	public function setPrior($prior) {
-		$this->prior = (int) $prior;
+	public function setPosition($position) {
+		$this->pos = (int) $position;
+	}
+
+	/**
+	 * @deprecated  since 0.6
+	 */
+	public function setPrior($position) {
+		$this->catpos = (int) $position;
 	}
 
 	/**

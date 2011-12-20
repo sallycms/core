@@ -29,7 +29,7 @@ class sly_Service_CategoryBaseTest extends sly_Service_CategoryTestBase {
 
 		$this->assertEquals('my "category"', $cat->getName());
 		$this->assertEquals('my "category"', $cat->getCatname());
-		$this->assertEquals(1, $cat->getPrior());
+		$this->assertEquals(1, $cat->getPosition());
 		$this->assertEquals('|', $cat->getPath());
 		$this->assertEquals(0, $cat->getParentId());
 		$this->assertTrue($cat->isOnline());

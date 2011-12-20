@@ -20,7 +20,7 @@ abstract class sly_Service_CategoryTestBase extends sly_StructureTest {
 		$cat     = $service->findById($id, $clang);
 		$msg     = 'Position of category '.$id.' should be '.$pos.'.';
 
-		$this->assertEquals($pos, $cat->getCatprior(), $msg);
+		$this->assertEquals($pos, $cat->getCatPosition(), $msg);
 	}
 
 	protected function move($id, $to, $clang = 1) {

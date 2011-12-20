@@ -38,10 +38,10 @@ class sly_Service_Category extends sly_Service_ArticleBase {
 		return implode(' AND ', array_values($where));
 	}
 
-	protected function getMaxPrior($parentID) {
+	protected function getMaxPosition($parentID) {
 		$db     = sly_DB_Persistence::getInstance();
 		$where  = $this->getSiblingQuery($parentID);
-		$maxPos = $db->magicFetch('article', 'MAX(catprior)', $where);
+		$maxPos = $db->magicFetch('article', 'MAX(catpos)', $where);
 
 		return $maxPos;
 	}
@@ -52,10 +52,10 @@ class sly_Service_Category extends sly_Service_ArticleBase {
 			     're_id' => $params['parent'],
 			      'name' => $params['name'],
 			   'catname' => $params['name'],
-			  'catprior' => $params['position'],
+			    'catpos' => $params['position'],
 			'attributes' => '',
 			 'startpage' => 1,
-			     'prior' => 1,
+			       'pos' => 1,
 			      'path' => $params['path'],
 			    'status' => $params['status'],
 			      'type' => $params['type'],
@@ -155,8 +155,8 @@ class sly_Service_Category extends sly_Service_ArticleBase {
 		$parent = $cat->getParentId();
 
 		foreach (sly_Util_Language::findAll(true) as $clangID) {
-			$catprior  = $this->findById($categoryID, $clangID)->getCatprior();
-			$followers = $this->getFollowerQuery($parent, $clangID, $catprior);
+			$catpos    = $this->findById($categoryID, $clangID)->getCatPosition();
+			$followers = $this->getFollowerQuery($parent, $clangID, $catpos);
 
 			$this->moveObjects('-', $followers);
 		}
@@ -241,25 +241,25 @@ class sly_Service_Category extends sly_Service_ArticleBase {
 
 		$oldParent = $category->getParentId();
 		$languages = sly_Util_Language::findAll(true);
-		$newPrio   = $this->getMaxPrior($targetID) + 1;
+		$newPos    = $this->getMaxPosition($targetID) + 1;
 		$oldPath   = $category->getPath();
 		$newPath   = $target ? ($target->getPath().$targetID.'|') : '|';
 
 		// move the $category in each language by itself
 
 		foreach ($languages as $clang) {
-			$cat  = $this->findById($categoryID, $clang);
-			$prio = $cat->getCatprior();
+			$cat = $this->findById($categoryID, $clang);
+			$pos = $cat->getCatPosition();
 
 			$cat->setParentId($targetID);
-			$cat->setCatprior($newPrio);
+			$cat->setCatPosition($newPos);
 			$cat->setPath($newPath);
 
 			// update the cat itself
 			$this->update($cat);
 
 			// move all followers one position up
-			$followers = $this->getFollowerQuery($oldParent, $clang, $prio);
+			$followers = $this->getFollowerQuery($oldParent, $clang, $pos);
 			$this->moveObjects('-', $followers);
 		}
 

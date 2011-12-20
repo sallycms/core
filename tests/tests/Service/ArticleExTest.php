@@ -176,7 +176,7 @@ class sly_Service_ArticleExTest extends sly_Service_ArticleTestBase {
 		}
 
 		$this->assertEquals($newID, $last->getId());
-		$this->assertEquals(4, $last->getPrior());
+		$this->assertEquals(4, $last->getPosition());
 		$this->assertEquals('', $last->getCatname());
 
 		$arts = $service->findArticlesByCategory(0, false, 2);
@@ -215,7 +215,7 @@ class sly_Service_ArticleExTest extends sly_Service_ArticleTestBase {
 
 		$art = $service->findById(7, 1);
 		$this->assertEquals($service->findById(1, 1)->getCatname(), $art->getCatname());
-		$this->assertEquals(2, $art->getPrior());
+		$this->assertEquals(2, $art->getPosition());
 
 		$this->assertCount(2, $service->findArticlesByCategory(0, false));
 		$this->assertCount(2, $service->findArticlesByCategory(1, false));
