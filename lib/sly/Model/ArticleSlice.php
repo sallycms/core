@@ -19,7 +19,7 @@ class sly_Model_ArticleSlice extends sly_Model_Base_Id {
 	protected $clang;
 	protected $slot;
 	protected $slice_id;
-	protected $prior;
+	protected $pos;
 	protected $createdate;
 	protected $updatedate;
 	protected $createuser;
@@ -32,7 +32,7 @@ class sly_Model_ArticleSlice extends sly_Model_Base_Id {
 		'createuser' => 'string',
 		'createdate' => 'int',
 		'updatedate' => 'int',
-		'prior'      => 'int',
+		'pos'        => 'int',
 		'article_id' => 'int',
 		'clang'      => 'int',
 		'slot'       => 'string',
@@ -62,7 +62,12 @@ class sly_Model_ArticleSlice extends sly_Model_Base_Id {
 	 *
 	 * @return int
 	 */
-	public function getPrior()      { return $this->prior;      }
+	public function getPosition()   { return $this->pos;        }
+	
+	/**
+	 * @deprecated  since 0.6
+	 */
+	public function getPrior()      { return $this->pos;        }
 
 	/**
 	 *
@@ -153,10 +158,10 @@ class sly_Model_ArticleSlice extends sly_Model_Base_Id {
 
 	/**
 	 *
-	 * @param int $prior
+	 * @param int $position
 	 */
-	public function setPrior($prior) {
-		$this->prior = $prior;
+	public function setPosition($position) {
+		$this->pos = (int) $position;
 	}
 
 	/**
@@ -275,7 +280,7 @@ class sly_Model_ArticleSlice extends sly_Model_Base_Id {
 			$this->getArticle()->getTemplateName(),
 			$this->getId(),
 			$this->getSlot(),
-			$this->getPrior(),
+			$this->getPosition(),
 			$this->getCreateuser()
 		);
 

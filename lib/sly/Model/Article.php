@@ -90,7 +90,7 @@ class sly_Model_Article extends sly_Model_Base_Article {
 		$where = array('article_id' => $this->getId(), 'clang' => $this->getClang());
 		if($slot !== null) $where['slot'] = $slot;
 
-		$slices = sly_Service_Factory::getArticleSliceService()->find($where, null, 'prior ASC');
+		$slices = sly_Service_Factory::getArticleSliceService()->find($where, null, 'pos ASC');
 		foreach($slices as $slice) {
 			$content .= $slice->getOutput();
 		}
