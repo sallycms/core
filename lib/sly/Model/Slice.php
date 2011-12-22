@@ -82,7 +82,6 @@ class sly_Model_Slice extends sly_Model_Base_Id {
 		$values   = $this->getValues();
 		$renderer = new sly_SliceRenderer($this->getModule(), $values);
 		$output   = $renderer->renderOutput();
-		$output   = $this->replaceLinks($output);
 		$output   = $this->replacePseudoConstants($output);
 		return $output;
 	}
@@ -99,36 +98,6 @@ class sly_Model_Slice extends sly_Model_Base_Id {
 		$output   = $this->replacePseudoConstants($output);
 
 		return $output;
-	}
-
-	/**
-	 * Replaces sally://ARTICLEID and sally://ARTICLEID-CLANGID in
-	 * the slice content by article http URLs.
-	 *
-	 * @param string $content
-	 * @return string
-	 */
-	protected function replaceLinks($content) {
-		preg_match_all('#(?:redaxo|sally)://([0-9]+)(?:-([0-9]+))?/?#', $content, $matches, PREG_OFFSET_CAPTURE | PREG_SET_ORDER);
-
-		$skew = 0;
-
-		foreach ($matches as $match) {
-			$complete = $match[0];
-			$length   = strlen($complete[0]);
-			$offset   = $complete[1];
-			$id       = (int) $match[1][0];
-			$clang    = isset($match[2]) ? (int) $match[2][0] : null;
-			$repl     = sly_Util_Article::getUrl($id, $clang);
-
-			// replace the match
-			$content = substr_replace($content, $repl, $offset + $skew, $length);
-
-			// ensure the next replacements get the correct offset
-			$skew += strlen($repl) - $length;
-		}
-
-		return $content;
 	}
 
 	/**
