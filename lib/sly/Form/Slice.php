@@ -107,6 +107,6 @@ class sly_Form_Slice extends sly_Form_Base {
 	 * @throws sly_Form_Exception  always
 	 */
 	public function render() {
-		throw new sly_Form_Exception('Can\' render a slice.');
+		throw new sly_Form_Exception(t('cannot_render_slices'));
 	}
 }

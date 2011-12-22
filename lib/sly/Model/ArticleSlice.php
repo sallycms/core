@@ -118,7 +118,7 @@ class sly_Model_ArticleSlice extends sly_Model_Base_Id {
 	 * @return Sly_Model_Slice
 	 */
 	public function getSlice() {
-		if(empty($this->slice)) {
+		if (empty($this->slice)) {
 			$this->slice = sly_Service_Factory::getSliceService()->findById($this->getSliceId());
 		}
 		return $this->slice;
@@ -196,9 +196,10 @@ class sly_Model_ArticleSlice extends sly_Model_Base_Id {
 	 * @return string the input form of this slice
 	 */
 	public function getInput() {
-		$slice = $this->getSlice();
+		$slice   = $this->getSlice();
 		$content = $slice->getInput();
 		$content = $this->replacePseudoConstants($content);
+
 		return $content;
 	}
 
@@ -207,6 +208,7 @@ class sly_Model_ArticleSlice extends sly_Model_Base_Id {
 	 */
 	public function getOutput() {
 		$slice_content_file = $this->getContentFileName();
+
 		if (!file_exists($slice_content_file)) {
 			if (!$this->generateContentFile()) {
 				return t('slice_could_not_be_generated').' '.t('check_rights_in_directory').$this->getContentDir();
@@ -230,15 +232,18 @@ class sly_Model_ArticleSlice extends sly_Model_Base_Id {
 	 */
 	private function getContentDir() {
 		static $cachedir;
-		if(!$cachedir) {
+
+		if (!$cachedir) {
 			$cachedir = sly_Util_Directory::create(SLY_DYNFOLDER.'/internal/sally/article_slice/');
 		}
+
 		return $cachedir;
 	}
 
 	private function getContentFileName() {
 		$cachedir   = $this->getContentDir();
 		$modulefile = sly_Service_Factory::getModuleService()->getOutputFilename($this->getModule());
+
 		return $cachedir.DIRECTORY_SEPARATOR.$this->getSliceId().'-'.md5($modulefile).'.slice.php';
 	}
 
@@ -247,12 +252,14 @@ class sly_Model_ArticleSlice extends sly_Model_Base_Id {
 		$slice   = $this->getSlice();
 		$content = $slice->getOutput();
 		$content = $this->replacePseudoConstants($content);
+
 		return file_put_contents($file, $content);
 	}
 
 	private function includeContentFile() {
 		$slice_content_file = $this->getContentFileName();
-		$article = $this->getArticle();
+		$article            = $this->getArticle(); // make available in slice
+
 		include $slice_content_file;
 	}
 
@@ -293,5 +300,4 @@ class sly_Model_ArticleSlice extends sly_Model_Base_Id {
 	public function __sleep() {
 		$this->slice = null;
 	}
-
 }

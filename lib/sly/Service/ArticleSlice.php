@@ -1,5 +1,4 @@
 <?php
-
 /*
  * Copyright (c) 2011, webvariants GbR, http://www.webvariants.de
  *
@@ -23,7 +22,6 @@ class sly_Service_ArticleSlice extends sly_Service_Model_Base_Id {
 	 * @param  array $params
 	 * @return sly_Model_ArticleSlice
 	 */
-
 	protected function makeInstance(array $params) {
 		return new sly_Model_ArticleSlice($params);
 	}
@@ -31,12 +29,13 @@ class sly_Service_ArticleSlice extends sly_Service_Model_Base_Id {
 	public function create($params) {
 		if (empty($params['slice_id'])) {
 			if (empty($params['module'])) {
-				throw new sly_Exception('sly_Service_ArticleSlice: A new ArticleSlice must eighter contain a slice_id, oder module value');
+				throw new sly_Exception(t('articleslice_must_contain_slice_id_or_module'));
 			}
+
 			$slice = sly_Service_Factory::getSliceService()->create(array('module' => $params['module']));
 			$params['slice_id'] = $slice->getId();
-			sly_dump($params['slice_id']);
 		}
+
 		$articleSlice = parent::create($params);
 
 		$pre = sly_Core::config()->get('DATABASE/TABLE_PREFIX');
@@ -59,9 +58,11 @@ class sly_Service_ArticleSlice extends sly_Service_Model_Base_Id {
 	public function delete($where) {
 		$sql = sly_DB_Persistence::getInstance();
 		$sql->select($this->tablename, 'id', $where);
+
 		foreach ($sql as $id) {
 			$this->deleteById($id);
 		}
+
 		return true;
 	}
 
@@ -83,7 +84,7 @@ class sly_Service_ArticleSlice extends sly_Service_Model_Base_Id {
 		$pre = sly_Core::config()->get('DATABASE/TABLE_PREFIX');
 
 		// fix order
-		$sql->query('UPDATE ' . $pre . 'article_slice SET pos = pos -1 WHERE
+		$sql->query('UPDATE '.$pre.'article_slice SET pos = pos -1 WHERE
 			article_id = ? AND clang = ? AND slot = ? AND pos > ?',
 			array(
 				$articleSlice->getArticleId(),
@@ -112,14 +113,13 @@ class sly_Service_ArticleSlice extends sly_Service_Model_Base_Id {
 	 */
 	public function move($slice_id, $clang, $direction) {
 		$slice_id = (int) $slice_id;
-		$clang = (int) $clang;
+		$clang    = (int) $clang;
 
 		if (!in_array($direction, array('up', 'down'))) {
-			throw new sly_Exception('ArticleSliceService: Unsupported direction "' . $direction . '"!', E_USER_ERROR);
+			throw new sly_Exception(t('unsupported_direction', $direction));
 		}
 
-		$success = false;
-
+		$success      = false;
 		$articleSlice = $this->findById($slice_id);
 
 		if ($articleSlice) {

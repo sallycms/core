@@ -132,7 +132,7 @@ class sly_Service_Template extends sly_Service_DevelopBase {
 	 */
 	public function getGenerated($name) {
 		if (!$this->exists($name)) {
-			throw new sly_Service_Template_Exception("Template '$name' does not exist.");
+			throw new sly_Service_Template_Exception(t('template_not_found', $name));
 		}
 
 		$filename     = $this->filterByCondition($name, $this->getFileType());

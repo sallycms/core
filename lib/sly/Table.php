@@ -39,7 +39,7 @@ class sly_Table extends sly_Viewable {
 		$this->columns            = array();
 		$this->classes            = array('sly-table');
 		$this->isEmpty            = false;
-		$this->emptyNotice        = 'Es wurden noch keine Datensätze angelegt.';
+		$this->emptyNotice        = t('table_is_empty');
 		$this->enableSorting      = false;
 		$this->enableSearching    = false;
 		$this->enableDragAndDrop  = false;
@@ -311,7 +311,7 @@ class sly_Table extends sly_Viewable {
 		$full = SLY_COREFOLDER.'/views/table/'.$file;
 		if (file_exists($full)) return $full;
 
-		throw new sly_Exception('View '.$file.' could not be found.');
+		throw new sly_Exception(t('view_not_found', $file));
 	}
 
 	/**

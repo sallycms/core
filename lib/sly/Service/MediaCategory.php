@@ -135,7 +135,7 @@ class sly_Service_MediaCategory extends sly_Service_Model_Base_Id {
 		$title = trim($title);
 
 		if (strlen($title) === 0) {
-			throw new sly_Exception(t('mediacat_title_cannot_be_empty'));
+			throw new sly_Exception(t('title_cannot_be_empty'));
 		}
 
 		$category = new sly_Model_MediaCategory();
@@ -162,7 +162,7 @@ class sly_Service_MediaCategory extends sly_Service_Model_Base_Id {
 	 */
 	public function update(sly_Model_MediaCategory $cat) {
 		if (strlen($cat->getName()) === 0) {
-			throw new sly_Exception(t('mediacat_title_cannot_be_empty'));
+			throw new sly_Exception(t('title_cannot_be_empty'));
 		}
 
 		$cat->setUpdateColumns();
@@ -187,7 +187,7 @@ class sly_Service_MediaCategory extends sly_Service_Model_Base_Id {
 		$cat = $this->findById($catID);
 
 		if (!$cat) {
-			throw new sly_Exception('Cannot delete category: ID '.$catID.' not found.');
+			throw new sly_Exception(t('category_not_found', $catID));
 		}
 
 		// check emptyness
@@ -195,13 +195,13 @@ class sly_Service_MediaCategory extends sly_Service_Model_Base_Id {
 		$children = $cat->getChildren();
 
 		if (!$force && !empty($children)) {
-			throw new sly_Exception('Cannot delete category: Category has sub-categories.', self::ERR_CAT_HAS_SUBCATS);
+			throw new sly_Exception(t('category_has_children'), self::ERR_CAT_HAS_SUBCATS);
 		}
 
 		$media = $cat->getMedia();
 
 		if (!$force && !empty($media)) {
-			throw new sly_Exception('Cannot delete category: Category is not empty.', self::ERR_CAT_HAS_MEDIA);
+			throw new sly_Exception(t('category_is_not_empty'), self::ERR_CAT_HAS_MEDIA);
 		}
 
 		// delete subcats

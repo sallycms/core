@@ -21,7 +21,7 @@ class sly_Util_User {
 	 */
 	public static function getPasswordHash(sly_Model_User $user, $password) {
 		$createdate = $user->getCreateDate();
-		if (empty($createdate)) throw new sly_Exception('Password could not be generated without a valid createdate.');
+		if (empty($createdate)) throw new sly_Exception(t('password_needs_valid_createdate'));
 		return sly_Util_Password::hash($password, $createdate);
 	}
 

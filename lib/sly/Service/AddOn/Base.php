@@ -54,11 +54,6 @@ abstract class sly_Service_AddOn_Base {
 	abstract protected function extend($time, $type, $component, $state);
 
 	/**
-	 * @return string
-	 */
-	abstract protected function getI18NPrefix();
-
-	/**
 	 * @param  mixed $component
 	 * @return string
 	 */
@@ -208,11 +203,8 @@ abstract class sly_Service_AddOn_Base {
 	 * @return mixed                 message or true if successful
 	 */
 	public function install($component, $installDump = true) {
-		$baseDir       = $this->baseFolder($component);
-		$installFile   = $baseDir.'install.inc.php';
-		$installSQL    = $baseDir.'install.sql';
-		$configFile    = $baseDir.'config.inc.php';
-		$componentName = is_array($component) ? $component[1] : $component;
+		$baseDir    = $this->baseFolder($component);
+		$configFile = $baseDir.'config.inc.php';
 
 		// return error message if an addOn wants to stop the install process
 
@@ -225,7 +217,7 @@ abstract class sly_Service_AddOn_Base {
 		// check for config.inc.php before we do anything
 
 		if (!is_readable($configFile)) {
-			return t('config_not_found');
+			return t('component_config_not_found');
 		}
 
 		// check requirements
@@ -246,31 +238,35 @@ abstract class sly_Service_AddOn_Base {
 
 		if (!empty($sallyVersions)) {
 			if (!$this->isCompatible($component)) {
-				return $this->I18N('sally_incompatible', sly_Core::getVersion('X.Y.Z'));
+				return t('component_incompatible', sly_Core::getVersion('X.Y.Z'));
 			}
 		}
 		else {
-			return $this->I18N('has_no_sally_version_info');
+			return t('component_has_no_sally_version_info');
 		}
 
 		// include install.inc.php if available
+
+		$installFile = $baseDir.'install.inc.php';
 
 		if (is_readable($installFile)) {
 			try {
 				$this->req($installFile);
 			}
 			catch (Exception $e) {
-				return $this->I18N('no_install', $componentName, $e->getMessage());
+				return t('component_install_failed', $e->getMessage());
 			}
 		}
 
 		// read install.sql and install DB
 
+		$installSQL = $baseDir.'install.sql';
+
 		if ($installDump && is_readable($installSQL)) {
 			$state = $this->installDump($installSQL);
 
 			if ($state !== true) {
-				return 'Error found in install.sql:<br />'.$state;
+				return t('component_install_sql_failed', $state);
 			}
 		}
 
@@ -309,11 +305,6 @@ abstract class sly_Service_AddOn_Base {
 	 * @return mixed       message or true if successful
 	 */
 	public function uninstall($component) {
-		$baseDir       = $this->baseFolder($component);
-		$uninstallFile = $baseDir.'uninstall.inc.php';
-		$uninstallSQL  = $baseDir.'uninstall.sql';
-		$componentName = is_array($component) ? $component[1] : $component;
-
 		// if not installed, try to disable if needed
 
 		if (!$this->isInstalled($component)) {
@@ -322,17 +313,8 @@ abstract class sly_Service_AddOn_Base {
 
 		// check for dependencies
 
-		if ($this->isActivated($component)) {
-			$dependencies = $this->getDependencies($component, true);
-
-			if (!empty($dependencies)) {
-				$dep  = reset($dependencies);
-				$msg  = is_array($dep) ? 'requires_plugin' : 'requires_addon';
-				$comp = is_array($component) ? implode('/', $component) : $component;
-
-				return $this->I18N($msg, $comp, is_array($dep) ? implode('/', $dep) : $dep);
-			}
-		}
+		$state = $this->checkRemoval($component);
+		if ($state !== true) return $state;
 
 		// stop if addOn forbids uninstall
 
@@ -352,22 +334,27 @@ abstract class sly_Service_AddOn_Base {
 
 		// include uninstall.inc.php if available
 
+		$baseDir       = $this->baseFolder($component);
+		$uninstallFile = $baseDir.'uninstall.inc.php';
+
 		if (is_readable($uninstallFile)) {
 			try {
 				$this->req($uninstallFile);
 			}
 			catch (Exception $e) {
-				return $this->I18N('no_uninstall', $componentName, $e->getMessage());
+				return t('component_uninstall_failed', $e->getMessage());
 			}
 		}
 
 		// read uninstall.sql
 
+		$uninstallSQL = $baseDir.'uninstall.sql';
+
 		if (is_readable($uninstallSQL)) {
 			$state = $this->installDump($uninstallSQL);
 
 			if ($state !== true) {
-				return 'Error found in uninstall.sql:<br />'.$state;
+				return t('component_uninstall_sql_failed', $state);
 			}
 		}
 
@@ -399,7 +386,7 @@ abstract class sly_Service_AddOn_Base {
 		}
 
 		if (!$this->isInstalled($component)) {
-			return t('no_activation', $component);
+			return t('component_activate_failed');
 		}
 
 		// We can't use the service to get the list of required addOns since the
@@ -436,6 +423,23 @@ abstract class sly_Service_AddOn_Base {
 			return true;
 		}
 
+		$state = $this->checkRemoval($component);
+		if ($state !== true) return $state;
+
+		$state = $this->extend('PRE', 'DEACTIVATE', $component, true);
+		if ($state !== true) return $state;
+
+		$this->setProperty($component, 'status', false);
+		return $this->extend('POST', 'DEACTIVATE', $component, true);
+	}
+
+	/**
+	 * Check if a component may be removed
+	 *
+	 * @param  mixed $component  addOn as string, plugin as array
+	 * @return mixed             true if successful, else an error message as a string
+	 */
+	private function checkRemoval($component) {
 		// Check if this component is required
 
 		$dependencies = $this->getDependencies($component, true);
@@ -445,17 +449,10 @@ abstract class sly_Service_AddOn_Base {
 			$msg  = is_array($dep) ? 'requires_plugin' : 'requires_addon';
 			$comp = is_array($component) ? implode('/', $component) : $component;
 
-			return $this->I18N($msg, $comp, is_array($dep) ? implode('/', $dep) : $dep);
+			return t($msg, $comp, is_array($dep) ? implode('/', $dep) : $dep);
 		}
 
-		$state = $this->extend('PRE', 'DEACTIVATE', $component, true);
-
-		if ($state !== true) {
-			return $state;
-		}
-
-		$this->setProperty($component, 'status', false);
-		return $this->extend('POST', 'DEACTIVATE', $component, true);
+		return true;
 	}
 
 	/**
@@ -516,25 +513,10 @@ abstract class sly_Service_AddOn_Base {
 		$obj = new sly_Util_Directory($dir);
 
 		if (!$obj->delete(true)) {
-			return $this->I18N('install_cant_delete_files');
+			return t('cannot_delete_files', $dir);
 		}
 
 		return $this->extend('POST', 'DELETE_'.strtoupper($type), $component, true);
-	}
-
-	/**
-	 * Translation helper
-	 *
-	 * All this method does is append 'addon_' or 'plugin_' to an i18n key. Call
-	 * it like t() with as many arguments as needed.
-	 *
-	 * @return string  the translated message
-	 */
-	protected function I18N() {
-		$args    = func_get_args();
-		$args[0] = $this->getI18NPrefix().$args[0];
-
-		return call_user_func_array('t', $args);
 	}
 
 	/**
@@ -722,11 +704,11 @@ abstract class sly_Service_AddOn_Base {
 			$requirement = explode('/', $requiredComponent, 2);
 
 			if (count($requirement) === 1 && !$aService->isAvailable($requirement[0])) {
-				return $this->I18N('requires_addon', $requirement[0], $componentName);
+				return t('requires_addon', $requirement[0], $componentName);
 			}
 
 			if (count($requirement) === 2 && !$pService->isAvailable($requirement)) {
-				return $this->I18N('requires_plugin', $requiredComponent, $componentName);
+				return t('requires_plugin', $requiredComponent, $componentName);
 			}
 		}
 

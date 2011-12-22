@@ -9,6 +9,10 @@
  */
 
 /**
+ * Array wrapper with path access
+ *
+ * No I18N here, or else we fail horrbily if a language file is broken!
+ *
  * @ingroup util
  */
 class sly_Util_Array {

@@ -27,7 +27,7 @@ class sly_Mail implements sly_Mail_Interface {
 		$instance  = new $className();
 
 		if (!($instance instanceof sly_Mail_Interface)) {
-			throw new sly_Mail_Exception('Mail instance does not implement sly_Mail_Interface.');
+			throw new sly_Mail_Exception(t('does_not_implement', $className, 'sly_Mail_Interface'));
 		}
 
 		return $instance;
@@ -115,7 +115,7 @@ class sly_Mail implements sly_Mail_Interface {
 
 		// do nothing if no one would read it
 		if (empty($this->tos)) {
-			throw new sly_Mail_Exception('No recipients given.');
+			throw new sly_Mail_Exception(t('no_recipients_given'));
 		}
 
 		// build recipient
@@ -145,7 +145,7 @@ class sly_Mail implements sly_Mail_Interface {
 
 		// and here we go
 		if (!mail($to, $subject, $this->body, $headers, $params)) {
-			throw new sly_Mail_Exception('Error sending mail.');
+			throw new sly_Mail_Exception(t('error_sending_mail'));
 		}
 
 		return true;
@@ -176,7 +176,7 @@ class sly_Mail implements sly_Mail_Interface {
 		$name = $name === null ? null : self::clean($name);
 
 		if (!self::isValid($mail)) {
-			throw new sly_Mail_Exception('Address "'.$mail.'" is not valid.');
+			throw new sly_Mail_Exception(t('email_is_invalid', $mail));
 		}
 
 		return array($mail, $name);
