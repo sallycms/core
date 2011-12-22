@@ -10,14 +10,14 @@
 
 class sly_SliceRenderer {
 
-	private $module;
+	private $moduleName;
 	private $values;
 
 	/**
 	 * @param array $values
 	 */
-	public function __construct($module, $values = array()) {
-		$this->module = $module;
+	public function __construct($moduleName, $values = array()) {
+		$this->moduleName = $moduleName;
 		$this->setValues($values);
 	}
 
@@ -40,10 +40,9 @@ class sly_SliceRenderer {
 
 	public function renderInput() {
 		$service                      = sly_Service_Factory::getModuleService();
-		$filenameHtuG50hNCdikAvf7CZ1F = $service->getFolder().DIRECTORY_SEPARATOR.$service->getInputFilename($this->module);
-
-		$form = new sly_Form('', '', $service->getTitle($this->module));
+		$filenameHtuG50hNCdikAvf7CZ1F = $service->getFolder().DIRECTORY_SEPARATOR.$service->getInputFilename($this->moduleName);
 		unset($service);
+		$form = new sly_Form('', '', '');
 		ob_start();
 		include $filenameHtuG50hNCdikAvf7CZ1F;
 		print $form->render(true);
@@ -52,11 +51,44 @@ class sly_SliceRenderer {
 
 	public function renderOutput() {
 		$service                      = sly_Service_Factory::getModuleService();
-		$filenameHtuG50hNCdikAvf7CZ1F = $service->getFolder().DIRECTORY_SEPARATOR.$service->getOutputFilename($this->module);
+		$filenameHtuG50hNCdikAvf7CZ1F = $service->getFolder().DIRECTORY_SEPARATOR.$service->getOutputFilename($this->moduleName);
 		unset($service);
 		ob_start();
 		include $filenameHtuG50hNCdikAvf7CZ1F;
-		return ob_get_clean();
+		$output = ob_get_clean();
+		$output = $this->replaceLinks($output);
+		return $output;
 	}
+
+	/**
+	 * Replaces sally://ARTICLEID and sally://ARTICLEID-CLANGID in
+	 * the slice content by article http URLs.
+	 *
+	 * @param string $content
+	 * @return string
+	 */
+	protected function replaceLinks($content) {
+		preg_match_all('#(?:redaxo|sally)://([0-9]+)(?:-([0-9]+))?/?#', $content, $matches, PREG_OFFSET_CAPTURE | PREG_SET_ORDER);
+
+		$skew = 0;
+
+		foreach ($matches as $match) {
+			$complete = $match[0];
+			$length   = strlen($complete[0]);
+			$offset   = $complete[1];
+			$id       = (int) $match[1][0];
+			$clang    = isset($match[2]) ? (int) $match[2][0] : null;
+			$repl     = sly_Util_Article::getUrl($id, $clang);
+
+			// replace the match
+			$content = substr_replace($content, $repl, $offset + $skew, $length);
+
+			// ensure the next replacements get the correct offset
+			$skew += strlen($repl) - $length;
+		}
+
+		return $content;
+	}
+
 
 }

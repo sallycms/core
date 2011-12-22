@@ -31,8 +31,8 @@ class sly_Service_SliceValue extends sly_Service_Model_Base_Id {
 	 * @param  string $finder
 	 * @return sly_Model_SliceValue
 	 */
-	public function findBySliceTypeFinder($slice_id, $type, $finder) {
-		$where = array('slice_id' => $slice_id, 'type' => $type, 'finder' => $finder);
+	public function findBySliceFinder($slice_id, $finder) {
+		$where = array('slice_id' => $slice_id, 'finder' => $finder);
 		$res   = $this->find($where);
 
 		if (count($res) == 1) return $res[0];
