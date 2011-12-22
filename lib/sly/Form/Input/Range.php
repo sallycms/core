@@ -30,6 +30,7 @@ class sly_Form_Input_Range extends sly_Form_Input_Number {
 	public function __construct($name, $label, $value = '', $id = null) {
 		parent::__construct($name, $label, $value, $id);
 		$this->setAttribute('type', 'range');
+		$this->addClass('rex-form-text');
 	}
 
 	/**
@@ -40,8 +41,6 @@ class sly_Form_Input_Range extends sly_Form_Input_Number {
 	 * @return string  the XHTML code
 	 */
 	public function render() {
-		$this->addClass('rex-form-text');
-
 		$path   = 'assets/js/';
 		$layout = sly_Core::getLayout();
 
