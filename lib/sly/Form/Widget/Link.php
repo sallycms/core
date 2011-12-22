@@ -31,6 +31,7 @@ class sly_Form_Widget_Link extends sly_Form_Widget_LinkBase implements sly_Form_
 	 */
 	public function __construct($name, $label, $value, $id = null) {
 		parent::__construct($name, $label, $value, $id);
+		$this->addOuterClass('rex-form-text');
 	}
 
 	/**
@@ -41,16 +42,6 @@ class sly_Form_Widget_Link extends sly_Form_Widget_LinkBase implements sly_Form_
 	public function render() {
 		$this->attributes['value'] = $this->getDisplayValue();
 		return $this->renderFilename('element/widget/link.phtml');
-	}
-
-	/**
-	 * Returns the outer row class
-	 *
-	 * @return string  the outer class
-	 */
-	public function getOuterClass() {
-		$this->addOuterClass('rex-form-text');
-		return $this->outerClass;
 	}
 
 	/**

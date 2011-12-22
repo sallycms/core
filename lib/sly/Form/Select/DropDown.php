@@ -55,13 +55,4 @@ class sly_Form_Select_DropDown extends sly_Form_Select_Base implements sly_Form_
 	public function render() {
 		return $this->renderFilename('element/select/dropdown.phtml');
 	}
-
-	/**
-	 * Returns the outer row class
-	 *
-	 * @return string  the outer class
-	 */
-	public function getOuterClass() {
-		return $this->outerClass;
-	}
 }
