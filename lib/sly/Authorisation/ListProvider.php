@@ -12,6 +12,7 @@
  * @ingroup authorisation
  */
 interface sly_Authorisation_ListProvider {
+	const ALL = 0;
 
 	/**
 	 * returns all ids for objects

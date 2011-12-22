@@ -145,7 +145,7 @@ abstract class sly_Form_Helper {
 		$isAdmin = self::$user->isAdmin();
 
 		switch (self::$type) {
-			case 'media':     $isAdmin |= self::$user->hasRight('media[0]'); break;
+			case 'media':     $isAdmin |= self::$user->hasRight('mediacategory', 'access' , sly_Authorisation_ListProvider::ALL); break;
 			case 'structure': $isAdmin |= sly_Util_Article::canEditArticle(self::$user, 0); break;
 		}
 
