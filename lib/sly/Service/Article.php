@@ -121,7 +121,7 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 		$article = $this->findById($articleID);
 
 		if ($article === null) {
-			throw new sly_Exception(t('no_such_article'));
+			throw new sly_Exception(t('article_not_found'));
 		}
 
 		// re-position all following articles
@@ -253,11 +253,11 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 		// check article
 
 		if ($article === null) {
-			throw new sly_Exception(t('no_such_article'));
+			throw new sly_Exception(t('article_not_found'));
 		}
 
 		if ($article->isStartArticle()) {
-			throw new sly_Exception('Use the category service to move categories.');
+			throw new sly_Exception(t('use_category_service_to_copy_categories'));
 		}
 
 		// check category
@@ -265,7 +265,7 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 		$cats = sly_Service_Factory::getCategoryService();
 
 		if ($target !== 0 && $cats->findById($target) === null) {
-			throw new sly_Exception(t('no_such_category'));
+			throw new sly_Exception(t('category_not_found'));
 		}
 
 		// prepare infos
@@ -321,11 +321,11 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 		// check article
 
 		if ($article === null) {
-			throw new sly_Exception(t('no_such_article'));
+			throw new sly_Exception(t('article_not_found'));
 		}
 
 		if ($article->isStartArticle()) {
-			throw new sly_Exception('Use the category service to move categories.');
+			throw new sly_Exception(t('use_category_service_to_move_categories'));
 		}
 
 		// check category
@@ -333,13 +333,13 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 		$cats = sly_Service_Factory::getCategoryService();
 
 		if ($target !== 0 && $cats->findById($target) === null) {
-			throw new sly_Exception(t('no_such_category'));
+			throw new sly_Exception(t('category_not_found'));
 		}
 
 		$source = (int) $article->getCategoryId();
 
 		if ($source === $target) {
-			throw new sly_Exception('Source and target category are the same.');
+			throw new sly_Exception(t('source_and_target_are_equal'));
 		}
 
 		// prepare infos
@@ -389,15 +389,15 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 		// check article
 
 		if ($article === null) {
-			throw new sly_Exception(t('no_such_article'));
+			throw new sly_Exception(t('article_not_found'));
 		}
 
 		if ($article->isStartArticle()) {
-			throw new sly_Exception('This article is already a start article.');
+			throw new sly_Exception(t('article_is_startarticle'));
 		}
 
 		if ($article->getCategoryId() === 0) {
-			throw new sly_Exception('Cannot make a root article into a start article.');
+			throw new sly_Exception(t('root_articles_cannot_be_startarticles'));
 		}
 
 		// switch key params of old and new start articles in every language

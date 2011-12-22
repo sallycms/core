@@ -139,7 +139,7 @@ class sly_Service_Category extends sly_Service_ArticleBase {
 		$cat = $this->findById($categoryID);
 
 		if ($cat === null) {
-			throw new sly_Exception(t('category_doesnt_exist'));
+			throw new sly_Exception(t('category_not_found'));
 		}
 
 		// check if this category still has children (both articles and categories)
@@ -147,7 +147,7 @@ class sly_Service_Category extends sly_Service_ArticleBase {
 		$children = $this->findByParentId($categoryID, true);
 
 		if ($this->findByParentId($categoryID, true)) {
-			throw new sly_Exception('Category has still content and therefore cannot be deleted.');
+			throw new sly_Exception(t('category_is_not_empty'));
 		}
 
 		// re-position all following categories
@@ -220,21 +220,21 @@ class sly_Service_Category extends sly_Service_ArticleBase {
 		// check categories
 
 		if ($category === null) {
-			throw new sly_Exception(t('no_such_category'));
+			throw new sly_Exception(t('category_not_found'));
 		}
 
 		if ($targetID !== 0 && $target === null) {
-			throw new sly_Exception('The target category does not exist.');
+			throw new sly_Exceptiont(t('target_category_not_found'));
 		}
 
 		if ($targetID !== 0 && $targetID === $categoryID) {
-			throw new sly_Exception('Cannot move a category into itself.');
+			throw new sly_Exception(t('source_and_target_are_equal'));
 		}
 
 		// check self-include ($target may not be a child of $category)
 
 		if ($target && $category->isAncestor($target)) {
-			throw new sly_Exception('Cannot move a category inside one of its children.');
+			throw new sly_Exception(t('cannot_move_category_into_child'));
 		}
 
 		// prepare movement

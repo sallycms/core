@@ -21,7 +21,7 @@ class sly_Util_ParamParser {
 	 */
 	public function __construct($filename) {
 		if (!file_exists($filename)) {
-			throw new sly_Exception('Datei nicht gefunden: '.$filename);
+			throw new sly_Exception(t('file_not_found', $filename));
 		}
 
 		$this->file   = $filename;
@@ -105,7 +105,7 @@ class sly_Util_ParamParser {
 				$value = sfYamlInline::load($value);
 			}
 			catch (InvalidArgumentException $e) {
-				trigger_error('Ungültiger Parameter entdeckt: "'.$value.'"', E_USER_WARNING);
+				trigger_error(t('invalid_develop_param', $value), E_USER_WARNING);
 			}
 
 			$this->params[$key] = $value;

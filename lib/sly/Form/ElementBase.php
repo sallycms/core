@@ -319,7 +319,7 @@ abstract class sly_Form_ElementBase extends sly_Viewable {
 		$full = SLY_COREFOLDER.'/views/form/'.$file;
 		if (file_exists($full)) return $full;
 
-		throw new sly_Form_Exception('View '.$file.' could not be found.');
+		throw new sly_Form_Exception(t('view_not_found', $file));
 	}
 
 	/**

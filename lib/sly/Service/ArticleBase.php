@@ -89,7 +89,7 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base {
 		$type    = $this->getModelType();
 
 		if (!$obj) {
-			throw new sly_Exception(ucfirst($type).' does not exist.');
+			throw new sly_Exception(t($type.'_not_found'));
 		}
 
 		// if no explicit status is given, just take the next one
@@ -175,7 +175,7 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base {
 		// check if parent exists
 
 		if ($parentID !== 0 && !sly_Util_Category::exists($parentID)) {
-			throw new sly_Exception('Parent category does not exist.');
+			throw new sly_Exception(t('parent_category_not_found'));
 		}
 
 		///////////////////////////////////////////////////////////////
@@ -273,7 +273,7 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base {
 		$obj = $this->findById($id, $clangID);
 
 		if ($obj === null) {
-			throw new sly_Exception(t('no_such_'.$modelType));
+			throw new sly_Exception(t($modelType.'_not_found'));
 		}
 
 		///////////////////////////////////////////////////////////////
@@ -413,11 +413,11 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base {
 		$objID = (int) $objID;
 
 		if ($objID === sly_Core::getSiteStartArticleId()) {
-			throw new sly_Exception(t('cant_delete_sitestartarticle'));
+			throw new sly_Exception(t('cannot_delete_sitestartarticle'));
 		}
 
 		if ($objID === sly_Core::getNotFoundArticleId()) {
-			throw new sly_Exception(t('cant_delete_notfoundarticle'));
+			throw new sly_Exception(t('cannot_delete_notfoundarticle'));
 		}
 	}
 }

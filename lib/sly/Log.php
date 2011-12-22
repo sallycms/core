@@ -47,8 +47,8 @@ class sly_Log {
 	 * @return string         the new directory which is being used from then on
 	 */
 	public static function setLogDirectory($dir) {
-		if (!sly_Util_Directory::create($dir)) {
-			throw new sly_Exception('Could not create logging directory in '.$dir.'.');
+		if (!is_dir($dir)) {
+			throw new sly_Exception(t('could_not_find_log_dir', $dir));
 		}
 
 		self::$targetDir = rtrim(realpath($dir), DIRECTORY_SEPARATOR);
@@ -192,7 +192,7 @@ class sly_Log {
 	 */
 	public function log($level, $message, $depth = 1, array $context = array()) {
 		if ($level != self::LEVEL_INFO && $level != self::LEVEL_ERROR && $level != self::LEVEL_WARNING) {
-			throw new sly_Exception('Unbekannter Nachrichtentyp: '.$level);
+			throw new sly_Exception(t('unknown_log_level', $level));
 		}
 
 		switch ($level) {

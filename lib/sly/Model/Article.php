@@ -87,11 +87,12 @@ class sly_Model_Article extends sly_Model_Base_Article {
 	 */
 	public function getContent($slot = null) {
 		$content = '';
-		$where = array('article_id' => $this->getId(), 'clang' => $this->getClang());
-		if($slot !== null) $where['slot'] = $slot;
+		$where   = array('article_id' => $this->getId(), 'clang' => $this->getClang());
+
+		if ($slot !== null) $where['slot'] = $slot;
 
 		$slices = sly_Service_Factory::getArticleSliceService()->find($where, null, 'pos ASC');
-		foreach($slices as $slice) {
+		foreach ($slices as $slice) {
 			$content .= $slice->getOutput();
 		}
 
@@ -112,7 +113,7 @@ class sly_Model_Article extends sly_Model_Base_Article {
 			$content = ob_get_clean();
 		}
 		else {
-			$content = 'No article type given.';
+			$content = t('no_article_type_set');
 		}
 
 		return $content;

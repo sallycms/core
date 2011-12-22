@@ -88,7 +88,7 @@ abstract class sly_Controller_Base {
 	 */
 	protected function computeContentType() {
 		if (!empty($this->content_type)) {
-			return $this->content_type.($this->charset ?  ('; charset='.$this->charset) : '');
+			return $this->content_type.($this->charset ? ('; charset='.$this->charset) : '');
 		}
 
 		return null;
