@@ -8,8 +8,7 @@
  * http://www.opensource.org/licenses/mit-license.php
  */
 
-$nativeFocus = sly_Helper_Modernizr::hasInput('autofocus');
-$attributes  = array(
+$attributes = array(
 	'class'   => implode(' ', $this->classes),
 	'method'  => strtolower($this->method),
 	'action'  => $this->action,
@@ -17,8 +16,10 @@ $attributes  = array(
 	'enctype' => $this->enctype
 );
 
-if (!empty($this->focussedElement) && $nativeFocus) {
-	$el = $this->findElementByID($this->focussedElement);
+$focus = $this->focussedElement;
+
+if (!empty($focus)) {
+	$el = $focus instanceof sly_Form_ElementBase ? $focus : $this->findElementByID($focus);
 	if ($el) $el->setAttribute('autofocus', 'autofocus');
 }
 
@@ -57,9 +58,3 @@ if (!empty($this->focussedElement) && $nativeFocus) {
 	</form>
 	<?php endif ?>
 </div>
-
-<?php if (!empty($this->focussedElement) && !$nativeFocus): ?>
-<script type="text/javascript">
-document.getElementById('<?php echo $this->focussedElement ?>').focus();
-</script>
-<?php endif ?>
