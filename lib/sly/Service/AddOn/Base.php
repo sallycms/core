@@ -704,11 +704,11 @@ abstract class sly_Service_AddOn_Base {
 			$requirement = explode('/', $requiredComponent, 2);
 
 			if (count($requirement) === 1 && !$aService->isAvailable($requirement[0])) {
-				return t('requires_addon', $requirement[0], $componentName);
+				return t('component_requires_addon', $requirement[0], $componentName);
 			}
 
 			if (count($requirement) === 2 && !$pService->isAvailable($requirement)) {
-				return t('requires_plugin', $requiredComponent, $componentName);
+				return t('component_requires_plugin', $requiredComponent, $componentName);
 			}
 		}
 
