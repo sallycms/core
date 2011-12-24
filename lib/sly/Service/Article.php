@@ -121,7 +121,7 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 		$article = $this->findById($articleID);
 
 		if ($article === null) {
-			throw new sly_Exception(t('article_not_found'));
+			throw new sly_Exception(t('article_not_found', $articleID));
 		}
 
 		// re-position all following articles

@@ -113,7 +113,7 @@ class sly_Model_Article extends sly_Model_Base_Article {
 			$content = ob_get_clean();
 		}
 		else {
-			$content = t('no_article_type_set');
+			$content = t('no_articletype_set');
 		}
 
 		return $content;

@@ -413,11 +413,11 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base {
 		$objID = (int) $objID;
 
 		if ($objID === sly_Core::getSiteStartArticleId()) {
-			throw new sly_Exception(t('cannot_delete_sitestartarticle'));
+			throw new sly_Exception(t('cannot_delete_start_article'));
 		}
 
 		if ($objID === sly_Core::getNotFoundArticleId()) {
-			throw new sly_Exception(t('cannot_delete_notfoundarticle'));
+			throw new sly_Exception(t('cannot_delete_not_found_article'));
 		}
 	}
 }
