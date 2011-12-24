@@ -449,7 +449,7 @@ abstract class sly_Service_AddOn_Base {
 			$msg  = is_array($dep) ? 'requires_plugin' : 'requires_addon';
 			$comp = is_array($component) ? implode('/', $component) : $component;
 
-			return t($msg, $comp, is_array($dep) ? implode('/', $dep) : $dep);
+			return t('component_'.$msg, $comp, is_array($dep) ? implode('/', $dep) : $dep);
 		}
 
 		return true;
@@ -513,7 +513,7 @@ abstract class sly_Service_AddOn_Base {
 		$obj = new sly_Util_Directory($dir);
 
 		if (!$obj->delete(true)) {
-			return t('cannot_delete_files', $dir);
+			return t('component_cleanup_failed', $dir);
 		}
 
 		return $this->extend('POST', 'DELETE_'.strtoupper($type), $component, true);
@@ -638,7 +638,7 @@ abstract class sly_Service_AddOn_Base {
 		$dir = new sly_Util_Directory($assetsDir);
 
 		if (!$dir->copyTo($target)) {
-			return t('install_cant_copy_files');
+			return t('component_assets_failed');
 		}
 
 		return true;

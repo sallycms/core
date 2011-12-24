@@ -211,7 +211,7 @@ class sly_Model_ArticleSlice extends sly_Model_Base_Id {
 
 		if (!file_exists($slice_content_file)) {
 			if (!$this->generateContentFile()) {
-				return t('slice_could_not_be_generated').' '.t('check_rights_in_directory').$this->getContentDir();
+				return t('slice_could_not_be_generated').' '.t('check_rights_in_directory', $this->getContentDir());
 			}
 		}
 
