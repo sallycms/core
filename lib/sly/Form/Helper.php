@@ -39,7 +39,7 @@ abstract class sly_Form_Helper {
 			self::$i18nLoaded = true;
 		}
 
-		$init   = array(0 => t('pool_kats_no'));
+		$init   = array(0 => t('no_category'));
 		$select = new sly_Form_Select_DropDown($name, '', -1, $init, $id);
 
 		if ($root === null) {
