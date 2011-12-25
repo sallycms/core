@@ -42,72 +42,8 @@ class sly_Util_Requirements {
 			return $this->result($version.' (MySQL)', version_compare($version, '5.0', '>=') ? self::OK : self::FAILED);
 		}
 		else {
-			return $this->failed('translate:no_mysql_mysqli');
+			return $this->failed(t('no_mysql_mysqli'));
 		}
-	}
-
-	/**
-	 * @return array
-	 */
-	public function gd() {
-		if (!function_exists('gd_info')) {
-			return $this->failed('translate:unavailable');
-		}
-
-		$version = gd_info();
-		return $this->ok($version['GD Version']);
-	}
-
-	/**
-	 * @return array
-	 */
-	public function xmlReader() {
-		return class_exists('XMLReader') ? $this->ok('translate:available') : $this->warning('translate:unavailable');
-	}
-
-	/**
-	 * @return array
-	 */
-	public function xmlWriter() {
-		return class_exists('XMLWriter') ? $this->ok('translate:available') : $this->warning('translate:unavailable');
-	}
-
-	/**
-	 * @return array
-	 */
-	public function curl() {
-		if (!function_exists('curl_init')) {
-			return $this->warning('translate:unavailable');
-		}
-
-		$ch = curl_init();
-
-		//Set curl to return the data instead of printing it to the browser.
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-		//Set the URL
-		curl_setopt($ch, CURLOPT_URL, 'http://www.google.com/');
-		curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 2);
-		curl_setopt($ch, CURLOPT_TIMEOUT, 3);
-		//Execute the fetch
-		$data = curl_exec($ch);
-		//Close the connection
-		curl_close($ch);
-
-		return empty($data) ? $this->warning('translate:timeout') : $this->ok('translate:available');
-	}
-
-	/**
-	 * @return array
-	 */
-	public function allowURLfopen() {
-		if (ini_get('allow_url_fopen') == 0) {
-			return $this->warning('translate:forbidden');
-		}
-
-		ini_set('default_socket_timeout', 3);
-		$data = @file_get_contents('http://www.google.com/');
-
-		return empty($data) ? $this->warning('translate:timeout') : $this->ok('translate:allowed');
 	}
 
 	/**
@@ -138,7 +74,7 @@ class sly_Util_Requirements {
 		if ($mem >= 64) return $this->ok($mem.'B');
 		else if (ini_set('memory_limit', '64M') !== false) return $this->warning($mem);
 		else if ($mem >= 16) return $this->ok($mem.'B');
-		else if (empty($mem)) return $this->warning('translate:unknown');
+		else if (empty($mem)) return $this->warning(t('unknown'));
 		else return $this->failed($mem.'B');
 	}
 
@@ -149,30 +85,9 @@ class sly_Util_Requirements {
 		$safe_mode    = ini_get('safe_mode');
 		$open_basedir = ini_get('open_basedir');
 
-		if (!$safe_mode && !$open_basedir) return $this->ok('translate:none');
+		if (!$safe_mode && !$open_basedir) return $this->ok(t('none'));
 		else if (!$safe_mode && $open_basedir) return $this->warning('open_basedir');
-		else return $this->failed($open_basedir ? 'translate:safemode_openbasedir' : 'safe_mode');
-	}
-
-	/**
-	 * @return array
-	 */
-	public function shortOpenTags() {
-		return ini_get('short_open_tag') == 0 ? $this->failed('translate:deactivated') : $this->ok('translate:activated');
-	}
-
-	/**
-	 * @return array
-	 */
-	public function registerGlobals() {
-		return ini_get('register_globals') == 0 ? $this->ok('translate:deactivated') : $this->warning('translate:activated');
-	}
-
-	/**
-	 * @return array
-	 */
-	public function magicQuotes() {
-		return ini_get('magic_quotes_gpc') == 0 ? $this->ok('translate:deactivated') : $this->warning('translate:activated');
+		else return $this->failed($open_basedir ? t('safemode_openbasedir') : 'safe_mode');
 	}
 
 	/**
@@ -182,6 +97,7 @@ class sly_Util_Requirements {
 	private function numPHPVersion($ext = '') {
 		$result = empty($ext) ? phpversion() : phpversion($ext);
 		$pos    = strpos($result, '-');
+
 		return $pos === false ? $result : substr($result, 0, $pos);
 	}
 
