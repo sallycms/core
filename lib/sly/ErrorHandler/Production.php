@@ -117,8 +117,15 @@ class sly_ErrorHandler_Production extends sly_ErrorHandler_Base implements sly_E
 		$file    = $this->getRelativeFilename($file);
 		$message = trim($message);
 
+		if (isset($_SERVER['REQUEST_METHOD'])) {
+			$req = $_SERVER['REQUEST_METHOD'].' '.$_SERVER['REQUEST_URI'];
+		}
+		else {
+			$req = 'php:'.$_SERVER['PHP_SELF'];
+		}
+
 		// doesn't really matter what method we call since we use our own format
-		$this->log->error("PHP $errorName ($errorCode): $message in $file line $line [$_SERVER[REQUEST_METHOD] $_SERVER[REQUEST_URI]]");
+		$this->log->error("PHP $errorName ($errorCode): $message in $file line $line [$req]");
 	}
 
 	/**
