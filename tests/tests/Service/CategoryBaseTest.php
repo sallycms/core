@@ -9,6 +9,10 @@
  */
 
 class sly_Service_CategoryBaseTest extends sly_Service_CategoryTestBase {
+	public static function setUpBeforeClass() {
+		sly_Core::setCurrentClang(1);
+	}
+
 	protected function getDataSetName() {
 		return 'pristine-sally';
 	}

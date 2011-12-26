@@ -9,6 +9,10 @@
  */
 
 class sly_Service_ArticleBaseTest extends sly_Service_ArticleTestBase {
+	public static function setUpBeforeClass() {
+		sly_Core::setCurrentClang(1);
+	}
+
 	protected function getDataSetName() {
 		return 'pristine-sally';
 	}
@@ -64,5 +68,18 @@ class sly_Service_ArticleBaseTest extends sly_Service_ArticleTestBase {
 		$this->assertFalse($service->findById($id, 1)->isOnline());
 		$service->changeStatus($id, 1, 1);
 		$this->assertTrue($service->findById($id, 1)->isOnline());
+	}
+
+	/**
+	 * test sly_Core::getCurrentClang()
+	 *
+	 * It seems that this method is a little out of place here, but since we have
+	 * different language IDs in different datasets and cannot ensure the current
+	 * DB state in the sly_CoreTest class, we test this method here.
+	 */
+	public function testCoreGetClang() {
+		sly_Core::setCurrentClang(null); // reset the current clang state
+		$_REQUEST['clang'] = 1;
+		return $this->assertEquals(1, sly_Core::getCurrentClang());
 	}
 }

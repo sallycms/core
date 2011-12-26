@@ -9,8 +9,16 @@
  */
 
 class sly_Service_CategoryExTest extends sly_Service_CategoryTestBase {
+	private static $clangA = 5;
+	private static $clangB = 7;
+
 	protected function getDataSetName() {
 		return 'sally-demopage';
+	}
+
+	public static function setUpBeforeClass() {
+		parent::setUpBeforeClass();
+		sly_Core::setCurrentClang(self::$clangA);
 	}
 
 	/*
@@ -25,8 +33,8 @@ class sly_Service_CategoryExTest extends sly_Service_CategoryTestBase {
 	 * @dataProvider movementsProvider
 	 */
 	public function testMovements($moves, array $expected) {
-		$this->moves($moves);
-		$this->assertPositions($expected);
+		$this->moves($moves, self::$clangA);
+		$this->assertPositions($expected, self::$clangA);
 	}
 
 	public function movementsProvider() {
@@ -62,7 +70,7 @@ class sly_Service_CategoryExTest extends sly_Service_CategoryTestBase {
 			$service->move($move[0], $move[1]);
 		}
 
-		$this->assertTree($expected);
+		$this->assertTree($expected, self::$clangA);
 	}
 
 	public function treeMovesProvider() {
@@ -98,7 +106,7 @@ class sly_Service_CategoryExTest extends sly_Service_CategoryTestBase {
 	/**
 	 * @depends testTreeMoves
 	 */
-	public function testArticle2Startpage() {
+	public function testConvertToStartArticle() {
 		// create some articles
 		$service    = sly_Service_Factory::getArticleService();
 		$catService = sly_Service_Factory::getCategoryService();
@@ -115,7 +123,7 @@ class sly_Service_CategoryExTest extends sly_Service_CategoryTestBase {
 		// current tree: 1<2<5>,3>,4
 		$service->convertToStartArticle($b);
 
-		$this->assertTree($b.'<2<5>,3>,4');
+		$this->assertTree($b.'<2<5>,3>,4', self::$clangA);
 
 		$this->assertEquals(1, $service->findById(1)->getPosition());
 		$this->assertEquals(2, $service->findById($a)->getPosition());
@@ -139,9 +147,10 @@ class sly_Service_CategoryExTest extends sly_Service_CategoryTestBase {
 
 	public function findByParentIdProvider() {
 		return array(
-			array(0, false, 1, array(1,2,3,4,5)), array(0, true, 1, array(1,2,3,5)),
-			array(0, false, 2, array(1,2,3,4,5)), array(0, true, 2, array()),
-			array(1, false, 1, array()), array(1, true, 1, array())
+			array(0, false, self::$clangA, array(1,2,3,4,5)), array(0, true, self::$clangA, array(1,2,3,5)),
+			array(0, false, self::$clangB, array(1,2,3,4,5)), array(0, true, self::$clangB, array()),
+			array(1, false, self::$clangA, array()),
+			array(1, true,  self::$clangA, array())
 		);
 	}
 }
