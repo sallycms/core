@@ -190,18 +190,21 @@ abstract class sly_Controller_Base {
 
 	/**
 	 * return classname for &page=whatever
-	 * It will return sly_Controller_Specials for &page=specials
-	 * and sly_Controller_Specials_Languages for &page=specials_languages
 	 *
-	 * @param string $pageparam
+	 * It will return sly_Controller_System for &page=system
+	 * and sly_Controller_System_Languages for &page=system_languages
+	 *
+	 * @param  string $pageparam
 	 * @return string
 	 */
 	protected static function getPageClassName($pageparam) {
 		$className = 'sly_Controller';
-		$parts = explode('_', $pageparam);
-		foreach($parts as $part) {
+		$parts     = explode('_', $pageparam);
+
+		foreach ($parts as $part) {
 			$className .= '_'.ucfirst($part);
 		}
+
 		return $className;
 	}
 
