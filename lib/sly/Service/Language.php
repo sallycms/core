@@ -81,7 +81,7 @@ class sly_Service_Language extends sly_Service_Model_Base_Id {
 		$db = sly_DB_Persistence::getInstance();
 
 		// get languages first
-		$langs = sly_Util_Language::findAll();
+		$langs = $this->find($where);
 
 		// delete
 		$res = parent::delete($where);
