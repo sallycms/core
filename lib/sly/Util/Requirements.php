@@ -141,7 +141,7 @@ class sly_Util_Requirements {
 	 * @return array
 	 */
 	private function result($text, $status) {
-		return array('text' => rex_translate($text), 'status' => $status);
+		return array('text' => sly_translate($text), 'status' => $status);
 	}
 
 	/**

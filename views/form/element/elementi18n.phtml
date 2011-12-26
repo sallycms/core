@@ -10,10 +10,10 @@
 
 $outerClass  = $element->getOuterClass();
 $outerClass  = $outerClass ? ' class="'.$outerClass.'"' : '';
-$help        = $element->getHelpText() ? '<span class="sly-form-helptext">'.nl2br(sly_html($element->getHelpText())).'</span>' : '';
+$help        = $element->getHelpText() ? '<span class="sly-form-helptext">'.nl2br(sly_translate($element->getHelpText(), true)).'</span>' : '';
 $isContainer = $element->isContainer();
 $label       = $element->getLabel();
-$label       = empty($label) ? '&nbsp;' : sly_html(rex_translate($label, null, false).':');
+$label       = empty($label) ? '&nbsp;' : sly_translate($label, true).':';
 
 // Elemente einrücken
 

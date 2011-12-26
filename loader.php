@@ -33,5 +33,4 @@ if (!$cacheExists) {
 	require_once SLY_COREFOLDER.'/lib/functions.php';
 	require_once SLY_COREFOLDER.'/functions/function_rex_globals.inc.php';
 	require_once SLY_COREFOLDER.'/functions/function_rex_client_cache.inc.php';
-	require_once SLY_COREFOLDER.'/functions/function_rex_other.inc.php';
 }
