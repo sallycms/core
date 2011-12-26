@@ -39,28 +39,36 @@ class sly_Service_Language extends sly_Service_Model_Base_Id {
 	 */
 	public function create($params) {
 		$langs = sly_Util_Language::findAll();
-		$sql   = sly_DB_Persistence::getInstance();
 
-		$sql->beginTransaction();
+		// if there are no languages yet, don't attempt to copy anything
 
-		try {
+		if (count($langs) === 0) {
 			$newLanguage = parent::create($params);
-
-			$sql->query(str_replace('~', sly_Core::config()->get('DATABASE/TABLE_PREFIX'),
-				'INSERT INTO ~article (id,re_id,name,catname,catpos,attributes,'.
-				'startpage,pos,path,status,createdate,updatedate,type,clang,createuser,'.
-				'updateuser,revision) '.
-				'SELECT id,re_id,name,catname,catpos,attributes,startpage,pos,path,0,createdate,'.
-				'updatedate,type,?,createuser,updateuser,revision '.
-				'FROM ~article WHERE clang = 1'),
-				array($newLanguage->getId())
-			);
-
-			$sql->commit();
 		}
-		catch (Exception $e) {
-			$sql->rollBack();
-			throw $e;
+		else {
+			$sql = sly_DB_Persistence::getInstance();
+			$sql->beginTransaction();
+
+			try {
+				$newLanguage = parent::create($params);
+				$sourceID    = $sql->magicFetch('clang', 'MIN(id)');
+
+				$sql->query(str_replace('~', sly_Core::getTablePrefix(),
+					'INSERT INTO ~article (id,re_id,name,catname,catpos,attributes,'.
+					'startpage,pos,path,status,createdate,updatedate,type,clang,createuser,'.
+					'updateuser,revision) '.
+					'SELECT id,re_id,name,catname,catpos,attributes,startpage,pos,path,0,createdate,'.
+					'updatedate,type,?,createuser,updateuser,revision '.
+					'FROM ~article WHERE clang = ?'),
+					array($newLanguage->getId(), $sourceID)
+				);
+
+				$sql->commit();
+			}
+			catch (Exception $e) {
+				$sql->rollBack();
+				throw $e;
+			}
 		}
 
 		// update cache before notifying the listeners (so that they can call findAll() and get fresh data)

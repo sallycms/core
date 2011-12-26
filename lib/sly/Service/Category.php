@@ -224,7 +224,7 @@ class sly_Service_Category extends sly_Service_ArticleBase {
 		}
 
 		if ($targetID !== 0 && $target === null) {
-			throw new sly_Exceptiont(t('target_category_not_found'));
+			throw new sly_Exception(t('target_category_not_found'));
 		}
 
 		if ($targetID !== 0 && $targetID === $categoryID) {
