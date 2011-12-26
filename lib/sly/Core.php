@@ -61,17 +61,17 @@ class sly_Core {
 	}
 
 	/**
-	 * @param int $clangId  the new clang
+	 * @param int $clangId  the new clang or null to reset
 	 */
 	public static function setCurrentClang($clangId) {
-		self::getInstance()->curClang = (int) $clangId;
+		self::getInstance()->curClang = $clangId === null ? null : (int) $clangId;
 	}
 
 	/**
-	 * @param int $articleId  the new article ID
+	 * @param int $articleId  the new article ID or null to reset
 	 */
 	public static function setCurrentArticleId($articleId) {
-		self::getInstance()->curArticleId = (int) $articleId;
+		self::getInstance()->curArticleId = $articleId === null ? null : (int) $articleId;
 	}
 
 	/**
