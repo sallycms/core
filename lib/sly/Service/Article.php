@@ -129,7 +129,7 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 		$parent = $article->getCategoryId();
 
 		foreach (sly_Util_Language::findAll(true) as $clangID) {
-			$pos       = $this->findById($articleID, $clangID)->getPos();
+			$pos       = $this->findById($articleID, $clangID)->getPosition();
 			$followers = $this->getFollowerQuery($parent, $clangID, $pos);
 
 			$this->moveObjects('-', $followers);
