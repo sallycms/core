@@ -52,7 +52,7 @@ $formatJS   = str_replace(
 $attrs['data-date']     = strftime('%Y-%m-%d', $value);
 $attrs['data-datetime'] = strftime('%Y-%m-%dT%H:%M:%S', $value);
 
-$attrs['class'] = 'rex-form-text sly-form-'.$type;
+$attrs['class'] = 'sly-form-text sly-form-'.$type;
 $attrs['type']  = $hasNative ? $type : 'text';
 $attrs['name']  = $name;
 $attrs['id']    = $attrs['name'];

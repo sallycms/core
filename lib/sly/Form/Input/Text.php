@@ -26,6 +26,6 @@ class sly_Form_Input_Text extends sly_Form_Input_Base {
 	public function __construct($name, $label, $value = '', $id = null) {
 		parent::__construct($name, $label, $value, $id);
 		$this->setAttribute('type', 'text');
-		$this->addOuterClass('rex-form-text');
+		$this->addOuterClass('sly-form-text');
 	}
 }
