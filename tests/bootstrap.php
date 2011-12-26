@@ -36,6 +36,10 @@ foreach (array('local', 'project') as $conf) {
 	copy($testFile, $liveFile);
 }
 
+// kill YAML cache
+$files = glob($sallyRoot.'/data/dyn/internal/sally/yaml-cache/*');
+if (is_array($files)) array_map('unlink', $files);
+
 // boot Sally
 require SLY_TESTING_ROOT.'/sally/backend/index.php';
 
