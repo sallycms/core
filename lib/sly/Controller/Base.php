@@ -282,11 +282,12 @@ abstract class sly_Controller_Base {
 			throw new sly_Authorisation_Exception(t('page_not_allowed', $this->action, get_class($this)), 403);
 		}
 
-		$method = $this->action;
-
 		ob_start();
 		$this->init();
+
+		$method = $this->action; // allow init() to reset the action!
 		$this->$method();
+
 		$this->teardown();
 		$output = ob_get_clean();
 
