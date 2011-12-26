@@ -35,7 +35,7 @@ class sly_Form_Input_Number extends sly_Form_Input_Base {
 	public function __construct($name, $label, $value = '', $id = null) {
 		parent::__construct($name, $label, $value, $id);
 		$this->setAttribute('type', 'number');
-		$this->addOuterClass('rex-form-text');
+		$this->addOuterClass('sly-form-text');
 	}
 
 	/**

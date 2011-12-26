@@ -13,9 +13,9 @@ $legend = sly_translate($this->legend);
 
 ?>
 
-<fieldset class="rex-form-col-<?php echo $this->columns ?> sly-num<?php echo ($this->num-1) ?>"<?php echo $id ?>>
+<fieldset class="sly-form-col-<?php echo $this->columns ?> sly-num<?php echo ($this->num-1) ?>"<?php echo $id ?>>
 	<?php if (mb_strlen($legend) > 0): ?><legend><?php echo sly_html($legend) ?></legend><?php endif ?>
-	<div class="rex-form-wrapper">
+	<div class="sly-form-wrapper">
 		<?php
 
 		$rowCount = count($this->rows);

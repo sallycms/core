@@ -32,7 +32,7 @@ class sly_Form_Input_Password extends sly_Form_Input_Base {
 	public function __construct($name, $label, $value = '', $id = null) {
 		parent::__construct($name, $label, $value, $id);
 		$this->setAttribute('type', 'password');
-		$this->addOuterClass('rex-form-text');
+		$this->addOuterClass('sly-form-text');
 		$this->redisplay = false;
 	}
 

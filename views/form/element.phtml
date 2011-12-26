@@ -9,7 +9,7 @@
  */
 
 $char        = chr(97 + $column);
-$outerClass  = array('rex-form-col-'.$char, $element->getOuterClass());
+$outerClass  = array('sly-form-col-'.$char, $element->getOuterClass());
 $help        = $element->getHelpText() ? '<span class="sly-form-helptext">'.nl2br(sly_translate($element->getHelpText(), true)).'</span>' : '';
 $isContainer = $element->isContainer();
 $label       = $element->getLabel();

@@ -32,7 +32,7 @@ abstract class sly_Form_Input_Base extends sly_Form_ElementBase implements sly_F
 	public function __construct($name, $label, $value, $id = null) {
 		parent::__construct($name, $label, $value, $id);
 		$this->annotation = '';
-		$this->addClass('rex-form-text');
+		$this->addClass('sly-form-text');
 	}
 
 	/**
