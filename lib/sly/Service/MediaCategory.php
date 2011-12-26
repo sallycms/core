@@ -224,6 +224,7 @@ class sly_Service_MediaCategory extends sly_Service_Model_Base_Id {
 
 		// update cache
 		sly_Core::cache()->flush('sly.mediacat');
+		sly_Core::cache()->flush('sly.mediacat.list');
 
 		// notify system
 		sly_Core::dispatcher()->notify('SLY_MEDIACAT_DELETED', $cat);
