@@ -123,8 +123,8 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base {
 		if (!isset($this->states[$type])) {
 			$s = array(
 				// display name, CSS class
-				array(t('status_offline'), 'rex-offline'),
-				array(t('status_online'),  'rex-online')
+				array(t('status_offline'), 'sly-offline'),
+				array(t('status_online'),  'sly-online')
 			);
 
 			$s = sly_Core::dispatcher()->filter($this->getEvent('STATUS_TYPES'), $s);
