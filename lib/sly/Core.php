@@ -189,21 +189,25 @@ class sly_Core {
 	/**
 	 * Get the current layout instance
 	 *
-	 * @param  string $type  the type of layout (only used when first instantiating the layout)
-	 * @return sly_Layout    the layout instance
+	 * @return sly_Layout  the layout instance
 	 */
-	public static function getLayout($type = 'XHTML') {
+	public static function getLayout() {
 		$instance = self::getInstance();
 
-		//FIXME: layout type kann bloss einmal pro request angegeben werden,
-		// reicht eigentlich auch
-		// eventuell könnte man das in der config oder in index.php angeben
 		if (!isset($instance->layout)) {
-			$className = 'sly_Layout_'.$type;
-			$instance->layout = new $className();
+			throw new sly_Exception(t('layout_has_not_been_set'));
 		}
 
 		return $instance->layout;
+	}
+
+	/**
+	 * Set the current layout instance
+	 *
+	 * @param sly_Layout $layout  the layout instance
+	 */
+	public static function setLayout(sly_Layout $layout) {
+		self::getInstance()->layout = $layout;
 	}
 
 	/**
@@ -443,7 +447,7 @@ class sly_Core {
 	 * @return string  current page or null if in frontend
 	 */
 	public static function getCurrentPage() {
-		return self::isBackend() ? sly_Controller_Base::getPage() : null;
+		return self::isBackend() ? sly_App_Backend::getCurrentPage() : null;
 	}
 
 	/**
