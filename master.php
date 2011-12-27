@@ -8,6 +8,20 @@
  * http://www.opensource.org/licenses/mit-license.php
  */
 
+define('SLY_START_TIME', microtime(true));
+
+if (!defined('SLY_IS_TESTING')) {
+	define('SLY_IS_TESTING', false);
+}
+
+define('SLY_HTDOCS_PATH', SLY_IS_TESTING ? SLY_TESTING_ROOT : '../');
+
+// start output buffering
+if (!SLY_IS_TESTING) {
+	ob_start();
+	ob_implicit_flush(0);
+}
+
 // remove magic quotes (function is deprecated as of PHP 5.4, so we either
 // have to check the PHP version or suppress the E_DEPRECATED warning)
 
