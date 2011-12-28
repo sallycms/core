@@ -196,6 +196,14 @@ abstract class sly_Service_AddOn_Base {
 	}
 
 	/**
+	 * @param  mixed   $component    addOn as string, plugin as array
+	 * @return string
+	 */
+	private function buildComponentName($component) {
+		return is_array($component) ? implode('/', $component) : $component;
+	}
+
+	/**
 	 * Install a component
 	 *
 	 * @param  mixed   $component    addOn as string, plugin as array
@@ -205,6 +213,7 @@ abstract class sly_Service_AddOn_Base {
 	public function install($component, $installDump = true) {
 		$baseDir    = $this->baseFolder($component);
 		$configFile = $baseDir.'config.inc.php';
+		$name       = $this->buildComponentName($component);
 
 		// return error message if an addOn wants to stop the install process
 
@@ -238,11 +247,11 @@ abstract class sly_Service_AddOn_Base {
 
 		if (!empty($sallyVersions)) {
 			if (!$this->isCompatible($component)) {
-				return t('component_incompatible', sly_Core::getVersion('X.Y.Z'));
+				return t('component_incompatible', $name, sly_Core::getVersion('X.Y.Z'));
 			}
 		}
 		else {
-			return t('component_has_no_sally_version_info');
+			return t('component_has_no_sally_version_info', $name);
 		}
 
 		// include install.inc.php if available
@@ -254,7 +263,7 @@ abstract class sly_Service_AddOn_Base {
 				$this->req($installFile);
 			}
 			catch (Exception $e) {
-				return t('component_install_failed', $e->getMessage());
+				return t('component_install_failed', $name, $e->getMessage());
 			}
 		}
 
@@ -266,7 +275,7 @@ abstract class sly_Service_AddOn_Base {
 			$state = $this->installDump($installSQL);
 
 			if ($state !== true) {
-				return t('component_install_sql_failed', $state);
+				return t('component_install_sql_failed', $name, $state);
 			}
 		}
 
@@ -336,13 +345,14 @@ abstract class sly_Service_AddOn_Base {
 
 		$baseDir       = $this->baseFolder($component);
 		$uninstallFile = $baseDir.'uninstall.inc.php';
+		$name          = $this->buildComponentName($component);
 
 		if (is_readable($uninstallFile)) {
 			try {
 				$this->req($uninstallFile);
 			}
 			catch (Exception $e) {
-				return t('component_uninstall_failed', $e->getMessage());
+				return t('component_uninstall_failed', $name, $e->getMessage());
 			}
 		}
 
@@ -354,7 +364,7 @@ abstract class sly_Service_AddOn_Base {
 			$state = $this->installDump($uninstallSQL);
 
 			if ($state !== true) {
-				return t('component_uninstall_sql_failed', $state);
+				return t('component_uninstall_sql_failed', $name, $state);
 			}
 		}
 
@@ -385,7 +395,9 @@ abstract class sly_Service_AddOn_Base {
 			return true;
 		}
 
-		if (!$this->isInstalled($component)) {
+		$name = $this->buildComponentName($component);
+
+		if (!$this->isInstalled($component, $name)) {
 			return t('component_activate_failed');
 		}
 
@@ -447,9 +459,10 @@ abstract class sly_Service_AddOn_Base {
 		if (!empty($dependencies)) {
 			$dep  = reset($dependencies);
 			$msg  = is_array($dep) ? 'requires_plugin' : 'requires_addon';
-			$comp = is_array($component) ? implode('/', $component) : $component;
+			$comp = $this->buildComponentName($component);
+			$dep  = $this->buildComponentName($dep);
 
-			return t('component_'.$msg, $comp, is_array($dep) ? implode('/', $dep) : $dep);
+			return t('component_'.$msg, $comp, $dep);
 		}
 
 		return true;
@@ -638,7 +651,7 @@ abstract class sly_Service_AddOn_Base {
 		$dir = new sly_Util_Directory($assetsDir);
 
 		if (!$dir->copyTo($target)) {
-			return t('component_assets_failed');
+			return t('component_assets_failed', $assetsDir);
 		}
 
 		return true;
@@ -698,7 +711,7 @@ abstract class sly_Service_AddOn_Base {
 		$requires      = $this->getRequirements($component);
 		$aService      = sly_Service_Factory::getAddOnService();
 		$pService      = sly_Service_Factory::getPluginService();
-		$componentName = is_array($component) ? implode('/', $component) : $component;
+		$componentName = $this->buildComponentName($component);
 
 		foreach ($requires as $requiredComponent) {
 			$requirement = explode('/', $requiredComponent, 2);
@@ -746,7 +759,7 @@ abstract class sly_Service_AddOn_Base {
 		$pluginService = sly_Service_Factory::getPluginService();
 		$addons        = $addonService->getAvailableAddons();
 		$result        = array();
-		$compAsString  = is_array($component) ? implode('/', $component) : $component;
+		$compAsString  = $this->buildComponentName($component);
 
 		foreach ($addons as $addon) {
 			// don't check yourself
@@ -831,7 +844,7 @@ abstract class sly_Service_AddOn_Base {
 	 * @param mixed $component  addOn as string, plugin as array
 	 */
 	protected function load($component) {
-		$compAsString  = is_array($component) ? implode('/', $component) : $component;
+		$compAsString = $this->buildComponentName($component);
 
 		if (in_array($compAsString, self::$loaded)) {
 			return true;
