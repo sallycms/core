@@ -132,6 +132,24 @@ abstract class sly_App_Base {
 		}
 	}
 
+	protected function handleStringResponse(sly_Response $response, $content, $appName) {
+		// collect additional output (warnings and notices from the bootstrapping)
+		while (ob_get_level()) $content = ob_get_clean().$content;
+
+		$config     = sly_Core::config();
+		$dispatcher = sly_Core::dispatcher();
+		$content    = $dispatcher->filter('OUTPUT_FILTER', $content, array('environment' => $appName));
+		$etag       = substr(md5($content), 0, 12);
+		$useEtag    = $config->get('USE_ETAG');
+
+		if ($useEtag === true || $useEtag === $appName) {
+			$response->setEtag($etag);
+		}
+
+		$response->setContent($content);
+		$response->isNotModified();
+	}
+
 	abstract public function run();
 	abstract public function getCurrentController();
 	abstract public function getControllerClassPrefix();
