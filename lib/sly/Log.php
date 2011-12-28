@@ -61,6 +61,11 @@ class sly_Log {
 	 * @return string  the absolute path to the log dir
 	 */
 	public static function getLogDirectory() {
+		// fallback in case the class is loaded via bootcache
+		if (self::$targetDir === null) {
+			self::setLogDirectory(SLY_DYNFOLDER.'/internal/sally/logs');
+		}
+
 		return self::$targetDir;
 	}
 
