@@ -135,7 +135,7 @@ abstract class sly_Controller_Base {
 	 * called when no distinct action parameter has been set, so in most cases
 	 * this is the entry point to your controller (from a user perspective).
 	 */
-	abstract protected function index();
+	abstract public function indexAction();
 
 	/**
 	 * Check access
