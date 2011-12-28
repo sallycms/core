@@ -1,0 +1,26 @@
+<?php
+/*
+ * Copyright (c) 2011, webvariants GbR, http://www.webvariants.de
+ *
+ * This file is released under the terms of the MIT license. You can find the
+ * complete text in the attached LICENSE file or online at:
+ *
+ * http://www.opensource.org/licenses/mit-license.php
+ */
+
+$buttons = array();
+
+foreach (array('submit', 'reset', 'apply', 'delete') as $type) {
+	$varname = $type.'Button';
+
+	if ($this->$varname) {
+		foreach ($this->buttonClasses[$type] as $class) {
+			$this->$varname->addClass($class);
+		}
+
+		$buttons[$type] = $this->$varname;
+	}
+}
+
+$bar = new sly_Form_ButtonBar($buttons);
+$fieldset->addRow(array($bar));
