@@ -97,13 +97,21 @@ class sly_Service_AddOn extends sly_Service_AddOn_Base {
 	 * @return array  Array der verfügbaren AddOns
 	 */
 	public function getAvailableAddons() {
-		$avail = array();
+		$cache    = sly_Core::cache();
+		$prodMode = !sly_Core::isDeveloperMode();
+		$avail    = $prodMode ? $cache->get('sly', 'availableaddons') : null;
 
-		foreach ($this->getRegisteredAddons() as $addonName) {
-			if ($this->isAvailable($addonName)) $avail[] = $addonName;
+		if (!is_array($avail)) {
+			$avail = array();
+
+			foreach ($this->getRegisteredAddons() as $addonName) {
+				if ($this->isAvailable($addonName)) $avail[] = $addonName;
+			}
+
+			natsort($avail);
+			if ($prodMode) $cache->set('sly', 'availableaddons', $avail);
 		}
 
-		natsort($avail);
 		return $avail;
 	}
 
