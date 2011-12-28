@@ -25,6 +25,6 @@ class sly_Response_Forward implements sly_Response_Action {
 	}
 
 	public function execute(sly_App_Backend $app) {
-		return $app->runPage($this->target, $this->action);
+		return $app->dispatch($this->target, $this->action);
 	}
 }
