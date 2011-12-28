@@ -365,17 +365,7 @@ class sly_Core {
 	 * loads all known addons into Sally
 	 */
 	public static function loadAddons() {
-		$addonService  = sly_Service_Factory::getAddOnService();
-		$pluginService = sly_Service_Factory::getPluginService();
-
-		foreach ($addonService->getRegisteredAddons() as $addonName) {
-			$addonService->loadAddon($addonName);
-
-			foreach ($pluginService->getRegisteredPlugins($addonName) as $pluginName) {
-				$pluginService->loadPlugin(array($addonName, $pluginName));
-			}
-		}
-
+		sly_Service_Factory::getAddOnService()->loadComponents();
 		self::dispatcher()->notify('ADDONS_INCLUDED');
 	}
 

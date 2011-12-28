@@ -15,6 +15,8 @@
 abstract class sly_Service_AddOn_Base {
 	protected static $loaded = array(); ///< array  list of loaded addOns and plugins for depedency aware loading
 
+	private $loadInfo = array();
+
 	/**
 	 * @param  mixed $component
 	 * @return string
@@ -90,14 +92,15 @@ abstract class sly_Service_AddOn_Base {
 	 *
 	 * @param mixed $component  addOn as string, plugin as array
 	 */
-	public function loadConfig($component) {
-		if ($this->isInstalled($component)) {
+	protected function loadConfig($component, $forceInstall = false, $forceActivated = false) {
+		if ($forceInstall || $forceActivated || $this->isInstalled($component)) {
 			$config       = sly_Core::config();
-			$defaultsFile = $this->baseFolder($component).'defaults.yml';
-			$globalsFile  = $this->baseFolder($component).'globals.yml';
+			$baseFolder   = $this->baseFolder($component);
+			$defaultsFile = $baseFolder.'defaults.yml';
+			$globalsFile  = $baseFolder.'globals.yml';
 
-			if ($this->isActivated($component)) {
-				$this->loadStatic($component);
+			if ($forceActivated || $this->isActivated($component)) {
+				$this->loadStatic($component, $baseFolder);
 
 				if (file_exists($defaultsFile)) {
 					$config->loadProjectDefaults($defaultsFile, false, $this->getConfPath($component));
@@ -113,9 +116,10 @@ abstract class sly_Service_AddOn_Base {
 	/**
 	 * @param mixed $component
 	 */
-	public function loadStatic($component) {
+	protected function loadStatic($component, $baseFolder = null) {
 		$config     = sly_Core::config();
-		$staticFile = $this->baseFolder($component).'static.yml';
+		$baseFolder = $baseFolder === null ? $this->baseFolder($component) : $baseFolder;
+		$staticFile = $baseFolder.'static.yml';
 
 		if (file_exists($staticFile)) {
 			$config->loadStatic($staticFile, $this->getConfPath($component));
@@ -295,6 +299,7 @@ abstract class sly_Service_AddOn_Base {
 
 		// mark component as installed
 		$this->setProperty($component, 'install', true);
+		$this->clearLoadCache();
 
 		// store current component version
 		$version = $this->getProperty($component, 'version', false);
@@ -370,6 +375,7 @@ abstract class sly_Service_AddOn_Base {
 
 		// mark component as not installed
 		$this->setProperty($component, 'install', false);
+		$this->clearLoadCache();
 
 		// delete files
 		$state  = $this->deletePublicFiles($component);
@@ -420,6 +426,7 @@ abstract class sly_Service_AddOn_Base {
 
 		$this->checkUpdate($component);
 		$this->setProperty($component, 'status', true);
+		$this->clearLoadCache();
 
 		return $this->extend('POST', 'ACTIVATE', $component, true);
 	}
@@ -442,6 +449,8 @@ abstract class sly_Service_AddOn_Base {
 		if ($state !== true) return $state;
 
 		$this->setProperty($component, 'status', false);
+		$this->clearLoadCache();
+
 		return $this->extend('POST', 'DEACTIVATE', $component, true);
 	}
 
@@ -840,28 +849,82 @@ abstract class sly_Service_AddOn_Base {
 		return (boolean) $versionOK;
 	}
 
+	protected function clearLoadCache() {
+		sly_Core::cache()->delete('sly', 'componentorder');
+		sly_Core::cache()->delete('sly', 'availableaddons');
+	}
+
+	public function loadComponents() {
+		$cache    = sly_Core::cache();
+		$prodMode = !sly_Core::isDeveloperMode();
+		$order    = $prodMode ? $cache->get('sly', 'componentorder') : null;
+
+		// if there is no cache yet, we load all components the slow way
+		if (!is_array($order)) {
+			$addonService  = sly_Service_Factory::getAddOnService();
+			$pluginService = sly_Service_Factory::getPluginService();
+
+			// reset our helper to keep track of the component stati
+			$this->loadInfo = array();
+
+			foreach ($addonService->getRegisteredAddons() as $addonName) {
+				$this->load($addonName);
+
+				foreach ($pluginService->getRegisteredPlugins($addonName) as $pluginName) {
+					$this->load(array($addonName, $pluginName));
+				}
+			}
+
+			// and now we have a nice list in $this->loadInfo that we can cache
+			if ($prodMode) $cache->set('sly', 'componentorder', $this->loadInfo);
+		}
+
+		// yay, a cache, let's skip the whole dependency stuff
+		else {
+			foreach ($order as $name => $info) {
+				list($component, $installed, $activated) = $info;
+
+				// load component config files
+				$this->loadConfig($component, $installed, $activated);
+
+				// init the component
+				if ($activated) {
+					$configFile = $this->baseFolder($component).'config.inc.php';
+					$this->req($configFile);
+
+					self::$loaded[$name] = $component;
+				}
+			}
+		}
+	}
+
 	/**
 	 * @param mixed $component  addOn as string, plugin as array
 	 */
 	protected function load($component) {
 		$compAsString = $this->buildComponentName($component);
 
-		if (in_array($compAsString, self::$loaded)) {
+		if (isset(self::$loaded[$compAsString])) {
 			return true;
 		}
 
-		if(!$this->exists($component)) {
+		$service = $this->getService($component);
+
+		if (!$service->exists($component)) {
 			trigger_error('Component '.$compAsString.' does not exists.', E_USER_WARNING);
 			return false;
 		}
 
-		$addonService  = sly_Service_Factory::getAddOnService();
-		$pluginService = sly_Service_Factory::getPluginService();
+		$activated = $this->isAvailable($component);
+		$installed = $activated || $this->isInstalled($component);
 
-		$this->loadConfig($component);
+		if ($installed) {
+			$this->loadConfig($component, $installed, $activated);
+			$this->loadInfo[$compAsString] = array($component, $installed, $activated);
+		}
 
-		if ($this->isAvailable($component)) {
-			$requires = $this->getProperty($component, 'requires');
+		if ($activated) {
+			$requires = $service->getProperty($component, 'requires');
 
 			if (!empty($requires)) {
 				if (!is_array($requires)) $requires = sly_makeArray($requires);
@@ -884,7 +947,7 @@ abstract class sly_Service_AddOn_Base {
 			$configFile = $this->baseFolder($component).'config.inc.php';
 			$this->req($configFile);
 
-			self::$loaded[] = $compAsString;
+			self::$loaded[$compAsString] = $component;
 		}
 	}
 
@@ -905,7 +968,7 @@ abstract class sly_Service_AddOn_Base {
 		// the component and would not the static.yml via loadStatic().
 
 		if ($this->isAvailable($component)) {
-			return $this->getProperty($component, $key, $default);
+			return $this->getService($component)->getProperty($component, $key, $default);
 		}
 
 		$file = $this->baseFolder($component).'static.yml';
@@ -923,5 +986,9 @@ abstract class sly_Service_AddOn_Base {
 		}
 
 		return isset($config[$key]) ? $config[$key] : $default;
+	}
+
+	private function getService($component) {
+		return is_array($component) ? sly_Service_Factory::getPluginService() : sly_Service_Factory::getAddOnService();
 	}
 }
