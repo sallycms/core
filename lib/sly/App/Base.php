@@ -48,37 +48,49 @@ abstract class sly_App_Base {
 	}
 
 	protected function runController($controller, $action) {
-		$response = sly_Core::getResponse();
-
 		// prepare controller
 		$method = $action.'Action';
 
 		if (!($controller instanceof sly_Controller_Base)) {
 			$className  = $this->getControllerClass($controller);
-			$controller = new $className();
-		}
-
-		if (!($controller instanceof sly_Controller_Base)) {
-			throw new sly_Controller_Exception(t('does_not_implement', $className, 'sly_Controller_Base'), 500);
+			$controller = $this->getController($className);
 		}
 
 		if (!method_exists($controller, $method)) {
-			throw new sly_Controller_Exception(t('unknown_action', $method, $className), 404);
+			if (!method_exists($controller, 'slyGetActionFallback')) {
+				throw new sly_Controller_Exception(t('unknown_action', $method, $className), 404);
+			}
+
+			$action = $controller->slyGetActionFallback();
+			$method = $action.'Action';
 		}
 
 		ob_start();
 
 		// init the controller
-		$r = $controller->init($action);
-		if ($r instanceof sly_Response) { ob_end_clean(); return $r; }
+		if (!isset($controller->__sly_init)) {
+			$r = $controller->init($action);
+			$controller->__sly_init = true;
+
+			if ($r instanceof sly_Response || $r instanceof sly_Response_Action) {
+				ob_end_clean();
+				return $r;
+			}
+		}
 
 		// run the action method
 		$r = $controller->$method();
-		if ($r instanceof sly_Response) { ob_end_clean(); return $r; }
+		if ($r instanceof sly_Response || $r instanceof sly_Response_Action) {
+			ob_end_clean();
+			return $r;
+		}
 
 		// and tear it down
 		$r = $controller->teardown($action);
-		if ($r instanceof sly_Response) { ob_end_clean(); return $r; }
+		if ($r instanceof sly_Response || $r instanceof sly_Response_Action) {
+			ob_end_clean();
+			return $r;
+		}
 
 		// collect output
 		return ob_get_clean();
@@ -148,6 +160,22 @@ abstract class sly_App_Base {
 
 		$response->setContent($content);
 		$response->isNotModified();
+	}
+
+	protected function getController($className) {
+		static $instances = array();
+
+		if (!isset($instances[$className])) {
+			$instance = new $className();
+
+			if (!($instance instanceof sly_Controller_Base)) {
+				throw new sly_Controller_Exception(t('does_not_implement', $instance, 'sly_Controller_Base'), 500);
+			}
+
+			$instances[$className] = $instance;
+		}
+
+		return $instances[$className];
 	}
 
 	abstract public function run();
