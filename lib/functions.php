@@ -154,10 +154,10 @@ function sly_makeArray($element) {
 /**
  * Text übersetzen
  *
- * @param  string $index  der zu übersetzende Begriff
- * @return string         die Übersetzung
+ * @param  string $key  der zu übersetzende Begriff
+ * @return string       die Übersetzung
  */
-function t($index) {
+function t($key) {
 	$args = func_get_args();
 	$func = null;
 
@@ -175,7 +175,7 @@ function t($index) {
 		}
 	}
 
-	return $func !== null ? call_user_func_array($func, $args) : $index;
+	return $func !== null ? call_user_func_array($func, $args) : $key;
 }
 
 /**
@@ -186,6 +186,23 @@ function t($index) {
  */
 function ht($index) {
 	return sly_html(t($index));
+}
+
+/**
+ * Übersetzt den Text $text, falls dieser mit dem Präfix "translate:" beginnt.
+ *
+ * @param  string $text  der zu übersetzende Text
+ * @param  bool   $html  wenn true, wird das Ergebnis durch sly_html() behandelt
+ * @return string        der übersetzte Wert
+ */
+function sly_translate($text, $html = false) {
+	$transKey = 'translate:';
+
+	if (sly_Util_String::startsWith($text, $transKey)) {
+		$text = t(mb_substr($text, 10));
+	}
+
+	return $html ? sly_html($text) : $text;
 }
 
 function sly_ini_get($key, $default = null) {

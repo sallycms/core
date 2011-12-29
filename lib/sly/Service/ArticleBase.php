@@ -14,8 +14,9 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base {
 
 	abstract protected function getModelType();
 	abstract protected function getSiblingQuery($id, $clang = null);
-	abstract protected function getMaxPrior($id);
 	abstract protected function buildModel(array $params);
+
+	abstract public function getMaxPosition($id);
 
 	/**
 	 * @param  sly_Model_Base_Article $article
@@ -88,7 +89,7 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base {
 		$type    = $this->getModelType();
 
 		if (!$obj) {
-			throw new sly_Exception(ucfirst($type).' does not exist.');
+			throw new sly_Exception(t($type.'_not_found'));
 		}
 
 		// if no explicit status is given, just take the next one
@@ -122,8 +123,8 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base {
 		if (!isset($this->states[$type])) {
 			$s = array(
 				// display name, CSS class
-				array(t('status_offline'), 'rex-offline'),
-				array(t('status_online'),  'rex-online')
+				array(t('status_offline'), 'sly-offline'),
+				array(t('status_online'),  'sly-online')
 			);
 
 			$s = sly_Core::dispatcher()->filter($this->getEvent('STATUS_TYPES'), $s);
@@ -174,7 +175,7 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base {
 		// check if parent exists
 
 		if ($parentID !== 0 && !sly_Util_Category::exists($parentID)) {
-			throw new sly_Exception('Parent category does not exist.');
+			throw new sly_Exception(t('parent_category_not_found'));
 		}
 
 		///////////////////////////////////////////////////////////////
@@ -191,7 +192,7 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base {
 		///////////////////////////////////////////////////////////////
 		// validate target position
 
-		$maxPos   = $this->getMaxPrior($parentID) + 1;
+		$maxPos   = $this->getMaxPosition($parentID) + 1;
 		$position = ($position <= 0 || $position > $maxPos) ? $maxPos : $position;
 
 		///////////////////////////////////////////////////////////////
@@ -272,13 +273,13 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base {
 		$obj = $this->findById($id, $clangID);
 
 		if ($obj === null) {
-			throw new sly_Exception(t('no_such_'.$modelType));
+			throw new sly_Exception(t($modelType.'_not_found'));
 		}
 
 		///////////////////////////////////////////////////////////////
 		// update the object itself
 
-		$isArticle ? $obj->setName($name) : $obj->setCatname($name);
+		$isArticle ? $obj->setName($name) : $obj->setCatName($name);
 
 		$obj->setUpdateColumns();
 		$this->update($obj);
@@ -299,19 +300,19 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base {
 		///////////////////////////////////////////////////////////////
 		// move object if required
 
-		$curPrior = $isArticle ? $obj->getPrior() : $obj->getCatprior();
+		$curPos = $isArticle ? $obj->getPosition() : $obj->getCatPosition();
 
-		if ($position !== false && $position != $curPrior) {
+		if ($position !== false && $position != $curPos) {
 			$position = (int) $position;
 			$parentID = $obj->getParentId();
-			$maxPrio  = $this->getMaxPrior($parentID);
-			$newPrio  = ($position <= 0 || $position > $maxPrio) ? $maxPrio : $position;
+			$maxPos   = $this->getMaxPosition($parentID);
+			$newPos   = ($position <= 0 || $position > $maxPos) ? $maxPos : $position;
 
 			// only do something if the position really changed
 
-			if ($newPrio != $curPrior) {
-				$relation    = $newPrio < $curPrior ? '+' : '-';
-				list($a, $b) = $newPrio < $curPrior ? array($newPrio, $curPrior) : array($curPrior, $newPrio);
+			if ($newPos != $curPos) {
+				$relation    = $newPos < $curPos ? '+' : '-';
+				list($a, $b) = $newPos < $curPos ? array($newPos, $curPos) : array($curPos, $newPos);
 
 				// move all other objects
 
@@ -320,7 +321,7 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base {
 
 				// save own, new position
 
-				$isArticle ? $obj->setPrior($newPrio) : $obj->setCatprior($newPrio);
+				$isArticle ? $obj->setPosition($newPos) : $obj->setCatPosition($newPos);
 				$this->update($obj);
 			}
 		}
@@ -337,7 +338,7 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base {
 	protected function moveObjects($op, $where) {
 		$db     = sly_DB_Persistence::getInstance();
 		$prefix = sly_Core::getTablePrefix();
-		$field  = $this->getModelType() === 'article' ? 'prior' : 'catprior';
+		$field  = $this->getModelType() === 'article' ? 'pos' : 'catpos';
 
 		$this->clearCacheByQuery($where);
 
@@ -347,8 +348,8 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base {
 		));
 	}
 
-	protected function buildPriorQuery($min, $max = null) {
-		$field = $this->getModelType() === 'article' ? 'prior' : 'catprior';
+	protected function buildPositionQuery($min, $max = null) {
+		$field = $this->getModelType() === 'article' ? 'pos' : 'catpos';
 
 		if ($max === null) {
 			return sprintf('%s >= %d', $field, $min);
@@ -359,9 +360,9 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base {
 
 	protected function getFollowerQuery($parent, $clang, $min, $max = null) {
 		$siblings = $this->getSiblingQuery($parent, $clang);
-		$prior    = $this->buildPriorQuery($min, $max);
+		$position = $this->buildPositionQuery($min, $max);
 
-		return $siblings.' AND '.$prior;
+		return $siblings.' AND '.$position;
 	}
 
 	/**
@@ -386,13 +387,13 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base {
 			$list  = array();
 			$sql   = sly_DB_Persistence::getInstance();
 			$where = $this->getSiblingQuery($categoryID, $clang);
-			$prior = $prefix === 'art' ? 'prior' : 'catprior';
+			$pos   = $prefix === 'art' ? 'pos' : 'catpos';
 
 			if ($ignoreOffline) {
 				$where .= ' AND status = 1';
 			}
 
-			$sql->select($this->tablename, 'id', $where, null, $prior.',name');
+			$sql->select($this->tablename, 'id', $where, null, $pos.',name');
 			foreach ($sql as $row) $list[] = (int) $row['id'];
 
 			sly_Core::cache()->set($namespace, $key, $list);
@@ -412,11 +413,11 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base {
 		$objID = (int) $objID;
 
 		if ($objID === sly_Core::getSiteStartArticleId()) {
-			throw new sly_Exception(t('cant_delete_sitestartarticle'));
+			throw new sly_Exception(t('cannot_delete_start_article'));
 		}
 
 		if ($objID === sly_Core::getNotFoundArticleId()) {
-			throw new sly_Exception(t('cant_delete_notfoundarticle'));
+			throw new sly_Exception(t('cannot_delete_not_found_article'));
 		}
 	}
 }

@@ -71,7 +71,7 @@ class sly_Util_Language {
 			$languageID = sly_Core::getCurrentClang();
 		}
 		elseif (!self::exists($languageID)) {
-			throw new sly_Exception('Unknown language given.');
+			throw new sly_Exception(t('language_not_found'));
 		}
 
 		$languageID = (int) $languageID;

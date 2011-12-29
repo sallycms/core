@@ -19,7 +19,7 @@ class sly_Model_ArticleSlice extends sly_Model_Base_Id {
 	protected $clang;
 	protected $slot;
 	protected $slice_id;
-	protected $prior;
+	protected $pos;
 	protected $createdate;
 	protected $updatedate;
 	protected $createuser;
@@ -32,7 +32,7 @@ class sly_Model_ArticleSlice extends sly_Model_Base_Id {
 		'createuser' => 'string',
 		'createdate' => 'int',
 		'updatedate' => 'int',
-		'prior'      => 'int',
+		'pos'        => 'int',
 		'article_id' => 'int',
 		'clang'      => 'int',
 		'slot'       => 'string',
@@ -62,7 +62,12 @@ class sly_Model_ArticleSlice extends sly_Model_Base_Id {
 	 *
 	 * @return int
 	 */
-	public function getPrior()      { return $this->prior;      }
+	public function getPosition()   { return $this->pos;        }
+
+	/**
+	 * @deprecated  since 0.6
+	 */
+	public function getPrior()      { return $this->pos;        }
 
 	/**
 	 *
@@ -74,25 +79,25 @@ class sly_Model_ArticleSlice extends sly_Model_Base_Id {
 	 *
 	 * @return int
 	 */
-	public function getCreatedate() { return $this->createdate; }
+	public function getCreateDate() { return $this->createdate; }
 
 	/**
 	 *
 	 * @return int
 	 */
-	public function getUpdatedate() { return $this->updatedate; }
+	public function getUpdateDate() { return $this->updatedate; }
 
 	/**
 	 *
 	 * @return string
 	 */
-	public function getCreateuser() { return $this->createuser; }
+	public function getCreateUser() { return $this->createuser; }
 
 	/**
 	 *
 	 * @return int
 	 */
-	public function getUpdateuser() { return $this->updateuser; }
+	public function getUpdateUser() { return $this->updateuser; }
 
 	/**
 	 *
@@ -113,7 +118,7 @@ class sly_Model_ArticleSlice extends sly_Model_Base_Id {
 	 * @return Sly_Model_Slice
 	 */
 	public function getSlice() {
-		if(empty($this->slice)) {
+		if (empty($this->slice)) {
 			$this->slice = sly_Service_Factory::getSliceService()->findById($this->getSliceId());
 		}
 		return $this->slice;
@@ -126,37 +131,37 @@ class sly_Model_ArticleSlice extends sly_Model_Base_Id {
 	/**
 	 * @param int $updatedate
 	 */
-	public function setUpdatedate($updatedate) {
+	public function setUpdateDate($updatedate) {
 		$this->updatedate = (int) $updatedate;
 	}
 
 	/**
 	 * @param string $updateuser
 	 */
-	public function setUpdateuser($updateuser) {
+	public function setUpdateUser($updateuser) {
 		$this->updateuser = $updateuser;
 	}
 
 	/**
 	 * @param int $createdate
 	 */
-	public function setCreatedate($createdate) {
+	public function setCreateDate($createdate) {
 		$this->createdate = (int) $createdate;
 	}
 
 	/**
 	 * @param string $createuser
 	 */
-	public function setCreateuser($createuser) {
+	public function setCreateUser($createuser) {
 		$this->createuser = $createuser;
 	}
 
 	/**
 	 *
-	 * @param int $prior
+	 * @param int $position
 	 */
-	public function setPrior($prior) {
-		$this->prior = $prior;
+	public function setPosition($position) {
+		$this->pos = (int) $position;
 	}
 
 	/**
@@ -191,9 +196,10 @@ class sly_Model_ArticleSlice extends sly_Model_Base_Id {
 	 * @return string the input form of this slice
 	 */
 	public function getInput() {
-		$slice = $this->getSlice();
+		$slice   = $this->getSlice();
 		$content = $slice->getInput();
 		$content = $this->replacePseudoConstants($content);
+
 		return $content;
 	}
 
@@ -202,9 +208,10 @@ class sly_Model_ArticleSlice extends sly_Model_Base_Id {
 	 */
 	public function getOutput() {
 		$slice_content_file = $this->getContentFileName();
+
 		if (!file_exists($slice_content_file)) {
 			if (!$this->generateContentFile()) {
-				return t('slice_could_not_be_generated').' '.t('check_rights_in_directory').$this->getContentDir();
+				return t('slice_could_not_be_generated').' '.t('check_rights_in_directory', $this->getContentDir());
 			}
 		}
 
@@ -225,15 +232,18 @@ class sly_Model_ArticleSlice extends sly_Model_Base_Id {
 	 */
 	private function getContentDir() {
 		static $cachedir;
-		if(!$cachedir) {
+
+		if (!$cachedir) {
 			$cachedir = sly_Util_Directory::create(SLY_DYNFOLDER.'/internal/sally/article_slice/');
 		}
+
 		return $cachedir;
 	}
 
 	private function getContentFileName() {
 		$cachedir   = $this->getContentDir();
 		$modulefile = sly_Service_Factory::getModuleService()->getOutputFilename($this->getModule());
+
 		return $cachedir.DIRECTORY_SEPARATOR.$this->getSliceId().'-'.md5($modulefile).'.slice.php';
 	}
 
@@ -242,12 +252,14 @@ class sly_Model_ArticleSlice extends sly_Model_Base_Id {
 		$slice   = $this->getSlice();
 		$content = $slice->getOutput();
 		$content = $this->replacePseudoConstants($content);
+
 		return file_put_contents($file, $content);
 	}
 
 	private function includeContentFile() {
 		$slice_content_file = $this->getContentFileName();
-		$article = $this->getArticle();
+		$article            = $this->getArticle(); // make available in slice
+
 		include $slice_content_file;
 	}
 
@@ -275,8 +287,8 @@ class sly_Model_ArticleSlice extends sly_Model_Base_Id {
 			$this->getArticle()->getTemplateName(),
 			$this->getId(),
 			$this->getSlot(),
-			$this->getPrior(),
-			$this->getCreateuser()
+			$this->getPosition(),
+			$this->getCreateUser()
 		);
 
 		return str_replace($search, $replace, $content);
@@ -288,5 +300,4 @@ class sly_Model_ArticleSlice extends sly_Model_Base_Id {
 	public function __sleep() {
 		$this->slice = null;
 	}
-
 }

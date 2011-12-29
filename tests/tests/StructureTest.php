@@ -37,14 +37,14 @@ abstract class sly_StructureTest extends sly_DatabaseTest {
 		return json_decode('{"0":{'.$tree.'}}', true);
 	}
 
-	protected function assertPositions(array $expected, $clang = 1) {
+	protected function assertPositions(array $expected, $clang) {
 		foreach ($expected as $idx => $id) {
 			if ($id === null) continue;
 			$this->assertPosition($id, $idx + 1, $clang);
 		}
 	}
 
-	protected function moves($moves, $clang = 1) {
+	protected function moves($moves, $clang) {
 		$moves = json_decode($moves, true);
 
 		foreach ($moves as $move) {
@@ -52,12 +52,12 @@ abstract class sly_StructureTest extends sly_DatabaseTest {
 		}
 	}
 
-	protected function makeMove($id, $to, array $expected, $clang = 1) {
+	protected function makeMove($id, $to, array $expected, $clang) {
 		$this->move($id, $to, $clang);
 		$this->assertPositions($expected, $clang);
 	}
 
-	protected function assertTree($tree, $clang = 1, $parent = 0) {
+	protected function assertTree($tree, $clang, $parent = 0) {
 		$tree    = is_string($tree) ? $this->parseTree($tree) : $tree;
 		$pos     = 1;
 		$service = $this->getService();
@@ -80,7 +80,7 @@ abstract class sly_StructureTest extends sly_DatabaseTest {
 		}
 	}
 
-	abstract protected function move($id, $to, $clang = 1);
-	abstract protected function assertPosition($id, $pos, $clang = 1);
+	abstract protected function move($id, $to, $clang);
+	abstract protected function assertPosition($id, $pos, $clang);
 	abstract protected function getService();
 }

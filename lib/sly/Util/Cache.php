@@ -105,7 +105,7 @@ class sly_Util_Cache {
 	 * @return string
 	 */
 	public static function getConfigFile() {
-		return SLY_DEVELOPFOLDER.'/caches.yml';
+		return SLY_DEVELOPFOLDER.'/config/caches.yml';
 	}
 
 	/**

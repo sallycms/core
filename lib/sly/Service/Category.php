@@ -38,10 +38,10 @@ class sly_Service_Category extends sly_Service_ArticleBase {
 		return implode(' AND ', array_values($where));
 	}
 
-	protected function getMaxPrior($parentID) {
+	public function getMaxPosition($parentID) {
 		$db     = sly_DB_Persistence::getInstance();
 		$where  = $this->getSiblingQuery($parentID);
-		$maxPos = $db->magicFetch('article', 'MAX(catprior)', $where);
+		$maxPos = $db->magicFetch('article', 'MAX(catpos)', $where);
 
 		return $maxPos;
 	}
@@ -52,10 +52,10 @@ class sly_Service_Category extends sly_Service_ArticleBase {
 			     're_id' => $params['parent'],
 			      'name' => $params['name'],
 			   'catname' => $params['name'],
-			  'catprior' => $params['position'],
+			    'catpos' => $params['position'],
 			'attributes' => '',
 			 'startpage' => 1,
-			     'prior' => 1,
+			       'pos' => 1,
 			      'path' => $params['path'],
 			    'status' => $params['status'],
 			      'type' => $params['type'],
@@ -139,7 +139,7 @@ class sly_Service_Category extends sly_Service_ArticleBase {
 		$cat = $this->findById($categoryID);
 
 		if ($cat === null) {
-			throw new sly_Exception(t('category_doesnt_exist'));
+			throw new sly_Exception(t('category_not_found'));
 		}
 
 		// check if this category still has children (both articles and categories)
@@ -147,7 +147,7 @@ class sly_Service_Category extends sly_Service_ArticleBase {
 		$children = $this->findByParentId($categoryID, true);
 
 		if ($this->findByParentId($categoryID, true)) {
-			throw new sly_Exception('Category has still content and therefore cannot be deleted.');
+			throw new sly_Exception(t('category_is_not_empty'));
 		}
 
 		// re-position all following categories
@@ -155,8 +155,8 @@ class sly_Service_Category extends sly_Service_ArticleBase {
 		$parent = $cat->getParentId();
 
 		foreach (sly_Util_Language::findAll(true) as $clangID) {
-			$catprior  = $this->findById($categoryID, $clangID)->getCatprior();
-			$followers = $this->getFollowerQuery($parent, $clangID, $catprior);
+			$catpos    = $this->findById($categoryID, $clangID)->getCatPosition();
+			$followers = $this->getFollowerQuery($parent, $clangID, $catpos);
 
 			$this->moveObjects('-', $followers);
 		}
@@ -220,46 +220,46 @@ class sly_Service_Category extends sly_Service_ArticleBase {
 		// check categories
 
 		if ($category === null) {
-			throw new sly_Exception(t('no_such_category'));
+			throw new sly_Exception(t('category_not_found'));
 		}
 
 		if ($targetID !== 0 && $target === null) {
-			throw new sly_Exception('The target category does not exist.');
+			throw new sly_Exception(t('target_category_not_found'));
 		}
 
 		if ($targetID !== 0 && $targetID === $categoryID) {
-			throw new sly_Exception('Cannot move a category into itself.');
+			throw new sly_Exception(t('source_and_target_are_equal'));
 		}
 
 		// check self-include ($target may not be a child of $category)
 
 		if ($target && $category->isAncestor($target)) {
-			throw new sly_Exception('Cannot move a category inside one of its children.');
+			throw new sly_Exception(t('cannot_move_category_into_child'));
 		}
 
 		// prepare movement
 
 		$oldParent = $category->getParentId();
 		$languages = sly_Util_Language::findAll(true);
-		$newPrio   = $this->getMaxPrior($targetID) + 1;
+		$newPos    = $this->getMaxPosition($targetID) + 1;
 		$oldPath   = $category->getPath();
 		$newPath   = $target ? ($target->getPath().$targetID.'|') : '|';
 
 		// move the $category in each language by itself
 
 		foreach ($languages as $clang) {
-			$cat  = $this->findById($categoryID, $clang);
-			$prio = $cat->getCatprior();
+			$cat = $this->findById($categoryID, $clang);
+			$pos = $cat->getCatPosition();
 
 			$cat->setParentId($targetID);
-			$cat->setCatprior($newPrio);
+			$cat->setCatPosition($newPos);
 			$cat->setPath($newPath);
 
 			// update the cat itself
 			$this->update($cat);
 
 			// move all followers one position up
-			$followers = $this->getFollowerQuery($oldParent, $clang, $prio);
+			$followers = $this->getFollowerQuery($oldParent, $clang, $pos);
 			$this->moveObjects('-', $followers);
 		}
 

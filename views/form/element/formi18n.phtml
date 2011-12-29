@@ -8,11 +8,11 @@
  * http://www.opensource.org/licenses/mit-license.php
  */
 
-$nativeFocus = sly_Helper_Modernizr::hasInput('autofocus');
-$id          = !empty($this->id) ? ' id="'.$this->id.'"' : '';
+$id    = !empty($this->id) ? ' id="'.$this->id.'"' : '';
+$focus = $this->focussedElement;
 
-if (!empty($this->focussedElement) && $nativeFocus) {
-	$el = $this->findElementByID($this->focussedElement);
+if (!empty($focus)) {
+	$el = $focus instanceof sly_Form_ElementBase ? $focus : $this->findElementByID($focus);
 	if ($el) $el->setAttribute('autofocus', 'autofocus');
 }
 
@@ -21,9 +21,9 @@ if (!empty($this->focussedElement) && $nativeFocus) {
 	<div class="sly-form">
 		<form method="<?php echo strtolower($this->method) ?>" action="<?php echo sly_html($this->action) ?>"<?php echo $id ?>>
 			<?php foreach ($this->fieldsets as $i => $fieldset): ?>
-			<fieldset class="rex-form-col-1">
+			<fieldset class="sly-form-col-1">
 				<legend><?php echo sly_html($fieldset['title']) ?></legend>
-				<div class="rex-form-wrapper">
+				<div class="sly-form-wrapper">
 
 				<?php
 
@@ -58,9 +58,3 @@ if (!empty($this->focussedElement) && $nativeFocus) {
 		</form>
 	</div>
 </div>
-
-<?php if (!empty($this->focussedElement) && !$nativeFocus): ?>
-<script type="text/javascript">
-document.getElementById('<?php echo $this->focussedElement ?>').focus();
-</script>
-<?php endif ?>

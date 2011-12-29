@@ -71,7 +71,7 @@ class sly_Service_ArticleType {
 	public function exists($articleType, $throwException = false) {
 		if (!array_key_exists($articleType, $this->data)) {
 			if ($throwException) {
-				throw new sly_Exception(t('exception_articletype_not_exists', $articleType));
+				throw new sly_Exception(t('articletype_not_found', $articleType));
 			}
 
 			return false;

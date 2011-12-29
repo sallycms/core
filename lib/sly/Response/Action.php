@@ -7,16 +7,7 @@
  *
  * http://www.opensource.org/licenses/mit-license.php
  */
-?>
-<p class="sly-form-col-a sly-form-submit">
-	<?php
-	$additionalClass = '';
 
-	foreach ($this->buttons as $button) {
-		$button->addClass('sly-form-submit'.$additionalClass);
-		$additionalClass = ' sly-form-submit-2';
-
-		print $button->render();
-	}
-	?>
-</p>
+interface sly_Response_Action {
+	public function execute(sly_App_Backend $app);
+}
