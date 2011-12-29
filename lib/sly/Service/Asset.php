@@ -29,7 +29,7 @@ class sly_Service_Asset {
 		$this->initCache();
 
 		$dispatcher = sly_Core::dispatcher();
-		$dispatcher->register(self::EVENT_PROCESS_ASSET, array($this, 'processScaffold'));
+		$dispatcher->register(self::EVENT_PROCESS_ASSET, array($this, 'processScaffold'), array(), true);
 	}
 
 	/**
@@ -135,16 +135,7 @@ class sly_Service_Asset {
 		return $path;
 	}
 
-	public function process() {
-		$file = sly_get('sly_asset', 'string');
-		if (empty($file)) {
-			if (isset($_GET['sly_asset'])) {
-				header('HTTP/1.0 400 Bad Request');
-				die;
-			}
-			return;
-		}
-
+	public function process($file) {
 		while (ob_get_level()) ob_end_clean();
 		ob_start();
 

@@ -39,13 +39,21 @@ class sly_Event_Dispatcher {
 	 * execution. A listener can get a list of special parameters that will be
 	 * handed to it when it's called.
 	 *
-	 * @param string $event     the event name (case sensitive, use upper case by convention)
-	 * @param mixed  $listener  the callback (anything PHP regards as callable)
-	 * @param array  $array     additional params for the listener
+	 * @param string  $event     the event name (case sensitive, use upper case by convention)
+	 * @param mixed   $listener  the callback (anything PHP regards as callable)
+	 * @param array   $array     additional params for the listener
+	 * @param boolean $first     if true, the listener will be put in front of existing listeners
 	 */
-	public function register($event, $listener, $params = array()) {
+	public function register($event, $listener, $params = array(), $first = false) {
 		$params = sly_makeArray($params);
-		$this->listeners[$event][] = array('listener' => $listener, 'params' => $params);
+		$item   = array('listener' => $listener, 'params' => $params);
+
+		if ($first && !empty($this->listeners[$event])) {
+			array_unshift($this->listeners[$event], $item);
+		}
+		else {
+			$this->listeners[$event][] = $item;
+		}
 	}
 
 	/**

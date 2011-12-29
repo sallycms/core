@@ -60,6 +60,15 @@ abstract class sly_Layout extends sly_Viewable {
 	}
 
 	/**
+	 * Set the page content directly
+	 *
+	 * @param string $content
+	 */
+	public function setContent($content) {
+		$this->content = trim($content);
+	}
+
+	/**
 	 * Render the page
 	 *
 	 * This method starts a buffer, prints the header, content and footer and
