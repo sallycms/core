@@ -13,6 +13,7 @@
  */
 class sly_Core {
 	private static $instance;  ///< sly_Core
+	private $app;              ///< sly_App_Interface
 	private $cache;            ///< BabelCache_Interface
 	private $configuration;    ///< sly_Configuration
 	private $dispatcher;       ///< sly_Event_Dispatcher
@@ -58,6 +59,20 @@ class sly_Core {
 		$inst = self::getInstance();
 		if (!$inst->cache) $inst->cache = sly_Cache::factory();
 		return $inst->cache;
+	}
+
+	/**
+	 * @param sly_App_Interface $app  the current system app
+	 */
+	public static function setCurrentApp(sly_App_Interface $app) {
+		self::getInstance()->app = $app;
+	}
+
+	/**
+	 * @return sly_App_Interface
+	 */
+	public static function getCurrentApp() {
+		return self::getInstance()->app;
 	}
 
 	/**
@@ -189,21 +204,25 @@ class sly_Core {
 	/**
 	 * Get the current layout instance
 	 *
-	 * @param  string $type  the type of layout (only used when first instantiating the layout)
-	 * @return sly_Layout    the layout instance
+	 * @return sly_Layout  the layout instance
 	 */
-	public static function getLayout($type = 'XHTML') {
+	public static function getLayout() {
 		$instance = self::getInstance();
 
-		//FIXME: layout type kann bloss einmal pro request angegeben werden,
-		// reicht eigentlich auch
-		// eventuell könnte man das in der config oder in index.php angeben
 		if (!isset($instance->layout)) {
-			$className = 'sly_Layout_'.$type;
-			$instance->layout = new $className();
+			throw new sly_Exception(t('layout_has_not_been_set'));
 		}
 
 		return $instance->layout;
+	}
+
+	/**
+	 * Set the current layout instance
+	 *
+	 * @param sly_Layout $layout  the layout instance
+	 */
+	public static function setLayout(sly_Layout $layout) {
+		self::getInstance()->layout = $layout;
 	}
 
 	/**
@@ -430,10 +449,21 @@ class sly_Core {
 	/**
 	 * Returns the current backend page
 	 *
+	 * @deprecated as of 0.6, use getCurrentController()
+	 *
 	 * @return string  current page or null if in frontend
 	 */
 	public static function getCurrentPage() {
-		return self::isBackend() ? sly_Controller_Base::getPage() : null;
+		return self::isBackend() ? self::getCurrentController() : null;
+	}
+
+	/**
+	 * Returns the current controller
+	 *
+	 * @return string  current controller
+	 */
+	public static function getCurrentController() {
+		return self::getCurrentApp()->getCurrentController();
 	}
 
 	/**

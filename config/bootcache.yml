@@ -2,6 +2,9 @@
 # They will be cached using the bootcache, together with addOn files.
 
 static:
+  - sly_App_Interface
+  - sly_App_Base
+  - sly_Controller_Base
   - sly_Loader
   - sly_Core
   - sly_Event_Dispatcher
@@ -42,8 +45,13 @@ static:
   - sly_Model_Base_Article
   - sly_Model_Article
   - sly_Response
-frontend: []
+frontend:
+  - sly_App_Frontend
+  - sly_Router_Base
+  - sly_Controller_Frontend_Base
+  - sly_Controller_Frontend_Article  # 99% of all requests will be article requests
 backend:
+  - sly_App_Backend
   - sly_Viewable
   - sly_Layout
   - sly_Layout_XHTML
@@ -57,4 +65,3 @@ backend:
   - sly_Service_Model_Base_Id
   - sly_Service_User
   - sly_Util_User
-  - sly_Controller_Base
