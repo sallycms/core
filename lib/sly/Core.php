@@ -13,6 +13,7 @@
  */
 class sly_Core {
 	private static $instance;  ///< sly_Core
+	private $app;              ///< sly_App_Interface
 	private $cache;            ///< BabelCache_Interface
 	private $configuration;    ///< sly_Configuration
 	private $dispatcher;       ///< sly_Event_Dispatcher
@@ -61,17 +62,31 @@ class sly_Core {
 	}
 
 	/**
-	 * @param int $clangId  the new clang
+	 * @param sly_App_Interface $app  the current system app
 	 */
-	public static function setCurrentClang($clangId) {
-		self::getInstance()->curClang = (int) $clangId;
+	public static function setCurrentApp(sly_App_Interface $app) {
+		self::getInstance()->app = $app;
 	}
 
 	/**
-	 * @param int $articleId  the new article ID
+	 * @return sly_App_Interface
+	 */
+	public static function getCurrentApp() {
+		return self::getInstance()->app;
+	}
+
+	/**
+	 * @param int $clangId  the new clang or null to reset
+	 */
+	public static function setCurrentClang($clangId) {
+		self::getInstance()->curClang = $clangId === null ? null : (int) $clangId;
+	}
+
+	/**
+	 * @param int $articleId  the new article ID or null to reset
 	 */
 	public static function setCurrentArticleId($articleId) {
-		self::getInstance()->curArticleId = (int) $articleId;
+		self::getInstance()->curArticleId = $articleId === null ? null : (int) $articleId;
 	}
 
 	/**
@@ -189,21 +204,25 @@ class sly_Core {
 	/**
 	 * Get the current layout instance
 	 *
-	 * @param  string $type  the type of layout (only used when first instantiating the layout)
-	 * @return sly_Layout    the layout instance
+	 * @return sly_Layout  the layout instance
 	 */
-	public static function getLayout($type = 'XHTML') {
+	public static function getLayout() {
 		$instance = self::getInstance();
 
-		//FIXME: layout type kann bloss einmal pro request angegeben werden,
-		// reicht eigentlich auch
-		// eventuell könnte man das in der config oder in index.php angeben
 		if (!isset($instance->layout)) {
-			$className = 'sly_Layout_'.$type;
-			$instance->layout = new $className();
+			throw new sly_Exception(t('layout_has_not_been_set'));
 		}
 
 		return $instance->layout;
+	}
+
+	/**
+	 * Set the current layout instance
+	 *
+	 * @param sly_Layout $layout  the layout instance
+	 */
+	public static function setLayout(sly_Layout $layout) {
+		self::getInstance()->layout = $layout;
 	}
 
 	/**
@@ -365,17 +384,7 @@ class sly_Core {
 	 * loads all known addons into Sally
 	 */
 	public static function loadAddons() {
-		$addonService  = sly_Service_Factory::getAddOnService();
-		$pluginService = sly_Service_Factory::getPluginService();
-
-		foreach ($addonService->getRegisteredAddons() as $addonName) {
-			$addonService->loadAddon($addonName);
-
-			foreach ($pluginService->getRegisteredPlugins($addonName) as $pluginName) {
-				$pluginService->loadPlugin(array($addonName, $pluginName));
-			}
-		}
-
+		sly_Service_Factory::getAddOnService()->loadComponents();
 		self::dispatcher()->notify('ADDONS_INCLUDED');
 	}
 
@@ -440,10 +449,21 @@ class sly_Core {
 	/**
 	 * Returns the current backend page
 	 *
+	 * @deprecated as of 0.6, use getCurrentController()
+	 *
 	 * @return string  current page or null if in frontend
 	 */
 	public static function getCurrentPage() {
-		return self::isBackend() ? sly_Controller_Base::getPage() : null;
+		return self::isBackend() ? self::getCurrentController() : null;
+	}
+
+	/**
+	 * Returns the current controller
+	 *
+	 * @return string  current controller
+	 */
+	public static function getCurrentController() {
+		return self::getCurrentApp()->getCurrentController();
 	}
 
 	/**

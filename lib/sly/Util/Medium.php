@@ -80,7 +80,7 @@ class sly_Util_Medium {
 		// check file data
 
 		if (!isset($fileData['tmp_name'])) {
-			throw new sly_Exception('Invalid file data array given.', self::ERR_INVALID_FILEDATA);
+			throw new sly_Exception(t('invalid_file_data'), self::ERR_INVALID_FILEDATA);
 		}
 
 		// If we're going to replace a medium, check if the type of the new
@@ -91,7 +91,7 @@ class sly_Util_Medium {
 			$oldType = $mediumToReplace->getFiletype();
 
 			if ($newType !== $oldType) {
-				throw new sly_Exception('The types of the old and new file don\'t match.', self::ERR_TYPE_MISMATCH);
+				throw new sly_Exception(t('types_of_old_and_new_do_not_match'), self::ERR_TYPE_MISMATCH);
 			}
 		}
 
@@ -113,7 +113,7 @@ class sly_Util_Medium {
 		// move uploaded file
 
 		if (!@move_uploaded_file($fileData['tmp_name'], $dstFile)) {
-			throw new sly_Exception('Error while moving the uploaded file.', self::ERR_UPLOAD_FAILED);
+			throw new sly_Exception(t('error_moving_uploaded_file'), self::ERR_UPLOAD_FAILED);
 		}
 
 		@chmod($dstFile, sly_Core::config()->get('FILEPERM'));

@@ -269,10 +269,10 @@ class sly_Form extends sly_Form_Base {
 	 * This method sets the focus to one element, generating a bit of jQuery code
 	 * to set the cursor to it when the form is rendered.
 	 *
-	 * @param string $elementID  the ID of the element to focus
+	 * @param mixed $element  the instance or ID of the element to focus
 	 */
-	public function setFocus($elementID) {
-		$this->focussedElement = $elementID;
+	public function setFocus($element) {
+		$this->focussedElement = $element;
 	}
 
 	/**

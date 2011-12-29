@@ -297,6 +297,31 @@ class sly_Util_String {
 	}
 
 	/**
+	 * @param  double $seconds
+	 * @return string
+	 */
+	public static function formatTimespan($seconds) {
+		$ms        = $seconds - floor($seconds);
+		$formatted = self::secondsToAbsTime($seconds - $ms);
+		list($hours, $mins, $secs) = explode(':', $formatted);
+
+		$hours = explode('d', $hours);
+		$days  = (int) (count($hours) === 1 ? 0 : $hours[0]);
+		$hours = (int) (count($hours) === 1 ? $hours[0] : $hours[1]);
+		$mins  = (int) $mins;
+		$secs  = (int) $secs;
+
+		$list = array();
+		if ($days)  $list[] = sprintf('%d %s', $days,    t('days_short'));
+		if ($hours) $list[] = sprintf('%d %s', $hours,   t('hours_short'));
+		if ($mins)  $list[] = sprintf('%d %s', $mins,    t('minutes_short'));
+		if ($secs)  $list[] = sprintf('%d %s', $secs,    t('seconds_short'));
+		if ($ms)    $list[] = sprintf('%d %s', $ms*1000, t('milliseconds_short'));
+
+		return implode(' ', $list);
+	}
+
+	/**
 	 * @param  string $text
 	 * @return string
 	 */

@@ -18,7 +18,7 @@ class sly_FunctionsTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals(sly_makeArray(array(1,2,3)), array(1,2,3));
 	}
 
-	public function testRexParamString() {
+	public function testQueryString() {
 		$this->assertEquals('&foo=bar', sly_Util_HTTP::queryString(array('foo' => 'bar'), '&'));
 		$this->assertEquals('&foo=%C3%9F%24', sly_Util_HTTP::queryString(array('foo' => 'ß$'), '&'));
 		$this->assertEquals('foo=bar', 'foo=bar');

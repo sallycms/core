@@ -18,11 +18,11 @@ class sly_Model_Base_Article extends sly_Model_Base {
 	protected $updateuser;  ///< string
 	protected $status;      ///< int
 	protected $name;        ///< string
-	protected $catprior;    ///< int
+	protected $catpos;      ///< int
 	protected $createdate;  ///< int
 	protected $clang;       ///< int
 	protected $re_id;       ///< int
-	protected $prior;       ///< int
+	protected $pos;         ///< int
 	protected $catname;     ///< string
 	protected $startpage;   ///< int
 	protected $updatedate;  ///< int
@@ -35,8 +35,7 @@ class sly_Model_Base_Article extends sly_Model_Base {
 	protected $_pk = array('id' => 'int', 'clang' => 'int'); ///< array
 	protected $_attributes = array(
 		'updateuser' => 'string', 'status' => 'int', 'name' => 'string',
-		'catprior' => 'int', 'createdate' => 'int',
-		're_id' => 'int', 'prior' => 'int',
+		'catpos' => 'int', 'createdate' => 'int', 're_id' => 'int', 'pos' => 'int',
 		'catname' => 'string', 'startpage' => 'int', 'updatedate' => 'int',
 		'createuser' => 'string', 'attributes' => 'string', 'path' => 'string',
 		'type' => 'string', 'revision' => 'int'
@@ -52,7 +51,7 @@ class sly_Model_Base_Article extends sly_Model_Base {
 	/**
 	 * @return string
 	 */
-	public function getUpdateuser() {
+	public function getUpdateUser() {
 		return $this->updateuser;
 	}
 
@@ -73,14 +72,21 @@ class sly_Model_Base_Article extends sly_Model_Base {
 	/**
 	 * @return int
 	 */
-	public function getCatprior() {
-		return $this->catprior;
+	public function getCatPosition() {
+		return $this->catpos;
+	}
+
+	/**
+	 * @deprecated  since 0.6
+	 */
+	public function getCatPrior() {
+		return $this->catpos;
 	}
 
 	/**
 	 * @return int
 	 */
-	public function getCreatedate() {
+	public function getCreateDate() {
 		return $this->createdate;
 	}
 
@@ -101,14 +107,21 @@ class sly_Model_Base_Article extends sly_Model_Base {
 	/**
 	 * @return int
 	 */
+	public function getPosition() {
+		return $this->pos;
+	}
+
+	/**
+	 * @deprecated  since 0.6
+	 */
 	public function getPrior() {
-		return $this->prior;
+		return $this->pos;
 	}
 
 	/**
 	 * @return string
 	 */
-	public function getCatname() {
+	public function getCatName() {
 		return $this->catname;
 	}
 
@@ -122,14 +135,14 @@ class sly_Model_Base_Article extends sly_Model_Base {
 	/**
 	 * @return int
 	 */
-	public function getUpdatedate() {
+	public function getUpdateDate() {
 		return $this->updatedate;
 	}
 
 	/**
 	 * @return string
 	 */
-	public function getCreateuser() {
+	public function getCreateUser() {
 		return $this->createuser;
 	}
 
@@ -171,7 +184,7 @@ class sly_Model_Base_Article extends sly_Model_Base {
 	/**
 	 * @param string $updateuser
 	 */
-	public function setUpdateuser($updateuser) {
+	public function setUpdateUser($updateuser) {
 		$this->updateuser = $updateuser;
 	}
 
@@ -190,16 +203,23 @@ class sly_Model_Base_Article extends sly_Model_Base {
 	}
 
 	/**
-	 * @param int $catprior
+	 * @param int $position
 	 */
-	public function setCatprior($catprior) {
-		$this->catprior = (int) $catprior;
+	public function setCatPosition($position) {
+		$this->catpos = (int) $position;
+	}
+
+	/**
+	 * @deprecated  since 0.6
+	 */
+	public function setCatPrior($position) {
+		$this->catpos = (int) $position;
 	}
 
 	/**
 	 * @param int $createdate
 	 */
-	public function setCreatedate($createdate) {
+	public function setCreateDate($createdate) {
 		$this->createdate = (int) $createdate;
 	}
 
@@ -218,16 +238,23 @@ class sly_Model_Base_Article extends sly_Model_Base {
 	}
 
 	/**
-	 * @param int $prior
+	 * @param int $position
 	 */
-	public function setPrior($prior) {
-		$this->prior = (int) $prior;
+	public function setPosition($position) {
+		$this->pos = (int) $position;
+	}
+
+	/**
+	 * @deprecated  since 0.6
+	 */
+	public function setPrior($position) {
+		$this->catpos = (int) $position;
 	}
 
 	/**
 	 * @param string $catname
 	 */
-	public function setCatname($catname) {
+	public function setCatName($catname) {
 		$this->catname = $catname;
 	}
 
@@ -241,14 +268,14 @@ class sly_Model_Base_Article extends sly_Model_Base {
 	/**
 	 * @param int $updatedate
 	 */
-	public function setUpdatedate($updatedate) {
+	public function setUpdateDate($updatedate) {
 		$this->updatedate = (int) $updatedate;
 	}
 
 	/**
 	 * @param string $createuser
 	 */
-	public function setCreateuser($createuser) {
+	public function setCreateUser($createuser) {
 		$this->createuser = $createuser;
 	}
 

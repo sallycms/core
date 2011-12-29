@@ -15,15 +15,15 @@ abstract class sly_Service_ArticleTestBase extends sly_StructureTest {
 		return $service;
 	}
 
-	protected function assertPosition($id, $pos, $clang = 1) {
+	protected function assertPosition($id, $pos, $clang) {
 		$service = $this->getService();
 		$art     = $service->findById($id, $clang);
 		$msg     = 'Position of article '.$id.' should be '.$pos.'.';
 
-		$this->assertEquals($pos, $art->getPrior(), $msg);
+		$this->assertEquals($pos, $art->getPosition(), $msg);
 	}
 
-	protected function move($id, $to, $clang = 1) {
+	protected function move($id, $to, $clang) {
 		$cat = $this->getService()->findById($id, $clang);
 		$this->getService()->edit($id, $clang, $cat->getName(), $to);
 	}

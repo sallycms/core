@@ -10,10 +10,10 @@
 
 $outerClass  = $element->getOuterClass();
 $outerClass  = $outerClass ? ' class="'.$outerClass.'"' : '';
-$help        = $element->getHelpText() ? '<span class="sly-form-helptext">'.nl2br(sly_html($element->getHelpText())).'</span>' : '';
+$help        = $element->getHelpText() ? '<span class="sly-form-helptext">'.nl2br(sly_translate($element->getHelpText(), true)).'</span>' : '';
 $isContainer = $element->isContainer();
 $label       = $element->getLabel();
-$label       = empty($label) ? '&nbsp;' : sly_html(rex_translate($label, null, false).':');
+$label       = empty($label) ? '&nbsp;' : sly_translate($label, true).':';
 
 // Elemente einrücken
 
@@ -26,7 +26,7 @@ if ($isContainer) {
 }
 else {
 	?>
-	<div class="rex-form-row<?php echo $isLast ? ' last' : '' ?>">
+	<div class="sly-form-row<?php echo $isLast ? ' last' : '' ?>">
 		<p<?php echo $outerClass ?>>
 			<label for="<?php echo $element->getID() ?>"><?php echo $label ?></label>
 			<?php echo $element->render() ?>

@@ -39,7 +39,7 @@ abstract class sly_Form_Helper {
 			self::$i18nLoaded = true;
 		}
 
-		$init   = array(0 => t('pool_kats_no'));
+		$init   = array(0 => t('no_category'));
 		$select = new sly_Form_Select_DropDown($name, '', -1, $init, $id);
 
 		if ($root === null) {
@@ -75,11 +75,12 @@ abstract class sly_Form_Helper {
 	 * @param  int            $root         the root category to use
 	 * @param  sly_Model_User $user         the user (null for the current one)
 	 * @param  string         $id           the elements ID
+	 * @param  boolean        $addHomepage  whether or not to add the start article
 	 * @return sly_Form_Select_DropDown     the generated select element
 	 */
 	public static function getCategorySelect($name, $hideOffline = true, $clang = null, $root = null, sly_Model_User $user = null, $id = null, $addHomepage = true) {
 		$values = array();
-		if($addHomepage) $values[0] = 'Homepage';
+		if ($addHomepage) $values[0] = t('start_article');
 		$select = new sly_Form_Select_DropDown($name, '', -1, $values, $id);
 
 		if ($root === null) {

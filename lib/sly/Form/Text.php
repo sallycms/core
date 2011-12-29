@@ -33,6 +33,9 @@ class sly_Form_Text extends sly_Form_ElementBase implements sly_Form_IElement {
 		parent::__construct('', $label, '', $id);
 		$this->content = $text;
 		$this->isHTML  = false;
+
+		$this->setAttribute('style', 'line-height:21px');
+		$this->addOuterClass('sly-form-read');
 	}
 
 	/**
@@ -52,7 +55,6 @@ class sly_Form_Text extends sly_Form_ElementBase implements sly_Form_IElement {
 	 * @return string  the XHTML code
 	 */
 	public function render() {
-		$this->setAttribute('style', 'line-height:21px');
 		$content = $this->isHTML ? $this->content : nl2br(sly_html($this->content));
 		return '<span '.$this->getAttributeString().'>'.$content.'</span>';
 	}
@@ -64,16 +66,6 @@ class sly_Form_Text extends sly_Form_ElementBase implements sly_Form_IElement {
 	 */
 	public function setIsHTML($isHTML) {
 		$this->isHTML = (boolean) $isHTML;
-	}
-
-	/**
-	 * Returns the outer row class
-	 *
-	 * @return string  the outer class
-	 */
-	public function getOuterClass() {
-		$this->addOuterClass('sly-form-read');
-		return $this->outerClass;
 	}
 
 	/**

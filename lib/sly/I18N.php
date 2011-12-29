@@ -107,13 +107,11 @@ class sly_I18N implements sly_I18N_Base {
 	 * @return string       translated message or the key like in translate:key when not found
 	 */
 	public function msg($key) {
-		if ($this->hasMsg($key)) {
-			$msg = $this->texts[$key];
-		}
-		else {
-			$msg = '[translate:'.$key.']';
+		if (!$this->hasMsg($key)) {
+			return '[translate:'.$key.']';
 		}
 
+		$msg          = $this->texts[$key];
 		$patterns     = array();
 		$replacements = array();
 

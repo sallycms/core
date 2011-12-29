@@ -1,5 +1,4 @@
 <?php
-
 /*
  * Copyright (c) 2011, webvariants GbR, http://www.webvariants.de
  *
@@ -23,7 +22,6 @@ class sly_Service_ArticleSlice extends sly_Service_Model_Base_Id {
 	 * @param  array $params
 	 * @return sly_Model_ArticleSlice
 	 */
-
 	protected function makeInstance(array $params) {
 		return new sly_Model_ArticleSlice($params);
 	}
@@ -31,26 +29,27 @@ class sly_Service_ArticleSlice extends sly_Service_Model_Base_Id {
 	public function create($params) {
 		if (empty($params['slice_id'])) {
 			if (empty($params['module'])) {
-				throw new sly_Exception('sly_Service_ArticleSlice: A new ArticleSlice must eighter contain a slice_id, oder module value');
+				throw new sly_Exception(t('articleslice_must_contain_slice_id_or_module'));
 			}
+
 			$slice = sly_Service_Factory::getSliceService()->create(array('module' => $params['module']));
 			$params['slice_id'] = $slice->getId();
-			sly_dump($params['slice_id']);
 		}
+
 		$articleSlice = parent::create($params);
 
 		$pre = sly_Core::config()->get('DATABASE/TABLE_PREFIX');
 		$sql = sly_DB_Persistence::getInstance();
 		$sql->query(
-				'UPDATE ' . $pre . $this->tablename . ' SET prior = prior + 1 ' .
-				'WHERE article_id = ? AND clang = ? AND slot = ? ' .
-				'AND prior >= ? AND id <> ?', array(
-			$articleSlice->getArticleId(),
-			$articleSlice->getClang(),
-			$articleSlice->getSlot(),
-			$articleSlice->getPrior(),
-			$articleSlice->getId()
-				)
+			'UPDATE ' . $pre . $this->tablename . ' SET pos = pos + 1 ' .
+			'WHERE article_id = ? AND clang = ? AND slot = ? ' .
+			'AND pos >= ? AND id <> ?', array(
+				$articleSlice->getArticleId(),
+				$articleSlice->getClang(),
+				$articleSlice->getSlot(),
+				$articleSlice->getPosition(),
+				$articleSlice->getId()
+			)
 		);
 
 		return $articleSlice;
@@ -59,9 +58,11 @@ class sly_Service_ArticleSlice extends sly_Service_Model_Base_Id {
 	public function delete($where) {
 		$sql = sly_DB_Persistence::getInstance();
 		$sql->select($this->tablename, 'id', $where);
+
 		foreach ($sql as $id) {
 			$this->deleteById($id);
 		}
+
 		return true;
 	}
 
@@ -83,13 +84,13 @@ class sly_Service_ArticleSlice extends sly_Service_Model_Base_Id {
 		$pre = sly_Core::config()->get('DATABASE/TABLE_PREFIX');
 
 		// fix order
-		$sql->query('UPDATE ' . $pre . 'article_slice SET prior = prior -1 WHERE
-			article_id = ? AND clang = ? AND slot = ? AND prior > ?',
+		$sql->query('UPDATE '.$pre.'article_slice SET pos = pos -1 WHERE
+			article_id = ? AND clang = ? AND slot = ? AND pos > ?',
 			array(
 				$articleSlice->getArticleId(),
 				$articleSlice->getClang(),
 				$articleSlice->getSlot(),
-				$articleSlice->getPrior()
+				$articleSlice->getPosition()
 			)
 		);
 
@@ -112,35 +113,34 @@ class sly_Service_ArticleSlice extends sly_Service_Model_Base_Id {
 	 */
 	public function move($slice_id, $clang, $direction) {
 		$slice_id = (int) $slice_id;
-		$clang = (int) $clang;
+		$clang    = (int) $clang;
 
 		if (!in_array($direction, array('up', 'down'))) {
-			throw new sly_Exception('ArticleSliceService: Unsupported direction "' . $direction . '"!', E_USER_ERROR);
+			throw new sly_Exception(t('unsupported_direction', $direction));
 		}
 
-		$success = false;
-
+		$success      = false;
 		$articleSlice = $this->findById($slice_id);
 
 		if ($articleSlice) {
-			$sql = sly_DB_Persistence::getInstance();
-			$article_id = (int) $articleSlice->getArticleId();
-			$prior = (int) $articleSlice->getPrior();
-			$slot = $articleSlice->getSlot();
-			$newprior = $direction == 'up' ? $prior - 1 : $prior + 1;
+			$sql        = sly_DB_Persistence::getInstance();
+			$article_id = $articleSlice->getArticleId();
+			$pos        = $articleSlice->getPosition();
+			$slot       = $articleSlice->getSlot();
+			$newpos     = $direction == 'up' ? $pos - 1 : $pos + 1;
 			$sliceCount = $this->count(array('article_id' => $article_id, 'clang' => $clang, 'slot' => $slot));
 
-			if ($newprior > -1 && $newprior < $sliceCount) {
-				$sql->update('article_slice', array('prior' => $prior), array('article_id' => $article_id, 'clang' => $clang, 'slot' => $slot, 'prior' => $newprior));
-				$articleSlice->setPrior($newprior);
+			if ($newpos > -1 && $newpos < $sliceCount) {
+				$sql->update('article_slice', array('pos' => $pos), array('article_id' => $article_id, 'clang' => $clang, 'slot' => $slot, 'pos' => $newpos));
+				$articleSlice->setPosition($newpos);
 				$this->save($articleSlice);
 
 				// notify system
 				sly_Core::dispatcher()->notify('SLY_SLICE_MOVED', $articleSlice, array(
-					'clang' => $clang,
+					'clang'     => $clang,
 					'direction' => $direction,
-					'oldprior' => $prior,
-					'newprior' => $newprior
+					'old_pos'   => $pos,
+					'new_pos'   => $newpos
 				));
 
 				$success = true;
@@ -149,5 +149,4 @@ class sly_Service_ArticleSlice extends sly_Service_Model_Base_Id {
 
 		return $success;
 	}
-
 }

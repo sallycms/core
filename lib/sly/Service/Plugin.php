@@ -147,13 +147,6 @@ class sly_Service_Plugin extends sly_Service_AddOn_Base {
 	}
 
 	/**
-	 * @return string
-	 */
-	protected function getI18NPrefix() {
-		return 'plugin_';
-	}
-
-	/**
 	 * @param  array $plugin
 	 * @return string
 	 */
@@ -174,8 +167,6 @@ class sly_Service_Plugin extends sly_Service_AddOn_Base {
 
 	public function exists($plugin) {
 		$base = $this->baseFolder($plugin);
-		if(!is_dir($base)) return false;
-		if(!file_exists($base.'config.inc.php')) return false;
-		return true;
+		return file_exists($base.'config.inc.php');
 	}
 }
