@@ -12,6 +12,7 @@ $here      = dirname(__FILE__);
 $sallyRoot = realpath($here.'/../../');
 
 define('SLY_IS_TESTING',        true);
+define('IS_SALLY_BACKEND',      true);
 define('SLY_TESTING_USER_ID',   1);
 define('SLY_TESTING_ROOT',      $sallyRoot);
 define('SLY_TESTING_USE_CACHE', true);
@@ -40,8 +41,16 @@ foreach (array('local', 'project') as $conf) {
 $files = glob($sallyRoot.'/data/dyn/internal/sally/yaml-cache/*');
 if (is_array($files)) array_map('unlink', $files);
 
-// boot Sally
-require SLY_TESTING_ROOT.'/sally/backend/index.php';
+// load core system
+require SLY_SALLYFOLDER.'/core/master.php';
+
+// add the backend app
+sly_Loader::addLoadPath(SLY_SALLYFOLDER.'/backend/lib/', 'sly_');
+
+// init the app
+$app = new sly_App_Backend();
+sly_Core::setCurrentApp($app);
+$app->initialize();
 
 // make tests autoloadable
 sly_Loader::addLoadPath(dirname(__FILE__).'/tests', 'sly_');
