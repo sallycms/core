@@ -12,6 +12,7 @@ class sly_Slice_Renderer {
 
 	private $moduleName;
 	private $values;
+	private $dataIndex;
 
 	/**
 	 * @param array $values
@@ -33,19 +34,22 @@ class sly_Slice_Renderer {
 		$this->values = $values;
 	}
 
-	protected function value($id, $default) {
+	protected function value($id, $default = null) {
 		if(!array_key_exists($id, $this->values)) return $default;
 		return $this->values[$id];
 	}
 
-	public function renderInput() {
+	public function renderInput($dataIndex) {
+		$this->dataIndex = $dataIndex;
 		$service                      = sly_Service_Factory::getModuleService();
 		$filenameHtuG50hNCdikAvf7CZ1F = $service->getFolder().DIRECTORY_SEPARATOR.$service->getInputFilename($this->moduleName);
 		unset($service);
-		$form = new sly_Form('', '', '');
+		$form = new sly_Slice_Form();
 		ob_start();
 		include $filenameHtuG50hNCdikAvf7CZ1F;
-		print $form->render(true);
+		$form->setSubmitButton(null);
+		$form->setResetButton(null);
+		print $form->render($dataIndex);
 		return ob_get_clean();
 	}
 
