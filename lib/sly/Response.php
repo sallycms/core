@@ -128,10 +128,7 @@ class sly_Response {
 		// Fix Content-Type
 		$charset = $this->charset ? $this->charset : 'UTF-8';
 
-		if ($this->headers->has('content-type')) {
-			$this->headers->set('content-type', 'text/html; charset='.$charset);
-		}
-		elseif ('text/' === substr($this->headers->get('content-type'), 0, 5) && false === strpos($this->headers->get('content-type'), 'charset')) {
+		if ($this->headers->has('content-type') && false === strpos($this->headers->get('content-type'), 'charset')) {
 			// add the charset
 			$this->headers->set('content-type', $this->headers->get('content-type').'; charset='.$charset);
 		}
@@ -185,7 +182,7 @@ class sly_Response {
 		if (!sly_ini_get('zlib.output_compression')) {
 			if (ob_start('ob_gzhandler') === false) {
 				// manually send content length if everything fails
-				$response->setHeader('Content-Length', mb_strlen($content));
+				$this->setHeader('Content-Length', mb_strlen($this->content));
 			}
 		}
 
