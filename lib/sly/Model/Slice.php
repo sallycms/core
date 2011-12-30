@@ -80,7 +80,7 @@ class sly_Model_Slice extends sly_Model_Base_Id {
 	 */
 	public function getOutput() {
 		$values   = $this->getValues();
-		$renderer = new sly_SliceRenderer($this->getModule(), $values);
+		$renderer = new sly_Slice_Renderer($this->getModule(), $values);
 		$output   = $renderer->renderOutput();
 		$output   = $this->replacePseudoConstants($output);
 		return $output;
