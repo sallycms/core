@@ -19,7 +19,7 @@ RewriteCond %1protected/%{ENV:HTTP_ENCODING_CACHEDIR}%2  !-f
 RewriteCond %1protected/%{ENV:HTTP_ENCODING_CACHEDIR}%2  !-l
 RewriteCond %{REQUEST_FILENAME}%{PATH_INFO}              !cache\.php
 RewriteCond %{REQUEST_FILENAME}%{PATH_INFO}              !protect\.php
-RewriteRule (.*)                                         ../../../../../index.php?slycontroller=asset&sly_asset=$1&encoding=%{ENV:HTTP_ENCODING_CACHEDIR} [QSA,L]
+RewriteRule (.*)                                         ../../../../../index.php?slycontroller=asset&sly_asset=$1 [QSA,L]
 
 # handle permissions
 # "data/dyn/public/sally/static-cache/assets/favicon.ico"
