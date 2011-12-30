@@ -320,7 +320,7 @@ class NestedSelectors
 	 * @param $comment
 	 * @return return type
 	 */
-	protected function encode_comment($comment)
+	protected static function encode_comment($comment)
 	{
 		// Encode new lines
 		$comment = preg_replace('/\n|\r/', '#NEWLINE#',$comment[1]);
