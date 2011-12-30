@@ -16,7 +16,7 @@
  */
 class sly_Model_SliceValue extends sly_Model_Base_Id {
 	protected $slice_id; ///< int
-	protected $type;     ///< string
+	protected $finder;   ///< string
 	protected $value;    ///< string
 
 	protected $_attributes = array('slice_id' => 'int', 'finder' => 'string', 'value' => 'string'); ///< array
