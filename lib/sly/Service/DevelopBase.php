@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright (c) 2011, webvariants GbR, http://www.webvariants.de
+ * Copyright (c) 2012, webvariants GbR, http://www.webvariants.de
  *
  * This file is released under the terms of the MIT license. You can find the
  * complete text in the attached LICENSE file or online at:
@@ -13,7 +13,6 @@
  * actions. This class holds general methods, that are used in all
  * implementors.
  *
- * @copyright 2011 webvariants GbR
  * @ingroup service
  */
 abstract class sly_Service_DevelopBase {
