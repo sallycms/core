@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright (c) 2011, webvariants GbR, http://www.webvariants.de
+ * Copyright (c) 2012, webvariants GbR, http://www.webvariants.de
  *
  * This file is released under the terms of the MIT license. You can find the
  * complete text in the attached LICENSE file or online at:
@@ -260,7 +260,7 @@ abstract class sly_Form_ElementBase extends sly_Viewable {
 	public function getDisplayValueHelper($type = 'string', $asArray = false) {
 		// Prüfen, ob das Formular bereits abgeschickt und noch einmal angezeigt
 		// werden soll. Falls ja, übernehmen wir den Wert aus den POST-Daten.
-		
+
 		$name = $this->attributes['name'];
 
 		if (isset($_POST[$name]) && !$asArray) {
