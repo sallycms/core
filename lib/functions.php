@@ -152,37 +152,34 @@ function sly_makeArray($element) {
 }
 
 /**
- * Text übersetzen
+ * translate a key
  *
- * @param  string $key  der zu übersetzende Begriff
- * @return string       die Übersetzung
+ * You can give more arguments than just the key to have them inserted at the
+ * special placeholders ({0}, {1}, ...).
+ *
+ * @param  string $key  the key to find in the current language database
+ * @return string       the found translation or a string like '[translate:X]'
  */
 function t($key) {
 	$args = func_get_args();
-	$func = null;
+	$i18n = sly_Core::getI18N();
 
-	if (sly_Core::isBackend()) {
-		$func = array(sly_Core::getI18N(), 'msg');
-	}
-	else {
-		// TODO: remove addon specific code
-		if (class_exists('WV9_Language')) {
-			$func = array(WV9_Language::getInstance(), 'translate');
-		}
-		else {
-			// try to find a translation via the default locale
-			$func = array(sly_Core::getI18N(), 'msg');
-		}
+	if (!($i18n instanceof sly_I18N)) {
+		throw new sly_Exception('No translation database set in sly_Core!');
 	}
 
-	return $func !== null ? call_user_func_array($func, $args) : $key;
+	$func = array($i18n, 'msg');
+	return call_user_func_array($func, $args);
 }
 
 /**
- * Text übersetzen und auf HTML vorbereiten
+ * translate a key and return result XHTML-encoded
  *
- * @param  string $index  der zu übersetzende Begriff
- * @return string         die Übersetzung, direkt mit htmlspecialchars() behandelt
+ * You can give more arguments than just the key to have them inserted at the
+ * special placeholders ({0}, {1}, ...).
+ *
+ * @param  string $key  the key to find in the current language database
+ * @return string       the found translation or a string like '[translate:X]' (always XHTML-safe)
  */
 function ht($index) {
 	return sly_html(t($index));
