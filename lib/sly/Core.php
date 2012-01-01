@@ -97,13 +97,7 @@ class sly_Core {
 	 * @return int  the current clang
 	 */
 	public static function getCurrentClang() {
-		$instance = self::getInstance();
-
-		if (!isset($instance->curClang)) {
-			$instance->curClang = sly_request('clang', 'rex-clang-id', self::getDefaultClangId());
-		}
-
-		return $instance->curClang;
+		return self::getInstance()->curClang;
 	}
 
 	/**
@@ -113,7 +107,7 @@ class sly_Core {
 	 */
 	public static function getCurrentLanguage() {
 		$clang = sly_Core::getCurrentClang();
-		return sly_Service_Factory::getLanguageService()->findById($clang);
+		return $clang > 0 ? sly_Service_Factory::getLanguageService()->findById($clang) : null;
 	}
 
 	/**
@@ -125,22 +119,7 @@ class sly_Core {
 	 * @return int  the current article ID
 	 */
 	public static function getCurrentArticleId() {
-		$conf     = self::config();
-		$instance = self::getInstance();
-
-		if (!isset($instance->curArticleId)) {
-			$instance->curArticleId = sly_request('article_id', 'int', self::getSiteStartArticleId());
-
-			if (!sly_Util_Article::exists($instance->curArticleId)) {
-				$instance->curArticleId = self::getNotFoundArticleId();
-			}
-
-			if (!sly_Util_Article::exists($instance->curArticleId)) {
-				$instance->curArticleId = -1;
-			}
-		}
-
-		return $instance->curArticleId;
+		return self::getInstance()->curArticleId;
 	}
 
 	/**
