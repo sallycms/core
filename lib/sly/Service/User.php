@@ -43,14 +43,20 @@ class sly_Service_User extends sly_Service_Model_Base_Id {
 	 */
 	public function save(sly_Model_Base $user) {
 		$event = ($user->getId() == sly_Model_Base_Id::NEW_ID) ? 'SLY_USER_ADDED' : 'SLY_USER_UPDATED';
-		$user = parent::save($user);
+		$user  = parent::save($user);
+
+		sly_Core::cache()->flush('sly.user');
 		sly_Core::dispatcher()->notify($event, $user);
+
 		return $user;
 	}
 
 	public function delete($where) {
 		$retval = parent::delete($where);
+
+		sly_Core::cache()->flush('sly.user');
 		sly_Core::dispatcher()->notify('SLY_USER_DELETED', $where['id']);
+
 		return $retval;
 	}
 
@@ -64,6 +70,31 @@ class sly_Service_User extends sly_Service_Model_Base_Id {
 		$res = $this->find(array('login' => $login));
 		if (count($res) == 1) return $res[0];
 		return null;
+	}
+
+	/**
+	 * @param  int $id
+	 * @return sly_Model_User
+	 */
+	public function findById($id) {
+		$id = (int) $id;
+
+		if ($id <= 0) {
+			return null;
+		}
+
+		$namespace = 'sly.user';
+		$obj       = sly_Core::cache()->get($namespace, $id, null);
+
+		if ($obj === null) {
+			$obj = $this->findOne(array('id' => $id));
+
+			if ($obj !== null) {
+				sly_Core::cache()->set($namespace, $id, $obj);
+			}
+		}
+
+		return $obj;
 	}
 
 	/**
