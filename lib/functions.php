@@ -10,7 +10,6 @@
 
 /**
  * @defgroup redaxo        REDAXO Legacy-API
- * @defgroup redaxo2       REDAXO OO-API
  * @defgroup authorisation Authorisation
  * @defgroup cache         Caches
  * @defgroup controller    Controller
@@ -27,22 +26,51 @@
  * @defgroup util          Utilities
  */
 
+/**
+ * Simple wrapper for settype()
+ *
+ * Adds the special type 'raw' (no type changing) and automatically trims every
+ * string.
+ *
+ * @param  mixed  $var   the variable to cast
+ * @param  string $type  the new variable type or 'raw' of no casting should happen
+ * @return mixed         the new variable value
+ */
+function sly_settype($var, $type) {
+	if ($type !== '' && $type !== 'raw') {
+		settype($var, $type);
+
+		if ($type === 'string') {
+			$var = trim($var);
+		}
+	}
+
+	return $var;
+}
+
+/**
+ * Searches for an array key and returns the casted value
+ *
+ * @param  mixed  $haystack  the array to search in
+ * @param  mixed  $key       the key to find
+ * @param  string $type      the new variable type or 'raw' of no casting should happen
+ * @param  string $default   the default value if $key was not found
+ * @return mixed             the new variable value
+ */
+function sly_setarraytype(array $haystack, $key, $type, $default = '') {
+	return array_key_exists($key, $haystack) ? sly_settype($haystack[$key], $type) : $default;
+}
+
 function sly_get($name, $type, $default = '') {
-	$value = _rex_array_key_cast($_GET, $name, $type, $default, false);
-	$value = strtolower($type) == 'string' ? trim($value) : $value;
-	return $value;
+	return sly_setarraytype($_GET, $name, $type, $default);
 }
 
 function sly_post($name, $type, $default = '') {
-	$value = _rex_array_key_cast($_POST, $name, $type, $default, false);
-	$value = strtolower($type) == 'string' ? trim($value) : $value;
-	return $value;
+	return sly_setarraytype($_POST, $name, $type, $default);
 }
 
 function sly_request($name, $type, $default = '') {
-	$value = _rex_array_key_cast($_REQUEST, $name, $type, $default, false);
-	$value = strtolower($type) == 'string' ? trim($value) : $value;
-	return $value;
+	return sly_setarraytype($_REQUEST, $name, $type, $default);
 }
 
 function sly_getArray($name, $types, $default = array()) {
@@ -54,8 +82,7 @@ function sly_getArray($name, $types, $default = array()) {
 			continue;
 		}
 
-		$value = _rex_cast_var($value, $types, $default, 'found', false); // $default und 'found' ab REDAXO 4.2
-		$value = strtolower($types) == 'string' ? trim($value) : $value;
+		$value = sly_settype($value, $types);
 	}
 
 	return $values;
@@ -70,8 +97,7 @@ function sly_postArray($name, $types, $default = array()) {
 			continue;
 		}
 
-		$value = _rex_cast_var($value, $types, $default, 'found', false); // $default und 'found' ab REDAXO 4.2
-		$value = strtolower($types) == 'string' ? trim($value) : $value;
+		$value = sly_settype($value, $types);
 	}
 
 	return $values;
