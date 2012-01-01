@@ -207,7 +207,7 @@ class sly_Service_MediaCategory extends sly_Service_Model_Base_Id {
 		// delete subcats
 
 		foreach ($children as $child) {
-			$this->delete($child, true);
+			$this->delete($child->getId(), true);
 		}
 
 		// delete files
