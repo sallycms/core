@@ -67,26 +67,9 @@ abstract class sly_App_Base {
 
 		ob_start();
 
-		// init the controller
-		if (!isset($controller->__sly_init)) {
-			$r = $controller->init($action);
-			$controller->__sly_init = true;
-
-			if ($r instanceof sly_Response || $r instanceof sly_Response_Action) {
-				ob_end_clean();
-				return $r;
-			}
-		}
-
 		// run the action method
 		$r = $controller->$method();
-		if ($r instanceof sly_Response || $r instanceof sly_Response_Action) {
-			ob_end_clean();
-			return $r;
-		}
 
-		// and tear it down
-		$r = $controller->teardown($action);
 		if ($r instanceof sly_Response || $r instanceof sly_Response_Action) {
 			ob_end_clean();
 			return $r;
@@ -178,8 +161,6 @@ abstract class sly_App_Base {
 		return $instances[$className];
 	}
 
-	abstract public function run();
-	abstract public function getCurrentController();
 	abstract public function getControllerClassPrefix();
 
 	abstract protected function handleControllerError(Exception $e, $controller, $action);
