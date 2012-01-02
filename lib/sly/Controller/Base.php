@@ -95,28 +95,6 @@ abstract class sly_Controller_Base {
 	}
 
 	/**
-	 * Init callback
-	 *
-	 * This method will be executed right before the real action method is
-	 * executed. Use this to setup your controller, like init the layout head
-	 * other stuff every action should perform.
-	 *
-	 * @todo  Make this init($action) once we decide to make all controllers
-	 *        aware of this param
-	 */
-	public function init() {
-	}
-
-	/**
-	 * Teardown callback
-	 *
-	 * This method will be executed right after the real action method is
-	 * executed. Use this to cleanup after your work is done.
-	 */
-	public function teardown() {
-	}
-
-	/**
 	 * Get view folder
 	 *
 	 * Controllers must implement this method to specify where its view files

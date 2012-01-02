@@ -25,7 +25,7 @@ abstract class sly_Controller_Ajax extends sly_Controller_Base {
 	 *
 	 * Clears all output buffers and opens a new, gzipped one.
 	 */
-	public function init() {
+	protected function init() {
 		while (ob_get_level()) ob_end_clean();
 		ob_start('ob_gzhandler');
 	}
@@ -36,7 +36,7 @@ abstract class sly_Controller_Ajax extends sly_Controller_Base {
 	 * This method will print the output buffer (if still open) and exit the
 	 * script execution.
 	 */
-	public function teardown() {
+	protected function teardown() {
 		while (ob_get_level()) ob_end_flush();
 		exit();
 	}
