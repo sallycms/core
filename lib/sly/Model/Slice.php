@@ -57,6 +57,18 @@ class sly_Model_Slice extends sly_Model_Base_Id {
 		return $sliceValue;
 	}
 
+	public function setValues($values = array()) {
+		try {
+			$this->flushValues();
+			foreach($values as $finder => $value) {
+				$this->addValue($finder, $value);
+			}
+		}catch(Exception $e) {
+			return false;
+		}
+		return true;
+	}
+
 	public function getValues() {
 		$values      = array();
 		$service     = sly_Service_Factory::getSliceValueService();

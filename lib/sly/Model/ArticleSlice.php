@@ -174,6 +174,10 @@ class sly_Model_ArticleSlice extends sly_Model_Base_Id {
 		$this->getSlice()->addValue($finder, $value);
 	}
 
+	public function setValues($values = array()) {
+		return $this->getSlice()->setValues($values);
+	}
+
 	/**
 	 * @param  string $type
 	 * @param  string $finder
