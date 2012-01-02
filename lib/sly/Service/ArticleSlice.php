@@ -77,9 +77,6 @@ class sly_Service_ArticleSlice extends sly_Service_Model_Base_Id {
 
 		$articleSlice = $this->findById($id);
 
-		// remove cachefiles
-		sly_Util_Slice::clearSliceCache($articleSlice->getSliceId());
-
 		$sql = sly_DB_Persistence::getInstance();
 		$pre = sly_Core::config()->get('DATABASE/TABLE_PREFIX');
 

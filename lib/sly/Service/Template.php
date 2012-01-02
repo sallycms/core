@@ -70,27 +70,6 @@ class sly_Service_Template extends sly_Service_DevelopBase {
 	}
 
 	/**
-	 * @param  string $name
-	 * @param  string $filename
-	 * @return boolean
-	 */
-	protected function flush($name = null, $filename = null) {
-		if ($name === null && $filename === null) {
-			$dir   = new sly_Util_Directory($this->getCacheFolder());
-			$files = $dir->listPlain(true, false, false, true, '');
-		}
-		elseif ($this->exists($name)) {
-			$files = array($this->getCacheFile($name, $filename));
-		}
-		else {
-			return false;
-		}
-
-		array_map('unlink', array_filter($files, 'file_exists'));
-		return true;
-	}
-
-	/**
 	 * Get available templates from this service
 	 *
 	 * Templates may be filtered by a class parameter. If class is set, only
@@ -110,56 +89,6 @@ class sly_Service_Template extends sly_Service_DevelopBase {
 		}
 
 		return $result;
-	}
-
-	/**
-	 * Get the cache folder where template cache-files are stored
-	 *
-	 * @throws sly_Service_Template_Exception  When no cache folder is available and could not be created
-	 * @return string                          the cache directory
-	 */
-	public function getCacheFolder() {
-		$dir = sly_Util_Directory::join(SLY_DYNFOLDER, 'internal/sally', $this->getClassIdentifier());
-		return sly_Util_Directory::create($dir, null, true);
-	}
-
-	/**
-	 * Generate the template cache-file for a template
-	 *
-	 * @throws sly_Service_Template_Exception  When the given template does ot exist
-	 * @param  string $name                    Unique template name
-	 * @return string                          the template file name
-	 */
-	public function getGenerated($name) {
-		if (!$this->exists($name)) {
-			throw new sly_Service_Template_Exception(t('template_not_found', $name));
-		}
-
-		$filename     = $this->filterByCondition($name, $this->getFileType());
-		$templateFile = $this->getCacheFile($name, $filename);
-
-		if (!file_exists($templateFile)) {
-			$content = $this->getContent($filename);
-
-			foreach (sly_Core::getVarTypes() as $var) {
-				$content = $var->getTemplate($content);
-			}
-
-			if (!file_put_contents($templateFile, $content) > 0) {
-				return false;
-			}
-		}
-
-		return $templateFile;
-	}
-
-	/**
-	 * @param  string $name
-	 * @param  string $filename
-	 * @return string
-	 */
-	public function getCacheFile($name, $filename) {
-		return sly_Util_Directory::join($this->getCacheFolder(), $name.'-'.md5($filename).'.php');
 	}
 
 	/**
@@ -256,7 +185,7 @@ class sly_Service_Template extends sly_Service_DevelopBase {
 	 * @param array  $params  Array of params to be available in the template
 	 */
 	public function includeFile($name_C3476zz3g21ug327ur623, $params = array()) {
-		$templateFile_C3476zz3g21ug327ur623 = $this->getGenerated($name_C3476zz3g21ug327ur623);
+		$templateFile_C3476zz3g21ug327ur623 = $this->getFilename($name_C3476zz3g21ug327ur623);
 		if (!empty($params)) extract($params);
 		include $templateFile_C3476zz3g21ug327ur623;
 	}

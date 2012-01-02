@@ -65,21 +65,6 @@ class sly_Service_Module extends sly_Service_DevelopBase {
 	}
 
 	/**
-	 * @param string $name
-	 * @param string $filename
-	 */
-	protected function flush($name = null, $filename = null) {
-		$sql   = sly_DB_Persistence::getInstance();
-		$where = $name === null ? null : array('module' => $name);
-
-		$sql->select('slice', 'id', $where);
-
-		foreach ($sql as $row) {
-			sly_Util_Slice::clearSliceCache((int) $row['id']);
-		}
-	}
-
-	/**
 	 * Get available modules from the service
 	 *
 	 * @return array  array of modules

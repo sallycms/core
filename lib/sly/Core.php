@@ -19,7 +19,6 @@ class sly_Core {
 	private $dispatcher;       ///< sly_Event_Dispatcher
 	private $curClang;         ///< int
 	private $curArticleId;     ///< int
-	private $varTypes;         ///< array
 	private $layout;           ///< sly_Layout
 	private $i18n;             ///< sly_I18N
 	private $errorHandler;     ///< sly_ErrorHandler
@@ -154,37 +153,6 @@ class sly_Core {
 		$clang     = $clang === null ? self::getCurrentClang() : (int) $clang;
 
 		return sly_Util_Article::findById($articleID, $clang);
-	}
-
-	/**
-	 * Register a new var class
-	 *
-	 * @param string $varType  class name of the new variable
-	 */
-	public static function registerVarType($varType) {
-		self::getInstance()->varTypes[] = $varType;
-	}
-
-	/**
-	 * Gibt immer eine Liste von Instanzen der Variablentypen zurück
-	 *
-	 * @throws sly_Exception  if one of the registered classes does not inherit rex_var
-	 * @return array          list of rex_var instances
-	 */
-	public static function getVarTypes() {
-		$instance = self::getInstance();
-
-		if (!isset($instance->varTypes)) $instance->varTypes = array();
-
-		foreach ($instance->varTypes as $idx => $obj) {
-			if (is_string($obj)) { // Es hat noch kein Autoloading für diese Klasse stattgefunden
-				$obj = new $obj();
-				if (!($obj instanceof rex_var)) throw new sly_Exception('VarType '.$instance->varTypes[$idx].' is no inheriting class of rex_var.');
-				$instance->varTypes[$idx] = $obj;
-			}
-		}
-
-		return $instance->varTypes;
 	}
 
 	/**
@@ -386,14 +354,6 @@ class sly_Core {
 	public static function loadAddons() {
 		sly_Service_Factory::getAddOnService()->loadComponents();
 		self::dispatcher()->notify('ADDONS_INCLUDED');
-	}
-
-	public static function registerCoreVarTypes() {
-		self::registerVarType('rex_var_article');
-		self::registerVarType('rex_var_template');
-		self::registerVarType('rex_var_value');
-		self::registerVarType('rex_var_link');
-		self::registerVarType('rex_var_media');
 	}
 
 	public static function registerListeners() {
