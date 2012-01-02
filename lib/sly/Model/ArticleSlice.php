@@ -115,7 +115,7 @@ class sly_Model_ArticleSlice extends sly_Model_Base_Id {
 
 	/**
 	 *
-	 * @return Sly_Model_Slice
+	 * @return sly_Model_Slice
 	 */
 	public function getSlice() {
 		if (empty($this->slice)) {
@@ -170,8 +170,8 @@ class sly_Model_ArticleSlice extends sly_Model_Base_Id {
 	 * @param  string $value
 	 * @return sly_Model_SliceValue
 	 */
-	public function addValue($type, $finder, $value = null) {
-		$this->getSlice()->addValue($type, $finder, $value);
+	public function addValue($finder, $value = null) {
+		$this->getSlice()->addValue($finder, $value);
 	}
 
 	/**
@@ -179,8 +179,8 @@ class sly_Model_ArticleSlice extends sly_Model_Base_Id {
 	 * @param  string $finder
 	 * @return mixed
 	 */
-	public function getValue($type, $finder) {
-		return $this->getSlice()->getValue($type, $finder);
+	public function getValue($finder) {
+		return $this->getSlice()->getValue($finder);
 	}
 
 
