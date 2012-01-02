@@ -69,6 +69,10 @@ abstract class sly_App_Base {
 			$method = $action.'Action';
 		}
 
+		if (!$controller->checkPermission($action)) {
+			throw new sly_Authorisation_Exception(t('page_not_allowed', $action, get_class($controller)), 403);
+		}
+
 		ob_start();
 
 		// run the action method
