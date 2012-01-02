@@ -97,7 +97,6 @@ abstract class sly_Service_DevelopBase {
 
 			$newData[$name][$type][$basename] = $this->buildData($basename, $mtime, $parser->get());
 
-			$this->flush($name, $basename);
 			$modified = true;
 		}
 
@@ -497,10 +496,4 @@ abstract class sly_Service_DevelopBase {
 	 */
 	protected abstract function buildData($filename, $mtime, $data);
 
-	/**
-	 * Clears the cache for a resource
-	 *
-	 * @param string  $name  Resource name or null for all resources. (default: null)
-	 */
-	protected abstract function flush($name = null, $filename = null);
 }

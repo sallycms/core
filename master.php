@@ -113,9 +113,6 @@ sly_Core::setErrorHandler($errorHandler);
 
 // Sync?
 if ($config->get('SETUP') === false) {
-	// Standard-Variablen
-	sly_Core::registerCoreVarTypes();
-
 	// Cache-Util initialisieren
 	sly_Util_Cache::registerListener();
 }
@@ -129,6 +126,6 @@ $coreVersion  = sly_Core::getVersion('X.Y.Z');
 $knownVersion = sly_Util_Versions::get('sally');
 
 if ($knownVersion !== $coreVersion) {
-	// dummy: implement some clever update mechanism (if needed)
+	// TODO: implement some clever update mechanism
 	sly_Util_Versions::set('sally', $coreVersion);
 }
