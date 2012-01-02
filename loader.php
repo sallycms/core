@@ -31,5 +31,4 @@ sly_Loader::register();
 if (!$cacheExists) {
 	require_once SLY_COREFOLDER.'/lib/compatibility.php';
 	require_once SLY_COREFOLDER.'/lib/functions.php';
-	require_once SLY_COREFOLDER.'/functions/function_rex_globals.inc.php';
 }

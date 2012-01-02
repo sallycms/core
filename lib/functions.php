@@ -10,7 +10,6 @@
 
 /**
  * @defgroup redaxo        REDAXO Legacy-API
- * @defgroup redaxo2       REDAXO OO-API
  * @defgroup authorisation Authorisation
  * @defgroup cache         Caches
  * @defgroup controller    Controller
@@ -27,22 +26,51 @@
  * @defgroup util          Utilities
  */
 
+/**
+ * Simple wrapper for settype()
+ *
+ * Adds the special type 'raw' (no type changing) and automatically trims every
+ * string.
+ *
+ * @param  mixed  $var   the variable to cast
+ * @param  string $type  the new variable type or 'raw' of no casting should happen
+ * @return mixed         the new variable value
+ */
+function sly_settype($var, $type) {
+	if ($type !== '' && $type !== 'raw') {
+		settype($var, $type);
+
+		if ($type === 'string') {
+			$var = trim($var);
+		}
+	}
+
+	return $var;
+}
+
+/**
+ * Searches for an array key and returns the casted value
+ *
+ * @param  mixed  $haystack  the array to search in
+ * @param  mixed  $key       the key to find
+ * @param  string $type      the new variable type or 'raw' of no casting should happen
+ * @param  string $default   the default value if $key was not found
+ * @return mixed             the new variable value
+ */
+function sly_setarraytype(array $haystack, $key, $type, $default = '') {
+	return array_key_exists($key, $haystack) ? sly_settype($haystack[$key], $type) : $default;
+}
+
 function sly_get($name, $type, $default = '') {
-	$value = _rex_array_key_cast($_GET, $name, $type, $default, false);
-	$value = strtolower($type) == 'string' ? trim($value) : $value;
-	return $value;
+	return sly_setarraytype($_GET, $name, $type, $default);
 }
 
 function sly_post($name, $type, $default = '') {
-	$value = _rex_array_key_cast($_POST, $name, $type, $default, false);
-	$value = strtolower($type) == 'string' ? trim($value) : $value;
-	return $value;
+	return sly_setarraytype($_POST, $name, $type, $default);
 }
 
 function sly_request($name, $type, $default = '') {
-	$value = _rex_array_key_cast($_REQUEST, $name, $type, $default, false);
-	$value = strtolower($type) == 'string' ? trim($value) : $value;
-	return $value;
+	return sly_setarraytype($_REQUEST, $name, $type, $default);
 }
 
 function sly_getArray($name, $types, $default = array()) {
@@ -54,8 +82,7 @@ function sly_getArray($name, $types, $default = array()) {
 			continue;
 		}
 
-		$value = _rex_cast_var($value, $types, $default, 'found', false); // $default und 'found' ab REDAXO 4.2
-		$value = strtolower($types) == 'string' ? trim($value) : $value;
+		$value = sly_settype($value, $types);
 	}
 
 	return $values;
@@ -70,8 +97,7 @@ function sly_postArray($name, $types, $default = array()) {
 			continue;
 		}
 
-		$value = _rex_cast_var($value, $types, $default, 'found', false); // $default und 'found' ab REDAXO 4.2
-		$value = strtolower($types) == 'string' ? trim($value) : $value;
+		$value = sly_settype($value, $types);
 	}
 
 	return $values;
@@ -152,37 +178,34 @@ function sly_makeArray($element) {
 }
 
 /**
- * Text übersetzen
+ * translate a key
  *
- * @param  string $key  der zu übersetzende Begriff
- * @return string       die Übersetzung
+ * You can give more arguments than just the key to have them inserted at the
+ * special placeholders ({0}, {1}, ...).
+ *
+ * @param  string $key  the key to find in the current language database
+ * @return string       the found translation or a string like '[translate:X]'
  */
 function t($key) {
 	$args = func_get_args();
-	$func = null;
+	$i18n = sly_Core::getI18N();
 
-	if (sly_Core::isBackend()) {
-		$func = array(sly_Core::getI18N(), 'msg');
-	}
-	else {
-		// TODO: remove addon specific code
-		if (class_exists('WV9_Language')) {
-			$func = array(WV9_Language::getInstance(), 'translate');
-		}
-		else {
-			// try to find a translation via the default locale
-			$func = array(sly_Core::getI18N(), 'msg');
-		}
+	if (!($i18n instanceof sly_I18N)) {
+		throw new sly_Exception('No translation database set in sly_Core!');
 	}
 
-	return $func !== null ? call_user_func_array($func, $args) : $key;
+	$func = array($i18n, 'msg');
+	return call_user_func_array($func, $args);
 }
 
 /**
- * Text übersetzen und auf HTML vorbereiten
+ * translate a key and return result XHTML-encoded
  *
- * @param  string $index  der zu übersetzende Begriff
- * @return string         die Übersetzung, direkt mit htmlspecialchars() behandelt
+ * You can give more arguments than just the key to have them inserted at the
+ * special placeholders ({0}, {1}, ...).
+ *
+ * @param  string $key  the key to find in the current language database
+ * @return string       the found translation or a string like '[translate:X]' (always XHTML-safe)
  */
 function ht($index) {
 	return sly_html(t($index));

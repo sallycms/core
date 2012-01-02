@@ -36,24 +36,17 @@ class sly_Util_Session {
 	 *
 	 * @param  string $key      the key where to find the var in superglobal aray $_SESSION
 	 * @param  string $type     the type to cast to
-	 * @param  mixed  $default  their default value to return if session var is empty
+	 * @param  mixed  $default  the default value to return if session var is not set
 	 * @return mixed            $value casted to $type
 	 */
 	public static function get($key, $type = '', $default = '') {
-		/**
-		 * FIXME: can we really put this under MIT license? ist some sort of copy
-		 * of REDAXO code
-		 */
+		$uid = self::getUID();
 
-		if (isset($_SESSION[self::getUID()][$key])) {
-			return _rex_cast_var($_SESSION[self::getUID()][$key], $type, $default, 'found', false);
+		if (isset($_SESSION[$uid][$key])) {
+			return sly_settype($_SESSION[$uid][$key], $type);
 		}
 
-		if ($default === '') {
-			return _rex_cast_var($default, $type, $default, 'default', false);
-		}
-
-		return $default;
+		return sly_settype($default, $type);
 	}
 
 	/**
