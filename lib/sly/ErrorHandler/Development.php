@@ -41,5 +41,6 @@ class sly_ErrorHandler_Development extends sly_ErrorHandler_Base implements sly_
 	 */
 	public function handleException(Exception $e) {
 		print $e;
+		die;
 	}
 }
