@@ -33,4 +33,13 @@ class sly_ErrorHandler_Development extends sly_ErrorHandler_Base implements sly_
 	public function uninit() {
 		/* do nothing */
 	}
+
+	/**
+	 * Handle a catched exception
+	 *
+	 * This method will just print the exception.
+	 */
+	public function handleException(Exception $e) {
+		print $e;
+	}
 }
