@@ -51,9 +51,13 @@ abstract class sly_App_Base {
 		// prepare controller
 		$method = $action.'Action';
 
-		if (!($controller instanceof sly_Controller_Base)) {
+		if (!($controller instanceof sly_Controller_Interface)) {
 			$className  = $this->getControllerClass($controller);
 			$controller = $this->getController($className);
+		}
+
+		if (!($controller instanceof sly_Controller_Interface)) {
+			throw new sly_Controller_Exception(t('does_not_implement', get_class($controller), 'sly_Controller_Interface'), 500);
 		}
 
 		if (!method_exists($controller, $method)) {
@@ -151,8 +155,8 @@ abstract class sly_App_Base {
 		if (!isset($instances[$className])) {
 			$instance = new $className();
 
-			if (!($instance instanceof sly_Controller_Base)) {
-				throw new sly_Controller_Exception(t('does_not_implement', $instance, 'sly_Controller_Base'), 500);
+			if (!($instance instanceof sly_Controller_Interface)) {
+				throw new sly_Controller_Exception(t('does_not_implement', get_class($instance), 'sly_Controller_Interface'), 500);
 			}
 
 			$instances[$className] = $instance;

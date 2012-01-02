@@ -105,24 +105,4 @@ abstract class sly_Controller_Base {
 	 * @return string  the path to the view files
 	 */
 	abstract protected function getViewFolder();
-
-	/**
-	 * Default controller action
-	 *
-	 * Implement this method to allow access to your controller. It will be
-	 * called when no distinct action parameter has been set, so in most cases
-	 * this is the entry point to your controller (from a user perspective).
-	 */
-	abstract public function indexAction();
-
-	/**
-	 * Check access
-	 *
-	 * This method should check whether the current user (if any) has access to
-	 * the requested action. In many cases, you will just make sure someone is
-	 * logged in at all, but you can also decide this on a by-action basis.
-	 *
-	 * @return boolean  true if access is granted, else false
-	 */
-	abstract protected function checkPermission();
 }
