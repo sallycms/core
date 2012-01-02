@@ -104,4 +104,13 @@ abstract class sly_Form_Select_Base extends sly_Form_ElementBase {
 	public function getValueCount() {
 		return count($this->values);
 	}
+
+	/**
+	 * Comfort wrapper for setting the value
+	 *
+	 * @return mixed $selected  the selected element (scalar or array)
+	 */
+	public function setSelected($selected) {
+		return $this->setAttribute('value', $selected);
+	}
 }
