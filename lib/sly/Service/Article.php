@@ -224,7 +224,7 @@ class sly_Service_Article extends sly_Service_Model_Base {
 
 		// Kategorie verschieben, wenn nötig
 		if ($position !== false && $position != $article->getPrior()) {
-			$parent = $article->getParentId();
+			$parent = $article->getCategoryId();
 			$oldPrio  = $article->getPrior();
 			$position = (int) $position;
 
