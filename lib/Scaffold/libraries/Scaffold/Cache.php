@@ -31,14 +31,12 @@ final class Scaffold_Cache
 	 */
 	private static $frozen = false;
 
-	private static $cacheFile = 'data/dyn/internal/sally/css-cache/mtimes.txt';
-
 	/**
 	 * Sets up the cache path
 	 *
 	 * @return return type
 	 */
-	public function setup($path,$lifetime)
+	public static function setup($path,$lifetime)
 	{
 		if (!is_dir($path))
 			Scaffold::log("Cache path does not exist. $path",0);
@@ -51,7 +49,7 @@ final class Scaffold_Cache
 	}
 
 
-	public function is_fresh($file)
+	public static function is_fresh($file)
 	{
 		if( time() <= ( self::$lifetime +  self::modified($file) ) )
 		{
@@ -69,7 +67,7 @@ final class Scaffold_Cache
 	 * @param $time
 	 * @return void
 	 */
-	public function lifetime($time)
+	public static function lifetime($time)
 	{
 		self::$lifetime = $time;
 	}
@@ -80,7 +78,7 @@ final class Scaffold_Cache
 	 * @param $file
 	 * @return string $string The contents of the file
 	 */
-	public function open($file)
+	public static function open($file)
 	{
 		if(self::exists($file))
 		{
@@ -96,7 +94,7 @@ final class Scaffold_Cache
 	 * @param $file
 	 * @return string
 	 */
-	public function exists($file)
+	public static function exists($file)
 	{
 		if(is_file(self::$cache_path.$file))
 			return true;
@@ -115,7 +113,7 @@ final class Scaffold_Cache
 	 * @param $file
 	 * @return int
 	 */
-	public function modified($file)
+	public static function modified($file)
 	{
 		return ( self::exists($file) ) ? (int) filemtime(self::find($file)) : 0 ;
 	}
@@ -126,7 +124,7 @@ final class Scaffold_Cache
 	 * @param $file
 	 * @return string
 	 */
-	public function find($file)
+	public static function find($file)
 	{
 		if(self::exists($file))
 			return self::$cache_path.$file;
@@ -139,7 +137,7 @@ final class Scaffold_Cache
 	 *
 	 * @return string  The path
 	 */
-	public function getPath()
+	public static function getPath()
 	{
 		if (is_dir(self::$cache_path)) return self::$cache_path;
 		return false;
@@ -151,7 +149,7 @@ final class Scaffold_Cache
 	 * @return void
 	 * @author Anthony Short
 	 */
-	public function write( $data, $target = '', $append = false )
+	public static function write( $data, $target = '', $append = false )
 	{
 		# Create the cache file
 		self::create(dirname($target));
@@ -175,25 +173,6 @@ final class Scaffold_Cache
 		chmod($target, 0777);
 		touch($target, time());
 
-		# Update cache list
-
-		clearstatcache();
-
-		$lines = file_exists(self::$cacheFile) ? array_map('trim', file(self::$cacheFile)) : array();
-		$lines = array_filter($lines);
-		$fp    = fopen(self::$cacheFile, 'wb');
-		$file  = $_GET['wv_f']; // der einzige Wert, der bereits in der cache.php bekannt ist
-
-		fwrite($fp, $file.':'.time()."\n");
-
-		foreach ($lines as $line) {
-			list($f, $mtime) = explode(':', $line);
-			if ($f == $file) continue;
-			fwrite($fp, $line."\n");
-		}
-
-		fclose($fp);
-		chmod(self::$cacheFile, 0777);
 		return true;
 	}
 
@@ -203,7 +182,7 @@ final class Scaffold_Cache
 	 * @param $file
 	 * @return boolean
 	 */
-	public function remove($file)
+	public static function remove($file)
 	{
 		if(self::find($file))
 		{
@@ -220,7 +199,7 @@ final class Scaffold_Cache
 	 * @param $dir
 	 * @return boolean
 	 */
-	public function remove_dir($dir)
+	public static function remove_dir($dir)
 	{
 		if(!is_dir($dir))
 		{
@@ -248,7 +227,7 @@ final class Scaffold_Cache
 	/**
 	 * Create the cache file directory
 	 */
-	public function create($path)
+	public static function create($path)
 	{
 		# If it already exists
 		if(is_dir(self::$cache_path.$path))

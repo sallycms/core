@@ -29,8 +29,7 @@ class sly_Service_Asset {
 		$this->initCache();
 
 		$dispatcher = sly_Core::dispatcher();
-		$dispatcher->register(self::EVENT_PROCESS_ASSET, array($this, 'processScaffold'));
-		$dispatcher->register('ALL_GENERATED', array(__CLASS__, 'clearCache'));
+		$dispatcher->register(self::EVENT_PROCESS_ASSET, array($this, 'processScaffold'), array(), true);
 	}
 
 	/**
@@ -38,36 +37,6 @@ class sly_Service_Asset {
 	 */
 	public function setForceGeneration($force = true) {
 		$this->forceGen = (boolean) $force;
-	}
-
-	/**
-	 * @return string
-	 */
-	private function getPreferredClientEncoding() {
-		static $enc;
-
-		if (!isset($enc)) {
-			$enc = false;
-			$e   = trim(sly_get('encoding', 'string'), '/');
-
-			if (in_array($e, array('plain', 'gzip', 'deflate'))) {
-				$enc = $e;
-			}
-			elseif (!empty($_SERVER['HTTP_ACCEPT_ENCODING'])) {
-				if (stripos($_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip') !== false) $enc = 'gzip';
-				elseif (stripos($_SERVER['HTTP_ACCEPT_ENCODING'], 'deflate') !== false) $enc = 'deflate';
-			}
-		}
-
-		return $enc;
-	}
-
-	/**
-	 * @return string
-	 */
-	private function getPreferredCacheDir() {
-		$enc = $this->getPreferredClientEncoding();
-		return $enc === false ? 'plain' : $enc;
 	}
 
 	public function validateCache() {
@@ -136,22 +105,9 @@ class sly_Service_Asset {
 		return $path;
 	}
 
-	public function process() {
-		$file = sly_get('sly_asset', 'string');
-		if (empty($file)) {
-			if (isset($_GET['sly_asset'])) {
-				header('HTTP/1.0 400 Bad Request');
-				die;
-			}
-			return;
-		}
-
-		while (ob_get_level()) ob_end_clean();
-		ob_start();
-
+	public function process($file, $encoding) {
 		// check if the file can be streamed
-
-		$blocked = sly_Core::config()->get('MEDIAPOOL/BLOCKED_EXTENSIONS');
+		$blocked = sly_Core::config()->get('BLOCKED_EXTENSIONS');
 		$ok      = true;
 
 		foreach ($blocked as $ext) {
@@ -178,8 +134,7 @@ class sly_Service_Asset {
 		}
 
 		if (!$ok) {
-			header('HTTP/1.0 403 Forbidden');
-			die;
+			throw new sly_Authorisation_Exception('Forbidden');
 		}
 
 		// do the work
@@ -188,28 +143,24 @@ class sly_Service_Asset {
 		$isProtected = $dispatcher->filter(self::EVENT_IS_PROTECTED_ASSET, false, compact('file'));
 		$access      = $isProtected ? self::ACCESS_PROTECTED : self::ACCESS_PUBLIC;
 
-		// "/../sally/data/dyn/public/sally/static-cache/[access]/gzip/assets/css/main.css"
-		$cacheFile = $this->getCacheFile($file, $access);
-
+		// "/../data/dyn/public/sally/static-cache/[access]/gzip/assets/css/main.css"
+		$cacheFile = $this->getCacheFile($file, $access, $encoding);
 		if (!file_exists($cacheFile) || $this->forceGen) {
-			try {
-				// let listeners process the file
-				$tmpFile = $dispatcher->filter(self::EVENT_PROCESS_ASSET, $file);
+			// let listeners process the file
+			$tmpFile = $dispatcher->filter(self::EVENT_PROCESS_ASSET, $file);
 
-				// now we can check if a listener has generated a valid file
-				if (!is_file($tmpFile)) throw new Exception('Not Found', 404);
-			}
-			catch (Exception $e) {
-				$code = $e->getCode();
-				header('HTTP/1.0 '.($code ? $code : 500));
-				die;
-			}
+			// now we can check if a listener has generated a valid file
+			if (!is_file($tmpFile)) return false;
 
-			$this->generateCacheFile($tmpFile, $cacheFile);
+			$this->generateCacheFile($tmpFile, $cacheFile, $encoding);
 			$file = $tmpFile;
 		}
-
+		if (!file_exists($cacheFile)) {
+			return false;
+		}
+		ob_start();
 		$this->printCacheFile($file, $cacheFile);
+		return ob_get_clean();
 	}
 
 	/**
@@ -217,8 +168,7 @@ class sly_Service_Asset {
 	 * @param  string $encoding
 	 * @return string
 	 */
-	protected function getCacheDir($access = self::ACCESS_PUBLIC, $encoding = null) {
-		$encoding = $encoding === null ? $this->getPreferredCacheDir() : $encoding;
+	protected function getCacheDir($access, $encoding) {
 		return sly_Util_Directory::join(SLY_DYNFOLDER, self::CACHE_DIR, $access, $encoding);
 	}
 
@@ -228,7 +178,7 @@ class sly_Service_Asset {
 	 * @param  string $encoding
 	 * @return string
 	 */
-	protected function getCacheFile($file = null, $access = self::ACCESS_PUBLIC, $encoding = null) {
+	protected function getCacheFile($file, $access, $encoding) {
 		return sly_Util_Directory::join($this->getCacheDir($access, $encoding), $file);
 	}
 
@@ -236,14 +186,13 @@ class sly_Service_Asset {
 	 * @param string $file
 	 * @param string $cacheFile
 	 */
-	protected function generateCacheFile($file, $cacheFile) {
+	protected function generateCacheFile($file, $cacheFile, $encoding) {
 		clearstatcache();
 		sly_Util_Directory::create(dirname($cacheFile), $this->getDirPerm());
 
-		$enc   = $this->getPreferredClientEncoding();
 		$level = error_reporting(0);
 
-		switch ($enc) {
+		switch ($encoding) {
 			case 'gzip':
 				$out = gzopen($cacheFile, 'wb');
 				$in  = fopen($file, 'rb');
@@ -283,60 +232,26 @@ class sly_Service_Asset {
 		error_reporting($level);
 	}
 
-	protected function printCacheFile($origFile, $file) {
-		$errors = ob_get_clean();
-		error_reporting(0);
+	/**
+	 * @param string $origFile
+	 * @param string $file
+	 */
+	protected function printCacheFile($file) {
+		$fp = @fopen($file, 'rb');
 
-		if (empty($errors)) {
-			$fp = fopen($file, 'rb');
-
-			if (!$fp) {
-				$errors = 'Cannot open file.';
-			}
+		if (!$fp) {
+			$errors = 'Cannot open file.';
 		}
 
 		if (empty($errors)) {
-			$type         = sly_Util_Mime::getType($origFile);
-			$cacheControl = sly_Core::config()->get('ASSETS_CACHE_CONTROL', 'max-age=29030401');
-			$enc          = $this->getPreferredClientEncoding();
-
-			list($main, $sub) = explode('/', $type);
-			if ($main === 'text') $type .= '; charset=UTF-8';
-
-			header('HTTP/1.1 200 OK');
-			header('Last-Modified: '.date('r', time()));
-			header('Cache-Control: '.$cacheControl);
-			header('Content-Type: '.$type);
-			header('Content-Length: '.filesize($file));
-
-			switch ($enc) {
-				case 'plain':
-					break;
-
-				case 'deflate':
-				case 'gzip':
-					header('Content-Encoding: '.$enc);
-					break;
-
-//				case 'mops': ?
-			}
-
-			// stream the file
-
 			while (!feof($fp)) {
 				print fread($fp, 65536);
-				flush();
 			}
 
 			fclose($fp);
+		}else {
+			throw new sly_Exception($errors);
 		}
-		else {
-			header('Content-Type: text/plain; charset=UTF-8');
-			header('HTTP/1.0 500 Internal Server Error');
-			print $errors;
-		}
-
-		die;
 	}
 
 	/**
@@ -426,11 +341,7 @@ class sly_Service_Asset {
 		return $jumper;
 	}
 
-	/**
-	 * @param  array $params
-	 * @return mixed          the subject (if given) or true
-	 */
-	public static function clearCache(array $params) {
+	public static function clearCache() {
 		$me  = new self();
 		$dir = $me->getCacheDir('', '');
 
@@ -463,15 +374,13 @@ class sly_Service_Asset {
 			file_put_contents($dir.'/'.$access.'/gzip/.htaccess', $htaccess[$access.'_gzip']);
 			file_put_contents($dir.'/'.$access.'/deflate/.htaccess', $htaccess[$access.'_deflate']);
 		}
-
-		return isset($params['subject']) ? $params['subject'] : true;
 	}
 
 	private function getFilePerm() {
-		return sly_Core::getFilePerm(sly_Core::DEFAULT_FILEPERM);
+		return sly_Core::getFilePerm();
 	}
 
 	private function getDirPerm() {
-		return sly_Core::getDirPerm(sly_Core::DEFAULT_DIRPERM);
+		return sly_Core::getDirPerm();
 	}
 }

@@ -50,15 +50,6 @@ abstract class sly_Form_Input_Boolean extends sly_Form_Input_Base {
 	}
 
 	/**
-	 * Returns the outer row class
-	 *
-	 * @return string  the outer class
-	 */
-	public function getOuterClass() {
-		return $this->outerClass;
-	}
-
-	/**
 	 * Returns the value to be displayed
 	 *
 	 * This method will return the values that shall be displayed in the form.

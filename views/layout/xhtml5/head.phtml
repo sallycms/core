@@ -7,9 +7,11 @@
  *
  * http://www.opensource.org/licenses/mit-license.php
  */
+$lang     = !empty($this->language) ? ' lang="'.$this->language.'"' : '';
+$manifest = !empty($this->manifest) ? ' manifest="'.$this->manifest.'"' : '';
 ?>
 <!DOCTYPE html>
-<html<?= !empty($this->language) ? ' lang="'.$this->language.'"' : '' ?><?= !empty($this->manifest) ? ' manifest="'.$this->manifest.'"' : '' ?>>
+<html<?php echo $lang.$manifest ?>>
 <head><?php
 	if (!empty($this->base)) {
 		print "\n\t<base href=\"".$this->base."\" />";
@@ -35,4 +37,4 @@
 	$this->printCSS();
 	if (!$this->scriptsAtBottom) $this->printJavaScript();
 ?></head>
-<body<?= $this->printBodyAttrs() ?>>
+<body<?php echo $this->printBodyAttrs() ?>>

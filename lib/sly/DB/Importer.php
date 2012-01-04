@@ -184,6 +184,6 @@ class sly_DB_Importer {
 		));
 
 		$this->returnValues['state'] = true;
-		return $msg.rex_generateAll();
+		return $msg.sly_Core::clearCache();
 	}
 }

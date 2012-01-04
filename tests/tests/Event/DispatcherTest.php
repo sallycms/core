@@ -54,11 +54,7 @@ class sly_Service_DispatcherTest extends PHPUnit_Framework_TestCase {
 	}
 
 	public static function setUpBeforeClass() {
-		self::$d = sly_Event_Dispatcher::getInstance();
-	}
-
-	public function testGetSingleton() {
-		$this->assertSame(self::$d, sly_Event_Dispatcher::getInstance());
+		self::$d = new sly_Event_Dispatcher();
 	}
 
 	public function setUp() {

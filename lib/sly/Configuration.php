@@ -26,36 +26,35 @@ class sly_Configuration {
 	private $staticConfig;  ///< sly_Util_Array
 	private $localConfig;   ///< sly_Util_Array
 	private $projectConfig; ///< sly_Util_Array
+	private $cache;         ///< sly_Util_Array
 
 	private $localConfigModified   = false; ///< boolean
 	private $projectConfigModified = false; ///< boolean
 
-	private static $instance; ///< sly_Configuration
-
-	private function __construct() {
+	public function __construct() {
 		$this->staticConfig  = new sly_Util_Array();
 		$this->localConfig   = new sly_Util_Array();
 		$this->projectConfig = new sly_Util_Array();
+		$this->cache         = null;
 	}
 
-	/**
-	 * @return sly_Configuration
-	 */
-	public static function getInstance() {
-		if (!self::$instance) self::$instance = new self();
-		return self::$instance;
+	public function __destruct() {
+		$this->flush();
 	}
 
 	/**
 	 * @return string  the directory where the config is stored
 	 */
 	protected function getConfigDir() {
+		static $protected = false;
+
 		$dir = SLY_DATAFOLDER.DIRECTORY_SEPARATOR.'config';
 
-		if (!sly_Util_Directory::createHttpProtected($dir)) {
+		if (!$protected && !sly_Util_Directory::createHttpProtected($dir)) {
 			throw new sly_Exception('Config-Verzeichnis '.$dir.' konnte nicht erzeugt werden.');
 		}
 
+		$protected = true;
 		return $dir;
 	}
 
@@ -74,7 +73,7 @@ class sly_Configuration {
 	}
 
 	public function loadDevelop() {
-		$dir = new sly_Util_Directory(SLY_BASE.DIRECTORY_SEPARATOR.'develop'.DIRECTORY_SEPARATOR.'config');
+		$dir = new sly_Util_Directory(SLY_DEVELOPFOLDER.DIRECTORY_SEPARATOR.'config');
 
 		if ($dir->exists()) {
 			foreach ($dir->listPlain() as $file) {
@@ -95,7 +94,7 @@ class sly_Configuration {
 	}
 
 	/**
-	 * @throws sly_Exception      when something is fucked up (file not found, bad parameters, ...)
+	 * @throws sly_Exception     when something is fucked up (file not found, bad parameters, ...)
 	 * @param  string $filename  the file to load
 	 * @param  string $key       where to mount the loaded config
 	 * @return mixed             false when an error occured, else the loaded configuration (most likely an array)
@@ -126,21 +125,23 @@ class sly_Configuration {
 		return $this->loadInternal($filename, self::STORE_PROJECT_DEFAULT, $force, $key);
 	}
 
-	public function loadLocalConfig(){
+	public function loadLocalConfig() {
 		$filename = $this->getLocalConfigFile();
 
 		if (file_exists($filename)) {
 			$config = sly_Util_YAML::load($filename);
 			$this->localConfig = new sly_Util_Array($config);
+			$this->cache = null;
 		}
 	}
 
-	public function loadProjectConfig(){
+	public function loadProjectConfig() {
 		$filename = $this->getProjectConfigFile();
 
 		if (file_exists($filename)) {
 			$config = sly_Util_YAML::load($filename);
 			$this->projectConfig = new sly_Util_Array($config);
+			$this->cache = null;
 		}
 	}
 
@@ -190,22 +191,13 @@ class sly_Configuration {
 	 * @return mixed            the found value or $default
 	 */
 	public function get($key, $default = null) {
-		$found = false;
+		if ($this->cache === null) {
+			// build merged config cache
+			$this->cache = array_replace_recursive($this->staticConfig->get('/', array()), $this->localConfig->get('/', array()), $this->projectConfig->get('/', array()));
+			$this->cache = new sly_Util_Array($this->cache);
+		}
 
-		$p = $this->projectConfig->hasget($key, array());
-		if (!is_array($p[1])) return $p[1];
-		$found = $found || $p[0];
-
-		$l = $this->localConfig->hasget($key, array());
-		if (!is_array($l[1])) return $l[1];
-		$found = $found || $l[0];
-
-		$s = $this->staticConfig->hasget($key, array());
-		if (!is_array($s[1])) return $s[1];
-		$found = $found || $s[0];
-
-		if (!$found) return $default;
-		return array_replace_recursive($s[1], $l[1], $p[1]);
+		return $this->cache->get($key, $default);
 	}
 
 	/**
@@ -292,6 +284,8 @@ class sly_Configuration {
 			throw new sly_Exception('Key '.$key.' ist nicht erlaubt!');
 		}
 
+		$this->cache = null;
+
 		if (!empty($value) && sly_Util_Array::isAssoc($value)) {
 			foreach ($value as $ikey => $val) {
 				$currentPath = trim($key.'/'.$ikey, '/');
@@ -376,9 +370,5 @@ class sly_Configuration {
 		if ($this->projectConfigModified) {
 			sly_Util_YAML::dump($this->getProjectConfigFile(), $this->projectConfig->get(null));
 		}
-	}
-
-	public function __destruct() {
-		$this->flush();
 	}
 }

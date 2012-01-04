@@ -16,7 +16,16 @@ class sly_DB_PDO_Driver_PGSQL extends sly_DB_PDO_Driver {
 	 * @return string
 	 */
 	public function getDSN() {
-		$format = empty($this->database) ? 'pgsql:host=%s' : 'pgsql:host=%s;dbname=%s';
-		return sprintf($format, $this->host, $this->database);
+		$dsn = 'pgsql:host='.$this->host;
+		if(!empty($this->database)) $dsn .=';dbname='.$this->database;
+		return $dsn;
+	}
+
+	/**
+	 * @param  string $name  the database name
+	 * @return string
+	 */
+	public function getCreateDatabaseSQL($name) {
+		return 'CREATE DATABASE `'.$name.'` WITH ENCODING \'UNICODE\'';
 	}
 }

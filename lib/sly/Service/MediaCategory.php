@@ -75,12 +75,30 @@ class sly_Service_MediaCategory extends sly_Service_Model_Base_Id {
 	}
 
 	/**
-	 * @param  string $cacheKey
-	 * @param  array  $where
-	 * @param  string $sortBy
+	 * Selects a category and all children recursively
+	 *
+	 * @param  int     $parentID   the sub-tree's root category or 0 for the whole tree
+	 * @param  boolean $asObjects  set to false if you need the IDs only
+	 * @return array               sorted list of category IDs
+	 */
+	public function findTree($parentID, $asObjects = true) {
+		$parentID = (int) $parentID;
+
+		if ($parentID === 0) {
+			return $this->findBy('tree_0', '1', 'id', $asObjects);
+		}
+
+		return $this->findBy('tree_'.$parentID, 'id = '.$parentID.' OR path LIKE "%|'.$parentID.'|%"', 'id', $asObjects);
+	}
+
+	/**
+	 * @param  string  $cacheKey
+	 * @param  array   $where
+	 * @param  string  $sortBy
+	 * @param  boolean $asObjects  set to false if you need the IDs only
 	 * @return array
 	 */
-	protected function findBy($cacheKey, $where, $sortBy) {
+	protected function findBy($cacheKey, $where, $sortBy, $asObjects = true) {
 		$namespace = 'sly.mediacat.list';
 		$list      = sly_Core::cache()->get($namespace, $cacheKey, null);
 
@@ -92,6 +110,10 @@ class sly_Service_MediaCategory extends sly_Service_Model_Base_Id {
 			foreach ($sql as $row) $list[] = (int) $row['id'];
 
 			sly_Core::cache()->set($namespace, $cacheKey, $list);
+		}
+
+		if (!$asObjects) {
+			return $list;
 		}
 
 		$objlist = array();
@@ -113,12 +135,13 @@ class sly_Service_MediaCategory extends sly_Service_Model_Base_Id {
 		$title = trim($title);
 
 		if (strlen($title) === 0) {
-			throw new sly_Exception(t('mediacat_title_cannot_be_empty'));
+			throw new sly_Exception(t('plase_enter_a_name'));
 		}
 
 		$category = new sly_Model_MediaCategory();
 		$category->setName($title);
 		$category->setRevision(0);
+		$category->setAttributes('');
 		$category->setCreateColumns();
 
 		$this->setPath($category, $parent);
@@ -139,7 +162,7 @@ class sly_Service_MediaCategory extends sly_Service_Model_Base_Id {
 	 */
 	public function update(sly_Model_MediaCategory $cat) {
 		if (strlen($cat->getName()) === 0) {
-			throw new sly_Exception(t('mediacat_title_cannot_be_empty'));
+			throw new sly_Exception(t('title_cannot_be_empty'));
 		}
 
 		$cat->setUpdateColumns();
@@ -164,7 +187,7 @@ class sly_Service_MediaCategory extends sly_Service_Model_Base_Id {
 		$cat = $this->findById($catID);
 
 		if (!$cat) {
-			throw new sly_Exception('Cannot delete category: ID '.$catID.' not found.');
+			throw new sly_Exception(t('category_not_found', $catID));
 		}
 
 		// check emptyness
@@ -172,19 +195,19 @@ class sly_Service_MediaCategory extends sly_Service_Model_Base_Id {
 		$children = $cat->getChildren();
 
 		if (!$force && !empty($children)) {
-			throw new sly_Exception('Cannot delete category: Category has sub-categories.', self::ERR_CAT_HAS_SUBCATS);
+			throw new sly_Exception(t('category_has_children'), self::ERR_CAT_HAS_SUBCATS);
 		}
 
 		$media = $cat->getMedia();
 
 		if (!$force && !empty($media)) {
-			throw new sly_Exception('Cannot delete category: Category is not empty.', self::ERR_CAT_HAS_MEDIA);
+			throw new sly_Exception(t('category_is_not_empty'), self::ERR_CAT_HAS_MEDIA);
 		}
 
 		// delete subcats
 
 		foreach ($children as $child) {
-			$this->delete($child, true);
+			$this->delete($child->getId(), true);
 		}
 
 		// delete files

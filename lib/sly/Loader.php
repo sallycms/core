@@ -107,7 +107,9 @@ class sly_Loader {
 
 			switch ($className) {
 				case 'sly_Log':
-					sly_Log::setLogDirectory(SLY_DYNFOLDER.'/internal/sally/logs');
+					$dir = SLY_DYNFOLDER.'/internal/sally/logs';
+					sly_Util_Directory::create($dir);
+					sly_Log::setLogDirectory($dir);
 					break;
 			}
 

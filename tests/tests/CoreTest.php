@@ -20,11 +20,6 @@ class sly_CoreTest extends PHPUnit_Framework_TestCase {
 		return $this->assertSame($a, $b);
 	}
 
-	public function testGetClang() {
-		$_REQUEST['clang'] = 1; // clang 1 always exists
-		return $this->assertEquals(1, sly_Core::getCurrentClang());
-	}
-
 	public function testGetNotExistingClang() {
 		$_REQUEST['clang'] = -1;
 		return $this->assertNotEquals(-1, sly_Core::getCurrentClang());

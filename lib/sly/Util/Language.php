@@ -16,14 +16,16 @@ class sly_Util_Language {
 	/**
 	 * @param  int $articleId
 	 * @param  int $clang
-	 * @return sly_Model_Article
+	 * @return sly_Model_Language
 	 */
 	public static function findById($languageID) {
 		$languages  = self::findAll();
 		$languageID = (int) $languageID;
-		if(isset($languages[$languageID])) {
+
+		if (isset($languages[$languageID])) {
 			return $languages[$languageID];
 		}
+
 		return null;
 	}
 
@@ -69,7 +71,7 @@ class sly_Util_Language {
 			$languageID = sly_Core::getCurrentClang();
 		}
 		elseif (!self::exists($languageID)) {
-			throw new sly_Exception('Unknown language given.');
+			throw new sly_Exception(t('language_not_found'));
 		}
 
 		$languageID = (int) $languageID;
@@ -91,6 +93,6 @@ class sly_Util_Language {
 	 * @return boolean
 	 */
 	public static function hasPermissionOnLanguage(sly_Model_User $user, $clangID) {
-		return $user->isAdmin() || $user->hasRight('clang[all]') || $user->hasRight('clang['.$clangID.']');
+		return $user->isAdmin() || $user->hasRight('language', 'access', $clangID);
 	}
 }

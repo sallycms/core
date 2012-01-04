@@ -45,7 +45,7 @@ class sly_I18N implements sly_I18N_Base {
 		$this->appendFile($path);
 
 		if ($setlocale) {
-			$this->setLocale();
+			$this->setPHPLocale();
 		}
 	}
 
@@ -56,7 +56,7 @@ class sly_I18N implements sly_I18N_Base {
 	 * loaded language file. Do this only once, since it hurts performance and
 	 * you don't need to change it at runtime anways.
 	 */
-	public function setLocale() {
+	public function setPHPLocale() {
 		$locales = array();
 
 		foreach (explode(',', $this->msg('setlocale')) as $locale) {
@@ -107,13 +107,11 @@ class sly_I18N implements sly_I18N_Base {
 	 * @return string       translated message or the key like in translate:key when not found
 	 */
 	public function msg($key) {
-		if ($this->hasMsg($key)) {
-			$msg = $this->texts[$key];
-		}
-		else {
-			$msg = '[translate:'.$key.']';
+		if (!$this->hasMsg($key)) {
+			return '[translate:'.$key.']';
 		}
 
+		$msg          = $this->texts[$key];
 		$patterns     = array();
 		$replacements = array();
 
@@ -180,5 +178,16 @@ class sly_I18N implements sly_I18N_Base {
 	 */
 	public function getLocale() {
 		return $this->locale;
+	}
+
+	/**
+	 * Reset the internal locale code
+	 *
+	 * Use wisely, my friend... with great power comes great mustache!
+	 *
+	 * @param string $locale  the new locale code (like 'de_de')
+	 */
+	public function setLocale($locale) {
+		$this->locale = $locale;
 	}
 }

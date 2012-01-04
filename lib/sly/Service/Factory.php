@@ -26,7 +26,7 @@ abstract class sly_Service_Factory {
 			$serviceName = 'sly_Service_'.$modelName;
 
 			if (!class_exists($serviceName)) {
-				throw new sly_Exception('sly_Service_Factory: Service für '.$modelName.' wurde nicht gefunden.');
+				throw new sly_Exception(t('service_not_found', $modelName));
 			}
 
 			$service = new $serviceName();
@@ -133,5 +133,12 @@ abstract class sly_Service_Factory {
 	 */
 	public static function getMediaCategoryService() {
 		return self::getService('MediaCategory');
+	}
+
+	/**
+	 * @return sly_Service_ArticleSlice  The articleslice service instance
+	 */
+	public static function getArticleSliceService() {
+		return self::getService('ArticleSlice');
 	}
 }

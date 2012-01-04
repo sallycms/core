@@ -84,6 +84,6 @@ class sly_Table_Column extends sly_Viewable {
 		$full = SLY_COREFOLDER.'/views/table/'.$file;
 		if (file_exists($full)) return $full;
 
-		throw new sly_Exception('View '.$file.' could not be found.');
+		throw new sly_Exception(t('view_not_found', $file));
 	}
 }

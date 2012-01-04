@@ -14,6 +14,7 @@
 class sly_Table extends sly_Viewable {
 	protected $id;                  ///< string
 	protected $columns;             ///< array
+	protected $classes;             ///< array
 	protected $isEmpty;             ///< boolean
 	protected $emptyNotice;         ///< string
 	protected $enableSorting;       ///< boolean
@@ -29,20 +30,24 @@ class sly_Table extends sly_Viewable {
 
 	/**
 	 * @param string $id
+	 * @param array  $classes  list of additional CSS classes for the table tag
 	 */
-	public function __construct($id = null) {
+	public function __construct($id = null, array $classes = array()) {
 		// Das 'a'-Präfix verhindert, dass die ID mit einer Zahl beginnt, was in HTML nicht erlaubt ist.
 
 		$this->id                 = $id === null ? 'a'.substr(md5(uniqid()), 0, 10) : $id;
 		$this->columns            = array();
+		$this->classes            = array('sly-table');
 		$this->isEmpty            = false;
-		$this->emptyNotice        = 'Es wurden noch keine Datensätze angelegt.';
+		$this->emptyNotice        = t('table_is_empty');
 		$this->enableSorting      = false;
 		$this->enableSearching    = false;
 		$this->enableDragAndDrop  = false;
 		$this->dragAndDropHandler = '';
 		$this->totalElements      = null;
 		$this->caption            = null;
+
+		foreach ($classes as $className) $this->addClass($className);
 	}
 
 	/**
@@ -306,6 +311,41 @@ class sly_Table extends sly_Viewable {
 		$full = SLY_COREFOLDER.'/views/table/'.$file;
 		if (file_exists($full)) return $full;
 
-		throw new sly_Exception('View '.$file.' could not be found.');
+		throw new sly_Exception(t('view_not_found', $file));
+	}
+
+	/**
+	 * Add a new class to the form
+	 *
+	 * This method will add a CSS class to the form tag. You can give mutliple
+	 * classes at once, the method will split them up and add them one at a time,
+	 * ensuring that they are unique.
+	 *
+	 * @param  string $class  the CSS class
+	 * @return array          the list of current classes (unique)
+	 */
+	public function addClass($class) {
+		$class = explode(' ', $class);
+		foreach ($class as $c) $this->classes[] = $c;
+		$this->classes = array_unique($this->classes);
+		return $this->classes;
+	}
+
+	/**
+	 * Remove all classes
+	 *
+	 * This method removes all set CSS classes for this form.
+	 */
+	public function clearClasses() {
+		$this->classes = array();
+	}
+
+	/**
+	 * Get all classes
+	 *
+	 * @return array  the list of CSS classes for this form
+	 */
+	public function getClasses() {
+		return $this->classes;
 	}
 }

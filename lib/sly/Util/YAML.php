@@ -17,10 +17,8 @@ class sly_Util_YAML {
 	 * @return string
 	 */
 	protected static function getCacheDir() {
-		$dir  = SLY_DYNFOLDER.'/internal/sally/yaml-cache';
-		$perm = sly_Core::getDirPerm(sly_Core::DEFAULT_DIRPERM); // give default value in case YAML has not yet been loaded
-
-		return sly_Util_Directory::create($dir, $perm, true);
+		$dir = SLY_DYNFOLDER.'/internal/sally/yaml-cache';
+		return sly_Util_Directory::create($dir, null, true);
 	}
 
 	/**
@@ -99,7 +97,7 @@ class sly_Util_YAML {
 			$exists = file_exists($cachefile);
 
 			file_put_contents($cachefile, '<?php $config = '.var_export($config, true).';', LOCK_EX);
-			if (!$exists) chmod($cachefile, sly_Core::getFilePerm(sly_Core::DEFAULT_FILEPERM));
+			if (!$exists) chmod($cachefile, sly_Core::getFilePerm());
 		}
 
 		return $config;
@@ -114,6 +112,6 @@ class sly_Util_YAML {
 		$exists = file_exists($filename);
 
 		file_put_contents($filename, $data, LOCK_EX);
-		if (!$exists) chmod($filename, sly_Core::getFilePerm(sly_Core::DEFAULT_FILEPERM));
+		if (!$exists) chmod($filename, sly_Core::getFilePerm());
 	}
 }
