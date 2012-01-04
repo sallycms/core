@@ -64,14 +64,13 @@ class sly_Service_ArticleExTest extends sly_Service_ArticleTestBase {
 
 		$a = 1;
 		$b = $service->add(1, 'A', 1, -1);
-		$c = $service->add(2, 'B', 1, -1);
+		$c = $service->add(1, 'B', 1, -1);
 
 		// make sure everything is fine up to here
 		$this->assertPositions(array($a, $b, $c), $lang);
 
 		// and now move the start article around
 		$this->move($a, 1, $lang); $this->assertPositions(array($a, $b, $c), $lang);
-		$this->move($a, 0, $lang); $this->assertPositions(array($a, $b, $c), $lang);
 		$this->move($a, 2, $lang); $this->assertPositions(array($b, $a, $c), $lang);
 		$this->move($a, 1, $lang); $this->assertPositions(array($a, $b, $c), $lang);
 		$this->move($a, 3, $lang); $this->assertPositions(array($b, $c, $a), $lang);
