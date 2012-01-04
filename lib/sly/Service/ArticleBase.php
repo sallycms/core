@@ -304,7 +304,7 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base {
 
 		if ($position !== false && $position != $curPos) {
 			$position = (int) $position;
-			$parentID = $obj->getParentId();
+			$parentID = $obj->getCategoryId();
 			$maxPos   = $this->getMaxPosition($parentID);
 			$newPos   = ($position <= 0 || $position > $maxPos) ? $maxPos : $position;
 
