@@ -31,9 +31,53 @@ class sly_Service_User extends sly_Service_Model_Base_Id {
 	 * @return sly_Model_User
 	 */
 	public function create($params) {
-		$model = $this->makeInstance($params);
-		if (isset($params['psw'])) $model->setPassword($params['psw']);
+		if (!isset($params['login']) || mb_strlen($params['login']) === 0) {
+			throw new sly_Exception(t('no_username_given'));
+		}
+
+		if (!isset($params['psw']) || mb_strlen($params['psw']) === 0) {
+			throw new sly_Exception(t('no_password_given'));
+		}
+
+		if ($this->find(array('login' => $params['login']))) {
+			throw new sly_Exception(t('user_login_already_exists'));
+		}
+
+		$currentUser = sly_Util_User::getCurrentUser();
+		$defaults    = array(
+			'status'      => false,
+			'rights'      => '',
+			'name'        => '',
+			'description' => '',
+			'lasttrydate' => 0,
+			'revision'    => 0,
+			'updatedate'  => time(),
+			'createdate'  => time(),
+			'updateuser'  => $currentUser ? $currentUser->getLogin() : '',
+			'createuser'  => $currentUser ? $currentUser->getLogin() : '',
+		);
+
+		$params = array_merge($defaults, $params);
+		$model  = $this->makeInstance($params);
+		$model->setPassword($params['psw']);
+
 		return $this->save($model);
+	}
+
+	/**
+	 * @param  string         $login
+	 * @param  string         $password
+	 * @param  boolean        $active
+	 * @param  string         $rights
+	 * @return sly_Model_User $user
+	 */
+	public function add($login, $password, $active, $rights) {
+		return $this->create(array(
+			'login'  => $login,
+			'psw'    => $password,
+			'status' => (boolean) $active,
+			'rights' => $rights
+		));
 	}
 
 	/**
