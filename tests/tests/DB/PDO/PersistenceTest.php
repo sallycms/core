@@ -21,7 +21,14 @@ class sly_DB_PDO_PersistenceTest extends sly_DatabaseTest {
 	}
 
 	private function assertResultSet(array $expected) {
-		$this->assertEquals($expected, self::$pers->all());
+		$all = self::$pers->all();
+		$len = count($expected);
+
+		$this->assertCount($len, $all);
+
+		for ($i = 0; $i < $len; ++$i) {
+			$this->assertEquals($expected[$i], $all[$i]);
+		}
 	}
 
 	public function testGetPDO() {
@@ -133,5 +140,64 @@ class sly_DB_PDO_PersistenceTest extends sly_DatabaseTest {
 		// named placeholders
 		$this->assertTrue(self::$pers->query('SELECT 1,:foo', array('foo' => 'testX')));
 		$this->assertResultSet(array(array('1' => '1', 'testX' => 'testX')));
+	}
+
+	/**
+	 * @dataProvider selectProvider
+	 */
+	public function testSelect($expected, $table, $select, $where, $group = null, $order = null, $offset = null, $limit = null, $having = null, $joins = null) {
+		$result = self::$pers->select($table, $select, $where, $group, $order, $offset, $limit, $having, $joins);
+
+		$this->assertTrue($result);
+		$this->assertResultSet($expected);
+	}
+
+	public function selectProvider() {
+		return array(
+			array(
+				array(array('id' => 1)),
+				'article', 'id', 'id = 1 AND clang = 5'
+			),
+
+			array(
+				array(array('id' => 5)),
+				'article', 'id', array('id' => 5, 'clang' => 5)
+			),
+
+			array(
+				array(),
+				'article', 'id', 'id = -1 AND clang = 5'
+			),
+
+			array(
+				array(array('startpage' => 0), array('startpage' => 1)),
+				'article', 'startpage', null, 'startpage', 'startpage'
+			),
+
+			array(
+				array(array('startpage' => 1)),
+				'article', 'startpage', array('startpage' => 1), 'startpage'
+			),
+
+			array(
+				array(array('startpage' => 1)),
+				'article', 'startpage', null, 'startpage', 'startpage', 1
+			),
+
+			array(
+				array(array('id' => 1)),
+				'article', 'id', array('clang' => 5), null, 'id', 0, 1
+			),
+
+			array(
+				array(array('id' => 2)),
+				'article', 'id', array('clang' => 5), null, 'id', 1, 1
+			),
+
+			array(
+				array(array('id' => 2), array('id' => 3)),
+				'article', 'id', array('clang' => 5), null, 'id', 1, 2
+			),
+		);
 	}
 }
