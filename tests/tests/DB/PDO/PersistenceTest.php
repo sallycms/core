@@ -8,11 +8,16 @@
  * http://www.opensource.org/licenses/mit-license.php
  */
 
-class sly_DB_PDO_PersistenceTest extends PHPUnit_Framework_TestCase {
+class sly_DB_PDO_PersistenceTest extends sly_DatabaseTest {
 	private static $pers;
 
 	public static function setUpBeforeClass() {
+		parent::setUpBeforeClass();
 		self::$pers = sly_DB_PDO_Persistence::getInstance();
+	}
+
+	protected function getDataSetName() {
+		return 'sally-demopage';
 	}
 
 	private function assertResultSet(array $expected) {
@@ -54,6 +59,51 @@ class sly_DB_PDO_PersistenceTest extends PHPUnit_Framework_TestCase {
 		);
 
 		$this->assertEquals($expected, self::$pers->all());
+	}
+
+	public function testListTables() {
+		$tables = self::$pers->listTables();
+		$this->assertCount(9, $tables);
+		$this->assertEquals(
+			array('sly_article', 'sly_article_slice', 'sly_clang', 'sly_file', 'sly_file_category',
+			'sly_registry', 'sly_slice', 'sly_slice_value', 'sly_user'),
+			$tables
+		);
+
+		$this->assertTrue(self::$pers->listTables('sly_user'));
+		$this->assertFalse(self::$pers->listTables('a'.uniqid()));
+	}
+
+	/**
+	 * @dataProvider fetchProvider
+	 */
+	public function testFetch($table, $cols, $where, $order, $expected) {
+		// fetch a single row
+		$result = self::$pers->fetch($table, $cols, $where, $order);
+		$this->assertEquals($expected, $result);
+	}
+
+	/**
+	 * @dataProvider fetchProvider
+	 */
+	public function testMagicFetch($table, $cols, $where, $order, $_, $expected = null) {
+		$expected = $expected === null ? $_ : $expected;
+		$result   = self::$pers->magicFetch($table, $cols, $where, $order);
+
+		$this->assertEquals($expected, $result);
+	}
+
+	public function fetchProvider() {
+		return array(
+			array('user', 'id',        array('id' => 1), null, array('id' => 1),                1),
+			array('user', 'id,status', array('id' => 1), null, array('id' => 1, 'status' => 1), null),
+			array('user', 'id',        null,             null, array('id' => 1),                1),
+			array('user', 'id',        array('id' => 2), null, false,                           null),
+
+			array('article', 'id', null,                                  'id DESC', array('id' => 8), 8),
+			array('article', 'id', array('re_id' => 0),                   'id ASC',  array('id' => 1), 1),
+			array('article', 'id', array('re_id' => 0, 'startpage' => 0), 'id ASC',  array('id' => 6), 6)
+		);
 	}
 
 	/**
