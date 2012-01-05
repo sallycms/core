@@ -126,7 +126,7 @@ class sly_Service_Article extends sly_Service_Model_Base {
 		$cache = sly_Core::cache();
 
 		foreach (sly_Util_Language::findAll(true) as $clangID) {
-			$db->select('article', 'id', 'prior >= '.$position.' AND startpage = 0 AND clang = '.$clangID.' AND re_id = '.$parentID);
+			$db->select('article', 'id', 'prior >= '.$position.' AND clang = '.$clangID.' AND ((startpage = 0 AND re_id = '.$parentID.') OR id = '.$parentID.')');
 
 			foreach ($db as $row) {
 				$cache->delete('sly.article', $row['id'].'_'.$clangID);
