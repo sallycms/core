@@ -20,7 +20,7 @@ class sly_DB_PDO_SQLBuilder_PGSQL extends sly_DB_PDO_SQLBuilder {
 	 */
 	public function build_limit($sql, $offset = 0, $limit = -1) {
 		$limit = intval($limit);
-		$limit = $limit > 0 ? $limit : 'ALL';
+		$limit = $limit > 0 && $limit !== null ? $limit : 'ALL';
 
 		return $sql.' LIMIT '.$limit.' OFFSET '.intval($offset);
 	}
