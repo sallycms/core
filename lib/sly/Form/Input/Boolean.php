@@ -45,8 +45,10 @@ abstract class sly_Form_Input_Boolean extends sly_Form_Input_Base {
 		$attributeString = $this->getAttributeString();
 
 		return
+		'<span>'.
 			'<input '.$attributeString.' /> '.
-			'<label class="sly-inline" for="'.$this->attributes['id'].'">'.sly_html($this->description).'</label>';
+			'<label class="sly-inline" for="'.$this->attributes['id'].'">'.sly_html($this->description).'</label>'.
+		'</span>';
 	}
 
 	/**
