@@ -290,7 +290,7 @@ class sly_Service_Article extends sly_Service_Model_Base {
 		foreach (sly_Util_Language::findAll(true) as $clangID) {
 			$iArticle = $this->findById($articleID, $clangID);
 			$prior    = $iArticle->getPrior();
-			$where    = 'prior >= '.$prior.' AND re_id = '.$parent.' AND catprior = 0 AND clang = '.$clangID;
+			$where    = 'prior >= '.$prior.' AND ((re_id = '.$parent.' AND catprior = 0) OR id = '.$parent.') AND clang = '.$clangID;
 
 			$db->query('UPDATE '.$prefix.'article SET prior = prior - 1 WHERE '.$where);
 
