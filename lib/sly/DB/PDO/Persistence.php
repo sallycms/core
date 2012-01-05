@@ -243,12 +243,26 @@ class sly_DB_PDO_Persistence extends sly_DB_Persistence {
 	}
 
 	/**
+	 * @return sly_DB_PDO_Connection
+	 */
+	public function getConnection() {
+		return $this->connection;
+	}
+
+	/**
+	 * @return PDO
+	 */
+	public function getPDO() {
+		return $this->connection->getPDO();
+	}
+
+	/**
 	 * @param  mixed $str
 	 * @param  int   $paramType
 	 * @return string
 	 */
 	public function quote($str, $paramType = PDO::PARAM_STR) {
-		return $this->connection->getPDO()->quote($str, $paramType);
+		return $this->getPDO()->quote($str, $paramType);
 	}
 
 	// =========================================================================
@@ -324,7 +338,7 @@ class sly_DB_PDO_Persistence extends sly_DB_Persistence {
 	}
 
 	public function all() {
-		return $this->statement->fetchAll();
+		return $this->statement->fetchAll(PDO::FETCH_ASSOC);
 	}
 
 
@@ -365,11 +379,8 @@ class sly_DB_PDO_Persistence extends sly_DB_Persistence {
 	}
 
 	public function rewind() {
-		// Ist in PDO-Statements nicht möglich!
-		// Achtung also, wenn über ein Result mehrfach iteriert werden soll.
-
 		if ($this->currentRow !== null) {
-			trigger_error('Über ein PDO-Resultset kann nicht mehrfach iteriert werden!', E_USER_WARNING);
+			throw new sly_DB_PDO_Exception('Über ein PDO-Resultset kann nicht mehrfach iteriert werden!');
 		}
 	}
 
