@@ -56,10 +56,6 @@ abstract class sly_App_Base {
 			$controller = $this->getController($className);
 		}
 
-		if (!($controller instanceof sly_Controller_Interface)) {
-			throw new sly_Controller_Exception(t('does_not_implement', get_class($controller), 'sly_Controller_Interface'), 500);
-		}
-
 		if (!method_exists($controller, $method)) {
 			if (!method_exists($controller, 'slyGetActionFallback')) {
 				throw new sly_Controller_Exception(t('unknown_action', $method, $className), 404);
@@ -120,10 +116,11 @@ abstract class sly_App_Base {
 	}
 
 	protected function notifySystemOfController($useCompatibility = false) {
+		$name       = $this->getCurrentControllerName();
 		$controller = $this->getCurrentController();
 		$params     = array(
 			'app'    => $this,
-			'class'  => $this->getControllerClass($controller),
+			'name'   => $name,
 			'action' => $this->getCurrentAction()
 		);
 
@@ -131,7 +128,7 @@ abstract class sly_App_Base {
 
 		if ($useCompatibility) {
 			// backwards compatibility for pre-0.6 code
-			sly_Core::dispatcher()->notify('PAGE_CHECKED', $controller, $params);
+			sly_Core::dispatcher()->notify('PAGE_CHECKED', $name);
 		}
 	}
 
@@ -167,6 +164,14 @@ abstract class sly_App_Base {
 		}
 
 		return $instances[$className];
+	}
+
+	public function getCurrentController() {
+		$name       = $this->getCurrentControllerName();
+		$className  = $this->getControllerClass($name);
+		$controller = $this->getController($className);
+
+		return $controller;
 	}
 
 	abstract public function getControllerClassPrefix();

@@ -388,21 +388,34 @@ class sly_Core {
 	/**
 	 * Returns the current backend page
 	 *
-	 * @deprecated as of 0.6, use getCurrentController()
+	 * @deprecated as of 0.6, use getCurrentControllerName()
 	 *
 	 * @return string  current page or null if in frontend
 	 */
 	public static function getCurrentPage() {
-		return self::isBackend() ? self::getCurrentController() : null;
+		return self::isBackend() ? self::getCurrentControllerName() : null;
 	}
 
 	/**
 	 * Returns the current controller
 	 *
-	 * @return string  current controller
+	 * @return sly_Controller_Interface  the current controller
 	 */
 	public static function getCurrentController() {
 		return self::getCurrentApp()->getCurrentController();
+	}
+
+	/**
+	 * Returns the current controller name
+	 *
+	 * Code using the controller name should never assume that it maps directly
+	 * to the controller class. Currently, it does, but this may change in a
+	 * future relase.
+	 *
+	 * @return string  current controller name
+	 */
+	public static function getCurrentControllerName() {
+		return self::getCurrentApp()->getCurrentControllerName();
 	}
 
 	/**
