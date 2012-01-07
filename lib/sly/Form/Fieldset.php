@@ -29,7 +29,7 @@ class sly_Form_Fieldset extends sly_Viewable {
 	protected $num;      ///< int
 	protected $columns;  ///< int
 	protected $legend;   ///< string
-	protected $id;       ///< string
+	protected $attrs;    ///< array
 
 	/**
 	 * Constructor
@@ -43,7 +43,7 @@ class sly_Form_Fieldset extends sly_Viewable {
 		$this->rows    = array();
 		$this->columns = $columns;
 		$this->legend  = $legend;
-		$this->id      = $id;
+		$this->attrs   = compact('id');
 
 		$this->setNum($num);
 	}
@@ -131,7 +131,32 @@ class sly_Form_Fieldset extends sly_Viewable {
 	public function getNum()     { return $this->num;     } ///< @return int
 	public function getColumns() { return $this->columns; } ///< @return int
 	public function getLegend()  { return $this->legend;  } ///< @return string
-	public function getID()      { return $this->id;      } ///< @return string
+
+	/**
+	 * @return string
+	 */
+	public function getID() {
+		return $this->getAttribute('id', '');
+	}
+
+	/**
+	 * @param  string $name
+	 * @param  mixed  $value
+	 * @return mixed
+	 */
+	public function setAttribute($name, $value) {
+		$this->attrs[$name] = is_string($value) ? trim($value) : $value;
+		return $this->attrs[$name];
+	}
+
+	/**
+	 * @param  string $name
+	 * @param  mixed  $default
+	 * @return mixed
+	 */
+	public function getAttribute($name, $default = null) {
+		return isset($this->attrs[$name]) ? $this->attrs[$name] : $default;
+	}
 
 	/**
 	 * Sets the number of columns
@@ -169,8 +194,7 @@ class sly_Form_Fieldset extends sly_Viewable {
 	 * @return string      the new id (trimmed)
 	 */
 	public function setID($id) {
-		$this->id = trim($id);
-		return $this->id;
+		return $this->setAttribute('id', trim($id));
 	}
 
 	/**
