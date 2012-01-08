@@ -16,7 +16,37 @@ class sly_DB_PDO_Driver_MYSQL extends sly_DB_PDO_Driver {
 	 * @return string
 	 */
 	public function getDSN() {
-		$format = empty($this->database) ? 'mysql:host=%s' : 'mysql:host=%s;dbname=%s';
-		return sprintf($format, $this->host, $this->database);
+		$dsn = 'mysql:host='.$this->host;
+		if (!empty($this->database)) $dsn .= ';dbname='.$this->database;
+		$dsn .= ';charset=utf8';
+		return $dsn;
+	}
+
+	/**
+	 * @param  string $name  the database name
+	 * @return string
+	 */
+	public function getCreateDatabaseSQL($name) {
+		return 'CREATE DATABASE `'.$name.'` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci';
+	}
+
+ 	/**
+ 	 * @return array
+ 	 */
+	public function getPDOOptions() {
+		// http://php.net/manual/en/ref.pdo-mysql.connection.php
+		if (version_compare(PHP_VERSION, '5.3.6', '>=')) {
+			return array();
+		}
+		else {
+			return array(PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8');
+		}
+	}
+
+ 	/**
+ 	 * @return array
+ 	 */
+	public function getPDOAttributes() {
+		return array(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => true);
 	}
 }

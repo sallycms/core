@@ -9,7 +9,7 @@
  */
 
 $type         = sly_Util_Language::isMultilingual() ? 'multilingual' : 'monolingual';
-$formRowClass = array('rex-form-row', 'sly-num'.$rowNum, 'sly-form-'.$type);
+$formRowClass = array('sly-form-row', 'sly-num'.$rowNum, 'sly-form-'.$type);
 $element      = reset($elements); // in multilingual rows, there can only be one...
 $containerID  = $element->getDisplayName();
 $values       = sly_makeArray($element->getAttribute('value'));
@@ -99,14 +99,14 @@ if (sly_Util_Language::isMultilingual()) {
 	print '<div class="sly-form-i18n-container c-'.$containerID.'"'.$style.'>';
 
 	$element      = new sly_Form_Text($element->getLabel(), $element->getHelpText());
-	$formRowClass = array('rex-form-row', 'sly-num'.$rowNum);
+	$formRowClass = array('sly-form-row', 'sly-num'.$rowNum);
 	$rel          = '';
 	$style        = '';
 
 	print $this->renderView('row_i18n_helper.phtml', compact('element', 'formRowClass', 'class', 'rel', 'style'));
 
 	foreach ($elements as $clangID => $element) {
-		$formRowClass = array('rex-form-row', 'sly-num'.$rowNum, 'clang-'.$clangID);
+		$formRowClass = array('sly-form-row', 'sly-num'.$rowNum, 'clang-'.$clangID);
 
 		$element->setLabel('      '.$langs[$clangID]->getName());
 		$element->setHelpText(''); // is displayed in the filler row we created above

@@ -20,7 +20,7 @@ class sly_DB_PDO_SQLBuilder_OCI extends sly_DB_PDO_SQLBuilder {
 	 */
 	public function build_limit($sql, $offset = 0, $limit = -1) {
 		$offset = intval($offset);
-		$limit  = intval($limit);
+		$limit  = $limit === null ? -1 : intval($limit);
 
 		// http://www.oracle.com/technology/oramag/oracle/06-sep/o56asktom.html
 

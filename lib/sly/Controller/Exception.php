@@ -17,6 +17,6 @@
  * @author  Zozi
  * @since   0.1
  */
-class sly_Controller_Exception extends Exception {
+class sly_Controller_Exception extends sly_Exception {
 
 }

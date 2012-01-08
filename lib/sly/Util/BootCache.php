@@ -29,6 +29,13 @@ class sly_Util_BootCache {
 		// add current cache instance
 		$cacheClass = get_class(sly_Core::cache());
 
+		// add current database driver
+		$driver = sly_Core::config()->get('DATABASE/DRIVER');
+		$driver = strtoupper($driver);
+
+		self::addClass('sly_DB_PDO_Driver_'.$driver);
+		self::addClass('sly_DB_PDO_SQLBuilder_'.$driver);
+
 		// TODO: Remove these dependency hacks with a more elegant solution (Reflection?)
 		if ($cacheClass === 'BabelCache_Memcached') {
 			self::addClass('BabelCache_Memcache');
@@ -104,11 +111,7 @@ class sly_Util_BootCache {
 
 		$functionFiles = array(
 			'lib/compatibility.php',
-			'lib/functions.php',
-			'functions/function_rex_globals.inc.php',
-			'functions/function_rex_client_cache.inc.php',
-			'functions/function_rex_other.inc.php',
-			'functions/function_rex_generate.inc.php'
+			'lib/functions.php'
 		);
 
 		foreach ($functionFiles as $fctFile) {

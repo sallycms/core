@@ -31,9 +31,53 @@ class sly_Service_User extends sly_Service_Model_Base_Id {
 	 * @return sly_Model_User
 	 */
 	public function create($params) {
-		$model = $this->makeInstance($params);
-		if (isset($params['psw'])) $model->setPassword($params['psw']);
+		if (!isset($params['login']) || mb_strlen($params['login']) === 0) {
+			throw new sly_Exception(t('no_username_given'));
+		}
+
+		if (!isset($params['psw']) || mb_strlen($params['psw']) === 0) {
+			throw new sly_Exception(t('no_password_given'));
+		}
+
+		if ($this->find(array('login' => $params['login']))) {
+			throw new sly_Exception(t('user_login_already_exists'));
+		}
+
+		$currentUser = sly_Util_User::getCurrentUser();
+		$defaults    = array(
+			'status'      => false,
+			'rights'      => '',
+			'name'        => '',
+			'description' => '',
+			'lasttrydate' => 0,
+			'revision'    => 0,
+			'updatedate'  => time(),
+			'createdate'  => time(),
+			'updateuser'  => $currentUser ? $currentUser->getLogin() : '',
+			'createuser'  => $currentUser ? $currentUser->getLogin() : '',
+		);
+
+		$params = array_merge($defaults, $params);
+		$model  = $this->makeInstance($params);
+		$model->setPassword($params['psw']);
+
 		return $this->save($model);
+	}
+
+	/**
+	 * @param  string         $login
+	 * @param  string         $password
+	 * @param  boolean        $active
+	 * @param  string         $rights
+	 * @return sly_Model_User $user
+	 */
+	public function add($login, $password, $active, $rights) {
+		return $this->create(array(
+			'login'  => $login,
+			'psw'    => $password,
+			'status' => (boolean) $active,
+			'rights' => $rights
+		));
 	}
 
 	/**
@@ -43,14 +87,20 @@ class sly_Service_User extends sly_Service_Model_Base_Id {
 	 */
 	public function save(sly_Model_Base $user) {
 		$event = ($user->getId() == sly_Model_Base_Id::NEW_ID) ? 'SLY_USER_ADDED' : 'SLY_USER_UPDATED';
-		$user = parent::save($user);
+		$user  = parent::save($user);
+
+		sly_Core::cache()->flush('sly.user');
 		sly_Core::dispatcher()->notify($event, $user);
+
 		return $user;
 	}
 
 	public function delete($where) {
 		$retval = parent::delete($where);
+
+		sly_Core::cache()->flush('sly.user');
 		sly_Core::dispatcher()->notify('SLY_USER_DELETED', $where['id']);
+
 		return $retval;
 	}
 
@@ -64,6 +114,31 @@ class sly_Service_User extends sly_Service_Model_Base_Id {
 		$res = $this->find(array('login' => $login));
 		if (count($res) == 1) return $res[0];
 		return null;
+	}
+
+	/**
+	 * @param  int $id
+	 * @return sly_Model_User
+	 */
+	public function findById($id) {
+		$id = (int) $id;
+
+		if ($id <= 0) {
+			return null;
+		}
+
+		$namespace = 'sly.user';
+		$obj       = sly_Core::cache()->get($namespace, $id, null);
+
+		if ($obj === null) {
+			$obj = $this->findOne(array('id' => $id));
+
+			if ($obj !== null) {
+				sly_Core::cache()->set($namespace, $id, $obj);
+			}
+		}
+
+		return $obj;
 	}
 
 	/**
@@ -91,7 +166,7 @@ class sly_Service_User extends sly_Service_Model_Base_Id {
 		$user    = $this->findByLogin($login);
 		$loginOK = false;
 
-		if ($user) {
+		if ($user instanceof sly_Model_User) {
 			$loginOK = $user->getLastTryDate() < time()-sly_Core::config()->get('RELOGINDELAY')
 					&& $user->getStatus() == 1
 					&& $this->checkPassword($user, $password);

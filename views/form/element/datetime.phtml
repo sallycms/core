@@ -52,7 +52,7 @@ $formatJS   = str_replace(
 $attrs['data-date']     = strftime('%Y-%m-%d', $value);
 $attrs['data-datetime'] = strftime('%Y-%m-%dT%H:%M:%S', $value);
 
-$attrs['class'] = 'rex-form-text sly-form-'.$type;
+$attrs['class'] = 'sly-form-text sly-form-'.$type;
 $attrs['type']  = $hasNative ? $type : 'text';
 $attrs['name']  = $name;
 $attrs['id']    = $attrs['name'];
@@ -90,15 +90,15 @@ $jsvarname = 'element'.sly_html($name);
 
 <script type="text/javascript">
 (function($) {
-	var <?= $jsvarname ?> = $('#<?= sly_html($name) ?>');
+	var <?php echo $jsvarname ?> = $('#<?php echo sly_html($name) ?>');
 
-	<? if ($hasNative): ?>
-	<?= $jsvarname ?>.val(<?= $jsvarname ?>.data('<?= $this->withTime() ? 'datetime' : 'date' ?>')).attr('step', 'any');
-	sly.addDatepickerToggler(<?= $jsvarname ?>, <?= $value === null ? 0 : 1 ?>);
-	<? else: ?>
+	<?php if ($hasNative): ?>
+	<?php echo $jsvarname ?>.val(<?php echo $jsvarname ?>.data('<?php echo $this->withTime() ? 'datetime' : 'date' ?>')).attr('step', 'any');
+	sly.addDatepickerToggler(<?php echo $jsvarname ?>, <?php echo $value === null ? 0 : 1 ?>);
+	<?php else: ?>
 	$(function() {
-		<?= $jsvarname ?>.<?= $this->withTime() ? 'datetime' : 'datepicker' ?>({dateFormat: '<?= addslashes($formatJS) ?>', userLang: '<?= $locale ?>'});
+		<?php echo $jsvarname ?>.<?php echo $this->withTime() ? 'datetime' : 'datepicker' ?>({dateFormat: '<?php echo addslashes($formatJS) ?>', userLang: '<?php echo $locale ?>'});
 	});
-	<? endif ?>
+	<?php endif ?>
 })(jQuery);
 </script>

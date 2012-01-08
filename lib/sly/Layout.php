@@ -60,6 +60,15 @@ abstract class sly_Layout extends sly_Viewable {
 	}
 
 	/**
+	 * Set the page content directly
+	 *
+	 * @param string $content
+	 */
+	public function setContent($content) {
+		$this->content = trim($content);
+	}
+
+	/**
 	 * Render the page
 	 *
 	 * This method starts a buffer, prints the header, content and footer and
@@ -257,7 +266,7 @@ abstract class sly_Layout extends sly_Viewable {
 	 * @param string $content  content attribute of the tag
 	 */
 	public function addHttpMeta($name, $content) {
-		$this->httpMetas[trim($name)] =trim($content);
+		$this->httpMetas[trim($name)] = trim($content);
 	}
 
 	/**
@@ -418,6 +427,8 @@ abstract class sly_Layout extends sly_Viewable {
 	 * Prints the closing body and html tags.
 	 */
 	public function printFooter() {
+		$this->printJavaScriptFiles();
+		$this->printJavaScript();
 		print '</body></html>';
 	}
 
@@ -435,6 +446,6 @@ abstract class sly_Layout extends sly_Viewable {
 		$full = SLY_COREFOLDER.'/views/'.$file;
 		if (file_exists($full)) return $full;
 
-		throw new sly_Exception('View '.$file.' could not be found.');
+		throw new sly_Exceptiont(t('view_not_found', $file));
 	}
 }

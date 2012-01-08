@@ -29,7 +29,7 @@ class sly_Form_Fieldset extends sly_Viewable {
 	protected $num;      ///< int
 	protected $columns;  ///< int
 	protected $legend;   ///< string
-	protected $id;       ///< string
+	protected $attrs;    ///< array
 
 	/**
 	 * Constructor
@@ -43,7 +43,7 @@ class sly_Form_Fieldset extends sly_Viewable {
 		$this->rows    = array();
 		$this->columns = $columns;
 		$this->legend  = $legend;
-		$this->id      = $id;
+		$this->attrs   = compact('id');
 
 		$this->setNum($num);
 	}
@@ -58,10 +58,8 @@ class sly_Form_Fieldset extends sly_Viewable {
 	 * @return boolean             always true
 	 */
 	public function addRow(array $row) {
-		$row = sly_makeArray($row);
-
 		if ($this->columns > 1 && $this->isMultilingual($row)) {
-			throw new sly_Form_Exception('Mehrsprachige Elemente können nicht in mehrspaltige Fieldsets eingefügt werden.');
+			throw new sly_Form_Exception(t('cannot_insert_multilingual_element_in_multicolumn_fieldset'));
 		}
 
 		$this->rows[] = $row;
@@ -133,7 +131,32 @@ class sly_Form_Fieldset extends sly_Viewable {
 	public function getNum()     { return $this->num;     } ///< @return int
 	public function getColumns() { return $this->columns; } ///< @return int
 	public function getLegend()  { return $this->legend;  } ///< @return string
-	public function getID($id)   { return $this->id;      } ///< @return string
+
+	/**
+	 * @return string
+	 */
+	public function getID() {
+		return $this->getAttribute('id', '');
+	}
+
+	/**
+	 * @param  string $name
+	 * @param  mixed  $value
+	 * @return mixed
+	 */
+	public function setAttribute($name, $value) {
+		$this->attrs[$name] = is_string($value) ? trim($value) : $value;
+		return $this->attrs[$name];
+	}
+
+	/**
+	 * @param  string $name
+	 * @param  mixed  $default
+	 * @return mixed
+	 */
+	public function getAttribute($name, $default = null) {
+		return isset($this->attrs[$name]) ? $this->attrs[$name] : $default;
+	}
 
 	/**
 	 * Sets the number of columns
@@ -146,7 +169,7 @@ class sly_Form_Fieldset extends sly_Viewable {
 		$num = ($num > 0 && $num < 26) ? $num : 1;
 
 		if ($num > 1 && $this->isMultilingual()) {
-			throw new sly_Form_Exception('Dieses Fieldset enthält mehrsprachige Elemente und muss daher einspaltig sein.');
+			throw new sly_Form_Exception(t('fieldset_contains_multilingual_elements_has_to_be_singlecolumn'));
 		}
 
 		$this->columns = $num;
@@ -171,8 +194,7 @@ class sly_Form_Fieldset extends sly_Viewable {
 	 * @return string      the new id (trimmed)
 	 */
 	public function setID($id) {
-		$this->id = trim($id);
-		return $this->id;
+		return $this->setAttribute('id', trim($id));
 	}
 
 	/**
@@ -219,6 +241,6 @@ class sly_Form_Fieldset extends sly_Viewable {
 		$full = SLY_COREFOLDER.'/views/form/'.$file;
 		if (file_exists($full)) return $full;
 
-		throw new sly_Form_Exception('View '.$file.' could not be found.');
+		throw new sly_Form_Exception(t('view_not_found', $file));
 	}
 }

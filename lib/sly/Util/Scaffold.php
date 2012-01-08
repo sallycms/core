@@ -33,7 +33,7 @@ class sly_Util_Scaffold {
 				define('SCAFFOLD_PRODUCTION', false);
 			}
 
-			$cacheDir = SLY_DYNFOLDER.'/internal/sally/css-cache';
+			$cacheDir = SLY_DYNFOLDER.'/internal/sally/temp';
 			sly_Util_Directory::create($cacheDir);
 
 			$config = array(

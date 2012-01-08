@@ -53,4 +53,4 @@ $attribs = sly_Util_HTML::buildAttributeString($this->htmlAttributes);
 $content = $left.$this->content.$right;
 
 ?>
-<th <?= $attribs ?>><?= $content ?></th>
+<th <?php echo $attribs ?>><?php echo $content ?></th>

@@ -15,6 +15,8 @@
 abstract class sly_Service_AddOn_Base {
 	protected static $loaded = array(); ///< array  list of loaded addOns and plugins for depedency aware loading
 
+	private $loadInfo = array();
+
 	/**
 	 * @param  mixed $component
 	 * @return string
@@ -54,11 +56,6 @@ abstract class sly_Service_AddOn_Base {
 	abstract protected function extend($time, $type, $component, $state);
 
 	/**
-	 * @return string
-	 */
-	abstract protected function getI18NPrefix();
-
-	/**
 	 * @param  mixed $component
 	 * @return string
 	 */
@@ -95,14 +92,15 @@ abstract class sly_Service_AddOn_Base {
 	 *
 	 * @param mixed $component  addOn as string, plugin as array
 	 */
-	public function loadConfig($component) {
-		if ($this->isInstalled($component)) {
+	protected function loadConfig($component, $forceInstall = false, $forceActivated = false) {
+		if ($forceInstall || $forceActivated || $this->isInstalled($component)) {
 			$config       = sly_Core::config();
-			$defaultsFile = $this->baseFolder($component).'defaults.yml';
-			$globalsFile  = $this->baseFolder($component).'globals.yml';
+			$baseFolder   = $this->baseFolder($component);
+			$defaultsFile = $baseFolder.'defaults.yml';
+			$globalsFile  = $baseFolder.'globals.yml';
 
-			if ($this->isActivated($component)) {
-				$this->loadStatic($component);
+			if ($forceActivated || $this->isActivated($component)) {
+				$this->loadStatic($component, $baseFolder);
 
 				if (file_exists($defaultsFile)) {
 					$config->loadProjectDefaults($defaultsFile, false, $this->getConfPath($component));
@@ -118,9 +116,10 @@ abstract class sly_Service_AddOn_Base {
 	/**
 	 * @param mixed $component
 	 */
-	public function loadStatic($component) {
+	protected function loadStatic($component, $baseFolder = null) {
 		$config     = sly_Core::config();
-		$staticFile = $this->baseFolder($component).'static.yml';
+		$baseFolder = $baseFolder === null ? $this->baseFolder($component) : $baseFolder;
+		$staticFile = $baseFolder.'static.yml';
 
 		if (file_exists($staticFile)) {
 			$config->loadStatic($staticFile, $this->getConfPath($component));
@@ -149,6 +148,12 @@ abstract class sly_Service_AddOn_Base {
 	 */
 	public function add($component) {
 		$this->setProperty($component, 'install', false);
+		$this->setProperty($component, 'status', false);
+
+		// only add plugins key on addOns
+		if (!is_array($component)) {
+			$this->setProperty($component, 'plugins', array());
+		}
 	}
 
 	/**
@@ -169,26 +174,37 @@ abstract class sly_Service_AddOn_Base {
 	 */
 	public function getSupportPageEx($component) {
 		$supportPage = $this->getSupportPage($component, '');
+		$author      = $this->getAuthor($component);
 
 		if ($supportPage) {
 			$supportPages = sly_makeArray($supportPage);
 			$links        = array();
 
-			foreach ($supportPages as $page) {
+			foreach ($supportPages as $idx => $page) {
 				$infos = parse_url($page);
 				if (!isset($infos['host'])) $infos = parse_url('http://'.$page);
 				if (!isset($infos['host'])) continue;
 
 				$page = sprintf('%s://%s%s', $infos['scheme'], $infos['host'], isset($infos['path']) ? $infos['path'] : '');
 				$host = substr($infos['host'], 0, 4) == 'www.' ? substr($infos['host'], 4) : $infos['host'];
+				$name = $idx === 0 && !empty($author) ? $author : $host;
+				$name = sly_Util_String::cutText($name, 40);
 
-				$links[] = '<a href="'.sly_html($page).'" class="sly-blank">'.sly_html($host).'</a>';
+				$links[] = '<a href="'.sly_html($page).'" class="sly-blank">'.sly_html($name).'</a>';
 			}
 
 			$supportPage = implode(', ', $links);
 		}
 
 		return $supportPage;
+	}
+
+	/**
+	 * @param  mixed   $component    addOn as string, plugin as array
+	 * @return string
+	 */
+	private function buildComponentName($component) {
+		return is_array($component) ? implode('/', $component) : $component;
 	}
 
 	/**
@@ -199,11 +215,9 @@ abstract class sly_Service_AddOn_Base {
 	 * @return mixed                 message or true if successful
 	 */
 	public function install($component, $installDump = true) {
-		$baseDir       = $this->baseFolder($component);
-		$installFile   = $baseDir.'install.inc.php';
-		$installSQL    = $baseDir.'install.sql';
-		$configFile    = $baseDir.'config.inc.php';
-		$componentName = is_array($component) ? $component[1] : $component;
+		$baseDir    = $this->baseFolder($component);
+		$configFile = $baseDir.'config.inc.php';
+		$name       = $this->buildComponentName($component);
 
 		// return error message if an addOn wants to stop the install process
 
@@ -216,7 +230,7 @@ abstract class sly_Service_AddOn_Base {
 		// check for config.inc.php before we do anything
 
 		if (!is_readable($configFile)) {
-			return t('config_not_found');
+			return t('component_config_not_found');
 		}
 
 		// check requirements
@@ -225,7 +239,7 @@ abstract class sly_Service_AddOn_Base {
 			$this->loadStatic($component); // static.yml
 		}
 
-		$msg = $this->checkDependencies($component);
+		$msg = $this->checkRequirements($component);
 
 		if ($msg !== true) {
 			return $msg;
@@ -236,39 +250,36 @@ abstract class sly_Service_AddOn_Base {
 		$sallyVersions = $this->getProperty($component, 'sally');
 
 		if (!empty($sallyVersions)) {
-			$sallyVersions = sly_makeArray($sallyVersions);
-			$versionOK     = false;
-
-			foreach ($sallyVersions as $version) {
-				$versionOK |= $this->checkVersion($version);
-			}
-
-			if (!$versionOK) {
-				return $this->I18N('sally_incompatible', sly_Core::getVersion('X.Y.Z'));
+			if (!$this->isCompatible($component)) {
+				return t('component_incompatible', $name, sly_Core::getVersion('X.Y.Z'));
 			}
 		}
 		else {
-			return $this->I18N('has_no_sally_version_info');
+			return t('component_has_no_sally_version_info', $name);
 		}
 
 		// include install.inc.php if available
+
+		$installFile = $baseDir.'install.inc.php';
 
 		if (is_readable($installFile)) {
 			try {
 				$this->req($installFile);
 			}
 			catch (Exception $e) {
-				return $this->I18N('no_install', $componentName, $e->getMessage());
+				return t('component_install_failed', $name, $e->getMessage());
 			}
 		}
 
 		// read install.sql and install DB
 
+		$installSQL = $baseDir.'install.sql';
+
 		if ($installDump && is_readable($installSQL)) {
 			$state = $this->installDump($installSQL);
 
 			if ($state !== true) {
-				return 'Error found in install.sql:<br />'.$state;
+				return t('component_install_sql_failed', $name, $state);
 			}
 		}
 
@@ -288,6 +299,7 @@ abstract class sly_Service_AddOn_Base {
 
 		// mark component as installed
 		$this->setProperty($component, 'install', true);
+		$this->clearLoadCache();
 
 		// store current component version
 		$version = $this->getProperty($component, 'version', false);
@@ -307,11 +319,6 @@ abstract class sly_Service_AddOn_Base {
 	 * @return mixed       message or true if successful
 	 */
 	public function uninstall($component) {
-		$baseDir       = $this->baseFolder($component);
-		$uninstallFile = $baseDir.'uninstall.inc.php';
-		$uninstallSQL  = $baseDir.'uninstall.sql';
-		$componentName = is_array($component) ? $component[1] : $component;
-
 		// if not installed, try to disable if needed
 
 		if (!$this->isInstalled($component)) {
@@ -320,17 +327,8 @@ abstract class sly_Service_AddOn_Base {
 
 		// check for dependencies
 
-		if ($this->isActivated($component)) {
-			$dependencies = $this->getDependencies($component, true);
-
-			if (!empty($dependencies)) {
-				$dep  = reset($dependencies);
-				$msg  = is_array($dep) ? 'requires_plugin' : 'requires_addon';
-				$comp = is_array($component) ? implode('/', $component) : $component;
-
-				return $this->I18N($msg, $comp, is_array($dep) ? implode('/', $dep) : $dep);
-			}
-		}
+		$state = $this->checkRemoval($component);
+		if ($state !== true) return $state;
 
 		// stop if addOn forbids uninstall
 
@@ -350,27 +348,34 @@ abstract class sly_Service_AddOn_Base {
 
 		// include uninstall.inc.php if available
 
+		$baseDir       = $this->baseFolder($component);
+		$uninstallFile = $baseDir.'uninstall.inc.php';
+		$name          = $this->buildComponentName($component);
+
 		if (is_readable($uninstallFile)) {
 			try {
 				$this->req($uninstallFile);
 			}
 			catch (Exception $e) {
-				return $this->I18N('no_uninstall', $componentName, $e->getMessage());
+				return t('component_uninstall_failed', $name, $e->getMessage());
 			}
 		}
 
 		// read uninstall.sql
 
+		$uninstallSQL = $baseDir.'uninstall.sql';
+
 		if (is_readable($uninstallSQL)) {
 			$state = $this->installDump($uninstallSQL);
 
 			if ($state !== true) {
-				return 'Error found in uninstall.sql:<br />'.$state;
+				return t('component_uninstall_sql_failed', $name, $state);
 			}
 		}
 
 		// mark component as not installed
 		$this->setProperty($component, 'install', false);
+		$this->clearLoadCache();
 
 		// delete files
 		$state  = $this->deletePublicFiles($component);
@@ -396,16 +401,18 @@ abstract class sly_Service_AddOn_Base {
 			return true;
 		}
 
-		if (!$this->isInstalled($component)) {
-			return t('no_activation', $component);
+		$name = $this->buildComponentName($component);
+
+		if (!$this->isInstalled($component, $name)) {
+			return t('component_activate_failed');
 		}
 
 		// We can't use the service to get the list of required addOns since the
 		// static.yml has not yet been loaded.
 
-		$this->loadStatic($component);
+		@$this->loadStatic($component);
 
-		$msg = $this->checkDependencies($component);
+		$msg = $this->checkRequirements($component);
 
 		if ($msg !== true) {
 			return $msg;
@@ -419,6 +426,7 @@ abstract class sly_Service_AddOn_Base {
 
 		$this->checkUpdate($component);
 		$this->setProperty($component, 'status', true);
+		$this->clearLoadCache();
 
 		return $this->extend('POST', 'ACTIVATE', $component, true);
 	}
@@ -434,6 +442,25 @@ abstract class sly_Service_AddOn_Base {
 			return true;
 		}
 
+		$state = $this->checkRemoval($component);
+		if ($state !== true) return $state;
+
+		$state = $this->extend('PRE', 'DEACTIVATE', $component, true);
+		if ($state !== true) return $state;
+
+		$this->setProperty($component, 'status', false);
+		$this->clearLoadCache();
+
+		return $this->extend('POST', 'DEACTIVATE', $component, true);
+	}
+
+	/**
+	 * Check if a component may be removed
+	 *
+	 * @param  mixed $component  addOn as string, plugin as array
+	 * @return mixed             true if successful, else an error message as a string
+	 */
+	private function checkRemoval($component) {
 		// Check if this component is required
 
 		$dependencies = $this->getDependencies($component, true);
@@ -441,19 +468,13 @@ abstract class sly_Service_AddOn_Base {
 		if (!empty($dependencies)) {
 			$dep  = reset($dependencies);
 			$msg  = is_array($dep) ? 'requires_plugin' : 'requires_addon';
-			$comp = is_array($component) ? implode('/', $component) : $component;
+			$comp = $this->buildComponentName($component);
+			$dep  = $this->buildComponentName($dep);
 
-			return $this->I18N($msg, $comp, is_array($dep) ? implode('/', $dep) : $dep);
+			return t('component_'.$msg, $comp, $dep);
 		}
 
-		$state = $this->extend('PRE', 'DEACTIVATE', $component, true);
-
-		if ($state !== true) {
-			return $state;
-		}
-
-		$this->setProperty($component, 'status', false);
-		return $this->extend('POST', 'DEACTIVATE', $component, true);
+		return true;
 	}
 
 	/**
@@ -514,25 +535,10 @@ abstract class sly_Service_AddOn_Base {
 		$obj = new sly_Util_Directory($dir);
 
 		if (!$obj->delete(true)) {
-			return $this->I18N('install_cant_delete_files');
+			return t('component_cleanup_failed', $dir);
 		}
 
 		return $this->extend('POST', 'DELETE_'.strtoupper($type), $component, true);
-	}
-
-	/**
-	 * Translation helper
-	 *
-	 * All this method does is append 'addon_' or 'plugin_' to an i18n key. Call
-	 * it like t() with as many arguments as needed.
-	 *
-	 * @return string  the translated message
-	 */
-	protected function I18N() {
-		$args    = func_get_args();
-		$args[0] = $this->getI18NPrefix().$args[0];
-
-		return call_user_func_array('t', $args);
 	}
 
 	/**
@@ -575,7 +581,7 @@ abstract class sly_Service_AddOn_Base {
 	 * @return mixed             the author as given in static.yml
 	 */
 	public function getAuthor($component, $default = null) {
-		return $this->getProperty($component, 'author', $default);
+		return $this->readConfigValue($component, 'author', $default);
 	}
 
 	/**
@@ -586,7 +592,7 @@ abstract class sly_Service_AddOn_Base {
 	 * @return mixed             the support page as given in static.yml
 	 */
 	public function getSupportPage($component, $default = null) {
-		return $this->getProperty($component, 'supportpage', $default);
+		return $this->readConfigValue($component, 'supportpage', $default);
 	}
 
 	/**
@@ -601,7 +607,7 @@ abstract class sly_Service_AddOn_Base {
 	 * @return string            the version
 	 */
 	public function getVersion($component, $default = null) {
-		$version     = $this->getProperty($component, 'version', null);
+		$version     = $this->readConfigValue($component, 'version', null);
 		$baseFolder  = $this->baseFolder($component);
 		$versionFile = $baseFolder.'/version';
 
@@ -651,8 +657,10 @@ abstract class sly_Service_AddOn_Base {
 
 		if (!is_dir($assetsDir)) return true;
 
-		if (!rex_copyDir($assetsDir, $target)) {
-			return t('install_cant_copy_files');
+		$dir = new sly_Util_Directory($assetsDir);
+
+		if (!$dir->copyTo($target)) {
+			return t('component_assets_failed', $assetsDir);
 		}
 
 		return true;
@@ -708,21 +716,21 @@ abstract class sly_Service_AddOn_Base {
 	 * @param  mixed $component
 	 * @return mixed             true if OK, else error message (string)
 	 */
-	private function checkDependencies($component) {
-		$requires      = sly_makeArray($this->getProperty($component, 'requires'));
+	private function checkRequirements($component) {
+		$requires      = $this->getRequirements($component);
 		$aService      = sly_Service_Factory::getAddOnService();
 		$pService      = sly_Service_Factory::getPluginService();
-		$componentName = is_array($component) ? implode('/', $component) : $component;
+		$componentName = $this->buildComponentName($component);
 
 		foreach ($requires as $requiredComponent) {
 			$requirement = explode('/', $requiredComponent, 2);
 
 			if (count($requirement) === 1 && !$aService->isAvailable($requirement[0])) {
-				return $this->I18N('requires_addon', $requirement[0], $componentName);
+				return t('component_requires_addon', $requirement[0], $componentName);
 			}
 
 			if (count($requirement) === 2 && !$pService->isAvailable($requirement)) {
-				return $this->I18N('requires_plugin', $requiredComponent, $componentName);
+				return t('component_requires_plugin', $requiredComponent, $componentName);
 			}
 		}
 
@@ -760,44 +768,37 @@ abstract class sly_Service_AddOn_Base {
 		$pluginService = sly_Service_Factory::getPluginService();
 		$addons        = $addonService->getAvailableAddons();
 		$result        = array();
-		$compAsString  = is_array($component) ? implode('/', $component) : $component;
-
-		if (!$this->isAvailable($component)) {
-			$this->loadConfig($component);
-		}
+		$compAsString  = $this->buildComponentName($component);
 
 		foreach ($addons as $addon) {
 			// don't check yourself
 			if ($compAsString === $addon) continue;
 
-			$requires = sly_makeArray($this->getProperty($addon, 'requires'));
+			$requires = $addonService->getRequirements($addon);
 			$inArray  = in_array($compAsString, $requires);
+			$visible  = !$onlyMissing || !$addonService->isActivated($addon);
 
-			if ($inArray && $onlyFirst) {
-				return array($addon);
-			}
-
-			if (!$onlyMissing || $inArray) {
+			if ($visible && $inArray) {
+				if ($onlyFirst) return array($addon);
 				$result[] = $addon;
 			}
 
 			$plugins = $pluginService->getAvailablePlugins($addon);
 
 			foreach ($plugins as $plugin) {
-				$requires = sly_makeArray($pluginService->getProperty(array($addon, $plugin), 'requires'));
+				$pComp    = array($addon, $plugin);
+				$requires = $pluginService->getRequirements($pComp);
 				$inArray  = in_array($compAsString, $requires);
+				$visible  = !$onlyMissing || !$pluginService->isActivated($pComp);
 
-				if ($inArray && $onlyFirst) {
-					return array(array($addon, $plugin));
-				}
-
-				if (!$onlyMissing || $inArray) {
-					$result[] = array($addon, $plugin);
+				if ($visible && $inArray) {
+					if ($onlyFirst) return array($pComp);
+					$result[] = $pComp;
 				}
 			}
 		}
 
-		return $onlyFirst ? reset($result) : $result;
+		return $onlyFirst ? (empty($result) ? '' : reset($result)) : $result;
 	}
 
 	/**
@@ -807,32 +808,123 @@ abstract class sly_Service_AddOn_Base {
 	 * @return mixed             false if not required, else the first found dependency
 	 */
 	public function isRequired($component) {
-		$dependency = $this->dependencyHelper($component, true, true);
+		$dependency = $this->dependencyHelper($component, false, true);
 		return empty($dependency) ? false : reset($dependency);
 	}
 
 	/**
-	 * @param mixed $component
+	 * Return a list of required addOns / plugins
+	 *
+	 * @param  mixed $component  addOn as string, plugin as array
+	 * @return array             list of required components
+	 */
+	public function getRequirements($component) {
+		return sly_makeArray($this->readConfigValue($component, 'requires'));
+	}
+
+	/**
+	 * Return a list of Sally versions the component is compatible with
+	 *
+	 * @param  mixed $component  addOn as string, plugin as array
+	 * @return array             list of sally versions
+	 */
+	public function getRequiredSallyVersions($component) {
+		return sly_makeArray($this->readConfigValue($component, 'sally'));
+	}
+
+	/**
+	 * Check if a component is compatible with this Sally version
+	 *
+	 * @param  mixed $component  addOn as string, plugin as array
+	 * @return boolean           true if compatible, else false
+	 */
+	public function isCompatible($component) {
+		$sallyVersions = $this->getRequiredSallyVersions($component);
+		$versionOK     = false;
+
+		foreach ($sallyVersions as $version) {
+			$versionOK |= $this->checkVersion($version);
+		}
+
+		return (boolean) $versionOK;
+	}
+
+	protected function clearLoadCache() {
+		sly_Core::cache()->delete('sly', 'componentorder');
+		sly_Core::cache()->delete('sly', 'availableaddons');
+	}
+
+	public function loadComponents() {
+		$cache    = sly_Core::cache();
+		$prodMode = !sly_Core::isDeveloperMode();
+		$order    = $prodMode ? $cache->get('sly', 'componentorder') : null;
+
+		// if there is no cache yet, we load all components the slow way
+		if (!is_array($order)) {
+			$addonService  = sly_Service_Factory::getAddOnService();
+			$pluginService = sly_Service_Factory::getPluginService();
+
+			// reset our helper to keep track of the component stati
+			$this->loadInfo = array();
+
+			foreach ($addonService->getRegisteredAddons() as $addonName) {
+				$this->load($addonName);
+
+				foreach ($pluginService->getRegisteredPlugins($addonName) as $pluginName) {
+					$this->load(array($addonName, $pluginName));
+				}
+			}
+
+			// and now we have a nice list in $this->loadInfo that we can cache
+			if ($prodMode) $cache->set('sly', 'componentorder', $this->loadInfo);
+		}
+
+		// yay, a cache, let's skip the whole dependency stuff
+		else {
+			foreach ($order as $name => $info) {
+				list($component, $installed, $activated) = $info;
+
+				// load component config files
+				$this->loadConfig($component, $installed, $activated);
+
+				// init the component
+				if ($activated) {
+					$configFile = $this->baseFolder($component).'config.inc.php';
+					$this->req($configFile);
+
+					self::$loaded[$name] = $component;
+				}
+			}
+		}
+	}
+
+	/**
+	 * @param mixed $component  addOn as string, plugin as array
 	 */
 	protected function load($component) {
-		$compAsString  = is_array($component) ? implode('/', $component) : $component;
+		$compAsString = $this->buildComponentName($component);
 
-		if (in_array($compAsString, self::$loaded)) {
+		if (isset(self::$loaded[$compAsString])) {
 			return true;
 		}
 
-		if(!$this->exists($component)) {
+		$service = $this->getService($component);
+
+		if (!$service->exists($component)) {
 			trigger_error('Component '.$compAsString.' does not exists.', E_USER_WARNING);
 			return false;
 		}
 
-		$addonService  = sly_Service_Factory::getAddOnService();
-		$pluginService = sly_Service_Factory::getPluginService();
+		$activated = $this->isAvailable($component);
+		$installed = $activated || $this->isInstalled($component);
 
-		$this->loadConfig($component);
+		if ($installed) {
+			$this->loadConfig($component, $installed, $activated);
+			$this->loadInfo[$compAsString] = array($component, $installed, $activated);
+		}
 
-		if ($this->isAvailable($component)) {
-			$requires = $this->getProperty($component, 'requires');
+		if ($activated) {
+			$requires = $service->getProperty($component, 'requires');
 
 			if (!empty($requires)) {
 				if (!is_array($requires)) $requires = sly_makeArray($requires);
@@ -855,7 +947,48 @@ abstract class sly_Service_AddOn_Base {
 			$configFile = $this->baseFolder($component).'config.inc.php';
 			$this->req($configFile);
 
-			self::$loaded[] = $compAsString;
+			self::$loaded[$compAsString] = $component;
 		}
+	}
+
+	/**
+	 * Read a config value directly (without using the config system)
+	 *
+	 * @param  mixed  $component  addOn as string, plugin as array
+	 * @param  string $key        array key
+	 * @param  mixed  $default    value if key is not set
+	 * @return mixed              value or default
+	 */
+	private function readConfigValue($component, $key, $default = null) {
+		static $cache = array();
+
+		// To make this method work on components that are not yet installed or
+		// activated, we have to get their static.yml's content on our own. The
+		// project config at this point already contains 'empty' information for
+		// the component and would not the static.yml via loadStatic().
+
+		if ($this->isAvailable($component)) {
+			return $this->getService($component)->getProperty($component, $key, $default);
+		}
+
+		$file = $this->baseFolder($component).'static.yml';
+		if (!file_exists($file)) return $default;
+
+		$mtime  = filemtime($file);
+		$config = array();
+
+		if (!isset($cache[$file.$mtime])) {
+			$config              = sly_Util_YAML::load($file);
+			$cache[$file.$mtime] = $config;
+		}
+		else {
+			$config = $cache[$file.$mtime];
+		}
+
+		return isset($config[$key]) ? $config[$key] : $default;
+	}
+
+	private function getService($component) {
+		return is_array($component) ? sly_Service_Factory::getPluginService() : sly_Service_Factory::getAddOnService();
 	}
 }

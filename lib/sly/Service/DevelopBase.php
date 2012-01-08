@@ -47,12 +47,7 @@ abstract class sly_Service_DevelopBase {
 	 */
 	public function getFolder() {
 		$dir = sly_Util_Directory::join(SLY_DEVELOPFOLDER, $this->getClassIdentifier());
-
-		if (!is_dir($dir) && !@mkdir($dir, sly_Core::getDirPerm(), true)) {
-			throw new sly_Exception('Konnte Verzeichnis '.$dir.' nicht erstellen.');
-		}
-
-		return $dir;
+		return sly_Util_Directory::create($dir, null, true);
 	}
 
 	/**
@@ -88,7 +83,7 @@ abstract class sly_Service_DevelopBase {
 			}
 
 			$parser = new sly_Util_ParamParser($file);
-			$data = $parser->get();
+			$data   = $parser->get();
 
 			if (empty($data) && $known) {
 				$modified = true;
@@ -102,7 +97,6 @@ abstract class sly_Service_DevelopBase {
 
 			$newData[$name][$type][$basename] = $this->buildData($basename, $mtime, $parser->get());
 
-			$this->flush($name, $basename);
 			$modified = true;
 		}
 
@@ -157,7 +151,7 @@ abstract class sly_Service_DevelopBase {
 		$result = true;
 
 		if ($name === null) {
-			trigger_error($filename.' has no internal name and cannot be loaded.', E_USER_WARNING);
+			trigger_error(t('file_has_no_internal_name', $filename), E_USER_WARNING);
 			$result = false;
 		}
 
@@ -169,7 +163,7 @@ abstract class sly_Service_DevelopBase {
 		*/
 
 		if (preg_match('#[^a-z0-9_.-]#i', $name)) {
-			trigger_error('The name '.$name.' contains invalid characters.', E_USER_WARNING);
+			trigger_error(t('name_contains_invalid_characters', $name), E_USER_WARNING);
 			$result = false;
 		}
 
@@ -297,7 +291,7 @@ abstract class sly_Service_DevelopBase {
 		$data = $this->getData();
 
 		if (!isset($data[$name])) {
-			throw new sly_Exception('The development resource "'.$name.'" is not available.');
+			throw new sly_Exception(t('develop_file_not_found', $name));
 		}
 
 		if ($type !== null && !isset($data[$name][$type])) {
@@ -339,7 +333,7 @@ abstract class sly_Service_DevelopBase {
 	 */
 	public function getContent($filename) {
 		$filename = sly_Util_Directory::join($this->getFolder(), $filename);
-		if (!file_exists($filename)) throw new sly_Exception("File '$filename' does not exist.");
+		if (!file_exists($filename)) throw new sly_Exception(t('file_not_found', $filename));
 		return file_get_contents($filename);
 	}
 
@@ -383,15 +377,16 @@ abstract class sly_Service_DevelopBase {
 			// if all files are filtered
 
 			if (empty($filenames)) {
-				throw new sly_Exception('All files for item ' . $name . ' were filtered');
+				throw new sly_Exception(t('no_condition_handler_found', $name));
 			}
 
-			//if there are more than one
+			// if there are more than one
+
 			if (count($filenames) > 1) {
 				// warn the user
 
 				if (!sly_Core::isBackend()) {
-					trigger_error('The concrete file for Item ' . $name . ' is not clear. Taking one without conditions or first to come.', E_USER_WARNING);
+					trigger_error(t('multiple_condition_handlers_found', $name), E_USER_WARNING);
 				}
 
 				// try to find one without without conditions)
@@ -501,10 +496,4 @@ abstract class sly_Service_DevelopBase {
 	 */
 	protected abstract function buildData($filename, $mtime, $data);
 
-	/**
-	 * Clears the cache for a resource
-	 *
-	 * @param string  $name  Resource name or null for all resources. (default: null)
-	 */
-	protected abstract function flush($name = null, $filename = null);
 }

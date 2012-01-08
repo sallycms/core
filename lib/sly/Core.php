@@ -13,14 +13,16 @@
  */
 class sly_Core {
 	private static $instance;  ///< sly_Core
+	private $app;              ///< sly_App_Interface
 	private $cache;            ///< BabelCache_Interface
+	private $configuration;    ///< sly_Configuration
+	private $dispatcher;       ///< sly_Event_Dispatcher
 	private $curClang;         ///< int
 	private $curArticleId;     ///< int
-	private $varTypes;         ///< array
 	private $layout;           ///< sly_Layout
-	private $navigation;       ///< sly_Layout_Navigation_Backend
 	private $i18n;             ///< sly_I18N
 	private $errorHandler;     ///< sly_ErrorHandler
+	private $response;         ///< sly_Response
 
 	// Use the following constants when you don't have access to the real
 	// config values (i.e. when in setup mode). They should map the values
@@ -30,7 +32,8 @@ class sly_Core {
 	const DEFAULT_DIRPERM  = 0777; ///< int
 
 	private function __construct() {
-		$this->cache = sly_Cache::factory();
+		$this->configuration = new sly_Configuration();
+		$this->dispatcher    = new sly_Event_Dispatcher();
 	}
 
 	/**
@@ -49,21 +52,40 @@ class sly_Core {
 	 * @return BabelCache_Interface  caching instance
 	 */
 	public static function cache() {
-		return self::getInstance()->cache;
+		// Because sly_Cache depends on self::config() being available, we cannot
+		// init the cache in sly_Core->__construct().
+
+		$inst = self::getInstance();
+		if (!$inst->cache) $inst->cache = sly_Cache::factory();
+		return $inst->cache;
 	}
 
 	/**
-	 * @param int $clangId  the new clang
+	 * @param sly_App_Interface $app  the current system app
+	 */
+	public static function setCurrentApp(sly_App_Interface $app) {
+		self::getInstance()->app = $app;
+	}
+
+	/**
+	 * @return sly_App_Interface
+	 */
+	public static function getCurrentApp() {
+		return self::getInstance()->app;
+	}
+
+	/**
+	 * @param int $clangId  the new clang or null to reset
 	 */
 	public static function setCurrentClang($clangId) {
-		self::getInstance()->curClang = (int) $clangId;
+		self::getInstance()->curClang = $clangId === null ? null : (int) $clangId;
 	}
 
 	/**
-	 * @param int $articleId  the new article ID
+	 * @param int $articleId  the new article ID or null to reset
 	 */
 	public static function setCurrentArticleId($articleId) {
-		self::getInstance()->curArticleId = (int) $articleId;
+		self::getInstance()->curArticleId = $articleId === null ? null : (int) $articleId;
 	}
 
 	/**
@@ -74,13 +96,7 @@ class sly_Core {
 	 * @return int  the current clang
 	 */
 	public static function getCurrentClang() {
-		$instance = self::getInstance();
-
-		if (!isset($instance->curClang)) {
-			$instance->curClang = sly_request('clang', 'rex-clang-id', self::getDefaultClangId());
-		}
-
-		return $instance->curClang;
+		return self::getInstance()->curClang;
 	}
 
 	/**
@@ -90,7 +106,7 @@ class sly_Core {
 	 */
 	public static function getCurrentLanguage() {
 		$clang = sly_Core::getCurrentClang();
-		return sly_Service_Factory::getLanguageService()->findById($clang);
+		return $clang > 0 ? sly_Service_Factory::getLanguageService()->findById($clang) : null;
 	}
 
 	/**
@@ -102,22 +118,7 @@ class sly_Core {
 	 * @return int  the current article ID
 	 */
 	public static function getCurrentArticleId() {
-		$conf     = self::config();
-		$instance = self::getInstance();
-
-		if (!isset($instance->curArticleId)) {
-			$instance->curArticleId = sly_request('article_id', 'int', self::getSiteStartArticleId());
-
-			if (!sly_Util_Article::exists($instance->curArticleId)) {
-				$instance->curArticleId = self::getNotFoundArticleId();
-			}
-
-			if (!sly_Util_Article::exists($instance->curArticleId)) {
-				$instance->curArticleId = -1;
-			}
-		}
-
-		return $instance->curArticleId;
+		return self::getInstance()->curArticleId;
 	}
 
 	/**
@@ -134,68 +135,41 @@ class sly_Core {
 	}
 
 	/**
-	 * Register a new var class
-	 *
-	 * @param string $varType  class name of the new variable
-	 */
-	public static function registerVarType($varType) {
-		self::getInstance()->varTypes[] = $varType;
-	}
-
-	/**
-	 * Gibt immer eine Liste von Instanzen der Variablentypen zurück
-	 *
-	 * @throws sly_Exception  if one of the registered classes does not inherit rex_var
-	 * @return array          list of rex_var instances
-	 */
-	public static function getVarTypes() {
-		$instance = self::getInstance();
-
-		if (!isset($instance->varTypes)) $instance->varTypes = array();
-
-		foreach ($instance->varTypes as $idx => $obj) {
-			if (is_string($obj)) { // Es hat noch kein Autoloading für diese Klasse stattgefunden
-				$obj = new $obj();
-				if (!($obj instanceof rex_var)) throw new sly_Exception('VarType '.$instance->varTypes[$idx].' is no inheriting class of rex_var.');
-				$instance->varTypes[$idx] = $obj;
-			}
-		}
-
-		return $instance->varTypes;
-	}
-
-	/**
 	 * @return sly_Configuration  the system configuration
 	 */
 	public static function config() {
-		return sly_Configuration::getInstance();
+		return self::getInstance()->configuration;
 	}
 
 	/**
 	 * @return sly_Event_Dispatcher  the event dispatcher
 	 */
 	public static function dispatcher() {
-		return sly_Event_Dispatcher::getInstance();
+		return self::getInstance()->dispatcher;
 	}
 
 	/**
 	 * Get the current layout instance
 	 *
-	 * @param  string $type  the type of layout (only used when first instantiating the layout)
-	 * @return sly_Layout    the layout instance
+	 * @return sly_Layout  the layout instance
 	 */
-	public static function getLayout($type = 'XHTML') {
+	public static function getLayout() {
 		$instance = self::getInstance();
 
-		//FIXME: layout type kann bloss einmal pro request angegeben werden,
-		// reicht eigentlich auch
-		// eventuell könnte man das in der config oder in index.php angeben
 		if (!isset($instance->layout)) {
-			$className = 'sly_Layout_'.$type;
-			$instance->layout = new $className();
+			throw new sly_Exception(t('layout_has_not_been_set'));
 		}
 
 		return $instance->layout;
+	}
+
+	/**
+	 * Set the current layout instance
+	 *
+	 * @param sly_Layout $layout  the layout instance
+	 */
+	public static function setLayout(sly_Layout $layout) {
+		self::getInstance()->layout = $layout;
 	}
 
 	/**
@@ -273,15 +247,22 @@ class sly_Core {
 	/**
 	 * @return int  permissions for files
 	 */
-	public static function getFilePerm($default = 0777) {
+	public static function getFilePerm($default = self::DEFAULT_FILEPERM) {
 		return (int) self::config()->get('FILEPERM', $default);
 	}
 
 	/**
 	 * @return int  permissions for directory
 	 */
-	public static function getDirPerm($default = 0777) {
+	public static function getDirPerm($default = self::DEFAULT_DIRPERM) {
 		return (int) self::config()->get('DIRPERM', $default);
+	}
+
+	/**
+	 * @return sring  the database table prefix
+	 */
+	public static function getTablePrefix() {
+		return self::config()->get('DATABASE/TABLE_PREFIX');
 	}
 
 	/**
@@ -339,44 +320,19 @@ class sly_Core {
 
 	/**
 	 * Returns the backend navigation
-	 *
+	 * @deprecated
 	 * @return sly_Layout_Navigation_Backend  the navigation object used for the backend menu
 	 */
 	public static function getNavigation() {
-		$instance = self::getInstance();
-
-		if (!isset($instance->navigation)) {
-			$instance->navigation = new sly_Layout_Navigation_Backend();
-		}
-
-		return $instance->navigation;
+		return self::getLayout('Backend')->getNavigation();
 	}
 
 	/**
 	 * loads all known addons into Sally
 	 */
 	public static function loadAddons() {
-		$addonService  = sly_Service_Factory::getAddOnService();
-		$pluginService = sly_Service_Factory::getPluginService();
-
-		foreach ($addonService->getRegisteredAddons() as $addonName) {
-			$addonService->loadAddon($addonName);
-
-			foreach ($pluginService->getRegisteredPlugins($addonName) as $pluginName) {
-				$pluginService->loadPlugin(array($addonName, $pluginName));
-			}
-		}
-
+		sly_Service_Factory::getAddOnService()->loadComponents();
 		self::dispatcher()->notify('ADDONS_INCLUDED');
-	}
-
-	public static function registerCoreVarTypes() {
-		self::registerVarType('rex_var_article');
-		self::registerVarType('rex_var_category');
-		self::registerVarType('rex_var_template');
-		self::registerVarType('rex_var_value');
-		self::registerVarType('rex_var_link');
-		self::registerVarType('rex_var_media');
 	}
 
 	public static function registerListeners() {
@@ -407,11 +363,88 @@ class sly_Core {
 	}
 
 	/**
+	 * @param sly_Response $errorHandler  the new response instance
+	 */
+	public static function setResponse(sly_Response $response) {
+		self::getInstance()->response = $response;
+	}
+
+	/**
+	 * @return sly_Response  the current response
+	 */
+	public static function getResponse() {
+		$instance = self::getInstance();
+
+		if (!$instance->response) {
+			$response = new sly_Response('', 200);
+			$response->setContentType('text/html', 'UTF-8');
+
+			$instance->response = $response;
+		}
+
+		return $instance->response;
+	}
+
+	/**
 	 * Returns the current backend page
+	 *
+	 * @deprecated as of 0.6, use getCurrentControllerName()
 	 *
 	 * @return string  current page or null if in frontend
 	 */
 	public static function getCurrentPage() {
-		return self::isBackend() ? sly_Controller_Base::getPage() : null;
+		return self::isBackend() ? self::getCurrentControllerName() : null;
+	}
+
+	/**
+	 * Returns the current controller
+	 *
+	 * @return sly_Controller_Interface  the current controller
+	 */
+	public static function getCurrentController() {
+		return self::getCurrentApp()->getCurrentController();
+	}
+
+	/**
+	 * Returns the current controller name
+	 *
+	 * Code using the controller name should never assume that it maps directly
+	 * to the controller class. Currently, it does, but this may change in a
+	 * future relase.
+	 *
+	 * @return string  current controller name
+	 */
+	public static function getCurrentControllerName() {
+		return self::getCurrentApp()->getCurrentControllerName();
+	}
+
+	/**
+	 * Clears the complete system cache
+	 *
+	 * @return string  the info messages (collected from all listeners)
+	 */
+	public static function clearCache() {
+		clearstatcache();
+
+		$obj = new sly_Util_Directory(SLY_DYNFOLDER.'/internal/sally/article_slice');
+		$obj->deleteFiles();
+
+		$obj = new sly_Util_Directory(SLY_DYNFOLDER.'/internal/sally/templates');
+		$obj->deleteFiles();
+
+		// clear loader cache
+		sly_Loader::clearCache();
+
+		// clear our own data caches
+		self::cache()->flush('sly', true);
+
+		// clear asset cache
+		sly_Service_Factory::getAssetService()->clearCache();
+
+		// create bootcache
+		sly_Util_BootCache::recreate('frontend');
+		sly_Util_BootCache::recreate('backend');
+
+		return self::dispatcher()->filter('SLY_CACHE_CLEARED', t('delete_cache_message'));
 	}
 }

@@ -17,7 +17,7 @@
  * @ingroup form
  * @author  Christoph
  */
-class sly_Form_Widget_MediaList extends sly_Form_ElementBase implements sly_Form_IElement {
+class sly_Form_Widget_MediaList extends sly_Form_Widget_MediaBase implements sly_Form_IElement {
 	/**
 	 * Constructor
 	 *

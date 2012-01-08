@@ -9,16 +9,22 @@
  */
 
 /**
+ * Array wrapper with path access
+ *
+ * No I18N here, or else we fail horrbily if a language file is broken!
+ *
  * @ingroup util
  */
 class sly_Util_Array {
-	private $array = array(); ///< array
+	private $array       = array(); ///< array
+	private $resultCache = array();
 
 	/**
 	 * @param array $data
 	 */
 	public function __construct($data = array()) {
-		$this->array = $data;
+		$this->array       = $data;
+		$this->resultCache = array();
 	}
 
 	/**
@@ -53,6 +59,8 @@ class sly_Util_Array {
 		}
 
 		$res = $value;
+		$this->resultCache = array();
+
 		return $value;
 	}
 
@@ -74,17 +82,23 @@ class sly_Util_Array {
 			return $this->array[$key];
 		}
 
+		if (array_key_exists($key, $this->resultCache)) {
+			return $this->resultCache[$key];
+		}
+
 		$path = self::getPath($key);
 		$res  = $this->array;
 
 		foreach ($path as $step) {
 			if (!array_key_exists($step, $res)) {
+				$this->resultCache[$key] = $default;
 				return $default;
 			}
 
 			$res = $res[$step];
 		}
 
+		$this->resultCache[$key] = $res;
 		return $res;
 	}
 
@@ -196,20 +210,21 @@ class sly_Util_Array {
 	}
 
 	/**
-	 * @todo  mark as deprecated in 0.6, it's not used anywhere
-	 * @param array $array
-	 */
-	public function merge($array) {
-		if (!is_array($array)) return false;
-		$this->array = array_replace_recursive($this->array, $array);
-	}
-
-	/**
 	 * @param  string $key
 	 * @return array
 	 */
 	protected static function getPath($key) {
-		return explode('/', $key);
+		$parts   = explode('/', $key);
+		$changes = false;
+
+		foreach ($parts as $idx => $part) {
+			if ($part === '') {
+				unset($parts[$idx]);
+				$changes = true;
+			}
+		}
+
+		return $changes ? array_values($parts) : $parts;
 	}
 
 	/**
