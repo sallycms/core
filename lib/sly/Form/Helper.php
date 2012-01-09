@@ -107,6 +107,27 @@ abstract class sly_Form_Helper {
 	}
 
 	/**
+	 * Creates a select element with all visible languages
+	 *
+	 * @param  string         $name      the elements name
+	 * @param  sly_Model_User $user      the user (null for the current one)
+	 * @param  string         $id        the elements ID
+	 * @return sly_Form_Select_DropDown  the generated select element
+	 */
+	public static function getLanguageSelect($name, sly_Model_User $user = null, $id = null) {
+		$langs = array();
+		$user  = $user ? $user : sly_Util_User::getCurrentUser();
+
+		foreach (sly_Util_Language::findAll() as $langID => $lang) {
+			if ($user && sly_Util_Language::hasPermissionOnLanguage($user, $langID)) {
+				$langs[$langID] = $lang->getName();
+			}
+		}
+
+		return new sly_Form_Select_DropDown($name, '', -1, $langs, $id);
+	}
+
+	/**
 	 * Helper function
 	 *
 	 * This method implements the tree walking algorithm used for both selects.
