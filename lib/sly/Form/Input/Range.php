@@ -30,7 +30,8 @@ class sly_Form_Input_Range extends sly_Form_Input_Number {
 	public function __construct($name, $label, $value = '', $id = null) {
 		parent::__construct($name, $label, $value, $id);
 		$this->setAttribute('type', 'range');
-		$this->addClass('sly-form-text');
+		$this->addClass('sly-form-range');
+		$this->addOuterClass('sly-form-range-row');
 	}
 
 	/**

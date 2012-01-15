@@ -32,7 +32,7 @@ class sly_Form_Input_Checkbox extends sly_Form_Input_Boolean {
 		parent::__construct($name, $label, $value, $description, $id);
 
 		$this->setAttribute('type', 'checkbox');
-		$this->addOuterClass('sly-form-checkbox');
+		$this->addOuterClass('sly-form-checkbox-row');
 		$this->addClass('sly-form-checkbox');
 	}
 }

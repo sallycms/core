@@ -27,7 +27,7 @@ class sly_Form_Textarea extends sly_Form_Input_Base {
 	 */
 	public function __construct($name, $label, $value, $id = null) {
 		parent::__construct($name, $label, $value, $id);
-		$this->addClass('sly-form-textarea');
+		$this->addClass('sly-form-textarea-row');
 		$this->setAttribute('rows', 10);
 		$this->setAttribute('cols', 50);
 	}

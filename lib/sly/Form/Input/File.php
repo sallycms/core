@@ -25,7 +25,7 @@ class sly_Form_Input_File extends sly_Form_Input_Base {
 	public function __construct($name, $label, $id = null) {
 		parent::__construct($name, $label, '', $id);
 		$this->setAttribute('type', 'file');
-		$this->addOuterClass('sly-form-text');
-		$this->addOuterClass('sly-form-file');
+		$this->addClass('sly-form-file');
+		$this->addOuterClass('sly-form-file-row');
 	}
 }

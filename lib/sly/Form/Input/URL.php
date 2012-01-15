@@ -27,5 +27,7 @@ class sly_Form_Input_URL extends sly_Form_Input_Text {
 	public function __construct($name, $label, $value = '', $id = null) {
 		parent::__construct($name, $label, $value, $id);
 		$this->setAttribute('type', 'url');
+		$this->addClass('sly-form-url');
+		$this->addOuterClass('sly-form-url-row');
 	}
 }

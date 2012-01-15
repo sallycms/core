@@ -8,14 +8,9 @@
  * http://www.opensource.org/licenses/mit-license.php
  */
 ?>
-<p class="sly-form-col-a sly-form-submit">
+<p class="sly-form-col-a sly-form-buttonbar">
 	<?php
-	$additionalClass = '';
-
 	foreach ($this->buttons as $button) {
-		$button->addClass('sly-form-submit'.$additionalClass);
-		$additionalClass = ' sly-form-submit-2';
-
 		print $button->render();
 	}
 	?>

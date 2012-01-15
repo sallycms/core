@@ -32,7 +32,7 @@ if (!empty($this->categories)) {
 
 <span class="sly-widget sly-media<?php echo isset($this->attributes['class']) ? ' '.sly_html($this->attributes['class']) : '' ?>"<?php echo $filetypeFilter.$categoryFilter ?>>
 	<input class="value" type="hidden" name="<?php echo $name ?>" value="<?php echo sly_html($filename) ?>" />
-	<input class="name" type="text" value="<?php echo sly_html($value) ?>" readonly="readonly" id="<?php echo $id ?>" />
+	<input class="name sly-form-text" type="text" value="<?php echo sly_html($value) ?>" readonly="readonly" id="<?php echo $id ?>" />
 
 	<span class="sly-icons"><a href="#" class="fct-open" title="<?php echo t('select_medium') ?>"></a></span>
 	<span class="sly-icons"><a href="#" class="fct-add" title="<?php echo t('upload_medium') ?>"></a></span>
