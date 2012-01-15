@@ -29,7 +29,7 @@ if (!empty($focus)) {
 
 				// Es reicht, die Daten im ersten Fieldset auszugeben...
 
-				if ($i == 0) {
+				if ($i === 0) {
 					foreach ($this->hiddenValues as $name => $value) {
 						print '<input type="hidden" name="'.sly_html($name).'" value="'.sly_html($value['value']).'"';
 						if (!empty($value['id'])) print ' id="'.sly_html($value['id']).'"';

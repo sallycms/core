@@ -33,7 +33,7 @@ class sly_Form_Input_Radio extends sly_Form_Input_Boolean {
 		parent::__construct($name, $label, $value, $description, $id);
 
 		$this->setAttribute('type', 'radio');
-		$this->addOuterClass('sly-form-radio');
+		$this->addOuterClass('sly-form-radio-row');
 		$this->addClass('sly-form-radio');
 	}
 }

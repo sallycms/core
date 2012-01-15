@@ -36,6 +36,7 @@ abstract class sly_Form_Select_Base extends sly_Form_ElementBase {
 	public function __construct($name, $label, $value, array $values, $id = null) {
 		parent::__construct($name, $label, $value, $id);
 		$this->values = $values;
+		$this->addOuterClass('sly-form-select-row');
 	}
 
 	/**

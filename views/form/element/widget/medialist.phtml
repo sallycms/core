@@ -37,7 +37,7 @@ if (!empty($this->categories)) {
 ?>
 <span class="sly-widget sly-medialist<?php echo isset($this->attributes['class']) ? ' '.sly_html($this->attributes['class']) : '' ?>"<?php echo $filetypeFilter.$categoryFilter ?>>
 	<input type="hidden" name="<?php echo $name ?>" value="<?php echo sly_html(implode(',', $values)) ?>" />
-	<select size="8" id="<?php echo $id ?>">
+	<select size="8" id="<?php echo $id ?>" class="sly-form-select">
 		<?php foreach ($list as $element): ?>
 		<option value="<?php echo sly_html($element[0]) ?>"><?php echo sly_html($element[1]) ?></option>
 		<?php endforeach ?>

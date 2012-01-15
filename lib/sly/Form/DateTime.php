@@ -34,7 +34,7 @@ class sly_Form_DateTime extends sly_Form_ElementBase implements sly_Form_IElemen
 		parent::__construct($name, $label, $value, $id);
 
 		$this->withTime   = (boolean) $withTime;
-		$this->outerClass = 'sly-form-text';
+		$this->outerClass = 'sly-form-datetime-row';
 	}
 
 	/**

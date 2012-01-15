@@ -28,6 +28,7 @@ class sly_Form_Widget_Media extends sly_Form_Widget_MediaBase implements sly_For
 	 */
 	public function __construct($name, $label, $value, $id = null) {
 		parent::__construct($name, $label, $value, $id);
+		$this->addOuterClass('sly-form-mediawidget-row');
 	}
 
 	/**

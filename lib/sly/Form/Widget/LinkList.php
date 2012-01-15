@@ -29,6 +29,7 @@ class sly_Form_Widget_LinkList extends sly_Form_Widget_LinkBase implements sly_F
 	 */
 	public function __construct($name, $label, $value, $id = null) {
 		parent::__construct($name, $label, $value, $id);
+		$this->addOuterClass('sly-form-linklistwidget-row');
 	}
 
 	/**

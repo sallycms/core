@@ -31,7 +31,7 @@ class sly_Form_Widget_Link extends sly_Form_Widget_LinkBase implements sly_Form_
 	 */
 	public function __construct($name, $label, $value, $id = null) {
 		parent::__construct($name, $label, $value, $id);
-		$this->addOuterClass('sly-form-text');
+		$this->addOuterClass('sly-form-linklist-row');
 	}
 
 	/**

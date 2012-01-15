@@ -18,7 +18,7 @@
  *
  * If you want to build you own form, this is the class you want to use.
  *
- * @see     https://projects.webvariants.de/projects/sallycms/wiki/Forms
+ * @see     http://docs.webvariants.de/sallycms/latest/sallycms/forms/index.html
  * @ingroup form
  * @author  Christoph
  */
