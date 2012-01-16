@@ -72,7 +72,18 @@ abstract class sly_App_Base {
 		ob_start();
 
 		// run the action method
-		$r = $controller->$method();
+		try {
+			$r = $controller->$method();
+		}
+		catch (Exception $e) {
+			// Allow the controller to handle all exceptions by implementing sly_Controller_ExceptionHandler
+			if ($controller instanceof sly_Controller_ExceptionHandler && $controller->handlesException($e)) {
+				$r = $controller->handleException($e, $action);
+			}
+			else {
+				throw $e;
+			}
+		}
 
 		if ($r instanceof sly_Response || $r instanceof sly_Response_Action) {
 			ob_end_clean();
