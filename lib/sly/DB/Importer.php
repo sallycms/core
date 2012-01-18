@@ -72,15 +72,6 @@ class sly_DB_Importer {
 		$queries = count($this->dump->getQueries());
 		$msg    .= t('importer_database_imported').'. '.t('importer_entry_count', $queries).'<br />';
 
-		// User-Tabelle ggf. anlegen, falls nicht vorhanden
-
-		try {
-			$this->checkForUserTable();
-		}
-		catch(sly_DB_PDO_Exception $e) {
-			$error = $e->getMessage();
-		}
-
 		// Cache erneuern, wenn alles OK lief
 
 		if (empty($error)) {
@@ -154,25 +145,6 @@ class sly_DB_Importer {
 	}
 
 	/**
-	 * @return mixed  sly_DB_Persistence when user table was created, else true
-	 */
-	protected function checkForUserTable() {
-		$prefix   = sly_Core::config()->get('DATABASE/TABLE_PREFIX');
-		$hasTable = sly_DB_Persistence::getInstance()->listTables($prefix.'user');
-
-		if (!$hasTable) {
-			$createStmt = file_get_contents(SLY_COREFOLDER.'/install/user.sql');
-			$createStmt = str_replace('%PREFIX%', $prefix, $createStmt);
-
-			$db = sly_DB_Persistence::getInstance();
-			$db->query($createStmt);
-			return $db;
-		}
-
-		return true;
-	}
-
-	/**
 	 * @param  string $msg
 	 * @return string
 	 */
@@ -184,6 +156,6 @@ class sly_DB_Importer {
 		));
 
 		$this->returnValues['state'] = true;
-		return $msg.rex_generateAll();
+		return $msg.sly_Core::clearCache();
 	}
 }

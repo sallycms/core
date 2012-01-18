@@ -7,16 +7,10 @@
  *
  * http://www.opensource.org/licenses/mit-license.php
  */
-
 ?>
-<p class="rex-form-col-a rex-form-submit">
-	<?
-	$additionalClass = '';
-
+<p class="sly-form-col-a sly-form-buttonbar">
+	<?php
 	foreach ($this->buttons as $button) {
-		$button->addClass('rex-form-submit'.$additionalClass);
-		$additionalClass = ' rex-form-submit-2';
-
 		print $button->render();
 	}
 	?>

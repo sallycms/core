@@ -39,7 +39,7 @@ abstract class sly_Form_Helper {
 			self::$i18nLoaded = true;
 		}
 
-		$init   = array(0 => t('pool_kats_no'));
+		$init   = array(0 => t('no_category'));
 		$select = new sly_Form_Select_DropDown($name, '', -1, $init, $id);
 
 		if ($root === null) {
@@ -75,11 +75,12 @@ abstract class sly_Form_Helper {
 	 * @param  int            $root         the root category to use
 	 * @param  sly_Model_User $user         the user (null for the current one)
 	 * @param  string         $id           the elements ID
+	 * @param  boolean        $addHomepage  whether or not to add the start article
 	 * @return sly_Form_Select_DropDown     the generated select element
 	 */
 	public static function getCategorySelect($name, $hideOffline = true, $clang = null, $root = null, sly_Model_User $user = null, $id = null, $addHomepage = true) {
 		$values = array();
-		if($addHomepage) $values[0] = 'Homepage';
+		if ($addHomepage) $values[0] = t('start_article');
 		$select = new sly_Form_Select_DropDown($name, '', -1, $values, $id);
 
 		if ($root === null) {
@@ -106,10 +107,31 @@ abstract class sly_Form_Helper {
 	}
 
 	/**
+	 * Creates a select element with all visible languages
+	 *
+	 * @param  string         $name      the elements name
+	 * @param  sly_Model_User $user      the user (null for the current one)
+	 * @param  string         $id        the elements ID
+	 * @return sly_Form_Select_DropDown  the generated select element
+	 */
+	public static function getLanguageSelect($name, sly_Model_User $user = null, $id = null) {
+		$langs = array();
+		$user  = $user ? $user : sly_Util_User::getCurrentUser();
+
+		foreach (sly_Util_Language::findAll() as $langID => $lang) {
+			if ($user && sly_Util_Language::hasPermissionOnLanguage($user, $langID)) {
+				$langs[$langID] = $lang->getName();
+			}
+		}
+
+		return new sly_Form_Select_DropDown($name, '', -1, $langs, $id);
+	}
+
+	/**
 	 * Helper function
 	 *
 	 * This method implements the tree walking algorithm used for both selects.
-	 * It pays attention to the advancedMode[] and csw[] permissions.
+	 * It pays attention to the csw[] permissions.
 	 *
 	 * @param mixed $category  the current category (media or structure)
 	 * @param int   $depth     current depth (to indent <option> elements)
@@ -119,14 +141,6 @@ abstract class sly_Form_Helper {
 
 		if (self::canSeeCategory($category)) {
 			$name = $category->getName();
-			$user = sly_Util_User::getCurrentUser();
-
-			// Die Anzeige hängt immer vom aktuellen Benutzer ab.
-
-			if ($user->hasRight('advancedMode[]')) {
-				$name .= ' ['.$category->getId().']';
-			}
-
 			self::$select->addValue($category->getId(), str_repeat(' ', $depth*2).$name);
 		}
 
@@ -153,8 +167,8 @@ abstract class sly_Form_Helper {
 		$isAdmin = self::$user->isAdmin();
 
 		switch (self::$type) {
-			case 'media':     $isAdmin |= self::$user->hasRight('media[0]'); break;
-			case 'structure': $isAdmin |= self::$user->hasRight('csw[0]'); break;
+			case 'media':     $isAdmin |= self::$user->hasRight('mediacategory', 'access' , sly_Authorisation_ListProvider::ALL); break;
+			case 'structure': $isAdmin |= sly_Util_Article::canEditArticle(self::$user, 0); break;
 		}
 
 		return $isAdmin;
@@ -176,7 +190,7 @@ abstract class sly_Form_Helper {
 				return self::$user->hasRight('media['.$category->getId().']');
 
 			case 'structure':
-				return sly_Util_Article::canReadArticle(self::$user, $category->getId());
+				return sly_Util_Category::canReadCategory(self::$user, $category->getId());
 
 			default:
 				return true;

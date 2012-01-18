@@ -5,7 +5,7 @@
  *
  * This module uses the methods from Minify_Compressor.php from Minify.
  * I've modified it to allow for optional compression in certain parts.
- * 
+ *
  * @author Stephen Clay <steve@mrclay.org>
  * @author Anthony Short
  */
@@ -25,20 +25,20 @@ class Formatter
 
     /**
      * Minify a CSS string
-     * 
+     *
      * @param string $css
      * @return string
      */
     public static function minify($css)
     {
         $css = str_replace("\r\n", "\n", $css);
-        
+
         if(Scaffold::$config['Formatter']['preserve_hacks'])
         {
 	        // preserve empty comment after '>'
 	        // http://www.webdevout.net/css-hacks#in_css-selectors
 	        $css = preg_replace('@>/\\*\\s*\\*/@', '>/*keep*/', $css);
-	        
+
 	        // preserve empty comment between property and value
 	        // http://css-discuss.incutio.com/?page=BoxModelHack
 	        $css = preg_replace('@/\\*\\s*\\*/\\s*:@', '/*keep*/:', $css);
@@ -52,8 +52,8 @@ class Formatter
         if(Scaffold::$config['Formatter']['rgb_to_hex'])
         {
             $css = self::rgb_to_hex($css);
-        }       
-        
+        }
+
         // Strip out the units on 0 measurements eg 0px
         if(Scaffold::$config['Formatter']['remove_empty_measurements'])
         {
@@ -71,10 +71,10 @@ class Formatter
         // remove ws around { } and last semicolon in declaration block
         $css = preg_replace('/\\s*{\\s*/', '{', $css);
         $css = preg_replace('/;?\\s*}\\s*/', '}', $css);
-        
+
         // remove ws surrounding semicolons
         $css = preg_replace('/\\s*;\\s*/', ';', $css);
-        
+
         // remove ws around urls
         $css = preg_replace('/
                 url\\(      # url(
@@ -83,11 +83,11 @@ class Formatter
                 \\s*
                 \\)         # )
             /x', 'url($1)', $css);
-        
+
         // remove ws between rules and colons
         $css = preg_replace('/
                 \\s*
-                ([{;])              # 1 = beginning of block or rule separator 
+                ([{;])              # 1 = beginning of block or rule separator
                 \\s*
                 ([\\*_]?[\\w\\-]+)  # 2 = property (and maybe IE filter)
                 \\s*
@@ -95,7 +95,7 @@ class Formatter
                 \\s*
                 (\\b|[#\'"])        # 3 = first character of a value
             /x', '$1$2:$3', $css);
-        
+
         // remove ws in selectors
         $css = preg_replace_callback('/
                 (?:              # non-capture
@@ -109,25 +109,25 @@ class Formatter
                 {                # open declaration block
             /x'
             ,array('Formatter', '_selectorsCB'), $css);
-        
+
         // minimize hex colors
         $css = preg_replace('/([^=])#([a-f\\d])\\2([a-f\\d])\\3([a-f\\d])\\4([\\s;\\}])/i'
             , '$1#$2$3$4$5', $css);
-        
+
         // remove spaces between font families
         $css = preg_replace_callback('/font-family:([^;}]+)([;}])/'
             ,array('Formatter', '_fontFamilyCB'), $css);
-        
+
         $css = preg_replace('/@import\\s+url/', '@import url', $css);
-        
+
         // replace any ws involving newlines with a single newline
         $css = preg_replace('/[ \\t]*\\n+\\s*/', "\n", $css);
-        
+
         if(Scaffold::$config['Formatter']['limit_line_lengths'])
         {
 	        // separate common descendent selectors w/ newlines (to limit line lengths)
 	        $css = preg_replace('/([\\w#\\.\\*]+)\\s+([\\w#\\.\\*]+){/', "$1\n$2{", $css);
-	        
+
 	        // Use newline after 1st numeric value (to limit line lengths).
 	        $css = preg_replace('/
 	            ((?:padding|margin|border|outline):\\d+(?:px|em)?) # 1 = prop : 1st numeric value
@@ -138,17 +138,17 @@ class Formatter
 
         return trim($css);
     }
-    
+
     /**
      * Converts font-weights into numbers
      *
      * @param $css
      * @return return type
      */
-    private function font_weights_to_numbers($css)
+    private static function font_weights_to_numbers($css)
     {
     	if( $found = Scaffold::$css->find_properties_with_value('font-weight','bold|normal') )
-    	{	
+    	{
 	    	foreach($found[2] as $key => $value)
 	    	{
 	    		if($value == 'bold')
@@ -161,10 +161,10 @@ class Formatter
 	    		}
 	    	}
     	}
-    	
+
     	return $css;
     }
-    
+
     /**
      * Takes a CSS string, finds all rgb() values and converts them to hex format
      *
@@ -178,58 +178,58 @@ class Formatter
 	    	foreach( $rgbs[2] as $key => $found )
 	    	{
 	    		$color = null;
-	    		
+
 	    		foreach(explode(',',$found) as $value)
 	    		{
 	    			$hex = dechex($value);
 	    			$color .= ( strlen($hex) == 1 ) ? 0 . $hex : $hex;
 	    		}
-	
+
 	    		$css = str_replace($rgbs[0][$key],"#" . $color,$css);
 	    	}
     	}
-    	
+
     	return $css;
     }
-    
+
     /**
-     * Replace what looks like a set of selectors  
+     * Replace what looks like a set of selectors
      *
      * @param array $m regex matches
      * @return string
      */
-    protected function _selectorsCB($m)
+    protected static function _selectorsCB($m)
     {
         // remove ws around the combinators
         return preg_replace('/\\s*([,>+~])\\s*/', '$1', $m[0]);
     }
-    
+
     /**
      * Process a comment and return a replacement
-     * 
+     *
      * @param array $m regex matches
      * @return string
      */
-    protected function _commentCB($m)
+    protected static function _commentCB($m)
     {
         $m = $m[1];
 
-        // $m is the comment content w/o the surrounding tokens, 
+        // $m is the comment content w/o the surrounding tokens,
         // but the return value will replace the entire comment.
-       
+
         if(Scaffold::$config['Formatter']['preserve_hacks'])
         {
-        	if ($m === 'keep') 
+        	if ($m === 'keep')
         	{
         	    return '/**/';
         	}
-			
+
 			// component of http://tantek.com/CSS/Examples/midpass.html
         	if ($m === '" "')
         	{
         	    return '/*" "*/';
         	}
-			
+
 			// component of http://tantek.com/CSS/Examples/midpass.html
         	if (preg_match('@";\\}\\s*\\}/\\*\\s+@', $m))
         	{
@@ -247,25 +247,25 @@ class Formatter
 			{
                 return "/*/{$n[1]}/**/";
             }
-            
+
             // comment ends like \*/
             elseif (substr($m, -1) === '\\')
             {
                 return '/*\\*/';
             }
-           
+
             // comment looks like /*/ foo */
             elseif ($m !== '' && $m[0] === '/')
             {
                 return '/*/*/';
             }
-    		
+
     		else
     		{
 	            return '/**/';
             }
         }
-		
+
 		if(Scaffold::$config['Formatter']['preserve_comments'] === true)
 		{
 			return '/*' .$m. '*/';
@@ -275,15 +275,15 @@ class Formatter
 			return ''; // remove all other comments
 		}
     }
-    
+
     /**
      * Process a font-family listing and return a replacement
-     * 
+     *
      * @param array $m regex matches
-     * 
-     * @return string   
+     *
+     * @return string
      */
-    protected function _fontFamilyCB($m)
+    protected static function _fontFamilyCB($m)
     {
         $m[1] = preg_replace('/
                 \\s*
@@ -296,7 +296,7 @@ class Formatter
             /x', '$1', $m[1]);
         return 'font-family:' . $m[1] . $m[2];
     }
-    
+
     /**
      * Makes a CSS string easier to read by adding line breaks where
      * needed and stripping out unneeded whitespace
@@ -308,25 +308,25 @@ class Formatter
     {
   		// escape data protocol to prevent processing
     	$css = preg_replace('#(url\(data:[^\)]+\))#e', "'esc('.base64_encode('$1').')'", $css);
-  
+
   		// line break after semi-colons (for @import)
     	$css = str_replace(';', ";\r\r", $css);
- 	
+
     	// normalize comments spacing and lines
     	$css = preg_replace('#\*/#sx',"*/\r",$css);
-    	
+
     	// normalize space around opening brackets
-    	$css = preg_replace('#\s*\{\s*#', "\r{\r", $css); 
-    	
+    	$css = preg_replace('#\s*\{\s*#', "\r{\r", $css);
+
     	// normalize property name/value space
-    	$css = preg_replace('#([-a-z]+):\s*([^;}{]+);\s*#i', "\t$1: $2;\r", $css); 
-    	
+    	$css = preg_replace('#([-a-z]+):\s*([^;}{]+);\s*#i', "\t$1: $2;\r", $css);
+
     	// normalize space around closing brackets
     	$css = preg_replace('#\s*\}\s*#', "\r}\r\r", $css);
-    	
+
     	// new line for each selector in a compound selector
     	$css = preg_replace('#,\s*#', ",\r", $css);
-   
+
     	// remove returns after commas in property values
     	if (preg_match_all('#:[^;]+,[^;]+;#', $css, $m))
     	{
@@ -335,9 +335,9 @@ class Formatter
     			$css = str_replace($oops, preg_replace('#,\r#', ', ', $oops), $css);
     		}
     	}
-    	
+
     	$css = preg_replace('#esc\(([^\)]+)\)#e', "base64_decode('$1')", $css); // unescape escaped blocks
-    	
+
     	// indent nested @media rules
     	if (preg_match('#@media[^\{]*\{(.*\}\s*)\}#', $css, $m))
     	{
@@ -346,4 +346,4 @@ class Formatter
 
     	return $css;
     }
-} 
+}

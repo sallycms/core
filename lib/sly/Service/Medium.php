@@ -144,7 +144,7 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id {
 		$fullname = SLY_MEDIAFOLDER.'/'.$filename;
 
 		if (!file_exists($fullname)) {
-			throw new sly_Exception('Can only add existing files.');
+			throw new sly_Exception(t('file_not_found', $filename));
 		}
 
 		// check category
@@ -169,6 +169,7 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id {
 		$file->setCategoryId((int) $categoryID);
 		$file->setRevision(0); // totally useless...
 		$file->setReFileId(0); // even more useless
+		$file->setAttributes('');
 		$file->setCreateColumns();
 
 		if ($size) {
@@ -208,7 +209,7 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id {
 		$medium = $this->findById($mediumID);
 
 		if (!$medium) {
-			throw new sly_Exception('Cannot delete medium: ID '.$mediumID.' not found.');
+			throw new sly_Exception(t('medium_not_found'));
 		}
 
 		try {
@@ -220,7 +221,8 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id {
 			}
 		}
 		catch (Exception $e) {
-			throw new sly_Exception('Cannot delete medium: '.$e->getMessage());
+			// re-wrap DB & PDO exceptions
+			throw new sly_Exception($e->getMessage());
 		}
 
 		$cache = sly_Core::cache();

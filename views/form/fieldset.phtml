@@ -8,13 +8,20 @@
  * http://www.opensource.org/licenses/mit-license.php
  */
 
-$id = $this->id ? ' id="'.sly_html($this->id).'"' : '';
+$attrs    = $this->attrs;
+$classes  = isset($attrs['class']) ? $attrs['class'] : '';
+$classes .= sprintf('sly-form-col-%d sly-num%d', $this->columns, $this->num-1);
+
+$attrs['class'] = $classes;
+
+$attrs  = sly_Util_HTML::buildAttributeString($attrs);
+$legend = sly_translate($this->legend);
 
 ?>
 
-<fieldset class="rex-form-col-<?= $this->columns ?> sly-num<?= ($this->num-1) ?>"<?= $id ?>>
-	<legend><?= sly_html(rex_translate($this->legend)) ?></legend>
-	<div class="rex-form-wrapper">
+<fieldset <?php echo $attrs ?>>
+	<?php if (mb_strlen($legend) > 0): ?><legend><?php echo sly_html($legend) ?></legend><?php endif ?>
+	<div class="sly-form-wrapper">
 		<?php
 
 		$rowCount = count($this->rows);

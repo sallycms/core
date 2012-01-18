@@ -10,7 +10,7 @@ $text = $texts[rand(0, count($texts) - 1)];
 <html lang="en">
 <head>
 	<meta charset="utf-8">
-	<title><?= sly_html($text[1]) ?></title>
+	<title><?php echo sly_html($text[1]) ?></title>
 	<meta name="robots" content="none,noarchive">
 	<style>
 	h1, p { font-family:Calibri; }
@@ -22,12 +22,12 @@ $text = $texts[rand(0, count($texts) - 1)];
 <body>
 <div id="horizon">
 	<div id="wrapper">
-		<h1><?= sly_html($text[0]) ?></h1>
+		<h1><?php echo sly_html($text[0]) ?></h1>
 		<p>Es trat ein interner Fehler beim Verarbeiten Ihrer Anfrage auf. Bitte versuchen Sie es später noch einmal.</p>
 	</div>
 </div>
 <!-- Illustration provided by The Oatmeal -->
 <?php $beast = base64_encode(file_get_contents(dirname(__FILE__).'/beast.png')); ?>
-<img src="data:image/png;base64,<?= $beast ?>" alt="" class="beast" />
+<img src="data:image/png;base64,<?php echo $beast ?>" alt="" class="beast" />
 </body>
 </html>

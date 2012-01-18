@@ -13,10 +13,6 @@
  */
 class sly_Util_Mime {
 	public static function getType($filename) {
-		if (!file_exists($filename)) {
-			throw new sly_Exception('Cannot get mimetype of non-existing file '.$filename.'.');
-		}
-
 		/*
 		Using the new, fancy finfo extension can lead to serious problems on poorly-
 		configured server (or Windows boxes). The extension will either just report
@@ -24,6 +20,10 @@ class sly_Util_Mime {
 		(e.g. 'text/plain' for .css files, in which cases falling back would not work).
 		So to avoid this headache, we always use the prebuilt list of mimetypes and
 		all is well.
+
+		if (!file_exists($filename)) {
+			throw new sly_Exception('Cannot get mimetype of non-existing file '.$filename.'.');
+		}
 
 		$type = null;
 
@@ -40,9 +40,14 @@ class sly_Util_Mime {
 		*/
 
 		// fallback to prebuilt list
-		$types = sly_Util_YAML::load(SLY_COREFOLDER.'/config/mimetypes.yml');
-		$ext   = strtolower(substr(strrchr($filename, '.'), 1));
-		$type  = isset($types[$ext]) ? $types[$ext] : 'application/octet-stream';
+		static $types = null;
+
+		if ($types === null) {
+			$types = sly_Util_YAML::load(SLY_COREFOLDER.'/config/mimetypes.yml');
+		}
+
+		$ext  = strtolower(substr(strrchr($filename, '.'), 1));
+		$type = isset($types[$ext]) ? $types[$ext] : 'application/octet-stream';
 
 		return $type;
 	}

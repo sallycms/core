@@ -35,6 +35,8 @@ class sly_Form_Input_Number extends sly_Form_Input_Base {
 	public function __construct($name, $label, $value = '', $id = null) {
 		parent::__construct($name, $label, $value, $id);
 		$this->setAttribute('type', 'number');
+		$this->addClass('sly-form-number');
+		$this->addOuterClass('sly-form-number-row');
 	}
 
 	/**
@@ -77,16 +79,6 @@ class sly_Form_Input_Number extends sly_Form_Input_Base {
 		$this->setMin($min);
 		$this->setMax($max);
 		$this->setStep($step);
-	}
-
-	/**
-	 * Returns the outer row class
-	 *
-	 * @return string  the outer class
-	 */
-	public function getOuterClass() {
-		$this->addOuterClass('rex-form-text');
-		return $this->outerClass;
 	}
 
 	/**

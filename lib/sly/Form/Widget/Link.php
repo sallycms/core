@@ -20,7 +20,7 @@
  * @ingroup form
  * @author  Christoph
  */
-class sly_Form_Widget_Link extends sly_Form_ElementBase implements sly_Form_IElement {
+class sly_Form_Widget_Link extends sly_Form_Widget_LinkBase implements sly_Form_IElement {
 	/**
 	 * Constructor
 	 *
@@ -31,6 +31,7 @@ class sly_Form_Widget_Link extends sly_Form_ElementBase implements sly_Form_IEle
 	 */
 	public function __construct($name, $label, $value, $id = null) {
 		parent::__construct($name, $label, $value, $id);
+		$this->addOuterClass('sly-form-linklist-row');
 	}
 
 	/**
@@ -41,16 +42,6 @@ class sly_Form_Widget_Link extends sly_Form_ElementBase implements sly_Form_IEle
 	public function render() {
 		$this->attributes['value'] = $this->getDisplayValue();
 		return $this->renderFilename('element/widget/link.phtml');
-	}
-
-	/**
-	 * Returns the outer row class
-	 *
-	 * @return string  the outer class
-	 */
-	public function getOuterClass() {
-		$this->addOuterClass('rex-form-text');
-		return $this->outerClass;
 	}
 
 	/**
@@ -77,13 +68,6 @@ class sly_Form_Widget_Link extends sly_Form_ElementBase implements sly_Form_IEle
 	}
 
 	public static function getFullName($articleID) {
-		static $advanced = null;
-
-		if ($advanced === null) {
-			$user     = sly_Util_User::getCurrentUser();
-			$advanced = $user ? $user->hasRight('advancedMode[]') : false;
-		}
-
 		$article = sly_Util_Article::findById($articleID);
 		$value   = '';
 
@@ -91,7 +75,7 @@ class sly_Form_Widget_Link extends sly_Form_ElementBase implements sly_Form_IEle
 			$title = $article->getName();
 			$value = $title ? $title : t('unnamed_article');
 
-			if ($advanced || !$title) {
+			if (mb_strlen($title) === 0) {
 				$value .= " [$articleID]";
 			}
 		}

@@ -27,6 +27,8 @@ class sly_Form_Input_Button extends sly_Form_Input_Base {
 	public function __construct($type, $name, $value) {
 		parent::__construct($name, '', $value);
 		$this->setAttribute('type', in_array($type, array('button', 'reset', 'submit')) ? $type : 'button');
+		$this->addOuterClass('sly-form-button-row');
+		$this->attributes['class'] = 'sly-button';
 	}
 
 	/**

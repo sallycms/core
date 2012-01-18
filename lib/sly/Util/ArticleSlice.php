@@ -16,10 +16,8 @@ class sly_Util_ArticleSlice {
 	 * @return boolean
 	 */
 	public static function exists($article_slice_id) {
-		$article_slice_id = (int) $article_slice_id;
-		$articleSlice     = self::findById($article_slice_id);
-
-		return is_object($articleSlice) && ($articleSlice instanceof OOArticleSlice);
+		$articleSlice = self::findById($article_slice_id);
+		return is_object($articleSlice) && ($articleSlice instanceof sly_Model_ArticleSlice);
 	}
 
 	/**
@@ -29,19 +27,19 @@ class sly_Util_ArticleSlice {
 	 * @return string
 	 */
 	public static function getModuleNameForSlice($article_slice_id) {
-		$article_slice_id = (int) $article_slice_id;
-		$articleSlice     = self::findById($article_slice_id);
+		$articleSlice = self::findById($article_slice_id);
 
 		if (is_null($articleSlice)) return '';
-		return $articleSlice->getModule();
+		return $articleSlice->getSlice()->getModule();
 	}
 
 	/**
 	 * @param int $article_slice_id
-	 * @return OOArticleSlice
+	 * @return sly_Model_ArticleSlice
 	 */
 	public static function findById($article_slice_id) {
-		return OOArticleSlice::getArticleSliceById($article_slice_id);
+		$article_slice_id = (int) $article_slice_id;
+		return sly_Service_Factory::getArticleSliceService()->findById($article_slice_id);
 	}
 
 	/**
@@ -54,28 +52,15 @@ class sly_Util_ArticleSlice {
 		$article_slice_id = (int) $article_slice_id;
 		if (!self::exists($article_slice_id)) return false;
 
-		$article_slice = self::findById($article_slice_id);
+		return sly_Service_Factory::getArticleSliceService()->deleteById($article_slice_id);
+	}
 
-		// remove cachefiles
-		sly_Util_Slice::clearSliceCache($article_slice->getSliceId());
+	public static function getModule($article_slice_id) {
+		$slice = self::findById($article_slice_id);
 
-		$sql = sly_DB_Persistence::getInstance();
-		$pre = sly_Core::config()->get('DATABASE/TABLE_PREFIX');
+		if (is_null($slice)) return false;
 
-		// fix order
-		$sql->query('UPDATE '.$pre.'article_slice SET prior = prior -1 WHERE '.
-			sprintf('article_id = %d AND clang = %d AND slot = "%s" AND prior > %d',
-			$article_slice->getArticleId(), $article_slice->getClang(), $article_slice->getSlot(), $article_slice->getPrior()
-		));
-
-		// delete articleslice
-		$sql->delete('article_slice', array('id' => $article_slice_id));
-
-		// delete slice
-		sly_Service_Factory::getSliceService()->delete(array('id' => $article_slice->getSliceId()));
-
-		// TODO delete less entries in cache
-		sly_Core::cache()->flush(OOArticleSlice::CACHE_NS);
-		return $sql->affectedRows() == 1;
+		$module = $slice->getModule();
+		return sly_Service_Factory::getModuleService()->exists($module) ? $module : false;
 	}
 }

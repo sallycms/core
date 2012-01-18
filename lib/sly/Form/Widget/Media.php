@@ -17,7 +17,7 @@
  * @ingroup form
  * @author  Christoph
  */
-class sly_Form_Widget_Media extends sly_Form_ElementBase implements sly_Form_IElement {
+class sly_Form_Widget_Media extends sly_Form_Widget_MediaBase implements sly_Form_IElement {
 	/**
 	 * Constructor
 	 *
@@ -28,6 +28,7 @@ class sly_Form_Widget_Media extends sly_Form_ElementBase implements sly_Form_IEl
 	 */
 	public function __construct($name, $label, $value, $id = null) {
 		parent::__construct($name, $label, $value, $id);
+		$this->addOuterClass('sly-form-mediawidget-row');
 	}
 
 	/**
@@ -55,13 +56,6 @@ class sly_Form_Widget_Media extends sly_Form_ElementBase implements sly_Form_IEl
 	}
 
 	public static function getFullName($filename) {
-		static $advanced = null;
-
-		if ($advanced === null) {
-			$user     = sly_Util_User::getCurrentUser();
-			$advanced = $user ? $user->hasRight('advancedMode[]') : false;
-		}
-
 		$medium = sly_Util_Medium::findByFilename($filename);
 		$value  = '';
 
@@ -69,7 +63,7 @@ class sly_Form_Widget_Media extends sly_Form_ElementBase implements sly_Form_IEl
 			$title = $medium->getTitle();
 			$value = $title ? $title : $filename;
 
-			if ($advanced && $title) {
+			if (mb_strlen($title) > 0) {
 				$value .= " ($filename)";
 			}
 		}

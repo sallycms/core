@@ -84,7 +84,7 @@ class sly_Util_Directory {
 		if (!is_dir($this->directory)) return false;
 
 		if (!empty($sortFunction) && !function_exists($sortFunction)) {
-			throw new sly_Exception('Sort function '.$sortFunction.' does not exist!');
+			throw new sly_Exception(t('sort_function_not_found', $sortFunction));
 		}
 
 		$handle = opendir($this->directory);
@@ -229,7 +229,7 @@ class sly_Util_Directory {
 				if ($recursion === false) return false;
 			}
 			elseif (is_file($src)) {
-				if (copy($src, $dst)) chmod($dst, sly_Core::getFilePerm(sly_Core::DEFAULT_FILEPERM));
+				if (copy($src, $dst)) chmod($dst, sly_Core::getFilePerm());
 				else return false;
 			}
 		}

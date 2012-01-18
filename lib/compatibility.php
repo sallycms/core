@@ -58,21 +58,3 @@ if (!function_exists('fnmatch')) {
 		return preg_match("#^".strtr(preg_quote($pattern, '#'), array('\*' => '.*', '\?' => '.', '\[' => '[', '\]' => ']'))."$#i", $string) > 0;
 	}
 }
-
-// add PHP userland JSON implementation
-
-if (!function_exists('json_encode')) {
-	function json_get_service() {
-		static $service = null;
-		if ($service === null) $service = new Services_JSON(SERVICES_JSON_LOOSE_TYPE);
-		return $service;
-	}
-
-	function json_encode($value) {
-		return json_get_service()->encode($value);
-	}
-
-	function json_decode($data) {
-		return json_get_service()->decode($data);
-	}
-}

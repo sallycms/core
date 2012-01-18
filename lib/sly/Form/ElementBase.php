@@ -149,11 +149,23 @@ abstract class sly_Form_ElementBase extends sly_Viewable {
 	 *
 	 * This method is just a wrapper for setting/removing the disabled attribute.
 	 *
-	 * @param boolean $disabled  true to disabled the element, else false
+	 * @param boolean $disabled  true to disable the element, else false
 	 */
 	public function setDisabled($disabled = true) {
 		if ($disabled) $this->setAttribute('disabled', 'disabled');
 		else $this->removeAttribute('disabled');
+	}
+
+	/**
+	 * Marks the element as (not) required
+	 *
+	 * This method is just a wrapper for setting/removing the required attribute.
+	 *
+	 * @param boolean $required  true to require a value, else false
+	 */
+	public function setRequired($required = true) {
+		if ($required) $this->setAttribute('required', 'required');
+		else $this->removeAttribute('required');
 	}
 
 	/**
@@ -307,7 +319,7 @@ abstract class sly_Form_ElementBase extends sly_Viewable {
 		$full = SLY_COREFOLDER.'/views/form/'.$file;
 		if (file_exists($full)) return $full;
 
-		throw new sly_Form_Exception('View '.$file.' could not be found.');
+		throw new sly_Form_Exception(t('view_not_found', $file));
 	}
 
 	/**

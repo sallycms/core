@@ -15,9 +15,10 @@ interface sly_Authorisation_Provider {
 
 	/**
 	 * @param  int    $userId
+	 * @param  sring  $context
 	 * @param  string $token
 	 * @param  int    $objectId
 	 * @return boolean
 	 */
-	public function hasPermission($userId, $token, $value = true);
+	public function hasPermission($userId, $context, $token, $value = true);
 }

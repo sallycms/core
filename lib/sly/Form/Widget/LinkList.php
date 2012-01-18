@@ -18,7 +18,7 @@
  * @ingroup form
  * @author  Christoph
  */
-class sly_Form_Widget_LinkList extends sly_Form_ElementBase implements sly_Form_IElement {
+class sly_Form_Widget_LinkList extends sly_Form_Widget_LinkBase implements sly_Form_IElement {
 	/**
 	 * Constructor
 	 *
@@ -29,6 +29,7 @@ class sly_Form_Widget_LinkList extends sly_Form_ElementBase implements sly_Form_
 	 */
 	public function __construct($name, $label, $value, $id = null) {
 		parent::__construct($name, $label, $value, $id);
+		$this->addOuterClass('sly-form-linklistwidget-row');
 	}
 
 	/**

@@ -39,10 +39,11 @@ class sly_Registry_Temp implements sly_Registry_Registry {
 
 	/**
 	 * @param  string $key
+	 * @param  mixed  $default
 	 * @return mixed
 	 */
-	public function get($key) {
-		return $this->store->get($key);
+	public function get($key, $default = null) {
+		return $this->store->get($key, $default);
 	}
 
 	/**
