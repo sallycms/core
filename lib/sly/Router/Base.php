@@ -8,7 +8,7 @@
  * http://www.opensource.org/licenses/mit-license.php
  */
 
-class sly_Router_Base {
+class sly_Router_Base implements sly_Router_Interface {
 	protected $routes;
 	protected $match;
 
@@ -52,6 +52,20 @@ class sly_Router_Base {
 	public function hasMatch() {
 		if ($this->match === false) $this->match();
 		return $this->match !== null;
+	}
+
+	public function getController() {
+		$controller = $this->get('controller', null);
+
+		if ($controller === null) {
+			throw new sly_Exception('Matched route does not contain a :controller placeholder.');
+		}
+
+		return $controller;
+	}
+
+	public function getAction() {
+		return $this->get('controller', 'index');
 	}
 
 	public function get($key, $default = null) {
