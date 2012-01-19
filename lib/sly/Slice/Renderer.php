@@ -67,7 +67,7 @@ class sly_Slice_Renderer {
 	 * @return string
 	 */
 	protected function replaceLinks($content) {
-		preg_match_all('#(?:redaxo|sally)://([0-9]+)(?:-([0-9]+))?/?#', $content, $matches, PREG_OFFSET_CAPTURE | PREG_SET_ORDER);
+		preg_match_all('#sally://([0-9]+)(?:-([0-9]+))?/?#', $content, $matches, PREG_OFFSET_CAPTURE | PREG_SET_ORDER);
 
 		$skew = 0;
 
