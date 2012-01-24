@@ -29,8 +29,12 @@ abstract class sly_Form_Input_Boolean extends sly_Form_Input_Base {
 	 */
 	public function __construct($name, $label, $value, $description = 'ja', $id = null) {
 		parent::__construct($name, $label, $value, $id);
+
 		$this->description = $description;
 		$this->checks      = array();
+
+		// remove the sly-form-text class
+		$this->setAttribute('class', '');
 	}
 
 	/**
