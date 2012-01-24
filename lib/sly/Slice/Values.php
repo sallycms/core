@@ -12,7 +12,7 @@ class sly_Slice_Values {
 		$this->data = $data;
 	}
 
-	public function value($id, $default = null) {
+	public function get($id, $default = null) {
 		if(!array_key_exists($id, $this->data)) return $default;
 		return $this->data[$id];
 	}
