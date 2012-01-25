@@ -861,17 +861,15 @@ abstract class sly_Service_AddOn_Base {
 
 		// if there is no cache yet, we load all components the slow way
 		if (!is_array($order)) {
-			$addonService  = sly_Service_Factory::getAddOnService();
 			$pluginService = sly_Service_Factory::getPluginService();
 
 			// reset our helper to keep track of the component stati
 			$this->loadInfo = array();
 
-			foreach ($addonService->getRegisteredAddons() as $addonName) {
+			foreach ($this->getRegisteredAddons() as $addonName) {
 				$this->load($addonName);
-
 				foreach ($pluginService->getRegisteredPlugins($addonName) as $pluginName) {
-					$this->load(array($addonName, $pluginName));
+					$pluginService->load(array($addonName, $pluginName));
 				}
 			}
 

@@ -70,16 +70,6 @@ class sly_Model_Article extends sly_Model_Base_Article {
 	}
 
 	/**
-	 * prints the articlecontent for a given slot, or if empty for all slots
-	 *
-	 * @param string $slot
-	 * @deprecated you should print $this->getContent by yourselves
-	 */
-	public function printContent($slot = null) {
-		print $this->getContent();
-	}
-
-	/**
 	 * returns the articlecontent for a given slot, or if empty for all slots
 	 *
 	 * @param  string $slot
