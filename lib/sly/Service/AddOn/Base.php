@@ -919,6 +919,12 @@ abstract class sly_Service_AddOn_Base {
 		if ($installed) {
 			$this->loadConfig($component, $installed, $activated);
 			$this->loadInfo[$compAsString] = array($component, $installed, $activated);
+			//TODO: remove this magic in next (0.7) release
+			$page = $this->getProperty($component, 'page', '');
+			$name = $this->getProperty($component, 'name', '');
+			if(!empty($page)) {
+				sly_Core::config()->set('authorisation/pages/token', array($page => $name));
+			}
 		}
 
 		if ($activated) {
