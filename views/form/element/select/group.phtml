@@ -33,7 +33,7 @@
 	?>
 </span>
 
-<?php if ($type == 'checkbox'): ?>
+<?php if ($type === 'checkbox' && count($this->values) > 1): ?>
 <span class="sly-select-checkbox-list sly-form-helptext">
 	<a rel="all" href="#"><?php echo t('select_all') ?></a> |
 	<a rel="none" href="#"><?php echo t('select_none') ?></a>
