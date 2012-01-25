@@ -12,7 +12,6 @@
  * @ingroup authorisation
  */
 class sly_Authorisation_ArticleListProvider implements sly_Authorisation_ListProvider {
-
 	private static $cache;
 
 	private function initcache() {
@@ -35,7 +34,4 @@ class sly_Authorisation_ArticleListProvider implements sly_Authorisation_ListPro
 		$this->initcache();
 		return self::$cache[$id];
 	}
-
 }
-
-?>
