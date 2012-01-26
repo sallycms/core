@@ -90,22 +90,24 @@ class sly_Service_ArticleType {
 	public function getModules($articleType, $slot = null) {
 		$moduleService   = sly_Service_Factory::getModuleService();
 		$templateService = sly_Service_Factory::getTemplateService();
-		$modules         = sly_makeArray($this->get($articleType, 'modules', array()));
+		$modules         = $this->get($articleType, 'modules', null);
 		$template        = $this->getTemplate($articleType);
 		$result          = array();
 
 		// check if slot is valid
 		if ($slot === null || $templateService->hasSlot($template, $slot)) {
 			$allModules = array_keys($moduleService->getModules());
+			$origDef    = $modules;
+			$modules    = sly_makeArray($modules);
 
 			// if there is no spec at all, allow all available modules
-			if (empty($modules)) {
+			if ($origDef === null) {
 				$modules = $allModules;
 			}
 
 			// if there is a complex spec, we have to look a bit closer
 			// $modules = {slotName: [mod,mod,mod], slotName: [mod,mod]
-			elseif ($this->isModulesDefComplex($modules)) {
+			elseif (!empty($modules) && $this->isModulesDefComplex($modules)) {
 				// if the slot has not been specified, allow all modules
 				if ($slot !== null && !array_key_exists($slot, $modules)) {
 					$modules = $allModules;
