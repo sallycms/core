@@ -96,14 +96,18 @@ abstract class sly_Form_ElementBase extends sly_Viewable {
 	 * @param string $className  the CSS class
 	 */
 	public function addClass($className) {
-		$class   = strval($this->getAttribute('class'));
-		$classes = empty($class) ? array() : explode(' ', $class);
+		$newClasses = $this->addClassHelper($className, $this->getAttribute('class'));
+		$this->setAttribute('class', $newClasses);
+	}
 
-		if (!in_array($className, $classes)) {
-			$classes[] = $className;
-		}
-
-		$this->setAttribute('class', implode(' ', array_unique($classes)));
+	/**
+	 * Removes a CSS class
+	 *
+	 * @param string $className  the CSS class
+	 */
+	public function removeClass($className) {
+		$newClasses = $this->removeClassHelper($className, $this->getAttribute('class'));
+		$this->setAttribute('class', $newClasses);
 	}
 
 	/**
@@ -331,14 +335,16 @@ abstract class sly_Form_ElementBase extends sly_Viewable {
 	 * @param string $className  the CSS class
 	 */
 	public function addOuterClass($className) {
-		$class   = strval($this->outerClass);
-		$classes = empty($class) ? array() : explode(' ', $class);
+		$this->outerClass = $this->addClassHelper($className, $this->outerClass);
+	}
 
-		if (!in_array($className, $classes)) {
-			$classes[] = $className;
-		}
-
-		$this->outerClass = implode(' ', array_unique($classes));
+	/**
+	 * Removes a CSS class
+	 *
+	 * @param string $className  the CSS class
+	 */
+	public function removeOuterClass($className) {
+		$this->outerClass = $this->removeClassHelper($className, $this->outerClass);
 	}
 
 	/**
@@ -350,13 +356,47 @@ abstract class sly_Form_ElementBase extends sly_Viewable {
 	 * @param string $className  the CSS class
 	 */
 	public function addFormRowClass($className) {
-		$class   = strval($this->formRowClass);
-		$classes = empty($class) ? array() : explode(' ', $class);
+		$this->formRowClass = $this->addClassHelper($className, $this->formRowClass);
+	}
 
-		if (!in_array($className, $classes)) {
-			$classes[] = $className;
+	/**
+	 * Removes a CSS class
+	 *
+	 * @param string $className  the CSS class
+	 */
+	public function removeFormRowClass($className) {
+		$this->formRowClass = $this->removeClassHelper($className, $this->formRowClass);
+	}
+
+	/**
+	 * Adds a new form row class
+	 *
+	 * This method will add a new CSS class to the element. Classes are
+	 * automatically made unique.
+	 *
+	 * @param string $className  the CSS class
+	 */
+	protected function addClassHelper($toAdd, $current) {
+		$classes = $this->getClassList($current.' '.$toAdd);
+		return implode(' ', $classes);
+	}
+
+	/**
+	 * @param string $className  the CSS class
+	 */
+	protected function removeClassHelper($toRemove, $current) {
+		$toRemove = $this->getClassList($toRemove);
+		$classes  = $this->getClassList($current);
+
+		foreach ($toRemove as $removeMe) {
+			$pos = array_search($removeMe, $classes);
+			if ($pos !== false) unset($classes[$pos]);
 		}
 
-		$this->formRowClass = implode(' ', array_unique($classes));
+		return implode(' ', $classes);
+	}
+
+	private function getClassList($classString) {
+		return array_unique(array_filter(array_map('trim', explode(' ', $classString))));
 	}
 }
