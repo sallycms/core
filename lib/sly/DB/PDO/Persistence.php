@@ -293,6 +293,33 @@ class sly_DB_PDO_Persistence extends sly_DB_Persistence {
 		$this->connection->setTransRunning(false);
 	}
 
+	public function transactional($callback, array $params = array()) {
+		$conn   = $this->connection;
+		$pdo    = $conn->getPDO();
+		$ownTrx = !$conn->isTransRunning();
+
+		if ($ownTrx) {
+			$this->beginTransaction();
+		}
+
+		try {
+			$return = call_user_func_array($callback, $params);
+
+			if ($ownTrx) {
+				$this->commit();
+			}
+
+			return $return;
+		}
+		catch (Exception $e) {
+			if ($ownTrx) {
+				$this->rollBack();
+			}
+
+			throw $e;
+		}
+	}
+
 	// =========================================================================
 	// ERROR UND LOGGING
 	// =========================================================================
