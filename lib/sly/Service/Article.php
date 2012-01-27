@@ -299,7 +299,7 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 			$this->copyContent($id, $newID, $clang, $clang);
 
 			// notify system
-			$disp->notify('SLY_ART_COPIED', $duplicate);
+			$disp->notify('SLY_ART_COPIED', $duplicate, compact('source'));
 		}
 
 		return $newID;
