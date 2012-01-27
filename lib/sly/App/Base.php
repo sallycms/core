@@ -175,6 +175,7 @@ abstract class sly_App_Base {
 	}
 
 	abstract public function getControllerClassPrefix();
+	abstract public function getCurrentControllerName();
 
 	abstract protected function handleControllerError(Exception $e, $controller, $action);
 }
