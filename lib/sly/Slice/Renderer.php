@@ -37,14 +37,23 @@ class sly_Slice_Renderer {
 		$service                      = sly_Service_Factory::getModuleService();
 		$filenameHtuG50hNCdikAvf7CZ1F = $service->getFolder().DIRECTORY_SEPARATOR.$service->getInputFilename($this->moduleName);
 		unset($service);
+
 		$values = new sly_Slice_Values($this->values);
 		$form   = new sly_Slice_Form();
+
 		ob_start();
-		include $filenameHtuG50hNCdikAvf7CZ1F;
-		$form->setSubmitButton(null);
-		$form->setResetButton(null);
-		print $form->render($dataIndex);
-		return ob_get_clean();
+
+		try {
+			include $filenameHtuG50hNCdikAvf7CZ1F;
+			$form->setSubmitButton(null);
+			$form->setResetButton(null);
+			print $form->render($dataIndex);
+			return ob_get_clean();
+		}
+		catch (Exception $e) {
+			ob_end_clean();
+			throw $e;
+		}
 	}
 
 	public function renderOutput() {
