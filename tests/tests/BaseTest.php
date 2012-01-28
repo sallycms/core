@@ -28,6 +28,10 @@ abstract class sly_BaseTest extends PHPUnit_Extensions_Database_TestCase {
 	public function setUp() {
 		parent::setUp();
 		sly_Core::cache()->flush('sly', true);
+
+		foreach ($this->getRequiredComponents() as $comp) {
+			$this->loadComponent($comp);
+		}
 	}
 
 	/**
@@ -50,6 +54,13 @@ abstract class sly_BaseTest extends PHPUnit_Extensions_Database_TestCase {
 	 * @return array
 	 */
 	protected function getAdditionalDataSets() {
+		return array();
+	}
+
+	/**
+	 * @return array
+	 */
+	protected function getRequiredComponents() {
 		return array();
 	}
 
