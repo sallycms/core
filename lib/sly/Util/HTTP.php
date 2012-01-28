@@ -44,31 +44,49 @@ class sly_Util_HTTP {
 	}
 
 	/**
-	 * @param  mixed  $targetArticle  article ID or article model
-	 * @param  int    $clang
-	 * @param  array  $parameters
-	 * @param  string $divider
+	 * @param  mixed   $targetArticle  article ID or article model
+	 * @param  int     $clang
+	 * @param  array   $parameters
+	 * @param  string  $divider
+	 * @param  boolean $secure
 	 * @return string
 	 */
-	public static function getAbsoluteUrl($targetArticle, $clang = false, $parameters = array(), $divider = '&amp;') {
-		$articleUrl = self::getUrl($targetArticle, $clang, $parameters, $divider);
+	public static function getAbsoluteUrl($targetArticle, $clang = null, $parameters = array(), $divider = '&amp;', $secure = null) {
+		$url = self::getUrl($targetArticle, $clang, $parameters, $divider, null);
 
-		if ($articleUrl[0] == '/') {
-			return self::getBaseUrl(false).$articleUrl;
+		// did we already get an absolute URL (cross domain realurl implementations)?
+		if (!preg_match('#^[a-z+]://#', $url)) {
+			if ($url[0] === '/') {
+				$url = self::getBaseUrl(false).$url;
+			}
+			else {
+				$url = self::getBaseUrl(true).'/'.$url;
+			}
 		}
 
-		$baseURL = self::getBaseUrl(true);
-		return $baseURL.'/'.$articleUrl;
+		// switch between http and https?
+		if ($secure !== null) {
+			$url = preg_replace('#^https?://#', $secure ? 'https://' : 'http://', $url);
+		}
+
+		return $url;
 	}
 
 	/**
-	 * @param  mixed  $targetArticle  article ID or article model
-	 * @param  int    $clang
-	 * @param  array  $parameters
-	 * @param  string $divider
+	 * @param  mixed   $targetArticle  article ID or article model
+	 * @param  int     $clang
+	 * @param  array   $parameters
+	 * @param  string  $divider
+	 * @param  boolean $secure
 	 * @return string
 	 */
-	public static function getUrl($targetArticle, $clang = null, $parameters = array(), $divider = '&amp;') {
+	public static function getUrl($targetArticle, $clang = null, $parameters = array(), $divider = '&amp;', $secure = null) {
+		$switch = $secure !== null && $secure !== self::isSecure();
+
+		if ($switch) {
+			return self::getAbsoluteUrl($targetArticle, $clang, $parameters, $divider, $secure);
+		}
+
 		$articleID = self::resolveArticle($targetArticle);
 		$article   = sly_Util_Article::findById($articleID, $clang);
 

@@ -8,15 +8,18 @@
  * http://www.opensource.org/licenses/mit-license.php
  */
 
+/**
+ * @since  0.6
+ * @author zozi@webvariants.de
+ */
 class sly_Slice_Renderer {
-
 	private $moduleName;
 	private $values;
 
 	/**
 	 * @param array $values
 	 */
-	public function __construct($moduleName, $values = array()) {
+	public function __construct($moduleName, array $values = array()) {
 		$this->moduleName = $moduleName;
 		$this->setValues($values);
 	}
@@ -27,27 +30,34 @@ class sly_Slice_Renderer {
 	 * @param array $values
 	 */
 	public function setValues($values) {
-		if(!sly_Util_Array::isAssoc($values)) {
+		if (!sly_Util_Array::isAssoc($values)) {
 			throw new sly_Exception('Values must be assoc array!');
 		}
+
 		$this->values = $values;
 	}
 
 	public function renderInput($dataIndex) {
-		$service                      = sly_Service_Factory::getModuleService();
-		$filenameHtuG50hNCdikAvf7CZ1F = $service->getFolder().DIRECTORY_SEPARATOR.$service->getInputFilename($this->moduleName);
-		unset($service);
+		$service  = sly_Service_Factory::getModuleService();
+		$filename = $service->getFolder().DIRECTORY_SEPARATOR.$service->getInputFilename($this->moduleName);
+		$values   = new sly_Slice_Values($this->values);
+		$helper   = new sly_Slice_Helper($values);
+		$form     = new sly_Slice_Form();
 
-		$values = new sly_Slice_Values($this->values);
-		$form   = new sly_Slice_Form();
+		unset($service);
 
 		ob_start();
 
 		try {
-			include $filenameHtuG50hNCdikAvf7CZ1F;
-			$form->setSubmitButton(null);
-			$form->setResetButton(null);
-			print $form->render($dataIndex);
+			include $filename;
+
+			if ($form instanceof sly_Form) {
+				$form->setSubmitButton(null);
+				$form->setResetButton(null);
+
+				print $form->render($dataIndex);
+			}
+
 			return ob_get_clean();
 		}
 		catch (Exception $e) {
