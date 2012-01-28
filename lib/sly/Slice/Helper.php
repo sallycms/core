@@ -45,7 +45,7 @@ class sly_Slice_Helper {
 	 * @return sly_Model_Article  the found article or the default value
 	 */
 	public function getArticle($identifier, $default = null, $clang = null) {
-		$clang = $clang === null || sly_Core::getCurrentClang() : (int) $clang;
+		$clang = $clang === null ? sly_Core::getCurrentClang() : (int) $clang;
 
 		if ($identifier instanceof sly_Model_Category) {
 			$identifier = $identifier->getStartArticle();
@@ -97,7 +97,7 @@ class sly_Slice_Helper {
 	 * @return sly_Model_Category  the found article or the default value
 	 */
 	public function getCategory($identifier, $default = null, $clang = null) {
-		$clang = $clang === null || sly_Core::getCurrentClang() : (int) $clang;
+		$clang = $clang === null ? sly_Core::getCurrentClang() : (int) $clang;
 
 		if ($identifier instanceof sly_Model_Article) {
 			$identifier = $identifier->getCategory();
