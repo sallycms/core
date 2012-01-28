@@ -8,8 +8,11 @@
  * http://www.opensource.org/licenses/mit-license.php
  */
 
+/**
+ * @since  0.6
+ * @author zozi@webvariants.de
+ */
 class sly_Slice_Form extends sly_Form {
-
 	public function __construct($action = '', $method = '', $title = '', $name = '', $id = '') {
 		parent::__construct($action, $method, $title, $name, $id);
 	}
@@ -28,9 +31,10 @@ class sly_Slice_Form extends sly_Form {
 	}
 
 	public function render($dataIndex = false) {
-		if(is_string($dataIndex)) {
+		if (is_string($dataIndex)) {
 			$this->addDataIndex($dataIndex);
 		}
+
 		return parent::render(true);
 	}
 }
