@@ -8,7 +8,7 @@
  * http://www.opensource.org/licenses/mit-license.php
  */
 
-abstract class sly_DatabaseTest extends PHPUnit_Extensions_Database_TestCase {
+abstract class sly_BaseTest extends PHPUnit_Extensions_Database_TestCase {
 	protected $pdo;
 
 	/**
@@ -35,7 +35,33 @@ abstract class sly_DatabaseTest extends PHPUnit_Extensions_Database_TestCase {
 	 */
 	public function getDataSet() {
 		$name = $this->getDataSetName();
-		return new PHPUnit_Extensions_Database_DataSet_YamlDataSet(dirname(__FILE__).'/../datasets/'.$name.'.yml');
+		$core = new PHPUnit_Extensions_Database_DataSet_YamlDataSet(dirname(__FILE__).'/../datasets/'.$name.'.yml');
+		$comp = new PHPUnit_Extensions_Database_DataSet_CompositeDataSet(array());
+		$comp->addDataSet($core);
+
+		foreach ($this->getAdditionalDataSets() as $ds) {
+			$comp->addDataSet($ds);
+		}
+
+		return $comp;
+	}
+
+	/**
+	 * @return array
+	 */
+	protected function getAdditionalDataSets() {
+		return array();
+	}
+
+	protected function loadComponent($component) {
+		if (is_array($component)) {
+			$service = sly_Service_Factory::getPluginService();
+			$service->loadPlugin($component, true);
+		}
+		else {
+			$service = sly_Service_Factory::getAddOnService();
+			$service->loadAddOn($component, true);
+		}
 	}
 
 	/**

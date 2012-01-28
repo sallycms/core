@@ -8,7 +8,7 @@
  * http://www.opensource.org/licenses/mit-license.php
  */
 
-class sly_Service_MediaCategoryTest extends sly_DatabaseTest {
+class sly_Service_MediaCategoryTest extends sly_BaseTest {
 	protected function getDataSetName() {
 		return 'pristine-sally';
 	}

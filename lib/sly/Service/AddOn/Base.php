@@ -897,9 +897,10 @@ abstract class sly_Service_AddOn_Base {
 	}
 
 	/**
-	 * @param mixed $component  addOn as string, plugin as array
+	 * @param mixed   $component  addOn as string, plugin as array
+	 * @param boolean $force      load the component even if it's not active
 	 */
-	protected function load($component) {
+	protected function load($component, $force = false) {
 		$compAsString = $this->buildComponentName($component);
 
 		if (isset(self::$loaded[$compAsString])) {
@@ -916,18 +917,20 @@ abstract class sly_Service_AddOn_Base {
 		$activated = $this->isAvailable($component);
 		$installed = $activated || $this->isInstalled($component);
 
-		if ($installed) {
+		if ($installed || $force) {
 			$this->loadConfig($component, $installed, $activated);
 			$this->loadInfo[$compAsString] = array($component, $installed, $activated);
-			//TODO: remove this magic in next (0.7) release
+
+			// TODO: remove this magic in next (0.7) release
 			$page = $this->getProperty($component, 'page', '');
 			$name = $this->getProperty($component, 'name', '');
-			if(!empty($page)) {
+
+			if (!empty($page)) {
 				sly_Core::config()->set('authorisation/pages/token', array($page => $name));
 			}
 		}
 
-		if ($activated) {
+		if ($activated || $force) {
 			$requires = $service->getProperty($component, 'requires');
 
 			if (!empty($requires)) {
@@ -937,11 +940,11 @@ abstract class sly_Service_AddOn_Base {
 					$required = explode('/', $required, 2);
 
 					// first load the addon
-					$this->load($required[0]);
+					$this->load($required[0], $force);
 
 					// then the plugin
 					if (count($required) === 2) {
-						$this->load($required);
+						$this->load($required, $force);
 					}
 				}
 			}

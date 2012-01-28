@@ -8,7 +8,7 @@
  * http://www.opensource.org/licenses/mit-license.php
  */
 
-abstract class sly_StructureTest extends sly_DatabaseTest {
+abstract class sly_StructureTest extends sly_BaseTest {
 	private static $origStart;
 	private static $origNotFound;
 
