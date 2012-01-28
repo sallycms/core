@@ -75,9 +75,9 @@ class sly_Service_ArticleTypeTest extends PHPUnit_Framework_TestCase {
 		return array(
 			array('default', 'main',   array('test1', 'test2')),
 			array('default', 'test',   array('test2')),
-			array('special', null,     array('test1', 'test2')),
-			array('special', 'main',   array('test1', 'test2')),
-			array('special', 'test',   array('test1', 'test2')),
+			array('special', null,     array()),
+			array('special', 'main',   array()),
+			array('special', 'test',   array()),
 			array('special', 'noslot', array()),
 			array('test',    null,     array('test1')),
 			array('test',    'main',   array('test1'))
