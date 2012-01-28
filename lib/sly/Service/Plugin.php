@@ -139,11 +139,12 @@ class sly_Service_Plugin extends sly_Service_AddOn_Base {
 	}
 
 	/**
-	 * @param  array $plugin
+	 * @param  array   $plugin
+	 * @param  boolean $force      load the plugin even if it's not active
 	 * @return null
 	 */
-	public function loadPlugin($plugin) {
-		return $this->load($plugin);
+	public function loadPlugin($plugin, $force = false) {
+		return $this->load($plugin, $force);
 	}
 
 	/**

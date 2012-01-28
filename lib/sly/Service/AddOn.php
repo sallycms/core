@@ -116,11 +116,12 @@ class sly_Service_AddOn extends sly_Service_AddOn_Base {
 	}
 
 	/**
-	 * @param  string $addonName
+	 * @param  string  $addonName
+	 * @param  boolean $force      load the addOn even if it's not active
 	 * @return null
 	 */
-	public function loadAddon($addonName) {
-		return $this->load($addonName);
+	public function loadAddon($addonName, $force = false) {
+		return $this->load($addonName, $force);
 	}
 
 	/**

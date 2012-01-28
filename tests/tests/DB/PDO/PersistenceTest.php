@@ -8,7 +8,7 @@
  * http://www.opensource.org/licenses/mit-license.php
  */
 
-class sly_DB_PDO_PersistenceTest extends sly_DatabaseTest {
+class sly_DB_PDO_PersistenceTest extends sly_BaseTest {
 	private static $pers;
 
 	public static function setUpBeforeClass() {
