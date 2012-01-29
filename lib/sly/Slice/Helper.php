@@ -13,20 +13,9 @@
  * @author chirstoph@webvariants.de
  */
 class sly_Slice_Helper {
-	private $values; ///< sly_Slice_Values
-
 	const CURRENT_ARTICLE  = -1; ///< int
 	const START_ARTICLE    = -2; ///< int
 	const NOTFOUND_ARTICLE = -3; ///< int
-
-	/**
-	 * Constructor
-	 *
-	 * @param sly_Slice_Values $values
-	 */
-	public function __construct(sly_Slice_Values $values) {
-		$this->values = $values;
-	}
 
 	/**
 	 * Get an article instance
@@ -167,5 +156,43 @@ class sly_Slice_Helper {
 		return $absolute
 			? sly_Util_HTTP::getAbsoluteUrl($target, $target->getClang(), $params, $divider, $secure)
 			: sly_Util_HTTP::getUrl($target, $target->getClang(), $params, $divider, $secure);
+	}
+
+	public function getImageTag($image, array $attributes = array(), $forceUri = false) {
+		$base = sly_Core::isBackend() ? '../' : '';
+
+		if (is_string($image)) {
+			$medium = sly_Util_Medium::findByFilename($image);
+			if ($medium && $medium->exists()) $image = $medium;
+		}
+
+		if ($image instanceof sly_Model_Medium) {
+			$src   = $base.'data/mediapool/'.$image->getFilename();
+			$alt   = $image->getTitle();
+			$title = $image->getTitle();
+		}
+		else {
+			if ($forceUri) {
+				$src = $base.'data/mediapool/'.$image;
+			}
+			else {
+				// a transparent 1x1 sized PNG, 81byte in size
+				$src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAAXNSR0IArs4c6QAAAAtJREFUCB1jYGAAAAADAAFPSAqvAAAAAElFTkSuQmCC';
+			}
+
+			$alt = $image;
+		}
+
+		$attributes['src'] = $src;
+
+		if (!isset($attributes['alt'])) {
+			$attributes['alt'] = $alt;
+		}
+
+		if (isset($title) && !isset($attributes['title'])) {
+			$attributes['title'] = $title;
+		}
+
+		return sprintf('<img %s />', sly_Util_HTML::buildAttributeString($attributes, array('alt')));
 	}
 }
