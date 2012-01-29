@@ -188,4 +188,16 @@ class sly_Slice_Values {
 	public function getUrl($id, $params, $divider = '&amp;', $absolute = false, $secure = null) {
 		return $this->helper->getUrl($this->get($id, sly_Slice_Helper::CURRENT_ARTICLE), $params, $divider, $absolute, $secure);
 	}
+
+	/**
+	 * Get a URL to an article
+	 *
+	 * @param  string  $id
+	 * @param  array   $attributes
+	 * @param  boolean $forceUri
+	 * @return string
+	 */
+	public function getImageTag($id, array $attributes = array(), $forceUri = false) {
+		return $this->helper->getImageTag($this->get($id, ''), $attributes, $forceUri);
+	}
 }
