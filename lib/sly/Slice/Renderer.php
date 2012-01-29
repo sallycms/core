@@ -40,12 +40,11 @@ class sly_Slice_Renderer {
 	public function renderInput($dataIndex) {
 		$service  = sly_Service_Factory::getModuleService();
 		$filename = $service->getFolder().DIRECTORY_SEPARATOR.$service->getInputFilename($this->moduleName);
-		$values   = new sly_Slice_Values($this->values);
-		$helper   = new sly_Slice_Helper($values);
+		$helper   = new sly_Slice_Helper();
+		$values   = new sly_Slice_Values($this->values, $helper);
 		$form     = new sly_Slice_Form();
 
 		unset($service);
-
 		ob_start();
 
 		try {
@@ -67,14 +66,25 @@ class sly_Slice_Renderer {
 	}
 
 	public function renderOutput() {
-		$service                      = sly_Service_Factory::getModuleService();
-		$filenameHtuG50hNCdikAvf7CZ1F = $service->getFolder().DIRECTORY_SEPARATOR.$service->getOutputFilename($this->moduleName);
+		$service  = sly_Service_Factory::getModuleService();
+		$filename = $service->getFolder().DIRECTORY_SEPARATOR.$service->getOutputFilename($this->moduleName);
+		$helper   = new sly_Slice_Helper();
+		$values   = new sly_Slice_Values($this->values, $helper);
+
 		unset($service);
-		$values = new sly_Slice_Values($this->values);
 		ob_start();
-		include $filenameHtuG50hNCdikAvf7CZ1F;
-		$output = ob_get_clean();
-		$output = $this->replaceLinks($output);
+
+		try {
+			include $filename;
+
+			$output = ob_get_clean();
+			$output = $this->replaceLinks($output);
+		}
+		catch (Exception $e) {
+			ob_end_clean();
+			throw $e;
+		}
+
 		return $output;
 	}
 
