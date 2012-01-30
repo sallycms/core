@@ -8,7 +8,7 @@
  * http://www.opensource.org/licenses/mit-license.php
  */
 
-abstract class sly_App_Base {
+abstract class sly_App_Base implements sly_App_Interface {
 	public function initialize() {
 		// include addOns
 		sly_Core::loadAddons();
@@ -175,7 +175,6 @@ abstract class sly_App_Base {
 	}
 
 	abstract public function getControllerClassPrefix();
-	abstract public function getCurrentControllerName();
 
 	abstract protected function handleControllerError(Exception $e, $controller, $action);
 }
