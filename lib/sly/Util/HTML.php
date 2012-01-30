@@ -104,4 +104,42 @@ class sly_Util_HTML {
 	public static function concatValues(&$value, $key) {
 		$value = strtolower(trim($key)).'="'.sly_html(trim($value)).'"';
 	}
+
+	public static function getImageTag($image, array $attributes = array(), $forceUri = false) {
+		$base = sly_Core::isBackend() ? '../' : '';
+
+		if (is_string($image)) {
+			$medium = sly_Util_Medium::findByFilename($image);
+			if ($medium && $medium->exists()) $image = $medium;
+		}
+
+		if ($image instanceof sly_Model_Medium) {
+			$src   = $base.'data/mediapool/'.$image->getFilename();
+			$alt   = $image->getTitle();
+			$title = $image->getTitle();
+		}
+		else {
+			if ($forceUri) {
+				$src = $base.'data/mediapool/'.$image;
+			}
+			else {
+				// a transparent 1x1 sized PNG, 81byte in size
+				$src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAAXNSR0IArs4c6QAAAAtJREFUCB1jYGAAAAADAAFPSAqvAAAAAElFTkSuQmCC';
+			}
+
+			$alt = $image;
+		}
+
+		$attributes['src'] = $src;
+
+		if (!isset($attributes['alt'])) {
+			$attributes['alt'] = $alt;
+		}
+
+		if (isset($title) && !isset($attributes['title'])) {
+			$attributes['title'] = $title;
+		}
+
+		return sprintf('<img %s />', sly_Util_HTML::buildAttributeString($attributes, array('alt')));
+	}
 }

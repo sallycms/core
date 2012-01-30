@@ -14,6 +14,10 @@
  * @author zozi@webvariants.de
  */
 class sly_Util_Category {
+	const CURRENT_ARTICLE  = -1; ///< int
+	const START_ARTICLE    = -2; ///< int
+	const NOTFOUND_ARTICLE = -3; ///< int
+
 	/**
 	 * checks wheter a category exists or not
 	 *
@@ -33,12 +37,39 @@ class sly_Util_Category {
 	}
 
 	/**
-	 * @param  int $categoryId
-	 * @param  int $clang
+	 * @param  int   $articleId
+	 * @param  int   $clang
+	 * @param  mixed $default
 	 * @return sly_Model_Category
 	 */
-	public static function findById($categoryId, $clang = null) {
+	public static function findById($categoryId, $clang = null, $default = null) {
 		return sly_Service_Factory::getCategoryService()->findById($categoryId, $clang);
+
+		$clang   = $clang === null ? sly_Core::getCurrentClang() : (int) $clang;
+		$service = sly_Service_Factory::getCategoryService();
+
+		if (sly_Util_String::isInteger($categoryId)) {
+			$cat = $service->findById($categoryId, $clang);
+			if ($cat) return $cat;
+		}
+		else {
+			throw new UnexpectedValueException('Unexpected value "'.$categoryId.'" in findById().');
+		}
+
+		switch ($default) {
+			case self::CURRENT_ARTICLE:  $id = sly_Core::getCurrentArticleId();   break;
+			case self::START_ARTICLE:    $id = sly_Core::getSiteStartArticleId(); break;
+			case self::NOTFOUND_ARTICLE: $id = sly_Core::getNotFoundArticleId();  break;
+			// no default case by design
+		}
+
+		if (isset($id)) {
+			$cat = $service->findById($id, $clang);
+			if ($cat) return $cat;
+			throw new sly_Exception('Could not find a matching category, giving up.');
+		}
+
+		return $default;
 	}
 
 	/**
