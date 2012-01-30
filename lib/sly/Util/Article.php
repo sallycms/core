@@ -14,6 +14,10 @@
  * @author zozi@webvariants.de
  */
 class sly_Util_Article {
+	const CURRENT_ARTICLE  = -1; ///< int
+	const START_ARTICLE    = -2; ///< int
+	const NOTFOUND_ARTICLE = -3; ///< int
+
 	/**
 	 * checks wheter an article exists or not
 	 *
@@ -33,12 +37,36 @@ class sly_Util_Article {
 	}
 
 	/**
-	 * @param  int $articleId
-	 * @param  int $clang
+	 * @param  int   $articleId
+	 * @param  int   $clang
+	 * @param  mixed $default
 	 * @return sly_Model_Article
 	 */
-	public static function findById($articleId, $clang = null) {
-		return sly_Service_Factory::getArticleService()->findById($articleId, $clang);
+	public static function findById($articleId, $clang = null, $default = null) {
+		$service = sly_Service_Factory::getArticleService();
+
+		if (sly_Util_String::isInteger($articleId)) {
+			$article = $service->findById($articleId, $clang);
+			if ($article) return $article;
+		}
+		else {
+			throw new UnexpectedValueException('Unexpected value "'.$articleId.'" in findById().');
+		}
+
+		switch ($default) {
+			case self::CURRENT_ARTICLE:  $id = sly_Core::getCurrentArticleId();   break;
+			case self::START_ARTICLE:    $id = sly_Core::getSiteStartArticleId(); break;
+			case self::NOTFOUND_ARTICLE: $id = sly_Core::getNotFoundArticleId();  break;
+			// no default case by design
+		}
+
+		if (isset($id)) {
+			$article = $service->findById($id, $clang);
+			if ($article) return $article;
+			throw new sly_Exception('Could not find a matching article, giving up.');
+		}
+
+		return $default;
 	}
 
 	/**
@@ -108,8 +136,15 @@ class sly_Util_Article {
 		return $user->hasRight('article', 'editcontent', $articleId);
 	}
 
-	public static function getUrl($articleId, $clang = null, $params = array()) {
+	public static function getUrl($articleId, $clang = null, $params, $divider = '&amp;', $absolute = false, $secure = null) {
 		$article = self::findById($articleId, $clang);
-		return $article ? $article->getUrl($params) : '';
+
+		if (!$article) {
+			throw new UnexpectedValueException('Could not detect the URL target given by "'.$target.'" in getUrl().');
+		}
+
+		return $absolute
+			? sly_Util_HTTP::getAbsoluteUrl($article, $article->getClang(), $params, $divider, $secure)
+			: sly_Util_HTTP::getUrl($article, $article->getClang(), $params, $divider, $secure);
 	}
 }

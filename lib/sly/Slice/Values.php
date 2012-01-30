@@ -14,18 +14,15 @@
  * @author christoph@webvariants.de
  */
 class sly_Slice_Values {
-	private $data;    ///< array
-	private $helper;  ///< sly_Slice_Helper
+	private $data; ///< array
 
 	/**
 	 * Constructor
 	 *
-	 * @param  array $data               the slice data
-	 * @param  sly_Slice_Helper $helper  helper for resolving article/category identifiers
+	 * @param array $data  the slice data
 	 */
-	public function __construct(array $data, sly_Slice_Helper $helper) {
-		$this->data   = $data;
-		$this->helper = $helper;
+	public function __construct(array $data) {
+		$this->data = $data;
 	}
 
 	/**
@@ -161,7 +158,7 @@ class sly_Slice_Values {
 	 * @return sly_Model_Article
 	 */
 	public function getArticle($id, $default = null) {
-		return $this->helper->getArticle($this->get($id, null), $default);
+		return sly_Util_Article::findById($this->get($id, null), $default);
 	}
 
 	/**
@@ -172,7 +169,7 @@ class sly_Slice_Values {
 	 * @return sly_Model_Category
 	 */
 	public function getCategory($id, $default = null) {
-		return $this->helper->getCategory($this->get($id, null), $default);
+		return sly_Util_Category::findById($this->get($id, null), $default);
 	}
 
 	/**
@@ -186,7 +183,7 @@ class sly_Slice_Values {
 	 * @return string
 	 */
 	public function getUrl($id, $params, $divider = '&amp;', $absolute = false, $secure = null) {
-		return $this->helper->getUrl($this->get($id, sly_Slice_Helper::CURRENT_ARTICLE), $params, $divider, $absolute, $secure);
+		return sly_Util_Article::getUrl($this->get($id, sly_Slice_Helper::CURRENT_ARTICLE), $params, $divider, $absolute, $secure);
 	}
 
 	/**
@@ -198,6 +195,6 @@ class sly_Slice_Values {
 	 * @return string
 	 */
 	public function getImageTag($id, array $attributes = array(), $forceUri = false) {
-		return $this->helper->getImageTag($this->get($id, ''), $attributes, $forceUri);
+		return sly_Util_HTML::getImageTag($this->get($id, ''), $attributes, $forceUri);
 	}
 }

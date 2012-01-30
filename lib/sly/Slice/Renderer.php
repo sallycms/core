@@ -40,8 +40,7 @@ class sly_Slice_Renderer {
 	public function renderInput($dataIndex) {
 		$service  = sly_Service_Factory::getModuleService();
 		$filename = $service->getFolder().DIRECTORY_SEPARATOR.$service->getInputFilename($this->moduleName);
-		$helper   = new sly_Slice_Helper();
-		$values   = new sly_Slice_Values($this->values, $helper);
+		$values   = new sly_Slice_Values($this->values);
 		$form     = new sly_Slice_Form();
 
 		unset($service);
@@ -68,8 +67,7 @@ class sly_Slice_Renderer {
 	public function renderOutput() {
 		$service  = sly_Service_Factory::getModuleService();
 		$filename = $service->getFolder().DIRECTORY_SEPARATOR.$service->getOutputFilename($this->moduleName);
-		$helper   = new sly_Slice_Helper();
-		$values   = new sly_Slice_Values($this->values, $helper);
+		$values   = new sly_Slice_Values($this->values);
 
 		unset($service);
 		ob_start();
