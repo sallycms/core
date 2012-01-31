@@ -43,18 +43,11 @@ class sly_Util_Category {
 	 * @return sly_Model_Category
 	 */
 	public static function findById($categoryId, $clang = null, $default = null) {
-		return sly_Service_Factory::getCategoryService()->findById($categoryId, $clang);
+		$service    = sly_Service_Factory::getCategoryService();
+		$categoryId = (int) $categoryId;
+		$cat        = $service->findById($categoryId, $clang);
 
-		$clang   = $clang === null ? sly_Core::getCurrentClang() : (int) $clang;
-		$service = sly_Service_Factory::getCategoryService();
-
-		if (sly_Util_String::isInteger($categoryId)) {
-			$cat = $service->findById($categoryId, $clang);
-			if ($cat) return $cat;
-		}
-		else {
-			throw new UnexpectedValueException('Unexpected value "'.$categoryId.'" in findById().');
-		}
+		if ($cat) return $cat;
 
 		switch ($default) {
 			case self::CURRENT_ARTICLE:  $id = sly_Core::getCurrentArticleId();   break;
