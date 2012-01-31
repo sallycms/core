@@ -43,15 +43,11 @@ class sly_Util_Article {
 	 * @return sly_Model_Article
 	 */
 	public static function findById($articleId, $clang = null, $default = null) {
-		$service = sly_Service_Factory::getArticleService();
+		$service   = sly_Service_Factory::getArticleService();
+		$articleId = (int) $articleId;
+		$article   = $service->findById($articleId, $clang);
 
-		if (sly_Util_String::isInteger($articleId)) {
-			$article = $service->findById($articleId, $clang);
-			if ($article) return $article;
-		}
-		else {
-			throw new UnexpectedValueException('Unexpected value "'.$articleId.'" in findById().');
-		}
+		if ($article) return $article;
 
 		switch ($default) {
 			case self::CURRENT_ARTICLE:  $id = sly_Core::getCurrentArticleId();   break;
