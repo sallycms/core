@@ -14,8 +14,7 @@
  */
 abstract class sly_Service_AddOn_Base {
 	protected static $loaded = array(); ///< array  list of loaded addOns and plugins for depedency aware loading
-
-	private $loadInfo = array();
+	private static $loadInfo = array();
 
 	/**
 	 * @param  mixed $component
@@ -855,26 +854,27 @@ abstract class sly_Service_AddOn_Base {
 	}
 
 	public function loadComponents() {
-		$cache    = sly_Core::cache();
-		$prodMode = !sly_Core::isDeveloperMode();
-		$order    = $prodMode ? $cache->get('sly', 'componentorder') : null;
+		$cache         = sly_Core::cache();
+		$prodMode      = !sly_Core::isDeveloperMode();
+		$order         = $prodMode ? $cache->get('sly', 'componentorder') : null;
+		$addonService  = sly_Service_Factory::getAddOnService();
+		$pluginService = sly_Service_Factory::getPluginService();
 
 		// if there is no cache yet, we load all components the slow way
 		if (!is_array($order)) {
-			$pluginService = sly_Service_Factory::getPluginService();
-
 			// reset our helper to keep track of the component stati
-			$this->loadInfo = array();
+			self::$loadInfo = array();
 
-			foreach ($this->getRegisteredAddons() as $addonName) {
-				$this->load($addonName);
+			foreach ($addonService->getRegisteredAddons() as $addonName) {
+				$addonService->load($addonName);
+
 				foreach ($pluginService->getRegisteredPlugins($addonName) as $pluginName) {
 					$pluginService->load(array($addonName, $pluginName));
 				}
 			}
 
-			// and now we have a nice list in $this->loadInfo that we can cache
-			if ($prodMode) $cache->set('sly', 'componentorder', $this->loadInfo);
+			// and now we have a nice list in self::$loadInfo that we can cache
+			$cache->set('sly', 'componentorder', self::$loadInfo);
 		}
 
 		// yay, a cache, let's skip the whole dependency stuff
@@ -882,13 +882,15 @@ abstract class sly_Service_AddOn_Base {
 			foreach ($order as $name => $info) {
 				list($component, $installed, $activated) = $info;
 
+				$service = is_array($component) ? $pluginService : $addonService;
+
 				// load component config files
-				$this->loadConfig($component, $installed, $activated);
+				$service->loadConfig($component, $installed, $activated);
 
 				// init the component
 				if ($activated) {
-					$configFile = $this->baseFolder($component).'config.inc.php';
-					$this->req($configFile);
+					$configFile = $service->baseFolder($component).'config.inc.php';
+					$service->req($configFile);
 
 					self::$loaded[$name] = $component;
 				}
@@ -919,7 +921,7 @@ abstract class sly_Service_AddOn_Base {
 
 		if ($installed || $force) {
 			$this->loadConfig($component, $installed, $activated);
-			$this->loadInfo[$compAsString] = array($component, $installed, $activated);
+			self::$loadInfo[$compAsString] = array($component, $installed, $activated);
 
 			// TODO: remove this magic in next (0.7) release
 			$page = $this->getProperty($component, 'page', '');
