@@ -208,7 +208,8 @@ function t($key) {
  * @return string       the found translation or a string like '[translate:X]' (always XHTML-safe)
  */
 function ht($index) {
-	return sly_html(t($index));
+	$args = func_get_args();
+	return sly_html(call_user_func_array('t', $args));
 }
 
 /**
