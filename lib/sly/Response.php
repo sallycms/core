@@ -186,6 +186,12 @@ class sly_Response {
 			}
 		}
 
+		// RFC 2616 said every not explicitly keep-alive Connection should receice a Connection: close,
+		// but at least Apache Websever breaks this, if the client sends just nothing (which is also not compliant).
+		if (empty($_SERVER['HTTP_CONNECTION']) || strtolower($_SERVER['HTTP_CONNECTION']) !== 'keep-alive') {
+			$this->setHeader('Connection', 'close');
+		}
+
 		$this->sendHeaders();
 		$this->sendContent();
 
