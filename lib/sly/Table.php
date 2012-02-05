@@ -282,9 +282,10 @@ class sly_Table extends sly_Viewable {
 	 * @param  string $tableName
 	 * @param  string $defaultColumn
 	 * @param  array  $enabledColumns
+	 * @param  string $defaultDirection
 	 * @return array
 	 */
-	public static function getSortingParameters($tableName, $defaultColumn, $enabledColumns = array()) {
+	public static function getSortingParameters($tableName, $defaultColumn, $enabledColumns = array(), $defaultDirection = 'asc') {
 		// support the old interface: get($defaultColumn, $enabledColumns)
 		if (empty($enabledColumns) && is_array($defaultColumn)) {
 			$enabledColumns = $defaultColumn;
@@ -293,7 +294,7 @@ class sly_Table extends sly_Viewable {
 		}
 
 		$sortby    = sly_get($tableName.'_sortby', 'string', $defaultColumn);
-		$direction = strtolower(sly_get($tableName.'_direction', 'string', 'asc')) == 'desc' ? 'DESC' : 'ASC';
+		$direction = strtolower(sly_get($tableName.'_direction', 'string', $defaultDirection)) === 'desc' ? 'DESC' : 'ASC';
 
 		if (!in_array($sortby, $enabledColumns)) {
 			$sortby = $defaultColumn;
