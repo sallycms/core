@@ -77,21 +77,23 @@ abstract class sly_Controller_Base {
 	 * This method renders a view, making all keys in $params available as
 	 * variables.
 	 *
-	 * @param  string $filename  the filename to include, relative to the view folder
-	 * @param  array  $params    additional parameters (become variables)
-	 * @return string            the generated output
+	 * @param  string  $filename      the filename to include, relative to the view folder
+	 * @param  array   $params        additional parameters (become variables)
+	 * @param  boolean $returnOutput  set to false to not use an output buffer
+	 * @return string                 the generated output if $returnOutput, else null
 	 */
-	protected function render($filename, array $params = array()) {
-		// make sure keys in $params won't overwrite $filename and $params
+	protected function render($filename, array $params = array(), $returnOutput = true) {
+		// make sure keys in $params won't overwrite our variables
 		$filenameHtuG50hNCdikAvf7CZ1F = $filename;
 		$paramsHtuG50hNCdikAvf7CZ1F   = $params;
-		unset($filename);
-		unset($params);
+		$bufferHtuG50hNCdikAvf7CZ1F   = $returnOutput;
+
+		unset($filename, $params, $returnOutput);
 		extract($paramsHtuG50hNCdikAvf7CZ1F);
 
-		ob_start();
+		if ($bufferHtuG50hNCdikAvf7CZ1F) ob_start();
 		include $this->getViewFolder().$filenameHtuG50hNCdikAvf7CZ1F;
-		return ob_get_clean();
+		if ($bufferHtuG50hNCdikAvf7CZ1F) return ob_get_clean();
 	}
 
 	/**
