@@ -26,8 +26,9 @@ abstract class sly_Form_Input_Boolean extends sly_Form_Input_Base {
 	 * @param array  $value        the current text
 	 * @param string $description  text to show right next to the checkbox
 	 * @param string $id           optional ID (if not given, the name is used)
+	 * @param string $checked      toggles the checked attribute
 	 */
-	public function __construct($name, $label, $value, $description = 'ja', $id = null) {
+	public function __construct($name, $label, $value, $description = 'ja', $id = null, $checked = false) {
 		parent::__construct($name, $label, $value, $id);
 
 		$this->description = $description;
@@ -35,6 +36,7 @@ abstract class sly_Form_Input_Boolean extends sly_Form_Input_Base {
 
 		// remove the sly-form-text class
 		$this->setAttribute('class', '');
+		$this->setChecked($checked);
 	}
 
 	/**

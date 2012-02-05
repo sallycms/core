@@ -28,9 +28,10 @@ class sly_Form_Input_Radio extends sly_Form_Input_Boolean {
 	 * @param array  $value        the current text
 	 * @param string $description  text to show right next to the checkbox
 	 * @param string $id           optional ID (if not given, the name is used)
+	 * @param string $checked      toggles the checked attribute
 	 */
-	public function __construct($name, $label, $value, $description = 'ja', $id = null) {
-		parent::__construct($name, $label, $value, $description, $id);
+	public function __construct($name, $label, $value, $description = 'ja', $id = null, $checked = false) {
+		parent::__construct($name, $label, $value, $description, $id, $checked);
 
 		$this->setAttribute('type', 'radio');
 		$this->addOuterClass('sly-form-radio-row');
