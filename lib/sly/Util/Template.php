@@ -25,7 +25,7 @@ class sly_Util_Template {
 		try {
 			sly_Service_Factory::getTemplateService()->includeFile($name, $params);
 		}
-		catch(sly_Service_Template_Exception $e) {
+		catch (sly_Service_Template_Exception $e) {
 			print $e->getMessage();
 		}
 	}
