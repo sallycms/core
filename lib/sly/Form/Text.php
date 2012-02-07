@@ -34,8 +34,8 @@ class sly_Form_Text extends sly_Form_ElementBase implements sly_Form_IElement {
 		$this->content = $text;
 		$this->isHTML  = false;
 
-		$this->setAttribute('style', 'line-height:21px');
 		$this->addOuterClass('sly-form-read-row');
+		$this->addClass('sly-form-read');
 	}
 
 	/**
