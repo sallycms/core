@@ -65,7 +65,7 @@ class sly_Router_Base implements sly_Router_Interface {
 	}
 
 	public function getAction() {
-		return $this->get('controller', 'index');
+		return $this->get('action', 'index');
 	}
 
 	public function get($key, $default = null) {
