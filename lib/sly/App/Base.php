@@ -154,10 +154,22 @@ abstract class sly_App_Base implements sly_App_Interface {
 		static $instances = array();
 
 		if (!isset($instances[$className])) {
+			if (!class_exists($className)) {
+				throw new sly_Controller_Exception(t('unknown_controller', $className), 404);
+			}
+
+			if (class_exists('ReflectionClass')) {
+				$reflector = new ReflectionClass($className);
+
+				if ($reflector->isAbstract()) {
+					throw new sly_Controller_Exception(t('unknown_controller', $className), 404);
+				}
+			}
+
 			$instance = new $className();
 
 			if (!($instance instanceof sly_Controller_Interface)) {
-				throw new sly_Controller_Exception(t('does_not_implement', get_class($instance), 'sly_Controller_Interface'), 500);
+				throw new sly_Controller_Exception(t('does_not_implement', $className, 'sly_Controller_Interface'), 404);
 			}
 
 			$instances[$className] = $instance;

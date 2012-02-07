@@ -132,7 +132,7 @@ class sly_Util_Article {
 		return $user->hasRight('article', 'editcontent', $articleId);
 	}
 
-	public static function getUrl($articleId, $clang = null, $params, $divider = '&amp;', $absolute = false, $secure = null) {
+	public static function getUrl($articleId, $clang = null, $params = array(), $divider = '&amp;', $absolute = false, $secure = null) {
 		$article = self::findById($articleId, $clang);
 
 		if (!$article) {
