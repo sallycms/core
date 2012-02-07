@@ -1,4 +1,4 @@
--- Sally Database Dump Version 0.6
+-- Sally Database Dump Version 0.7
 -- Prefix sly_
 
 CREATE TABLE sly_article (id NUMBER(10) NOT NULL, clang NUMBER(10) NOT NULL, re_id NUMBER(10) NOT NULL, name VARCHAR2(255) NOT NULL, catname VARCHAR2(255) NOT NULL, catpos NUMBER(10) NOT NULL, attributes TEXT NOT NULL, startpage NUMBER(1) NOT NULL, pos NUMBER(10) NOT NULL, path VARCHAR2(255) NOT NULL, status NUMBER(10) NOT NULL, type VARCHAR2(64) NOT NULL, createdate NUMBER(10) NOT NULL, updatedate NUMBER(10) NOT NULL, createuser VARCHAR2(255) NOT NULL, updateuser VARCHAR2(255) NOT NULL, revision NUMBER(10) DEFAULT 0 NOT NULL, PRIMARY KEY(id, clang));
