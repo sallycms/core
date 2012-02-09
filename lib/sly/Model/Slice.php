@@ -110,10 +110,10 @@ class sly_Model_Slice extends sly_Model_Base_Id {
 	public function getInput() {
 		$service  = sly_Service_Factory::getModuleService();
 		$filename = $service->getInputFilename($this->getModule());
-		$output   = $service->getContent($filename);
-		$output   = $this->replacePseudoConstants($output);
+		$input    = $service->getContent($filename);
+		$input    = $this->replacePseudoConstants($input);
 
-		return $output;
+		return $input;
 	}
 
 	/**
