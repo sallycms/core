@@ -35,11 +35,11 @@ class sly_Util_Requirements {
 		if (function_exists('mysqli_get_client_version')) {
 			$versionNum = mysqli_get_client_version();
 			$version    = sprintf('%d.%d.%d', floor($versionNum / 10000), floor($versionNum / 100) % 100, $versionNum % 10000);
-			return $this->result($version.' (MySQLi)', $versionNum >= 50000 ? self::OK : self::FAILED);
+			return $this->result($version.' (MySQLi)', $versionNum >= 50100 ? self::OK : ($versionNum >= 50000 ? self::WARNING : self::FAILED));
 		}
 		elseif (function_exists('mysql_get_client_info')) {
 			$version = mysql_get_client_info();
-			return $this->result($version.' (MySQL)', version_compare($version, '5.0', '>=') ? self::OK : self::FAILED);
+			return $this->result($version.' (MySQL)', version_compare($version, '5.1', '>=') ? self::OK : self::FAILED);
 		}
 		else {
 			return $this->failed(t('no_mysql_mysqli'));
