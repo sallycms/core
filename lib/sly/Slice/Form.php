@@ -30,7 +30,7 @@ class sly_Slice_Form extends sly_Form {
 		}
 	}
 
-	public function render($dataIndex = false) {
+	public function render($dataIndex = null) {
 		if (is_string($dataIndex)) {
 			$this->addDataIndex($dataIndex);
 		}
