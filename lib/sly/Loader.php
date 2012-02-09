@@ -145,7 +145,14 @@ class sly_Loader {
 				$shortClass = $className;
 			}
 
-			$file     = str_replace('_', DIRECTORY_SEPARATOR, $shortClass).'.php';
+			$file = str_replace('_', DIRECTORY_SEPARATOR, $shortClass).'.php';
+
+			// allow class names to be prefixed with a single underscore
+
+			if ($file[0] === DIRECTORY_SEPARATOR) {
+				$file[0] = '_';
+			}
+
 			$fullPath = $path.DIRECTORY_SEPARATOR.$file;
 
 			// file_exists + !is_dir is faster than calling is_file and since we
