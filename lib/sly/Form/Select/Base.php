@@ -58,10 +58,12 @@ abstract class sly_Form_Select_Base extends sly_Form_ElementBase {
 	 *
 	 * Use this method to completely replace all values with a new list.
 	 *
-	 * @param array $values  the new list
+	 * @param  array $values         the new list
+	 * @return sly_Form_Select_Base  the object itself
 	 */
 	public function setValues(array $values) {
 		$this->values = $values;
+		return $this;
 	}
 
 	/**
@@ -70,11 +72,13 @@ abstract class sly_Form_Select_Base extends sly_Form_ElementBase {
 	 * This method will add a new value or overwrite an existing one (keys will
 	 * be unique).
 	 *
-	 * @param string $key    the key
-	 * @param string $value  the value
+	 * @param  string $key           the key
+	 * @param  string $value         the value
+	 * @return sly_Form_Select_Base  the object itself
 	 */
 	public function addValue($key, $value) {
 		$this->values[$key] = $value;
+		return $this;
 	}
 
 	/**
@@ -82,10 +86,12 @@ abstract class sly_Form_Select_Base extends sly_Form_ElementBase {
 	 *
 	 * This method will remove a value, identified by its key.
 	 *
-	 * @param string $key  the key to remove
+	 * @param  string $key           the key to remove
+	 * @return sly_Form_Select_Base  the object itself
 	 */
 	public function removeValue($key) {
 		unset($this->values[$key]);
+		return $this;
 	}
 
 	/**
@@ -109,7 +115,7 @@ abstract class sly_Form_Select_Base extends sly_Form_ElementBase {
 	/**
 	 * Comfort wrapper for setting the value
 	 *
-	 * @return mixed $selected  the selected element (scalar or array)
+	 * @return sly_Form_Select_Base  the object itself
 	 */
 	public function setSelected($selected) {
 		return $this->setAttribute('value', $selected);

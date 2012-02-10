@@ -41,10 +41,12 @@ class sly_Form_Text extends sly_Form_ElementBase implements sly_Form_IElement {
 	/**
 	 * Sets the text
 	 *
-	 * @param string $text  the new text
+	 * @param  string $text   the new text
+	 * @return sly_Form_Text  the object itself
 	 */
 	public function setText($text) {
 		$this->text = $text;
+		return $this;
 	}
 
 	/**
@@ -62,10 +64,12 @@ class sly_Form_Text extends sly_Form_ElementBase implements sly_Form_IElement {
 	/**
 	 * Controls the XHTML conversion
 	 *
-	 * @param boolean $isHTML  set this to false to disabled the sly_html() in render()
+	 * @param  boolean $isHTML  set this to false to disabled the sly_html() in render()
+	 * @return sly_Form_Text    the object itself
 	 */
 	public function setIsHTML($isHTML) {
 		$this->isHTML = (boolean) $isHTML;
+		return $this;
 	}
 
 	/**

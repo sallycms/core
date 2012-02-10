@@ -40,10 +40,12 @@ class sly_Form_Container extends sly_Form_ElementBase implements sly_Form_IEleme
 	/**
 	 * Sets the content
 	 *
-	 * @param string $content  the new content
+	 * @param  string $content     the new content
+	 * @return sly_Form_Container  the object itself
 	 */
 	public function setContent($content) {
 		$this->content = $content;
+		return $this;
 	}
 
 	/**

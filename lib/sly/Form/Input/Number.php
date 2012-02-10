@@ -42,28 +42,34 @@ class sly_Form_Input_Number extends sly_Form_Input_Base {
 	/**
 	 * Sets the minimum value
 	 *
-	 * @param int $min  the new value
+	 * @param  int $min               the new value
+	 * @return sly_Form_Input_Number  the object itself
 	 */
 	public function setMin($min) {
 		$this->min = (int) $min;
+		return $this;
 	}
 
 	/**
 	 * Sets the maximum value
 	 *
-	 * @param int $max  the new value
+	 * @param  int $max               the new value
+	 * @return sly_Form_Input_Number  the object itself
 	 */
 	public function setMax($max) {
 		$this->max = (int) $max;
+		return $this;
 	}
 
 	/**
 	 * Sets the step value
 	 *
-	 * @param int $step  the new value
+	 * @param  int $step              the new value
+	 * @return sly_Form_Input_Number  the object itself
 	 */
 	public function setStep($step) {
 		$this->step = (int) $step;
+		return $this;
 	}
 
 	/**
@@ -71,14 +77,17 @@ class sly_Form_Input_Number extends sly_Form_Input_Base {
 	 *
 	 * This method will call setMin(), setMax() and setStep() in succession.
 	 *
-	 * @param int $min   the new min value
-	 * @param int $max   the new max value
-	 * @param int $step  the new step value
+	 * @param  int $min               the new min value
+	 * @param  int $max               the new max value
+	 * @param  int $step              the new step value
+	 * @return sly_Form_Input_Number  the object itself
 	 */
 	public function setBounds($min, $max, $step = 1) {
 		$this->setMin($min);
 		$this->setMax($max);
 		$this->setStep($step);
+
+		return $this;
 	}
 
 	/**
