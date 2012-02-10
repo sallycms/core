@@ -172,7 +172,10 @@ class sly_Service_Template extends sly_Service_DevelopBase {
 	 * @return string        The templates filename
 	 */
 	public function getFilename($name) {
-		return $this->get($name, 'filename');
+		if (!$this->exists($name)) {
+			throw new sly_Exception("Template '$name' does not exist.");
+		}
+		return $this->filterByCondition($name, $this->getFileType());
 	}
 
 	/**
