@@ -8,6 +8,10 @@
  * http://www.opensource.org/licenses/mit-license.php
  */
 
+/**
+ * @author christoph@webvariants.de
+ * @since  0.6
+ */
 class sly_Router_Base implements sly_Router_Interface {
 	protected $routes;
 	protected $match;
