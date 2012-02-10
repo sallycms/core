@@ -49,10 +49,12 @@ class sly_Form_DateTime extends sly_Form_ElementBase implements sly_Form_IElemen
 	/**
 	 * Enables or disables the time picker
 	 *
-	 * @param boolean $withTime  true or false
+	 * @param  boolean $withTime  true or false
+	 * @return sly_Form_DateTime  the object itself
 	 */
 	public function setWithTime($withTime = true) {
 		$this->withTime = (boolean) $withTime;
+		return $this;
 	}
 
 	/**

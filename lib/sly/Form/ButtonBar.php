@@ -88,16 +88,21 @@ class sly_Form_ButtonBar extends sly_Form_ElementBase implements sly_Form_IEleme
 	/**
 	 * Adds a new button
 	 *
-	 * @param sly_Form_Input_Button $button  the new button to add
+	 * @param  sly_Form_Input_Button $button  the new button to add
+	 * @return sly_Form_ButtonBar             the object itself
 	 */
 	public function addButton(sly_Form_Input_Button $button) {
 		$this->buttons[] = $button;
+		return $this;
 	}
 
 	/**
 	 * Clears the list of buttons
+	 *
+	 * @return sly_Form_ButtonBar  the object itself
 	 */
 	public function clearButtons() {
 		$this->buttons = array();
+		return $this;
 	}
 }

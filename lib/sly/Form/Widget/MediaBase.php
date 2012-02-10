@@ -21,10 +21,17 @@ abstract class sly_Form_Widget_MediaBase extends sly_Form_ElementBase {
 	protected $filetypes  = array();
 	protected $categories = array();
 
+	/**
+	 * @return sly_Form_Widget_MediaBase  the widget itself
+	 */
 	public function filterByCategories(array $cats, $recursive = false) {
 		foreach ($cats as $cat) $this->filterByCategory($cat, $recursive);
+		return $this;
 	}
 
+	/**
+	 * @return sly_Form_Widget_MediaBase  the widget itself
+	 */
 	public function filterByCategory($cat, $recursive = false) {
 		$catID = $cat instanceof sly_Model_MediaCategory ? $cat->getId() : (int) $cat;
 
@@ -44,23 +51,34 @@ abstract class sly_Form_Widget_MediaBase extends sly_Form_ElementBase {
 			$this->categories = array_unique($this->categories);
 		}
 
-		return $this->categories;
+		return $this;
 	}
 
+	/**
+	 * @return sly_Form_Widget_MediaBase  the widget itself
+	 */
 	public function filterByFiletypes(array $types) {
 		foreach ($types as $type) {
 			$this->filetypes[] = sly_Util_Mime::getType('tmp.'.ltrim($type, '.'));
 		}
 
 		$this->filetypes = array_unique($this->filetypes);
-		return $this->filetypes;
+		return $this;
 	}
 
+	/**
+	 * @return sly_Form_Widget_MediaBase  the widget itself
+	 */
 	public function clearCategoryFilter() {
 		$this->categories = array();
+		return $this;
 	}
 
+	/**
+	 * @return sly_Form_Widget_MediaBase  the widget itself
+	 */
 	public function clearFiletypeFilter() {
 		$this->filetypes = array();
+		return $this;
 	}
 }
