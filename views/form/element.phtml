@@ -8,9 +8,16 @@
  * http://www.opensource.org/licenses/mit-license.php
  */
 
+if ($element->isHelpTextHTML()) {
+	$help = $element->getHelpText();
+}
+else {
+	$help = nl2br(sly_translate($element->getHelpText(), true));
+}
+
 $char        = chr(97 + $column);
 $outerClass  = array('sly-form-col-'.$char, $element->getOuterClass());
-$help        = $element->getHelpText() ? '<span class="sly-form-helptext">'.nl2br(sly_translate($element->getHelpText(), true)).'</span>' : '';
+$help        = $element->getHelpText() ? '<span class="sly-form-helptext">'.$help.'</span>' : '';
 $isContainer = $element->isContainer();
 $label       = $element->getLabel();
 $label       = empty($label) ? '&nbsp;' : sly_translate($label, true).':';
