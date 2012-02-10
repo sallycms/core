@@ -17,12 +17,13 @@
  * @author  Christoph
  */
 abstract class sly_Form_ElementBase extends sly_Viewable {
-	protected $label;         ///< string
-	protected $attributes;    ///< array
-	protected $helpText;      ///< string
-	protected $outerClass;    ///< string
-	protected $formRowClass;  ///< string
-	protected $multilingual;  ///< boolean
+	protected $label;          ///< string
+	protected $attributes;     ///< array
+	protected $helpText;       ///< string
+	protected $outerClass;     ///< string
+	protected $formRowClass;   ///< string
+	protected $multilingual;   ///< boolean
+	protected $helpTextIsHtml; ///< boolean
 
 	/**
 	 * Constructor
@@ -33,11 +34,12 @@ abstract class sly_Form_ElementBase extends sly_Viewable {
 	 * @param string  $id     optional ID (if it should differ from $name)
 	 */
 	public function __construct($name, $label, $value, $id = null) {
-		$this->attributes   = array();
-		$this->label        = $label;
-		$this->outerClass   = '';
-		$this->formRowClass = '';
-		$this->multilingual = false;
+		$this->attributes     = array();
+		$this->label          = $label;
+		$this->outerClass     = '';
+		$this->formRowClass   = '';
+		$this->multilingual   = false;
+		$this->helpTextIsHtml = false;
 
 		$this->setAttribute('name',  $name);
 		$this->setAttribute('value', $value);
@@ -182,6 +184,22 @@ abstract class sly_Form_ElementBase extends sly_Viewable {
 	 */
 	public function setHelpText($helpText) {
 		$this->helpText = $helpText;
+	}
+
+	/**
+	 * Toggle whether or not the helptext may contain HTML
+	 *
+	 * @param boolean $flag  true to allow HTML, else false
+	 */
+	public function setHelpTextIsHTML($flag) {
+		$this->helpTextIsHtml = (boolean) $flag;
+	}
+
+	/**
+	 * @return boolean
+	 */
+	public function isHelpTextHTML() {
+		return $this->helpTextIsHtml;
 	}
 
 	/**
