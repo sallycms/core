@@ -55,7 +55,7 @@ class sly_Util_HTTP {
 		$url = self::getUrl($targetArticle, $clang, $parameters, $divider, null);
 
 		// did we already get an absolute URL (cross domain realurl implementations)?
-		if (!preg_match('#^[a-z+]://#', $url)) {
+		if (!preg_match('#^[a-z]+://#', $url)) {
 			if ($url[0] === '/') {
 				$url = self::getBaseUrl(false).$url;
 			}
