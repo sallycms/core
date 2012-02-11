@@ -64,7 +64,7 @@ class sly_Slice_Renderer {
 		}
 	}
 
-	public function renderOutput() {
+	public function renderOutput(sly_Model_ISlice $slice) {
 		$service  = sly_Service_Factory::getModuleService();
 		$filename = $service->getFolder().DIRECTORY_SEPARATOR.$service->getOutputFilename($this->moduleName);
 		$values   = new sly_Slice_Values($this->values);
