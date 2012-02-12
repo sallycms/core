@@ -9,7 +9,6 @@
  */
 
 /**
- * @defgroup redaxo        REDAXO Legacy-API
  * @defgroup authorisation Authorisation
  * @defgroup cache         Caches
  * @defgroup controller    Controller
@@ -141,6 +140,9 @@ function sly_merge($array1, $array2) {
  * @return array               das resultierende Array
  */
 function sly_arrayReplace($array, $needle, $replacement) {
+	// prevent endless loop
+	if ($needle == $replacement) return $array;
+
 	$i = array_search($needle, $array);
 	if ($i === false) return $array;
 	$array[$i] = $replacement;
