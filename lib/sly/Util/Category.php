@@ -101,7 +101,7 @@ class sly_Util_Category {
 				$path = '|%';
 			}
 			$query  = sly_DB_Persistence::getInstance();
-			$prefix = sly_Core::config()->get('DATABASE/TABLE_PREFIX');
+			$prefix = sly_Core::getTablePrefix();
 			$query->query('SELECT DISTINCT id FROM '.$prefix.'article WHERE path LIKE ?', array($path));
 			foreach($query as $row) {
 				if(sly_Util_Article::canEditContent($user, $row['id'])) {

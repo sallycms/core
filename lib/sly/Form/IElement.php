@@ -26,7 +26,8 @@ interface sly_Form_IElement {
 	 * This method will add a new CSS class to the element. Classes are
 	 * automatically made unique.
 	 *
-	 * @param string $className  the CSS class
+	 * @param  string $className  the CSS class
+	 * @return sly_Form_IElement  the object itself
 	 */
 	public function addClass($className);
 
@@ -45,16 +46,17 @@ interface sly_Form_IElement {
 	 * This method will add a new attribute, if it's allowed or the name begins
 	 * with "data-" (generic HTML5 attribute).
 	 *
-	 * @param  string $name   the attribute's name
-	 * @param  mixed  $value  the new value
-	 * @return boolean        true if the attribute is allowed, else false
+	 * @param  string $name       the attribute's name
+	 * @param  mixed  $value      the new value
+	 * @return sly_Form_IElement  the object itself
 	 */
 	public function setAttribute($name, $value);
 
 	/**
 	 * Removes an attribute
 	 *
-	 * @param string $name  the attribute's name
+	 * @param  string $name       the attribute's name
+	 * @return sly_Form_IElement  the object itself
 	 */
 	public function removeAttribute($name);
 
@@ -64,7 +66,8 @@ interface sly_Form_IElement {
 	 * This method will add a new CSS class to the element. Classes are
 	 * automatically made unique.
 	 *
-	 * @param string $className  the CSS class
+	 * @param  string $className  the CSS class
+	 * @return sly_Form_IElement  the object itself
 	 */
 	public function addOuterClass($className);
 

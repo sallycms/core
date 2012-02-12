@@ -17,12 +17,13 @@
  * @author  Christoph
  */
 abstract class sly_Form_ElementBase extends sly_Viewable {
-	protected $label;         ///< string
-	protected $attributes;    ///< array
-	protected $helpText;      ///< string
-	protected $outerClass;    ///< string
-	protected $formRowClass;  ///< string
-	protected $multilingual;  ///< boolean
+	protected $label;          ///< string
+	protected $attributes;     ///< array
+	protected $helpText;       ///< string
+	protected $outerClass;     ///< string
+	protected $formRowClass;   ///< string
+	protected $multilingual;   ///< boolean
+	protected $helpTextIsHtml; ///< boolean
 
 	/**
 	 * Constructor
@@ -33,11 +34,12 @@ abstract class sly_Form_ElementBase extends sly_Viewable {
 	 * @param string  $id     optional ID (if it should differ from $name)
 	 */
 	public function __construct($name, $label, $value, $id = null) {
-		$this->attributes   = array();
-		$this->label        = $label;
-		$this->outerClass   = '';
-		$this->formRowClass = '';
-		$this->multilingual = false;
+		$this->attributes     = array();
+		$this->label          = $label;
+		$this->outerClass     = '';
+		$this->formRowClass   = '';
+		$this->multilingual   = false;
+		$this->helpTextIsHtml = false;
 
 		$this->setAttribute('name',  $name);
 		$this->setAttribute('value', $value);
@@ -71,20 +73,24 @@ abstract class sly_Form_ElementBase extends sly_Viewable {
 	/**
 	 * Sets an attribute
 	 *
-	 * @param  string $name   the attribute's name
-	 * @param  mixed  $value  the new value
+	 * @param  string $name          the attribute's name
+	 * @param  mixed  $value         the new value
+	 * @return sly_Form_ElementBase  the object itself
 	 */
 	public function setAttribute($name, $value) {
 		$this->attributes[$name] = $value;
+		return $this;
 	}
 
 	/**
 	 * Removes an attribute
 	 *
-	 * @param string $name  the attribute's name
+	 * @param  string $name          the attribute's name
+	 * @return sly_Form_ElementBase  the object itself
 	 */
 	public function removeAttribute($name) {
 		unset($this->attributes[$name]);
+		return $this;
 	}
 
 	/**
@@ -93,21 +99,27 @@ abstract class sly_Form_ElementBase extends sly_Viewable {
 	 * This method will add a new CSS class to the element. Classes are
 	 * automatically made unique.
 	 *
-	 * @param string $className  the CSS class
+	 * @param  string $className     the CSS class
+	 * @return sly_Form_ElementBase  the object itself
 	 */
 	public function addClass($className) {
 		$newClasses = $this->addClassHelper($className, $this->getAttribute('class'));
 		$this->setAttribute('class', $newClasses);
+
+		return $this;
 	}
 
 	/**
 	 * Removes a CSS class
 	 *
-	 * @param string $className  the CSS class
+	 * @param  string $className     the CSS class
+	 * @return sly_Form_ElementBase  the object itself
 	 */
 	public function removeClass($className) {
 		$newClasses = $this->removeClassHelper($className, $this->getAttribute('class'));
 		$this->setAttribute('class', $newClasses);
+
+		return $this;
 	}
 
 	/**
@@ -116,7 +128,8 @@ abstract class sly_Form_ElementBase extends sly_Viewable {
 	 * This method will add a new CSS style to the element. Styles are
 	 * automatically made unique.
 	 *
-	 * @param string $style  the CSS style
+	 * @param  string $style         the CSS style
+	 * @return sly_Form_ElementBase  the object itself
 	 */
 	public function addStyle($style) {
 		$styles = strval($this->getAttribute('style'));
@@ -126,7 +139,7 @@ abstract class sly_Form_ElementBase extends sly_Viewable {
 			$styles[] = $style;
 		}
 
-		$this->setAttribute('style', implode(' ', array_unique($styles)));
+		return $this->setAttribute('style', implode(' ', array_unique($styles)));
 	}
 
 	/**
@@ -153,7 +166,8 @@ abstract class sly_Form_ElementBase extends sly_Viewable {
 	 *
 	 * This method is just a wrapper for setting/removing the disabled attribute.
 	 *
-	 * @param boolean $disabled  true to disable the element, else false
+	 * @param  boolean $disabled     true to disable the element, else false
+	 * @return sly_Form_ElementBase  the object itself
 	 */
 	public function setDisabled($disabled = true) {
 		if ($disabled) $this->setAttribute('disabled', 'disabled');
@@ -165,11 +179,12 @@ abstract class sly_Form_ElementBase extends sly_Viewable {
 	 *
 	 * This method is just a wrapper for setting/removing the required attribute.
 	 *
-	 * @param boolean $required  true to require a value, else false
+	 * @param  boolean $required     true to require a value, else false
+	 * @return sly_Form_ElementBase  the object itself
 	 */
 	public function setRequired($required = true) {
-		if ($required) $this->setAttribute('required', 'required');
-		else $this->removeAttribute('required');
+		if ($required) return $this->setAttribute('required', 'required');
+		else return $this->removeAttribute('required');
 	}
 
 	/**
@@ -178,10 +193,30 @@ abstract class sly_Form_ElementBase extends sly_Viewable {
 	 * The help text will be displayed below the element in a smaller font. HTML
 	 * is not allowed.
 	 *
-	 * @param string $helpText  the new help text
+	 * @param  string $helpText      the new help text
+	 * @return sly_Form_ElementBase  the object itself
 	 */
 	public function setHelpText($helpText) {
 		$this->helpText = $helpText;
+		return $this;
+	}
+
+	/**
+	 * Toggle whether or not the helptext may contain HTML
+	 *
+	 * @param  boolean $flag         true to allow HTML, else false
+	 * @return sly_Form_ElementBase  the object itself
+	 */
+	public function setHelpTextIsHTML($flag) {
+		$this->helpTextIsHtml = (boolean) $flag;
+		return $this;
+	}
+
+	/**
+	 * @return boolean
+	 */
+	public function isHelpTextHTML() {
+		return $this->helpTextIsHtml;
 	}
 
 	/**
@@ -190,10 +225,12 @@ abstract class sly_Form_ElementBase extends sly_Viewable {
 	 * The label will be displayed left to the element. HTML is not allowed. Use
 	 * Spaces to indent the label (leading spaces will be converted to &nbsp;).
 	 *
-	 * @param string $label  the new label
+	 * @param  string $label         the new label
+	 * @return sly_Form_ElementBase  the object itself
 	 */
 	public function setLabel($label) {
 		$this->label = $label;
+		return $this;
 	}
 
 	/**
@@ -254,11 +291,11 @@ abstract class sly_Form_ElementBase extends sly_Viewable {
 	 * value).
 	 *
 	 * @param  boolean $multilingual  the new status
-	 * @return boolean                the new status
+	 * @return sly_Form_ElementBase   the object itself
 	 */
 	public function setMultilingual($multilingual = true) {
 		$this->multilingual = (boolean) $multilingual;
-		return $this->multilingual;
+		return $this;
 	}
 
 	/**
@@ -332,19 +369,23 @@ abstract class sly_Form_ElementBase extends sly_Viewable {
 	 * This method will add a new CSS class to the element. Classes are
 	 * automatically made unique.
 	 *
-	 * @param string $className  the CSS class
+	 * @param  string $className     the CSS class
+	 * @return sly_Form_ElementBase  the object itself
 	 */
 	public function addOuterClass($className) {
 		$this->outerClass = $this->addClassHelper($className, $this->outerClass);
+		return $this;
 	}
 
 	/**
 	 * Removes a CSS class
 	 *
-	 * @param string $className  the CSS class
+	 * @param  string $className     the CSS class
+	 * @return sly_Form_ElementBase  the object itself
 	 */
 	public function removeOuterClass($className) {
 		$this->outerClass = $this->removeClassHelper($className, $this->outerClass);
+		return $this;
 	}
 
 	/**
@@ -353,19 +394,23 @@ abstract class sly_Form_ElementBase extends sly_Viewable {
 	 * This method will add a new CSS class to the element. Classes are
 	 * automatically made unique.
 	 *
-	 * @param string $className  the CSS class
+	 * @param  string $className     the CSS class
+	 * @return sly_Form_ElementBase  the object itself
 	 */
 	public function addFormRowClass($className) {
 		$this->formRowClass = $this->addClassHelper($className, $this->formRowClass);
+		return $this;
 	}
 
 	/**
 	 * Removes a CSS class
 	 *
-	 * @param string $className  the CSS class
+	 * @param  string $className     the CSS class
+	 * @return sly_Form_ElementBase  the object itself
 	 */
 	public function removeFormRowClass($className) {
 		$this->formRowClass = $this->removeClassHelper($className, $this->formRowClass);
+		return $this;
 	}
 
 	/**
@@ -374,7 +419,8 @@ abstract class sly_Form_ElementBase extends sly_Viewable {
 	 * This method will add a new CSS class to the element. Classes are
 	 * automatically made unique.
 	 *
-	 * @param string $className  the CSS class
+	 * @param  string $className  the CSS class
+	 * @return string             string of all current classes
 	 */
 	protected function addClassHelper($toAdd, $current) {
 		$classes = $this->getClassList($current.' '.$toAdd);
@@ -382,7 +428,8 @@ abstract class sly_Form_ElementBase extends sly_Viewable {
 	}
 
 	/**
-	 * @param string $className  the CSS class
+	 * @param  string $className  the CSS class
+	 * @return string             string of all current classes
 	 */
 	protected function removeClassHelper($toRemove, $current) {
 		$toRemove = $this->getClassList($toRemove);
@@ -396,6 +443,14 @@ abstract class sly_Form_ElementBase extends sly_Viewable {
 		return implode(' ', $classes);
 	}
 
+	/**
+	 * Normalize class string
+	 *
+	 * Removes duplicates and extra spaces.
+	 *
+	 * @param  string $classString
+	 * @return array
+	 */
 	private function getClassList($classString) {
 		return array_unique(array_filter(array_map('trim', explode(' ', $classString))));
 	}

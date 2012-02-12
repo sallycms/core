@@ -77,11 +77,12 @@ abstract class sly_Form_Input_Boolean extends sly_Form_Input_Base {
 	 *
 	 * Toggles the checkbox. Use this only on monolingual elements.
 	 *
-	 * @param boolean $checked  true if the element is checked, else false
+	 * @param  boolean $checked        true if the element is checked, else false
+	 * @return sly_Form_Input_Boolean  the object itself
 	 */
 	public function setChecked($checked = true) {
-		if ($checked) $this->setAttribute('checked', 'checked');
-		else $this->removeAttribute('checked');
+		if ($checked) return $this->setAttribute('checked', 'checked');
+		else return $this->removeAttribute('checked');
 	}
 
 	/**
@@ -90,10 +91,12 @@ abstract class sly_Form_Input_Boolean extends sly_Form_Input_Base {
 	 * Toggles the checkbox for each language. Use this when the element is used
 	 * in a multilingual form.
 	 *
-	 * @param array $checks  list of stati ({clang: checked, clang2: checked})
+	 * @param  array $checks           list of stati ({clang: checked, clang2: checked})
+	 * @return sly_Form_Input_Boolean  the object itself
 	 */
 	public function setChecks($checks) {
 		$this->checks = sly_makeArray($checks);
+		return $this;
 	}
 
 	/**

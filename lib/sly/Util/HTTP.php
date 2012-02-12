@@ -55,7 +55,7 @@ class sly_Util_HTTP {
 		$url = self::getUrl($targetArticle, $clang, $parameters, $divider, null);
 
 		// did we already get an absolute URL (cross domain realurl implementations)?
-		if (!preg_match('#^[a-z+]://#', $url)) {
+		if (!preg_match('#^[a-z]+://#', $url)) {
 			if ($url[0] === '/') {
 				$url = self::getBaseUrl(false).$url;
 			}
@@ -152,6 +152,9 @@ class sly_Util_HTTP {
 	 * @return string
 	 */
 	public static function getHost() {
+		// return a well defined value if run on CLI to make unit tests possible
+		if (PHP_SAPI === 'cli') return 'cli';
+
 		if (isset($_SERVER['HTTP_X_FORWARDED_HOST']))   return $_SERVER['HTTP_X_FORWARDED_HOST'];
 		if (isset($_SERVER['HTTP_HOST']))               return $_SERVER['HTTP_HOST'];
 		if (isset($_SERVER['HTTP_X_FORWARDED_SERVER'])) return $_SERVER['HTTP_X_FORWARDED_SERVER'];

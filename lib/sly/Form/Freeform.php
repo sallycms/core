@@ -37,7 +37,8 @@ class sly_Form_Freeform extends sly_Form_ElementBase implements sly_Form_IElemen
 	/**
 	 * Sets the content
 	 *
-	 * @param string $content  the new content
+	 * @param  string $content    the new content
+	 * @return sly_Form_Freeform  the object itself
 	 */
 	public function setContent($content) {
 		$this->content = $content;

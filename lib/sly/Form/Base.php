@@ -25,7 +25,7 @@ abstract class sly_Form_Base extends sly_Viewable {
 	 * implement itself.
 	 *
 	 * @param  array $row  list of form elements (sly_Form_IElement elements)
-	 * @return boolean     always true
+	 * @return sly_Form    the current object
 	 */
 	abstract public function addRow(array $row);
 
@@ -36,14 +36,14 @@ abstract class sly_Form_Base extends sly_Viewable {
 	 * element will be put in its own row.
 	 *
 	 * @param  array $elements  list of form elements (sly_Form_IElement elements)
-	 * @return boolean          true if everything worked, else false
+	 * @return sly_Form         the current object
 	 */
 	public function addElements(array $elements) {
-		$success = true;
 		foreach (array_filter($elements) as $element) {
-			$success &= $this->addRow(array($element));
+			$this->addRow(array($element));
 		}
-		return $success;
+
+		return $this;
 	}
 
 	/**
@@ -54,7 +54,7 @@ abstract class sly_Form_Base extends sly_Viewable {
 	 *
 	 * @see    add()
 	 * @param  sly_Form_IElement $element  the element to add
-	 * @return boolean                     true if it worked, else false
+	 * @return sly_Form                    the current object
 	 */
 	public function addElement(sly_Form_IElement $element) {
 		return $this->addRow(array($element));
@@ -66,7 +66,7 @@ abstract class sly_Form_Base extends sly_Viewable {
 	 * This method adds a single form element using a new row.
 	 *
 	 * @param  sly_Form_IElement $element  the element to add
-	 * @return boolean                     true if it worked, else false
+	 * @return sly_Form                    the current object
 	 */
 	public function add(sly_Form_IElement $element) {
 		return $this->addRow(array($element));
@@ -78,16 +78,14 @@ abstract class sly_Form_Base extends sly_Viewable {
 	 * This method can be used to add multiple rows to a form at once.
 	 *
 	 * @param  array $rows  list of form rows (each an array of sly_Form_IElement elements)
-	 * @return boolean      true if everything worked, else false
+	 * @return sly_Form     the current object
 	 */
 	public function addRows(array $rows) {
-		$success = true;
-
 		foreach (array_filter($rows) as $row) {
-			$success &= $this->addRow($row);
+			$this->addRow($row);
 		}
 
-		return $success;
+		return $this;
 	}
 
 	/**
@@ -107,12 +105,15 @@ abstract class sly_Form_Base extends sly_Viewable {
 	 * The given value will be automatically XHTML encoded (so give the raw
 	 * value!).
 	 *
-	 * @param string $name   the element's name
-	 * @param string $value  the value
-	 * @param string $id     an optional ID for the <input> tag
+	 * @param  string $name   the element's name
+	 * @param  string $value  the value
+	 * @param  string $id     an optional ID for the <input> tag
+	 * @return sly_Form       the current object
 	 */
 	public function addHiddenValue($name, $value, $id = null) {
 		$this->hiddenValues[$name] = array('value' => $value, 'id' => $id);
+
+		return $this;
 	}
 
 	/**

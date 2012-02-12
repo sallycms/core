@@ -41,12 +41,13 @@ class sly_Form_Slice extends sly_Form_Base {
 	 *
 	 * This method can be used to add a row to a slice.
 	 *
-	 * @param  array $row  list of form elements (sly_Form_IElement elements)
-	 * @return boolean     always true
+	 * @param  array $row      list of form elements (sly_Form_IElement elements)
+	 * @return boolean         always true
+	 * @return sly_Form_Slice  the object itself
 	 */
 	public function addRow(array $row) {
 		$this->rows[] = $row;
-		return true;
+		return $this;
 	}
 
 	/**
@@ -63,9 +64,10 @@ class sly_Form_Slice extends sly_Form_Base {
 	 * attributes. Use this if you need to identify the slice content after the
 	 * integration.
 	 *
-	 * @param sly_Form          $form            the target form
-	 * @param array             $containerAttrs  list of attributes (if null, no container is created)
-	 * @param sly_Form_Fieldset $fieldset        fieldset to append the elements to
+	 * @param  sly_Form          $form            the target form
+	 * @param  array             $containerAttrs  list of attributes (if null, no container is created)
+	 * @param  sly_Form_Fieldset $fieldset        fieldset to append the elements to
+	 * @return sly_Form_Slice                     the object itself
 	 */
 	public function integrate(sly_Form $form, $containerAttrs = null, sly_Form_Fieldset $fieldset = null) {
 		$fieldset = $fieldset instanceof sly_Form_Fieldset ? $fieldset : $form->getCurrentFieldset();
@@ -90,13 +92,18 @@ class sly_Form_Slice extends sly_Form_Base {
 		if ($containerAttrs !== null) {
 			$fieldset->addRow(new sly_Form_Fragment('</div>'));
 		}
+
+		return $this;
 	}
 
 	/**
 	 * Removes all rows
+	 *
+	 * @return sly_Form_Slice  the object itself
 	 */
 	public function clear() {
 		$this->rows = array();
+		return $this;
 	}
 
 	/**

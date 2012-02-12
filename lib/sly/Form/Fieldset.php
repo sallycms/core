@@ -55,7 +55,7 @@ class sly_Form_Fieldset extends sly_Viewable {
 	 *
 	 * @throws sly_Form_Exception  if the form has multiple columns and one element is multilingual
 	 * @param  array $row          array containing the form elements
-	 * @return boolean             always true
+	 * @return sly_Form_Fieldset   the object itself
 	 */
 	public function addRow(array $row) {
 		if ($this->columns > 1 && $this->isMultilingual($row)) {
@@ -63,7 +63,7 @@ class sly_Form_Fieldset extends sly_Viewable {
 		}
 
 		$this->rows[] = $row;
-		return true;
+		return $this;
 	}
 
 	/**
@@ -96,17 +96,16 @@ class sly_Form_Fieldset extends sly_Viewable {
 	 *
 	 * This method can be used to add multiple rows to a form at once.
 	 *
-	 * @param  array $rows  list of form rows (each an array of sly_Form_IElement elements)
-	 * @return boolean      true if everything worked, else false
+	 * @param  array $rows        list of form rows (each an array of sly_Form_IElement elements)
+	 * @return boolean            true if everything worked, else false
+	 * @return sly_Form_Fieldset  the object itself
 	 */
 	public function addRows(array $rows) {
-		$success = true;
-
 		foreach (array_filter($rows) as $row) {
-			$success &= $this->addRow(sly_makeArray($row));
+			$this->addRow(sly_makeArray($row));
 		}
 
-		return $success;
+		return $this;
 	}
 
 	/**
@@ -122,9 +121,12 @@ class sly_Form_Fieldset extends sly_Viewable {
 
 	/**
 	 * Remove all rows
+	 *
+	 * @return sly_Form_Fieldset  the object itself
 	 */
 	public function clearRows() {
 		$this->rows = array();
+		return $this;
 	}
 
 	public function getRows()    { return $this->rows;    } ///< @return array
@@ -142,11 +144,11 @@ class sly_Form_Fieldset extends sly_Viewable {
 	/**
 	 * @param  string $name
 	 * @param  mixed  $value
-	 * @return mixed
+	 * @return sly_Form_Fieldset  the object itself
 	 */
 	public function setAttribute($name, $value) {
 		$this->attrs[$name] = is_string($value) ? trim($value) : $value;
-		return $this->attrs[$name];
+		return $this;
 	}
 
 	/**
@@ -163,7 +165,7 @@ class sly_Form_Fieldset extends sly_Viewable {
 	 *
 	 * @throws sly_Form_Exception  if the form has multiple columns and one element is multilingual
 	 * @param  int $num            number of columns, ranging from 1 to 26
-	 * @return int                 the new number of columns
+	 * @return sly_Form_Fieldset   the object itself
 	 */
 	public function setColumns($num) {
 		$num = ($num > 0 && $num < 26) ? $num : 1;
@@ -173,18 +175,18 @@ class sly_Form_Fieldset extends sly_Viewable {
 		}
 
 		$this->columns = $num;
-		return $this->columns;
+		return $this;
 	}
 
 	/**
 	 * Sets the legend
 	 *
-	 * @param  string $legend  the new legend
-	 * @return string          the new legend (trimmed)
+	 * @param  string $legend     the new legend
+	 * @return sly_Form_Fieldset  the object itself
 	 */
 	public function setLegend($legend) {
 		$this->legend = trim($legend);
-		return $this->legend;
+		return $this;
 	}
 
 	/**
@@ -207,8 +209,8 @@ class sly_Form_Fieldset extends sly_Viewable {
 	 * The current fieldset number is stored in the temporary registry under the
 	 * key 'sly.form.fieldset.num'.
 	 *
-	 * @param  int $num  the new number
-	 * @return int       the new number
+	 * @param  int $num           the new number
+	 * @return sly_Form_Fieldset  the object itself
 	 */
 	public function setNum($num = -1) {
 		$registry = sly_Core::getTempRegistry();
@@ -224,7 +226,7 @@ class sly_Form_Fieldset extends sly_Viewable {
 		$this->num = $num;
 		$registry->set($key, $num);
 
-		return $num;
+		return $this;
 	}
 
 	/**

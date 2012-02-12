@@ -14,7 +14,7 @@
  * @author  zozi@webvariants.de
  * @ingroup model
  */
-class sly_Model_ArticleSlice extends sly_Model_Base_Id {
+class sly_Model_ArticleSlice extends sly_Model_Base_Id implements sly_Model_ISlice {
 	protected $article_id;
 	protected $clang;
 	protected $slot;
@@ -128,6 +128,12 @@ class sly_Model_ArticleSlice extends sly_Model_Base_Id {
 		return $this->getSlice()->getModule();
 	}
 
+	public function setModule($module) {
+		$slice = &$this->getSlice();
+		$slice->setModule($module);
+		sly_Service_Factory::getSliceService()->save($slice);
+	}
+
 	/**
 	 * @param int $updatedate
 	 */
@@ -165,13 +171,12 @@ class sly_Model_ArticleSlice extends sly_Model_Base_Id {
 	}
 
 	/**
-	 * @param  string $type
 	 * @param  string $finder
 	 * @param  string $value
 	 * @return sly_Model_SliceValue
 	 */
 	public function addValue($finder, $value = null) {
-		$this->getSlice()->addValue($finder, $value);
+		return $this->getSlice()->addValue($finder, $value);
 	}
 
 	public function setValues($values = array()) {
@@ -187,6 +192,9 @@ class sly_Model_ArticleSlice extends sly_Model_Base_Id {
 		return $this->getSlice()->getValue($finder);
 	}
 
+	public function getValues() {
+		return $this->getSlice()->getValues();
+	}
 
 	/**
 	 * @return int
@@ -196,53 +204,15 @@ class sly_Model_ArticleSlice extends sly_Model_Base_Id {
 	}
 
 	/**
+	 * get the rendered output
 	 *
-	 * @return string the input form of this slice
-	 */
-	public function getInput() {
-		$content = $this->getSlice()->getInput();
-		$content = $this->replacePseudoConstants($content);
-		return $content;
-	}
-
-	/**
-	 * @return string the content of the slice
+	 * @return string
 	 */
 	public function getOutput() {
-		$content = $this->getSlice()->getOutput();
-		$content = $this->replacePseudoConstants($content);
-		return $content;
-	}
-
-	/**
-	 * replace some pseudo constants that can be uses in article slices
-	 *
-	 * @staticvar array  $search
-	 * @param     string $content
-	 * @return    string the content with replaces strings
-	 */
-	private function replacePseudoConstants($content) {
-		static $search = array(
-			'ARTICLE_ID',
-			'CLANG_ID',
-			'TEMPLATE_NAME',
-			'ARTICLE_SLICE_ID',
-			'SLOT',
-			'POSITION',
-			'CREATE_USER_LOGIN'
-		);
-
-		$replace = array(
-			$this->getArticleId(),
-			$this->getClang(),
-			$this->getArticle()->getTemplateName(),
-			$this->getId(),
-			$this->getSlot(),
-			$this->getPosition(),
-			$this->getCreateUser()
-		);
-
-		return str_replace($search, $replace, $content);
+		$values   = $this->getValues();
+		$renderer = new sly_Slice_Renderer($this->getModule(), $values);
+		$output   = $renderer->renderOutput($this);
+		return $output;
 	}
 
 	/**

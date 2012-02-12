@@ -8,18 +8,21 @@
  * http://www.opensource.org/licenses/mit-license.php
  */
 
+/**
+ * @author christoph@webvariants.de
+ * @since  0.6
+ */
 class sly_Router_Base implements sly_Router_Interface {
 	protected $routes;
 	protected $match;
 
 	public function __construct(array $routes = array()) {
-		$this->routes = array_unique($routes);
+		$this->routes = $routes;
 		$this->match  = false;
 	}
 
-	public function addRoute($route) {
-		$this->routes[] = $route;
-		$this->routes   = array_unique($this->routes);
+	public function addRoute($route, array $values) {
+		$this->routes[$route] = $values;
 	}
 
 	public function clearRoutes() {
@@ -35,12 +38,12 @@ class sly_Router_Base implements sly_Router_Interface {
 			$this->match = null;
 			$requestUri  = $this->getRequestUri();
 
-			foreach ($this->routes as $route) {
+			foreach ($this->routes as $route => $values) {
 				$regex = $this->buildRegex($route);
 				$match = null;
 
 				if (preg_match("#^$regex#u", $requestUri, $match)) {
-					$this->match = $match;
+					$this->match = array($match, $values);
 					break;
 				}
 			}
@@ -50,29 +53,37 @@ class sly_Router_Base implements sly_Router_Interface {
 	}
 
 	public function hasMatch() {
-		if ($this->match === false) $this->match();
-		return $this->match !== null;
+		return is_array($this->match());
 	}
 
 	public function getController() {
 		$controller = $this->get('controller', null);
 
 		if ($controller === null) {
-			throw new sly_Exception('Matched route does not contain a :controller placeholder.');
+			throw new sly_Exception('Matched route contains neither a :controller placeholder not a controller value.');
 		}
 
 		return $controller;
 	}
 
 	public function getAction() {
-		return $this->get('controller', 'index');
+		return $this->get('action', 'index');
 	}
 
 	public function get($key, $default = null) {
-		if ($this->match === false) $this->match();
-		if ($this->match === null) return $default;
+		$this->match();
 
-		return isset($this->match[$key]) ? $this->match[$key] : $default;
+		if (!is_array($this->match)) {
+			return $default;
+		}
+
+		list($match, $values) = $this->match;
+
+		if (array_key_exists($key, $match)) {
+			return $match[$key];
+		}
+
+		return array_key_exists($key, $values) ? $values[$key] : $default;
 	}
 
 	public function getRequestUri() {

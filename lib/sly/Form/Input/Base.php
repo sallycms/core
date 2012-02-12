@@ -69,7 +69,8 @@ abstract class sly_Form_Input_Base extends sly_Form_ElementBase implements sly_F
 	 *
 	 * Give a value of '0' to remove the maxlength attribute.
 	 *
-	 * @param int $maxLength  the new max length
+	 * @param  int $maxLength       the new max length
+	 * @return sly_Form_Input_Base  the object itself
 	 */
 	public function setMaxLength($maxLength) {
 		$maxLength = abs(intval($maxLength));
@@ -80,12 +81,15 @@ abstract class sly_Form_Input_Base extends sly_Form_ElementBase implements sly_F
 		else {
 			$this->removeAttribute('maxlength');
 		}
+
+		return $this;
 	}
 
 	/**
 	 * Sets the input to read-only
 	 *
-	 * @param boolean $readonly  true to set the attribute, false to remove it
+	 * @param  boolean $readonly    true to set the attribute, false to remove it
+	 * @return sly_Form_Input_Base  the object itself
 	 */
 	public function setReadOnly($readonly = true) {
 		if ($readonly) {
@@ -94,15 +98,18 @@ abstract class sly_Form_Input_Base extends sly_Form_ElementBase implements sly_F
 		else {
 			$this->removeAttribute('readonly');
 		}
+
+		return $this;
 	}
 
 	/**
 	 * Sets the size
 	 *
-	 * @param int $size  the new size
+	 * @param  int $size            the new size
+	 * @return sly_Form_Input_Base  the object itself
 	 */
 	public function setSize($size) {
-		$this->setAttribute('size', abs((int) $size));
+		return $this->setAttribute('size', abs((int) $size));
 	}
 
 	/**
@@ -115,10 +122,12 @@ abstract class sly_Form_Input_Base extends sly_Form_ElementBase implements sly_F
 	 * Make sure that the element has a fixed length / size, since by default the
 	 * input field will take up the complete form row.
 	 *
-	 * @param string $annotation  the new annotation
+	 * @param  string $annotation   the new annotation
+	 * @return sly_Form_Input_Base  the object itself
 	 */
 	public function setAnnotation($annotation) {
 		$this->annotation = trim($annotation);
+		return $this;
 	}
 
 	/**
@@ -126,9 +135,11 @@ abstract class sly_Form_Input_Base extends sly_Form_ElementBase implements sly_F
 	 *
 	 * This method sets the placeholder attribute, defined in HTML5.
 	 *
-	 * @param string $placeholder  the new placeholder
+	 * @param  string $placeholder  the new placeholder
+	 * @return sly_Form_Input_Base  the object itself
 	 */
 	public function setPlaceholder($placeholder) {
 		$this->placeholder = trim($placeholder);
+		return $this;
 	}
 }

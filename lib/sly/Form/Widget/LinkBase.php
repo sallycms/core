@@ -24,10 +24,17 @@ abstract class sly_Form_Widget_LinkBase extends sly_Form_ElementBase {
 	protected $types      = array();
 	protected $categories = array();
 
+	/**
+	 * @return sly_Form_Widget_LinkBase  the widget itself
+	 */
 	public function filterByCategories(array $cats, $recursive = false) {
 		foreach ($cats as $cat) $this->filterByCategory($cat, $recursive);
+		return $this;
 	}
 
+	/**
+	 * @return sly_Form_Widget_LinkBase  the widget itself
+	 */
 	public function filterByCategory($cat, $recursive = false) {
 		$catID = $cat instanceof sly_Model_Category ? $cat->getId() : (int) $cat;
 
@@ -47,21 +54,32 @@ abstract class sly_Form_Widget_LinkBase extends sly_Form_ElementBase {
 			$this->categories = array_unique($this->categories);
 		}
 
-		return $this->categories;
+		return $this;
 	}
 
+	/**
+	 * @return sly_Form_Widget_LinkBase  the widget itself
+	 */
 	public function filterByArticleTypes(array $types) {
 		foreach ($types as $type) $this->types[] = $type;
 		$this->types = array_unique($this->types);
 
-		return $this->types;
+		return $this;
 	}
 
+	/**
+	 * @return sly_Form_Widget_LinkBase  the widget itself
+	 */
 	public function clearCategoryFilter() {
 		$this->categories = array();
+		return $this;
 	}
 
+	/**
+	 * @return sly_Form_Widget_LinkBase  the widget itself
+	 */
 	public function clearArticleTypeFilter() {
 		$this->types = array();
+		return $this;
 	}
 }

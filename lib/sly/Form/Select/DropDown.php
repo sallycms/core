@@ -27,10 +27,11 @@ class sly_Form_Select_DropDown extends sly_Form_Select_Base implements sly_Form_
 	 * box, as elements with a size > 1 only waste space when only one can be
 	 * selected at a time.
 	 *
-	 * @param int $size  the new size
+	 * @param  int $size                 the new size
+	 * @return sly_Form_Select_DropDown  the object itself
 	 */
 	public function setSize($size) {
-		$this->setAttribute('size', (int) $size);
+		return $this->sly_Form_Select_DropDown('size', (int) $size);
 	}
 
 	/**
@@ -38,11 +39,12 @@ class sly_Form_Select_DropDown extends sly_Form_Select_Base implements sly_Form_
 	 *
 	 * Use this method to toggle the "multiple" attribute.
 	 *
-	 * @param boolean $multiple  true to enable, false to disable multi selection
+	 * @param  boolean $multiple         true to enable, false to disable multi selection
+	 * @return sly_Form_Select_DropDown  the object itself
 	 */
 	public function setMultiple($multiple) {
-		if ($multiple) $this->setAttribute('multiple', 'multiple');
-		else $this->removeAttribute('multiple');
+		if ($multiple) return $this->setAttribute('multiple', 'multiple');
+		else return $this->removeAttribute('multiple');
 	}
 
 	/**

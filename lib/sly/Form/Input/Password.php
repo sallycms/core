@@ -45,7 +45,8 @@ class sly_Form_Input_Password extends sly_Form_Input_Base {
 	 * was an error). Set this to true to enable it, but be aware that this will
 	 * put the unencrypted password in the XHTML output.
 	 *
-	 * @param boolean $redisplay  true or false
+	 * @param  boolean $redisplay       true or false
+	 * @return sly_Form_Input_Password  the object itself
 	 */
 	public function setPasswordReDisplay($redisplay) {
 		$this->redisplay = (boolean) $redisplay;

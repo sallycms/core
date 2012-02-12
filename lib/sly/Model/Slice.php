@@ -48,13 +48,13 @@ class sly_Model_Slice extends sly_Model_Base_Id {
 	/**
 	 * @param  string $type
 	 * @param  string $finder
-	 * @return sly_Model_SliceValue
+	 * @return mixed
 	 */
 	public function getValue($finder) {
 		$service    = sly_Service_Factory::getSliceValueService();
 		$sliceValue = $service->findBySliceTypeFinder($this->getId(), $finder);
 
-		return $sliceValue;
+		return $sliceValue ? $sliceValue->getValue() : null;
 	}
 
 	public function setValues($values = array()) {
@@ -92,48 +92,15 @@ class sly_Model_Slice extends sly_Model_Base_Id {
 	}
 
 	/**
+	 * get the rendered output
+	 *
 	 * @return string
 	 */
 	public function getOutput() {
 		$values   = $this->getValues();
 		$renderer = new sly_Slice_Renderer($this->getModule(), $values);
-		$output   = $renderer->renderOutput();
-		$output   = $this->replacePseudoConstants($output);
+		$output   = $renderer->renderOutput($this);
 		return $output;
 	}
 
-	/**
-	 * returns the input form for this slice
-	 *
-	 * @return string
-	 */
-	public function getInput() {
-		$service  = sly_Service_Factory::getModuleService();
-		$filename = $service->getInputFilename($this->getModule());
-		$output   = $service->getContent($filename);
-		$output   = $this->replacePseudoConstants($output);
-
-		return $output;
-	}
-
-	/**
-	 * replace some pseude constants that can be used in slices
-	 *
-	 * @staticvar array  $search
-	 * @param     string $content
-	 * @return    string the content with replaces strings
-	 */
-	private function replacePseudoConstants($content) {
-		static $search = array(
-			'MODULE_NAME',
-			'SLICE_ID'
-		);
-
-		$replace = array(
-			$this->getModule(),
-			$this->getId()
-		);
-
-		return str_replace($search, $replace, $content);
-	}
 }

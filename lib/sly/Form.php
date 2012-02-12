@@ -77,10 +77,12 @@ class sly_Form extends sly_Form_Base {
 	 * Use this method to alter the encoding, for example when you use the form
 	 * to upload files.
 	 *
-	 * @param string $enctype  the new enctype
+	 * @param  string $enctype  the new enctype
+	 * @return sly_Form         the current object
 	 */
 	public function setEncType($enctype) {
 		$this->enctype = trim($enctype);
+		return $this;
 	}
 
 	/**
@@ -112,7 +114,7 @@ class sly_Form extends sly_Form_Base {
 	 * cases, this is the last one, that has been created.
 	 *
 	 * @param  array $row  the array of form elements
-	 * @return boolean     always true
+	 * @return sly_Form    the current object
 	 */
 	public function addRow(array $row) {
 		if ($this->currentFieldset === null) {
@@ -120,7 +122,7 @@ class sly_Form extends sly_Form_Base {
 		}
 
 		$this->currentFieldset->addRow($row);
-		return true;
+		return $this;
 	}
 
 	/**
@@ -128,11 +130,14 @@ class sly_Form extends sly_Form_Base {
 	 *
 	 * This methods just adds a new fieldset to the form and marks it as active.
 	 *
-	 * @param sly_Form_Fieldset $fieldset  the fieldset to add
+	 * @param  sly_Form_Fieldset $fieldset  the fieldset to add
+	 * @return sly_Form                     the current object
 	 */
 	public function addFieldset(sly_Form_Fieldset $fieldset) {
 		$this->fieldsets[]     = $fieldset;
 		$this->currentFieldset = null;
+
+		return $this;
 	}
 
 	/**
@@ -142,10 +147,13 @@ class sly_Form extends sly_Form_Base {
 	 * overwrite the default button with your own (giving a new button) or to
 	 * remove the button (giving null).
 	 *
-	 * @param sly_Form_Input_Button $submitButton  the new submit button
+	 * @param  sly_Form_Input_Button $submitButton  the new submit button
+	 * @return sly_Form                             the current object
 	 */
 	public function setSubmitButton(sly_Form_Input_Button $submitButton = null) {
 		$this->submitButton = $submitButton;
+
+		return $this;
 	}
 
 	/**
@@ -155,10 +163,13 @@ class sly_Form extends sly_Form_Base {
 	 * overwrite the default button with your own (giving a new button) or to
 	 * remove the button (giving null).
 	 *
-	 * @param sly_Form_Input_Button $resetButton  the new reset button
+	 * @param  sly_Form_Input_Button $resetButton  the new reset button
+	 * @return sly_Form                            the current object
 	 */
 	public function setResetButton(sly_Form_Input_Button $resetButton = null) {
 		$this->resetButton = $resetButton;
+
+		return $this;
 	}
 
 	/**
@@ -169,10 +180,13 @@ class sly_Form extends sly_Form_Base {
 	 * remove the button (giving null).
 	 * This button does not exist by default.
 	 *
-	 * @param sly_Form_Input_Button $applyButton  the new apply button
+	 * @param  sly_Form_Input_Button $applyButton  the new apply button
+	 * @return sly_Form                            the current object
 	 */
 	public function setApplyButton(sly_Form_Input_Button $applyButton = null) {
 		$this->applyButton = $applyButton;
+
+		return $this;
 	}
 
 	/**
@@ -183,10 +197,13 @@ class sly_Form extends sly_Form_Base {
 	 * remove the button (giving null).
 	 * This button does not exist by default.
 	 *
-	 * @param sly_Form_Input_Button $deleteButton  the new delete button
+	 * @param  sly_Form_Input_Button $deleteButton  the new delete button
+	 * @return sly_Form                             the current object
 	 */
 	public function setDeleteButton(sly_Form_Input_Button $deleteButton = null) {
 		$this->deleteButton = $deleteButton;
+
+		return $this;
 	}
 
 	/**
@@ -231,12 +248,15 @@ class sly_Form extends sly_Form_Base {
 	 * This methods adds a class to a specific button. $type can be 'submit',
 	 * 'reset', 'delete' or 'apply'. The list of classes per type will be unique.
 	 *
-	 * @param string $type   the button type (submit, reset, delete or apply)
-	 * @param string $class  the new CSS class
+	 * @param  string $type   the button type (submit, reset, delete or apply)
+	 * @param  string $class  the new CSS class
+	 * @return sly_Form       the current object
 	 */
 	public function addButtonClass($type, $class) {
 		$this->buttonClasses[$type][] = trim($class);
 		$this->buttonClasses[$type]   = array_unique($this->buttonClasses[$type]);
+
+		return $this;
 	}
 
 	/**
@@ -257,10 +277,14 @@ class sly_Form extends sly_Form_Base {
 	 * This method will remove all fieldsets from the form and reset the active
 	 * fieldset to 'none'. This will make any add* method create a new fieldset
 	 * when called.
+	 *
+	 * @return sly_Form  the current object
 	 */
 	public function clearElements() {
 		$this->fieldsets       = array();
 		$this->currentFieldset = null;
+
+		return $this;
 	}
 
 	/**
@@ -269,10 +293,13 @@ class sly_Form extends sly_Form_Base {
 	 * This method sets the focus to one element, generating a bit of jQuery code
 	 * to set the cursor to it when the form is rendered.
 	 *
-	 * @param mixed $element  the instance or ID of the element to focus
+	 * @param  mixed $element  the instance or ID of the element to focus
+	 * @return sly_Form        the current object
 	 */
 	public function setFocus($element) {
 		$this->focussedElement = $element;
+
+		return $this;
 	}
 
 	/**
@@ -343,22 +370,27 @@ class sly_Form extends sly_Form_Base {
 	 * ensuring that they are unique.
 	 *
 	 * @param  string $class  the CSS class
-	 * @return array          the list of current classes (unique)
+	 * @return sly_Form       the current object
 	 */
 	public function addClass($class) {
 		$class = explode(' ', $class);
 		foreach ($class as $c) $this->classes[] = $c;
 		$this->classes = array_unique($this->classes);
-		return $this->classes;
+
+		return $this;
 	}
 
 	/**
 	 * Remove all classes
 	 *
 	 * This method removes all set CSS classes for this form.
+	 *
+	 * @return sly_Form  the current object
 	 */
 	public function clearClasses() {
 		$this->classes = array();
+
+		return $this;
 	}
 
 	/**
