@@ -38,7 +38,7 @@ class sly_Service_ArticleSlice extends sly_Service_Model_Base_Id {
 
 		$articleSlice = parent::create($params);
 
-		$pre = sly_Core::config()->get('DATABASE/TABLE_PREFIX');
+		$pre = sly_Core::getTablePrefix();
 		$sql = sly_DB_Persistence::getInstance();
 		$sql->query(
 			'UPDATE ' . $pre . $this->tablename . ' SET pos = pos + 1 ' .
@@ -78,7 +78,7 @@ class sly_Service_ArticleSlice extends sly_Service_Model_Base_Id {
 		$articleSlice = $this->findById($id);
 
 		$sql = sly_DB_Persistence::getInstance();
-		$pre = sly_Core::config()->get('DATABASE/TABLE_PREFIX');
+		$pre = sly_Core::getTablePrefix();
 
 		// fix order
 		$sql->query('UPDATE '.$pre.'article_slice SET pos = pos -1 WHERE

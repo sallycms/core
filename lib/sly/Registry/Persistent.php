@@ -21,7 +21,7 @@ class sly_Registry_Persistent implements sly_Registry_Registry {
 	private function __construct() {
 		$this->store  = new sly_Util_Array();
 		$this->pdo    = sly_DB_Persistence::getInstance();
-		$this->prefix = sly_Core::config()->get('DATABASE/TABLE_PREFIX');
+		$this->prefix = sly_Core::getTablePrefix();
 	}
 
 	/**
