@@ -189,7 +189,7 @@ class sly_DB_PDO_Persistence extends sly_DB_Persistence {
 		static $prefix = null;
 
 		if ($prefix === null) {
-			$prefix = sly_Core::config()->get('DATABASE/TABLE_PREFIX');
+			$prefix = sly_Core::getTablePrefix();
 		}
 
 		return $prefix;

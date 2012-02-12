@@ -224,7 +224,7 @@ class sly_DB_Dump {
 	 * user defined (user meaning a visitor) content.
 	 */
 	protected function replacePrefix() {
-		$prefix = sly_Core::config()->get('DATABASE/TABLE_PREFIX');
+		$prefix = sly_Core::getTablePrefix();
 
 		if ($this->prefix && $prefix !== $this->prefix) {
 			$quoted = preg_quote($this->prefix, '/');
@@ -253,7 +253,7 @@ class sly_DB_Dump {
 		$user = sly_Util_User::getCurrentUser();
 
 		if ($prefix === null) {
-			$prefix = sly_Core::config()->get('DATABASE/TABLE_PREFIX');
+			$prefix = sly_Core::getTablePrefix();
 		}
 
 		$query = str_replace('%USER%', $user ? $user->getLogin() : '', $query);
