@@ -52,7 +52,7 @@ class sly_Model_Slice extends sly_Model_Base_Id {
 	 */
 	public function getValue($finder) {
 		$service    = sly_Service_Factory::getSliceValueService();
-		$sliceValue = $service->findBySliceTypeFinder($this->getId(), $finder);
+		$sliceValue = $service->findBySliceFinder($this->getId(), $finder);
 
 		return $sliceValue ? $sliceValue->getValue() : null;
 	}
