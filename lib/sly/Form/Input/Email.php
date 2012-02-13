@@ -27,6 +27,7 @@ class sly_Form_Input_Email extends sly_Form_Input_Text {
 	public function __construct($name, $label, $value = '', $id = null) {
 		parent::__construct($name, $label, $value, $id);
 		$this->setAttribute('type', 'email');
+		$this->addClass('sly-form-email');
 		$this->addOuterClass('sly-form-email-row');
 	}
 }
