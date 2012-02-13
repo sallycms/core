@@ -31,7 +31,7 @@ class sly_Form_Select_DropDown extends sly_Form_Select_Base implements sly_Form_
 	 * @return sly_Form_Select_DropDown  the object itself
 	 */
 	public function setSize($size) {
-		return $this->sly_Form_Select_DropDown('size', (int) $size);
+		return $this->setAttribute('size', (int) $size);
 	}
 
 	/**
