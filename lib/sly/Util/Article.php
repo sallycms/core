@@ -124,7 +124,7 @@ class sly_Util_Article {
 
 	public static function canEditArticle(sly_Model_User $user, $articleId) {
 		if ($user->isAdmin()) return true;
-		return sly_Authorisation::hasPermission($user->getId(), 'article', 'edit', $articleId);
+		return $user->hasRight('article', 'edit', $articleId);
 	}
 
 	public static function canEditContent(sly_Model_User $user, $articleId) {

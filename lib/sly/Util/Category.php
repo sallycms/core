@@ -88,25 +88,32 @@ class sly_Util_Category {
 		if($user->isAdmin()) return true;
 		static $canReadCache;
 
-		if (!isset($canReadCache[$categoryId])) {
-			$canReadCache[$categoryId] = false;
+		if (!isset($canReadCache[$user->getId()])) {
+			$canReadCache[$user->getId()] = array();
+		}
 
-			if(sly_Util_Article::canEditContent($user, $categoryId)) $canReadCache[$categoryId] = true;
+		if (!isset($canReadCache[$user->getId()][$categoryId])) {
+			$canReadCache[$user->getId()][$categoryId] = false;
 
-			//check all children for write rights
-			$article = self::findById($categoryId);
-			if ($article) {
-				$path = $article->getPath().$article->getId().'|%';
+			if(sly_Util_Article::canEditContent($user, $categoryId)) {
+				$canReadCache[$user->getId()][$categoryId] = true;
 			} else {
-				$path = '|%';
-			}
-			$query  = sly_DB_Persistence::getInstance();
-			$prefix = sly_Core::getTablePrefix();
-			$query->query('SELECT DISTINCT id FROM '.$prefix.'article WHERE path LIKE ?', array($path));
-			foreach($query as $row) {
-				if(sly_Util_Article::canEditContent($user, $row['id'])) {
-					$canReadCache[$categoryId] = true;
-					break;
+
+				//check all children for write rights
+				$article = self::findById($categoryId);
+				if ($article) {
+					$path = $article->getPath().$article->getId().'|%';
+				} else {
+					$path = '|%';
+				}
+				$query  = sly_DB_Persistence::getInstance();
+				$prefix = sly_Core::getTablePrefix();
+				$query->query('SELECT DISTINCT id FROM '.$prefix.'article WHERE path LIKE ?', array($path));
+				foreach($query as $row) {
+					if(sly_Util_Article::canEditContent($user, $row['id'])) {
+						$canReadCache[$user->getId()][$categoryId] = true;
+						break;
+					}
 				}
 			}
 		}
