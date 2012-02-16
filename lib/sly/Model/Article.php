@@ -77,16 +77,17 @@ class sly_Model_Article extends sly_Model_Base_Article {
 	 */
 	public function getContent($slot = null) {
 		$content = '';
-		$where   = array('article_id' => $this->getId(), 'clang' => $this->getClang());
-
-		if ($slot !== null) $where['slot'] = $slot;
-
-		$slices = sly_Service_Factory::getArticleSliceService()->find($where, null, 'pos ASC');
-		foreach ($slices as $slice) {
+		foreach ($this->getSlices($slot) as $slice) {
 			$content .= $slice->getOutput();
 		}
 
 		return $content;
+	}
+
+	public function getSlices($slot = null) {
+		$where   = array('article_id' => $this->getId(), 'clang' => $this->getClang());
+		if ($slot !== null) $where['slot'] = $slot;
+		return sly_Service_Factory::getArticleSliceService()->find($where, null, 'pos ASC');
 	}
 
 	/**
