@@ -126,7 +126,7 @@ class sly_Util_Medium {
 			$mediumToReplace->setFiletype($newType);
 			$mediumToReplace->setFilesize(filesize($dstFile));
 
-			$size = @getimagesize($targetFile);
+			$size = @getimagesize($dstFile);
 
 			if ($size) {
 				$mediumToReplace->setWidth($size[0]);
