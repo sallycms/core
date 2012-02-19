@@ -88,15 +88,17 @@ class sly_Util_Category {
 		if ($user->isAdmin()) return true;
 		static $canReadCache;
 
-		if (!isset($canReadCache[$user->getId()])) {
-			$canReadCache[$user->getId()] = array();
+		$userId = $user->getId();
+
+		if (!isset($canReadCache[$userId])) {
+			$canReadCache[$userId] = array();
 		}
 
-		if (!isset($canReadCache[$user->getId()][$categoryId])) {
-			$canReadCache[$user->getId()][$categoryId] = false;
+		if (!isset($canReadCache[$userId][$categoryId])) {
+			$canReadCache[$userId][$categoryId] = false;
 
 			if (sly_Util_Article::canEditContent($user, $categoryId)) {
-				$canReadCache[$user->getId()][$categoryId] = true;
+				$canReadCache[$userId][$categoryId] = true;
 			}
 			else {
 				// check all children for write rights
@@ -115,13 +117,13 @@ class sly_Util_Category {
 
 				foreach ($query as $row) {
 					if (sly_Util_Article::canEditContent($user, $row['id'])) {
-						$canReadCache[$user->getId()][$categoryId] = true;
+						$canReadCache[$userId][$categoryId] = true;
 						break;
 					}
 				}
 			}
 		}
 
-		return isset($canReadCache[$categoryId]) ? $canReadCache[$categoryId] : false;
+		return isset($canReadCache[$userId][$categoryId]) ? $canReadCache[$userId][$categoryId] : false;
 	}
 }
