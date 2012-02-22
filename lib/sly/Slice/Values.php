@@ -173,6 +173,17 @@ class sly_Slice_Values {
 	}
 
 	/**
+	 * Get a medium instance
+	 *
+	 * @param  string  $id
+	 * @param  mixed   $default
+	 * @return sly_Model_Medium
+	 */
+	public function getMedium($id, $default = null) {
+		return sly_Util_Medium::findByFilename($this->get($id, null), $default);
+	}
+
+	/**
 	 * Get a URL to an article
 	 *
 	 * @param  string  $id
