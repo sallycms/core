@@ -37,4 +37,21 @@ class sly_Slice_Form extends sly_Form {
 
 		return parent::render(true);
 	}
+
+	/**
+	 * @throws sly_Exception
+	 * @param  string $method
+	 * @param  array  $arguments
+	 * @return mixed
+	 */
+	public function __call($method, $arguments) {
+		$event      = strtoupper('SLY_SLICEFORM_'.$method);
+		$dispatcher = sly_Core::dispatcher();
+
+		if (!$dispatcher->hasListeners($event)) {
+			throw new sly_Exception('Call to undefined method '.get_class($this).'::'.$method.'()');
+		}
+
+		return $dispatcher->filter($event, null, array('method' => $method, 'arguments' => $arguments, 'object' => $this));
+	}
 }

@@ -158,7 +158,7 @@ abstract class sly_Model_Base {
 		$dispatcher = sly_Core::dispatcher();
 
 		if (!$dispatcher->hasListeners($event)) {
-			throw new sly_Exception('Call to undefined function '.$method.'()');
+			throw new sly_Exception('Call to undefined method '.get_class($this).'::'.$method.'()');
 		}
 
 		return $dispatcher->filter($event, null, array('method' => $method, 'arguments' => $arguments, 'object' => $this));
