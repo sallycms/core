@@ -208,4 +208,21 @@ class sly_Slice_Values {
 	public function getImageTag($id, array $attributes = array(), $forceUri = false) {
 		return sly_Util_HTML::getImageTag($this->get($id, ''), $attributes, $forceUri);
 	}
+
+	/**
+	 * @throws sly_Exception
+	 * @param  string $method
+	 * @param  array  $arguments
+	 * @return mixed
+	 */
+	public function __call($method, $arguments) {
+		$event      = strtoupper('SLY_SLICEVALUES_'.$method);
+		$dispatcher = sly_Core::dispatcher();
+
+		if (!$dispatcher->hasListeners($event)) {
+			throw new sly_Exception('Call to undefined method '.get_class($this).'::'.$method.'()');
+		}
+
+		return $dispatcher->filter($event, null, array('method' => $method, 'arguments' => $arguments, 'object' => $this));
+	}
 }
