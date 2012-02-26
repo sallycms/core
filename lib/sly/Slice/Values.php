@@ -173,6 +173,17 @@ class sly_Slice_Values {
 	}
 
 	/**
+	 * Get a medium instance
+	 *
+	 * @param  string  $id
+	 * @param  mixed   $default
+	 * @return sly_Model_Medium
+	 */
+	public function getMedium($id, $default = null) {
+		return sly_Util_Medium::findByFilename($this->get($id, null), $default);
+	}
+
+	/**
 	 * Get a URL to an article
 	 *
 	 * @param  string  $id
@@ -196,5 +207,22 @@ class sly_Slice_Values {
 	 */
 	public function getImageTag($id, array $attributes = array(), $forceUri = false) {
 		return sly_Util_HTML::getImageTag($this->get($id, ''), $attributes, $forceUri);
+	}
+
+	/**
+	 * @throws sly_Exception
+	 * @param  string $method
+	 * @param  array  $arguments
+	 * @return mixed
+	 */
+	public function __call($method, $arguments) {
+		$event      = strtoupper('SLY_SLICEVALUES_'.$method);
+		$dispatcher = sly_Core::dispatcher();
+
+		if (!$dispatcher->hasListeners($event)) {
+			throw new sly_Exception('Call to undefined method '.get_class($this).'::'.$method.'()');
+		}
+
+		return $dispatcher->filter($event, null, array('method' => $method, 'arguments' => $arguments, 'object' => $this));
 	}
 }

@@ -10,16 +10,16 @@
 
 abstract class sly_App_Base implements sly_App_Interface {
 	public function initialize() {
+		$setup = sly_Core::config()->get('SETUP') === true;
+
 		// include addOns
-		sly_Core::loadAddons();
+		if (!$setup) sly_Core::loadAddons();
 
 		// register listeners
 		sly_Core::registerListeners();
 
 		// synchronize develop
-		if (sly_Core::config()->get('SETUP') === false) {
-			$this->syncDevelopFiles();
-		}
+		if (!$setup) $this->syncDevelopFiles();
 	}
 
 	public function dispatch($controller, $action) {

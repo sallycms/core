@@ -426,12 +426,6 @@ class sly_Core {
 	public static function clearCache() {
 		clearstatcache();
 
-		$obj = new sly_Util_Directory(SLY_DYNFOLDER.'/internal/sally/article_slice');
-		$obj->deleteFiles();
-
-		$obj = new sly_Util_Directory(SLY_DYNFOLDER.'/internal/sally/templates');
-		$obj->deleteFiles();
-
 		// clear loader cache
 		sly_Loader::clearCache();
 
