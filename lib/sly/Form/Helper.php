@@ -187,7 +187,7 @@ abstract class sly_Form_Helper {
 
 		switch (self::$type) {
 			case 'media':
-				return self::$user->hasRight('media['.$category->getId().']');
+				return self::$user->hasRight('mediacategory', 'access', $category->getId());
 
 			case 'structure':
 				return sly_Util_Category::canReadCategory(self::$user, $category->getId());
