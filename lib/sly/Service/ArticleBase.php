@@ -273,7 +273,7 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base {
 		$obj = $this->findById($id, $clangID);
 
 		if ($obj === null) {
-			throw new sly_Exception(t($modelType.'_not_found'));
+			throw new sly_Exception(t($modelType.'_not_found', $id));
 		}
 
 		///////////////////////////////////////////////////////////////
