@@ -138,7 +138,10 @@ class sly_Util_Article {
 		$article = self::findById($articleId, $clang);
 
 		if (!$article) {
-			throw new UnexpectedValueException('Could not detect the URL target given by "'.$target.'" in getUrl().');
+			$clang     = $clang === null ? sly_Core::getCurrentClang() : (int) $clang;
+			$articleId = (int) $articleId;
+
+			throw new UnexpectedValueException('Could not find article '.$articleId.'/'.$clang.' in getUrl().');
 		}
 
 		return $absolute
