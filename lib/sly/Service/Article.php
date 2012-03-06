@@ -256,10 +256,6 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 			throw new sly_Exception(t('article_not_found'));
 		}
 
-		if ($article->isStartArticle()) {
-			throw new sly_Exception(t('use_category_service_to_copy_categories'));
-		}
-
 		// check category
 
 		$cats = sly_Service_Factory::getCategoryService();
@@ -290,6 +286,11 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 			$duplicate->setPath($cat ? ($cat->getPath().$target.'|') : '|');
 			$duplicate->setUpdateColumns();
 			$duplicate->setCreateColumns();
+
+			// make sure that when copying start articles
+			// we actually create an article and not a category
+			$duplicate->setStartpage(0);
+			$duplicate->setCatPosition(0);
 
 			// store it
 			$sql->insert($this->tablename, array_merge($duplicate->getPKHash(), $duplicate->toHash()));
