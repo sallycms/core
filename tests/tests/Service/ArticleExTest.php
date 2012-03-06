@@ -248,6 +248,24 @@ class sly_Service_ArticleExTest extends sly_Service_ArticleTestBase {
 		$this->assertEquals(reset($arts)->getName(), end($arts)->getCatName());
 	}
 
+	/**
+	 * Check if the article service can copy a start article
+	 *
+	 * This makes sure that the article service correctly sets startpage = 0
+	 * and catpos = 0 (and makes the copy a true article instead of a shallow
+	 * category copy).
+	 */
+	public function testCopyStartArticle() {
+		$service = $this->getService();
+		$newID   = $service->copy(1, 0);
+
+		$this->assertInternalType('int', $newID);
+
+		$art = $service->findById($newID);
+		$this->assertEquals(0, $art->getStartpage());
+		$this->assertEquals(0, $art->getCatPosition());
+	}
+
 	public function testMove() {
 		$service  = $this->getService();
 		$articles = array(6,7,8);
