@@ -464,7 +464,7 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 		$revision = (int) $revision;
 
 		if ($srcID === $dstID && $srcClang === $dstClang) {
-			throw new sly_Exception('Cannot copy article into itself.');
+			throw new sly_Exception(t('source_and_target_are_equal'));
 		}
 
 		$source = $this->findById($srcID, $srcClang);
