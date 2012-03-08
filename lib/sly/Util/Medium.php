@@ -155,6 +155,7 @@ class sly_Util_Medium {
 		$origFilename = $filename;
 		$filename     = mb_strtolower($filename);
 		$filename     = str_replace(array('ä', 'ö', 'ü', 'ß'), array('ae', 'oe', 'ue', 'ss'), $filename);
+		$filename     = sly_Core::dispatcher()->filter('SLY_MEDIUM_FILENAME', $filename, array('orig' => $origFilename));
 		$filename     = preg_replace('#[^a-z0-9.+-]#i', '_', $filename);
 		$extension    = sly_Util_String::getFileExtension($filename);
 
