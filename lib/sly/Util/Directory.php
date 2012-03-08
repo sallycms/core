@@ -323,4 +323,24 @@ class sly_Util_Directory {
 
 		return $status;
 	}
+
+	/**
+	 * Fixes ISO-8859-1 characters in filenames
+	 *
+	 * On Windows systems, the filesystem API returns ISO-8859-1 strings for
+	 * filenames and directories. This method will return the UTF-8 encoded name
+	 * if it's called on a Windows machine. Otherwise, the $filename will be
+	 * returned without any changes.
+	 *
+	 * Use this when you want to display filenames or want to treat filenames
+	 * with string functions. Be aware that you cannot use the UTF-8 encoded
+	 * filename for the filesystem API (like in file_exists()).
+	 *
+	 * @since  0.6.2
+	 * @param  string $filename  the filename as it was returned from PHP's filesystem functions
+	 * @return string
+	 */
+	public static function fixWindowsDisplayFilename($filename) {
+		return strtoupper(substr(PHP_OS, 0, 3)) === 'WIN' ? utf8_encode($filename) : $filename;
+	}
 }

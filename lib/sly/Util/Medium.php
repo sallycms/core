@@ -152,10 +152,11 @@ class sly_Util_Medium {
 	 * @return string
 	 */
 	public static function createFilename($filename, $doSubindexing = true) {
-		$filename  = strtolower(self::correctEncoding($filename));
-		$filename  = str_replace(array('ä','ö', 'ü', 'ß'), array('ae', 'oe', 'ue', 'ss'), $filename);
-		$filename  = preg_replace('#[^a-z0-9.+-]#i', '_', $filename);
-		$extension = sly_Util_String::getFileExtension($filename);
+		$origFilename = $filename;
+		$filename     = mb_strtolower($filename);
+		$filename     = str_replace(array('ä', 'ö', 'ü', 'ß'), array('ae', 'oe', 'ue', 'ss'), $filename);
+		$filename     = preg_replace('#[^a-z0-9.+-]#i', '_', $filename);
+		$extension    = sly_Util_String::getFileExtension($filename);
 
 		if ($extension) {
 			$filename  = substr($filename, 0, -(strlen($extension)+1));
@@ -173,7 +174,7 @@ class sly_Util_Medium {
 
 		$newFilename = $filename.$extension;
 
-		if ($doSubindexing) {
+		if ($doSubindexing || $origFilename !== $newFilename) {
 			// increment filename suffix until an unique one was found
 
 			if (file_exists(SLY_MEDIAFOLDER.'/'.$newFilename)) {
@@ -183,16 +184,6 @@ class sly_Util_Medium {
 		}
 
 		return $newFilename;
-	}
-
-	/**
-	 * @param  string $filename
-	 * @return string
-	 */
-	public static function correctEncoding($filename) {
-		$enc = mb_detect_encoding($filename, 'Windows-1252, ISO-8859-1, ISO-8859-2, UTF-8');
-		if ($enc != 'UTF-8') $filename = mb_convert_encoding($filename, 'UTF-8', $enc);
-		return $filename;
 	}
 
 	/**
