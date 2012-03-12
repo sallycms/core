@@ -22,20 +22,15 @@ class sly_Service_SliceValue extends sly_Service_Model_Base_Id {
 	 * @return sly_Model_SliceValue
 	 */
 	protected function makeInstance(array $params) {
+		if(!is_string($params['value'])|| json_decode($params['value']) === null) {
+			$params['value'] = json_encode($params['value']);
+		}
 		return new sly_Model_SliceValue($params);
 	}
 
 	public function save(sly_Model_Base $model) {
 		$model->setValue(json_encode($model->getValue()));
 		return parent::save($model);
-	}
-
-	public function find($where = null, $group = null, $order = null, $offset = null, $limit = null, $having = null) {
-		$values = parent::find($where, $group, $order, $offset, $limit, $having);
-		foreach($values as &$value) {
-			$value->setValue(json_decode($value->getValue()));
-		}
-		return $values;
 	}
 
 	/**
