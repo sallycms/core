@@ -104,7 +104,13 @@ class sly_Slice_Renderer {
 			$offset   = $complete[1];
 			$id       = (int) $match[1][0];
 			$clang    = isset($match[2]) ? (int) $match[2][0] : null;
-			$repl     = sly_Util_Article::getUrl($id, $clang);
+
+			try {
+				$repl = sly_Util_Article::getUrl($id, $clang);
+			}
+			catch (Exception $e) {
+				$repl = '#';
+			}
 
 			// replace the match
 			$content = substr_replace($content, $repl, $offset + $skew, $length);
