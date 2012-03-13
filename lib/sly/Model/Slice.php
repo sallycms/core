@@ -16,11 +16,29 @@
  */
 class sly_Model_Slice extends sly_Model_Base_Id {
 	protected $module; ///< string
+	protected $values; ///< array
 
-	protected $_attributes = array('module' => 'string'); ///< array
-	protected $_hasMany    = array('SliceValue' => array('delete_cascade' => true, 'foreign_key' => array('slice_id' => 'id'))); ///< array
+	protected $_attributes = array('module' => 'string', 'values' => 'array'); ///< array
 
-	/**
+	public function __construct($params = array()) {
+		if (!is_array($params['values'])) $params['values'] = json_decode($params['values'], true);
+		if ($params['values'] === null) $params['values'] = array();
+		parent::__construct($params);
+	}
+
+	public function toHash() {
+		$data = array();
+		foreach ($this->_attributes as $name => $type) {
+			if($name === 'values') {
+				$data[$name] = json_encode($this->$name);
+			} else {
+				$data[$name] = $this->$name;
+			}
+		}
+		return $data;
+	}
+
+		/**
 	 * @return string
 	 */
 	public function getModule() {
@@ -35,14 +53,11 @@ class sly_Model_Slice extends sly_Model_Base_Id {
 	}
 
 	/**
-	 * @param  string $type
 	 * @param  string $finder
 	 * @param  string $value
-	 * @return sly_Model_SliceValue
 	 */
-	public function addValue($finder, $value = null) {
-		$service = sly_Service_Factory::getSliceValueService();
-		return $service->create(array('slice_id' => $this->getId(), 'finder' => $finder, 'value' => $value));
+	public function setValue($finder, $value = null) {
+		$this->values[$finder] = $value;
 	}
 
 	/**
@@ -50,45 +65,19 @@ class sly_Model_Slice extends sly_Model_Base_Id {
 	 * @param  string $finder
 	 * @return mixed
 	 */
-	public function getValue($finder) {
-		$service    = sly_Service_Factory::getSliceValueService();
-		$sliceValue = $service->findBySliceFinder($this->getId(), $finder);
-
-		return $sliceValue ? $sliceValue->getValue() : null;
+	public function getValue($finder, $default = null) {
+		return isset($this->values[$finder]) ? $this->values[$finder] : $default;
 	}
 
 	public function setValues($values = array()) {
-		$sql = sly_DB_Persistence::getInstance();
-		try {
-			$sql->beginTransaction();
-			$this->flushValues();
-			foreach($values as $finder => $value) {
-				$this->addValue($finder, $value);
-			}
-			$sql->commit();
-		}catch(Exception $e) {
-			$sql->rollBack();
-			return false;
+		if(!sly_Util_Array::isAssoc($values)) {
+			throw new sly_Exception('Values must be assoc array!');
 		}
-		return true;
+		$this->values = sly_makeArray($values);
 	}
 
 	public function getValues() {
-		$values      = array();
-		$service     = sly_Service_Factory::getSliceValueService();
-		$sliceValues = $service->find(array('slice_id' => $this->getId()));
-		foreach($sliceValues as $value) {
-			$values[$value->getFinder()] = $value->getValue();
-		}
-		return $values;
-	}
-
-	/**
-	 * @return int
-	 */
-	public function flushValues() {
-		$service = sly_Service_Factory::getSliceValueService();
-		return $service->delete(array('slice_id' => $this->getId()));
+		return $this->values;
 	}
 
 	/**
