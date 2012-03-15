@@ -68,9 +68,8 @@ class sly_Model_Slice extends sly_Model_Base_Id {
 			$sql->commit();
 		}catch(Exception $e) {
 			$sql->rollBack();
-			return false;
+			throw $e;
 		}
-		return true;
 	}
 
 	public function getValues() {
