@@ -21,6 +21,11 @@ class sly_Model_SliceValue extends sly_Model_Base_Id {
 
 	protected $_attributes = array('slice_id' => 'int', 'finder' => 'string', 'value' => 'string'); ///< array
 
+	public function __construct($params = array()) {
+		parent::__construct($params);
+		$this->value =json_decode($this->value);
+	}
+
 	public function getSliceId() { return $this->slice_id; } ///< @return int
 	public function getFinder()  { return $this->finder;   } ///< @return string
 	public function getValue()   { return $this->value;    } ///< @return string
