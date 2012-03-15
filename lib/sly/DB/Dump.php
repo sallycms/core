@@ -29,9 +29,8 @@ class sly_DB_Dump {
 	protected $headers;   ///< array
 	protected $prefix;    ///< string
 	protected $version;   ///< string
-	protected $queries;   ///< array
 
-	private $content;     ///< string
+	const COLLECT_CALLBACK = 1; ///< int  the lamest dummy callback ever
 
 	/**
 	 * Constructor
@@ -100,14 +99,7 @@ class sly_DB_Dump {
 	 * @return array                      array of queries
 	 */
 	public function getQueries($replaceVariables = false) {
-		$queries = $this->getProperty('queries');
-		if ($replaceVariables === false) return $queries;
-
-		foreach ($queries as $idx => $qry) {
-			$queries[$idx] = self::replaceVariables($qry);
-		}
-
-		return $queries;
+		return $this->mapQueries(self::COLLECT_CALLBACK, true, $replaceVariables);
 	}
 
 	/**
@@ -151,11 +143,6 @@ class sly_DB_Dump {
 			$this->version = $this->findHeader('#^sally database dump version ([0-9.]+)#i');
 			$this->prefix  = $this->findHeader('#^prefix ([a-z0-9_]+)#i');
 
-			$this->content = $this->getContent();
-			$this->replacePrefix();
-			$this->readQueries();
-			$this->content = '';
-
 			return true;
 		}
 		catch (Exception $e) {
@@ -173,11 +160,11 @@ class sly_DB_Dump {
 	 * Comments can be either '--' style or '##' style.
 	 */
 	protected function readHeaders() {
-		$f = fopen($this->filename, 'r');
+		$f = fopen($this->filename, 'rb');
 		$this->headers = array();
 
 		for (;;) {
-			$line  = fgets($f, 256);
+			$line  = fgets($f, 8192);
 			$start = substr($line, 0, 2);
 
 			if ($start !== '##' && $start !== '--') {
@@ -223,16 +210,18 @@ class sly_DB_Dump {
 	 * queries are stored), but be aware that this might lead to problems with
 	 * user defined (user meaning a visitor) content.
 	 */
-	protected function replacePrefix() {
+	public function replacePrefix($query) {
 		$prefix = sly_Core::getTablePrefix();
 
 		if ($this->prefix && $prefix !== $this->prefix) {
 			$quoted = preg_quote($this->prefix, '/');
 
-			$this->content = preg_replace('/(TABLE `?)'.$quoted.'/i',  '$1'.$prefix, $this->content);
-			$this->content = preg_replace('/(INTO `?)'.$quoted.'/i',   '$1'.$prefix, $this->content);
-			$this->content = preg_replace('/(EXISTS `?)'.$quoted.'/i', '$1'.$prefix, $this->content);
+			$query = preg_replace('/(TABLE `?)'.$quoted.'/i',  '$1'.$prefix, $query);
+			$query = preg_replace('/(INTO `?)'.$quoted.'/i',   '$1'.$prefix, $query);
+			$query = preg_replace('/(EXISTS `?)'.$quoted.'/i', '$1'.$prefix, $query);
 		}
+
+		return $query;
 	}
 
 	/**
@@ -273,26 +262,64 @@ class sly_DB_Dump {
 	 * @author  Adminer
 	 * @license Apache License, Version 2.0
 	 */
-	protected function readQueries() {
+	public function mapQueries($callback, $replacePrefix = true, $replaceVariables = false) {
 		$delimiter = ';';
 		$offset    = 0;
-		$parse     = '[\'`"]|/\\*|-- |#'; //! ` and # not everywhere
-		$query     = $this->content;
-		$stack     = '';
+		$parse     = '(\'[^\'\\\\]*\')|(`[^`\\\\]*`)|[\'`"]|/\\*|-- |#'; //! ` and # not everywhere
+
+		if ($replacePrefix) {
+			$this->parse();
+		}
+
+		$fp    = fopen($this->filename, 'rb');
+		$chunk = 524288;
+		$query = fread($fp, $chunk);
+
+		if ($callback === self::COLLECT_CALLBACK) {
+			$queries = array();
+		}
+
+		$ends = array(
+			'/*'  => '\\*/',
+			'['   => ']',
+			'-- ' => "\n",
+			'#'   => "\n"
+		);
 
 		while ($query !== '') {
 			preg_match('('.preg_quote($delimiter)."|$parse|\$)", $query, $match, PREG_OFFSET_CAPTURE, $offset); // should always match
 
-			$found  = $match[0][0];
-			$offset = $match[0][1] + strlen($found);
+			$found = $match[0][0];
 
-			if (!$found && rtrim($query) === '') {
+			if (!$found) {
+				if (!feof($fp)) {
+					$query .= fread($fp, $chunk);
+					continue;
+				}
+
 				break;
 			}
 
-			if ($found && $found !== $delimiter) { // find matching quote or comment end
-				while (preg_match('(' . ($found == '/*' ? '\\*/' : ($found == '[' ? ']' : (preg_match('~^(-- |#)~', $found) ? "\n" : preg_quote($found) . "|\\\\."))) . '|$)s', $query, $match, PREG_OFFSET_CAPTURE, $offset)) { //! respect sql_mode NO_BACKSLASH_ESCAPES
-					$s      = $match[0][0];
+			$offset    = $match[0][1] + strlen($found);
+			$firstChar = $found[0];
+			$lastChar  = $found[strlen($found)-1];
+
+			if (strlen($found) >= 2 && $lastChar === $firstChar && ($firstChar === '\'' || $firstChar === '`')) {
+				continue;
+			}
+
+			if ($found !== $delimiter) { // find matching quote or comment end
+				$end = isset($ends[$found]) ? $ends[$found] : (preg_quote($found)."|\\\\.");
+
+				// respect sql_mode NO_BACKSLASH_ESCAPES
+				while (preg_match('('.$end.'|$)s', $query, $match, PREG_OFFSET_CAPTURE, $offset)) {
+					$s = $match[0][0];
+
+					if (!$s && !feof($fp)) {
+						$query .= fread($fp, $chunk);
+						continue;
+					}
+
 					$offset = $match[0][1] + strlen($s);
 
 					if ($s[0] != "\\") {
@@ -306,8 +333,27 @@ class sly_DB_Dump {
 				$offset = 0;
 
 				$q = trim($q);
-				if (strlen($q) > 0) $this->queries[] = $q;
+
+				if (strlen($q) > 0) {
+					if ($replacePrefix)    $q = $this->replacePrefix($q);
+					if ($replaceVariables) $q = self::replaceVariables($q);
+
+					if ($callback === self::COLLECT_CALLBACK) {
+						$queries[] = $q;
+					}
+					else {
+						call_user_func($callback, $q);
+					}
+				}
 			}
+		}
+
+		print $tokens;
+
+		fclose($fp);
+
+		if ($callback === self::COLLECT_CALLBACK) {
+			return $queries;
 		}
 	}
 
