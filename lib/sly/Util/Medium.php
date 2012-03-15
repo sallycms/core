@@ -113,7 +113,7 @@ class sly_Util_Medium {
 		// move uploaded file
 
 		if (!@move_uploaded_file($fileData['tmp_name'], $dstFile)) {
-			throw new sly_Exception(t('error_moving_uploaded_file'), self::ERR_UPLOAD_FAILED);
+			throw new sly_Exception(t('error_moving_uploaded_file', basename($fileData['tmp_name'])), self::ERR_UPLOAD_FAILED);
 		}
 
 		@chmod($dstFile, sly_Core::config()->get('FILEPERM'));
