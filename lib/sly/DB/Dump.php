@@ -348,8 +348,6 @@ class sly_DB_Dump {
 			}
 		}
 
-		print $tokens;
-
 		fclose($fp);
 
 		if ($callback === self::COLLECT_CALLBACK) {
