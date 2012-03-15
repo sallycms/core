@@ -50,8 +50,8 @@ class sly_Configuration {
 
 		$dir = SLY_DATAFOLDER.DIRECTORY_SEPARATOR.'config';
 
-		if (!$protected && !sly_Util_Directory::createHttpProtected($dir)) {
-			throw new sly_Exception('Config-Verzeichnis '.$dir.' konnte nicht erzeugt werden.');
+		if (!$protected) {
+			sly_Util_Directory::createHttpProtected($dir, true);
 		}
 
 		$protected = true;

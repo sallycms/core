@@ -309,8 +309,8 @@ class sly_Util_Directory {
 	 * @param  string $path
 	 * @return boolean
 	 */
-	public static function createHttpProtected($path) {
-		$status = self::create($path);
+	public static function createHttpProtected($path, $throwException = false) {
+		$status = self::create($path, null, $throwException);
 
 		if ($status && !file_exists($path.'/.htaccess')) {
 			$htaccess = "order deny,allow\ndeny from all";
