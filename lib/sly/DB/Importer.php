@@ -70,7 +70,7 @@ class sly_DB_Importer {
 		}
 
 		$queries = count($this->dump->getQueries());
-		$msg    .= t('importer_database_imported').'. '.t('importer_entry_count', $queries).'<br />';
+		$msg    .= t('importer_database_imported').' '.t('importer_entry_count', $queries).'<br />';
 
 		// Cache erneuern, wenn alles OK lief
 
@@ -128,20 +128,22 @@ class sly_DB_Importer {
 	 * @return array  list of errors
 	 */
 	protected function executeQueries() {
-		$queries = $this->dump->getQueries();
-		$sql     = sly_DB_Persistence::getInstance();
-		$error   = array();
+		$this->sql    = sly_DB_Persistence::getInstance();
+		$this->errors = array();
 
-		foreach ($queries as $qry) {
-			try {
-				$sql->exec($qry);
-			}
-			catch (sly_DB_PDO_Exception $e) {
-				$error[] = $e->getMessage();
-			}
+		$this->dump->mapQueries(array($this, 'execQuery'));
+
+		$this->sql = null;
+		return $this->errors;
+	}
+
+	public function execQuery($query) {
+		try {
+			$this->sql->exec($query);
 		}
-
-		return $error;
+		catch (sly_DB_PDO_Exception $e) {
+			$this->errors[] = $e->getMessage();
+		}
 	}
 
 	/**
