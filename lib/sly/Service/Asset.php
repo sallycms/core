@@ -145,6 +145,7 @@ class sly_Service_Asset {
 
 		// "/../data/dyn/public/sally/static-cache/[access]/gzip/assets/css/main.css"
 		$cacheFile = $this->getCacheFile($file, $access, $encoding);
+
 		if (!file_exists($cacheFile) || $this->forceGen) {
 			// let listeners process the file
 			$tmpFile = $dispatcher->filter(self::EVENT_PROCESS_ASSET, $file);
@@ -155,9 +156,11 @@ class sly_Service_Asset {
 			$this->generateCacheFile($tmpFile, $cacheFile, $encoding);
 			$file = $tmpFile;
 		}
+
 		if (!file_exists($cacheFile)) {
 			return false;
 		}
+
 		ob_start();
 		$this->printCacheFile($file, $cacheFile);
 		return ob_get_clean();
@@ -249,7 +252,8 @@ class sly_Service_Asset {
 			}
 
 			fclose($fp);
-		}else {
+		}
+		else {
 			throw new sly_Exception($errors);
 		}
 	}
