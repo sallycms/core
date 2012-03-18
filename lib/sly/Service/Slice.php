@@ -16,7 +16,6 @@
  */
 class sly_Service_Slice extends sly_Service_Model_Base_Id {
 	protected $tablename  = 'slice'; ///< string
-	protected $hasCascade = true;    ///< boolean
 
 	/**
 	 * @param  array $params
@@ -33,15 +32,6 @@ class sly_Service_Slice extends sly_Service_Model_Base_Id {
 	 * @return sly_Model_Slice
 	 */
 	public function copy(sly_Model_Slice $slice) {
-		$valueservice = sly_Service_Factory::getSliceValueService();
-		$clone        = $this->create(array('module' => $slice->getModule()));
-
-		foreach ($valueservice->find(array('slice_id' => $slice->getId())) as $sliceValue) {
-			$sliceValue->setId(sly_Model_Base_Id::NEW_ID);
-			$sliceValue->setSliceId($clone->getId());
-			$valueservice->save($sliceValue);
-		}
-
-		return $clone;
+		return $this->create(array('module' => $slice->getModule(), 'values' => $slice->getValues()));
 	}
 }

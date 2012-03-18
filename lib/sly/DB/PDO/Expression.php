@@ -145,8 +145,8 @@ class sly_DB_PDO_Expression {
 		$sql = $g = '';
 
 		foreach ($hash as $name => $value) {
-			if (is_array($value)) $sql .= "$g$name IN (?)";
-			else $sql .= "$g$name = ?";
+			if (is_array($value)) $sql .= "$g`$name` IN (?)";
+			else $sql .= "$g`$name` = ?";
 
 			$g = $glue;
 		}

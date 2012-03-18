@@ -173,10 +173,9 @@ class sly_Model_ArticleSlice extends sly_Model_Base_Id implements sly_Model_ISli
 	/**
 	 * @param  string $finder
 	 * @param  string $value
-	 * @return sly_Model_SliceValue
 	 */
-	public function addValue($finder, $value = null) {
-		return $this->getSlice()->addValue($finder, $value);
+	public function setValue($finder, $value = null) {
+		$this->getSlice()->addValue($finder, $value);
 	}
 
 	public function setValues($values = array()) {
@@ -188,19 +187,12 @@ class sly_Model_ArticleSlice extends sly_Model_Base_Id implements sly_Model_ISli
 	 * @param  string $finder
 	 * @return mixed
 	 */
-	public function getValue($finder) {
-		return $this->getSlice()->getValue($finder);
+	public function getValue($finder, $default = null) {
+		return $this->getSlice()->getValue($finder, $default);
 	}
 
 	public function getValues() {
 		return $this->getSlice()->getValues();
-	}
-
-	/**
-	 * @return int
-	 */
-	public function flushValues() {
-		$this->getSlice()->flushValues();
 	}
 
 	/**

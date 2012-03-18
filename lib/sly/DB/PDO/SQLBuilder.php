@@ -334,7 +334,7 @@ abstract class sly_DB_PDO_SQLBuilder {
 	 * @return string
 	 */
 	protected function build_delete() {
-		$sql = "DELETE FROM $this->table";
+		$sql = "DELETE FROM `$this->table`";
 		if ($this->where) $sql .= " WHERE $this->where";
 		return $sql;
 	}
@@ -343,8 +343,8 @@ abstract class sly_DB_PDO_SQLBuilder {
 	 * @return string
 	 */
 	protected function build_insert() {
-		$keys = implode(',', array_keys($this->data));
-		$e    = new sly_DB_PDO_Expression("INSERT INTO $this->table ($keys) VALUES (?)", array_values($this->data));
+		$keys = "`".implode('`,`', array_keys($this->data))."`";
+		$e    = new sly_DB_PDO_Expression("INSERT INTO `$this->table` ($keys) VALUES (?)", array_values($this->data));
 
 		$e->set_connection($this->connection);
 		return $e->to_s();
@@ -354,7 +354,7 @@ abstract class sly_DB_PDO_SQLBuilder {
 	 * @return string
 	 */
 	protected function build_select() {
-		$sql = "SELECT $this->select FROM $this->table";
+		$sql = "SELECT $this->select FROM `$this->table`";
 
 		if ($this->joins)  $sql .= ' '.$this->joins;
 		if ($this->where)  $sql .= " WHERE $this->where";
@@ -374,7 +374,7 @@ abstract class sly_DB_PDO_SQLBuilder {
 	 */
 	protected function build_update() {
 		$fields = array_keys($this->data);
-		$sql    = "UPDATE $this->table SET ".implode(' = ?, ', $fields).' = ?';
+		$sql    = "UPDATE `$this->table` SET `".implode('` = ?, `', $fields).'` = ?';
 
 		if ($this->where) {
 			$sql .= " WHERE $this->where";

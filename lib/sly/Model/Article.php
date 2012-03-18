@@ -77,7 +77,18 @@ class sly_Model_Article extends sly_Model_Base_Article {
 	 */
 	public function getContent($slot = null) {
 		$content = '';
+		$moduleService = sly_Service_Factory::getModuleService();
+		$typeService   = sly_Service_Factory::getArticleTypeService();
 		foreach ($this->getSlices($slot) as $slice) {
+			$module = $slice->getModule();
+			if(!$moduleService->exists($module)) {
+				trigger_error('Module '.$module.' does not exists in article/clang '.$this->getId().'/'.$this->getClang(), E_USER_WARNING);
+				continue;
+			}
+			if(!$typeService->hasModule($this->getType(), $module, $slice->getSlot())) {
+				trigger_error('Module '.$module.' is not allowed in type/slot '.$this->getType().'/'.$slice->getSlot(), E_USER_WARNING);
+				continue;
+			}
 			$content .= $slice->getOutput();
 		}
 
