@@ -49,6 +49,17 @@ abstract class sly_DB_Persistence implements Iterator {
 	abstract public function update($table, $newValues, $where = null);
 
 	/**
+	 * inserts or updates data sets in database
+	 *
+	 * @param  string  $table
+	 * @param  array   $newValues
+	 * @param  mixed   $where
+	 * @param  boolean $transactional
+	 * @return int
+	 */
+	abstract public function replace($table, $newValues, $where, $transactional = false);
+
+	/**
 	 * @param  string $table
 	 * @param  string $select
 	 * @param  mixed  $where
