@@ -97,8 +97,8 @@ class sly_Util_HTTP {
 	 * @param  boolean $addScriptPath
 	 * @return string
 	 */
-	public static function getBaseUrl($addScriptPath = false) {
-		$protocol = self::isSecure() ? 'https': 'http';
+	public static function getBaseUrl($addScriptPath = false, $forceProtocol = null) {
+		$protocol = $forceProtocol === null ? (self::isSecure() ? 'https': 'http') : $forceProtocol;
 		$host     = self::getHost();
 		$path     = '';
 

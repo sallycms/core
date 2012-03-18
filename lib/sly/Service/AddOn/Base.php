@@ -818,7 +818,15 @@ abstract class sly_Service_AddOn_Base {
 	 * @return array             list of required components
 	 */
 	public function getRequirements($component) {
-		return sly_makeArray($this->readConfigValue($component, 'requires'));
+		$req = sly_makeArray($this->readConfigValue($component, 'requires'));
+
+		foreach ($req as $idx => $r) {
+			if (strpos($r, '/') !== false) {
+				$req[$idx] = explode('/', $r);
+			}
+		}
+
+		return $req;
 	}
 
 	/**

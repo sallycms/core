@@ -73,14 +73,14 @@ class sly_Service_ArticleTypeTest extends PHPUnit_Framework_TestCase {
 
 	public function getModulesProvider() {
 		return array(
-			array('default', 'main',   array('test1', 'test2')),
+			array('default', 'main',   array('test1', 'test2', 'test3')),
 			array('default', 'test',   array('test2')),
 			array('special', null,     array()),
 			array('special', 'main',   array()),
 			array('special', 'test',   array()),
 			array('special', 'noslot', array()),
-			array('test',    null,     array('test1')),
-			array('test',    'main',   array('test1'))
+			array('test',    null,     array('test1', 'test3')),
+			array('test',    'main',   array('test1', 'test3'))
 		);
 	}
 

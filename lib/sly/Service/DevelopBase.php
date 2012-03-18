@@ -11,14 +11,14 @@
 /**
  * Base service-class for development files such as templates, modules,
  * actions. This class holds general methods, that are used in all
- * implementors.
+ * implementations.
  *
  * @ingroup service
  */
 abstract class sly_Service_DevelopBase {
+	private $data;             ///< array
+	private $lastRefreshTime;  ///< int
 
-	private $data;                            ///< array
-	private $lastRefreshTime;                 ///< int
 	protected $conditionEvaluators = array(); ///< array
 
 	/**
@@ -28,15 +28,19 @@ abstract class sly_Service_DevelopBase {
 	 * @return array               Array of files
 	 */
 	public function getFiles($absolute = true) {
-		$dir    = new sly_Util_Directory($this->getFolder());
-		$files  = $dir->listPlain(true, false, false, $absolute);
+		$dir    = $this->getFolder();
+		$dirObj = new sly_Util_Directory($dir);
+		$files  = $dirObj->listRecursive(false, true);
 		$retval = array();
 
 		foreach ($files as $filename) {
-			if ($this->isFileValid($filename)) $retval[] = $filename;
+			if ($this->isFileValid($filename)) {
+				$file = $absolute ? $filename : $this->getRelName($filename);
+				$retval[] = $file;
+			}
 		}
 
-		natsort($retval);
+		natcasesort($retval);
 		return $retval;
 	}
 
@@ -66,19 +70,21 @@ abstract class sly_Service_DevelopBase {
 		$newData  = array();
 		$oldData  = $this->getData();
 		$modified = false;
+		$dir      = $this->getFolder();
 
 		foreach ($files as $file) {
-			$basename = basename($file);
+			$basename = $this->getRelName($file);
 			$mtime    = filemtime($file);
 			$type     = $this->getFileType($basename);
+			$arrayKey = $this->encodeFilenameForArray($basename);
 
 			// Wenn sich die Datei nicht geändert hat, können wir die bekannten
 			// Daten einfach 1:1 übernehmen.
 
 			$known = $this->find('filename', $basename, $this->getFileType($basename));
 
-			if ($known && $oldData[$known][$type][$basename]['mtime'] == $mtime) {
-				$newData[$known][$type][$basename] = $oldData[$known][$type][$basename];
+			if ($known && $oldData[$known][$type][$arrayKey]['mtime'] == $mtime) {
+				$newData[$known][$type][$arrayKey] = $oldData[$known][$type][$arrayKey];
 				continue;
 			}
 
@@ -95,7 +101,7 @@ abstract class sly_Service_DevelopBase {
 				continue;
 			}
 
-			$newData[$name][$type][$basename] = $this->buildData($basename, $mtime, $parser->get());
+			$newData[$name][$type][$arrayKey] = $this->buildData($basename, $mtime, $parser->get());
 
 			$modified = true;
 		}
@@ -122,7 +128,11 @@ abstract class sly_Service_DevelopBase {
 
 		$files = $this->getFiles();
 		$known = $this->getKnownFiles();
-		$bases = array_map('basename', $files);
+		$bases = array();
+
+		foreach ($files as $file) {
+			$bases[] = $this->getRelName($file);
+		}
 
 		return
 			/* files?         */ count($files) > 0 &&
@@ -277,12 +287,12 @@ abstract class sly_Service_DevelopBase {
 	 * returns an array with all user defined parameters. User parameters may
 	 * also be fetched directly by giving the name of the parameter.
 	 *
-	 * @throws sly_Exception      When the resource with the given name is not available
-	 * @param  string  $name      Name of the item
-	 * @param  string  $key       Key of the desired parameter. null gets all. (default: null)
-	 * @param  string  $default   Default value, if the desired parameter is not set (default: null)
-	 * @param  string  $type      Filetype if necessary (default: null)
-	 * @param  string  $filename  A special Filename to get a parameter from
+	 * @throws sly_Exception      when the resource with the given name is not available
+	 * @param  string  $name      name of the item
+	 * @param  string  $key       key of the desired parameter. null gets all. (default: null)
+	 * @param  string  $default   default value, if the desired parameter is not set (default: null)
+	 * @param  string  $type      filetype if necessary (default: null)
+	 * @param  string  $filename  a special filename to get a parameter from
 	 * @return mixed              array with all user defined parameters or string with the desired parameter
 	 */
 	public function get($name, $key = null, $default = null, $type = null, $filename = null) {
@@ -306,6 +316,10 @@ abstract class sly_Service_DevelopBase {
 					break;
 				}
 			}
+		}
+
+		if ($filename !== null) {
+			$filename = $this->encodeFilenameForArray($filename);
 		}
 
 		// return all data?
@@ -350,15 +364,25 @@ abstract class sly_Service_DevelopBase {
 		$data      = $this->getData();
 		$filenames = array_keys($data[$name][$type]);
 
+		// Replace the file key ('foo*bar.php') with the real path ('foo/bar.php'),
+		// so that all event listeners can use the real path.
+		foreach ($filenames as $idx => $key) {
+			$filenames[$idx] = $this->decodeFileKey($key);
+		}
+
 		// need to check the files
 		if (count($filenames) > 1) {
 			// run all evaluators
 			foreach ($this->conditionEvaluators as $param => $evaluator) {
 				// prepare data
 				$filter = array();
-				foreach ($filenames as $filename) {
-					if (isset($data[$name][$type][$filename]['params'][$param])) {
-						$filter[$filename] = $data[$name][$type][$filename]['params'][$param];
+
+				foreach ($filenames as $idx => $filename) {
+					$key  = $this->encodeFilenameForArray($filename);
+					$info = $data[$name][$type][$key];
+
+					if (isset($info['params'][$param])) {
+						$filter[$filename] = $info['params'][$param];
 					}
 				}
 
@@ -375,27 +399,24 @@ abstract class sly_Service_DevelopBase {
 			}
 
 			// if all files are filtered
-
 			if (empty($filenames)) {
 				throw new sly_Exception(t('no_condition_handler_found', $name));
 			}
 
 			// if there are more than one
-
 			if (count($filenames) > 1) {
 				// warn the user
-
 				if (!sly_Core::isBackend()) {
 					trigger_error(t('multiple_condition_handlers_found', $name), E_USER_WARNING);
 				}
 
-				// try to find one without without conditions)
-
+				// try to find one without without conditions
 				foreach ($filenames as $filename) {
 					$nocondition = true;
+					$key         = $this->encodeFilenameForArray($filename);
 
 					foreach (array_keys($this->conditionEvaluators) as $condition) {
-						$nocondition = $nocondition || isset($data[$name][$type][$filename]['params'][$condition]);
+						$nocondition = $nocondition || isset($data[$name][$type][$key]['params'][$condition]);
 					}
 
 					if ($nocondition) {
@@ -417,6 +438,18 @@ abstract class sly_Service_DevelopBase {
 	 */
 	public function registerConditionEvaluator($param, $evaluator) {
 		$this->conditionEvaluators[$param] = $evaluator;
+	}
+
+	protected function getRelName($filename) {
+		return str_replace(DIRECTORY_SEPARATOR, '/', sly_Util_Directory::getRelative($filename, $this->getFolder()));
+	}
+
+	protected function encodeFilenameForArray($filename) {
+		return str_replace(array('/', '\\'), '*', $filename);
+	}
+
+	protected function decodeFileKey($filename) {
+		return str_replace('*', '/', $filename);
 	}
 
 	/**

@@ -12,4 +12,4 @@ ARTICLE_TYPES:
       title: Test
       template: standard
       testprop: [1, 2]
-      modules: [test1]
+      modules: [test1, test3]
