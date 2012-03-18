@@ -104,6 +104,33 @@ class sly_DB_PDO_Persistence extends sly_DB_Persistence {
 	}
 
 	/**
+	 * @param  string  $table
+	 * @param  array   $newValues
+	 * @param  mixed   $where
+	 * @param  boolean $transactional
+	 * @return int
+	 */
+	public function replace($table, $newValues, $where, $transactional = false) {
+		if ($transactional) {
+			return $this->transactional(array($this, 'replaceHelper'), array($table, $newValues, $where));
+		}
+		else {
+			$this->replaceHelper($table, $newValues, $where);
+		}
+	}
+
+	protected function replaceHelper($table, $newValues, $where) {
+		$count = $this->magicFetch($table, 'COUNT(*)', $where);
+
+		if ($count == 0) {
+			return $this->insert($table, array_merge($where, $newValues));
+		}
+		else {
+			return $this->update($table, $newValues, $where);
+		}
+	}
+
+	/**
 	 * @param  string $table
 	 * @param  string $select
 	 * @param  mixed  $where
