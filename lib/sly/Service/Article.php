@@ -179,7 +179,7 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 		if ($alist === null) {
 			$alist = array();
 			$sql   = sly_DB_Persistence::getInstance();
-			$where = array('type' => $type, 'clang' => $clangId, 'startpage' => 0);
+			$where = array('type' => $type, 'clang' => $clangId);
 
 			if ($ignore_offlines) $where['status'] = 1;
 
