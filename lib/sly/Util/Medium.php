@@ -132,6 +132,10 @@ class sly_Util_Medium {
 				$mediumToReplace->setWidth($size[0]);
 				$mediumToReplace->setHeight($size[1]);
 			}
+			else {
+				$mediumToReplace->setWidth(0);
+				$mediumToReplace->setHeight(0);
+			}
 
 			$file = $service->update($mediumToReplace);
 
