@@ -135,30 +135,6 @@ class sly_Model_User extends sly_Model_Base_Id {
 	/**
 	 * @return array
 	 */
-	public function getAllowedCategories() {
-		preg_match_all('/#csw\[(\d+)\]/', $this->getRights(), $matches);
-		return isset($matches[1]) ? $matches[1] : array();
-	}
-
-	/**
-	 * @return array
-	 */
-	public function getAllowedMediaCategories() {
-		preg_match_all('/#media\[(\d+)\]/', $this->getRights(), $matches);
-		return isset($matches[1]) ? $matches[1] : array();
-	}
-
-	/**
-	 * @return array
-	 */
-	public function getAllowedModules() {
-		preg_match_all('/#module\[(.+?)\]/', $this->getRights(), $matches);
-		return isset($matches[1]) ? $matches[1] : array();
-	}
-
-	/**
-	 * @return array
-	 */
 	public function getAllowedCLangs() {
 		$allowedLanguages = array();
 		foreach (sly_Util_Language::findAll(true) as $language) {
@@ -187,10 +163,4 @@ class sly_Model_User extends sly_Model_Base_Id {
 		return sly_Service_Factory::getUserService()->delete(array('id' => $this->id));
 	}
 
-	/**
-	 * @return boolean
-	 */
-	public function hasStructureRight() {
-		return $this->isAdmin() || sly_Util_Category::canReadCategory($this, 0);
-	}
 }
