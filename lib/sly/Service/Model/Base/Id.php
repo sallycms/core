@@ -28,14 +28,14 @@ abstract class sly_Service_Model_Base_Id extends sly_Service_Model_Base {
 	 */
 	public function save(sly_Model_Base $model) {
 		$persistence = sly_DB_Persistence::getInstance();
+		$data        = $model->toHash();
 
 		if ($model->getId() == sly_Model_Base_Id::NEW_ID) {
-			$data = $model->toHash();
 			$persistence->insert($this->getTableName(), $data);
 			$model->setId($persistence->lastId());
 		}
 		else {
-			$persistence->update($this->getTableName(), $model->toHash(), $model->getPKHash());
+			$persistence->update($this->getTableName(), $data, $model->getPKHash());
 		}
 
 		return $model;
