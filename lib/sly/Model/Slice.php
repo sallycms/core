@@ -20,25 +20,7 @@ class sly_Model_Slice extends sly_Model_Base_Id {
 
 	protected $_attributes = array('module' => 'string', 'values' => 'array'); ///< array
 
-	public function __construct($params = array()) {
-		if (!is_array($params['values'])) $params['values'] = json_decode($params['values'], true);
-		if ($params['values'] === null) $params['values'] = array();
-		parent::__construct($params);
-	}
-
-	public function toHash() {
-		$data = array();
-		foreach ($this->_attributes as $name => $type) {
-			if($name === 'values') {
-				$data[$name] = json_encode($this->$name);
-			} else {
-				$data[$name] = $this->$name;
-			}
-		}
-		return $data;
-	}
-
-		/**
+	/**
 	 * @return string
 	 */
 	public function getModule() {
