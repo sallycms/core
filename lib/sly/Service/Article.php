@@ -457,7 +457,7 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 	 * @param int $dstClang  target clang
 	 * @param int $revision  revision (unused)
 	 */
-	function copyContent($srcID, $dstID, $srcClang = 0, $dstClang = 0, $revision = 0) {
+	public function copyContent($srcID, $dstID, $srcClang = 0, $dstClang = 0, $revision = 0) {
 		$srcClang = (int) $srcClang;
 		$dstClang = (int) $dstClang;
 		$srcID    = (int) $srcID;
