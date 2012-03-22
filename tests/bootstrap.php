@@ -27,9 +27,10 @@ if (!is_dir(SLY_ADDONFOLDER)) mkdir(SLY_ADDONFOLDER);
 
 // prepare our own config files
 foreach (array('local', 'project') as $conf) {
+	$constant   = 'SLY_TESTING_'.strtoupper($conf).'_CONFIG';
 	$liveFile   = $sallyRoot.'/data/config/sly_'.$conf.'.yml';
 	$backupFile = $sallyRoot.'/data/config/sly_'.$conf.'.yml.bak';
-	$testFile   = $sallyRoot.'/sally/tests/config/sly_'.$conf.'.yml';
+	$testFile   = defined($constant) ? constant($constant) : $sallyRoot.'/sally/tests/config/sly_'.$conf.'.yml';
 
 	if (file_exists($liveFile)) {
 		rename($liveFile, $backupFile);

@@ -10,6 +10,7 @@
 
 abstract class sly_BaseTest extends PHPUnit_Extensions_Database_TestCase {
 	protected $pdo;
+	private $setup;
 
 	/**
 	 * @return PHPUnit_Extensions_Database_DB_IDatabaseConnection
@@ -29,8 +30,12 @@ abstract class sly_BaseTest extends PHPUnit_Extensions_Database_TestCase {
 		parent::setUp();
 		sly_Core::cache()->flush('sly', true);
 
-		foreach ($this->getRequiredComponents() as $comp) {
-			$this->loadComponent($comp);
+		if (!$this->setup) {
+			foreach ($this->getRequiredComponents() as $comp) {
+				$this->loadComponent($comp);
+			}
+
+			$this->setup = true;
 		}
 	}
 
@@ -39,9 +44,12 @@ abstract class sly_BaseTest extends PHPUnit_Extensions_Database_TestCase {
 	 */
 	public function getDataSet() {
 		$name = $this->getDataSetName();
-		$core = new PHPUnit_Extensions_Database_DataSet_YamlDataSet(dirname(__FILE__).'/../datasets/'.$name.'.yml');
 		$comp = new PHPUnit_Extensions_Database_DataSet_CompositeDataSet(array());
-		$comp->addDataSet($core);
+
+		if ($name !== null) {
+			$core = new PHPUnit_Extensions_Database_DataSet_YamlDataSet(dirname(__FILE__).'/../datasets/'.$name.'.yml');
+			$comp->addDataSet($core);
+		}
 
 		foreach ($this->getAdditionalDataSets() as $ds) {
 			$comp->addDataSet($ds);
