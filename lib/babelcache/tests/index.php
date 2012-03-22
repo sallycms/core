@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright (c) 2011, webvariants GbR, http://www.webvariants.de
+ * Copyright (c) 2012, webvariants GbR, http://www.webvariants.de
  *
  * This file is released under the terms of the MIT license. You can find the
  * complete text in the attached LICENSE file or online at:
@@ -23,6 +23,7 @@ assertNotEquals(BabelCache::generateKey('1'), BabelCache::generateKey(1), 'gener
 assertNotEquals('', BabelCache::generateKey(false), 'generateKey() handles false correctly.');
 assertNotEquals('', BabelCache::generateKey(null), 'generateKey() handles null correctly.');
 assertNotEquals('', BabelCache::generateKey(array()), 'generateKey() handles an empty array correctly.');
+assertNotEquals(BabelCache::generateKey(array()), BabelCache::generateKey(array(1)), 'generateKey() handles an empty array correctly.');
 
 $factory = new TestFactory();
 $obj     = $factory->getCache('BabelCache_Blackhole');
