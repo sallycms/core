@@ -18,6 +18,55 @@
  * @author  Christoph
  */
 class sly_Form_Widget_MediaList extends sly_Form_Widget_MediaBase implements sly_Form_IElement {
+	protected $min = 0;
+	protected $max = -1;
+
+	/**
+	 * Set minimum number of required files
+	 *
+	 * @param int $min
+	 */
+	public function setMinElements($min) {
+		$min = (int) $min;
+		$this->min = $min <= 0 ? 0 : $min;
+
+		if ($this->min > $this->max) {
+			$this->max = $this->min;
+		}
+	}
+
+	/**
+	 * Set maximum number of allowed files
+	 *
+	 * @param int $max  (-1 means 'no limit')
+	 */
+	public function setMaxElements($max) {
+		$max = (int) $max;
+		$this->max = $max < 0 ? -1 : $max;
+
+		if ($this->min < $this->max) {
+			$this->min = $this->max;
+		}
+	}
+
+	/**
+	 * Get minimum number of required files
+	 *
+	 * @return int
+	 */
+	public function getMinElements() {
+		return $this->min;
+	}
+
+	/**
+	 * Get maximum number of allowed files
+	 *
+	 * @return int
+	 */
+	public function getMaxElements() {
+		return $this->max;
+	}
+
 	/**
 	 * Constructor
 	 *

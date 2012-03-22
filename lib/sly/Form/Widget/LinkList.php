@@ -19,6 +19,35 @@
  * @author  Christoph
  */
 class sly_Form_Widget_LinkList extends sly_Form_Widget_LinkBase implements sly_Form_IElement {
+	protected $min = 0;
+	protected $max = -1;
+
+	public function setMinElements($min) {
+		$min = (int) $min;
+		$this->min = $min <= 0 ? 0 : $min;
+
+		if ($this->min > $this->max) {
+			$this->max = $this->min;
+		}
+	}
+
+	public function setMaxElements($max) {
+		$max = (int) $max;
+		$this->max = $max < 0 ? -1 : $max;
+
+		if ($this->min < $this->max) {
+			$this->min = $this->max;
+		}
+	}
+
+	public function getMinElements() {
+		return $this->min;
+	}
+
+	public function getMaxElements() {
+		return $this->max;
+	}
+
 	/**
 	 * Constructor
 	 *

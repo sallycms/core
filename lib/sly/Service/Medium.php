@@ -176,6 +176,10 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id {
 			$file->setWidth($size[0]);
 			$file->setHeight($size[1]);
 		}
+		else {
+			$file->setWidth(0);
+			$file->setHeight(0);
+		}
 
 		// store and return it
 
