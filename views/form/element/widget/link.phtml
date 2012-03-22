@@ -32,9 +32,15 @@ if (!empty($this->categories)) {
 	$categoryFilter = ' data-categories="'.implode('|', $this->categories).'"';
 }
 
+$cls = 'sly-widget sly-link'.(isset($this->attributes['class']) ? ' '.sly_html($this->attributes['class']) : '');
+
+if ($this->getAttribute('required') === 'required') {
+	$cls .= ' required';
+}
+
 ?>
 
-<span class="sly-widget sly-link<?php echo isset($this->attributes['class']) ? ' '.sly_html($this->attributes['class']) : '' ?>" data-catid="<?php echo $category ?>"<?php echo $typeFilter.$categoryFilter ?>>
+<span class="<?php echo $cls ?>" data-catid="<?php echo $category ?>"<?php echo $typeFilter.$categoryFilter ?>>
 	<input class="value" type="hidden" name="<?php echo $name ?>" value="<?php echo sly_html($artID) ?>" />
 	<input class="name sly-form-text" type="text" id="<?php echo $id ?>" value="<?php echo sly_html($value) ?>" readonly="readonly" />
 
