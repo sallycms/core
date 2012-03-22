@@ -34,8 +34,18 @@ if (!empty($this->categories)) {
 	$categoryFilter = ' data-categories="'.implode('|', $this->categories).'"';
 }
 
+$cls = 'sly-widget sly-medialist'.(isset($this->attributes['class']) ? ' '.sly_html($this->attributes['class']) : '');
+$min = $this->getMinElements();
+$max = $this->getMaxElements();
+$cur = count($values);
+
+if ($max !== -1 && $cur >= $max) $cls .= ' at-max';
+if ($cur <= $min) $cls .= ' at-min';
+
+$minMax = ' data-min="'.$min.'" data-max="'.$max.'"';
+
 ?>
-<span class="sly-widget sly-medialist<?php echo isset($this->attributes['class']) ? ' '.sly_html($this->attributes['class']) : '' ?>"<?php echo $filetypeFilter.$categoryFilter ?>>
+<span class="<?php echo $cls ?>"<?php echo $filetypeFilter.$categoryFilter.$minMax ?>>
 	<input type="hidden" name="<?php echo $name ?>" value="<?php echo sly_html(implode(',', $values)) ?>" />
 	<select size="8" id="<?php echo $id ?>" class="sly-form-select">
 		<?php foreach ($list as $element): ?>
