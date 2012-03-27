@@ -168,7 +168,7 @@ class sly_Slice_Form extends sly_Form {
 			throw new sly_Exception('Unexpected select type "'.$type.'" given.');
 		}
 
-		$className = 'sly_Form_Select_'.($type === 'droddown' ? 'DropDown' : ucfirst($type));
+		$className = 'sly_Form_Select_'.($type === 'dropdown' ? 'DropDown' : ucfirst($type));
 		$instance  = new $className($name, $label, $selected, $values);
 
 		if ($type === 'dropdown') {
