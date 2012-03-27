@@ -97,6 +97,16 @@ class sly_I18N implements sly_I18N_Base {
 	}
 
 	/**
+	 * Adds a custom translation key on the current object
+	 *
+	 * @param string $key          key to translate
+	 * @param string $translation  translation
+	 */
+	public function setMessage($key, $translation) {
+		$this->texts[$key] = $translation;
+	}
+
+	/**
 	 * Translate a key
 	 *
 	 * Looks in the message list for a matching key and returns the message. This
