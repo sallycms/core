@@ -103,13 +103,19 @@ class sly_Util_HTTP {
 		$path     = '';
 
 		if ($addScriptPath) {
-			$path = dirname($_SERVER['SCRIPT_NAME']); // '/foo' or '/foo/sally/backend'
-
-			if (IS_SALLY_BACKEND) {
-				$path = dirname(dirname($path));
+			// in CLI, the SCRIPT_NAME would be something like 'C:\xamp\php\phpunit'...
+			if (PHP_SAPI === 'cli') {
+				$path = '/sally';
 			}
+			else {
+				$path = dirname($_SERVER['SCRIPT_NAME']); // '/foo' or '/foo/sally/backend'
 
-			$path = str_replace('\\', '/', $path);
+				if (IS_SALLY_BACKEND) {
+					$path = dirname(dirname($path));
+				}
+
+				$path = str_replace('\\', '/', $path);
+			}
 		}
 
 		return rtrim(sprintf('%s://%s%s', $protocol, $host, $path), '/');
