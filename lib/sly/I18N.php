@@ -182,6 +182,15 @@ class sly_I18N implements sly_I18N_Base {
 	}
 
 	/**
+	 * Return all translations
+	 *
+	 * @return array  plain list of translations
+	 */
+	public function getMessages() {
+		return $this->texts;
+	}
+
+	/**
 	 * Return the locale code of this instance
 	 *
 	 * @return string  the locale code (like 'de_de')
