@@ -164,12 +164,19 @@ class sly_Util_HTTP {
 		// return a well defined value if run on CLI to make unit tests possible
 		if (PHP_SAPI === 'cli') return 'cli';
 
-		if (isset($_SERVER['HTTP_X_FORWARDED_HOST']))   return $_SERVER['HTTP_X_FORWARDED_HOST'];
-		if (isset($_SERVER['HTTP_HOST']))               return $_SERVER['HTTP_HOST'];
-		if (isset($_SERVER['HTTP_X_FORWARDED_SERVER'])) return $_SERVER['HTTP_X_FORWARDED_SERVER'];
-		if (isset($_SERVER['SERVER_NAME']))             return $_SERVER['SERVER_NAME'];
+		$host = '';
 
-		return '';
+		if (isset($_SERVER['HTTP_X_FORWARDED_HOST']))   $host = $_SERVER['HTTP_X_FORWARDED_HOST'];
+		if (isset($_SERVER['HTTP_HOST']))               $host = $_SERVER['HTTP_HOST'];
+		if (isset($_SERVER['HTTP_X_FORWARDED_SERVER'])) $host = $_SERVER['HTTP_X_FORWARDED_SERVER'];
+		if (isset($_SERVER['SERVER_NAME']))             $host = $_SERVER['SERVER_NAME'];
+
+		// remove port if present
+		if ($host && strpos($host, ':') !== false) {
+			$host = substr($host, 0, strpos($host, ':'));
+		}
+
+		return $host;
 	}
 
 	/**
