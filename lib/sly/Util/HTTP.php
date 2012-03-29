@@ -64,6 +64,9 @@ class sly_Util_HTTP {
 			}
 		}
 
+		// remove all '/./' steps
+		$url = preg_replace('#/\./#', '/', $url);
+
 		// switch between http and https?
 		if ($secure !== null) {
 			$url = preg_replace('#^https?://#', $secure ? 'https://' : 'http://', $url);
