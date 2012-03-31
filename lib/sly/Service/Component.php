@@ -197,6 +197,40 @@ class sly_Service_Component {
 	}
 
 	/**
+	 * Check if a component changed and must be disabled
+	 *
+	 * @return boolean  true if there were changes, else false
+	 */
+	public function deactivateIncompatibleComponents() {
+		$components = $this->getInstalledComponents(null, true);
+		$changes    = false;
+
+		foreach ($components as $component) {
+			$oldVal   = $this->getProperty($component, 'compatible');
+			$newVal   = $this->isCompatible($component, true);
+			$changes |= ($oldVal !== $newVal);
+
+			$this->setProperty($component, 'compatible', $newVal);
+
+			// disable all dependencies
+			if ($oldVal !== $newVal && $newVal === false) {
+				$deps = $this->getRecursiveDependencies($component);
+				$this->setProperty($component, 'status', false);
+
+				foreach ($deps as $dep) {
+					$this->setProperty($dep, 'status', false);
+				}
+			}
+		}
+
+		if ($changes) {
+			$this->clearLoadCache();
+		}
+
+		return $changes;
+	}
+
+	/**
 	 * Adds a new component to the global config
 	 *
 	 * @param mixed $component  addOn as string, plugin as array
@@ -204,6 +238,7 @@ class sly_Service_Component {
 	public function add($component) {
 		$this->setProperty($component, 'install', false);
 		$this->setProperty($component, 'status', false);
+		$this->setProperty($component, 'compatible', $this->isCompatible($component, true));
 	}
 
 	/**
@@ -841,7 +876,7 @@ class sly_Service_Component {
 	 * @return array
 	 */
 	public function getAvailableComponents($parent = null, $recursive = false) {
-		return $this->filterByProperty($parent, $recursive, 'activated');
+		return $this->filterByProperty($parent, $recursive, 'status');
 	}
 
 	/**
@@ -850,7 +885,7 @@ class sly_Service_Component {
 	 * @return array
 	 */
 	public function getInstalledComponents($parent = null, $recursive = false) {
-		return $this->filterByProperty($parent, $recursive, 'installed');
+		return $this->filterByProperty($parent, $recursive, 'install');
 	}
 
 	/**
@@ -878,17 +913,43 @@ class sly_Service_Component {
 	/**
 	 * Returns a list of dependent components
 	 *
+	 * This method will go through all components and check whether they
+	 * require the given component.
+	 *
+	 * @param  mixed   $component
+	 * @param  boolean $inclDeactivated  if true non-enabled components will be included as well
+	 * @return array                     a list of components
+	 */
+	public function getRecursiveDependencies($component, $inclDeactivated = false) {
+		$stack  = $this->dependencyHelper($component, false, false, $inclDeactivated);
+		$result = array();
+
+		while (!empty($stack)) {
+			$comp  = array_shift($stack);
+			$stack = array_merge($stack, $this->dependencyHelper($comp, false, false, $inclDeactivated));
+			$stack = array_unique($stack);
+
+			$result[] = $comp;
+		}
+
+		return $result;
+	}
+
+	/**
+	 * Returns a list of dependent components
+	 *
 	 * This method will go through all addOns and plugins and check whether they
 	 * require the given component. The return value will only contain direct
 	 * dependencies, it's not recursive.
 	 *
-	 * @param  mixed   $component    addOn as string, plugin as array
-	 * @param  boolean $onlyMissing  if true, only not available components will be returned
-	 * @param  boolean $onlyFirst    set this to true if you're only want to know whether a dependency exists
-	 * @return array                 a list of components (containing strings for addOns and arrays for plugins)
+	 * @param  mixed   $component        addOn as string, plugin as array
+	 * @param  boolean $onlyMissing      if true, only not available components will be returned
+	 * @param  boolean $onlyFirst        set this to true if you're only want to know whether a dependency exists
+	 * @param  boolean $inclDeactivated  if true non-enabled components will be included as well
+	 * @return array                     a list of components (containing strings for addOns and arrays for plugins)
 	 */
-	public function dependencyHelper($component, $onlyMissing = false, $onlyFirst = false) {
-		$components = $this->getAvailableComponents(null, true);
+	public function dependencyHelper($component, $onlyMissing = false, $onlyFirst = false, $inclDeactivated = false) {
+		$components = $inclDeactivated ? $this->getInstalledComponents(null, true) : $this->getAvailableComponents(null, true);
 		$result     = array();
 		$name       = $this->buildName($component);
 
@@ -926,8 +987,8 @@ class sly_Service_Component {
 	 * @param  mixed $component  addOn as string, plugin as array
 	 * @return array             list of required components
 	 */
-	public function getRequirements($component) {
-		$req = sly_makeArray($this->readConfigValue($component, 'requires'));
+	public function getRequirements($component, $forceRefresh = false) {
+		$req = sly_makeArray($this->readConfigValue($component, 'requires', null, $forceRefresh));
 
 		foreach ($req as $idx => $r) {
 			$req[$idx] = $this->decodeComponent($r);
@@ -942,8 +1003,8 @@ class sly_Service_Component {
 	 * @param  mixed $component  addOn as string, plugin as array
 	 * @return array             list of sally versions
 	 */
-	public function getRequiredSallyVersions($component) {
-		return sly_makeArray($this->readConfigValue($component, 'sally'));
+	public function getRequiredSallyVersions($component, $forceRefresh = false) {
+		return sly_makeArray($this->readConfigValue($component, 'sally', null, $forceRefresh));
 	}
 
 	/**
@@ -952,8 +1013,12 @@ class sly_Service_Component {
 	 * @param  mixed $component  addOn as string, plugin as array
 	 * @return boolean           true if compatible, else false
 	 */
-	public function isCompatible($component) {
-		$sallyVersions = $this->getRequiredSallyVersions($component);
+	public function isCompatible($component, $forceRefresh = false) {
+		if (!$forceRefresh) {
+			return $this->getProperty($component, 'compatible', false);
+		}
+
+		$sallyVersions = $this->getRequiredSallyVersions($component, true);
 		$versionOK     = false;
 
 		foreach ($sallyVersions as $version) {
@@ -968,9 +1033,13 @@ class sly_Service_Component {
 	}
 
 	public function loadComponents() {
+		// Make sure we don't accidentally load components that have become
+		// incompatible due to Sally and/or component updates.
+		$changes = $this->deactivateIncompatibleComponents();
+
 		$cache    = sly_Core::cache();
 		$prodMode = !sly_Core::isDeveloperMode();
-		$order    = $prodMode ? $cache->get('sly.components', 'order') : null;
+		$order    = (!$changes && $prodMode) ? $cache->get('sly.components', 'order') : null;
 
 		// if there is no cache yet, we load all components the slow way
 		if (!is_array($order)) {
@@ -1021,8 +1090,9 @@ class sly_Service_Component {
 			return false;
 		}
 
-		$activated = $this->isAvailable($component);
-		$installed = $activated || $this->isInstalled($component);
+		$compatible = $this->isCompatible($component);
+		$activated  = $compatible && $this->isAvailable($component);
+		$installed  = $compatible && ($activated || $this->isInstalled($component));
 
 		if ($installed || $force) {
 			$this->loadConfig($component, $installed, $activated);
@@ -1061,32 +1131,32 @@ class sly_Service_Component {
 	 * @param  mixed  $default    value if key is not set
 	 * @return mixed              value or default
 	 */
-	private function readConfigValue($component, $key, $default = null) {
-		static $cache = array();
-
+	private function readConfigValue($component, $key, $default = null, $forceRefresh = false) {
 		// To make this method work on components that are not yet installed or
 		// activated, we have to get their static.yml's content on our own. The
 		// project config at this point already contains 'empty' information for
 		// the component and would not the static.yml via loadStatic().
 
-		if ($this->isAvailable($component)) {
+		if (!$forceRefresh && $this->isAvailable($component)) {
 			return $this->getProperty($component, $key, $default);
 		}
 
 		$file = $this->baseFolder($component).'static.yml';
-		if (!file_exists($file)) return $default;
+		if (!file_exists($file)) return $default; // bad component
 
-		$mtime  = filemtime($file);
-		$config = array();
+		$cache = sly_Core::cache();
+		$ckey  = md5($file);
+		$mtime = filemtime($file);
+		$data  = $cache->get('sly.components.staticyml', $ckey, null);
 
-		if (!isset($cache[$file.$mtime])) {
-			$config              = sly_Util_YAML::load($file);
-			$cache[$file.$mtime] = $config;
+		if (!is_array($data) || $data['mtime'] != $mtime) {
+			$config = sly_Util_YAML::load($file);
+			$data   = array('mtime' => $mtime, 'config' => $config);
+
+			$cache->set('sly.components.staticyml', $ckey, $data);
 		}
-		else {
-			$config = $cache[$file.$mtime];
-		}
 
+		$config = $data['config'];
 		return isset($config[$key]) ? $config[$key] : $default;
 	}
 }
