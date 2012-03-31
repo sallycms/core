@@ -43,7 +43,7 @@ class sly_DB_Dump {
 	 */
 	public function __construct($filename) {
 		if (!file_exists($filename)) {
-			throw new sly_Exception(t('file', $filename));
+			throw new sly_Exception(t('file_not_found', $filename));
 		}
 
 		$this->filename = $filename;
