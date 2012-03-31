@@ -769,7 +769,7 @@ abstract class sly_Service_AddOn_Base {
 				$sql->query($query);
 			}
 		}
-		catch (sly_Exception $e) {
+		catch (sly_DB_Exception $e) {
 			return $e->getMessage();
 		}
 
