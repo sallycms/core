@@ -56,19 +56,19 @@ function sly_settype($var, $type) {
  * @param  string $default   the default value if $key was not found
  * @return mixed             the new variable value
  */
-function sly_setarraytype(array $haystack, $key, $type, $default = '') {
+function sly_setarraytype(array $haystack, $key, $type, $default = null) {
 	return array_key_exists($key, $haystack) ? sly_settype($haystack[$key], $type) : $default;
 }
 
-function sly_get($name, $type, $default = '') {
+function sly_get($name, $type, $default = null) {
 	return sly_setarraytype($_GET, $name, $type, $default);
 }
 
-function sly_post($name, $type, $default = '') {
+function sly_post($name, $type, $default = null) {
 	return sly_setarraytype($_POST, $name, $type, $default);
 }
 
-function sly_request($name, $type, $default = '') {
+function sly_request($name, $type, $default = null) {
 	return sly_setarraytype($_REQUEST, $name, $type, $default);
 }
 
