@@ -116,6 +116,22 @@ class sly_Service_AddOn extends sly_Service_AddOn_Base {
 	}
 
 	/**
+	 * Gibt ein Array aller installierten AddOns zurück.
+	 *
+	 * @return array  Array aller registrierten AddOns
+	 */
+	public function getInstalledAddons() {
+		$installed = array();
+
+		foreach ($this->getRegisteredAddons() as $addon) {
+			if ($this->isInstalled($addon)) $installed[] = $addon;
+		}
+
+		natsort($installed);
+		return $installed;
+	}
+
+	/**
 	 * @param  string  $addonName
 	 * @param  boolean $force      load the addOn even if it's not active
 	 * @return null
