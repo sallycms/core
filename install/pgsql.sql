@@ -9,9 +9,7 @@ CREATE TABLE sly_file (id SERIAL NOT NULL, re_file_id INT NOT NULL, category_id 
 CREATE INDEX filename ON sly_file (filename);
 CREATE TABLE sly_file_category (id SERIAL NOT NULL, name VARCHAR(255) NOT NULL, re_id INT NOT NULL, path VARCHAR(255) NOT NULL, attributes TEXT NULL, createdate INT NOT NULL, updatedate INT NOT NULL, createuser VARCHAR(255) NOT NULL, updateuser VARCHAR(255) NOT NULL, revision INT DEFAULT 0 NOT NULL, PRIMARY KEY(id));
 CREATE TABLE sly_user (id SERIAL NOT NULL, name VARCHAR(255) NULL, description VARCHAR(255) NULL, login VARCHAR(50) NOT NULL, psw CHAR(40), status BOOLEAN NOT NULL, rights TEXT NOT NULL, lasttrydate INT DEFAULT 0 NOT NULL, timezone VARCHAR(64) NULL, createdate INT NOT NULL, updatedate INT NOT NULL, createuser VARCHAR(255) NOT NULL, updateuser VARCHAR(255) NOT NULL, revision INT DEFAULT 0 NOT NULL, PRIMARY KEY(id));
-CREATE TABLE sly_slice (id SERIAL NOT NULL, module VARCHAR(64) NOT NULL, PRIMARY KEY(id));
-CREATE TABLE sly_slice_value (id SERIAL NOT NULL, slice_id INT NOT NULL, finder VARCHAR(50) NOT NULL, value TEXT NOT NULL, PRIMARY KEY(id));
-CREATE INDEX slice_id ON sly_slice_value (slice_id);
+CREATE TABLE sly_slice (id SERIAL NOT NULL, module VARCHAR(64) NOT NULL, serialized_values LONGTEXT NOT NULL, PRIMARY KEY(id));
 CREATE TABLE sly_registry (name VARCHAR(255) NOT NULL, value BYTEA NOT NULL, PRIMARY KEY(name));
 
 -- populate database with some initial data
