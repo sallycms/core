@@ -362,7 +362,8 @@ class sly_Service_Component {
 		$installSQL = $baseDir.'install.sql';
 
 		if ($installDump && is_readable($installSQL)) {
-			$state = $this->installDump($installSQL);
+			$mysiam = $this->getProperty($component, 'allow_non_innodb', false);
+			$state  = $this->installDump($installSQL, $mysiam);
 
 			if ($state !== true) {
 				return t('component_install_sql_failed', $name, $state);
@@ -778,19 +779,38 @@ class sly_Service_Component {
 	}
 
 	/**
-	 * @param  string $file
-	 * @return mixed         error message (string) or true
+	 * @param  string  $file
+	 * @param  boolean $allowMyISAM
+	 * @return mixed                 error message (string) or true
 	 */
-	private function installDump($file) {
+	private function installDump($file, $allowMyISAM) {
 		try {
-			$dump = new sly_DB_Dump($file);
-			$sql  = sly_DB_Persistence::getInstance();
+			$dump    = new sly_DB_Dump($file);
+			$sql     = sly_DB_Persistence::getInstance();
+			$queries = $dump->getQueries(true);
 
-			foreach ($dump->getQueries(true) as $query) {
+			// check queries for bad (i.e. non-InnoDB) engines
+
+			if (!$allowMyISAM) {
+				foreach ($queries as $idx => $query) {
+					if (preg_match('#\bCREATE\s+TABLE\b#si', $query) && preg_match('#\bENGINE\s*=\s*([a-z]+)\b#si', $query, $match)) {
+						$engine = strtolower($match[1]);
+
+						if ($engine !== 'innodb') {
+							return t('query_uses_forbidden_storage_engine', $idx+1, $match[1]);
+						}
+					}
+				}
+
+				// force InnoDB for CREATE statements without an ENGINE declaration
+				$sql->exec('SET storage_engine = InnoDB');
+			}
+
+			foreach ($queries as $query) {
 				$sql->query($query);
 			}
 		}
-		catch (sly_Exception $e) {
+		catch (sly_DB_Exception $e) {
 			return $e->getMessage();
 		}
 
