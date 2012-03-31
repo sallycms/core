@@ -22,10 +22,11 @@ class sly_Util_Category {
 	 * checks wheter a category exists or not
 	 *
 	 * @param  int $categoryId
+	 * @param  int $clang
 	 * @return boolean
 	 */
-	public static function exists($categoryId) {
-		return self::isValid(self::findById($categoryId));
+	public static function exists($categoryId, $clang = null) {
+		return self::isValid(self::findById($categoryId, $clang));
 	}
 
 	/**

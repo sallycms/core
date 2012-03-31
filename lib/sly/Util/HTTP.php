@@ -64,6 +64,9 @@ class sly_Util_HTTP {
 			}
 		}
 
+		// remove all '/./' steps
+		$url = preg_replace('#/\./#', '/', $url);
+
 		// switch between http and https?
 		if ($secure !== null) {
 			$url = preg_replace('#^https?://#', $secure ? 'https://' : 'http://', $url);
@@ -103,13 +106,19 @@ class sly_Util_HTTP {
 		$path     = '';
 
 		if ($addScriptPath) {
-			$path = dirname($_SERVER['SCRIPT_NAME']); // '/foo' or '/foo/sally/backend'
-
-			if (IS_SALLY_BACKEND) {
-				$path = dirname(dirname($path));
+			// in CLI, the SCRIPT_NAME would be something like 'C:\xamp\php\phpunit'...
+			if (PHP_SAPI === 'cli') {
+				$path = '/sally';
 			}
+			else {
+				$path = dirname($_SERVER['SCRIPT_NAME']); // '/foo' or '/foo/sally/backend'
 
-			$path = str_replace('\\', '/', $path);
+				if (IS_SALLY_BACKEND) {
+					$path = dirname(dirname($path));
+				}
+
+				$path = str_replace('\\', '/', $path);
+			}
 		}
 
 		return rtrim(sprintf('%s://%s%s', $protocol, $host, $path), '/');
@@ -155,12 +164,19 @@ class sly_Util_HTTP {
 		// return a well defined value if run on CLI to make unit tests possible
 		if (PHP_SAPI === 'cli') return 'cli';
 
-		if (isset($_SERVER['HTTP_X_FORWARDED_HOST']))   return $_SERVER['HTTP_X_FORWARDED_HOST'];
-		if (isset($_SERVER['HTTP_HOST']))               return $_SERVER['HTTP_HOST'];
-		if (isset($_SERVER['HTTP_X_FORWARDED_SERVER'])) return $_SERVER['HTTP_X_FORWARDED_SERVER'];
-		if (isset($_SERVER['SERVER_NAME']))             return $_SERVER['SERVER_NAME'];
+		$host = '';
 
-		return '';
+		if (isset($_SERVER['HTTP_X_FORWARDED_HOST']))   $host = $_SERVER['HTTP_X_FORWARDED_HOST'];
+		if (isset($_SERVER['HTTP_HOST']))               $host = $_SERVER['HTTP_HOST'];
+		if (isset($_SERVER['HTTP_X_FORWARDED_SERVER'])) $host = $_SERVER['HTTP_X_FORWARDED_SERVER'];
+		if (isset($_SERVER['SERVER_NAME']))             $host = $_SERVER['SERVER_NAME'];
+
+		// remove port if present
+		if ($host && strpos($host, ':') !== false) {
+			$host = substr($host, 0, strpos($host, ':'));
+		}
+
+		return $host;
 	}
 
 	/**
