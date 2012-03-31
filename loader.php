@@ -24,8 +24,6 @@ sly_Loader::addLoadPath(SLY_DEVELOPFOLDER.'/lib');
 sly_Loader::addLoadPath(SLY_COREFOLDER.'/lib');
 sly_Loader::addLoadPath(SLY_COREFOLDER.'/lib/sfYaml');
 sly_Loader::addLoadPath(SLY_COREFOLDER.'/lib/babelcache');
-sly_Loader::addLoadPath(SLY_COREFOLDER.'/lib/rex/oo', 'OO');
-sly_Loader::addLoadPath(SLY_COREFOLDER.'/lib/PEAR');
 sly_Loader::register();
 
 if (!$cacheExists) {
