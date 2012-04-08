@@ -432,6 +432,10 @@ class sly_Core {
 		// clear our own data caches
 		self::cache()->flush('sly', true);
 
+		// sync develop files
+		sly_Service_Factory::getTemplateService()->refresh();
+		sly_Service_Factory::getModuleService()->refresh();
+
 		// clear asset cache
 		sly_Service_Factory::getAssetService()->clearCache();
 
