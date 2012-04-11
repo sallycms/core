@@ -336,7 +336,7 @@ class sly_Service_Component {
 		$sallyVersions = $this->getProperty($component, 'sally');
 
 		if (!empty($sallyVersions)) {
-			if (!$this->isCompatible($component)) {
+			if (!$this->isCompatible($component, true)) {
 				return t('component_incompatible', $name, sly_Core::getVersion('X.Y.Z'));
 			}
 		}
@@ -679,6 +679,17 @@ class sly_Service_Component {
 	 */
 	public function getSupportPage($component, $default = null) {
 		return $this->readConfigValue($component, 'supportpage', $default);
+	}
+
+	/**
+	 * Get parent component (only relevant for backend list)
+	 *
+	 * @param  mixed $component  addOn as string, plugin as array
+	 * @param  mixed $default    default value if no page was specified in static.yml
+	 * @return mixed             the parent component or null if not given
+	 */
+	public function getParent($component) {
+		return $this->readConfigValue($component, 'parent', null);
 	}
 
 	/**
