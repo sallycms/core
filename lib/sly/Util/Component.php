@@ -9,7 +9,7 @@
  */
 
 class sly_Util_Component {
-	public static function getService($component) {
+	public static function getService() {
 		return sly_Service_Factory::getComponentService();
 	}
 
