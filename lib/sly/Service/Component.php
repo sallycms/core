@@ -44,7 +44,7 @@ class sly_Service_Component {
 	}
 
 	/**
-	 * @param  mixed $component
+	 * @param  string $component
 	 * @return string
 	 */
 	public function baseFolder($component = null) {
@@ -60,10 +60,10 @@ class sly_Service_Component {
 	/**
 	 * Setzt eine Eigenschaft einer Komponente.
 	 *
-	 * @param  array  $plugin    Plugin als array(addon, plugin)
-	 * @param  string $property  Name der Eigenschaft
-	 * @param  mixed  $value     Wert der Eigenschaft
-	 * @return mixed             der gesetzte Wert
+	 * @param  string $component  component
+	 * @param  string $property   Name der Eigenschaft
+	 * @param  mixed  $value      Wert der Eigenschaft
+	 * @return mixed              der gesetzte Wert
 	 */
 	public function setProperty($component, $property, $value) {
 		return sly_Core::config()->set($this->getConfPath($component).'/'.$property, $value);
@@ -72,7 +72,7 @@ class sly_Service_Component {
 	/**
 	 * Gibt eine Eigenschaft einer Komponente zurück.
 	 *
-	 * @param  array  $plugin     Plugin als array(addon, plugin)
+	 * @param  string $component  component
 	 * @param  string $property   Name der Eigenschaft
 	 * @param  mixed  $default    Rückgabewert, falls die Eigenschaft nicht gefunden wurde
 	 * @return string             Wert der Eigenschaft des Plugins
@@ -83,7 +83,7 @@ class sly_Service_Component {
 
 	/**
 	 * @param  string $type
-	 * @param  mixed  $component
+	 * @param  string $component
 	 * @return string
 	 */
 	protected function dynFolder($type, $component) {
@@ -1022,7 +1022,7 @@ class sly_Service_Component {
 		$req = sly_makeArray($this->readConfigValue($component, 'requires', null, $forceRefresh));
 
 		foreach ($req as $idx => $r) {
-			$req[$idx] = $this->decodeComponent($r);
+			$req[$idx] = $this->getPath($r, '/', false);
 		}
 
 		return $req;
@@ -1136,6 +1136,7 @@ class sly_Service_Component {
 			if (!empty($requires) && is_array($requires)) {
 				foreach ($requires as $required) {
 					$parts = $this->decodeComponent($required);
+					$comp  = '';
 
 					// load main comp > sub comp > sub comp > and finally the $required one
 					foreach ($parts as $part) {
