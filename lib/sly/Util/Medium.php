@@ -87,7 +87,7 @@ class sly_Util_Medium {
 		// file matches the old one.
 
 		if ($mediumToReplace) {
-			$newType = self::getMimetype($fileData['tmp_name']);
+			$newType = self::getMimetype($fileData['tmp_name'], $fileData['name']);
 			$oldType = $mediumToReplace->getFiletype();
 
 			if ($newType !== $oldType) {
@@ -195,7 +195,7 @@ class sly_Util_Medium {
 	 * @param  string $filename
 	 * @return string
 	 */
-	public static function getMimetype($filename) {
+	public static function getMimetype($filename, $realName) {
 		$size = @getimagesize($filename);
 
 		// if it's an image, we know the type
@@ -205,7 +205,7 @@ class sly_Util_Medium {
 
 		// fallback to a generic type
 		else {
-			$mimetype = sly_Util_Mime::getType($filename);
+			$mimetype = sly_Util_Mime::getType($realName);
 		}
 
 		return $mimetype;
