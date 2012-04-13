@@ -260,7 +260,7 @@ sly_article:
    -
       id: '7'
       re_id: '0'
-      name: 'Ãœber Sally'
+      name: 'Über Sally'
       catname: ''
       catpos: '0'
       attributes: ''
@@ -293,7 +293,67 @@ sly_article:
       createuser: 'admin'
       updateuser: 'admin'
       revision: '0'
-sly_article_slice: []
+sly_article_slice:
+   -
+      id: 1
+      clang: 5
+      slot: main
+      pos: 2
+      slice_id: 1
+      article_id: 1
+      createdate: 1312475380
+      updatedate: 1334320617
+      createuser: admin
+      updateuser: admin
+      revision: 0
+   -
+      id: 2
+      clang: 5
+      slot: main
+      pos: 0
+      slice_id: 2
+      article_id: 2
+      createdate: 1312476040
+      updatedate: 1327727661
+      createuser: admin
+      updateuser: admin
+      revision: 0
+   -
+      id: 4
+      clang: 5
+      slot: main
+      pos: 1
+      slice_id: 4
+      article_id: 1
+      createdate: 1334320508
+      updatedate: 1334320508
+      createuser: admin
+      updateuser: admin
+      revision: 0
+   -
+      id: 5
+      clang: 5
+      slot: main
+      pos: 0
+      slice_id: 5
+      article_id: 1
+      createdate: 1334320517
+      updatedate: 1334320517
+      createuser: admin
+      updateuser: admin
+      revision: 0
+   -
+      id: 6
+      clang: 5
+      slot: main
+      pos: 3
+      slice_id: 6
+      article_id: 1
+      createdate: 1334320539
+      updatedate: 1334320539
+      createuser: admin
+      updateuser: admin
+      revision: 0
 sly_clang:
    -
       id: 5
@@ -308,8 +368,53 @@ sly_clang:
 sly_file: []
 sly_file_category: []
 sly_registry: []
-sly_slice: []
-sly_slice_value: []
+sly_slice:
+   -
+      id: 1
+      module: wymeditor
+   -
+      id: 2
+      module: image
+   -
+      id: 4
+      module: image
+   -
+      id: 5
+      module: wymeditor
+   -
+      id: 6
+      module: image
+sly_slice_value:
+   -
+      id: 10
+      slice_id: 1
+      type: ''
+      finder: html
+      value: '"<p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.<\/p>"'
+   -
+      id: 4
+      slice_id: 2
+      type: ''
+      finder: image
+      value: '"fish2.jpg"'
+   -
+      id: 7
+      slice_id: 4
+      type: ''
+      finder: image
+      value: '"fish2.jpg"'
+   -
+      id: 8
+      slice_id: 5
+      type: ''
+      finder: html
+      value: '"<p>Hallo Welt!<\/p>"'
+   -
+      id: 9
+      slice_id: 6
+      type: ''
+      finder: image
+      value: '"fish.jpg"'
 sly_user:
    -
       id: 1
