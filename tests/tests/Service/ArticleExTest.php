@@ -266,6 +266,37 @@ class sly_Service_ArticleExTest extends sly_Service_ArticleTestBase {
 		$this->assertEquals(0, $art->getCatPosition());
 	}
 
+	/**
+	 * @depends testCopy
+	 */
+	public function testIfCopyAlsoCopiesContent() {
+		$service = $this->getService();
+		$newID   = $service->copy(1, 1);
+		$sliceS  = sly_Service_Factory::getArticleSliceService();
+
+		$oldSlices = $sliceS->find(array('article_id' => 1,      'clang' => 1), null, 'slot ASC, pos ASC');
+		$newSlices = $sliceS->find(array('article_id' => $newID, 'clang' => 1), null, 'slot ASC, pos ASC');
+
+		$this->assertEquals(count($oldSlices), count($newSlices));
+
+		foreach ($oldSlices as $idx => $oldSlice) {
+			$this->compareSlices($oldSlice, $newSlices[$idx]);
+
+			$this->assertEquals($oldSlice->getClang(), $newSlice->getClang());
+			$this->assertNotEquals($oldSlice->getArticleId(), $newSlice->getArticleId());
+			$this->assertNotEquals($oldSlice->getId(), $newSlice->getId());
+		}
+	}
+
+	private function compareSlices(sly_Model_ArticleSlice $oldSlice, sly_Model_ArticleSlice $newSlice) {
+		$this->assertEquals($oldSlice->getSlot(), $newSlice->getSlot());
+		$this->assertEquals($oldSlice->getPosition(), $newSlice->getPosition());
+		$this->assertEquals($oldSlice->getCreatedate(), $newSlice->getCreatedate());
+		$this->assertEquals($oldSlice->getUpdatedate(), $newSlice->getUpdatedate());
+		$this->assertEquals($oldSlice->getCreateuser(), $newSlice->getCreateuser());
+		$this->assertEquals($oldSlice->getUpdateuser(), $newSlice->getUpdateuser());
+	}
+
 	public function testMove() {
 		$service  = $this->getService();
 		$articles = array(6,7,8);
