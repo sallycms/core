@@ -274,13 +274,16 @@ class sly_Service_ArticleExTest extends sly_Service_ArticleTestBase {
 		$newID   = $service->copy(1, 1);
 		$sliceS  = sly_Service_Factory::getArticleSliceService();
 
-		$oldSlices = $sliceS->find(array('article_id' => 1,      'clang' => 1), null, 'slot ASC, pos ASC');
-		$newSlices = $sliceS->find(array('article_id' => $newID, 'clang' => 1), null, 'slot ASC, pos ASC');
+		$oldSlices = $sliceS->find(array('article_id' => 1,      'clang' => self::$clangA), null, 'slot ASC, pos ASC');
+		$newSlices = $sliceS->find(array('article_id' => $newID, 'clang' => self::$clangA), null, 'slot ASC, pos ASC');
 
-		$this->assertEquals(count($oldSlices), count($newSlices));
+		$this->assertCount(4, $oldSlices);
+		$this->assertCount(4, $newSlices);
 
 		foreach ($oldSlices as $idx => $oldSlice) {
-			$this->compareSlices($oldSlice, $newSlices[$idx]);
+			$newSlice = $newSlices[$idx];
+
+			$this->compareSlices($oldSlice, $newSlice);
 
 			$this->assertEquals($oldSlice->getClang(), $newSlice->getClang());
 			$this->assertNotEquals($oldSlice->getArticleId(), $newSlice->getArticleId());
@@ -291,8 +294,8 @@ class sly_Service_ArticleExTest extends sly_Service_ArticleTestBase {
 	private function compareSlices(sly_Model_ArticleSlice $oldSlice, sly_Model_ArticleSlice $newSlice) {
 		$this->assertEquals($oldSlice->getSlot(), $newSlice->getSlot());
 		$this->assertEquals($oldSlice->getPosition(), $newSlice->getPosition());
-		$this->assertEquals($oldSlice->getCreatedate(), $newSlice->getCreatedate());
-		$this->assertEquals($oldSlice->getUpdatedate(), $newSlice->getUpdatedate());
+//		$this->assertEquals($oldSlice->getCreatedate(), $newSlice->getCreatedate()); // get reset on copy to time()
+//		$this->assertEquals($oldSlice->getUpdatedate(), $newSlice->getUpdatedate()); // get reset on copy to time()
 		$this->assertEquals($oldSlice->getCreateuser(), $newSlice->getCreateuser());
 		$this->assertEquals($oldSlice->getUpdateuser(), $newSlice->getUpdateuser());
 	}

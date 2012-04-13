@@ -490,7 +490,7 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 
 			$where['slot'] = $srcSlot;
 			$slices        = $asServ->find($where);
-			$position      = count($slices); // starts at 0
+			$position      = 0;
 
 			foreach ($slices as $articleSlice) {
 				$sql->beginTransaction();
