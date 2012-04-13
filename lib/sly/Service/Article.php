@@ -496,7 +496,7 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 
 			// find slices to copy
 			$where['slot'] = $srcSlot;
-			$slices        = $asServ->find($where);
+			$slices        = $asServ->find($where, null, 'pos ASC');
 
 			foreach ($slices as $articleSlice) {
 				$sql->beginTransaction();
