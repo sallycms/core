@@ -69,13 +69,17 @@ class sly_DB_PDO_PersistenceTest extends sly_BaseTest {
 	}
 
 	public function testListTables() {
-		$tables = self::$pers->listTables();
-		$this->assertCount(9, $tables);
-		$this->assertEquals(
-			array('sly_article', 'sly_article_slice', 'sly_clang', 'sly_file', 'sly_file_category',
-			'sly_registry', 'sly_slice', 'sly_slice_value', 'sly_user'),
-			$tables
+		$tables   = self::$pers->listTables();
+		$expected = array(
+			'sly_article', 'sly_article_slice', 'sly_clang', 'sly_file', 'sly_file_category',
+			'sly_registry', 'sly_slice', 'sly_slice_value', 'sly_user'
 		);
+
+		$this->assertGreaterThanOrEqual(count($expected), count($tables));
+
+		foreach ($expected as $table) {
+			$this->assertContains($table, $tables);
+		}
 
 		$this->assertTrue(self::$pers->listTables('sly_user'));
 		$this->assertFalse(self::$pers->listTables('a'.uniqid()));
