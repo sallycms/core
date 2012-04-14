@@ -155,7 +155,9 @@ abstract class sly_Service_AddOn_Base {
 			$newVal   = $addonService->isCompatible($addonName, true);
 			$changes |= ($oldVal !== $newVal);
 
-			$addonService->setProperty($addonName, 'compatible', $newVal);
+			if ($oldVal !== $newVal) {
+				$addonService->setProperty($addonName, 'compatible', $newVal);
+			}
 
 			// disable all dependencies
 			if ($oldVal !== $newVal && $newVal === false) {
@@ -178,7 +180,9 @@ abstract class sly_Service_AddOn_Base {
 				$newVal   = $pluginService->isCompatible($plugin, true);
 				$changes |= ($oldVal !== $newVal);
 
-				$pluginService->setProperty($plugin, 'compatible', $newVal);
+				if ($oldVal !== $newVal) {
+					$pluginService->setProperty($plugin, 'compatible', $newVal);
+				}
 
 				// disable all dependencies
 				if ($oldVal !== $newVal && $newVal === false) {
@@ -1036,10 +1040,11 @@ abstract class sly_Service_AddOn_Base {
 			self::$loadInfo[$compAsString] = array($component, $installed, $activated);
 
 			// TODO: remove this magic in next (0.7) release
-			$page = $this->getProperty($component, 'page', '');
-			$name = $this->getProperty($component, 'name', '');
+			$page   = $this->getProperty($component, 'page', '');
+			$name   = $this->getProperty($component, 'name', '');
+			$config = sly_Core::config();
 
-			if (!empty($page)) {
+			if (!empty($page) && !$config->has('authorisation/pages/token/'.$page)) {
 				sly_Core::config()->set('authorisation/pages/token', array($page => $name));
 			}
 		}
