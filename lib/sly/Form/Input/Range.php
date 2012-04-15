@@ -42,15 +42,6 @@ class sly_Form_Input_Range extends sly_Form_Input_Number {
 	 * @return string  the XHTML code
 	 */
 	public function render() {
-		$path   = 'assets/js/';
-		$layout = sly_Core::getLayout();
-
-		$layout->addCSSFile($path.'jqueryui-theme/jqueryui.min.css');
-		$layout->addJavaScriptFile($path.'jqueryui.core.min.js');
-		$layout->addJavaScriptFile($path.'jqueryui.widget.min.js');
-		$layout->addJavaScriptFile($path.'jqueryui.mouse.min.js');
-		$layout->addJavaScriptFile($path.'jqueryui.slider.min.js');
-
 		$this->attributes['min']  = $this->min;
 		$this->attributes['max']  = $this->max;
 		$this->attributes['step'] = $this->step;
