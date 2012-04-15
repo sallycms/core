@@ -8,6 +8,10 @@
  * http://www.opensource.org/licenses/mit-license.php
  */
 
+if (PHP_SAPI !== 'cli') {
+	die('This script must be run from CLI.');
+}
+
 $here      = dirname(__FILE__);
 $sallyRoot = realpath($here.'/../../');
 

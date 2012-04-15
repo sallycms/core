@@ -469,7 +469,7 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 		}
 
 		$source = $this->findById($srcID, $srcClang);
-		$dest   = $this->findById($srcID, $srcClang);
+		$dest   = $this->findById($dstID, $dstClang);
 
 		// copy the slices by their slots
 
@@ -482,15 +482,21 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 		$srcSlots   = $tplService->getSlots($source->getTemplateName());
 		$dstSlots   = $tplService->getSlots($dest->getTemplateName());
 		$where      = array('article_id' => $srcID, 'clang' => $srcClang, 'revision' => $revision);
+		$dstWhere   = array('article_id' => $dstID, 'clang' => $dstClang, 'revision' => $revision);
 		$changes    = false;
 
 		foreach ($srcSlots as $srcSlot) {
 			// skip slots not present in the destination article
 			if (!in_array($srcSlot, $dstSlots)) continue;
 
+			// find start position in target article
+			$dstWhere['slot'] = $srcSlot;
+			$slices           = $asServ->find($dstWhere);
+			$position         = count($slices);
+
+			// find slices to copy
 			$where['slot'] = $srcSlot;
 			$slices        = $asServ->find($where);
-			$position      = count($slices); // starts at 0
 
 			foreach ($slices as $articleSlice) {
 				$sql->beginTransaction();
