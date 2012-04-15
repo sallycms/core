@@ -1,0 +1,41 @@
+<?php
+/*
+ * Copyright (c) 2012, webvariants GbR, http://www.webvariants.de
+ *
+ * This file is released under the terms of the MIT license. You can find the
+ * complete text in the attached LICENSE file or online at:
+ *
+ * http://www.opensource.org/licenses/mit-license.php
+ */
+?>
+<span class="sly-select-<?php echo $type ?>-list sly-select-group" id="<?php echo sly_html($this->getID()) ?>">
+	<?php
+	$selected  = sly_makeArray($this->getDisplayValue());
+	$elementID = $this->getID();
+
+	foreach ($this->values as $key => $value) {
+		$checked  = in_array($key, $selected);
+		$id       = 'sly_autogen_'.$elementID.'_'.$key.'_id';
+		$attr     = array(
+			'type'    => $type,
+			'value'   => $key,
+			'id'      => $id,
+			'name'    => $this->attributes['name'].($type == 'radio' ? '' : '[]'),
+			'checked' => $checked ? 'checked' : '',
+			'class'   => 'sly-form-checkbox',
+			'style'   => isset($this->attributes['style']) ? $this->attributes['style'] : ''
+		);
+
+		print '<span><input '.sly_Util_HTML::buildAttributeString($attr).' /> ';
+		print '<label for="'.$id.'" class="sly-inline">'.sly_html($value).'</label></span>';
+		print "\n";
+	}
+	?>
+</span>
+
+<?php if ($type === 'checkbox' && count($this->values) > 1): ?>
+<span class="sly-select-checkbox-list sly-form-helptext">
+	<a rel="all" href="#"><?php echo t('select_all') ?></a> |
+	<a rel="none" href="#"><?php echo t('select_none') ?></a>
+</span>
+<?php endif ?>
