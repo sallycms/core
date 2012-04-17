@@ -47,7 +47,7 @@ $minMax = ' data-min="'.$min.'" data-max="'.$max.'"';
 ?>
 <span class="<?php echo $cls ?>"<?php echo $typeFilter.$categoryFilter.$minMax ?>>
 	<input type="hidden" name="<?php echo $name ?>" value="<?php echo sly_html(implode(',', $values)) ?>" />
-	<select size="8" class="sly-form-select" id="<?php echo $id ?>">
+	<select size="8" class="sly-form-select sly-no-chosen" id="<?php echo $id ?>">
 		<?php foreach ($list as $element): ?>
 		<option value="<?php echo sly_html($element[0]) ?>"><?php echo sly_html($element[1]) ?></option>
 		<?php endforeach ?>
