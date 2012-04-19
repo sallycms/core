@@ -166,10 +166,10 @@ class sly_Util_HTTP {
 
 		$host = '';
 
-		if (isset($_SERVER['HTTP_X_FORWARDED_HOST']))   $host = $_SERVER['HTTP_X_FORWARDED_HOST'];
-		if (isset($_SERVER['HTTP_HOST']))               $host = $_SERVER['HTTP_HOST'];
-		if (isset($_SERVER['HTTP_X_FORWARDED_SERVER'])) $host = $_SERVER['HTTP_X_FORWARDED_SERVER'];
-		if (isset($_SERVER['SERVER_NAME']))             $host = $_SERVER['SERVER_NAME'];
+		if     (isset($_SERVER['HTTP_X_FORWARDED_HOST']))   $host = $_SERVER['HTTP_X_FORWARDED_HOST'];
+		elseif (isset($_SERVER['HTTP_HOST']))               $host = $_SERVER['HTTP_HOST'];
+		elseif (isset($_SERVER['HTTP_X_FORWARDED_SERVER'])) $host = $_SERVER['HTTP_X_FORWARDED_SERVER'];
+		elseif (isset($_SERVER['SERVER_NAME']))             $host = $_SERVER['SERVER_NAME'];
 
 		// remove port if present
 		if ($host && strpos($host, ':') !== false) {
