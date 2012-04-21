@@ -398,16 +398,17 @@ abstract class sly_Service_DevelopBase {
 				}
 			}
 
-			// if all files are filtered
+			// if all files got filtered away
 			if (empty($filenames)) {
-				throw new sly_Exception(t('no_condition_handler_found', $name));
+				throw new sly_Exception(t('condition_handlers_empty_result', $name));
 			}
 
-			// if there are more than one
+			// if multiple resources are left over
 			if (count($filenames) > 1) {
 				// warn the user
 				if (!sly_Core::isBackend()) {
-					trigger_error(t('multiple_condition_handlers_found', $name), E_USER_WARNING);
+					$files = implode(', ', $filenames);
+					trigger_error(t('condition_handlers_result_ambiguous', $name, $files), E_USER_WARNING);
 				}
 
 				// try to find one without without conditions
