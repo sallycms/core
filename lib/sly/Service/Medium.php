@@ -156,7 +156,7 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id {
 		}
 
 		$size     = @getimagesize($fullname);
-		$mimetype = empty($mimetype) ? sly_Util_Medium::getMimetype($fullname) : $mimetype;
+		$mimetype = empty($mimetype) ? sly_Util_Medium::getMimetype($fullname, $filename) : $mimetype;
 
 		// create file object
 

@@ -210,7 +210,9 @@ class sly_Service_Component {
 			$newVal   = $this->isCompatible($component, true);
 			$changes |= ($oldVal !== $newVal);
 
-			$this->setProperty($component, 'compatible', $newVal);
+			if ($oldVal !== $newVal) {
+				$this->setProperty($component, 'compatible', $newVal);
+			}
 
 			// disable all dependencies
 			if ($oldVal !== $newVal && $newVal === false) {
