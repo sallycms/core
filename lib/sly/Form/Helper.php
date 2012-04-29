@@ -25,6 +25,28 @@ abstract class sly_Form_Helper {
 	private static $i18nLoaded = false;
 
 	/**
+	 * Create a single select box with all timezones
+	 *
+	 * @param  string $name              element's name
+	 * @param  string $selected          the currently selected element or null for the system timezone
+	 * @return sly_Form_Select_DropDown
+	 */
+	public static function getTimezoneSelect($name = 'timezone', $selected = null) {
+		$selected = $selected === null ? sly_Core::getTimezone() : $selected;
+		$list     = DateTimeZone::listIdentifiers();
+		$list     = array_combine($list, $list);
+
+		// transform all timezones from 'Continent/City' to 'Continent / City'
+		// to make it easier to filter them via Chosen
+
+		foreach ($list as $idx => $tz) {
+			$list[$idx] = str_replace('/', ' / ', $tz);
+		}
+
+		return new sly_Form_Select_DropDown($name, t('timezone'), $selected, $list);
+	}
+
+	/**
 	 * Creates a select element with all visible media categories
 	 *
 	 * @param  string         $name      the elements name
