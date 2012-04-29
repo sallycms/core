@@ -963,7 +963,12 @@ abstract class sly_Service_AddOn_Base {
 	public function loadComponents() {
 		// Make sure we don't accidentally load components that have become
 		// incompatible due to Sally and/or component updates.
-		$changes = $this->deactivateIncompatibleComponents();
+		if (sly_Core::isDeveloperMode()) {
+			$changes = $this->deactivateIncompatibleComponents();
+		}
+		else {
+			$changes = false;
+		}
 
 		$cache         = sly_Core::cache();
 		$prodMode      = !sly_Core::isDeveloperMode();
