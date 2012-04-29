@@ -21,13 +21,7 @@ abstract class sly_StatelessTest extends PHPUnit_Framework_TestCase {
 	}
 
 	protected function loadComponent($component) {
-		if (is_array($component)) {
-			$service = sly_Service_Factory::getPluginService();
-			$service->loadPlugin($component, true);
-		}
-		else {
-			$service = sly_Service_Factory::getAddOnService();
-			$service->loadAddOn($component, true);
-		}
+		$service = sly_Service_Factory::getComponentService();
+		$service->load($component, true);
 	}
 }

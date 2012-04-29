@@ -66,17 +66,10 @@ abstract class sly_Service_Factory {
 	}
 
 	/**
-	 * @return sly_Service_AddOn  The addon service instance
+	 * @return sly_Service_Component  The component service instance
 	 */
-	public static function getAddOnService() {
-		return self::getService('AddOn');
-	}
-
-	/**
-	 * @return sly_Service_Plugin  The plugin service instance
-	 */
-	public static function getPluginService() {
-		return self::getService('Plugin');
+	public static function getComponentService() {
+		return self::getService('Component');
 	}
 
 	/**

@@ -22,10 +22,8 @@ else {
 sly_Loader::enablePathCache();
 sly_Loader::addLoadPath(SLY_DEVELOPFOLDER.'/lib');
 sly_Loader::addLoadPath(SLY_COREFOLDER.'/lib');
-sly_Loader::addLoadPath(SLY_COREFOLDER.'/lib/sfYaml');
-sly_Loader::addLoadPath(SLY_COREFOLDER.'/lib/babelcache');
-sly_Loader::addLoadPath(SLY_COREFOLDER.'/lib/rex/oo', 'OO');
-sly_Loader::addLoadPath(SLY_COREFOLDER.'/lib/PEAR');
+sly_Loader::addLoadPath(SLY_BASE.'/sally/vendor/fabpot/yaml/lib');
+sly_Loader::addLoadPath(SLY_BASE.'/sally/vendor/webvariants/babelcache');
 sly_Loader::register();
 
 if (!$cacheExists) {
