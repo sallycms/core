@@ -98,6 +98,19 @@ class sly_Service_ArticleSlice extends sly_Service_Model_Base_Id {
 		return $sql->affectedRows() == 1;
 	}
 
+	public function findByArticleClangSlot($articleID, $clang = null, $slot = null) {
+		if ($clang === null) $clang = sly_Core::getCurrentClang();
+		$where = array('article_id' => $articleID, 'clang' => $clang);
+		$order = 'pos ASC';
+		if ($slot !== null) {
+			$where['slot'] = $slot;
+		} else {
+			$order = 'slot ASC, '.$order;
+		}
+
+		return $this->find($where, null, $order);
+	}
+
 	/**
 	 * Verschiebt einen Slice
 	 *
