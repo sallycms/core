@@ -27,12 +27,24 @@ class sly_Util_Lessphp {
 		require_once SLY_SALLYFOLDER.'/vendor/leafo/lessphp/lessc.inc.php';
 
 		$less = new lessc($cssFile);
-		return $less->parse();
+		$css  = $less->parse();
+		return self::reduce($css);
 	}
 
 	public static function processString($css) {
 		require_once SLY_COREFOLDER.'/lib/lessphp/lessc.inc.php';
 		$less = new lessc();
-		return $less->parse($css);
+		$css  = $less->parse($css);
+		return self::reduce($css);
+	}
+
+
+	private static function reduce($css) {
+		// remove double spaces
+		$css = preg_replace('# +#i', ' ', $css);
+		// remove newlines and tabulators
+		$css = str_replace(array("\t","\n","\r"), '', $css);
+
+		return $css;
 	}
 }
