@@ -44,6 +44,10 @@ class sly_Util_Lessphp {
 		$css = preg_replace('# +#i', ' ', $css);
 		// remove newlines and tabulators
 		$css = str_replace(array("\t","\n","\r"), '', $css);
+		// remove spaces before and after {,},:,>,; and ,
+		$css = preg_replace('#\s*(\{|\}|,|;|>|:)\s*#si', '$1', $css);
+		// remove last semocolon in definition
+		$css = str_replace(';}', '}', $css);
 
 		return $css;
 	}
