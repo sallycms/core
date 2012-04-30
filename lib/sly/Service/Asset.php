@@ -30,6 +30,7 @@ class sly_Service_Asset {
 
 		$dispatcher = sly_Core::dispatcher();
 		$dispatcher->register(self::EVENT_PROCESS_ASSET, array($this, 'processScaffold'), array(), true);
+		$dispatcher->register(self::EVENT_PROCESS_ASSET, array($this, 'processLessCSS'), array(), true);
 	}
 
 	/**
@@ -269,6 +270,29 @@ class sly_Service_Asset {
 			$css     = sly_Util_Scaffold::process($file);
 			$dir     = SLY_DYNFOLDER.'/'.self::TEMP_DIR;
 			$tmpFile = $dir.'/'.md5($file).'.css';
+
+			sly_Util_Directory::create($dir, $this->getDirPerm());
+
+			file_put_contents($tmpFile, $css);
+			chmod($tmpFile, $this->getFilePerm());
+
+			return $tmpFile;
+		}
+
+		return $file;
+	}
+
+	/**
+	 * @param  array $params
+	 * @return string
+	 */
+	public function processLessCSS($params) {
+		$file = $params['subject'];
+
+		if (sly_Util_String::endsWith($file, '.less') && file_exists(SLY_BASE.'/'.$file)) {
+			$css     = sly_Util_Lessphp::process($file);
+			$dir     = SLY_DYNFOLDER.'/'.self::TEMP_DIR;
+			$tmpFile = $dir.'/'.md5($file).'.less';
 
 			sly_Util_Directory::create($dir, $this->getDirPerm());
 
