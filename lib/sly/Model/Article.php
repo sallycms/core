@@ -96,9 +96,7 @@ class sly_Model_Article extends sly_Model_Base_Article {
 	}
 
 	public function getSlices($slot = null) {
-		$where   = array('article_id' => $this->getId(), 'clang' => $this->getClang());
-		if ($slot !== null) $where['slot'] = $slot;
-		return sly_Service_Factory::getArticleSliceService()->find($where, null, 'pos ASC');
+		return sly_Service_Factory::getArticleSliceService()->findByArticleClangSlot($this->getId(), $this->getClang(), $slot);
 	}
 
 	/**
