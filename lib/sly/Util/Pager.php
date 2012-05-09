@@ -216,11 +216,13 @@ class sly_Util_Pager {
 					break;
 			}
 
-			$links[] = array(
-				'url'        => $url,
-				'text'       => $text,
-				'attributes' => $attribs
-			);
+			if (mb_strlen($text) > 0) {
+				$links[] = array(
+					'url'        => $url,
+					'text'       => $text,
+					'attributes' => $attribs
+				);
+			}
 		}
 
 		return $links;
