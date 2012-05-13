@@ -297,7 +297,9 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 			$this->deleteListCache();
 
 			// copy slices
-			$this->copyContent($id, $newID, $clang, $clang);
+			if ($source->hasType()) {
+				$this->copyContent($id, $newID, $clang, $clang);
+			}
 
 			// notify system
 			$disp->notify('SLY_ART_COPIED', $duplicate, compact('source'));
