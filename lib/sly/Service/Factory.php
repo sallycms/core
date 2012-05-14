@@ -29,7 +29,16 @@ abstract class sly_Service_Factory {
 				throw new sly_Exception(t('service_not_found', $modelName));
 			}
 
-			$service = new $serviceName();
+			if ($modelName === 'PackageManager') {
+				$pkgService = self::getPackageService();
+				$service    = new $serviceName($pkgService);
+			}
+			elseif ($modelName === 'Package') {
+				$service = new $serviceName(SLY_ADDONFOLDER, SLY_DYNFOLDER);
+			}
+			else {
+				$service = new $serviceName();
+			}
 
 			self::$services[$modelName] = $service;
 		}
@@ -66,10 +75,17 @@ abstract class sly_Service_Factory {
 	}
 
 	/**
-	 * @return sly_Service_Component  The component service instance
+	 * @return sly_Service_Package  The package service instance
 	 */
-	public static function getComponentService() {
-		return self::getService('Component');
+	public static function getPackageService() {
+		return self::getService('Package');
+	}
+
+	/**
+	 * @return sly_Service_PackageManager  The package manager service instance
+	 */
+	public static function getPackageManagerService() {
+		return self::getService('PackageManager');
 	}
 
 	/**

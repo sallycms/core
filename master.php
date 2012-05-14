@@ -43,7 +43,7 @@ if (ini_get('register_globals')) {
 	$keys         = array_keys($GLOBALS);
 
 	foreach ($keys as $key) {
-		if (!in_array($key, $superglobals) && $key != 'GLOBALS') {
+		if (!in_array($key, $superglobals) && $key !== 'GLOBALS') {
 			unset($$key);
 		}
 	}

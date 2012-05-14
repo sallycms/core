@@ -34,7 +34,8 @@ static:
   - sly_I18N
   - sly_Service_Factory
   - sly_Service_Asset
-  - sly_Service_Component
+  - sly_Service_Package
+  - sly_Service_PackageManager
   - sly_Util_Article
   - sly_Service_Model_Base
   - sly_Service_ArticleBase
