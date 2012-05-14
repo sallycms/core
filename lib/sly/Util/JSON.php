@@ -11,9 +11,9 @@
 /**
  * @ingroup util
  */
-class sly_Util_YAML {
+class sly_Util_JSON {
 	protected static function getService() {
-		return sly_Service_Factory::getService('File_YAML');
+		return sly_Service_Factory::getService('File_JSON');
 	}
 
 	/**
@@ -42,11 +42,10 @@ class sly_Util_YAML {
 	}
 
 	/**
-	 * Cached loading of a YAML file
+	 * Cached loading of a JSON file
 	 *
 	 * @throws sly_Exception
-	 * @throws InvalidArgumentException
-	 * @param  string  $filename     Path to YAML file
+	 * @param  string  $filename     Path to JSON file
 	 * @param  boolean $forceCached  always return cached version (if it exists)
 	 * @return mixed                 parsed content
 	 */
