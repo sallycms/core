@@ -34,10 +34,21 @@ class sly_Util_AddOn {
 	}
 
 	/**
+	 * returns the base URI for all addOn assets
+	 *
+	 * @param  string $addon  addOn name
+	 * @return string         a string like '../data/dyn/public/vendor/addon/'
+	 */
+	public static function assetBaseUri($addon) {
+		$base = 'data/dyn/public/'.$addon.'/';
+		return sly_Core::isBackend() ? "../$base" : $base;
+	}
+
+	/**
 	 * returns the full path to the public directory
 	 *
-	 * @param  string $addon  the addon to check
-	 * @return boolean
+	 * @param  string $addon  addOn name
+	 * @return string
 	 */
 	public static function publicDirectory($addon) {
 		return self::getService()->publicDirectory($addon);
@@ -46,8 +57,8 @@ class sly_Util_AddOn {
 	/**
 	 * returns the full path to the internal directory
 	 *
-	 * @param  string $addon  the addon to check
-	 * @return boolean
+	 * @param  string $addon  addOn name
+	 * @return string
 	 */
 	public static function internalDirectory($addon) {
 		return self::getService()->internalDirectory($addon);
@@ -56,8 +67,8 @@ class sly_Util_AddOn {
 	/**
 	 * returns the addon's version
 	 *
-	 * @param  string $addon  the addon to check
-	 * @return boolean
+	 * @param  string $addon  addOn name
+	 * @return string
 	 */
 	public static function getVersion($addon) {
 		return self::getService()->getPackageService()->getVersion($addon);
@@ -66,8 +77,8 @@ class sly_Util_AddOn {
 	/**
 	 * returns the addon's author
 	 *
-	 * @param  string $addon  the addon to check
-	 * @return boolean
+	 * @param  string $addon  addOn name
+	 * @return string
 	 */
 	public static function getAuthor($addon) {
 		return self::getService()->getPackageService()->getAuthor($addon);
