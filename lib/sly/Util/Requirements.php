@@ -22,8 +22,8 @@ class sly_Util_Requirements {
 	public function phpVersion() {
 		$version = $this->numPHPVersion();
 		$current = $this->versionValue($version);
-		$best    = $this->versionValue('5.3');
-		$ok      = $this->versionValue('5.2');
+		$best    = $this->versionValue('5.4.3');
+		$ok      = $this->versionValue('5.2.1');
 
 		return $this->result($version, $current >= $best ? self::OK : ($current >= $ok ? self::WARNING : self::FAILED));
 	}
