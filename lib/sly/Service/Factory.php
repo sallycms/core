@@ -39,7 +39,10 @@ abstract class sly_Service_Factory {
 			}
 			elseif ($modelName === 'AddOn') {
 				$pkgService = self::getService('Package_AddOn');
+				$vndService = self::getService('Package_Vendor');
 				$service    = new $serviceName($pkgService, SLY_DYNFOLDER);
+
+				$service->setVendorPackageService($vndService);
 			}
 			elseif ($modelName === 'Package_Vendor') {
 				$service = new $serviceName(SLY_VENDORFOLDER);

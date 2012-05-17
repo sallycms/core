@@ -14,6 +14,7 @@
  */
 class sly_Service_AddOn {
 	protected $pkgService; ///< sly_Service_Package
+	protected $vndService; ///< sly_Service_Package  vendor package service (optional)
 	protected $dynDir;     ///< string
 
 	const SALLY_PKGKEY     = 'sallycms/sallycms';
@@ -26,6 +27,13 @@ class sly_Service_AddOn {
 	public function __construct(sly_Service_Package $pkgService, $dynDir) {
 		$this->pkgService = $pkgService;
 		$this->dynDir     = sly_Util_Directory::normalize($dynDir).DIRECTORY_SEPARATOR;
+	}
+
+	/**
+	 * @param sly_Service_Package $service
+	 */
+	public function setVendorPackageService(sly_Service_Package $service) {
+		$this->vndService = $service;
 	}
 
 	/**
@@ -166,6 +174,13 @@ class sly_Service_AddOn {
 	 */
 	public function getRequirements($addon) {
 		$ignore = array(self::INSTALLER_PKGKEY, self::SALLY_PKGKEY);
+
+		// filter out vendor packages
+		if ($this->vndService) {
+			$vendors = $this->vndService->findPackages();
+			$ignore  = array_merge($ignore, $vendors);
+		}
+
 		return $this->pkgService->getRequirements($addon, true, $ignore);
 	}
 
@@ -262,6 +277,16 @@ class sly_Service_AddOn {
 	 */
 	public function internalDirectory($addon) {
 		return $this->dynDirectory('internal', $addon);
+	}
+
+	/**
+	 * Checks if an addOn exists
+	 *
+	 * @param  string $addon  addon name
+	 * @return boolean
+	 */
+	public function exists($addon) {
+		return $this->pkgService->exists($addon);
 	}
 
 	/**
