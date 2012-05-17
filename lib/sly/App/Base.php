@@ -12,8 +12,8 @@ abstract class sly_App_Base implements sly_App_Interface {
 	public function initialize() {
 		$setup = sly_Core::config()->get('SETUP') === true;
 
-		// boot packages
-		if (!$setup) sly_Core::loadPackages();
+		// boot addOns
+		if (!$setup) sly_Core::loadAddOns();
 
 		// register listeners
 		sly_Core::registerListeners();

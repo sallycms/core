@@ -17,20 +17,17 @@ class sly_Util_Composer extends sly_Util_JSON {
 	/**
 	 * @param  string  $filename
 	 * @param  string  $key
-	 * @param  boolean $tryExtra  if true and $key is not found at the root level, $key is also search in 'extra/sallycms/$key'
+	 * @param  boolean $tryExtra  if true $key is first searched in /extra/sallycms/$key, before /$key ist searched
 	 * @return string
 	 */
 	public static function getKey($filename, $key, $tryExtra = true) {
+		if ($tryExtra) {
+			$val = self::getSallyKey($filename, $key);
+			if ($val !== null) return $val;
+		}
+
 		$data = self::load($filename);
-
-		// match
-		if (array_key_exists($key, $data)) return $data[$key];
-
-		// give up
-		if (!$tryExtra) return null;
-
-		// try extra
-		return self::getSallyKey($filename, $key);
+		return array_key_exists($key, $data) ? $data[$key] : null;
 	}
 
 	/**

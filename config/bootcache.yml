@@ -35,7 +35,8 @@ static:
   - sly_Service_Factory
   - sly_Service_Asset
   - sly_Service_Package
-  - sly_Service_PackageManager
+  - sly_Service_AddOn
+  - sly_Service_AddOnManager
   - sly_Util_Article
   - sly_Service_Model_Base
   - sly_Service_ArticleBase

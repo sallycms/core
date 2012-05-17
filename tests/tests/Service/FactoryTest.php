@@ -10,7 +10,7 @@
 
 class sly_Service_FactoryTest extends PHPUnit_Framework_TestCase {
 	public function testGetService() {
-		$service = sly_Service_Factory::getPackageService();
+		$service = sly_Service_Factory::getAddOnPackageService();
 		$this->assertInstanceOf('sly_Service_Package', $service);
 	}
 
@@ -22,8 +22,8 @@ class sly_Service_FactoryTest extends PHPUnit_Framework_TestCase {
 	}
 
 	public function testGetSingleton() {
-		$a = sly_Service_Factory::getPackageService();
-		$b = sly_Service_Factory::getService('Package');
+		$a = sly_Service_Factory::getAddOnPackageService();
+		$b = sly_Service_Factory::getService('Package_AddOn');
 		$this->assertSame($a, $b);
 	}
 }
