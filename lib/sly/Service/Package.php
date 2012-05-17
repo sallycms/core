@@ -280,8 +280,8 @@ class sly_Service_Package {
 
 					foreach ($subdirs as $subdir) {
 						// good package
-						if ($this->exists($dir.$subdir)) {
-							$packages[] = $dir.$subdir;
+						if ($this->exists($dir.'/'.$subdir)) {
+							$packages[] = $dir.'/'.$subdir;
 						}
 					}
 				}
