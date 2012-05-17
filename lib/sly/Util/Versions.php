@@ -13,19 +13,19 @@
  */
 class sly_Util_Versions {
 	/**
-	 * @param  string $component
+	 * @param  string $path
 	 * @return string
 	 */
-	public static function get($component) {
-		return sly_Core::config()->get('versions/'.$component, false);
+	public static function get($path) {
+		return sly_Core::config()->get('versions/'.$path, false);
 	}
 
 	/**
-	 * @param  string $component
+	 * @param  string $path
 	 * @param  string $version
 	 * @return string
 	 */
-	public static function set($component, $version) {
-		return sly_Core::config()->set('versions/'.$component, $version);
+	public static function set($path, $version) {
+		return sly_Core::config()->set('versions/'.$path, $version);
 	}
 }

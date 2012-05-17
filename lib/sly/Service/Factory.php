@@ -25,16 +25,27 @@ abstract class sly_Service_Factory {
 		if (!isset(self::$services[$modelName])){
 			$serviceName = 'sly_Service_'.$modelName;
 
+			if ($modelName === 'Package_Vendor' || $modelName === 'Package_AddOn') {
+				$serviceName = 'sly_Service_Package';
+			}
+
 			if (!class_exists($serviceName)) {
 				throw new sly_Exception(t('service_not_found', $modelName));
 			}
 
-			if ($modelName === 'PackageManager') {
-				$pkgService = self::getPackageService();
-				$service    = new $serviceName($pkgService);
+			if ($modelName === 'AddOn_Manager') {
+				$aService = self::getService('AddOn');
+				$service  = new $serviceName($aService);
 			}
-			elseif ($modelName === 'Package') {
-				$service = new $serviceName(SLY_ADDONFOLDER, SLY_DYNFOLDER);
+			elseif ($modelName === 'AddOn') {
+				$pkgService = self::getService('Package_AddOn');
+				$service    = new $serviceName($pkgService, SLY_DYNFOLDER);
+			}
+			elseif ($modelName === 'Package_Vendor') {
+				$service = new $serviceName(SLY_VENDORFOLDER);
+			}
+			elseif ($modelName === 'Package_AddOn') {
+				$service = new $serviceName(SLY_ADDONFOLDER);
 			}
 			else {
 				$service = new $serviceName();
@@ -75,17 +86,31 @@ abstract class sly_Service_Factory {
 	}
 
 	/**
-	 * @return sly_Service_Package  The package service instance
+	 * @return sly_Service_Package  The package service instance initiliazed on SLY_VENDORFOLDER
 	 */
-	public static function getPackageService() {
-		return self::getService('Package');
+	public static function getVendorPackageService() {
+		return self::getService('Package_Vendor');
 	}
 
 	/**
-	 * @return sly_Service_PackageManager  The package manager service instance
+	 * @return sly_Service_Package  The package service instance initiliazed on SLY_ADDONFOLDER
 	 */
-	public static function getPackageManagerService() {
-		return self::getService('PackageManager');
+	public static function getAddOnPackageService() {
+		return self::getService('Package_AddOn');
+	}
+
+	/**
+	 * @return sly_Service_AddOn  The addOn service instance
+	 */
+	public static function getAddOnService() {
+		return self::getService('AddOn');
+	}
+
+	/**
+	 * @return sly_Service_AddOn_Manager  The addOn manager service instance
+	 */
+	public static function getAddOnManagerService() {
+		return self::getService('AddOn_Manager');
 	}
 
 	/**

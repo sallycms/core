@@ -329,11 +329,11 @@ class sly_Core {
 	}
 
 	/**
-	 * loads all known packages into Sally
+	 * loads all known addOns into Sally
 	 */
-	public static function loadPackages() {
-		sly_Service_Factory::getPackageManagerService()->loadPackages();
-		self::dispatcher()->notify('SLY_PACKAGES_LOADED');
+	public static function loadAddOns() {
+		sly_Service_Factory::getAddOnManagerService()->loadAddOns();
+		self::dispatcher()->notify('SLY_ADDONS_LOADED');
 	}
 
 	public static function registerListeners() {
@@ -466,7 +466,7 @@ class sly_Core {
 		sly_Service_Factory::getAssetService()->clearCache();
 
 		// refresh addOns
-		sly_Service_Factory::getPackageManagerService()->refreshPackages();
+		sly_Service_Factory::getAddOnManagerService()->refresh();
 
 		// create bootcache
 		sly_Util_BootCache::recreate('frontend');

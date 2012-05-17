@@ -16,12 +16,12 @@ abstract class sly_StatelessTest extends PHPUnit_Framework_TestCase {
 	/**
 	 * @return array
 	 */
-	protected function getRequiredPackages() {
+	protected function getRequiredAddOns() {
 		return array();
 	}
 
-	protected function loadPackage($package) {
-		$service = sly_Service_Factory::getPackageManagerService();
-		$service->load($package, true);
+	protected function loadAddOn($addon) {
+		$service = sly_Service_Factory::getAddOnManagerService();
+		$service->load($addon, true);
 	}
 }

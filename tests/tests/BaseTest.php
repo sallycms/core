@@ -31,8 +31,8 @@ abstract class sly_BaseTest extends PHPUnit_Extensions_Database_TestCase {
 		sly_Core::cache()->flush('sly', true);
 
 		if (!$this->setup) {
-			foreach ($this->getRequiredPackages() as $pkg) {
-				$this->loadPackage($pkg);
+			foreach ($this->getRequiredAddOns() as $addon) {
+				$this->loadAddOns($addon);
 			}
 
 			$this->setup = true;
@@ -68,13 +68,13 @@ abstract class sly_BaseTest extends PHPUnit_Extensions_Database_TestCase {
 	/**
 	 * @return array
 	 */
-	protected function getRequiredPackages() {
+	protected function getRequiredAddOns() {
 		return array();
 	}
 
-	protected function loadPackage($package) {
-		$service = sly_Service_Factory::getPackageManagerService();
-		$service->load($package, true);
+	protected function loadAddOn($addon) {
+		$service = sly_Service_Factory::getAddOnManagerService();
+		$service->load($addon, true);
 	}
 
 	/**

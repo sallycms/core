@@ -6,4 +6,4 @@ DEVELOPER_MODE: true
 PROJECTNAME: SallyCMS-Projekt
 TIMEZONE: Europe/Berlin
 DEFAULT_LOCALE: de_de
-packages: []
+addons: []
