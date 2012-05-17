@@ -252,20 +252,37 @@ class sly_Service_Package {
 	public function findPackages() {
 		$root     = $this->baseDirectory();
 		$packages = array();
-		$dirs     = $this->readDir($root);
 
-		foreach ($dirs as $dir) {
-			// evil package not conforming to naming convention
-			if ($this->exists($dir)) {
-				$packages[] = $dir;
+		// If we're in a real composer vendor directory, there is a installed.json,
+		// that contains a list of all packages. We use this to detect packages
+		// have no composer.json themselves (aka leafo/lessphp).
+		$installed = $root.'composer/installed.json';
+
+		if (file_exists($installed)) {
+			$data = sly_Util_JSON::load($installed);
+
+			foreach ($data as $pkg) {
+				$packages[] = $pkg['name'];
 			}
-			else {
-				$subdirs = $this->readDir($root.'/'.$dir);
+		}
 
-				foreach ($subdirs as $subdir) {
-					// good package
-					if ($this->exists($dir.'/'.$subdir)) {
-						$packages[] = $dir.'/'.$subdir;
+		// Or else scan the filesystem.
+		else {
+			$dirs = $this->readDir($root);
+
+			foreach ($dirs as $dir) {
+				// evil package not conforming to naming convention
+				if ($this->exists($dir)) {
+					$packages[] = $dir;
+				}
+				else {
+					$subdirs = $this->readDir($root.$dir);
+
+					foreach ($subdirs as $subdir) {
+						// good package
+						if ($this->exists($dir.$subdir)) {
+							$packages[] = $dir.$subdir;
+						}
 					}
 				}
 			}
