@@ -35,7 +35,7 @@ class sly_Form_Widget_LinkList extends sly_Form_Widget_LinkBase implements sly_F
 		$max = (int) $max;
 		$this->max = $max < 0 ? -1 : $max;
 
-		if ($this->min < $this->max) {
+		if ($this->min > $this->max) {
 			$this->min = $this->max;
 		}
 	}
