@@ -619,7 +619,7 @@ class sly_Service_AddOn_Manager {
 	public function refresh() {
 		$aservice = $this->addOnService;
 		$pservice = $this->pkgService;
-		$packages = $pservice->findPackages();
+		$packages = $pservice->getPackages();
 
 		// remove missing addOns
 		$registered = $aservice->getRegisteredAddOns();

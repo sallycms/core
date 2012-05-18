@@ -16,6 +16,8 @@ class sly_Service_Package {
 	protected $sourceDir; ///< string
 	protected $cache;     ///< BabelCache_Interface
 	protected $composers; ///< array
+	protected $refreshed; ///< boolean
+	protected $namespace; ///< string
 
 	/**
 	 * @param string               $sourceDir
@@ -25,6 +27,8 @@ class sly_Service_Package {
 		$this->sourceDir = sly_Util_Directory::normalize($sourceDir).DIRECTORY_SEPARATOR;
 		$this->cache     = $cache;
 		$this->composers = array();
+		$this->refreshed = false;
+		$this->namespace = substr(md5($this->sourceDir), 0, 10).'_';
 	}
 
 	/**
@@ -33,6 +37,7 @@ class sly_Service_Package {
 	public function clearCache() {
 		sly_Core::cache()->flush('sly.package', true);
 		$this->composers = array();
+		$this->refreshed = false;
 	}
 
 	/**
@@ -49,20 +54,26 @@ class sly_Service_Package {
 		return $dir;
 	}
 
+	protected function getCacheKey($package, $key) {
+		$package = str_replace('/', '%', $package);
+		return ($package ? $package.'%' : '').$key;
+	}
+
 	protected function getCache($package, $key, $default = null) {
-		return $this->cache->get('sly.package', str_replace('/', '%', $package).'%'.$key, $default);
+		return $this->cache->get('sly.package.'.$this->namespace, $this->getCacheKey($package, $key), $default);
 	}
 
 	protected function setCache($package, $key, $value) {
-		return $this->cache->set('sly.package', str_replace('/', '%', $package).'%'.$key, $value);
+		return $this->cache->set('sly.package.'.$this->namespace, $this->getCacheKey($package, $key), $value);
 	}
 
 	/**
-	 * @param  string $package  package name
+	 * @param  string  $package       package name
+	 * @param  boolean $forceRefresh  true to not use the cache and check if the composer.json is present
 	 * @return boolean
 	 */
-	public function exists($package) {
-		$exists = $this->getCache($package, 'exists');
+	public function exists($package, $forceRefresh = false) {
+		$exists = $forceRefresh ? null : $this->getCache($package, 'exists');
 
 		if ($exists === null) {
 			$base   = $this->baseDirectory($package);
@@ -170,7 +181,11 @@ class sly_Service_Package {
 			if ($composer === null) {
 				$filename = $this->baseDirectory($package).'composer.json';
 				$composer = new sly_Util_Composer($filename);
+				$composer->getContent(); // read file
 
+				$this->setCache($package, 'composer.json', $composer);
+			}
+			elseif (sly_Core::isDeveloperMode() && $composer->revalidate()) {
 				$this->setCache($package, 'composer.json', $composer);
 			}
 
@@ -262,7 +277,7 @@ class sly_Service_Package {
 			return $result;
 		}
 
-		$all    = $this->findPackages();
+		$all    = $this->getPackages();
 		$stack  = array($package);
 		$result = array();
 
@@ -292,6 +307,22 @@ class sly_Service_Package {
 	}
 
 	/**
+	 * @return array  list of packages (cached if possible)
+	 */
+	public function getPackages() {
+		$packages = $this->getCache('', 'packages');
+
+		if ($packages === null || ($this->refreshed === false && sly_Core::isDeveloperMode())) {
+			$packages = $this->findPackages();
+
+			$this->refreshed = true;
+			$this->setCache('', 'packages', $packages);
+		}
+
+		return $packages;
+	}
+
+	/**
 	 * @return array  list of found packages
 	 */
 	public function findPackages() {
@@ -317,7 +348,7 @@ class sly_Service_Package {
 
 			foreach ($dirs as $dir) {
 				// evil package not conforming to naming convention
-				if ($this->exists($dir)) {
+				if ($this->exists($dir, true)) {
 					$packages[] = $dir;
 				}
 				else {
@@ -325,7 +356,7 @@ class sly_Service_Package {
 
 					foreach ($subdirs as $subdir) {
 						// good package
-						if ($this->exists($dir.'/'.$subdir)) {
+						if ($this->exists($dir.'/'.$subdir, true)) {
 							$packages[] = $dir.'/'.$subdir;
 						}
 					}

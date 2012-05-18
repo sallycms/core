@@ -177,7 +177,7 @@ class sly_Service_AddOn {
 
 		// filter out vendor packages
 		if ($this->vndService) {
-			$vendors = $this->vndService->findPackages();
+			$vendors = $this->vndService->getPackages();
 			$ignore  = array_merge($ignore, $vendors);
 		}
 
