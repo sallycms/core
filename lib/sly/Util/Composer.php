@@ -11,32 +11,60 @@
 /**
  * @ingroup util
  */
-class sly_Util_Composer extends sly_Util_JSON {
+class sly_Util_Composer {
+	protected $filename;
+	protected $data;
+
 	const EXTRA_SUBKEY = 'sallycms';
 
+	public function __construct($filename) {
+		if (!is_file($filename)) {
+			throw new sly_Exception(t('file_not_found', $filename));
+		}
+
+		$this->filename = realpath($filename);
+		$this->data     = false;
+	}
+
+	public function __sleep() {
+		return array('filename', 'data');
+	}
+
+	public function getFilename() {
+		return $this->filename;
+	}
+
+	public function getContent() {
+		if ($this->data === false) {
+			#debug_print_backtrace();die;
+			$this->data = sly_Util_JSON::load($this->filename, false, true);
+			#var_dump($this->data);
+		}
+
+		return $this->data;
+	}
+
 	/**
-	 * @param  string  $filename
 	 * @param  string  $key
 	 * @param  boolean $tryExtra  if true $key is first searched in /extra/sallycms/$key, before /$key ist searched
 	 * @return string
 	 */
-	public static function getKey($filename, $key, $tryExtra = true) {
+	public function getKey($key, $tryExtra = true) {
 		if ($tryExtra) {
-			$val = self::getSallyKey($filename, $key);
+			$val = $this->getSallyKey($key);
 			if ($val !== null) return $val;
 		}
 
-		$data = self::load($filename);
-		return array_key_exists($key, $data) ? $data[$key] : null;
+		$data = $this->getContent();
+		return $data === null ? null : (array_key_exists($key, $data) ? $data[$key] : null);
 	}
 
 	/**
-	 * @param  string $filename
-	 * @param  string $key
+	 * @param  string $subkey
 	 * @return string
 	 */
-	public static function getSallyKey($filename, $key = null) {
-		$extra  = self::getKey($filename, 'extra', false);
+	public function getSallyKey($filename, $subkey = null) {
+		$extra  = $this->getKey('extra', false);
 		$subkey = self::EXTRA_SUBKEY;
 
 		// nothing set
@@ -45,8 +73,8 @@ class sly_Util_Composer extends sly_Util_JSON {
 		$extra = $extra[$subkey];
 
 		// return everything if requested
-		if ($key === null) return $extra;
+		if ($subkey === null) return $extra;
 
-		return array_key_exists($key, $extra) ? $extra[$key] : null;
+		return array_key_exists($subkey, $extra) ? $extra[$subkey] : null;
 	}
 }
