@@ -45,12 +45,13 @@ class sly_Util_JSON {
 	 * Cached loading of a JSON file
 	 *
 	 * @throws sly_Exception
-	 * @param  string  $filename     Path to JSON file
-	 * @param  boolean $forceCached  always return cached version (if it exists)
-	 * @return mixed                 parsed content
+	 * @param  string  $filename             path to file to load
+	 * @param  boolean $forceCached          always return cached version (if it exists)
+	 * @param  boolean $disableRuntimeCache  do not cache the decoded file contents in $this->cache
+	 * @return mixed                         parsed content
 	 */
-	public static function load($filename, $forceCached = false) {
-		return self::getService()->load($filename, $forceCached);
+	public static function load($filename, $forceCached = false, $disableRuntimeCache = false) {
+		return self::getService()->load($filename, $forceCached, $disableRuntimeCache);
 	}
 
 	/**

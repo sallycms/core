@@ -12,6 +12,16 @@
  * @ingroup util
  */
 abstract class sly_Service_File_Base {
+	protected $cache;
+
+	public function __construct() {
+		$this->clearCache();
+	}
+
+	public function clearCache() {
+		$this->cache = array();
+	}
+
 	/**
 	 * @throws sly_Exception
 	 * @return string
@@ -75,13 +85,22 @@ abstract class sly_Service_File_Base {
 	 * Cached loading of a file
 	 *
 	 * @throws sly_Exception
-	 * @param  string  $filename     path to file to load
-	 * @param  boolean $forceCached  always return cached version (if it exists)
-	 * @return mixed                 parsed content
+	 * @param  string  $filename             path to file to load
+	 * @param  boolean $forceCached          always return cached version (if it exists)
+	 * @param  boolean $disableRuntimeCache  do not cache the decoded file contents in $this->cache
+	 * @return mixed                         parsed content
 	 */
-	public function load($filename, $forceCached = false) {
+	public function load($filename, $forceCached = false, $disableRuntimeCache = false) {
 		if (mb_strlen($filename) === 0 || !is_string($filename)) {
 			throw new sly_Exception('No file given!');
+		}
+
+		if (!$disableRuntimeCache) {
+			$cacheKey = str_replace(array('\\', '/'), '/', $filename);
+
+			if (isset($this->cache[$cacheKey])) {
+				return $this->cache[$cacheKey];
+			}
 		}
 
 		if (!is_file($filename)) {
@@ -120,6 +139,10 @@ abstract class sly_Service_File_Base {
 
 			file_put_contents($cachefile, '<?php $config = '.var_export($config, true).';', LOCK_EX);
 			if (!$exists) chmod($cachefile, sly_Core::getFilePerm());
+		}
+
+		if (!$disableRuntimeCache) {
+			$this->cache[$cacheKey] = $config;
 		}
 
 		return $config;
