@@ -13,6 +13,7 @@
  */
 class sly_Util_Composer {
 	protected $filename;
+	protected $mtime;
 	protected $data;
 
 	const EXTRA_SUBKEY = 'sallycms';
@@ -23,11 +24,8 @@ class sly_Util_Composer {
 		}
 
 		$this->filename = realpath($filename);
+		$this->mtime    = null;
 		$this->data     = false;
-	}
-
-	public function __sleep() {
-		return array('filename', 'data');
 	}
 
 	public function getFilename() {
@@ -36,12 +34,29 @@ class sly_Util_Composer {
 
 	public function getContent() {
 		if ($this->data === false) {
-			#debug_print_backtrace();die;
-			$this->data = sly_Util_JSON::load($this->filename, false, true);
-			#var_dump($this->data);
+			$this->data  = sly_Util_JSON::load($this->filename, false, true);
+			$this->mtime = filemtime($this->filename);
 		}
 
 		return $this->data;
+	}
+
+	public function revalidate() {
+		if ($this->mtime !== null) {
+			if (!file_exists($this->filename)) {
+				$this->data  = null;
+				$this->mtime = time();
+				return true;
+			}
+
+			if (filemtime($this->filename) > $this->mtime) {
+				$this->data = false;
+				$this->getContent();
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**
