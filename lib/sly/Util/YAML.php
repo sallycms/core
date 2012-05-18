@@ -46,12 +46,13 @@ class sly_Util_YAML {
 	 *
 	 * @throws sly_Exception
 	 * @throws InvalidArgumentException
-	 * @param  string  $filename     Path to YAML file
-	 * @param  boolean $forceCached  always return cached version (if it exists)
-	 * @return mixed                 parsed content
+	 * @param  string  $filename             path to file to load
+	 * @param  boolean $forceCached          always return cached version (if it exists)
+	 * @param  boolean $disableRuntimeCache  do not cache the decoded file contents in $this->cache
+	 * @return mixed                         parsed content
 	 */
-	public static function load($filename, $forceCached = false) {
-		return self::getService()->load($filename, $forceCached);
+	public static function load($filename, $forceCached = false, $disableRuntimeCache = false) {
+		return self::getService()->load($filename, $forceCached, $disableRuntimeCache);
 	}
 
 	/**
