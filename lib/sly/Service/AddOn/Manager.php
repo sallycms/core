@@ -485,7 +485,7 @@ class sly_Service_AddOn_Manager {
 	}
 
 	public function clearCache() {
-		sly_Core::cache()->flush('sly.addon', true);
+		$this->addOnService->clearCache();
 	}
 
 	public function loadAddOns() {
