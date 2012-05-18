@@ -45,10 +45,12 @@ abstract class sly_Service_Factory {
 				$service->setVendorPackageService($vndService);
 			}
 			elseif ($modelName === 'Package_Vendor') {
-				$service = new $serviceName(SLY_VENDORFOLDER);
+				$cache   = sly_Core::cache();
+				$service = new $serviceName(SLY_VENDORFOLDER, $cache);
 			}
 			elseif ($modelName === 'Package_AddOn') {
-				$service = new $serviceName(SLY_ADDONFOLDER);
+				$cache   = sly_Core::cache();
+				$service = new $serviceName(SLY_ADDONFOLDER, $cache);
 			}
 			else {
 				$service = new $serviceName();

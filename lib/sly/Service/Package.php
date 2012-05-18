@@ -14,12 +14,25 @@
  */
 class sly_Service_Package {
 	protected $sourceDir; ///< string
+	protected $cache;     ///< BabelCache_Interface
+	protected $composers; ///< array
 
 	/**
-	 * @param string $sourceDir
+	 * @param string               $sourceDir
+	 * @param BabelCache_Interface $cache
 	 */
-	public function __construct($sourceDir) {
+	public function __construct($sourceDir, BabelCache_Interface $cache) {
 		$this->sourceDir = sly_Util_Directory::normalize($sourceDir).DIRECTORY_SEPARATOR;
+		$this->cache     = $cache;
+		$this->composers = array();
+	}
+
+	/**
+	 * Clears the addOn metadata cache
+	 */
+	public function clearCache() {
+		sly_Core::cache()->flush('sly.package', true);
+		$this->composers = array();
 	}
 
 	/**
@@ -36,13 +49,29 @@ class sly_Service_Package {
 		return $dir;
 	}
 
+	protected function getCache($package, $key, $default = null) {
+		return $this->cache->get('sly.package', str_replace('/', '%', $package).'%'.$key, $default);
+	}
+
+	protected function setCache($package, $key, $value) {
+		return $this->cache->set('sly.package', str_replace('/', '%', $package).'%'.$key, $value);
+	}
+
 	/**
 	 * @param  string $package  package name
 	 * @return boolean
 	 */
 	public function exists($package) {
-		$base = $this->baseDirectory($package);
-		return file_exists($base.'composer.json');
+		$exists = $this->getCache($package, 'exists');
+
+		if ($exists === null) {
+			$base   = $this->baseDirectory($package);
+			$exists = file_exists($base.'composer.json');
+
+			$this->setCache($package, 'exists', $exists);
+		}
+
+		return $exists;
 	}
 
 	/**
@@ -81,30 +110,12 @@ class sly_Service_Package {
 	/**
 	 * Get version
 	 *
-	 * This method tries to get the version from the composer.json. If no version
-	 * is found, it tries to read the contents of a version file in the
-	 * package's directory.
-	 *
 	 * @param  string $package  package name
 	 * @param  mixed  $default  default value if no version was specified
 	 * @return string           the version
 	 */
 	public function getVersion($package, $default = null) {
-		$version     = $this->getKey($package, 'version', null);
-		$baseDir     = $this->baseDirectory($package);
-		$versionFile = $baseDir.'/version';
-
-		if ($version === null && file_exists($versionFile)) {
-			$version = trim(file_get_contents($versionFile));
-		}
-
-		$versionFile = $baseDir.'/VERSION';
-
-		if ($version === null && file_exists($versionFile)) {
-			$version = trim(file_get_contents($versionFile));
-		}
-
-		return $version === null ? $default : $version;
+		return $this->getKey($package, 'version', $default);
 	}
 
 	/**
@@ -153,9 +164,20 @@ class sly_Service_Package {
 	 * @return mixed            value or default
 	 */
 	public function getKey($package, $key, $default = null) {
-		$composer = $this->baseDirectory($package).'composer.json';
-		$value    = sly_Util_Composer::getKey($composer, $key);
+		if (!isset($this->composers[$package])) {
+			$composer = $this->getCache($package, 'composer.json');
 
+			if ($composer === null) {
+				$filename = $this->baseDirectory($package).'composer.json';
+				$composer = new sly_Util_Composer($filename);
+
+				$this->setCache($package, 'composer.json', $composer);
+			}
+
+			$this->composers[$package] = $composer;
+		}
+
+		$value = $this->composers[$package]->getKey($key);
 		return $value === null ? $default : $value;
 	}
 
@@ -165,11 +187,24 @@ class sly_Service_Package {
 	 * Required packages are packages that $package itself needs to run.
 	 *
 	 * @param  string  $package    package name
-	 * @param  boolean $recursive  if true, requirements are search resursively
+	 * @param  boolean $recursive  if true, requirements are search recursively
 	 * @param  array   $ignore     list of packages to ignore (and not recurse into)
 	 * @return array               list of required packages
 	 */
 	public function getRequirements($package, $recursive = true, array $ignore = array()) {
+		$cacheKey = 'requirements_'.($recursive ? 1 : 0);
+		$result   = $this->getCache($package, $cacheKey);
+
+		if ($result !== null) {
+			// apply ignore list
+			foreach ($ignore as $i) {
+				$idx = array_search($i, $result);
+				if ($idx !== false) unset($result[$idx]);
+			}
+
+			return array_values($result);
+		}
+
 		$stack  = array($package);
 		$result = array();
 
@@ -205,6 +240,8 @@ class sly_Service_Package {
 		while ($recursive && !empty($stack));
 
 		natcasesort($result);
+		$this->setCache($package, $cacheKey, $result);
+
 		return $result;
 	}
 
@@ -214,10 +251,17 @@ class sly_Service_Package {
 	 * Dependent packages are packages that need $package to run.
 	 *
 	 * @param  string  $package    package name
-	 * @param  boolean $recursive  if true, dependencies are search resursively
+	 * @param  boolean $recursive  if true, dependencies are search recursively
 	 * @return array               list of required packages
 	 */
 	public function getDependencies($package, $recursive = true) {
+		$cacheKey = 'dependencies_'.($recursive ? 1 : 0);
+		$result   = $this->getCache($package, $cacheKey);
+
+		if ($result !== null) {
+			return $result;
+		}
+
 		$all    = $this->findPackages();
 		$stack  = array($package);
 		$result = array();
@@ -242,6 +286,7 @@ class sly_Service_Package {
 
 		$result = array_unique($result);
 		natcasesort($result);
+		$this->setCache($package, $cacheKey, $result);
 
 		return $result;
 	}
