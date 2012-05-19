@@ -78,14 +78,14 @@ class sly_Util_Composer {
 	 * @param  string $subkey
 	 * @return string
 	 */
-	public function getSallyKey($filename, $subkey = null) {
-		$extra  = $this->getKey('extra', false);
-		$subkey = self::EXTRA_SUBKEY;
+	public function getSallyKey($subkey = null) {
+		$extra = $this->getKey('extra', false);
+		$key   = self::EXTRA_SUBKEY;
 
 		// nothing set
-		if (!isset($extra[$subkey])) return null;
+		if (!isset($extra[$key])) return null;
 
-		$extra = $extra[$subkey];
+		$extra = $extra[$key];
 
 		// return everything if requested
 		if ($subkey === null) return $extra;
