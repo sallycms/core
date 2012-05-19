@@ -29,7 +29,7 @@ class sly_Service_Asset {
 		$this->initCache();
 
 		$dispatcher = sly_Core::dispatcher();
-		$dispatcher->register(self::EVENT_PROCESS_ASSET, array($this, 'processLessCSS'), array(), true);
+		$dispatcher->register(self::EVENT_PROCESS_ASSET, array($this, 'processLessCSS'));
 	}
 
 	/**
