@@ -362,9 +362,9 @@ class sly_Service_Asset {
 		$obj = new sly_Util_Directory($dir);
 		$obj->delete(true);
 
-		// clear the Scaffold temp dir
-		$scaffoldDir = sly_Util_Directory::join(SLY_DYNFOLDER, self::TEMP_DIR);
-		$obj         = new sly_Util_Directory($scaffoldDir);
+		// clear the temp dir
+		$tmpDir = sly_Util_Directory::join(SLY_DYNFOLDER, self::TEMP_DIR);
+		$obj    = new sly_Util_Directory($tmpDir);
 
 		$obj->deleteFiles(true);
 
