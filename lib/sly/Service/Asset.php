@@ -29,7 +29,6 @@ class sly_Service_Asset {
 		$this->initCache();
 
 		$dispatcher = sly_Core::dispatcher();
-		$dispatcher->register(self::EVENT_PROCESS_ASSET, array($this, 'processScaffold'), array(), true);
 		$dispatcher->register(self::EVENT_PROCESS_ASSET, array($this, 'processLessCSS'), array(), true);
 	}
 
@@ -263,30 +262,7 @@ class sly_Service_Asset {
 	 * @param  array $params
 	 * @return string
 	 */
-	public function processScaffold($params) {
-		$file = $params['subject'];
-
-		if (sly_Util_String::endsWith($file, '.css') && file_exists(SLY_BASE.'/'.$file)) {
-			$css     = sly_Util_Scaffold::process($file);
-			$dir     = SLY_DYNFOLDER.'/'.self::TEMP_DIR;
-			$tmpFile = $dir.'/'.md5($file).'.css';
-
-			sly_Util_Directory::create($dir, $this->getDirPerm());
-
-			file_put_contents($tmpFile, $css);
-			chmod($tmpFile, $this->getFilePerm());
-
-			return $tmpFile;
-		}
-
-		return $file;
-	}
-
-	/**
-	 * @param  array $params
-	 * @return string
-	 */
-	public function processLessCSS($params) {
+	public function processLessCSS(array $params) {
 		$file = $params['subject'];
 
 		if (sly_Util_String::endsWith($file, '.less') && file_exists(SLY_BASE.'/'.$file)) {
