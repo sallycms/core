@@ -44,7 +44,7 @@ class sly_Form_Widget_MediaList extends sly_Form_Widget_MediaBase implements sly
 		$max = (int) $max;
 		$this->max = $max < 0 ? -1 : $max;
 
-		if ($this->min < $this->max) {
+		if ($this->min > $this->max) {
 			$this->min = $this->max;
 		}
 	}
