@@ -33,4 +33,12 @@ class sly_Util_User {
 	public static function getCurrentUser() {
 		return sly_Service_Factory::getUserService()->getCurrentUser();
 	}
+
+	/**
+	 * @param  int $userId
+	 * @return sly_Model_User
+	 */
+	public static function findById($userId) {
+		return sly_Service_Factory::getUserService()->findById($userId);
+	}
 }
