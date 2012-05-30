@@ -32,7 +32,7 @@ class sly_Util_Lessphp {
 	}
 
 	public static function processString($css) {
-		require_once SLY_COREFOLDER.'/lib/lessphp/lessc.inc.php';
+		require_once SLY_SALLYFOLDER.'/vendor/leafo/lessphp/lessc.inc.php';
 		$less = new lessc();
 		$css  = $less->parse($css);
 		return self::reduce($css);
