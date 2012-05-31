@@ -23,32 +23,25 @@ class sly_Util_Lessphp {
 	 * @return string           the processed css code
 	 */
 	public static function process($cssFile) {
-		sly_dump($cssFile);
-		require_once SLY_SALLYFOLDER.'/vendor/leafo/lessphp/lessc.inc.php';
-
-		$less = new lessc($cssFile);
-		$css  = $less->parse();
-		return self::reduce($css);
+		return self::getCompiler($cssFile)->parse();
 	}
 
 	public static function processString($css) {
-		require_once SLY_COREFOLDER.'/lib/lessphp/lessc.inc.php';
-		$less = new lessc();
-		$css  = $less->parse($css);
-		return self::reduce($css);
+		return self::getCompiler()->parse($css);
 	}
 
+	public static function getCompiler($fname = null) {
+		require_once SLY_VENDORFOLDER.'/leafo/lessphp/lessc.inc.php';
 
-	private static function reduce($css) {
-		// remove double spaces
-		$css = preg_replace('# +#i', ' ', $css);
-		// remove newlines and tabulators
-		$css = str_replace(array("\t","\n","\r"), '', $css);
-		// remove spaces before and after {,},:,>,; and ,
-		$css = preg_replace('#\s*(\{|\}|,|;|>|:)\s*#si', '$1', $css);
-		// remove last semocolon in definition
-		$css = str_replace(';}', '}', $css);
+		$less = new lessc($fname);
+		$less->setFormatter('compressed');
 
-		return $css;
+		// add custom mixin package to default import dir
+		$dir   = (array) $less->importDir;
+		$dir[] = SLY_VENDORFOLDER.'/sallycms/less-mixins/';
+
+		$less->importDir = array_filter($dir);
+
+		return $less;
 	}
 }
