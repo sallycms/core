@@ -44,56 +44,75 @@ class sly_Mail implements sly_Mail_Interface {
 	}
 
 	/**
-	 * @param string $mail  the address
-	 * @param string $name  an optional name
+	 * @param  string $mail        the address
+	 * @param  string $name        an optional name
+	 * @return sly_Mail_Interface  self
 	 */
 	public function addTo($mail, $name = null) {
 		$this->tos[] = self::parseAddress($mail, $name);
-	}
-
-	public function clearTo() {
-		$this->tos = array();
+		return $this;
 	}
 
 	/**
-	 * @param string $mail  the address
-	 * @param string $name  an optional name
+	 * Clear recipients
+	 *
+	 * @return sly_Mail_Interface  self
+	 */
+	public function clearTo() {
+		$this->tos = array();
+		return $this;
+	}
+
+	/**
+	 * @param  string $mail        the address
+	 * @param  string $name        an optional name
+	 * @return sly_Mail_Interface  self
 	 */
 	public function setFrom($mail, $name = null) {
 		$this->from = self::parseAddress($mail, $name);
+		return $this;
 	}
 
 	/**
-	 * @param string $subject  the new subject
+	 * @param  string $subject     the new subject
+	 * @return sly_Mail_Interface  self
 	 */
 	public function setSubject($subject) {
 		$this->subject = self::clean($subject);
+		return $this;
 	}
 
 	/**
-	 * @param string $body  the new body
+	 * @param  string $body        the new body
+	 * @return sly_Mail_Interface  self
 	 */
 	public function setBody($body) {
 		$this->body = self::clean($body);
+		return $this;
 	}
 
 	/**
-	 * @param string $contentType  the new content type
+	 * @param  string $contentType  the new content type
+	 * @return sly_Mail_Interface   self
 	 */
 	public function setContentType($contentType) {
 		$this->contentType = strtolower(trim($contentType));
+		return $this;
 	}
 
 	/**
-	 * @param string $charset  the new charset
+	 * @param  string $charset     the new charset
+	 * @return sly_Mail_Interface  self
 	 */
 	public function setCharset($charset) {
 		$this->charset = strtoupper(trim($charset));
+		return $this;
 	}
 
 	/**
-	 * @param string $field  the header field (like 'x-foo')
-	 * @param string $value  the header value (when empty, the corresponding header will be removed)
+	 * @param  string $field       the header field (like 'x-foo')
+	 * @param  string $value       the header value (when empty, the corresponding header will be removed)
+	 * @return sly_Mail_Interface  self
 	 */
 	public function setHeader($field, $value) {
 		$field = strtolower(trim($field));
@@ -104,6 +123,8 @@ class sly_Mail implements sly_Mail_Interface {
 		else {
 			$this->headers[$field] = self::clean($value);
 		}
+
+		return $this;
 	}
 
 	/**

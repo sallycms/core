@@ -181,7 +181,12 @@ abstract class sly_App_Base implements sly_App_Interface {
 	}
 
 	public function getCurrentController() {
-		$name       = $this->getCurrentControllerName();
+		$name = $this->getCurrentControllerName();
+
+		if (mb_strlen($name) === 0) {
+			return null;
+		}
+
 		$className  = $this->getControllerClass($name);
 		$controller = $this->getController($className);
 
