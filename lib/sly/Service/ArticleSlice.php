@@ -114,10 +114,11 @@ class sly_Service_ArticleSlice extends sly_Service_Model_Base_Id {
 	/**
 	 * Verschiebt einen Slice
 	 *
+	 * @throws sly_Exception
 	 * @param  int    $slice_id   ID des Slices
 	 * @param  int    $clang      ID der Sprache
 	 * @param  string $direction  Richtung in die verschoben werden soll
-	 * @return array              ein Array welches den Status sowie eine Fehlermeldung beinhaltet
+	 * @return boolean            true if moved, else false
 	 */
 	public function move($slice_id, $direction) {
 		$slice_id = (int) $slice_id;
@@ -126,34 +127,36 @@ class sly_Service_ArticleSlice extends sly_Service_Model_Base_Id {
 			throw new sly_Exception(t('unsupported_direction', $direction));
 		}
 
-		$success      = false;
 		$articleSlice = $this->findById($slice_id);
 
-		if ($articleSlice) {
-			$sql        = sly_DB_Persistence::getInstance();
-			$article_id = $articleSlice->getArticleId();
-			$clang      = $articleSlice->getClang();
-			$pos        = $articleSlice->getPosition();
-			$slot       = $articleSlice->getSlot();
-			$newpos     = $direction == 'up' ? $pos - 1 : $pos + 1;
-			$sliceCount = $this->count(array('article_id' => $article_id, 'clang' => $clang, 'slot' => $slot));
+		if (!$articleSlice) {
+			throw new sly_Exception(t('slice_not_found', $slice_id));
+		}
 
-			if ($newpos > -1 && $newpos < $sliceCount) {
-				$sql->update('article_slice', array('pos' => $pos), array('article_id' => $article_id, 'clang' => $clang, 'slot' => $slot, 'pos' => $newpos));
-				$articleSlice->setPosition($newpos);
-				$articleSlice->setUpdateColumns();
-				$this->save($articleSlice);
+		$success    = false;
+		$sql        = sly_DB_Persistence::getInstance();
+		$article_id = $articleSlice->getArticleId();
+		$clang      = $articleSlice->getClang();
+		$pos        = $articleSlice->getPosition();
+		$slot       = $articleSlice->getSlot();
+		$newpos     = $direction === 'up' ? $pos - 1 : $pos + 1;
+		$sliceCount = $this->count(array('article_id' => $article_id, 'clang' => $clang, 'slot' => $slot));
 
-				// notify system
-				sly_Core::dispatcher()->notify('SLY_SLICE_MOVED', $articleSlice, array(
-					'clang'     => $clang,
-					'direction' => $direction,
-					'old_pos'   => $pos,
-					'new_pos'   => $newpos
-				));
+		if ($newpos > -1 && $newpos < $sliceCount) {
+			$sql->update('article_slice', array('pos' => $pos), array('article_id' => $article_id, 'clang' => $clang, 'slot' => $slot, 'pos' => $newpos));
+			$articleSlice->setPosition($newpos);
+			$articleSlice->setUpdateColumns();
+			$this->save($articleSlice);
 
-				$success = true;
-			}
+			// notify system
+			sly_Core::dispatcher()->notify('SLY_SLICE_MOVED', $articleSlice, array(
+				'clang'     => $clang,
+				'direction' => $direction,
+				'old_pos'   => $pos,
+				'new_pos'   => $newpos
+			));
+
+			$success = true;
 		}
 
 		return $success;

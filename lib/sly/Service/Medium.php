@@ -213,7 +213,7 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id {
 		$medium = $this->findById($mediumID);
 
 		if (!$medium) {
-			throw new sly_Exception(t('medium_not_found'));
+			throw new sly_Exception(t('medium_not_found', $mediumID));
 		}
 
 		try {
