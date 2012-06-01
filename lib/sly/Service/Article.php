@@ -261,7 +261,7 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 		$cats = sly_Service_Factory::getCategoryService();
 
 		if ($target !== 0 && $cats->findById($target) === null) {
-			throw new sly_Exception(t('category_not_found'));
+			throw new sly_Exception(t('category_not_found', $target));
 		}
 
 		// prepare infos
@@ -336,7 +336,7 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 		$cats = sly_Service_Factory::getCategoryService();
 
 		if ($target !== 0 && $cats->findById($target) === null) {
-			throw new sly_Exception(t('category_not_found'));
+			throw new sly_Exception(t('category_not_found', $target));
 		}
 
 		$source = (int) $article->getCategoryId();
