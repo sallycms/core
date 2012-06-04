@@ -40,6 +40,9 @@ foreach (array('local', 'project') as $conf) {
 	if (file_exists($liveFile)) {
 		rename($liveFile, $backupFile);
 	}
+	else {
+		@mkdir(dirname($liveFile), 0777, true);
+	}
 
 	copy($testFile, $liveFile);
 }
