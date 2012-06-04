@@ -6,4 +6,4 @@ DEVELOPER_MODE: true
 PROJECTNAME: 'Sally Trunk'
 TIMEZONE: Europe/Berlin
 DEFAULT_LOCALE: de_de
-ADDON: []
+addons: []
