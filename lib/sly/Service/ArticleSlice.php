@@ -28,29 +28,27 @@ class sly_Service_ArticleSlice extends sly_Service_Model_Base_Id {
 
 	public function save(sly_Model_Base $model) {
 		$sql = sly_DB_Persistence::getInstance();
-		try {
-			$pre = sly_Core::getTablePrefix();
-			$sql->beginTransaction();
+		return $sql->transactional(array($this, 'saveTrx'), array($model));
+	}
 
-			if($model->getId() === sly_Model_Base_Id::NEW_ID) {
-				$sql->query(
-					'UPDATE ' . $pre . $this->tablename . ' SET pos = pos + 1 ' .
-					'WHERE article_id = ? AND clang = ? AND slot = ? ' .
-					'AND pos >= ?', array(
-						$model->getArticleId(),
-						$model->getClang(),
-						$model->getSlot(),
-						$model->getPosition()
-					)
-				);
-			}
-			$model = parent::save($model);
-			$sql->commit();
-		} catch (Exception $e) {
-			$sql->rollBack();
-			throw $e;
+	public function saveTrx(sly_Model_ArticleSlice $slice) {
+		if ($slice->getId() === sly_Model_Base_Id::NEW_ID) {
+			$sql = sly_DB_Persistence::getInstance();
+			$pre = sly_Core::getTablePrefix();
+
+			$sql->query(
+				'UPDATE '.$pre.$this->tablename.' SET pos = pos + 1 ' .
+				'WHERE article_id = ? AND clang = ? AND slot = ? ' .
+				'AND pos >= ?', array(
+					$slice->getArticleId(),
+					$slice->getClang(),
+					$slice->getSlot(),
+					$slice->getPosition()
+				)
+			);
 		}
-		return $model;
+
+		return parent::save($slice);
 	}
 
 	public function delete($where) {
