@@ -372,49 +372,23 @@ sly_slice:
    -
       id: 1
       module: wymeditor
+      serialized_values: '{"html":"<p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.<\/p>"}'
    -
       id: 2
       module: image
+      serialized_values: '{"image":"fish2.jpg"}'
    -
       id: 4
       module: image
+      serialized_values: '{"image":"fish2.jpg"}'
    -
       id: 5
       module: wymeditor
+      serialized_values: '{"html":"<p>Hallo Welt!<\/p>"}'
    -
       id: 6
       module: image
-sly_slice_value:
-   -
-      id: 10
-      slice_id: 1
-      type: ''
-      finder: html
-      value: '"<p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.<\/p>"'
-   -
-      id: 4
-      slice_id: 2
-      type: ''
-      finder: image
-      value: '"fish2.jpg"'
-   -
-      id: 7
-      slice_id: 4
-      type: ''
-      finder: image
-      value: '"fish2.jpg"'
-   -
-      id: 8
-      slice_id: 5
-      type: ''
-      finder: html
-      value: '"<p>Hallo Welt!<\/p>"'
-   -
-      id: 9
-      slice_id: 6
-      type: ''
-      finder: image
-      value: '"fish.jpg"'
+      serialized_values: '{"image":"fish2.jpg"}'
 sly_user:
    -
       id: 1

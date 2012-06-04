@@ -10,7 +10,6 @@ sly_file: []
 sly_file_category: []
 sly_registry: []
 sly_slice: []
-sly_slice_value: []
 sly_user:
    -
       id: 1
