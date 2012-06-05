@@ -139,7 +139,7 @@ class sly_Service_Category extends sly_Service_ArticleBase {
 		$cat = $this->findById($categoryID);
 
 		if ($cat === null) {
-			throw new sly_Exception(t('category_not_found'));
+			throw new sly_Exception(t('category_not_found', $categoryID));
 		}
 
 		// check if this category still has children (both articles and categories)
@@ -220,7 +220,7 @@ class sly_Service_Category extends sly_Service_ArticleBase {
 		// check categories
 
 		if ($category === null) {
-			throw new sly_Exception(t('category_not_found'));
+			throw new sly_Exception(t('category_not_found', $categoryID));
 		}
 
 		if ($targetID !== 0 && $target === null) {

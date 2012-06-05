@@ -18,3 +18,6 @@ authorisation:
   article:
     title: 'translate:article'
     list: 'sly_Authorisation_ArticleListProvider'
+  apps:
+    title: 'translate:applications'
+    token: []

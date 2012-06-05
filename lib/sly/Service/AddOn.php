@@ -237,26 +237,10 @@ class sly_Service_AddOn {
 		$sallyVersions = $this->getRequiredSallyVersions($addon);
 
 		foreach ($sallyVersions as $version) {
-			if ($this->checkVersion($version)) return true;
+			if (sly_Util_Versions::isCompatible($version)) return true;
 		}
 
 		return false;
-	}
-
-	/**
-	 * Check if a version number matches
-	 *
-	 * This will take a well-formed version number (X.Y.Z) and compare it against
-	 * the system version. You can leave out parts from the right to make it
-	 * more general (i.e. '0.2' will match any 0.2.x version).
-	 *
-	 * @param  string $version  the version number to check against
-	 * @param  string $ref      reference version (null uses the Sally version)
-	 * @return boolean          true for a match, else false
-	 */
-	public function checkVersion($version, $ref = null) {
-		$thisVersion = $ref === null ? sly_Core::getVersion('X.Y.Z') : $ref;
-		return preg_match('#^'.preg_quote($version, '#').'.*#i', $thisVersion) == 1;
 	}
 
 	/**

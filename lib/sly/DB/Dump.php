@@ -360,7 +360,7 @@ class sly_DB_Dump {
 			throw new sly_Exception('Invalid file pointer given.');
 		}
 
-		fwrite($fp, sprintf("-- Sally Database Dump Version %s\n", sly_Core::getVersion('X.Y')));
+		fwrite($fp, sprintf("-- Sally Database Dump Version %s\n", sly_Core::getVersion('X.Y.*')));
 		fwrite($fp, sprintf("-- Prefix %s\n", sly_Core::getTablePrefix()));
 	}
 }

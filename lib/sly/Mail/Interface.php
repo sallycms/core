@@ -10,41 +10,52 @@
 
 interface sly_Mail_Interface {
 	/**
-	 * @param string $mail  the address
-	 * @param string $name  an optional name
+	 * @param  string $mail        the address
+	 * @param  string $name        an optional name
+	 * @return sly_Mail_Interface  self
 	 */
 	public function addTo($mail, $name = null);
+
+	/**
+	 * @return sly_Mail_Interface  self
+	 */
 	public function clearTo();
 
 	/**
-	 * @param string $mail  the address
-	 * @param string $name  an optional name
+	 * @param  string $mail        the address
+	 * @param  string $name        an optional name
+	 * @return sly_Mail_Interface  self
 	 */
 	public function setFrom($mail, $name = null);
 
 	/**
-	 * @param string $subject  the new subject
+	 * @param  string $subject     the new subject
+	 * @return sly_Mail_Interface  self
 	 */
 	public function setSubject($subject);
 
 	/**
-	 * @param string $body  the new body
+	 * @param  string $body        the new body
+	 * @return sly_Mail_Interface  self
 	 */
 	public function setBody($body);
 
 	/**
-	 * @param string $contentType  the new content type
+	 * @param  string $contentType  the new content type
+	 * @return sly_Mail_Interface   self
 	 */
 	public function setContentType($contentType);
 
 	/**
-	 * @param string $charset  the new charset
+	 * @param  string $charset     the new charset
+	 * @return sly_Mail_Interface  self
 	 */
 	public function setCharset($charset);
 
 	/**
-	 * @param string $field  the header field (like 'x-foo')
-	 * @param string $value  the header value (when empty, the corresponding header will be removed)
+	 * @param  string $field       the header field (like 'x-foo')
+	 * @param  string $value       the header value (when empty, the corresponding header will be removed)
+	 * @return sly_Mail_Interface  self
 	 */
 	public function setHeader($field, $value);
 
