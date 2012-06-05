@@ -139,6 +139,7 @@ class sly_Util_Directory {
 			$list[] = $absolute ? $filename : substr($filename, $baselen);
 		}
 
+		natcasesort($list);
 		return $list;
 	}
 
