@@ -105,7 +105,11 @@ class sly_Util_Directory {
 		}
 
 		closedir($handle);
-		if (!empty($sortFunction)) $sortFunction($list);
+
+		if (!empty($sortFunction)) {
+			$sortFunction($list);
+			$list = array_values($list);
+		}
 
 		return $list;
 	}
@@ -139,7 +143,8 @@ class sly_Util_Directory {
 			$list[] = $absolute ? $filename : substr($filename, $baselen);
 		}
 
-		return $list;
+		natcasesort($list);
+		return array_values($list);
 	}
 
 	/**

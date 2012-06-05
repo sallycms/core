@@ -28,29 +28,27 @@ class sly_Service_ArticleSlice extends sly_Service_Model_Base_Id {
 
 	public function save(sly_Model_Base $model) {
 		$sql = sly_DB_Persistence::getInstance();
-		try {
-			$pre = sly_Core::getTablePrefix();
-			$sql->beginTransaction();
+		return $sql->transactional(array($this, 'saveTrx'), array($model));
+	}
 
-			if($model->getId() === sly_Model_Base_Id::NEW_ID) {
-				$sql->query(
-					'UPDATE ' . $pre . $this->tablename . ' SET pos = pos + 1 ' .
-					'WHERE article_id = ? AND clang = ? AND slot = ? ' .
-					'AND pos >= ?', array(
-						$model->getArticleId(),
-						$model->getClang(),
-						$model->getSlot(),
-						$model->getPosition()
-					)
-				);
-			}
-			$model = parent::save($model);
-			$sql->commit();
-		} catch (Exception $e) {
-			$sql->rollBack();
-			throw $e;
+	public function saveTrx(sly_Model_ArticleSlice $slice) {
+		if ($slice->getId() === sly_Model_Base_Id::NEW_ID) {
+			$sql = sly_DB_Persistence::getInstance();
+			$pre = sly_Core::getTablePrefix();
+
+			$sql->query(
+				'UPDATE '.$pre.$this->tablename.' SET pos = pos + 1 ' .
+				'WHERE article_id = ? AND clang = ? AND slot = ? ' .
+				'AND pos >= ?', array(
+					$slice->getArticleId(),
+					$slice->getClang(),
+					$slice->getSlot(),
+					$slice->getPosition()
+				)
+			);
 		}
-		return $model;
+
+		return parent::save($slice);
 	}
 
 	public function delete($where) {
@@ -114,10 +112,11 @@ class sly_Service_ArticleSlice extends sly_Service_Model_Base_Id {
 	/**
 	 * Verschiebt einen Slice
 	 *
+	 * @throws sly_Exception
 	 * @param  int    $slice_id   ID des Slices
 	 * @param  int    $clang      ID der Sprache
 	 * @param  string $direction  Richtung in die verschoben werden soll
-	 * @return array              ein Array welches den Status sowie eine Fehlermeldung beinhaltet
+	 * @return boolean            true if moved, else false
 	 */
 	public function move($slice_id, $direction) {
 		$slice_id = (int) $slice_id;
@@ -126,34 +125,36 @@ class sly_Service_ArticleSlice extends sly_Service_Model_Base_Id {
 			throw new sly_Exception(t('unsupported_direction', $direction));
 		}
 
-		$success      = false;
 		$articleSlice = $this->findById($slice_id);
 
-		if ($articleSlice) {
-			$sql        = sly_DB_Persistence::getInstance();
-			$article_id = $articleSlice->getArticleId();
-			$clang      = $articleSlice->getClang();
-			$pos        = $articleSlice->getPosition();
-			$slot       = $articleSlice->getSlot();
-			$newpos     = $direction == 'up' ? $pos - 1 : $pos + 1;
-			$sliceCount = $this->count(array('article_id' => $article_id, 'clang' => $clang, 'slot' => $slot));
+		if (!$articleSlice) {
+			throw new sly_Exception(t('slice_not_found', $slice_id));
+		}
 
-			if ($newpos > -1 && $newpos < $sliceCount) {
-				$sql->update('article_slice', array('pos' => $pos), array('article_id' => $article_id, 'clang' => $clang, 'slot' => $slot, 'pos' => $newpos));
-				$articleSlice->setPosition($newpos);
-				$articleSlice->setUpdateColumns();
-				$this->save($articleSlice);
+		$success    = false;
+		$sql        = sly_DB_Persistence::getInstance();
+		$article_id = $articleSlice->getArticleId();
+		$clang      = $articleSlice->getClang();
+		$pos        = $articleSlice->getPosition();
+		$slot       = $articleSlice->getSlot();
+		$newpos     = $direction === 'up' ? $pos - 1 : $pos + 1;
+		$sliceCount = $this->count(array('article_id' => $article_id, 'clang' => $clang, 'slot' => $slot));
 
-				// notify system
-				sly_Core::dispatcher()->notify('SLY_SLICE_MOVED', $articleSlice, array(
-					'clang'     => $clang,
-					'direction' => $direction,
-					'old_pos'   => $pos,
-					'new_pos'   => $newpos
-				));
+		if ($newpos > -1 && $newpos < $sliceCount) {
+			$sql->update('article_slice', array('pos' => $pos), array('article_id' => $article_id, 'clang' => $clang, 'slot' => $slot, 'pos' => $newpos));
+			$articleSlice->setPosition($newpos);
+			$articleSlice->setUpdateColumns();
+			$this->save($articleSlice);
 
-				$success = true;
-			}
+			// notify system
+			sly_Core::dispatcher()->notify('SLY_SLICE_MOVED', $articleSlice, array(
+				'clang'     => $clang,
+				'direction' => $direction,
+				'old_pos'   => $pos,
+				'new_pos'   => $newpos
+			));
+
+			$success = true;
 		}
 
 		return $success;

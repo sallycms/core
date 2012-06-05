@@ -218,8 +218,10 @@ class sly_Loader {
 		$dir   = new sly_Util_Directory(self::getCacheDir());
 		$files = $dir->listPlain(true, false);
 
-		foreach ($files as $file) {
-			unlink($dir.'/'.$file);
+		if ($files) {
+			foreach ($files as $file) {
+				unlink($dir.'/'.$file);
+			}
 		}
 
 		self::$pathCache = array();
