@@ -38,7 +38,6 @@ class sly_Util_HTTP {
 			301 => 'Moved Permanently',
 			302 => 'Found',
 			303 => 'See Other',
-			304 => 'Not Modified',
 			305 => 'Use Proxy',
 			307 => 'Temporary Redirect'
 		);
