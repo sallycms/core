@@ -76,7 +76,7 @@ sly_Core::cache()->flush('sly');
 
 // clean up later on
 if (!$travis) {
-	register_shutdown_function(function() {
+	function sallyTestsShutdown() {
 		$sallyRoot  = realpath(dirname(__FILE__).'/../../');
 		$configRoot = $sallyRoot.'/data/config/';
 
@@ -90,5 +90,7 @@ if (!$travis) {
 				@unlink($backupFile);
 			}
 		}
-	});
+	}
+
+	register_shutdown_function('sallyTestsShutdown');
 }
