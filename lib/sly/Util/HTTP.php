@@ -33,7 +33,16 @@ class sly_Util_HTTP {
 			$noticeText = t('redirect_to', sly_html($targetUrl));
 		}
 
-		$stati  = array(301 => 'Moved Permanently', 302 => 'Found', 303 => 'See Other');
+		$stati = array(
+			300 => 'Multiple Choices',
+			301 => 'Moved Permanently',
+			302 => 'Found',
+			303 => 'See Other',
+			304 => 'Not Modified',
+			305 => 'Use Proxy',
+			307 => 'Temporary Redirect'
+		);
+
 		$status = isset($stati[$status]) ? $status : 301;
 		$text   = $stati[$status];
 
