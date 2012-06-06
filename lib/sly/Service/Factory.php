@@ -25,11 +25,36 @@ abstract class sly_Service_Factory {
 		if (!isset(self::$services[$modelName])){
 			$serviceName = 'sly_Service_'.$modelName;
 
+			if ($modelName === 'Package_Vendor' || $modelName === 'Package_AddOn') {
+				$serviceName = 'sly_Service_Package';
+			}
+
 			if (!class_exists($serviceName)) {
 				throw new sly_Exception(t('service_not_found', $modelName));
 			}
 
-			$service = new $serviceName();
+			if ($modelName === 'AddOn_Manager') {
+				$aService = self::getService('AddOn');
+				$service  = new $serviceName($aService);
+			}
+			elseif ($modelName === 'AddOn') {
+				$pkgService = self::getService('Package_AddOn');
+				$vndService = self::getService('Package_Vendor');
+				$service    = new $serviceName($pkgService, SLY_DYNFOLDER);
+
+				$service->setVendorPackageService($vndService);
+			}
+			elseif ($modelName === 'Package_Vendor') {
+				$cache   = sly_Core::cache();
+				$service = new $serviceName(SLY_VENDORFOLDER, $cache);
+			}
+			elseif ($modelName === 'Package_AddOn') {
+				$cache   = sly_Core::cache();
+				$service = new $serviceName(SLY_ADDONFOLDER, $cache);
+			}
+			else {
+				$service = new $serviceName();
+			}
 
 			self::$services[$modelName] = $service;
 		}
@@ -66,17 +91,31 @@ abstract class sly_Service_Factory {
 	}
 
 	/**
-	 * @return sly_Service_AddOn  The addon service instance
+	 * @return sly_Service_Package  The package service instance initiliazed on SLY_VENDORFOLDER
+	 */
+	public static function getVendorPackageService() {
+		return self::getService('Package_Vendor');
+	}
+
+	/**
+	 * @return sly_Service_Package  The package service instance initiliazed on SLY_ADDONFOLDER
+	 */
+	public static function getAddOnPackageService() {
+		return self::getService('Package_AddOn');
+	}
+
+	/**
+	 * @return sly_Service_AddOn  The addOn service instance
 	 */
 	public static function getAddOnService() {
 		return self::getService('AddOn');
 	}
 
 	/**
-	 * @return sly_Service_Plugin  The plugin service instance
+	 * @return sly_Service_AddOn_Manager  The addOn manager service instance
 	 */
-	public static function getPluginService() {
-		return self::getService('Plugin');
+	public static function getAddOnManagerService() {
+		return self::getService('AddOn_Manager');
 	}
 
 	/**

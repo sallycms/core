@@ -1,5 +1,7 @@
 RewriteEngine On
 
+AddType text/css less
+
 SetEnvIfNoCase ^Accept-Encoding$ ".*" HTTP_ENCODING_CACHEDIR=plain/
 
 <IfModule mod_headers.c>
