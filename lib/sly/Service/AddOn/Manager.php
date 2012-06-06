@@ -34,8 +34,9 @@ class sly_Service_AddOn_Manager {
 	 * This method copies all files in 'assets' to the public directory of the
 	 * given addon.
 	 *
+	 * @throws sly_Exception  in case the assets could not be copied
 	 * @param  string $addon  addon name
-	 * @return mixed          true if successful, else an error message as a string
+	 * @return boolean        always true
 	 */
 	public function copyAssets($addon) {
 		$baseDir   = $this->pkgService->baseDirectory($addon);
@@ -49,7 +50,7 @@ class sly_Service_AddOn_Manager {
 		$dir = new sly_Util_Directory($assetsDir);
 
 		if (!$dir->copyTo($target)) {
-			return t('addon_assets_failed', $assetsDir);
+			throw new sly_Exception(t('addon_assets_failed', $assetsDir));
 		}
 
 		return true;
@@ -80,45 +81,39 @@ class sly_Service_AddOn_Manager {
 	/**
 	 * Removes all public files
 	 *
-	 * @param  string $addon  addon name
-	 * @return mixed          true if successful, else an error message as a string
+	 * @param string $addon  addon name
 	 */
 	public function deletePublicFiles($addon) {
-		return $this->deleteFiles('public', $addon);
+		$this->deleteFiles('public', $addon);
 	}
 
 	/**
 	 * Removes all internal files
 	 *
-	 * @param  string $addon  addon name
-	 * @return mixed          true if successful, else an error message as a string
+	 * @param string $addon  addon name
 	 */
 	public function deleteInternalFiles($addon) {
-		return $this->deleteFiles('internal', $addon);
+		$this->deleteFiles('internal', $addon);
 	}
 
 	/**
 	 * Removes all files in a directory
 	 *
+	 * @throws sly_Exception  in case the assets could not be copied
 	 * @param  string $type   'public' or 'internal'
 	 * @param  string $addon  addon name
-	 * @return mixed          true if successful, else an error message as a string
 	 */
 	protected function deleteFiles($type, $addon) {
-		$dir   = $this->addOnService->dynDirectory($type, $addon);
-		$state = $this->fireEvent('PRE', 'DELETE_'.strtoupper($type), $addon, true);
+		$this->fireEvent('PRE', 'DELETE_'.strtoupper($type), $addon);
 
-		if ($state !== true) {
-			return $state;
-		}
-
+		$dir = $this->addOnService->dynDirectory($type, $addon);
 		$obj = new sly_Util_Directory($dir);
 
 		if (!$obj->delete(true)) {
-			return t('addon_cleanup_failed', $dir);
+			throw new sly_Exception(t('addon_cleanup_failed', $dir));
 		}
 
-		return $this->fireEvent('POST', 'DELETE_'.strtoupper($type), $addon, false);
+		$this->fireEvent('POST', 'DELETE_'.strtoupper($type), $addon);
 	}
 
 	/**
@@ -172,9 +167,9 @@ class sly_Service_AddOn_Manager {
 	/**
 	 * Install an addOn
 	 *
+	 * @throws sly_Exception         in case anything goes wrong
 	 * @param  string  $addon        addOn name
 	 * @param  boolean $installDump
-	 * @return mixed                 message or true if successful
 	 */
 	public function install($addon, $installDump = true) {
 		$aservice = $this->addOnService;
@@ -183,28 +178,26 @@ class sly_Service_AddOn_Manager {
 		$bootFile = $baseDir.'boot.php';
 
 		// return error message if an addon wants to stop the install process
-		$state = $this->fireEvent('PRE', 'INSTALL', $addon, true);
-		if ($state !== true) return $state;
+		$this->fireEvent('PRE', 'INSTALL', $addon);
 
 		// check for boot.php before we do anything
 		if (!is_readable($bootFile)) {
-			return t('addon_boot_file_not_found', $addon);
+			throw new sly_Exception(t('addon_boot_file_not_found', $addon));
 		}
 
 		// check requirements
-		$msg = $this->checkRequirements($addon);
-		if ($msg !== true) return $msg;
+		$this->checkRequirements($addon);
 
 		// check Sally version
 		$sallyVersions = $aservice->getRequiredSallyVersions($addon);
 
 		if (!empty($sallyVersions)) {
 			if (!$aservice->isCompatible($addon)) {
-				return t('addon_incompatible', $addon, sly_Core::getVersion('X.Y.Z'));
+				throw new sly_Exception(t('addon_incompatible', $addon, sly_Core::getVersion('X.Y.Z')));
 			}
 		}
 		else {
-			return t('addon_has_no_sally_version_info', $addon);
+			throw new sly_Exception(t('addon_has_no_sally_version_info', $addon));
 		}
 
 		// include install.php if available
@@ -215,7 +208,7 @@ class sly_Service_AddOn_Manager {
 				$this->req($installFile);
 			}
 			catch (Exception $e) {
-				return t('addon_install_failed', $addon, $e->getMessage());
+				throw new sly_Exception(t('addon_install_failed', $addon, $e->getMessage()));
 			}
 		}
 
@@ -224,11 +217,7 @@ class sly_Service_AddOn_Manager {
 
 		if ($installDump && is_readable($installSQL)) {
 			$mysiam = $pservice->getKey($addon, 'allow_non_innodb', false);
-			$state  = $this->installDump($installSQL, $mysiam);
-
-			if ($state !== true) {
-				return t('addon_install_sql_failed', $addon, $state);
-			}
+			$this->installDump($installSQL, $mysiam, 'install');
 		}
 
 		// copy assets to data/dyn/public
@@ -248,14 +237,14 @@ class sly_Service_AddOn_Manager {
 		}
 
 		// notify listeners
-		return $this->fireEvent('POST', 'INSTALL', $addon, false);
+		$this->fireEvent('POST', 'INSTALL', $addon);
 	}
 
 	/**
 	 * Uninstall an addOn
 	 *
+	 * @throws sly_Exception  in case anything goes wrong
 	 * @param  string $addon  addOn name
-	 * @return mixed          message or true if successful
 	 */
 	public function uninstall($addon) {
 		$aservice = $this->addOnService;
@@ -263,20 +252,18 @@ class sly_Service_AddOn_Manager {
 
 		// if not installed, try to disable if needed
 		if (!$aservice->isInstalled($addon)) {
-			return $this->deactivate($addon);
+			$this->deactivate($addon);
+			return;
 		}
 
 		// check for dependencies
-		$state = $this->checkDependencies($addon);
-		if ($state !== true) return $state;
+		$this->checkDependencies($addon);
 
 		// stop if (another) addon forbids uninstall
-		$state = $this->fireEvent('PRE', 'UNINSTALL', $addon, true);
-		if ($state !== true) return $state;
+		$this->fireEvent('PRE', 'UNINSTALL', $addon);
 
 		// deactivate addon first
-		$state = $this->deactivate($addon);
-		if ($state !== true) return $state;
+		$this->deactivate($addon);
 
 		// include uninstall.php if available
 		$baseDir   = $pservice->baseDirectory($addon);
@@ -287,7 +274,7 @@ class sly_Service_AddOn_Manager {
 				$this->req($uninstall);
 			}
 			catch (Exception $e) {
-				return t('addon_uninstall_failed', $addon, $e->getMessage());
+				throw new sly_Exception(t('addon_uninstall_failed', $addon, $e->getMessage()));
 			}
 		}
 
@@ -295,38 +282,25 @@ class sly_Service_AddOn_Manager {
 		$uninstallSQL = $baseDir.'uninstall.sql';
 
 		if (is_readable($uninstallSQL)) {
-			$state = $this->installDump($uninstallSQL);
-
-			if ($state !== true) {
-				return t('addon_uninstall_sql_failed', $addon, $state);
-			}
+			$this->installDump($uninstallSQL, false, 'uninstall');
 		}
 
 		// mark addOn as not installed
 		$aservice->setProperty($addon, 'install', false);
 
 		// delete files
-		$state  = $this->deletePublicFiles($addon);
-		$stateB = $this->deleteInternalFiles($addon);
-
-		if ($stateB !== true) {
-			// overwrite or concat stati
-			$state = $state === true ? $stateB : $stateA.'<br />'.$stateB;
-		}
-
-		if ($state !== true) {
-			return $state;
-		}
+		$this->deletePublicFiles($addon);
+		$this->deleteInternalFiles($addon);
 
 		// notify listeners
-		return $this->fireEvent('POST', 'UNINSTALL', $addon, false);
+		$this->fireEvent('POST', 'UNINSTALL', $addon);
 	}
 
 	/**
 	 * Activate an addOn
 	 *
+	 * @throws sly_Exception  in case anything goes wrong
 	 * @param  string $addon  addOn name
-	 * @return mixed          true if successful, else an error message as a string
 	 */
 	public function activate($addon) {
 		$aservice = $this->addOnService;
@@ -334,33 +308,31 @@ class sly_Service_AddOn_Manager {
 
 		// check preconditions
 		if ($aservice->isActivated($addon)) {
-			return true;
+			return;
 		}
 
 		if (!$aservice->isInstalled($addon)) {
-			return t('addon_activate_failed', $addon);
+			throw new sly_Exception(t('addon_activate_failed', $addon));
 		}
 
 		// check requirements
-		$msg = $this->checkRequirements($addon);
-		if ($msg !== true) return $msg;
+		$this->checkRequirements($addon);
 
 		// ask other addons about their plans
-		$state = $this->fireEvent('PRE', 'ACTIVATE', $addon, true);
-		if ($state !== true) return $state;
+		$this->fireEvent('PRE', 'ACTIVATE', $addon);
 
 		$this->checkUpdate($addon);
 		$aservice->setProperty($addon, 'status', true);
 		$this->clearCache();
 
-		return $this->fireEvent('POST', 'ACTIVATE', $addon, false);
+		$this->fireEvent('POST', 'ACTIVATE', $addon);
 	}
 
 	/**
 	 * Deactivate a addon
 	 *
+	 * @throws sly_Exception  in case anything goes wrong
 	 * @param  string $addon  addOn name
-	 * @return mixed          true if successful, else an error message as a string
 	 */
 	public function deactivate($addon) {
 		$aservice = $this->addOnService;
@@ -368,43 +340,39 @@ class sly_Service_AddOn_Manager {
 
 		// check preconditions
 		if (!$aservice->isActivated($addon)) {
-			return true;
+			return;
 		}
 
 		// check removal
-		$state = $this->checkDependencies($addon);
-		if ($state !== true) return $state;
+		$this->checkDependencies($addon);
 
 		// ask other addons about their plans
-		$state = $this->fireEvent('PRE', 'DEACTIVATE', $addon, true);
-		if ($state !== true) return $state;
+		$this->fireEvent('PRE', 'DEACTIVATE', $addon);
 
 		$aservice->setProperty($addon, 'status', false);
 		$this->clearCache();
 
-		return $this->fireEvent('POST', 'DEACTIVATE', $addon, false);
+		$this->fireEvent('POST', 'DEACTIVATE', $addon);
 	}
 
 	/**
 	 * Check if an addon may be removed
 	 *
+	 * @throws sly_Exception  in case anything goes wrong
 	 * @param  string $addon  addOn name
-	 * @return mixed          true if successful, else an error message as a string
 	 */
 	private function checkDependencies($addon) {
 		$service      = $this->addOnService;
 		$dependencies = $service->getDependencies($addon, true, true);
 
 		if (!empty($dependencies)) {
-			return t('addon_requires_addon', $addon, reset($dependencies));
+			throw new sly_Exception(t('addon_requires_addon', $addon, reset($dependencies)));
 		}
-
-		return true;
 	}
 
 	/**
+	 * @throws sly_Exception  in case anything goes wrong
 	 * @param  string $addon  addOn name
-	 * @return mixed          true if OK, else error message (string)
 	 */
 	private function checkRequirements($addon) {
 		$aservice = $this->addOnService;
@@ -412,11 +380,9 @@ class sly_Service_AddOn_Manager {
 
 		foreach ($requires as $required) {
 			if (!$aservice->isAvailable($required)) {
-				return t('addon_requires_addon', $required, $addon);
+				throw new sly_Exception(t('addon_requires_addon', $required, $addon));
 			}
 		}
-
-		return true;
 	}
 
 	/**
@@ -446,11 +412,12 @@ class sly_Service_AddOn_Manager {
 	}
 
 	/**
+	 * @throws sly_Exception         in case anything goes wrong
 	 * @param  string  $file
 	 * @param  boolean $allowMyISAM
-	 * @return mixed                 error message (string) or true
+	 * @param  string  $type         'install' or 'uninstall'
 	 */
-	private function installDump($file, $allowMyISAM) {
+	private function installDump($file, $allowMyISAM, $type) {
 		try {
 			$dump    = new sly_DB_Dump($file);
 			$sql     = sly_DB_Persistence::getInstance();
@@ -464,7 +431,7 @@ class sly_Service_AddOn_Manager {
 						$engine = strtolower($match[1]);
 
 						if ($engine !== 'innodb') {
-							return t('query_uses_forbidden_storage_engine', $idx+1, $match[1]);
+							throw new sly_Exception(t('query_uses_forbidden_storage_engine', $idx+1, $match[1]));
 						}
 					}
 				}
@@ -478,10 +445,8 @@ class sly_Service_AddOn_Manager {
 			}
 		}
 		catch (sly_DB_Exception $e) {
-			return $e->getMessage();
+			throw new sly_Exception(t('addon_'.$type.'_sql_failed', $addon, $e->getMessage()));
 		}
-
-		return true;
 	}
 
 	public function clearCache() {
@@ -646,21 +611,11 @@ class sly_Service_AddOn_Manager {
 	}
 
 	/**
-	 * @param  string  $time
-	 * @param  string  $type
-	 * @param  string  $addon
-	 * @param  boolean $filter
-	 * @return mixed
+	 * @param string  $time
+	 * @param string  $type
+	 * @param string  $addon
 	 */
-	protected function fireEvent($time, $type, $addon, $filter) {
-		$event  = 'SLY_ADDON_'.$time.'_'.$type;
-		$params = compact('addon');
-
-		if ($filter) {
-			return sly_Core::dispatcher()->filter($event, true, $params);
-		}
-
-		sly_Core::dispatcher()->notify($event, true, $params);
-		return true;
+	protected function fireEvent($time, $type, $addon) {
+		sly_Core::dispatcher()->notify('SLY_ADDON_'.$time.'_'.$type, $addon);
 	}
 }
