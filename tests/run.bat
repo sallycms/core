@@ -1,2 +1,4 @@
 @echo off
-call phpunit --strict --bootstrap bootstrap.php %* tests
+cd ../../
+call phpunit --configuration sally/tests/%1.xml
+cd sally/tests/

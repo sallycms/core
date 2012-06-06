@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit backupGlobals="true"
+	backupStaticAttributes="false"
+	bootstrap="bootstrap.php"
+	cacheTokens="true"
+	colors="true"
+	convertErrorsToExceptions="true"
+	convertNoticesToExceptions="true"
+	convertWarningsToExceptions="true"
+	forceCoversAnnotation="false"
+	mapTestClassNameToCoveredClassName="false"
+	printerClass="PHPUnit_TextUI_ResultPrinter"
+	processIsolation="false"
+	stopOnError="false"
+	stopOnFailure="false"
+	stopOnIncomplete="false"
+	stopOnSkipped="false"
+	testSuiteLoaderClass="PHPUnit_Runner_StandardTestSuiteLoader"
+	strict="true"
+	verbose="false">
+
+	<testsuites>
+		<testsuite name="tests">
+			<directory>tests/Event</directory>
+			<directory>tests/Util</directory>
+
+			<!-- for some obscure reasons, file paths are not resolved to the position of this file... -->
+			<file>sally/tests/tests/DB/DumpTest.php</file>
+			<file>sally/tests/tests/Service/ArticleTypeTest.php</file>
+			<file>sally/tests/tests/Service/FactoryTest.php</file>
+			<file>sally/tests/tests/Service/ModuleTest.php</file>
+			<file>sally/tests/tests/Service/TemplateTest.php</file>
+			<file>sally/tests/tests/CoreTest.php</file>
+			<file>sally/tests/tests/FunctionsTest.php</file>
+			<file>sally/tests/tests/LoaderTest.php</file>
+		</testsuite>
+	</testsuites>
+</phpunit>
