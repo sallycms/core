@@ -113,6 +113,7 @@ class sly_Util_FlashMessage {
 	public function appendMessage($type, $msg) {
 		if (!empty($this->messages[$type])) {
 			$cur = end($this->messages[$type]);
+			$idx = key($this->messages[$type]);
 
 			// Store multiple lines here as an array and let the view decide
 			// whether or not to implode them with "<br>" or "\n".
@@ -121,7 +122,7 @@ class sly_Util_FlashMessage {
 			}
 
 			$cur[] = $msg;
-			$this->messages[$type] = $cur;
+			$this->messages[$type][$idx] = $cur;
 		}
 		else {
 			$this->addMessage($type, $msg);
@@ -131,7 +132,7 @@ class sly_Util_FlashMessage {
 	}
 
 	/**
-	 * append message
+	 * prepend message
 	 *
 	 * @param string $type
 	 * @param string $msg
@@ -152,7 +153,7 @@ class sly_Util_FlashMessage {
 				}
 
 				array_unshift($cur, $msg);
-				$this->messages[$type] = $cur;
+				$this->messages[$type][0] = $cur;
 			}
 		}
 		else {
