@@ -220,6 +220,36 @@ abstract class sly_Form_ElementBase extends sly_Viewable {
 	}
 
 	/**
+	 * Sets the value
+	 *
+	 * @param  mixed $value          the new value
+	 * @return sly_Form_ElementBase  the object itself
+	 */
+	public function setValue($value) {
+		return $this->setAttribute('value', $value);
+	}
+
+	/**
+	 * Sets the name
+	 *
+	 * @param  string $name          the new name
+	 * @return sly_Form_ElementBase  the object itself
+	 */
+	public function setName($name) {
+		return $this->setAttribute('name', $name);
+	}
+
+	/**
+	 * Sets the ID
+	 *
+	 * @param  string $id            the new id
+	 * @return sly_Form_ElementBase  the object itself
+	 */
+	public function setID($id) {
+		return $this->setAttribute('id', $id);
+	}
+
+	/**
 	 * Sets the label
 	 *
 	 * The label will be displayed left to the element. HTML is not allowed. Use
