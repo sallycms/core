@@ -29,7 +29,13 @@ class sly_Service_Language extends sly_Service_Model_Base_Id {
 	 */
 	public function save(sly_Model_Base $model) {
 		sly_Core::cache()->delete('sly.language', 'all');
-		return parent::save($model);
+
+		$result = parent::save($model);
+
+		// notify listeners
+		sly_Core::dispatcher()->notify('CLANG_UPDATED', $model);
+
+		return $result;
 	}
 
 	/**
@@ -76,7 +82,7 @@ class sly_Service_Language extends sly_Service_Model_Base_Id {
 		sly_Core::cache()->set('sly.language', 'all', $langs);
 
 		// notify listeners
-		sly_Core::dispatcher()->notify('CLANG_ADDED', '', array('id' => $newLanguage->getId(), 'language' => $newLanguage));
+		sly_Core::dispatcher()->notify('CLANG_ADDED', $newLanguage, array('id' => $newLanguage->getId(), 'language' => $newLanguage));
 
 		return $newLanguage;
 	}
@@ -107,7 +113,7 @@ class sly_Service_Language extends sly_Service_Model_Base_Id {
 			$db->delete('article', $params);
 			$db->delete('article_slice', $params);
 
-			sly_Core::dispatcher()->notify('CLANG_DELETED','', array(
+			sly_Core::dispatcher()->notify('CLANG_DELETED', $language, array(
 				'id'   => $language->getId(),
 				'name' => $language->getName()
 			));

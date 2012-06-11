@@ -4,8 +4,8 @@ CACHING_STRATEGY: BabelCache_Blackhole
 DATABASE:
   DRIVER: mysql
   HOST: localhost
-  LOGIN: develop
-  PASSWORD: develop
-  NAME: sally_base
+  LOGIN: root
+  PASSWORD: ''
+  NAME: sally_test
   PERSISTENT: false
   TABLE_PREFIX: sly_
