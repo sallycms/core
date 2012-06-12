@@ -10,22 +10,6 @@
 
 class sly_Util_User {
 	/**
-	 * Generates a password hash for a given user and a given password sting.
-	 *
-	 * The given user must have set at least the createdate
-	 *
-	 * @throws sly_Exception             When createdate is empty
-	 * @param  sly_Model_User $user      The user object
-	 * @param  string         $password  The plain password string
-	 * @return string                    The hashed password
-	 */
-	public static function getPasswordHash(sly_Model_User $user, $password) {
-		$createdate = $user->getCreateDate();
-		if (empty($createdate)) throw new sly_Exception(t('password_needs_valid_createdate'));
-		return sly_Util_Password::hash($password, $createdate);
-	}
-
-	/**
 	 * return currently logged-in user
 	 *
 	 * @return sly_Model_User

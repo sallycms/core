@@ -81,7 +81,7 @@ class sly_Model_User extends sly_Model_Base_Id {
 	 * @param string $password  The password (plain)
 	 */
 	public function setPassword($password) {
-		$this->setHashedPassword(sly_Util_User::getPasswordHash($this, $password));
+		$this->setHashedPassword(sly_Util_Password::hash($password));
 	}
 
 	/**

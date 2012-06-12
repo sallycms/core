@@ -174,6 +174,14 @@ class sly_Service_User extends sly_Service_Model_Base_Id {
 			if ($loginOK) {
 				sly_Util_Session::set('UID', $user->getId());
 				sly_Util_Session::regenerate_id();
+
+				// upgrade hash if possible
+				$current  = $user->getPassword();
+				$upgraded = sly_Util_Password::upgrade($password, $current);
+
+				if ($upgraded) {
+					$user->setHashedPassword($upgraded);
+				}
 			}
 
 			$user->setLastTryDate(time());
@@ -198,6 +206,6 @@ class sly_Service_User extends sly_Service_Model_Base_Id {
 	 * @return boolean                   true if the passwords match, otherwise false.
 	 */
 	public function checkPassword(sly_Model_User $user, $password) {
-		return sly_Util_User::getPasswordHash($user, $password) == $user->getPassword();
+		return sly_Util_Password::verify($password, $user->getPassword(), $user->getCreateDate());
 	}
 }
