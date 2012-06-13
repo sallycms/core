@@ -14,12 +14,12 @@
  * @ingroup util
  */
 class sly_Util_Password {
-	const BCRYPT_COST_FACTOR = 11;     ///< int     remember, this is used exponentially
-	const ITERATIONS_PBKDF2  = 1000;   ///< int     iteration count for PBKDF2
-	const ITERATIONS_SHA1    = 100000; ///< int     iteration count for fast hashing algorithms like SHA-*
-	const ALGORITHM_BLOWFISH = '2a';   ///< string  aka bcrypt
-	const ALGORITHM_PBKDF2   = 'XX';   ///< string  pseudo-identifier
-	const ALGORITHM_SHA1     = 'ZZ';   ///< string  pseudo-identifier to let us know we had to fall back to SHA-1
+	const BCRYPT_COST_FACTOR = 10;    ///< int     remember, this is used exponentially
+	const ITERATIONS_PBKDF2  = 500;   ///< int     iteration count for PBKDF2
+	const ITERATIONS_SHA1    = 50000; ///< int     iteration count for fast hashing algorithms like SHA-*
+	const ALGORITHM_BLOWFISH = '2a';  ///< string  aka bcrypt
+	const ALGORITHM_PBKDF2   = 'XX';  ///< string  pseudo-identifier
+	const ALGORITHM_SHA1     = 'ZZ';  ///< string  pseudo-identifier to let us know we had to fall back to SHA-1
 
 	/**
 	 * Hash a password
