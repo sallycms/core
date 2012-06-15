@@ -244,6 +244,8 @@ class sly_Util_String {
 	 * @return string        die Liste als String (zum Beispiel "a, b, c und d")
 	 */
 	public static function humanImplode($list, $last = ' und ') {
+		$list = array_values($list);
+
 		switch (count($list)) {
 			case 0: return '';
 			case 1: return $list[0];
