@@ -49,6 +49,8 @@ class sly_Util_Password {
 	}
 
 	public static function verify($password, $hash, $saltForOldschoolHash = null) {
+		if (strlen($hash) === 0) return false;
+
 		// assume old-school hashing (Sally < 0.7)
 		if ($hash[0] !== '$') {
 			if ($saltForOldschoolHash === null) {
@@ -65,7 +67,13 @@ class sly_Util_Password {
 			$computed = $password;
 		}
 		else {
-			list ($unused, $id, $tail) = explode('$', $hash, 3);
+			$parts = explode('$', $hash, 3);
+
+			if (count($parts) !== 3) {
+				throw new sly_Exception('Unknown hash format given.');
+			}
+
+			list ($unused, $id, $tail) = $parts;
 
 			switch ($id) {
 				case self::ALGORITHM_BLOWFISH:
@@ -150,16 +158,12 @@ class sly_Util_Password {
 	 * $2a$11$55d8b827ece4799484d67u6l5O8XSzrXcw4zDWKuUcfDxqai7BZJm
 	 *
 	 * @param  string $password
-	 * @param  string $salt      the full salt for crypt() ('$2a$08$....') or just the actual, alphanumeric salt
 	 * @return string
 	 */
-	public static function bcrypt($password, $salt = null) {
-		// no salt or non-complete salt
-		if ($salt === null || $salt[0] !== '$') {
-			// salt may be at most 22 characters long and must be [a-zA-Z0-9./]
-			$salt = $salt === null ? bin2hex(self::getRandomData(11)) : substr($salt, 0, 22);
-			$salt = sprintf('$%s$%02d$%s', self::ALGORITHM_BLOWFISH, self::BCRYPT_COST_FACTOR, $salt);
-		}
+	public static function bcrypt($password) {
+		// salt may be at most 22 characters long and must be [a-zA-Z0-9./]
+		$salt = bin2hex(self::getRandomData(11));
+		$salt = sprintf('$%s$%02d$%s', self::ALGORITHM_BLOWFISH, self::BCRYPT_COST_FACTOR, $salt);
 
 		return crypt($password, $salt);
 	}
