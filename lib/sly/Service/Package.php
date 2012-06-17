@@ -93,7 +93,11 @@ class sly_Service_Package {
 	 * @return mixed            the author as given in static.yml
 	 */
 	public function getAuthor($package, $default = null) {
-		return $this->getKey($package, 'author', $default);
+		$authors = $this->getKey($package, 'authors', null);
+		if (!is_array($authors) || empty($authors)) return $default;
+
+		$first = reset($authors);
+		return isset($first['name']) ? $first['name'] : $default;
 	}
 
 	/**
@@ -116,6 +120,25 @@ class sly_Service_Package {
 	 */
 	public function getParent($package) {
 		return $this->getKey($package, 'parent', null);
+	}
+
+	/**
+	 * Get children packages (only relevant for backend list)
+	 *
+	 * @param  string $package  parent package name
+	 * @return array
+	 */
+	public function getChildren($parent) {
+		$packages = $this->getPackages();
+		$children = array();
+
+		foreach ($packages as $package) {
+			if ($this->getParent($package) === $parent) {
+				$children[] = $package;
+			}
+		}
+
+		return $children;
 	}
 
 	/**
