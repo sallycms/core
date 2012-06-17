@@ -158,6 +158,16 @@ class sly_Service_User extends sly_Service_Model_Base_Id {
 	}
 
 	/**
+	 * set current user object
+	 *
+	 * @param sly_Model_User $user  the user that should be logged in from now on
+	 */
+	public function setCurrentUser(sly_Model_User $user) {
+		sly_Util_Session::set('UID', $user->getId());
+		self::$currentUser = $user;
+	}
+
+	/**
 	 * @param  string $login
 	 * @param  string $password
 	 * @return boolean
