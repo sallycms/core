@@ -274,6 +274,16 @@ class sly_Service_AddOn {
 	}
 
 	/**
+	 * get addOn version
+	 *
+	 * @param  string $addon  addon name
+	 * @return string
+	 */
+	public function getVersion($addon) {
+		return $this->pkgService->getVersion($addon);
+	}
+
+	/**
 	 * Check if an addon is registered
 	 *
 	 * @param  string $addon  addon name
