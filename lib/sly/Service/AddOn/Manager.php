@@ -611,9 +611,11 @@ class sly_Service_AddOn_Manager {
 	}
 
 	/**
-	 * @param string  $time
-	 * @param string  $type
-	 * @param string  $addon
+	 * Fire a notify event regarding addOn state changes
+	 *
+	 * @param string $time   'PRE' or 'POST'
+	 * @param string $type   'INSTALL', 'UNINSTALL', ...
+	 * @param string $addon  the addOn that we operate on
 	 */
 	protected function fireEvent($time, $type, $addon) {
 		sly_Core::dispatcher()->notify('SLY_ADDON_'.$time.'_'.$type, $addon);
