@@ -109,10 +109,19 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 
 	/**
 	 * @throws sly_Exception
+	 * @param  sly_Model_Base_Article  $article
+	 * @return boolean
+	 */
+	public function deleteByArticle(sly_Model_Base_Article $article) {
+		return $this->deleteById($article->getId());
+	}
+
+	/**
+	 * @throws sly_Exception
 	 * @param  int    $articleID
 	 * @return boolean
 	 */
-	public function delete($articleID) {
+	public function deleteById($articleID) {
 		$articleID = (int) $articleID;
 		$this->checkForSpecialArticle($articleID);
 

@@ -64,4 +64,13 @@ class sly_Service_Slice extends sly_Service_Model_Base_Id {
 		$new = new sly_Model_Slice($slice->toHash());
 		return $this->save($new);
 	}
+
+	/**
+	 * @throws sly_Exception
+	 * @param  sly_Model_Slice $slice
+	 * @return int
+	 */
+	public function deleteBySlice(sly_Model_Slice $slice) {
+		return $this->deleteById($slice->getId());
+	}
 }

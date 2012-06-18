@@ -88,6 +88,15 @@ class sly_Service_Language extends sly_Service_Model_Base_Id {
 	}
 
 	/**
+	 * @throws sly_Exception
+	 * @param  sly_Model_Language  $language
+	 * @return int
+	 */
+	public function deleteByLanguage(sly_Model_Language $language) {
+		return $this->deleteById($language->getId());
+	}
+
+	/**
 	 * @param  array $where
 	 * @return int
 	 */
