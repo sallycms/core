@@ -209,7 +209,7 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id {
 	 * @param  sly_Model_Medium $medium
 	 * @return boolean
 	 */
-	public function deleteByCategory(sly_Model_Medium $medium) {
+	public function deleteByMedium(sly_Model_Medium $medium) {
 		return $this->deleteById($medium->getId());
 	}
 
