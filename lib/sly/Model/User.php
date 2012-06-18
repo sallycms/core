@@ -154,13 +154,10 @@ class sly_Model_User extends sly_Model_Base_Id {
 		return sly_Authorisation::hasPermission($this->getId(), $context, $right, $value);
 	}
 
-	// Misc
-
 	/**
 	 * @return int
 	 */
 	public function delete() {
-		return sly_Service_Factory::getUserService()->delete(array('id' => $this->id));
+		return sly_Service_Factory::getUserService()->deleteById($this->id);
 	}
-
 }

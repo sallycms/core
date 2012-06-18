@@ -63,9 +63,19 @@ class sly_Service_ArticleSlice extends sly_Service_Model_Base_Id {
 	}
 
 	/**
+	 * @throws sly_Exception
+	 * @param  sly_Model_ArticleSlice  $article
+	 * @return boolean
+	 */
+	public function deleteByArticleSlice(sly_Model_ArticleSlice $slice) {
+		return $this->deleteById($slice->getId());
+	}
+
+	/**
 	 * tries to delete a slice
 	 *
-	 * @param int $article_slice_id
+	 * @throws sly_Exception
+	 * @param  int $article_slice_id
 	 * @return boolean
 	 */
 	public function deleteById($id) {
@@ -88,7 +98,7 @@ class sly_Service_ArticleSlice extends sly_Service_Model_Base_Id {
 		);
 
 		// delete slice
-		sly_Service_Factory::getSliceService()->delete(array('id' => $articleSlice->getSliceId()));
+		sly_Service_Factory::getSliceService()->deleteById($articleSlice->getSliceId());
 
 		// delete articleslice
 		$sql->delete($this->tablename, array('id' => $id));

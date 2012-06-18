@@ -50,4 +50,12 @@ abstract class sly_Service_Model_Base_Id extends sly_Service_Model_Base {
 		$model = $this->makeInstance($params);
 		return $this->save($model);
 	}
+
+	/**
+	 * @param  int $id
+	 * @return int
+	 */
+	public function deleteById($id) {
+		return $this->delete(array('id' => (int) $id));
+	}
 }
