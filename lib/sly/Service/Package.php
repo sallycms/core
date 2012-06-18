@@ -365,6 +365,16 @@ class sly_Service_Package {
 			foreach ($data as $pkg) {
 				$packages[] = $pkg['name'];
 			}
+
+			$installed = $root.'composer/installed_dev.json';
+
+			if (file_exists($installed)) {
+				$data = sly_Util_JSON::load($installed);
+
+				foreach ($data as $pkg) {
+					$packages[] = $pkg['name'];
+				}
+			}
 		}
 
 		// Or else scan the filesystem.
