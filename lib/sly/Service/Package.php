@@ -204,7 +204,9 @@ class sly_Service_Package {
 			if ($composer === null) {
 				$filename = $this->baseDirectory($package).'composer.json';
 				$composer = new sly_Util_Composer($filename);
-				$composer->getContent(); // read file
+
+				$composer->setPackage($package);
+				$composer->getContent($this->baseDirectory().'composer'); // read file
 
 				$this->setCache($package, 'composer.json', $composer);
 			}

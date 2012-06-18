@@ -13,29 +13,64 @@
  */
 class sly_Util_Composer {
 	protected $filename;
+	protected $package;
+	protected $proxy;
 	protected $mtime;
 	protected $data;
 
 	const EXTRA_SUBKEY = 'sallycms';
 
 	public function __construct($filename) {
-		if (!is_file($filename)) {
-			throw new sly_Exception(t('file_not_found', $filename));
-		}
-
-		$this->filename = realpath($filename);
+		$this->filename = $filename;
+		$this->proxy    = null;
 		$this->mtime    = null;
 		$this->data     = false;
+	}
+
+	public function setPackage($package) {
+		$this->package = $package;
+		return $this;
 	}
 
 	public function getFilename() {
 		return $this->filename;
 	}
 
-	public function getContent() {
+	public function getContent($composerDir = null) {
 		if ($this->data === false) {
-			$this->data  = sly_Util_JSON::load($this->filename, false, true);
-			$this->mtime = filemtime($this->filename);
+			$found = false;
+
+			if (($composerDir || $this->proxy) && $this->package) {
+				$composerDir = $this->proxy ? dirname($this->proxy) : $composerDir;
+
+				foreach (array('installed.json', 'installed_dev.json') as $filename) {
+					$filename = $composerDir.'/'.$filename;
+
+					if (file_exists($filename)) {
+						$data = sly_Util_JSON::load($filename, false, true);
+
+						foreach ($data as $package) {
+							if (isset($package['name']) && $package['name'] === $this->package) {
+								$this->data  = $package;
+								$this->mtime = filemtime($filename);
+								$this->proxy = $filename;
+
+								$found = true;
+								break 2;
+							}
+						}
+					}
+				}
+			}
+
+			if (!$found && file_exists($this->filename)) {
+				$this->data  = sly_Util_JSON::load($this->filename, false, true);
+				$this->mtime = filemtime($this->filename);
+				$this->proxy = null;
+			}
+			elseif (!$found) {
+				throw new sly_Exception(t('file_not_found', $this->filename));
+			}
 		}
 
 		return $this->data;
@@ -43,13 +78,15 @@ class sly_Util_Composer {
 
 	public function revalidate() {
 		if ($this->mtime !== null) {
-			if (!file_exists($this->filename)) {
+			$realFile = $this->proxy ? $this->proxy : $this->filename;
+
+			if (!file_exists($realFile)) {
 				$this->data  = null;
 				$this->mtime = time();
 				return true;
 			}
 
-			if (filemtime($this->filename) > $this->mtime) {
+			if (filemtime($realFile) > $this->mtime) {
 				$this->data = false;
 				$this->getContent();
 				return true;
