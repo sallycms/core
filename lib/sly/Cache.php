@@ -20,8 +20,8 @@ class sly_Cache extends BabelCache_Factory {
 	private static $cacheImpls = array(
 		'BabelCache_APC'              => 'APC',
 		'BabelCache_Blackhole'        => 'Blackhole',
-		'BabelCache_Filesystem'       => 'Filesystem',
-		'BabelCache_Filesystem_Plain' => 'Filesystem (plain)',
+//		'BabelCache_Filesystem'       => 'Filesystem',
+		'BabelCache_Filesystem_Plain' => 'Filesystem',
 		'BabelCache_eAccelerator'     => 'eAccelerator',
 		'BabelCache_Memcache'         => 'Memcache',
 		'BabelCache_Memcached'        => 'Memcached',
