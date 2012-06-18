@@ -104,7 +104,31 @@ class sly_Util_Password {
 			}
 		}
 
-		return $computed === $hash;
+		return self::equals($computed, $hash);
+	}
+
+	/**
+	 * Compare two strings length-indenpendently
+	 *
+	 * This method implements a constant-time algorithm to compare passwords to
+    * avoid (remote) timing attacks.
+    *
+	 * @param  string $strA  string A
+	 * @param  string $strB  string B
+	 * @return boolean       true if match, else false
+	 */
+	public static function equals($strA, $strB) {
+		if (strlen($strA) !== strlen($strB)) {
+			return false;
+		}
+
+		$result = 0;
+
+		for ($i = 0; $i < strlen($strA); ++$i) {
+			$result |= ord($strA[$i]) ^ ord($strB[$i]);
+		}
+
+		return 0 === $result;
 	}
 
 	public static function upgrade($password, $oldHash) {
