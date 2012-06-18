@@ -111,8 +111,8 @@ class sly_Util_Password {
 	 * Compare two strings length-indenpendently
 	 *
 	 * This method implements a constant-time algorithm to compare passwords to
-    * avoid (remote) timing attacks.
-    *
+	 * avoid (remote) timing attacks.
+	 *
 	 * @param  string $strA  string A
 	 * @param  string $strB  string B
 	 * @return boolean       true if match, else false
