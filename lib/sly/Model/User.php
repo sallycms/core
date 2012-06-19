@@ -18,7 +18,7 @@ class sly_Model_User extends sly_Model_Base_Id {
 	protected $name;          ///< string
 	protected $description;   ///< string
 	protected $login;         ///< string
-	protected $psw;           ///< string
+	protected $password;      ///< string
 	protected $status;        ///< int
 	protected $rights;        ///< string
 	protected $createuser;    ///< string
@@ -34,7 +34,7 @@ class sly_Model_User extends sly_Model_Base_Id {
 	protected $isAdmin;       ///< boolean
 
 	protected $_attributes = array(
-		'name' => 'string', 'description' => 'string', 'login' => 'string', 'psw' => 'string',
+		'name' => 'string', 'description' => 'string', 'login' => 'string', 'password' => 'string',
 		'status' => 'int', 'rights' => 'string', 'updateuser' => 'string',
 		'updatedate' => 'int', 'createuser' => 'string', 'createdate' => 'int', 'lasttrydate' => 'int',
 		'timezone' => 'string', 'revision' => 'int'
@@ -87,10 +87,10 @@ class sly_Model_User extends sly_Model_Base_Id {
 	/**
 	 * Sets a password into the user model, where hashing is already done
 	 *
-	 * @param string $psw  The hashed password
+	 * @param string $password  The hashed password
 	 */
-	public function setHashedPassword($psw) {
-		$this->psw = $psw;
+	public function setHashedPassword($password) {
+		$this->password = $password;
 	}
 
 	public function setStatus($status)           { $this->status      = (int) $status;      } ///< @param int    $status
@@ -105,7 +105,7 @@ class sly_Model_User extends sly_Model_Base_Id {
 	public function getName()        { return $this->name;        } ///< @return string
 	public function getDescription() { return $this->description; } ///< @return string
 	public function getLogin()       { return $this->login;       } ///< @return string
-	public function getPassword()    { return $this->psw;         } ///< @return string
+	public function getPassword()    { return $this->password;    } ///< @return string
 	public function getStatus()      { return $this->status;      } ///< @return int
 	public function getRights()      { return $this->rights;      } ///< @return string
 	public function getCreateDate()  { return $this->createdate;  } ///< @return int
