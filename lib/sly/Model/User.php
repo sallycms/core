@@ -36,8 +36,8 @@ class sly_Model_User extends sly_Model_Base_Id {
 	protected $_attributes = array(
 		'name' => 'string', 'description' => 'string', 'login' => 'string', 'password' => 'string',
 		'status' => 'int', 'rights' => 'string', 'updateuser' => 'string',
-		'updatedate' => 'int', 'createuser' => 'string', 'createdate' => 'int', 'lasttrydate' => 'int',
-		'timezone' => 'string', 'revision' => 'int'
+		'updatedate' => 'datetime', 'createuser' => 'string', 'createdate' => 'datetime',
+		'lasttrydate' => 'datetime', 'timezone' => 'string', 'revision' => 'int'
 	); ///< array
 
 	/**
@@ -49,9 +49,9 @@ class sly_Model_User extends sly_Model_Base_Id {
 	}
 
 	protected function evalRights() {
-		$config = sly_Core::config();
+		$config      = sly_Core::config();
+		$rightsArray = array_filter(explode('#', $this->getRights()));
 
-		$rightsArray   = array_filter(explode('#', $this->getRights()));
 		$this->startpage     = $config->get('START_PAGE');
 		$this->backendLocale = sly_Core::getDefaultLocale();
 		$this->isAdmin       = false;
@@ -93,14 +93,32 @@ class sly_Model_User extends sly_Model_Base_Id {
 		$this->password = $password;
 	}
 
-	public function setStatus($status)           { $this->status      = (int) $status;      } ///< @param int    $status
-	public function setCreateDate($createdate)   { $this->createdate  = (int) $createdate;  } ///< @param int    $createdate
-	public function setUpdateDate($updatedate)   { $this->updatedate  = (int) $updatedate;  } ///< @param int    $updatedate
-	public function setCreateUser($createuser)   { $this->createuser  = $createuser;        } ///< @param string $createuser
-	public function setUpdateUser($updateuser)   { $this->updateuser  = $updateuser;        } ///< @param string $updateuser
-	public function setLastTryDate($lasttrydate) { $this->lasttrydate = (int) $lasttrydate; } ///< @param int    $lasttrydate
-	public function setTimeZone($timezone)       { $this->timezone    = $timezone;          } ///< @param string $timezone
-	public function setRevision($revision)       { $this->revision    = (int) $revision;    } ///< @param int    $revision
+	/**
+	 * @param mixed $createdate  unix timestamp or date using 'YYYY-MM-DD HH:MM:SS' format
+	 */
+	public function setCreateDate($createdate) {
+		$this->createdate = sly_Util_String::isInteger($createdate) ? (int) $createdate : strtotime($createdate);
+	}
+
+	/**
+	 * @param mixed $updatedate  unix timestamp or date using 'YYYY-MM-DD HH:MM:SS' format
+	 */
+	public function setUpdateDate($updatedate) {
+		$this->updatedate = sly_Util_String::isInteger($updatedate) ? (int) $updatedate : strtotime($updatedate);
+	}
+
+	/**
+	 * @param mixed $lasttrydate  unix timestamp or date using 'YYYY-MM-DD HH:MM:SS' format
+	 */
+	public function setLastTryDate($lasttrydate) {
+		$this->lasttrydate = sly_Util_String::isInteger($lasttrydate) ? (int) $lasttrydate : strtotime($lasttrydate);
+	}
+
+	public function setStatus($status)         { $this->status     = (int) $status;   } ///< @param int    $status
+	public function setCreateUser($createuser) { $this->createuser = $createuser;     } ///< @param string $createuser
+	public function setUpdateUser($updateuser) { $this->updateuser = $updateuser;     } ///< @param string $updateuser
+	public function setTimeZone($timezone)     { $this->timezone   = $timezone;       } ///< @param string $timezone
+	public function setRevision($revision)     { $this->revision   = (int) $revision; } ///< @param int    $revision
 
 	public function getName()        { return $this->name;        } ///< @return string
 	public function getDescription() { return $this->description; } ///< @return string

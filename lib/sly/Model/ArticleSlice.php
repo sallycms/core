@@ -31,8 +31,8 @@ class sly_Model_ArticleSlice extends sly_Model_Base_Id implements sly_Model_ISli
 	protected $_attributes = array(
 		'updateuser' => 'string',
 		'createuser' => 'string',
-		'createdate' => 'int',
-		'updatedate' => 'int',
+		'createdate' => 'datetime',
+		'updatedate' => 'datetime',
 		'pos'        => 'int',
 		'article_id' => 'int',
 		'clang'      => 'int',
@@ -45,66 +45,88 @@ class sly_Model_ArticleSlice extends sly_Model_Base_Id implements sly_Model_ISli
 	 *
 	 * @return int
 	 */
-	public function getArticleId()  { return $this->article_id; }
+	public function getArticleId() {
+		return $this->article_id;
+	}
 
 	/**
 	 *
 	 * @return int
 	 */
-	public function getClang()      { return $this->clang;      }
+	public function getClang() {
+		return $this->clang;
+	}
 
 	/**
 	 *
 	 * @return string
 	 */
-	public function getSlot()       { return $this->slot;       }
+	public function getSlot() {
+		return $this->slot;
+	}
 
 	/**
 	 *
 	 * @return int
 	 */
-	public function getPosition()   { return $this->pos;        }
+	public function getPosition() {
+		return $this->pos;
+	}
 
 	/**
 	 * @deprecated  since 0.6
 	 */
-	public function getPrior()      { return $this->pos;        }
+	public function getPrior() {
+		return $this->pos;
+	}
 
 	/**
 	 *
 	 * @return int
 	 */
-	public function getSliceId()    { return $this->slice_id;   }
+	public function getSliceId() {
+		return $this->slice_id;
+	}
 
 	/**
 	 *
 	 * @return int
 	 */
-	public function getCreateDate() { return $this->createdate; }
+	public function getCreateDate() {
+		return $this->createdate;
+	}
 
 	/**
 	 *
 	 * @return int
 	 */
-	public function getUpdateDate() { return $this->updatedate; }
+	public function getUpdateDate() {
+		return $this->updatedate;
+	}
 
 	/**
 	 *
 	 * @return string
 	 */
-	public function getCreateUser() { return $this->createuser; }
+	public function getCreateUser() {
+		return $this->createuser;
+	}
 
 	/**
 	 *
 	 * @return int
 	 */
-	public function getUpdateUser() { return $this->updateuser; }
+	public function getUpdateUser() {
+		return $this->updateuser;
+	}
 
 	/**
 	 *
 	 * @return int
 	 */
-	public function getRevision()   { return $this->revision;   }
+	public function getRevision() {
+		return $this->revision;
+	}
 
 	/**
 	 *
@@ -173,10 +195,10 @@ class sly_Model_ArticleSlice extends sly_Model_Base_Id implements sly_Model_ISli
 	}
 
 	/**
-	 * @param int $updatedate
+	 * @param mixed $updatedate  unix timestamp or date using 'YYYY-MM-DD HH:MM:SS' format
 	 */
 	public function setUpdateDate($updatedate) {
-		$this->updatedate = (int) $updatedate;
+		$this->updatedate = sly_Util_String::isInteger($updatedate) ? (int) $updatedate : strtotime($updatedate);
 	}
 
 	/**
@@ -187,10 +209,10 @@ class sly_Model_ArticleSlice extends sly_Model_Base_Id implements sly_Model_ISli
 	}
 
 	/**
-	 * @param int $createdate
+	 * @param mixed $createdate  unix timestamp or date using 'YYYY-MM-DD HH:MM:SS' format
 	 */
 	public function setCreateDate($createdate) {
-		$this->createdate = (int) $createdate;
+		$this->createdate = sly_Util_String::isInteger($createdate) ? (int) $createdate : strtotime($createdate);
 	}
 
 	/**
@@ -246,7 +268,7 @@ class sly_Model_ArticleSlice extends sly_Model_Base_Id implements sly_Model_ISli
 	 * drop slice from serialized instance
 	 */
 	public function __sleep() {
-		$this->slice = null;
+		$this->slice   = null;
 		$this->article = null;
 	}
 }
