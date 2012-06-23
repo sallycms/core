@@ -150,7 +150,7 @@ class sly_Service_User extends sly_Service_Model_Base_Id {
 		if (sly_Core::config()->get('SETUP')) return null;
 
 		if (self::$currentUser === false) {
-			$userID = SLY_IS_TESTING ? SLY_TESTING_USER_ID : sly_Util_Session::get('UID', 'int', -1);
+			$userID = sly_Util_Session::get('UID', 'int', -1);
 			self::$currentUser = $this->findById($userID);
 		}
 
