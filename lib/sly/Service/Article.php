@@ -241,7 +241,7 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 	 * @param sly_Model_User    $user
 	 */
 	public function touch(sly_Model_Article $article, sly_Model_User $user) {
-		$article->setUpdateColumns($user->getLogin());
+		$article->setUpdateColumns($user);
 		$this->update($article);
 	}
 

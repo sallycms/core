@@ -49,7 +49,7 @@ class sly_Service_User extends sly_Service_Model_Base_Id {
 			'rights'      => '',
 			'name'        => '',
 			'description' => '',
-			'lasttrydate' => 0,
+			'lasttrydate' => null,
 			'revision'    => 0,
 			'updatedate'  => time(),
 			'createdate'  => time(),
