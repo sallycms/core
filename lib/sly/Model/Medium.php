@@ -33,8 +33,8 @@ class sly_Model_Medium extends sly_Model_Base_Id {
 
 	protected $_attributes = array(
 		'updateuser' => 'string', 'category_id' => 'int', 'revision' => 'int',
-		'title' => 'string', 'createdate' => 'int', 'filename' => 'string',
-		'height' => 'int', 'width' => 'int', 'updatedate' => 'int',
+		'title' => 'string', 'createdate' => 'datetime', 'filename' => 'string',
+		'height' => 'int', 'width' => 'int', 'updatedate' => 'datetime',
 		're_file_id' => 'int', 'createuser' => 'string', 'originalname' => 'string',
 		'attributes' => 'string', 'filetype' => 'string', 'filesize' => 'string'
 	); ///< array
@@ -59,17 +59,29 @@ class sly_Model_Medium extends sly_Model_Base_Id {
 	public function setCategoryId($category_id)    { $this->category_id  = $category_id;  } ///< @param int    $category_id
 	public function setRevision($revision)         { $this->revision     = $revision;     } ///< @param int    $revision
 	public function setTitle($title)               { $this->title        = $title;        } ///< @param string $title
-	public function setCreateDate($createdate)     { $this->createdate   = $createdate;   } ///< @param int    $createdate
 	public function setFilename($filename)         { $this->filename     = $filename;     } ///< @param string $filename
 	public function setHeight($height)             { $this->height       = $height;       } ///< @param int    $height
 	public function setWidth($width)               { $this->width        = $width;        } ///< @param int    $width
-	public function setUpdateDate($updatedate)     { $this->updatedate   = $updatedate;   } ///< @param int    $updatedate
 	public function setReFileId($re_file_id)       { $this->re_file_id   = $re_file_id;   } ///< @param int    $re_file_id
 	public function setCreateUser($createuser)     { $this->createuser   = $createuser;   } ///< @param string $createuser
 	public function setOriginalName($originalname) { $this->originalname = $originalname; } ///< @param string $originalname
 	public function setAttributes($attributes)     { $this->attributes   = $attributes;   } ///< @param string $attributes
 	public function setFiletype($filetype)         { $this->filetype     = $filetype;     } ///< @param string $filetype
 	public function setFilesize($filesize)         { $this->filesize     = $filesize;     } ///< @param int    $filesize
+
+	/**
+	 * @param mixed $createdate  unix timestamp or date using 'YYYY-MM-DD HH:MM:SS' format
+	 */
+	public function setCreateDate($createdate) {
+		$this->createdate = sly_Util_String::isInteger($createdate) ? (int) $createdate : strtotime($createdate);
+	}
+
+	/**
+	 * @param mixed $updatedate  unix timestamp or date using 'YYYY-MM-DD HH:MM:SS' format
+	 */
+	public function setUpdateDate($updatedate) {
+		$this->updatedate = sly_Util_String::isInteger($updatedate) ? (int) $updatedate : strtotime($updatedate);
+	}
 
 	/**
 	 * @return sly_Model_MediaCategory
