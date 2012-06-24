@@ -48,7 +48,7 @@ class sly_DB_Importer {
 		$flash->addInfo($msg);
 
 		// refresh cache
-		sly_Core::dispatcher()->filter('SLY_DB_IMPORTER_AFTER', $this->dump, array(
+		sly_Core::dispatcher()->notify('SLY_DB_IMPORTER_AFTER', $this->dump, array(
 			'filename' => $this->filename,
 			'filesize' => filesize($this->filename)
 		));
