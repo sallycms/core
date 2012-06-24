@@ -472,6 +472,6 @@ class sly_Core {
 		sly_Util_BootCache::recreate('frontend');
 		sly_Util_BootCache::recreate('backend');
 
-		return self::dispatcher()->filter('SLY_CACHE_CLEARED', t('delete_cache_message'));
+		self::dispatcher()->notify('SLY_CACHE_CLEARED');
 	}
 }
