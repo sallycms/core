@@ -180,10 +180,19 @@ class sly_Service_MediaCategory extends sly_Service_Model_Base_Id {
 
 	/**
 	 * @throws sly_Exception
+	 * @param  sly_Model_MediaCategory $cat
+	 * @param  boolean                 $force
+	 */
+	public function deleteByCategory(sly_Model_MediaCategory $cat, $force = false) {
+		$this->delete($cat->getId(), false);
+	}
+
+	/**
+	 * @throws sly_Exception
 	 * @param  int     $catID
 	 * @param  boolean $force
 	 */
-	public function delete($catID, $force = false) {
+	public function deleteById($catID, $force = false) {
 		$cat = $this->findById($catID);
 
 		if (!$cat) {
@@ -207,7 +216,7 @@ class sly_Service_MediaCategory extends sly_Service_Model_Base_Id {
 		// delete subcats
 
 		foreach ($children as $child) {
-			$this->delete($child->getId(), true);
+			$this->deleteById($child->getId(), true);
 		}
 
 		// delete files
@@ -215,7 +224,7 @@ class sly_Service_MediaCategory extends sly_Service_Model_Base_Id {
 		$service = sly_Service_Factory::getMediumService();
 
 		foreach ($media as $medium) {
-			$service->delete($medium);
+			$service->deleteByMedium($medium);
 		}
 
 		// delete cat itself

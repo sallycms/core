@@ -10,20 +10,20 @@ sly_file: []
 sly_file_category: []
 sly_registry: []
 sly_slice: []
-sly_slice_value: []
 sly_user:
    -
       id: 1
       name: Admin
       description: ''
       login: admin
-      psw: c5e4335577bb89540b15e2f5251e8bc02ced5b32
+      # make sure to use a compatible hash here
+      password: c5e4335577bb89540b15e2f5251e8bc02ced5b32
       status: 1
       rights: '#admin[]#'
       createuser: setup
       updateuser: admin
-      createdate: 1302655028
-      updatedate: 1311293111
-      lasttrydate: 1317608132
+      createdate: '2011-04-13 02:37:08'
+      updatedate: '2011-07-22 02:05:11'
+      lasttrydate: '2011-10-03 04:15:32'
       timezone: Europe/Berlin
       revision: 0

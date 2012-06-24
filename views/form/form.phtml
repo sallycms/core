@@ -47,7 +47,7 @@ if (!empty($focus)) {
 		if ($hasButtonBar) {
 			$fieldset = end($this->fieldsets);
 			if (!$fieldset) $fieldset = $this->beginFieldset($this->title);
-			print $this->renderView('buttons.phtml', array('fieldset' => $fieldset, 'hasButtonBar' => $hasButtonBar));
+			print $this->renderView('buttons.phtml', array('fieldset' => $fieldset));
 		}
 
 		foreach ($this->fieldsets as $i => $fieldset) {

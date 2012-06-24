@@ -54,7 +54,7 @@ class sly_Service_MediaCategoryTest extends sly_BaseTest {
 		$service = $this->getService();
 		$catID   = $service->add('Meine Kategorie', null)->getId();
 
-		$service->delete($catID);
+		$service->deleteById($catID);
 		$this->assertNull($service->findById($catID));
 
 		$cats = $service->findByParentId(0);
@@ -114,13 +114,13 @@ class sly_Service_MediaCategoryTest extends sly_BaseTest {
 
 		// easy deletions
 
-		$service->delete($catB);
-		$service->delete($catC);
+		$service->deleteById($catB);
+		$service->deleteById($catC);
 
 		// complex cases
 
 		try {
-			$service->delete($catD);
+			$service->deleteById($catD);
 			$this->fail('Deleting categories with children should not be possible without $force.');
 		}
 		catch (sly_Exception $e) {
@@ -128,7 +128,7 @@ class sly_Service_MediaCategoryTest extends sly_BaseTest {
 		}
 
 		// and now use the $force
-		$service->delete($catD, true);
-		$service->delete($catA, true);
+		$service->deleteById($catD, true);
+		$service->deleteById($catA, true);
 	}
 }

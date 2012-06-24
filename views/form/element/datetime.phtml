@@ -31,74 +31,36 @@ if ($value === false) {
 	$value = time();
 }
 
-if ($value !== null) {
-	$value = sly_Util_String::isInteger($value) ? intval($value) : strtotime($value);
-}
-
-// JavaScript-Version
+// prepare formatting
 
 $type       = $this->withTime() ? 'datetime-local' : 'date';
-$hasNative  = sly_Helper_Modernizr::hasInputtype($type);
-$dateformat = '%d.%m.%Y'; // t('dateformat');
-$formatJS   = $dateformat;
+$dateformat = t($this->withTime() ? 'datetimeformat' : 'dateformat');
 $formatJS   = str_replace(
-	array('%a', '%A', '%d', '%e', '%j', '%b', '%B', '%h', '%m', '%y', '%Y'),
-	array('D',  'DD', 'dd', 'd',  'oo', 'M',  'MM', 'M',  'mm', 'y',  'yy'),
-	$formatJS);
+	array('%a',  '%A',   '%b',  '%B',   '%e', '%d', /* '??', */ '%m', '%y', '%Y',  '%H',  '%M'),
+	array('ddd', 'dddd', 'mmm', 'mmmm', 'd',  'dd', /* 'm',  */ 'mm', 'yy', 'yyyy', 'HH', 'MM'),
+	$dateformat
+);
 
-// Datum und Zeit als HTML5-Attribut ablegen, damit wir die RFC-konforme Version
-// per JavaScript setzen können.
+// prepare date
 
-$attrs['data-date']     = strftime('%Y-%m-%d', $value);
-$attrs['data-datetime'] = strftime('%Y-%m-%dT%H:%M:%S', $value);
+$format = $this->withTime() ? 'Y-m-d\TH:i' : 'Y-m-d';
 
-$attrs['class'] = 'sly-form-text sly-form-'.$type;
-$attrs['type']  = $hasNative ? $type : 'text';
-$attrs['name']  = $name;
-$attrs['id']    = $attrs['name'];
-$attrs['value'] = $value === null ? '' : sly_Util_String::formatStrftime($dateformat.($this->withTime() ? ' %H:%M' : ''), $value);
-
-print '<input '.sly_Util_HTML::buildAttributeString($attrs).' />';
-
-$registry = sly_Core::getTempRegistry();
-$locale   = t('htmllang');
-
-if (!$hasNative && !$registry->has('sly.form.datetime.links')) {
-	$path   = 'assets/js/';
-	$layout = sly_Core::getLayout();
-
-	$layout->addCSSFile($path.'jqueryui-theme/jqueryui.min.css');
-
-	$layout->addJavaScriptFile($path.'jqueryui.core.min.js');
-	$layout->addJavaScriptFile($path.'jqueryui.datepicker.min.js');
-	$layout->addJavaScriptFile($path.'jqueryui.effects.min.js');
-
-	if ($this->withTime()) {
-		$layout->addJavaScriptFile($path.'jqueryui.widget.min.js');
-		$layout->addJavaScriptFile($path.'jqueryui.mouse.min.js');
-		$layout->addJavaScriptFile($path.'jqueryui.slider.min.js');
-		$layout->addJavaScriptFile($path.'jquery.timepicker.min.js');
-	}
-
-	$registry->set('sly.form.datetime.links', true);
+if ($value instanceof DateTime) {
+	$value = $value->format($format);
+}
+elseif ($value !== null) {
+	$stamp = sly_Util_String::isInteger($value) ? intval($value) : strtotime($value);
+	$value = date($format, $stamp);
 }
 
-// Die userLang dient dazu, dass PHP auch ohne korrekt gesetztes Locale das
-// Datum richtig parsen kann.
-$jsvarname = 'element'.sly_html($name);
-?>
+// we need the format later on
+$attrs['data-format']  = $formatJS;
 
-<script type="text/javascript">
-(function($) {
-	var <?php echo $jsvarname ?> = $('#<?php echo sly_html($name) ?>');
+$attrs['class']    = 'sly-form-text sly-form-'.$type;
+$attrs['type']     = $type;
+$attrs['name']     = $name;
+$attrs['id']       = $name;
+$attrs['value']    = $value === null ? '' : $value;
+$attrs['required'] = $this->getAttribute('required') ? 'required' : '';
 
-	<?php if ($hasNative): ?>
-	<?php echo $jsvarname ?>.val(<?php echo $jsvarname ?>.data('<?php echo $this->withTime() ? 'datetime' : 'date' ?>')).attr('step', 'any');
-	sly.addDatepickerToggler(<?php echo $jsvarname ?>, <?php echo $value === null ? 0 : 1 ?>);
-	<?php else: ?>
-	$(function() {
-		<?php echo $jsvarname ?>.<?php echo $this->withTime() ? 'datetime' : 'datepicker' ?>({dateFormat: '<?php echo addslashes($formatJS) ?>', userLang: '<?php echo $locale ?>'});
-	});
-	<?php endif ?>
-})(jQuery);
-</script>
+print '<input '.sly_Util_HTML::buildAttributeString($attrs).' />';

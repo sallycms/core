@@ -31,7 +31,7 @@ print "Hallo Welt!";
  * @sly custom  42
  */
 
-Hallo REX_ARTICLE[id=1]!
+Hallo Welt!
 
 \$x = 4;
 print \$x + 5;
