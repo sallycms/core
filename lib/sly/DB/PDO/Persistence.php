@@ -394,14 +394,17 @@ class sly_DB_PDO_Persistence extends sly_DB_Persistence {
 	/**
 	 * Gibt alle resultierenden Zeilen zurück.
 	 *
-	 * @param  const $fetch_style
-	 * @param  mixed $fetch_argument
+	 * @param  const $fetchStyle
+	 * @param  mixed $fetchArgument
 	 * @return array
 	 */
-	public function all($fetch_style = PDO::FETCH_ASSOC, $fetch_argument = null) {
-		return $this->statement->fetchAll($fetch_style, $fetch_argument);
-	}
+	public function all($fetchStyle = PDO::FETCH_ASSOC, $fetchArgument = null) {
+		if ($fetchStyle === PDO::FETCH_ASSOC) {
+			return $this->statement->fetchAll($fetchStyle);
+		}
 
+		return $this->statement->fetchAll($fetchStyle, $fetchArgument);
+	}
 
 	// =========================================================================
 	// ITERATOR-METHODEN
