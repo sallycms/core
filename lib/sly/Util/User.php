@@ -25,4 +25,22 @@ class sly_Util_User {
 	public static function findById($userId) {
 		return sly_Service_Factory::getUserService()->findById($userId);
 	}
+
+	/**
+	 * checks wheter a user exists or not
+	 *
+	 * @param  int $userId
+	 * @return boolean
+	 */
+	public static function exists($userId) {
+		return self::isValid(self::findById($userId));
+	}
+
+	/**
+	 * @param  sly_Model_User $user
+	 * @return boolean
+	 */
+	public static function isValid($user) {
+		return $user instanceof sly_Model_User;
+	}
 }

@@ -391,8 +391,15 @@ class sly_DB_PDO_Persistence extends sly_DB_Persistence {
 		return new $classname($this->connection->getPDO(), $table);
 	}
 
-	public function all() {
-		return $this->statement->fetchAll(PDO::FETCH_ASSOC);
+	/**
+	 * Gibt alle resultierenden Zeilen zurück.
+	 *
+	 * @param  const $fetch_style
+	 * @param  mixed $fetch_argument
+	 * @return array
+	 */
+	public function all($fetch_style = PDO::FETCH_ASSOC, $fetch_argument = null) {
+		return $this->statement->fetchAll($fetch_style, $fetch_argument);
 	}
 
 
