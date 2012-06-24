@@ -180,7 +180,7 @@ class sly_Response {
 
 		// safely enable gzip output
 		if (!sly_ini_get('zlib.output_compression')) {
-			if (ob_start('ob_gzhandler') === false) {
+			if (@ob_start('ob_gzhandler') === false) {
 				// manually send content length if everything fails
 				$this->setHeader('Content-Length', mb_strlen($this->content, '8bit'));
 			}
