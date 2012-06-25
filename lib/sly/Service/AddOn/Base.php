@@ -150,7 +150,7 @@ abstract class sly_Service_AddOn_Base {
 		$pluginService = sly_Service_Factory::getPluginService();
 		$changes       = false;
 
-		foreach ($addonService->getInstalledAddons() as $addonName) {
+		foreach ($addonService->getRegisteredAddons() as $addonName) {
 			$oldVal   = $addonService->getProperty($addonName, 'compatible');
 			$newVal   = $addonService->isCompatible($addonName, true);
 			$changes |= ($oldVal !== $newVal);
