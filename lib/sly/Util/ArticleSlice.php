@@ -63,4 +63,24 @@ class sly_Util_ArticleSlice {
 		$module = $slice->getModule();
 		return sly_Service_Factory::getModuleService()->exists($module) ? $module : false;
 	}
+
+	/**
+	 * @param  int    $articleId
+	 * @param  int    $clang
+	 * @param  string $slot
+	 * @return array
+	 */
+	public static function findByArticle($articleId, $clang = null, $slot = null) {
+		$articleId = (int) $articleId;
+		$clang     = $clang === null ? sly_Core::getCurrentClang() : (int) $clang;
+		$where     = array('article_id' => $articleId, 'clang' => $clang);
+		$order     = 'pos ASC';
+
+		if ($slot !== null) {
+			$where['slot'] = $slot;
+			$order         = 'slot ASC, pos ASC';
+		}
+
+		return sly_Service_Factory::getArticleSliceService()->find($where, null, $order);
+	}
 }
