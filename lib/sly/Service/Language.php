@@ -88,21 +88,22 @@ class sly_Service_Language extends sly_Service_Model_Base_Id {
 	public function delete($where) {
 		$db = sly_DB_Persistence::getInstance();
 
-		// get languages first
-		$langs = $this->find($where);
+		// find all languages first
+		$toDelete = $this->find($where);
+		$allLangs = sly_Util_Language::findAll();
 
 		// delete
 		$res = parent::delete($where);
 
 		// update cache (so that addOns can access fresh clang data when listening to CLANG_DELETED)
-		foreach ($langs as $language) {
-			unset($langs[$language->getId()]);
+		foreach ($toDelete as $language) {
+			unset($allLangs[$language->getId()]);
 		}
 
-		sly_Core::cache()->set('sly.language', 'all', $langs);
+		sly_Core::cache()->set('sly.language', 'all', $allLangs);
 
 		// remove
-		foreach ($langs as $language) {
+		foreach ($toDelete as $language) {
 			$params = array('clang' => $language->getId());
 			$db->delete('article', $params);
 			$db->delete('article_slice', $params);
