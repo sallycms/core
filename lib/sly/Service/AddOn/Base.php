@@ -174,7 +174,7 @@ abstract class sly_Service_AddOn_Base {
 				}
 			}
 
-			foreach ($pluginService->getInstalledPlugins($addonName) as $pluginName) {
+			foreach ($pluginService->getRegisteredPlugins($addonName) as $pluginName) {
 				$plugin   = array($addonName, $pluginName);
 				$oldVal   = $pluginService->getProperty($plugin, 'compatible');
 				$newVal   = $pluginService->isCompatible($plugin, true);
