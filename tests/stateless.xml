@@ -33,6 +33,7 @@
 			<file>sally/tests/tests/CoreTest.php</file>
 			<file>sally/tests/tests/FunctionsTest.php</file>
 			<file>sally/tests/tests/LoaderTest.php</file>
+			<file>sally/tests/tests/RegistryTest.php</file>
 		</testsuite>
 	</testsuites>
 </phpunit>
