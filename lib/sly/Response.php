@@ -128,7 +128,7 @@ class sly_Response {
 		// Fix Content-Type
 		$charset = $this->charset ? $this->charset : 'UTF-8';
 
-		if ($this->headers->has('content-type') && false === strpos($this->headers->get('content-type'), 'charset')) {
+		if ($this->headers->has('content-type') && 0 === strpos($this->headers->get('content-type'), 'text/') && false === strpos($this->headers->get('content-type'), 'charset')) {
 			// add the charset
 			$this->headers->set('content-type', $this->headers->get('content-type').'; charset='.$charset);
 		}
