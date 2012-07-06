@@ -483,6 +483,6 @@ class sly_Response {
 	}
 
 	public function isRedirect($location = null) {
-		return in_array($this->statusCode, array(201, 301, 302, 303, 307)) && (null === $location ? true : ($location == $this->headers->get('location')));
+		return in_array($this->statusCode, array(201, 301, 302, 303, 307, 308)) && (null === $location ? true : ($location == $this->headers->get('location')));
 	}
 }
