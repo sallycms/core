@@ -8,9 +8,6 @@
  * http://www.opensource.org/licenses/mit-license.php
  */
 
-/**
- * @ingroup layout
- */
 class sly_Response_Forward implements sly_Response_Action {
 	protected $target;
 	protected $action;
