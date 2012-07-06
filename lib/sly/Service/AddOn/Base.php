@@ -1025,20 +1025,23 @@ abstract class sly_Service_AddOn_Base {
 			return true;
 		}
 
-		$service = $this->getService($component);
-
-		if (!$service->exists($component)) {
-			trigger_error('Component '.$compAsString.' does not exists.', E_USER_WARNING);
-
-			sly_Core::cache()->flush('sly.staticyml');
-			$this->clearLoadCache();
-
-			return false;
-		}
-
+		$service    = $this->getService($component);
 		$compatible = $this->isCompatible($component);
 		$activated  = $compatible && $this->isAvailable($component);
 		$installed  = $compatible && ($activated || $this->isInstalled($component));
+
+		if (!$service->exists($component)) {
+			if ($activated || $installed) {
+				trigger_error('Component '.$compAsString.' does not exist.', E_USER_WARNING);
+			}
+
+			sly_Core::cache()->flush('sly.staticyml');
+			$this->clearLoadCache();
+			$this->deleteInternalFiles($component);
+			$this->deletePublicFiles($component);
+
+			return false;
+		}
 
 		if ($installed || $force) {
 			$this->loadConfig($component, $installed, $activated);
