@@ -158,9 +158,13 @@ class sly_Response {
 		// Fix Content-Type
 		$charset = $this->charset ? $this->charset : 'UTF-8';
 
-		if ($this->headers->has('content-type') && 0 === strpos($this->headers->get('content-type'), 'text/') && false === strpos($this->headers->get('content-type'), 'charset')) {
-			// add the charset
-			$this->headers->set('content-type', $this->headers->get('content-type').'; charset='.$charset);
+		if ($this->headers->has('content-type')) {
+			$type = $this->headers->get('content-type');
+
+			if ((0 === strpos($type, 'text/') || $type === 'application/javascript') && false === strpos($type, 'charset')) {
+				// add the charset
+				$this->headers->set('content-type', $this->headers->get('content-type').'; charset='.$charset);
+			}
 		}
 
 		// Fix Content-Length
