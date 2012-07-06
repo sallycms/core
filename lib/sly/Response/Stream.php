@@ -29,11 +29,18 @@ class sly_Response_Stream extends sly_Response {
 		$this->file = $path;
 	}
 
+	public function send() {
+		// make sure there is no output buffer blocking our chunked response
+		while (ob_end_clean());
+
+		parent::send();
+	}
+
 	public function sendContent() {
 		$fp = fopen($this->file, 'rb');
 
 		while (!feof($fp)) {
-			print fread($fp, 8192);
+			print fread($fp, 16384); // send 16K at once
 			ob_flush();
 			flush();
 		}
