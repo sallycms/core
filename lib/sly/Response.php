@@ -374,7 +374,7 @@ class sly_Response {
 	 */
 	public function setCache(array $options) {
 		if ($diff = array_diff(array_keys($options), array('etag', 'last_modified'))) {
-			throw new InvalidArgumentException(sprintf('Response does not support the following options: "%s".', implode('", "', array_keys($diff))));
+			throw new InvalidArgumentException(sprintf('Response does not support the following options: "%s".', implode('", "', array_values($diff))));
 		}
 
 		if (isset($options['etag'])) {
