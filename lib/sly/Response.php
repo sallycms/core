@@ -152,7 +152,7 @@ class sly_Response {
 	 */
 	public function prepare() {
 		if ($this->isInformational() || in_array($this->statusCode, array(204, 304))) {
-			$this->setContent('');
+			$this->setContent(null);
 		}
 
 		// Fix Content-Type
