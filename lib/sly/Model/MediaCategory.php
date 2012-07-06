@@ -27,19 +27,31 @@ class sly_Model_MediaCategory extends sly_Model_Base_Id {
 
 	protected $_attributes = array(
 		'name' => 'string', 're_id' => 'int', 'path' => 'string', 'createuser' => 'string',
-		'createdate' => 'int', 'updateuser' => 'string', 'updatedate' => 'int',
+		'createdate' => 'datetime', 'updateuser' => 'string', 'updatedate' => 'datetime',
 		'attributes' => 'string', 'revision' => 'int'
 	); ///< array
 
 	public function setName($name)             { $this->name       = $name;       } ///< @param string $name
 	public function setParentId($re_id)        { $this->re_id      = $re_id;      } ///< @param int    $re_id
 	public function setPath($path)             { $this->path       = $path;       } ///< @param string $path
-	public function setCreateDate($createdate) { $this->createdate = $createdate; } ///< @param int    $createdate
-	public function setUpdateDate($updatedate) { $this->updatedate = $updatedate; } ///< @param int    $updatedate
 	public function setCreateUser($createuser) { $this->createuser = $createuser; } ///< @param string $createuser
 	public function setUpdateUser($updateuser) { $this->updateuser = $updateuser; } ///< @param string $updateuser
 	public function setAttributes($attributes) { $this->attributes = $attributes; } ///< @param string $attributes
 	public function setRevision($revision)     { $this->revision   = $revision;   } ///< @param int    $revision
+
+	/**
+	 * @param mixed $createdate  unix timestamp or date using 'YYYY-MM-DD HH:MM:SS' format
+	 */
+	public function setCreateDate($createdate) {
+		$this->createdate = sly_Util_String::isInteger($createdate) ? (int) $createdate : strtotime($createdate);
+	}
+
+	/**
+	 * @param mixed $updatedate  unix timestamp or date using 'YYYY-MM-DD HH:MM:SS' format
+	 */
+	public function setUpdateDate($updatedate) {
+		$this->updatedate = sly_Util_String::isInteger($updatedate) ? (int) $updatedate : strtotime($updatedate);
+	}
 
 	public function getName()       { return $this->name;       } ///< @return string
 	public function getParentId()   { return $this->re_id;      } ///< @return int

@@ -49,7 +49,7 @@ class sly_DB_PDO_Connection {
 	 */
 	public static function getInstance($driver, $host, $login, $password, $database) {
 		if (!class_exists('sly_DB_PDO_Driver_'.strtoupper($driver))) {
-			throw new sly_DB_PDO_Exception('Unbekannter Datenbank-Treiber: '.$driver);
+			throw new sly_DB_PDO_Exception('Unknown Database Driver: '.$driver);
 		}
 
 		$driverClass = 'sly_DB_PDO_Driver_'.strtoupper($driver);

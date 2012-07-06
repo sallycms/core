@@ -206,14 +206,23 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id {
 
 	/**
 	 * @throws sly_Exception
+	 * @param  sly_Model_Medium $medium
+	 * @return boolean
+	 */
+	public function deleteByMedium(sly_Model_Medium $medium) {
+		return $this->deleteById($medium->getId());
+	}
+
+	/**
+	 * @throws sly_Exception
 	 * @param  int $mediumID
 	 * @return boolean
 	 */
-	public function delete($mediumID) {
+	public function deleteById($mediumID) {
 		$medium = $this->findById($mediumID);
 
 		if (!$medium) {
-			throw new sly_Exception(t('medium_not_found'));
+			throw new sly_Exception(t('medium_not_found', $mediumID));
 		}
 
 		try {
