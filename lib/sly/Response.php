@@ -22,9 +22,21 @@ class sly_Response {
 	protected $statusText;
 	protected $charset;
 
+	/**
+	 * Status codes translation table.
+	 *
+	 * The list of codes is complete according to the
+	 * {@link http://www.iana.org/assignments/http-status-codes/ Hypertext Transfer Protocol (HTTP) Status Code Registry}
+	 * (last updated 2012-02-13).
+	 *
+	 * Unless otherwise noted, the status code is defined in RFC2616.
+	 *
+	 * @var array
+	 */
 	static public $statusTexts = array(
 		100 => 'Continue',
 		101 => 'Switching Protocols',
+		102 => 'Processing',            // RFC2518
 		200 => 'OK',
 		201 => 'Created',
 		202 => 'Accepted',
@@ -32,13 +44,18 @@ class sly_Response {
 		204 => 'No Content',
 		205 => 'Reset Content',
 		206 => 'Partial Content',
+		207 => 'Multi-Status',          // RFC4918
+		208 => 'Already Reported',      // RFC5842
+		226 => 'IM Used',               // RFC3229
 		300 => 'Multiple Choices',
 		301 => 'Moved Permanently',
 		302 => 'Found',
 		303 => 'See Other',
 		304 => 'Not Modified',
 		305 => 'Use Proxy',
+		306 => 'Reserved',
 		307 => 'Temporary Redirect',
+		308 => 'Permanent Redirect',    // RFC-reschke-http-status-308-07
 		400 => 'Bad Request',
 		401 => 'Unauthorized',
 		402 => 'Payment Required',
@@ -58,12 +75,25 @@ class sly_Response {
 		416 => 'Requested Range Not Satisfiable',
 		417 => 'Expectation Failed',
 		418 => 'I\'m a teapot',
+		422 => 'Unprocessable Entity',  // RFC4918
+		423 => 'Locked',                // RFC4918
+		424 => 'Failed Dependency',     // RFC4918
+		425 => 'Reserved for WebDAV advanced collections expired proposal',   // RFC2817
+		426 => 'Upgrade Required',      // RFC2817
+		428 => 'Precondition Required', // RFC-nottingham-http-new-status-04
+		429 => 'Too Many Requests',     // RFC-nottingham-http-new-status-04
+		431 => 'Request Header Fields Too Large',   // RFC-nottingham-http-new-status-04
 		500 => 'Internal Server Error',
 		501 => 'Not Implemented',
 		502 => 'Bad Gateway',
 		503 => 'Service Unavailable',
 		504 => 'Gateway Timeout',
-		505 => 'HTTP Version Not Supported'
+		505 => 'HTTP Version Not Supported',
+		506 => 'Variant Also Negotiates (Experimental)', // [RFC2295]
+		507 => 'Insufficient Storage',  // RFC4918
+		508 => 'Loop Detected',         // RFC5842
+		510 => 'Not Extended',          // RFC2774
+		511 => 'Network Authentication Required'   // RFC-nottingham-http-new-status-04
 	);
 
 	/**
@@ -122,15 +152,19 @@ class sly_Response {
 	 */
 	public function prepare() {
 		if ($this->isInformational() || in_array($this->statusCode, array(204, 304))) {
-			$this->setContent('');
+			$this->setContent(null);
 		}
 
 		// Fix Content-Type
 		$charset = $this->charset ? $this->charset : 'UTF-8';
 
-		if ($this->headers->has('content-type') && false === strpos($this->headers->get('content-type'), 'charset')) {
-			// add the charset
-			$this->headers->set('content-type', $this->headers->get('content-type').'; charset='.$charset);
+		if ($this->headers->has('content-type')) {
+			$type = $this->headers->get('content-type');
+
+			if ((0 === strpos($type, 'text/') || $type === 'application/javascript') && false === strpos($type, 'charset')) {
+				// add the charset
+				$this->headers->set('content-type', $this->headers->get('content-type').'; charset='.$charset);
+			}
 		}
 
 		// Fix Content-Length
@@ -181,8 +215,10 @@ class sly_Response {
 		// safely enable gzip output
 		if (!sly_ini_get('zlib.output_compression')) {
 			if (@ob_start('ob_gzhandler') === false) {
-				// manually send content length if everything fails
-				$this->setHeader('Content-Length', mb_strlen($this->content, '8bit'));
+				// manually send content length if everything fails and we're not streaming
+				if ($this->content !== null) {
+					$this->setHeader('Content-Length', mb_strlen($this->content, '8bit'));
+				}
 			}
 		}
 
@@ -374,7 +410,7 @@ class sly_Response {
 	 */
 	public function setCache(array $options) {
 		if ($diff = array_diff(array_keys($options), array('etag', 'last_modified'))) {
-			throw new InvalidArgumentException(sprintf('Response does not support the following options: "%s".', implode('", "', array_keys($diff))));
+			throw new InvalidArgumentException(sprintf('Response does not support the following options: "%s".', implode('", "', array_values($diff))));
 		}
 
 		if (isset($options['etag'])) {
@@ -453,6 +489,6 @@ class sly_Response {
 	}
 
 	public function isRedirect($location = null) {
-		return in_array($this->statusCode, array(201, 301, 302, 303, 307)) && (null === $location ? true : ($location == $this->headers->get('location')));
+		return in_array($this->statusCode, array(201, 301, 302, 303, 307, 308)) && (null === $location ? true : ($location == $this->headers->get('location')));
 	}
 }

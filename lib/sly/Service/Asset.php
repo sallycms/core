@@ -146,24 +146,27 @@ class sly_Service_Asset {
 		// "/../data/dyn/public/sally/static-cache/[access]/gzip/assets/css/main.css"
 		$cacheFile = $this->getCacheFile($file, $access, $encoding);
 
-		if (!file_exists($cacheFile) || $this->forceGen) {
-			// let listeners process the file
-			$tmpFile = $dispatcher->filter(self::EVENT_PROCESS_ASSET, $file);
-
-			// now we can check if a listener has generated a valid file
-			if (!is_file($tmpFile)) return false;
-
-			$this->generateCacheFile($tmpFile, $cacheFile, $encoding);
-			$file = $tmpFile;
+		// if the file already exists, stop here (can only happen if someone
+		// manually requests index.php?slycontroller...).
+		if (file_exists($cacheFile) && !$this->forceGen) {
+			return new sly_Response('', 400);
 		}
+
+		// let listeners process the file
+		$tmpFile = $dispatcher->filter(self::EVENT_PROCESS_ASSET, $file);
+
+		// now we can check if a listener has generated a valid file
+		if (!is_file($tmpFile)) return null;
+
+		// create the encoded file
+		$this->generateCacheFile($tmpFile, $cacheFile, $encoding);
 
 		if (!file_exists($cacheFile)) {
-			return false;
+			return null;
 		}
 
-		ob_start();
-		$this->printCacheFile($file, $cacheFile);
-		return ob_get_clean();
+		// return the plain, unencoded file to the asset controller
+		return $tmpFile;
 	}
 
 	/**
@@ -186,10 +189,10 @@ class sly_Service_Asset {
 	}
 
 	/**
-	 * @param string $file
+	 * @param string $sourceFile
 	 * @param string $cacheFile
 	 */
-	protected function generateCacheFile($file, $cacheFile, $encoding) {
+	protected function generateCacheFile($sourceFile, $cacheFile, $encoding) {
 		clearstatcache();
 		sly_Util_Directory::create(dirname($cacheFile), $this->getDirPerm());
 
@@ -198,7 +201,7 @@ class sly_Service_Asset {
 		switch ($encoding) {
 			case 'gzip':
 				$out = gzopen($cacheFile, 'wb');
-				$in  = fopen($file, 'rb');
+				$in  = fopen($sourceFile, 'rb');
 
 				while (!feof($in)) {
 		 			$buf = fread($in, 4096);
@@ -211,7 +214,7 @@ class sly_Service_Asset {
 
 			case 'deflate':
 				$out = fopen($cacheFile, 'wb');
-				$in  = fopen($file, 'rb');
+				$in  = fopen($sourceFile, 'rb');
 
 				stream_filter_append($out, 'zlib.deflate', STREAM_FILTER_WRITE, 6);
 
@@ -225,7 +228,7 @@ class sly_Service_Asset {
 
 			case 'plain':
 			default:
-				copy($file, $cacheFile);
+				copy($sourceFile, $cacheFile);
 		}
 
 		if (file_exists($cacheFile)) {

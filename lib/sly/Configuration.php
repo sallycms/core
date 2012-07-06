@@ -216,6 +216,8 @@ class sly_Configuration {
 		$this->localConfigModified = true;
 		$this->projectConfig->remove($key);
 		$this->projectConfigModified = true;
+
+		$this->cache = null;
 	}
 
 	/**

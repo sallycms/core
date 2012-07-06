@@ -49,6 +49,7 @@ frontend:
   - sly_App_Frontend
   - sly_Router_Base
   - sly_Router_Interface
+  - sly_Controller_Interface
   - sly_Controller_Frontend_Base
   - sly_Controller_Frontend_Article  # 99% of all requests will be article requests
 backend:

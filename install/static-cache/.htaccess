@@ -1,5 +1,9 @@
 RewriteEngine On
 
+# If your hosting requires a RewriteBase, you have to add it here, too.
+# Set it the the base of your frontend plus '/data/dyn/public/sally/static-cache/'.
+# RewriteBase /.../data/dyn/public/sally/static-cache/
+
 AddType text/css less
 
 SetEnvIfNoCase ^Accept-Encoding$ ".*" HTTP_ENCODING_CACHEDIR=plain/
