@@ -8,7 +8,7 @@
  * http://www.opensource.org/licenses/mit-license.php
  */
 
-class sly_Response_Stream implements sly_Response {
+class sly_Response_Stream extends sly_Response {
 	protected $file;
 
 	/**
@@ -33,7 +33,8 @@ class sly_Response_Stream implements sly_Response {
 		$fp = fopen($this->file, 'rb');
 
 		while (!feof($fp)) {
-			print fread($fp, 65536);
+			print fread($fp, 8192);
+			ob_flush();
 			flush();
 		}
 
