@@ -59,7 +59,7 @@ sly_Loader::addLoadPath(SLY_SALLYFOLDER.'/backend/lib/', 'sly_');
 
 // add DbUnit
 if ($travis) {
-	$dirs = glob(SLY_VENDORFOLDER.'/pear-phpunit/*', GLOB_ONLYDIR);
+	$dirs = glob(SLY_VENDORFOLDER.'/pear-pear.phpunit.de/*', GLOB_ONLYDIR);
 	foreach ($dirs as $dir) sly_Loader::addLoadPath($dir);
 }
 
