@@ -28,4 +28,11 @@ class sly_Util_Versions {
 	public static function set($component, $version) {
 		return sly_Core::config()->set('versions/'.$component, $version);
 	}
+
+	/**
+	 * @param  string $component
+	 */
+	public static function remove($component) {
+		sly_Core::config()->remove('versions/'.$component);
+	}
 }

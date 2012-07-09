@@ -454,6 +454,8 @@ abstract class sly_Service_AddOn_Base {
 			$state = $state === true ? $stateB : $stateA.'<br />'.$stateB;
 		}
 
+		sly_Util_Versions::remove($this->getVersionKey($component));
+
 		// notify listeners
 		return $this->extend('POST', 'UNINSTALL', $component, $state);
 	}
@@ -1053,7 +1055,7 @@ abstract class sly_Service_AddOn_Base {
 			$config = sly_Core::config();
 
 			if (!empty($page) && !$config->has('authorisation/pages/token/'.$page)) {
-				sly_Core::config()->set('authorisation/pages/token', array($page => $name));
+				sly_Core::config()->set('authorisation/pages/token', array($page => $name), sly_Configuration::STORE_STATIC);
 			}
 		}
 
