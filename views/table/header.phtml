@@ -49,8 +49,10 @@ if (!sly_Table::isDragAndDropMode() && $hasSearch) {
 	print '<form method="get" action="index.php">';
 	print '<p class="sly-table-extras-filter">'.t('filter').': ';
 
-	foreach ($_GET as $name => $value) {
-		if ($name != 'p_'.$this->id && $name != $key && is_scalar($value)) {
+	$getParams = $this->searchParams === null ? $_GET : $this->searchParams;
+
+	foreach ($getParams as $name => $value) {
+		if ($name !== 'p_'.$this->id && $name !== $key && is_scalar($value)) {
 			print '<input type="hidden" name="'.sly_html($name).'" value="'.sly_html($value).'" />';
 		}
 	}
