@@ -31,7 +31,7 @@ class sly_Util_User {
 	 * @param  boolean $forceRefresh
 	 * @return sly_Model_User
 	 */
-	public function getCurrentUser($forceRefresh = false) {
+	public static function getCurrentUser($forceRefresh = false) {
 		return sly_Service_Factory::getUserService()->getCurrentUser($forceRefresh);
 	}
 
