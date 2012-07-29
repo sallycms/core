@@ -99,7 +99,7 @@ class sly_Util_Article {
 	 * @param  int     $clang
 	 * @return array
 	 */
-	public static function getRootArticles($ignore_offlines = false, $clang = false) {
+	public static function getRootArticles($ignore_offlines = false, $clang = null) {
 		return self::findByCategory(0, $ignore_offlines, $clang);
 	}
 

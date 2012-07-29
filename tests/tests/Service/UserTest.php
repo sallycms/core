@@ -136,7 +136,7 @@ class sly_Service_UserTest extends sly_BaseTest {
 		$user    = $service->create(array('login' => '0', 'psw' => '0'));
 		$id      = $user->getId();
 
-		$service->delete(array('id' => $id));
+		$service->deleteById($id);
 
 		$this->assertNull($service->findById($id));
 		$this->assertCount(1, $service->find());
