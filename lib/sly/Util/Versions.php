@@ -119,4 +119,11 @@ class sly_Util_Versions {
 
 		return !!$result;
 	}
+
+	/**
+	 * @param  string $component
+	 */
+	public static function remove($component) {
+		sly_Core::config()->remove('versions/'.$component);
+	}
 }

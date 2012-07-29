@@ -193,8 +193,8 @@ class sly_Slice_Values {
 	 * @param  boolean $secure
 	 * @return string
 	 */
-	public function getUrl($id, $params, $divider = '&amp;', $absolute = false, $secure = null) {
-		return sly_Util_Article::getUrl($this->get($id, sly_Slice_Helper::CURRENT_ARTICLE), $params, $divider, $absolute, $secure);
+	public function getUrl($id, $params = array(), $divider = '&amp;', $absolute = false, $secure = null) {
+		return sly_Util_Article::getUrl($this->get($id, sly_Util_Article::CURRENT_ARTICLE), null, $params, $divider, $absolute, $secure);
 	}
 
 	/**

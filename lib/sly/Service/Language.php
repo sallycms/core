@@ -57,7 +57,14 @@ class sly_Service_Language extends sly_Service_Model_Base_Id {
 
 			try {
 				$newLanguage = parent::create($params);
-				$sourceID    = $sql->magicFetch('clang', 'MIN(id)');
+				$sourceID    = sly_Core::getDefaultClangId();
+
+				// if a bad default language was configured, use the first one
+				if (!isset($langs[$sourceID])) {
+					$ids = array_keys($langs);
+					sort($ids);
+					$sourceID = reset($ids);
+				}
 
 				$sql->query(str_replace('~', sly_Core::getTablePrefix(),
 					'INSERT INTO ~article (id,re_id,name,catname,catpos,attributes,'.

@@ -23,6 +23,7 @@ class sly_Table extends sly_Viewable {
 	protected $dragAndDropHandler;  ///< boolean
 	protected $totalElements;       ///< int
 	protected $caption;             ///< string
+	protected $searchParams;        ///< array
 
 	private $content;               ///< string
 
@@ -46,6 +47,7 @@ class sly_Table extends sly_Viewable {
 		$this->dragAndDropHandler = '';
 		$this->totalElements      = null;
 		$this->caption            = null;
+		$this->searchParams       = null;
 
 		foreach ($classes as $className) $this->addClass($className);
 	}
@@ -176,9 +178,11 @@ class sly_Table extends sly_Viewable {
 
 	/**
 	 * @param boolean $enable
+	 * @param array   $getParams  override default detection of GET parameters by giving an array instead of null
 	 */
-	public function enableSearching($enable = true) {
+	public function enableSearching($enable = true, array $getParams = null) {
 		$this->enableSearching = (bool) $enable;
+		$this->searchParams    = $getParams;
 	}
 
 	/**
