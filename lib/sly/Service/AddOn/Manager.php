@@ -73,9 +73,12 @@ class sly_Service_AddOn_Manager {
 	 * @param string $addon  addon name
 	 */
 	public function remove($addon) {
-		$path = $this->addOnService->getConfPath($addon);
+		$pservice = $this->pkgService;
+		$path     = $this->addOnService->getConfPath($addon);
+
 		sly_Core::config()->remove($path);
-		sly_Util_Versions::remove($this->getVersionKey($component));
+		sly_Util_Versions::remove($pservice->getVersion($addon));
+
 		$this->clearCache();
 	}
 
@@ -294,7 +297,7 @@ class sly_Service_AddOn_Manager {
 		$this->deleteInternalFiles($addon);
 
 		// remove version data
-		sly_Util_Versions::remove($this->getVersionKey($component));
+		sly_Util_Versions::remove($pservice->getVersion($addon));
 
 		// notify listeners
 		$this->fireEvent('POST', 'UNINSTALL', $addon);
