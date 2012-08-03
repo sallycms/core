@@ -1007,6 +1007,7 @@ abstract class sly_Service_AddOn_Base {
 
 				// init the component
 				if ($activated) {
+					$this->addAuthTokenIfNeeded($component);
 					$configFile = $service->baseFolder($component).'config.inc.php';
 					$service->req($configFile);
 
@@ -1048,15 +1049,6 @@ abstract class sly_Service_AddOn_Base {
 		if ($installed || $force) {
 			$this->loadConfig($component, $installed, $activated);
 			self::$loadInfo[$compAsString] = array($component, $installed, $activated);
-
-			// TODO: remove this magic in next (0.7) release
-			$page   = $this->getProperty($component, 'page', '');
-			$name   = $this->getProperty($component, 'name', '');
-			$config = sly_Core::config();
-
-			if (!empty($page) && !$config->has('authorisation/pages/token/'.$page)) {
-				sly_Core::config()->set('authorisation/pages/token', array($page => $name), sly_Configuration::STORE_STATIC);
-			}
 		}
 
 		if ($activated || $force) {
@@ -1079,7 +1071,7 @@ abstract class sly_Service_AddOn_Base {
 			}
 
 			$this->checkUpdate($component);
-
+			$this->addAuthTokenIfNeeded($component);
 			$configFile = $this->baseFolder($component).'config.inc.php';
 			$this->req($configFile);
 
@@ -1126,5 +1118,15 @@ abstract class sly_Service_AddOn_Base {
 
 	private function getService($component) {
 		return is_array($component) ? sly_Service_Factory::getPluginService() : sly_Service_Factory::getAddOnService();
+	}
+
+	private function addAuthTokenIfNeeded($component) {
+		$page   = $this->getProperty($component, 'page', '');
+		$name   = $this->getProperty($component, 'name', '');
+		$config = sly_Core::config();
+
+		if (!empty($page) && !$config->has('authorisation/pages/token/'.$page)) {
+			sly_Core::config()->set('authorisation/pages/token', array($page => $name), sly_Configuration::STORE_STATIC);
+		}
 	}
 }
