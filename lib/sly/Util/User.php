@@ -10,12 +10,14 @@
 
 class sly_Util_User {
 	/**
-	 * return currently logged-in user
+	/**
+	 * return current user object
 	 *
+	 * @param  boolean $forceRefresh
 	 * @return sly_Model_User
 	 */
-	public static function getCurrentUser() {
-		return sly_Service_Factory::getUserService()->getCurrentUser();
+	public static function getCurrentUser($forceRefresh = false) {
+		return sly_Service_Factory::getUserService()->getCurrentUser($forceRefresh);
 	}
 
 	/**
