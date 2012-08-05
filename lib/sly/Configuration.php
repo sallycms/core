@@ -27,6 +27,7 @@ class sly_Configuration {
 	private $localConfig;   ///< sly_Util_Array
 	private $projectConfig; ///< sly_Util_Array
 	private $cache;         ///< sly_Util_Array
+	private $flush;         ///< boolean
 
 	private $localConfigModified   = false; ///< boolean
 	private $projectConfigModified = false; ///< boolean
@@ -36,10 +37,17 @@ class sly_Configuration {
 		$this->localConfig   = new sly_Util_Array();
 		$this->projectConfig = new sly_Util_Array();
 		$this->cache         = null;
+		$this->flush         = true;
 	}
 
 	public function __destruct() {
-		$this->flush();
+		if ($this->flush) {
+			$this->flush();
+		}
+	}
+
+	public function setFlushOnDestruct($enabled) {
+		$this->flush = (boolean) $enabled;
 	}
 
 	/**
