@@ -184,7 +184,7 @@ class sly_Model_ArticleSlice extends sly_Model_Base_Id implements sly_Model_ISli
 	public function setArticle(sly_Model_Article $article) {
 		$this->article = $article;
 		$this->article_id = $article->getId();
-		$this->clang = $article->getId();
+		$this->clang = $article->getClang();
 	}
 
 	/**
