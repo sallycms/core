@@ -31,7 +31,7 @@ class sly_Response_Stream extends sly_Response {
 
 	public function send() {
 		// make sure there is no output buffer blocking our chunked response
-		while (ob_end_clean());
+		while (@ob_end_clean());
 
 		parent::send();
 	}
