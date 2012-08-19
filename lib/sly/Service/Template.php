@@ -83,7 +83,9 @@ class sly_Service_Template extends sly_Service_DevelopBase {
 		$result = array();
 
 		foreach ($this->getData() as $name => $types) {
-			if (empty($class) || $this->getClass($name) == $class) {
+			$cls = $this->getClass($name);
+
+			if (empty($class) || (is_string($cls) && $cls === $class) || (is_array($cls) && in_array($class, $cls))) {
 				$result[$name] = $this->getTitle($name);
 			}
 		}
