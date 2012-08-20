@@ -140,7 +140,7 @@ class sly_DB_Dump {
 		try {
 			$this->readHeaders();
 
-			$this->version = $this->findHeader('#^sally database dump version ([0-9.]+)#i');
+			$this->version = $this->findHeader('#^sally database dump version ([0-9*.]+)#i');
 			$this->prefix  = $this->findHeader('#^prefix ([a-z0-9_]+)#i');
 
 			return true;

@@ -69,10 +69,10 @@ class sly_DB_Importer {
 	 */
 	protected function checkVersion() {
 		$dumpVersion = $this->dump->getVersion();
-		$thisVersion = sly_Core::getVersion('X.Y');
+		$thisVersion = sly_Core::getVersion('X.Y.Y');
 
-		if ($dumpVersion === false || $dumpVersion != $thisVersion) {
-			throw new sly_Exception(t('importer_no_valid_import_file_version', $dumpVersion, $thisVersion));
+		if ($dumpVersion === null || !sly_Util_Versions::isCompatible($dumpVersion)) {
+			throw new sly_Exception(t('importer_no_valid_import_file_version'));
 		}
 	}
 
@@ -82,7 +82,7 @@ class sly_DB_Importer {
 	protected function checkPrefix() {
 		$prefix = $this->dump->getPrefix();
 
-		if ($prefix === false) {
+		if ($prefix === null) {
 			throw new sly_Exception(t('importer_no_valid_import_file_prefix'));
 		}
 	}
