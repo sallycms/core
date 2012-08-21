@@ -14,19 +14,30 @@ class sly_Response_Stream extends sly_Response {
 	/**
 	 * Constructor
 	 *
-	 * @param string  $file     Full path to the file that should be streamed
+	 * @param mixed   $file     Full path to the file that should be streamed or stream ressource
 	 * @param integer $status   The response status code
 	 * @param array   $headers  An array of response headers
 	 */
 	public function __construct($file, $status = 200, array $headers = array()) {
-		$path = realpath($file);
-
-		if ($path === false || !is_file($path)) {
-			throw new sly_Exception('Could not find file "'.$file.'".');
-		}
-
 		parent::__construct(null, $status, $headers);
-		$this->file = $path;
+		
+		if (is_resource($file)) {
+			if (get_resource_type ($file) == 'stream') {
+				$this->file = $file;
+			}
+			else {
+				throw new sly_Exception('Ressource must be of type stream');
+			}
+		}
+		else {
+			$path = realpath($file);
+
+			if ($path === false || !is_file($path)) {
+				throw new sly_Exception('Could not find file "'.$file.'".');
+			}
+
+			$this->file = $path;
+		}
 	}
 
 	public function send() {
@@ -37,7 +48,7 @@ class sly_Response_Stream extends sly_Response {
 	}
 
 	public function sendContent() {
-		$fp = fopen($this->file, 'rb');
+		$fp = is_resource($this->file) ? $this->file : fopen($this->file, 'rb');
 
 		while (!feof($fp)) {
 			print fread($fp, 16384); // send 16K at once
