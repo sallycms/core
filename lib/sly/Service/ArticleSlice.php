@@ -75,7 +75,7 @@ class sly_Service_ArticleSlice extends sly_Service_Model_Base_Id {
 	 * tries to delete a slice
 	 *
 	 * @throws sly_Exception
-	 * @param  int $article_slice_id
+	 * @param  int $id
 	 * @return boolean
 	 */
 	public function deleteById($id) {

@@ -95,6 +95,15 @@ class sly_Service_User extends sly_Service_Model_Base_Id {
 		return $user;
 	}
 
+	/**
+	 * @throws sly_Exception
+	 * @param  sly_Model_User $user
+	 * @return int
+	 */
+	public function deleteByUser(sly_Model_User $user) {
+		return $this->deleteById($user->getId());
+	}
+
 	public function delete($where) {
 		$retval = parent::delete($where);
 
