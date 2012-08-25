@@ -22,8 +22,8 @@ class sly_Util_Requirements {
 	public function phpVersion() {
 		$version = $this->numPHPVersion();
 		$current = $this->versionValue($version);
-		$best    = $this->versionValue('5.3');
-		$ok      = $this->versionValue('5.2');
+		$best    = $this->versionValue('5.4.3');
+		$ok      = $this->versionValue('5.2.1');
 
 		return $this->result($version, $current >= $best ? self::OK : ($current >= $ok ? self::WARNING : self::FAILED));
 	}
@@ -69,13 +69,14 @@ class sly_Util_Requirements {
 	 * @return array
 	 */
 	public function memoryLimit() {
-		$mem = ini_get('memory_limit');
+		$mem = sly_ini_get('memory_limit');
+		$mem/=1024*1024;
 
-		if ($mem >= 64) return $this->ok($mem.'B');
-		else if (ini_set('memory_limit', '64M') !== false) return $this->warning($mem);
-		else if ($mem >= 16) return $this->ok($mem.'B');
+		if ($mem >= 64) return $this->ok($mem.'MB');
+		else if (ini_set('memory_limit', '64M') !== false) return $this->warning($mem.'MB');
+		else if ($mem >= 16) return $this->ok($mem.'MB');
 		else if (empty($mem)) return $this->warning(t('unknown'));
-		else return $this->failed($mem.'B');
+		else return $this->failed($mem.'MB');
 	}
 
 	/**

@@ -56,7 +56,7 @@ class sly_Service_LanguageTest extends sly_BaseTest {
 		$lang     = $service->create(array('name' => 'test', 'locale' => 'xx_YY'));
 		$id       = $lang->getId();
 
-		$service->delete(array('id' => $id));
+		$service->deleteById($id);
 		$this->assertNull($service->findById($id));
 
 		$langs = sly_Util_Language::findAll();

@@ -137,7 +137,7 @@ class sly_Configuration {
 		$filename = $this->getLocalConfigFile();
 
 		if (file_exists($filename)) {
-			$config = sly_Util_YAML::load($filename);
+			$config = sly_Util_YAML::load($filename, false, true);
 			$this->localConfig = new sly_Util_Array($config);
 			$this->cache = null;
 		}
@@ -147,7 +147,7 @@ class sly_Configuration {
 		$filename = $this->getProjectConfigFile();
 
 		if (file_exists($filename)) {
-			$config = sly_Util_YAML::load($filename);
+			$config = sly_Util_YAML::load($filename, false, true);
 			$this->projectConfig = new sly_Util_Array($config);
 			$this->cache = null;
 		}
@@ -183,7 +183,7 @@ class sly_Configuration {
 			return false;
 		}
 
-		$config = sly_Util_YAML::load($filename);
+		$config = sly_Util_YAML::load($filename, false, true);
 
 		// geladene konfiguration in globale konfiguration mergen
 		$this->setInternal($key, $config, $mode, $force);

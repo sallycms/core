@@ -18,7 +18,7 @@ class sly_Model_User extends sly_Model_Base_Id {
 	protected $name;          ///< string
 	protected $description;   ///< string
 	protected $login;         ///< string
-	protected $psw;           ///< string
+	protected $password;      ///< string
 	protected $status;        ///< int
 	protected $rights;        ///< string
 	protected $createuser;    ///< string
@@ -34,10 +34,10 @@ class sly_Model_User extends sly_Model_Base_Id {
 	protected $isAdmin;       ///< boolean
 
 	protected $_attributes = array(
-		'name' => 'string', 'description' => 'string', 'login' => 'string', 'psw' => 'string',
+		'name' => 'string', 'description' => 'string', 'login' => 'string', 'password' => 'string',
 		'status' => 'int', 'rights' => 'string', 'updateuser' => 'string',
-		'updatedate' => 'int', 'createuser' => 'string', 'createdate' => 'int', 'lasttrydate' => 'int',
-		'timezone' => 'string', 'revision' => 'int'
+		'updatedate' => 'datetime', 'createuser' => 'string', 'createdate' => 'datetime',
+		'lasttrydate' => 'datetime', 'timezone' => 'string', 'revision' => 'int'
 	); ///< array
 
 	/**
@@ -49,9 +49,9 @@ class sly_Model_User extends sly_Model_Base_Id {
 	}
 
 	protected function evalRights() {
-		$config = sly_Core::config();
+		$config      = sly_Core::config();
+		$rightsArray = array_filter(explode('#', $this->getRights()));
 
-		$rightsArray   = array_filter(explode('#', $this->getRights()));
 		$this->startpage     = $config->get('START_PAGE');
 		$this->backendLocale = sly_Core::getDefaultLocale();
 		$this->isAdmin       = false;
@@ -81,31 +81,49 @@ class sly_Model_User extends sly_Model_Base_Id {
 	 * @param string $password  The password (plain)
 	 */
 	public function setPassword($password) {
-		$this->setHashedPassword(sly_Util_User::getPasswordHash($this, $password));
+		$this->setHashedPassword(sly_Util_Password::hash($password));
 	}
 
 	/**
 	 * Sets a password into the user model, where hashing is already done
 	 *
-	 * @param string $psw  The hashed password
+	 * @param string $password  The hashed password
 	 */
-	public function setHashedPassword($psw) {
-		$this->psw = $psw;
+	public function setHashedPassword($password) {
+		$this->password = $password;
 	}
 
-	public function setStatus($status)           { $this->status      = (int) $status;      } ///< @param int    $status
-	public function setCreateDate($createdate)   { $this->createdate  = (int) $createdate;  } ///< @param int    $createdate
-	public function setUpdateDate($updatedate)   { $this->updatedate  = (int) $updatedate;  } ///< @param int    $updatedate
-	public function setCreateUser($createuser)   { $this->createuser  = $createuser;        } ///< @param string $createuser
-	public function setUpdateUser($updateuser)   { $this->updateuser  = $updateuser;        } ///< @param string $updateuser
-	public function setLastTryDate($lasttrydate) { $this->lasttrydate = (int) $lasttrydate; } ///< @param int    $lasttrydate
-	public function setTimeZone($timezone)       { $this->timezone    = $timezone;          } ///< @param string $timezone
-	public function setRevision($revision)       { $this->revision    = (int) $revision;    } ///< @param int    $revision
+	/**
+	 * @param mixed $createdate  unix timestamp or date using 'YYYY-MM-DD HH:MM:SS' format
+	 */
+	public function setCreateDate($createdate) {
+		$this->createdate = sly_Util_String::isInteger($createdate) ? (int) $createdate : strtotime($createdate);
+	}
+
+	/**
+	 * @param mixed $updatedate  unix timestamp or date using 'YYYY-MM-DD HH:MM:SS' format
+	 */
+	public function setUpdateDate($updatedate) {
+		$this->updatedate = sly_Util_String::isInteger($updatedate) ? (int) $updatedate : strtotime($updatedate);
+	}
+
+	/**
+	 * @param mixed $lasttrydate  unix timestamp or date using 'YYYY-MM-DD HH:MM:SS' format
+	 */
+	public function setLastTryDate($lasttrydate) {
+		$this->lasttrydate = sly_Util_String::isInteger($lasttrydate) ? (int) $lasttrydate : strtotime($lasttrydate);
+	}
+
+	public function setStatus($status)         { $this->status     = (int) $status;   } ///< @param int    $status
+	public function setCreateUser($createuser) { $this->createuser = $createuser;     } ///< @param string $createuser
+	public function setUpdateUser($updateuser) { $this->updateuser = $updateuser;     } ///< @param string $updateuser
+	public function setTimeZone($timezone)     { $this->timezone   = $timezone;       } ///< @param string $timezone
+	public function setRevision($revision)     { $this->revision   = (int) $revision; } ///< @param int    $revision
 
 	public function getName()        { return $this->name;        } ///< @return string
 	public function getDescription() { return $this->description; } ///< @return string
 	public function getLogin()       { return $this->login;       } ///< @return string
-	public function getPassword()    { return $this->psw;         } ///< @return string
+	public function getPassword()    { return $this->password;    } ///< @return string
 	public function getStatus()      { return $this->status;      } ///< @return int
 	public function getRights()      { return $this->rights;      } ///< @return string
 	public function getCreateDate()  { return $this->createdate;  } ///< @return int
@@ -135,30 +153,6 @@ class sly_Model_User extends sly_Model_Base_Id {
 	/**
 	 * @return array
 	 */
-	public function getAllowedCategories() {
-		preg_match_all('/#csw\[(\d+)\]/', $this->getRights(), $matches);
-		return isset($matches[1]) ? $matches[1] : array();
-	}
-
-	/**
-	 * @return array
-	 */
-	public function getAllowedMediaCategories() {
-		preg_match_all('/#media\[(\d+)\]/', $this->getRights(), $matches);
-		return isset($matches[1]) ? $matches[1] : array();
-	}
-
-	/**
-	 * @return array
-	 */
-	public function getAllowedModules() {
-		preg_match_all('/#module\[(.+?)\]/', $this->getRights(), $matches);
-		return isset($matches[1]) ? $matches[1] : array();
-	}
-
-	/**
-	 * @return array
-	 */
 	public function getAllowedCLangs() {
 		$allowedLanguages = array();
 		foreach (sly_Util_Language::findAll(true) as $language) {
@@ -178,19 +172,10 @@ class sly_Model_User extends sly_Model_Base_Id {
 		return sly_Authorisation::hasPermission($this->getId(), $context, $right, $value);
 	}
 
-	// Misc
-
 	/**
 	 * @return int
 	 */
 	public function delete() {
-		return sly_Service_Factory::getUserService()->delete(array('id' => $this->id));
-	}
-
-	/**
-	 * @return boolean
-	 */
-	public function hasStructureRight() {
-		return $this->isAdmin() || sly_Util_Category::canReadCategory($this, 0);
+		return sly_Service_Factory::getUserService()->deleteById($this->id);
 	}
 }

@@ -25,13 +25,14 @@ class sly_Model_ArticleSlice extends sly_Model_Base_Id implements sly_Model_ISli
 	protected $createuser;
 	protected $updateuser;
 	protected $revision;
-	protected $slice; ///< sly_Model_Slice
+	protected $slice;   ///< sly_Model_Slice
+	protected $article; ///< sly_Model_Article
 
 	protected $_attributes = array(
 		'updateuser' => 'string',
 		'createuser' => 'string',
-		'createdate' => 'int',
-		'updatedate' => 'int',
+		'createdate' => 'datetime',
+		'updatedate' => 'datetime',
 		'pos'        => 'int',
 		'article_id' => 'int',
 		'clang'      => 'int',
@@ -44,73 +45,98 @@ class sly_Model_ArticleSlice extends sly_Model_Base_Id implements sly_Model_ISli
 	 *
 	 * @return int
 	 */
-	public function getArticleId()  { return $this->article_id; }
+	public function getArticleId() {
+		return $this->article_id;
+	}
 
 	/**
 	 *
 	 * @return int
 	 */
-	public function getClang()      { return $this->clang;      }
+	public function getClang() {
+		return $this->clang;
+	}
 
 	/**
 	 *
 	 * @return string
 	 */
-	public function getSlot()       { return $this->slot;       }
+	public function getSlot() {
+		return $this->slot;
+	}
 
 	/**
 	 *
 	 * @return int
 	 */
-	public function getPosition()   { return $this->pos;        }
+	public function getPosition() {
+		return $this->pos;
+	}
 
 	/**
 	 * @deprecated  since 0.6
 	 */
-	public function getPrior()      { return $this->pos;        }
+	public function getPrior() {
+		return $this->pos;
+	}
 
 	/**
 	 *
 	 * @return int
 	 */
-	public function getSliceId()    { return $this->slice_id;   }
+	public function getSliceId() {
+		return $this->slice_id;
+	}
 
 	/**
 	 *
 	 * @return int
 	 */
-	public function getCreateDate() { return $this->createdate; }
+	public function getCreateDate() {
+		return $this->createdate;
+	}
 
 	/**
 	 *
 	 * @return int
 	 */
-	public function getUpdateDate() { return $this->updatedate; }
+	public function getUpdateDate() {
+		return $this->updatedate;
+	}
 
 	/**
 	 *
 	 * @return string
 	 */
-	public function getCreateUser() { return $this->createuser; }
+	public function getCreateUser() {
+		return $this->createuser;
+	}
 
 	/**
 	 *
 	 * @return int
 	 */
-	public function getUpdateUser() { return $this->updateuser; }
+	public function getUpdateUser() {
+		return $this->updateuser;
+	}
 
 	/**
 	 *
 	 * @return int
 	 */
-	public function getRevision()   { return $this->revision;   }
+	public function getRevision() {
+		return $this->revision;
+	}
 
 	/**
 	 *
 	 * @return sly_Model_Article
 	 */
 	public function getArticle() {
-		return sly_Util_Article::findById($this->getArticleId(), $this->getClang());
+		if (empty($this->article)) {
+			$this->article =  sly_Util_Article::findById($this->getArticleId(), $this->getClang());
+		}
+		return $this->article;
 	}
 
 	/**
@@ -129,16 +155,36 @@ class sly_Model_ArticleSlice extends sly_Model_Base_Id implements sly_Model_ISli
 	}
 
 	public function setModule($module) {
-		$slice = &$this->getSlice();
+		$slice = $this->getSlice();
 		$slice->setModule($module);
-		sly_Service_Factory::getSliceService()->save($slice);
+		$this->slice = sly_Service_Factory::getSliceService()->save($slice);
 	}
 
 	/**
-	 * @param int $updatedate
+	 *
+	 * @param sly_Model_Slice $slice
 	 */
-	public function setUpdateDate($updatedate) {
-		$this->updatedate = (int) $updatedate;
+	public function setSlice(sly_Model_Slice $slice) {
+		$this->slice = $slice;
+		$this->slice_id = $slice->getId();
+	}
+
+	/**
+	 *
+	 * @param type $slot
+	 */
+	public function setSlot($slot) {
+		$this->slot = $slot;
+	}
+
+	/**
+	 *
+	 * @param sly_Model_Article $article
+	 */
+	public function setArticle(sly_Model_Article $article) {
+		$this->article = $article;
+		$this->article_id = $article->getId();
+		$this->clang = $article->getClang();
 	}
 
 	/**
@@ -149,10 +195,10 @@ class sly_Model_ArticleSlice extends sly_Model_Base_Id implements sly_Model_ISli
 	}
 
 	/**
-	 * @param int $createdate
+	 * @param mixed $updatedate  unix timestamp or date using 'YYYY-MM-DD HH:MM:SS' format
 	 */
-	public function setCreateDate($createdate) {
-		$this->createdate = (int) $createdate;
+	public function setUpdateDate($updatedate) {
+		$this->updatedate = sly_Util_String::isInteger($updatedate) ? (int) $updatedate : strtotime($updatedate);
 	}
 
 	/**
@@ -160,6 +206,13 @@ class sly_Model_ArticleSlice extends sly_Model_Base_Id implements sly_Model_ISli
 	 */
 	public function setCreateUser($createuser) {
 		$this->createuser = $createuser;
+	}
+
+	/**
+	 * @param mixed $createdate  unix timestamp or date using 'YYYY-MM-DD HH:MM:SS' format
+	 */
+	public function setCreateDate($createdate) {
+		$this->createdate = sly_Util_String::isInteger($createdate) ? (int) $createdate : strtotime($createdate);
 	}
 
 	/**
@@ -173,10 +226,9 @@ class sly_Model_ArticleSlice extends sly_Model_Base_Id implements sly_Model_ISli
 	/**
 	 * @param  string $finder
 	 * @param  string $value
-	 * @return sly_Model_SliceValue
 	 */
-	public function addValue($finder, $value = null) {
-		return $this->getSlice()->addValue($finder, $value);
+	public function setValue($finder, $value = null) {
+		$this->getSlice()->addValue($finder, $value);
 	}
 
 	public function setValues($values = array()) {
@@ -188,19 +240,12 @@ class sly_Model_ArticleSlice extends sly_Model_Base_Id implements sly_Model_ISli
 	 * @param  string $finder
 	 * @return mixed
 	 */
-	public function getValue($finder) {
-		return $this->getSlice()->getValue($finder);
+	public function getValue($finder, $default = null) {
+		return $this->getSlice()->getValue($finder, $default);
 	}
 
 	public function getValues() {
 		return $this->getSlice()->getValues();
-	}
-
-	/**
-	 * @return int
-	 */
-	public function flushValues() {
-		$this->getSlice()->flushValues();
 	}
 
 	/**
@@ -215,10 +260,15 @@ class sly_Model_ArticleSlice extends sly_Model_Base_Id implements sly_Model_ISli
 		return $output;
 	}
 
+	public function setRevision($revision) {
+		$this->revision = (int) $revision;
+	}
+
 	/**
 	 * drop slice from serialized instance
 	 */
 	public function __sleep() {
-		$this->slice = null;
+		$this->slice   = null;
+		$this->article = null;
 	}
 }
