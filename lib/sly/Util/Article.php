@@ -71,7 +71,15 @@ class sly_Util_Article {
 	 * @return sly_Model_Article
 	 */
 	public static function findSiteStartArticle($clang = null) {
-		return self::findById(sly_core::getSiteStartArticleId(), $clang);
+		return self::findById(sly_Core::getSiteStartArticleId(), $clang);
+	}
+
+	/**
+	 * @param  int $clang
+	 * @return sly_Model_Article
+	 */
+	public static function findNotFoundArticle($clang = null) {
+		return self::findById(sly_Core::getNotFoundArticleId(), $clang);
 	}
 
 	/**
