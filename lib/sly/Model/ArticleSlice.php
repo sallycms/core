@@ -158,7 +158,7 @@ class sly_Model_ArticleSlice extends sly_Model_Base_Id implements sly_Model_ISli
 		$service = sly_Service_Factory::getArticleSliceService();
 		$db      = sly_DB_Persistence::getInstance();
 
-		return $service->find(sprintf('slot = %s AND pos < %d AND article_id = %d AND clang = %d', $db->quote($this->getSlot()), $this->getPosition(), $this->getArticleId(), $this->getClang()));
+		return reset($service->find(sprintf('slot = %s AND pos < %d AND article_id = %d AND clang = %d', $db->quote($this->getSlot()), $this->getPosition(), $this->getArticleId(), $this->getClang())));
 	}
 
 	/**
@@ -169,7 +169,7 @@ class sly_Model_ArticleSlice extends sly_Model_Base_Id implements sly_Model_ISli
 		$service = sly_Service_Factory::getArticleSliceService();
 		$db      = sly_DB_Persistence::getInstance();
 
-		return $service->find(sprintf('slot = %s AND pos > %d AND article_id = %d AND clang = %d', $db->quote($this->getSlot()), $this->getPosition(), $this->getArticleId(), $this->getClang()));
+		return reset($service->find(sprintf('slot = %s AND pos > %d AND article_id = %d AND clang = %d', $db->quote($this->getSlot()), $this->getPosition(), $this->getArticleId(), $this->getClang())));
 	}
 
 	public function getModule() {
