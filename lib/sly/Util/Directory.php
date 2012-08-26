@@ -87,8 +87,12 @@ class sly_Util_Directory {
 			throw new sly_Exception(t('sort_function_not_found', $sortFunction));
 		}
 
-		$handle = opendir($this->directory);
+		$handle = @opendir($this->directory);
 		$list   = array();
+
+		if (!$handle) {
+			return false;
+		}
 
 		while ($file = readdir($handle)) {
 			if ($file == '.' || $file == '..') continue;
