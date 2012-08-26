@@ -23,11 +23,11 @@ class sly_Util_Lessphp {
 	 * @return string           the processed css code
 	 */
 	public static function process($cssFile) {
-		return self::getCompiler($cssFile)->parse();
+		return self::getCompiler()->compileFile($cssFile);
 	}
 
 	public static function processString($css) {
-		return self::getCompiler()->parse($css);
+		return self::getCompiler()->compile($css);
 	}
 
 	public static function getCompiler($fname = null) {
@@ -40,7 +40,7 @@ class sly_Util_Lessphp {
 		$dir   = (array) $less->importDir;
 		$dir[] = SLY_VENDORFOLDER.'/sallycms/less-mixins/';
 
-		$less->importDir = array_filter($dir);
+		$less->setImportDir(array_filter($dir));
 
 		return $less;
 	}
