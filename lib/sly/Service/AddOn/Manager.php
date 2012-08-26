@@ -77,7 +77,7 @@ class sly_Service_AddOn_Manager {
 		$path     = $this->addOnService->getConfPath($addon);
 
 		sly_Core::config()->remove($path);
-		sly_Util_Versions::remove($pservice->getVersion($addon));
+		sly_Util_Versions::remove($pservice->getVersionKey($addon));
 
 		$this->clearCache();
 	}
