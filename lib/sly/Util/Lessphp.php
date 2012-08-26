@@ -23,7 +23,9 @@ class sly_Util_Lessphp {
 	 * @return string           the processed css code
 	 */
 	public static function process($cssFile) {
-		return self::getCompiler()->compileFile($cssFile);
+		// Do not use ->compileFile() to have the $cssFile's dirname as the *first*
+		// importdir instead of the last, so users can use their own 'mixin.less'.
+		return self::getCompiler($cssFile)->compile(file_get_contents($cssFile));
 	}
 
 	public static function processString($css) {
@@ -39,6 +41,9 @@ class sly_Util_Lessphp {
 		// add custom mixin package to default import dir
 		$dir   = (array) $less->importDir;
 		$dir[] = SLY_VENDORFOLDER.'/sallycms/less-mixins/';
+
+		// always add the file's dir as the first import dir
+		if ($fname) array_unshift($dir, dirname($fname));
 
 		$less->setImportDir(array_filter($dir));
 
