@@ -43,7 +43,7 @@ class sly_DB_Importer {
 
 		$flash   = sly_Core::getFlashMessage();
 		$queries = count($this->dump->getQueries());
-		$msg     = t('importer_database_imported').' '.t('importer_entry_count', $queries);
+		$msg     = t('importer_database_imported', $queries);
 
 		$flash->addInfo($msg);
 
