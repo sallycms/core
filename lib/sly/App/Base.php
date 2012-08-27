@@ -39,6 +39,27 @@ abstract class sly_App_Base implements sly_App_Interface {
 	}
 
 	public function tryController($controller, $action) {
+		// build controller instance and check permissions
+		try {
+			if (!($controller instanceof sly_Controller_Interface)) {
+				$className  = $this->getControllerClass($controller);
+				$controller = $this->getController($className);
+			}
+
+			if (!$controller->checkPermission($action)) {
+				throw new sly_Authorisation_Exception(t('page_not_allowed', $action, get_class($controller)), 403);
+			}
+		}
+		catch (Exception $e) {
+			return $this->handleControllerError($e, $controller, $action);
+		}
+
+		// generic controllers should have no safety net and *must not* throw exceptions.
+		if ($controller instanceof sly_Controller_Generic) {
+			return $this->runController($controller, 'generic', $action);
+		}
+
+		// classic controllers should have a basic exception handling provided by us.
 		try {
 			return $this->runController($controller, $action);
 		}
@@ -47,32 +68,19 @@ abstract class sly_App_Base implements sly_App_Interface {
 		}
 	}
 
-	protected function runController($controller, $action) {
+	protected function runController($controller, $action, $param = null) {
+		ob_start();
+
 		// prepare controller
 		$method = $action.'Action';
 
-		if (!($controller instanceof sly_Controller_Interface)) {
-			$className  = $this->getControllerClass($controller);
-			$controller = $this->getController($className);
-		}
-
-		if (!method_exists($controller, $method)) {
-			if (!method_exists($controller, 'slyGetActionFallback')) {
-				throw new sly_Controller_Exception(t('unknown_action', $method, $className), 404);
-			}
-
-			$action = $controller->slyGetActionFallback();
-			$method = $action.'Action';
-		}
-
-		if (!$controller->checkPermission($action)) {
-			throw new sly_Authorisation_Exception(t('page_not_allowed', $action, get_class($controller)), 403);
-		}
-
-		ob_start();
-
 		// run the action method
-		$r = $controller->$method();
+		if ($param === null) {
+			$r = $controller->$method();
+		}
+		else {
+			$r = $controller->$method($param);
+		}
 
 		if ($r instanceof sly_Response || $r instanceof sly_Response_Action) {
 			ob_end_clean();
