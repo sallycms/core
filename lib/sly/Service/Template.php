@@ -189,9 +189,15 @@ class sly_Service_Template extends sly_Service_DevelopBase {
 	 * @param string $name    Unique template name
 	 * @param array  $params  Array of params to be available in the template
 	 */
-	public function includeFile($name_C3476zz3g21ug327ur623, $params = array()) {
-		$templateFile_C3476zz3g21ug327ur623 = $this->getFilename($name_C3476zz3g21ug327ur623);
-		if (!empty($params)) extract($params);
-		include SLY_DEVELOPFOLDER.'/templates/'.$templateFile_C3476zz3g21ug327ur623;
+	public function includeFile($name, $params = array()) {
+		unset($name);
+		if (!empty($params)) {
+			unset($params);
+			extract(func_get_arg(1));
+		}
+		else {
+			unset($params);
+		}
+		include SLY_DEVELOPFOLDER.'/templates/'. $this->getFilename(func_get_arg(0));
 	}
 }
