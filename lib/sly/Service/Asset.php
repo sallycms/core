@@ -169,6 +169,21 @@ class sly_Service_Asset {
 		return $tmpFile;
 	}
 
+	public function removeCacheFiles($file) {
+		foreach (array(self::ACCESS_PUBLIC, self::ACCESS_PROTECTED) as $access) {
+			foreach (array('plain', 'gzip', 'deflate') as $encoding) {
+				// "/../data/dyn/public/sally/static-cache/gzip/assets/css/main.css"
+				$cacheFile = $this->getCacheFile($file, $access, $encoding);
+
+				if (!file_exists($cacheFile)) {
+					continue;
+				}
+
+				unlink($cacheFile);
+			}
+		}
+	}
+
 	/**
 	 * @param  string $access
 	 * @param  string $encoding
