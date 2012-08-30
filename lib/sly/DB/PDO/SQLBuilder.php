@@ -256,7 +256,7 @@ abstract class sly_DB_PDO_SQLBuilder {
 
 			if ($j < $num_values) {
 				if (!is_null($values[$j])) {
-					$bind = is_array($values[$j]) ? ' IN(?)' : '=?';
+					$bind = is_array($values[$j]) ? ' IN (?)' : ' = ?';
 					$conditions[] = $values[$j];
 				}
 				else {

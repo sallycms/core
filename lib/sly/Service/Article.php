@@ -109,10 +109,19 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 
 	/**
 	 * @throws sly_Exception
+	 * @param  sly_Model_Base_Article  $article
+	 * @return boolean
+	 */
+	public function deleteByArticle(sly_Model_Base_Article $article) {
+		return $this->deleteById($article->getId());
+	}
+
+	/**
+	 * @throws sly_Exception
 	 * @param  int    $articleID
 	 * @return boolean
 	 */
-	public function delete($articleID) {
+	public function deleteById($articleID) {
 		$articleID = (int) $articleID;
 		$this->checkForSpecialArticle($articleID);
 
@@ -232,7 +241,7 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 	 * @param sly_Model_User    $user
 	 */
 	public function touch(sly_Model_Article $article, sly_Model_User $user) {
-		$article->setUpdateColumns($user->getLogin());
+		$article->setUpdateColumns($user);
 		$this->update($article);
 	}
 
@@ -261,7 +270,7 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 		$cats = sly_Service_Factory::getCategoryService();
 
 		if ($target !== 0 && $cats->findById($target) === null) {
-			throw new sly_Exception(t('category_not_found'));
+			throw new sly_Exception(t('category_not_found', $target));
 		}
 
 		// prepare infos
@@ -336,7 +345,7 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 		$cats = sly_Service_Factory::getCategoryService();
 
 		if ($target !== 0 && $cats->findById($target) === null) {
-			throw new sly_Exception(t('category_not_found'));
+			throw new sly_Exception(t('category_not_found', $target));
 		}
 
 		$source = (int) $article->getCategoryId();
