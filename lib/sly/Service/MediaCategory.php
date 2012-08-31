@@ -184,7 +184,7 @@ class sly_Service_MediaCategory extends sly_Service_Model_Base_Id {
 	 * @param  boolean                 $force
 	 */
 	public function deleteByCategory(sly_Model_MediaCategory $cat, $force = false) {
-		$this->delete($cat->getId(), false);
+		$this->deleteById($cat->getId(), $force);
 	}
 
 	/**
