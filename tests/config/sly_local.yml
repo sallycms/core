@@ -6,6 +6,6 @@ DATABASE:
   HOST: localhost
   LOGIN: develop
   PASSWORD: develop
-  NAME: sally_base
+  NAME: sally_test
   PERSISTENT: false
   TABLE_PREFIX: sly_
