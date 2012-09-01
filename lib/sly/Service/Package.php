@@ -357,13 +357,18 @@ class sly_Service_Package {
 		// If we're in a real composer vendor directory, there is a installed.json,
 		// that contains a list of all packages. We use this to detect packages
 		// have no composer.json themselves (aka leafo/lessphp).
+		// On the other hand, we must make sure that we only read those packages
+		// that are actually inside $root, as the installed.json will contain data
+		// about *all* packages (i.e. for vendors and addons)!
 		$installed = $root.'composer/installed.json';
 
 		if (file_exists($installed)) {
 			$data = sly_Util_JSON::load($installed);
 
 			foreach ($data as $pkg) {
-				$packages[] = $pkg['name'];
+				if (is_dir($root.$pkg['name'])) {
+					$packages[] = $pkg['name'];
+				}
 			}
 
 			$installed = $root.'composer/installed_dev.json';
@@ -372,7 +377,9 @@ class sly_Service_Package {
 				$data = sly_Util_JSON::load($installed);
 
 				foreach ($data as $pkg) {
-					$packages[] = $pkg['name'];
+					if (is_dir($root.$pkg['name'])) {
+						$packages[] = $pkg['name'];
+					}
 				}
 			}
 		}
