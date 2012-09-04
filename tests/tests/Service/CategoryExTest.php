@@ -153,4 +153,47 @@ class sly_Service_CategoryExTest extends sly_Service_CategoryTestBase {
 			array(1, true,  self::$clangA, array())
 		);
 	}
+
+	/**
+	 * @dataProvider  statusProvider
+	 */
+	public function testDeleteCancelledIfChildrenExist($status) {
+		$service = $this->getService();
+		$parent  = 2;
+
+		// create some children
+		$service->add($parent, 'A', $status, -1);
+		$B = $service->add($parent, 'B', $status, -1);
+		$service->add($parent, 'C', $status, -1);
+
+		// and some children inside B
+		$service->add($B, 'X', $status, -1);
+		$service->add($B, 'Y', $status, -1);
+		$service->add($B, 'Z', $status, -1);
+
+		try {
+			// boom
+			$service->delete($B);
+			$this->fail('Should not have been able to delete a category with children.');
+		}
+		catch (sly_Exception $e) {
+			$this->assertTrue(true);
+		}
+
+		try {
+			// boom
+			$service->delete($parent);
+			$this->fail('Should not have been able to delete a category with children.');
+		}
+		catch (sly_Exception $e) {
+			$this->assertTrue(true);
+		}
+	}
+
+	public function statusProvider() {
+		return array(
+			array(0),
+			array(1)
+		);
+	}
 }
