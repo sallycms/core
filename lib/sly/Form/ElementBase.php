@@ -139,7 +139,7 @@ abstract class sly_Form_ElementBase extends sly_Viewable {
 			$styles[] = $style;
 		}
 
-		return $this->setAttribute('style', implode(' ', array_unique($styles)));
+		return $this->setAttribute('style', implode(';', array_unique($styles)));
 	}
 
 	/**
