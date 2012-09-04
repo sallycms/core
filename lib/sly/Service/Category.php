@@ -127,10 +127,19 @@ class sly_Service_Category extends sly_Service_ArticleBase {
 
 	/**
 	 * @throws sly_Exception
+	 * @param  sly_Model_Base_Article  $category
+	 * @return boolean
+	 */
+	public function deleteByCategory(sly_Model_Base_Article $category) {
+		return $this->deleteById($category->getId());
+	}
+
+	/**
+	 * @throws sly_Exception
 	 * @param  int $categoryID
 	 * @return boolean
 	 */
-	public function delete($categoryID) {
+	public function deleteById($categoryID) {
 		$categoryID = (int) $categoryID;
 		$this->checkForSpecialArticle($categoryID);
 
@@ -139,7 +148,7 @@ class sly_Service_Category extends sly_Service_ArticleBase {
 		$cat = $this->findById($categoryID);
 
 		if ($cat === null) {
-			throw new sly_Exception(t('category_not_found'));
+			throw new sly_Exception(t('category_not_found', $categoryID));
 		}
 
 		// check if this category still has children (both articles and categories)
@@ -164,7 +173,7 @@ class sly_Service_Category extends sly_Service_ArticleBase {
 		// remove the start article of this category (and this also kills the category itself)
 
 		$service = sly_Service_Factory::getArticleService();
-		$service->delete($categoryID);
+		$service->deleteById($categoryID);
 
 		// fire event
 		$dispatcher = sly_Core::dispatcher();
@@ -220,7 +229,7 @@ class sly_Service_Category extends sly_Service_ArticleBase {
 		// check categories
 
 		if ($category === null) {
-			throw new sly_Exception(t('category_not_found'));
+			throw new sly_Exception(t('category_not_found', $categoryID));
 		}
 
 		if ($targetID !== 0 && $target === null) {

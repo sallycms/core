@@ -29,7 +29,7 @@ class sly_Service_Asset {
 		$this->initCache();
 
 		$dispatcher = sly_Core::dispatcher();
-		$dispatcher->register(self::EVENT_PROCESS_ASSET, array($this, 'processScaffold'), array(), true);
+		$dispatcher->register(self::EVENT_PROCESS_ASSET, array($this, 'processLessCSS'));
 	}
 
 	/**
@@ -280,13 +280,13 @@ class sly_Service_Asset {
 	 * @param  array $params
 	 * @return string
 	 */
-	public function processScaffold($params) {
+	public function processLessCSS(array $params) {
 		$file = $params['subject'];
 
-		if (sly_Util_String::endsWith($file, '.css') && file_exists(SLY_BASE.'/'.$file)) {
-			$css     = sly_Util_Scaffold::process($file);
+		if (sly_Util_String::endsWith($file, '.less') && file_exists(SLY_BASE.'/'.$file)) {
+			$css     = sly_Util_Lessphp::process($file);
 			$dir     = SLY_DYNFOLDER.'/'.self::TEMP_DIR;
-			$tmpFile = $dir.'/'.md5($file).'.css';
+			$tmpFile = $dir.'/'.md5($file).'.less';
 
 			sly_Util_Directory::create($dir, $this->getDirPerm());
 
@@ -380,9 +380,9 @@ class sly_Service_Asset {
 		$obj = new sly_Util_Directory($dir);
 		$obj->delete(true);
 
-		// clear the Scaffold temp dir
-		$scaffoldDir = sly_Util_Directory::join(SLY_DYNFOLDER, self::TEMP_DIR);
-		$obj         = new sly_Util_Directory($scaffoldDir);
+		// clear the temp dir
+		$tmpDir = sly_Util_Directory::join(SLY_DYNFOLDER, self::TEMP_DIR);
+		$obj    = new sly_Util_Directory($tmpDir);
 
 		$obj->deleteFiles(true);
 

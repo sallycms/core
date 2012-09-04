@@ -49,7 +49,7 @@ class sly_Service_User extends sly_Service_Model_Base_Id {
 			'rights'      => '',
 			'name'        => '',
 			'description' => '',
-			'lasttrydate' => 0,
+			'lasttrydate' => null,
 			'revision'    => 0,
 			'updatedate'  => time(),
 			'createdate'  => time(),
@@ -93,6 +93,15 @@ class sly_Service_User extends sly_Service_Model_Base_Id {
 		sly_Core::dispatcher()->notify($event, $user);
 
 		return $user;
+	}
+
+	/**
+	 * @throws sly_Exception
+	 * @param  sly_Model_User $user
+	 * @return int
+	 */
+	public function deleteByUser(sly_Model_User $user) {
+		return $this->deleteById($user->getId());
 	}
 
 	public function delete($where) {
@@ -151,11 +160,21 @@ class sly_Service_User extends sly_Service_Model_Base_Id {
 		if (sly_Core::config()->get('SETUP')) return null;
 
 		if (self::$currentUser === false || $forceRefresh) {
-			$userID = SLY_IS_TESTING ? SLY_TESTING_USER_ID : sly_Util_Session::get('UID', 'int', -1);
+			$userID = sly_Util_Session::get('UID', 'int', -1);
 			self::$currentUser = $this->findById($userID);
 		}
 
 		return self::$currentUser;
+	}
+
+	/**
+	 * set current user object
+	 *
+	 * @param sly_Model_User $user  the user that should be logged in from now on
+	 */
+	public function setCurrentUser(sly_Model_User $user) {
+		sly_Util_Session::set('UID', $user->getId());
+		self::$currentUser = $user;
 	}
 
 	/**
@@ -175,6 +194,14 @@ class sly_Service_User extends sly_Service_Model_Base_Id {
 			if ($loginOK) {
 				sly_Util_Session::set('UID', $user->getId());
 				sly_Util_Session::regenerate_id();
+
+				// upgrade hash if possible
+				$current  = $user->getPassword();
+				$upgraded = sly_Util_Password::upgrade($password, $current);
+
+				if ($upgraded) {
+					$user->setHashedPassword($upgraded);
+				}
 			}
 
 			$user->setLastTryDate(time());
@@ -199,6 +226,6 @@ class sly_Service_User extends sly_Service_Model_Base_Id {
 	 * @return boolean                   true if the passwords match, otherwise false.
 	 */
 	public function checkPassword(sly_Model_User $user, $password) {
-		return sly_Util_User::getPasswordHash($user, $password) == $user->getPassword();
+		return sly_Util_Password::verify($password, $user->getPassword(), $user->getCreateDate());
 	}
 }

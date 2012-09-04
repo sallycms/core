@@ -20,8 +20,8 @@ class sly_Cache extends BabelCache_Factory {
 	private static $cacheImpls = array(
 		'BabelCache_APC'              => 'APC',
 		'BabelCache_Blackhole'        => 'Blackhole',
-		'BabelCache_Filesystem'       => 'Filesystem',
-		'BabelCache_Filesystem_Plain' => 'Filesystem (plain)',
+//		'BabelCache_Filesystem'       => 'Filesystem',
+		'BabelCache_Filesystem_Plain' => 'Filesystem',
 		'BabelCache_eAccelerator'     => 'eAccelerator',
 		'BabelCache_Memcache'         => 'Memcache',
 		'BabelCache_Memcached'        => 'Memcached',
@@ -102,7 +102,7 @@ class sly_Cache extends BabelCache_Factory {
 			self::$cachingStrategy = $cachingStrategy;
 		}
 
-		if ($cachingStrategy === 'BabelCache_Filesystem') {
+		if ($cachingStrategy === 'BabelCache_Filesystem' || $cachingStrategy === 'BabelCache_Filesystem_Plain') {
 			BabelCache_Filesystem::setDirPermissions(sly_Core::getDirPerm());
 			BabelCache_Filesystem::setFilePermissions(sly_Core::getFilePerm());
 		}

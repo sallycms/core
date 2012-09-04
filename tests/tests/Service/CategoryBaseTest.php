@@ -54,7 +54,7 @@ class sly_Service_CategoryBaseTest extends sly_Service_CategoryTestBase {
 		$service = $this->getService();
 		$id      = $service->add(0, 'tmp', 1, -1);
 
-		$service->delete($id);
+		$service->deleteById($id);
 
 		$this->assertNull($service->findById($id));
 	}

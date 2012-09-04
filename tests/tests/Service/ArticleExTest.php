@@ -229,7 +229,7 @@ class sly_Service_ArticleExTest extends sly_Service_ArticleTestBase {
 		$arts = $service->findArticlesByCategory($root, false, self::$clangB);
 		$this->assertCount(4, $arts);
 
-		$service->delete($newID);
+		$service->deleteById($newID);
 
 		////////////////////////////////////////////////////////////
 		// copy the article in another category
