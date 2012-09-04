@@ -59,6 +59,14 @@ class sly_Service_CategoryBaseTest extends sly_Service_CategoryTestBase {
 		$this->assertNull($service->findById($id));
 	}
 
+	/**
+	 * @expectedException  sly_Exception
+	 */
+	public function testDeleteNonExisting() {
+		$service = $this->getService();
+		$service->delete(2);
+	}
+
 	public function testChangeStatus() {
 		$service = $this->getService();
 		$id      = $service->add(0, 'tmp', 1, -1);

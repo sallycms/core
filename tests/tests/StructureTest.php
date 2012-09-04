@@ -29,6 +29,16 @@ abstract class sly_StructureTest extends sly_BaseTest {
 		$conf->set('NOTFOUND_ARTICLE_ID', self::$origNotFound);
 	}
 
+	protected function tearDown() {
+		// sanity check: re_id may never point to a non-existing category
+		$result = $this->pdo->query('SELECT * FROM sly_article WHERE re_id NOT IN (SELECT id FROM sly_article WHERE 1) AND re_id <> 0');
+		$this->assertEquals(0, $result->rowCount(), 're_id may never point to a non-existing category');
+
+		// sanity check: positions may never be negative
+		$result = $this->pdo->query('SELECT * FROM sly_article WHERE pos < 0 OR catpos < 0');
+		$this->assertEquals(0, $result->rowCount(), 'pos and catpos may never be negative');
+	}
+
 	protected function parseTree($tree) {
 		$tree = preg_replace('/([0-9]+)</', '"\1":{', $tree);
 		$tree = str_replace('>', '}', $tree);

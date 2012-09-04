@@ -144,9 +144,9 @@ class sly_Service_Category extends sly_Service_ArticleBase {
 
 		// check if this category still has children (both articles and categories)
 
-		$children = $this->findByParentId($categoryID, true);
+		$children = $this->findByParentId($categoryID, false);
 
-		if ($this->findByParentId($categoryID, true)) {
+		if (!empty($children)) {
 			throw new sly_Exception(t('category_is_not_empty'));
 		}
 
