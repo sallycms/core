@@ -64,7 +64,7 @@ class sly_Service_CategoryBaseTest extends sly_Service_CategoryTestBase {
 	 */
 	public function testDeleteNonExisting() {
 		$service = $this->getService();
-		$service->delete(2);
+		$service->deleteById(2);
 	}
 
 	public function testChangeStatus() {

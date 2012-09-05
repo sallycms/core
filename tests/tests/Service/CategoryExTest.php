@@ -173,7 +173,7 @@ class sly_Service_CategoryExTest extends sly_Service_CategoryTestBase {
 
 		try {
 			// boom
-			$service->delete($B);
+			$service->deleteById($B);
 			$this->fail('Should not have been able to delete a category with children.');
 		}
 		catch (sly_Exception $e) {
@@ -182,7 +182,7 @@ class sly_Service_CategoryExTest extends sly_Service_CategoryTestBase {
 
 		try {
 			// boom
-			$service->delete($parent);
+			$service->deleteById($parent);
 			$this->fail('Should not have been able to delete a category with children.');
 		}
 		catch (sly_Exception $e) {
