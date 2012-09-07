@@ -155,11 +155,13 @@ class sly_Model_User extends sly_Model_Base_Id {
 	 */
 	public function getAllowedCLangs() {
 		$allowedLanguages = array();
+
 		foreach (sly_Util_Language::findAll(true) as $language) {
 			if ($this->isAdmin() || $this->hasRight('language', 'access', $language)) {
 				$allowedLanguages[] = $language;
 			}
 		}
+
 		return $allowedLanguages;
 	}
 

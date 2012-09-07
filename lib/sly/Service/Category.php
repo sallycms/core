@@ -103,26 +103,28 @@ class sly_Service_Category extends sly_Service_ArticleBase {
 
 	/**
 	 * @throws sly_Exception
-	 * @param  int    $parentID
-	 * @param  string $name
-	 * @param  int    $status
-	 * @param  int    $position
+	 * @param  int            $parentID
+	 * @param  string         $name
+	 * @param  int            $status
+	 * @param  int            $position
+	 * @param  sly_Model_User $user      creator or null for the current user
 	 * @return int
 	 */
-	public function add($parentID, $name, $status = 0, $position = -1) {
-		return $this->addHelper($parentID, $name, $status, $position);
+	public function add($parentID, $name, $status = 0, $position = -1, sly_Model_User $user = null) {
+		return $this->addHelper($parentID, $name, $status, $position, $user);
 	}
 
 	/**
 	 * @throws sly_Exception
-	 * @param  int    $categoryID
-	 * @param  int    $clangID
-	 * @param  string $name
-	 * @param  mixed  $position
+	 * @param  int            $categoryID
+	 * @param  int            $clangID
+	 * @param  string         $name
+	 * @param  mixed          $position
+	 * @param  sly_Model_User $user        updateuser or null for the current user
 	 * @return boolean
 	 */
-	public function edit($categoryID, $clangID, $name, $position = false) {
-		return $this->editHelper($categoryID, $clangID, $name, $position);
+	public function edit($categoryID, $clangID, $name, $position = false, sly_Model_User $user = null) {
+		return $this->editHelper($categoryID, $clangID, $name, $position, $user);
 	}
 
 	/**
@@ -217,12 +219,14 @@ class sly_Service_Category extends sly_Service_ArticleBase {
 	 *
 	 * The sub-tree will be placed at the end of the target category.
 	 *
-	 * @param int $categoryID  ID of the category that should be moved
-	 * @param int $targetID    target category ID
+	 * @param int            $categoryID  ID of the category that should be moved
+	 * @param int            $targetID    target category ID
+	 * @param sly_Model_User $user         updateuser or null for the current user
 	 */
-	public function move($categoryID, $targetID) {
+	public function move($categoryID, $targetID, sly_Model_User $user = null) {
 		$categoryID = (int) $categoryID;
 		$targetID   = (int) $targetID;
+		$user       = $this->getActor($user, __METHOD__);
 		$category   = $this->findById($categoryID);
 		$target     = $this->findById($targetID);
 
@@ -263,6 +267,7 @@ class sly_Service_Category extends sly_Service_ArticleBase {
 			$cat->setParentId($targetID);
 			$cat->setCatPosition($newPos);
 			$cat->setPath($newPath);
+			$cat->setUpdateColumns($user);
 
 			// update the cat itself
 			$this->update($cat);
@@ -291,7 +296,8 @@ class sly_Service_Category extends sly_Service_ArticleBase {
 		foreach ($languages as $clang) {
 			$dispatcher->notify('SLY_CAT_MOVED', $categoryID, array(
 				'clang'  => $clang,
-				'target' => $targetID
+				'target' => $targetID,
+				'user'   => $user
 			));
 		}
 	}

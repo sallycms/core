@@ -85,26 +85,28 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 
 	/**
 	 * @throws sly_Exception
-	 * @param  int    $categoryID
-	 * @param  string $name
-	 * @param  int    $status
-	 * @param  int    $position
+	 * @param  int            $categoryID
+	 * @param  string         $name
+	 * @param  int            $status
+	 * @param  int            $position
+	 * @param  sly_Model_User $user        creator or null for the current user
 	 * @return int
 	 */
-	public function add($categoryID, $name, $status, $position = -1) {
-		return $this->addHelper($categoryID, $name, $status, $position);
+	public function add($categoryID, $name, $status, $position = -1, sly_Model_User $user = null) {
+		return $this->addHelper($categoryID, $name, $status, $position, $user);
 	}
 
 	/**
 	 * @throws sly_Exception
-	 * @param  int    $articleID
-	 * @param  int    $clangID
-	 * @param  string $name
-	 * @param  int    $position
+	 * @param  int            $articleID
+	 * @param  int            $clangID
+	 * @param  string         $name
+	 * @param  int            $position
+	 * @param  sly_Model_User $user       updateuser or null for the current user
 	 * @return boolean
 	 */
-	public function edit($articleID, $clangID, $name, $position = false) {
-		return $this->editHelper($articleID, $clangID, $name, $position);
+	public function edit($articleID, $clangID, $name, $position = false, sly_Model_User $user = null) {
+		return $this->editHelper($articleID, $clangID, $name, $position, $user);
 	}
 
 	/**
@@ -211,12 +213,14 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 	/**
 	 * @param  sly_Model_Article $article
 	 * @param  string            $type
+	 * @param  sly_Model_User    $user     updateuser or null for the current user
 	 * @return boolean
 	 */
-	public function setType(sly_Model_Article $article, $type) {
+	public function setType(sly_Model_Article $article, $type, sly_Model_User $user = null) {
 		$oldType   = $article->getType();
 		$langs     = sly_Util_Language::findAll(true);
 		$articleID = $article->getId();
+		$user      = $this->getActor($user, __METHOD__);
 
 		foreach ($langs as $clangID) {
 			$article = sly_Util_Article::findById($articleID, $clangID);
@@ -224,14 +228,14 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 			// update the article
 
 			$article->setType($type);
-			$article->setUpdateColumns();
+			$article->setUpdateColumns($user);
 			$this->update($article);
 		}
 
 		// notify system
 
 		$dispatcher = sly_Core::dispatcher();
-		$dispatcher->notify('SLY_ART_TYPE', $article, array('old_type' => $oldType));
+		$dispatcher->notify('SLY_ART_TYPE', $article, array('old_type' => $oldType, 'user' => $user));
 
 		return true;
 	}
@@ -250,13 +254,15 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 	 *
 	 * The article will be placed at the end of the target category.
 	 *
-	 * @param  int $id      article ID
-	 * @param  int $target  target category ID
-	 * @return int          the new article's ID
+	 * @param  int            $id      article ID
+	 * @param  int            $target  target category ID
+	 * @param  sly_Model_User $user    creator for copies or null for the current user
+	 * @return int                     the new article's ID
 	 */
-	public function copy($id, $target) {
+	public function copy($id, $target, sly_Model_User $user = null) {
 		$id      = (int) $id;
 		$target  = (int) $target;
+		$user    = $this->getActor($user, __METHOD__);
 		$article = $this->findById($id);
 
 		// check article
@@ -293,8 +299,8 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 			$duplicate->setPosition($pos);
 			$duplicate->setStatus(0);
 			$duplicate->setPath($cat ? ($cat->getPath().$target.'|') : '|');
-			$duplicate->setUpdateColumns();
-			$duplicate->setCreateColumns();
+			$duplicate->setUpdateColumns($user);
+			$duplicate->setCreateColumns($user);
 
 			// make sure that when copying start articles
 			// we actually create an article and not a category
@@ -311,7 +317,7 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 			}
 
 			// notify system
-			$disp->notify('SLY_ART_COPIED', $duplicate, compact('source'));
+			$disp->notify('SLY_ART_COPIED', $duplicate, compact('source', 'user'));
 		}
 
 		return $newID;
@@ -322,12 +328,14 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 	 *
 	 * The article will be placed at the end of the target category.
 	 *
-	 * @param int $id      article ID
-	 * @param int $target  target category ID
+	 * @param int            $id      article ID
+	 * @param int            $target  target category ID
+	 * @param sly_Model_User $user    updateuser or null for the current user
 	 */
-	public function move($id, $target) {
+	public function move($id, $target, sly_Model_User $user = null) {
 		$id      = (int) $id;
 		$target  = (int) $target;
+		$user    = $this->getActor($user, __METHOD__);
 		$article = $this->findById($id);
 
 		// check article
@@ -369,7 +377,7 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 			$moved->setCatName($cat ? $cat->getName() : '');
 			$moved->setStatus(0);
 			$moved->setPosition($pos);
-			$moved->setUpdateColumns();
+			$moved->setUpdateColumns($user);
 
 			// move article at the end of new category
 			$this->update($moved);
@@ -381,7 +389,8 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 			// notify system
 			$disp->notify('SLY_ART_MOVED', $id, array(
 				'clang'  => $clang,
-				'target' => $target
+				'target' => $target,
+				'user'   => $user
 			));
 		}
 	}
@@ -392,10 +401,12 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 	 * The article will be converted to an category and all articles and
 	 * categories will be moved to be its children.
 	 *
-	 * @param int $articleID  article ID
+	 * @param int            $articleID  article ID
+	 * @param sly_Model_User $user       updateuser or null for the current user
 	 */
-	public function convertToStartArticle($articleID) {
+	public function convertToStartArticle($articleID, sly_Model_User $user = null) {
 		$articleID = (int) $articleID;
+		$user      = $this->getActor($user, __METHOD__);
 		$article   = $this->findById($articleID);
 
 		// check article
@@ -452,7 +463,7 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 
 		// notify system
 
-		sly_Core::dispatcher()->notify('SLY_ART_TO_STARTPAGE', $articleID, array('old_cat' => $oldCat));
+		sly_Core::dispatcher()->notify('SLY_ART_TO_STARTPAGE', $articleID, array('old_cat' => $oldCat, 'user' => $user));
 	}
 
 	/**
@@ -462,18 +473,20 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 	 * article. Slots not present in the target are simply skipped. Existing
 	 * content remains the same.
 	 *
-	 * @param int $srcID     source article ID
-	 * @param int $dstID     target article ID
-	 * @param int $srcClang  source clang
-	 * @param int $dstClang  target clang
-	 * @param int $revision  revision (unused)
+	 * @param int            $srcID     source article ID
+	 * @param int            $dstID     target article ID
+	 * @param int            $srcClang  source clang
+	 * @param int            $dstClang  target clang
+	 * @param int            $revision  revision (unused)
+	 * @param sly_Model_User $user      author or null for the current user
 	 */
-	public function copyContent($srcID, $dstID, $srcClang = 0, $dstClang = 0, $revision = 0) {
+	public function copyContent($srcID, $dstID, $srcClang = 0, $dstClang = 0, $revision = 0, sly_Model_User $user = null) {
 		$srcClang = (int) $srcClang;
 		$dstClang = (int) $dstClang;
 		$srcID    = (int) $srcID;
 		$dstID    = (int) $dstID;
 		$revision = (int) $revision;
+		$user     = $this->getActor($user, __METHOD__);
 
 		if ($srcID === $dstID && $srcClang === $dstClang) {
 			throw new sly_Exception(t('source_and_target_are_equal'));
@@ -488,8 +501,7 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 		$asServ     = sly_Service_Factory::getArticleSliceService();
 		$tplService = sly_Service_Factory::getTemplateService();
 		$sql        = sly_DB_Persistence::getInstance();
-		$user       = sly_Util_User::getCurrentUser();
-		$login      = $user ? $user->getLogin() : '';
+		$login      = $user->getLogin();
 		$srcSlots   = $tplService->getSlots($source->getTemplateName());
 		$dstSlots   = $tplService->getSlots($dest->getTemplateName());
 		$where      = array('article_id' => $srcID, 'clang' => $srcClang, 'revision' => $revision);
@@ -544,6 +556,7 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 				'from_clang'  => $srcClang,
 				'to_id'       => $dstID,
 				'to_clang'    => $dstClang,
+				'user'        => $user
 			));
 		}
 	}

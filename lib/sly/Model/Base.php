@@ -82,8 +82,12 @@ abstract class sly_Model_Base {
 	 * @param mixed $user  sly_Model_User or username as a string
 	 */
 	public function setUpdateColumns($user = null) {
-		if (!$user) {
+		if (!is_string($user) && !($user instanceof sly_Model_User)) {
 			$user = sly_Util_User::getCurrentUser();
+
+			if (!$user) {
+				throw new sly_Exception(t('operation_requires_user_context', __METHOD__));
+			}
 		}
 
 		if ($user instanceof sly_Model_User) {
@@ -91,18 +95,19 @@ abstract class sly_Model_Base {
 		}
 
 		$this->setUpdateDate(time());
-
-		if ($user) {
-			$this->setUpdateUser($user);
-		}
+		$this->setUpdateUser($user);
 	}
 
 	/**
 	 * @param mixed $user  sly_Model_User or username as a string
 	 */
 	public function setCreateColumns($user = null) {
-		if (!$user) {
+		if (!is_string($user) && !($user instanceof sly_Model_User)) {
 			$user = sly_Util_User::getCurrentUser();
+
+			if (!$user) {
+				throw new sly_Exception(t('operation_requires_user_context', __METHOD__));
+			}
 		}
 
 		if ($user instanceof sly_Model_User) {
@@ -110,11 +115,8 @@ abstract class sly_Model_Base {
 		}
 
 		$this->setCreateDate(time());
+		$this->setCreateUser($user);
 		$this->setUpdateColumns($user);
-
-		if ($user) {
-			$this->setCreateUser($user);
-		}
 	}
 
 	/**

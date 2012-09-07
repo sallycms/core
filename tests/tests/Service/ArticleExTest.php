@@ -89,7 +89,7 @@ class sly_Service_ArticleExTest extends sly_Service_ArticleTestBase {
 	 * @expectedException sly_Exception
 	 */
 	public function testIllegalTreeMoves($id, $target) {
-		$this->getService()->move($id, $target, self::$clangA);
+		$this->getService()->move($id, $target);
 	}
 
 	public function illegalMoveProvider() {
