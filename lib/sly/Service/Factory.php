@@ -22,7 +22,7 @@ abstract class sly_Service_Factory {
 	 * @return sly_Service_Base   an implementation of sly_Service_Base
 	 */
 	public static function getService($modelName) {
-		if (!isset(self::$services[$modelName])){
+		if (!isset(self::$services[$modelName])) {
 			$serviceName = 'sly_Service_'.$modelName;
 
 			if ($modelName === 'Package_Vendor' || $modelName === 'Package_AddOn') {
@@ -33,27 +33,36 @@ abstract class sly_Service_Factory {
 				throw new sly_Exception(t('service_not_found', $modelName));
 			}
 
-			if ($modelName === 'AddOn_Manager') {
-				$aService = self::getService('AddOn');
-				$service  = new $serviceName($aService);
-			}
-			elseif ($modelName === 'AddOn') {
-				$pkgService = self::getService('Package_AddOn');
-				$vndService = self::getService('Package_Vendor');
-				$service    = new $serviceName($pkgService, SLY_DYNFOLDER);
+			switch ($modelName) {
+				case 'Asset':
+					$service = new $serviceName(sly_Core::config(), sly_Core::dispatcher());
+					break;
 
-				$service->setVendorPackageService($vndService);
-			}
-			elseif ($modelName === 'Package_Vendor') {
-				$cache   = sly_Core::cache();
-				$service = new $serviceName(SLY_VENDORFOLDER, $cache);
-			}
-			elseif ($modelName === 'Package_AddOn') {
-				$cache   = sly_Core::cache();
-				$service = new $serviceName(SLY_ADDONFOLDER, $cache);
-			}
-			else {
-				$service = new $serviceName();
+				case 'AddOn_Manager':
+					$aService = self::getService('AddOn');
+					$service  = new $serviceName($aService);
+					break;
+
+				case 'AddOn':
+					$pkgService = self::getService('Package_AddOn');
+					$vndService = self::getService('Package_Vendor');
+					$service    = new $serviceName($pkgService, SLY_DYNFOLDER);
+
+					$service->setVendorPackageService($vndService);
+					break;
+
+				case 'Package_Vendor':
+					$cache   = sly_Core::cache();
+					$service = new $serviceName(SLY_VENDORFOLDER, $cache);
+					break;
+
+				case 'Package_AddOn':
+					$cache   = sly_Core::cache();
+					$service = new $serviceName(SLY_ADDONFOLDER, $cache);
+					break;
+
+				default:
+					$service = new $serviceName();
 			}
 
 			self::$services[$modelName] = $service;

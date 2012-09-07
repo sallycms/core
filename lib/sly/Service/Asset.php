@@ -23,12 +23,17 @@ class sly_Service_Asset {
 	const ACCESS_PUBLIC    = 'public';     ///< string
 	const ACCESS_PROTECTED = 'protected';  ///< string
 
+	protected $dispatcher;
+	protected $config;
+
 	private $forceGen = true; ///< boolean
 
-	public function __construct() {
+	public function __construct(sly_Configuration $config, sly_Event_Dispatcher $dispatcher) {
 		$this->initCache();
 
-		$dispatcher = sly_Core::dispatcher();
+		$this->dispatcher = $dispatcher;
+		$this->config     = $config;
+
 		$dispatcher->register(self::EVENT_PROCESS_ASSET, array($this, 'processLessCSS'));
 	}
 
@@ -40,10 +45,8 @@ class sly_Service_Asset {
 	}
 
 	public function validateCache() {
-		$dispatcher = sly_Core::dispatcher();
-
 		// [assets/css/main.css, data/mediapool/foo.jpg, ...] (echte, vorhandene Dateien)
-		$protected = $dispatcher->filter(self::EVENT_GET_PROTECTED_ASSETS, array());
+		$protected = $this->dispatcher->filter(self::EVENT_GET_PROTECTED_ASSETS, array());
 		$protected = array_unique(array_filter($protected));
 
 		foreach (array(self::ACCESS_PUBLIC, self::ACCESS_PROTECTED) as $access) {
@@ -65,7 +68,7 @@ class sly_Service_Asset {
 
 					// if original file is missing, ask listeners
 					if (!file_exists($realfile)) {
-						$translated = $dispatcher->filter(self::EVENT_REVALIDATE_ASSETS, array($file));
+						$translated = $this->dispatcher->filter(self::EVENT_REVALIDATE_ASSETS, array($file));
 						$realfile   = SLY_BASE.'/'.reset($translated); // "there can only be one!" ... or at least we hope so
 					}
 
@@ -107,7 +110,7 @@ class sly_Service_Asset {
 
 	public function process($file, $encoding) {
 		// check if the file can be streamed
-		$blocked = sly_Core::config()->get('BLOCKED_EXTENSIONS');
+		$blocked = $this->config->get('BLOCKED_EXTENSIONS');
 		$ok      = true;
 
 		foreach ($blocked as $ext) {
@@ -122,7 +125,7 @@ class sly_Service_Asset {
 			$ok         = strpos($normalized, '/') === false; // allow files in root directory (favicon)
 
 			if (!$ok) {
-				$allowed = sly_Core::config()->get('ASSETS_DIRECTORIES');
+				$allowed = $this->config->get('ASSETS_DIRECTORIES');
 
 				foreach ($allowed as $path) {
 					if (sly_Util_String::startsWith($file, $path)) {
@@ -138,9 +141,7 @@ class sly_Service_Asset {
 		}
 
 		// do the work
-
-		$dispatcher  = sly_Core::dispatcher();
-		$isProtected = $dispatcher->filter(self::EVENT_IS_PROTECTED_ASSET, false, compact('file'));
+		$isProtected = $this->dispatcher->filter(self::EVENT_IS_PROTECTED_ASSET, false, compact('file'));
 		$access      = $isProtected ? self::ACCESS_PROTECTED : self::ACCESS_PUBLIC;
 
 		// "/../data/dyn/public/sally/static-cache/[access]/gzip/assets/css/main.css"
@@ -153,7 +154,7 @@ class sly_Service_Asset {
 		}
 
 		// let listeners process the file
-		$tmpFile = $dispatcher->filter(self::EVENT_PROCESS_ASSET, $file);
+		$tmpFile = $this->dispatcher->filter(self::EVENT_PROCESS_ASSET, $file);
 
 		// now we can check if a listener has generated a valid file
 		if (!is_file($tmpFile)) return null;
@@ -364,7 +365,7 @@ class sly_Service_Asset {
 	}
 
 	public static function clearCache() {
-		$me  = new self();
+		$me  = new self(sly_Core::config(), sly_Core::dispatcher());
 		$dir = $me->getCacheDir('', '');
 
 		// Remember htaccess files, so that we do not kill and re-create them.
