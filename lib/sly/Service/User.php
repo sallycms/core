@@ -211,7 +211,7 @@ class sly_Service_User extends sly_Service_Model_Base_Id {
 			}
 
 			$user->setLastTryDate(time());
-			$this->save($user);
+			$this->save($user, $user);
 
 			self::$currentUser = false;
 		}
