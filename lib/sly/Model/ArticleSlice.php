@@ -124,6 +124,20 @@ class sly_Model_ArticleSlice extends sly_Model_Base_Id implements sly_Model_ISli
 		return $this->slice;
 	}
 
+	public function getPrevious() {
+		$service = sly_Service_Factory::getArticleSliceService();
+		$db      = sly_DB_Persistence::getInstance();
+
+		return $service->findOne(sprintf('slot = %s AND pos < %d AND article_id = %d AND clang = %d ORDER BY pos DESC', $db->quote($this->getSlot()), $this->getPosition(), $this->getArticleId(), $this->getClang()));
+	}
+
+	public function getNext() {
+		$service = sly_Service_Factory::getArticleSliceService();
+		$db      = sly_DB_Persistence::getInstance();
+
+		return $service->findOne(sprintf('slot = %s AND pos > %d AND article_id = %d AND clang = %d ORDER BY pos ASC', $db->quote($this->getSlot()), $this->getPosition(), $this->getArticleId(), $this->getClang()));
+	}
+
 	public function getModule() {
 		return $this->getSlice()->getModule();
 	}
