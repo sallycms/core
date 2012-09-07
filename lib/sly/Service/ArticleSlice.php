@@ -156,10 +156,29 @@ class sly_Service_ArticleSlice extends sly_Service_Model_Base_Id {
 		$sliceCount = $this->count(array('article_id' => $article_id, 'clang' => $clang, 'slot' => $slot));
 
 		if ($newpos > -1 && $newpos < $sliceCount) {
-			$sql->update('article_slice', array('pos' => $pos), array('article_id' => $article_id, 'clang' => $clang, 'slot' => $slot, 'pos' => $newpos));
-			$articleSlice->setPosition($newpos);
-			$articleSlice->setUpdateColumns($user);
-			$this->save($articleSlice);
+			$ownTrx = !$sql->isTransRunning();
+
+			if ($ownTrx) {
+				$sql->beginTransaction();
+			}
+
+			try {
+				$sql->update('article_slice', array('pos' => $pos), array('article_id' => $article_id, 'clang' => $clang, 'slot' => $slot, 'pos' => $newpos));
+				$articleSlice->setPosition($newpos);
+				$articleSlice->setUpdateColumns($user);
+				$this->save($articleSlice);
+
+				if ($ownTrx) {
+					$sql->commit();
+				}
+			}
+			catch (Exception $e) {
+				if ($ownTrx) {
+					$sql->rollBack();
+				}
+
+				throw $e;
+			}
 
 			// notify system
 			sly_Core::dispatcher()->notify('SLY_SLICE_MOVED', $articleSlice, array(

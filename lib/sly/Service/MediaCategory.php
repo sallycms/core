@@ -218,23 +218,39 @@ class sly_Service_MediaCategory extends sly_Service_Model_Base_Id {
 			throw new sly_Exception(t('category_is_not_empty'), self::ERR_CAT_HAS_MEDIA);
 		}
 
-		// delete subcats
-
-		foreach ($children as $child) {
-			$this->deleteById($child->getId(), true);
-		}
-
-		// delete files
-
 		$service = sly_Service_Factory::getMediumService();
+		$db      = sly_DB_Persistence::getInstance();
+		$ownTrx  = !$db->isTransRunning();
 
-		foreach ($media as $medium) {
-			$service->deleteByMedium($medium);
+		if ($ownTrx) {
+			$db->beginTransaction();
 		}
 
-		// delete cat itself
-		$sql = sly_DB_Persistence::getInstance();
-		$sql->delete('file_category', array('id' => $cat->getId()));
+		try {
+			// delete subcats
+			foreach ($children as $child) {
+				$this->deleteById($child->getId(), true);
+			}
+
+			// delete files
+			foreach ($media as $medium) {
+				$service->deleteByMedium($medium);
+			}
+
+			// delete cat itself
+			$db->delete('file_category', array('id' => $cat->getId()));
+
+			if ($ownTrx) {
+				$db->commit();
+			}
+		}
+		catch (Exception $e) {
+			if ($ownTrx) {
+				$db->rollBack();
+			}
+
+			throw $e;
+		}
 
 		// update cache
 		sly_Core::cache()->flush('sly.mediacat');

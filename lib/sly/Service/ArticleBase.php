@@ -220,39 +220,58 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base {
 		///////////////////////////////////////////////////////////////
 		// create article/category rows for all languages
 
-		$dispatcher = sly_Core::dispatcher();
-		$newID      = $db->magicFetch('article', 'MAX(id)') + 1;
+		$ownTrx = !$db->isTransRunning();
 
-		foreach (sly_Util_Language::findAll(true) as $clangID) {
-			$obj = $this->buildModel(array(
-				      'id' => $newID,
-				  'parent' => $parentID,
-				    'name' => $name,
-				'position' => $position,
-				    'path' => $path,
-				  'status' => $status ? 1 : 0,
-				    'type' => $type,
-				   'clang' => $clangID
-			));
+		if ($ownTrx) {
+			$db->beginTransaction();
+		}
 
-			$obj->setUpdateColumns($user);
-			$obj->setCreateColumns($user);
-			$db->insert($this->tablename, array_merge($obj->getPKHash(), $obj->toHash()));
+		try {
+			$dispatcher = sly_Core::dispatcher();
+			$newID      = $db->magicFetch('article', 'MAX(id)') + 1;
 
-			$this->deleteListCache();
+			foreach (sly_Util_Language::findAll(true) as $clangID) {
+				$obj = $this->buildModel(array(
+					      'id' => $newID,
+					  'parent' => $parentID,
+					    'name' => $name,
+					'position' => $position,
+					    'path' => $path,
+					  'status' => $status ? 1 : 0,
+					    'type' => $type,
+					   'clang' => $clangID
+				));
 
-			// notify system
+				$obj->setUpdateColumns($user);
+				$obj->setCreateColumns($user);
+				$db->insert($this->tablename, array_merge($obj->getPKHash(), $obj->toHash()));
 
-			$dispatcher->notify($this->getEvent('ADDED'), $newID, array(
-				're_id'    => $parentID,
-				'clang'    => $clangID,
-				'name'     => $name,
-				'position' => $position,
-				'path'     => $path,
-				'status'   => $status,
-				'type'     => $type,
-				'user'     => $user
-			));
+				$this->deleteListCache();
+
+				// notify system
+
+				$dispatcher->notify($this->getEvent('ADDED'), $newID, array(
+					're_id'    => $parentID,
+					'clang'    => $clangID,
+					'name'     => $name,
+					'position' => $position,
+					'path'     => $path,
+					'status'   => $status,
+					'type'     => $type,
+					'user'     => $user
+				));
+			}
+
+			if ($ownTrx) {
+				$db->commit();
+			}
+		}
+		catch (Exception $e) {
+			if ($ownTrx) {
+				$db->rollBack();
+			}
+
+			throw $e;
 		}
 
 		return $newID;
@@ -283,58 +302,76 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base {
 			throw new sly_Exception(t($modelType.'_not_found', $id));
 		}
 
-		///////////////////////////////////////////////////////////////
-		// update the object itself
+		$db     = sly_DB_Persistence::getInstance();
+		$ownTrx = !$db->isTransRunning();
 
-		$isArticle ? $obj->setName($name) : $obj->setCatName($name);
-
-		$obj->setUpdateColumns($user);
-		$this->update($obj);
-
-		///////////////////////////////////////////////////////////////
-		// change catname of all children
-
-		$db = sly_DB_Persistence::getInstance();
-
-		if (!$isArticle) {
-			$where = array('re_id' => $id, 'startpage' => 0, 'clang' => $clangID);
-			$db->update('article', array('catname' => $name), $where);
-
-			// and remove them from the cache
-			$this->clearCacheByQuery($where);
+		if ($ownTrx) {
+			$db->beginTransaction();
 		}
 
-		///////////////////////////////////////////////////////////////
-		// move object if required
+		try {
+			///////////////////////////////////////////////////////////////
+			// update the object itself
 
-		$curPos = $isArticle ? $obj->getPosition() : $obj->getCatPosition();
+			$isArticle ? $obj->setName($name) : $obj->setCatName($name);
 
-		if ($position !== false && $position != $curPos) {
-			$position = (int) $position;
-			$parentID = $isArticle ? $obj->getCategoryId() : $obj->getParentId();
-			$maxPos   = $this->getMaxPosition($parentID);
-			$newPos   = ($position <= 0 || $position > $maxPos) ? $maxPos : $position;
+			$obj->setUpdateColumns($user);
+			$this->update($obj);
 
-			// only do something if the position really changed
+			///////////////////////////////////////////////////////////////
+			// change catname of all children
 
-			if ($newPos != $curPos) {
-				$relation    = $newPos < $curPos ? '+' : '-';
-				list($a, $b) = $newPos < $curPos ? array($newPos, $curPos) : array($curPos, $newPos);
+			if (!$isArticle) {
+				$where = array('re_id' => $id, 'startpage' => 0, 'clang' => $clangID);
+				$db->update('article', array('catname' => $name), $where);
 
-				// move all other objects
+				// and remove them from the cache
+				$this->clearCacheByQuery($where);
+			}
 
-				$followers = $this->getFollowerQuery($parentID, $clangID, $a, $b);
-				$this->moveObjects($relation, $followers);
+			///////////////////////////////////////////////////////////////
+			// move object if required
 
-				// save own, new position
+			$curPos = $isArticle ? $obj->getPosition() : $obj->getCatPosition();
 
-				$isArticle ? $obj->setPosition($newPos) : $obj->setCatPosition($newPos);
-				$this->update($obj);
+			if ($position !== false && $position != $curPos) {
+				$position = (int) $position;
+				$parentID = $isArticle ? $obj->getCategoryId() : $obj->getParentId();
+				$maxPos   = $this->getMaxPosition($parentID);
+				$newPos   = ($position <= 0 || $position > $maxPos) ? $maxPos : $position;
+
+				// only do something if the position really changed
+
+				if ($newPos != $curPos) {
+					$relation    = $newPos < $curPos ? '+' : '-';
+					list($a, $b) = $newPos < $curPos ? array($newPos, $curPos) : array($curPos, $newPos);
+
+					// move all other objects
+
+					$followers = $this->getFollowerQuery($parentID, $clangID, $a, $b);
+					$this->moveObjects($relation, $followers);
+
+					// save own, new position
+
+					$isArticle ? $obj->setPosition($newPos) : $obj->setCatPosition($newPos);
+					$this->update($obj);
+				}
+			}
+
+			// be safe and clear all lists
+			$this->deleteListCache();
+
+			if ($ownTrx) {
+				$db->commit();
 			}
 		}
+		catch (Exception $e) {
+			if ($ownTrx) {
+				$db->rollBack();
+			}
 
-		// be safe and clear all lists
-		$this->deleteListCache();
+			throw $e;
+		}
 
 		$dispatcher = sly_Core::dispatcher();
 		$dispatcher->notify($this->getEvent('UPDATED'), $obj, array('user' => $user));
