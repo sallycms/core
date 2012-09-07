@@ -15,7 +15,6 @@
  * @ingroup service
  */
 class sly_Service_ArticleSlice extends sly_Service_Model_Base_Id {
-
 	protected $tablename = 'article_slice'; ///< string
 
 	/**
@@ -107,12 +106,17 @@ class sly_Service_ArticleSlice extends sly_Service_Model_Base_Id {
 	}
 
 	public function findByArticleClangSlot($articleID, $clang = null, $slot = null) {
-		if ($clang === null) $clang = sly_Core::getCurrentClang();
+		if ($clang === null) {
+			$clang = sly_Core::getCurrentClang();
+		}
+
 		$where = array('article_id' => $articleID, 'clang' => $clang);
 		$order = 'pos ASC';
+
 		if ($slot !== null) {
 			$where['slot'] = $slot;
-		} else {
+		}
+		else {
 			$order = 'slot ASC, '.$order;
 		}
 
@@ -120,21 +124,22 @@ class sly_Service_ArticleSlice extends sly_Service_Model_Base_Id {
 	}
 
 	/**
-	 * Verschiebt einen Slice
+	 * Move a slice up or down
 	 *
 	 * @throws sly_Exception
-	 * @param  int    $slice_id   ID des Slices
-	 * @param  int    $clang      ID der Sprache
-	 * @param  string $direction  Richtung in die verschoben werden soll
-	 * @return boolean            true if moved, else false
+	 * @param  int            $slice_id   article slice ID
+	 * @param  string         $direction  direction to move, either 'up' or 'down'
+	 * @param  sly_Model_User $user       updateuser or null for current user
+	 * @return boolean                    true if moved, else false
 	 */
-	public function move($slice_id, $direction) {
+	public function move($slice_id, $direction, sly_Model_User $user = null) {
 		$slice_id = (int) $slice_id;
 
 		if (!in_array($direction, array('up', 'down'))) {
 			throw new sly_Exception(t('unsupported_direction', $direction));
 		}
 
+		$user         = $this->getActor($user, __METHOD__);
 		$articleSlice = $this->findById($slice_id);
 
 		if (!$articleSlice) {
@@ -153,7 +158,7 @@ class sly_Service_ArticleSlice extends sly_Service_Model_Base_Id {
 		if ($newpos > -1 && $newpos < $sliceCount) {
 			$sql->update('article_slice', array('pos' => $pos), array('article_id' => $article_id, 'clang' => $clang, 'slot' => $slot, 'pos' => $newpos));
 			$articleSlice->setPosition($newpos);
-			$articleSlice->setUpdateColumns();
+			$articleSlice->setUpdateColumns($user);
 			$this->save($articleSlice);
 
 			// notify system
@@ -161,7 +166,8 @@ class sly_Service_ArticleSlice extends sly_Service_Model_Base_Id {
 				'clang'     => $clang,
 				'direction' => $direction,
 				'old_pos'   => $pos,
-				'new_pos'   => $newpos
+				'new_pos'   => $newpos,
+				'user'      => $user
 			));
 
 			$success = true;

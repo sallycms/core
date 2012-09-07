@@ -27,10 +27,13 @@ class sly_Service_User extends sly_Service_Model_Base_Id {
 	}
 
 	/**
-	 * @param  array $params
+	 * @param  array          $params
+	 * @param  sly_Model_User $creator  creator or null for the current user
 	 * @return sly_Model_User
 	 */
-	public function create($params) {
+	public function create($params, sly_Model_User $creator = null) {
+		$creator = $this->getActor($creator, __METHOD__);
+
 		if (!isset($params['login']) || mb_strlen($params['login']) === 0) {
 			throw new sly_Exception(t('no_username_given'));
 		}
@@ -43,8 +46,7 @@ class sly_Service_User extends sly_Service_Model_Base_Id {
 			throw new sly_Exception(t('user_login_already_exists'));
 		}
 
-		$currentUser = sly_Util_User::getCurrentUser();
-		$defaults    = array(
+		$defaults = array(
 			'status'      => false,
 			'rights'      => '',
 			'name'        => '',
@@ -53,15 +55,15 @@ class sly_Service_User extends sly_Service_Model_Base_Id {
 			'revision'    => 0,
 			'updatedate'  => time(),
 			'createdate'  => time(),
-			'updateuser'  => $currentUser ? $currentUser->getLogin() : '',
-			'createuser'  => $currentUser ? $currentUser->getLogin() : '',
+			'updateuser'  => $creator->getLogin(),
+			'createuser'  => $creator->getLogin(),
 		);
 
 		$params = array_merge($defaults, $params);
 		$model  = $this->makeInstance($params);
 		$model->setPassword($params['psw']);
 
-		return $this->save($model);
+		return $this->save($model, $creator);
 	}
 
 	/**
@@ -69,28 +71,32 @@ class sly_Service_User extends sly_Service_Model_Base_Id {
 	 * @param  string         $password
 	 * @param  boolean        $active
 	 * @param  string         $rights
+	 * @param  sly_Model_User $creator   creator or null for the current user
 	 * @return sly_Model_User $user
 	 */
-	public function add($login, $password, $active, $rights) {
+	public function add($login, $password, $active, $rights, sly_Model_User $creator = null) {
 		return $this->create(array(
 			'login'  => $login,
 			'psw'    => $password,
 			'status' => (boolean) $active,
 			'rights' => $rights
-		));
+		), $creator);
 	}
 
 	/**
+	 * Save an existing user model instance
 	 *
-	 * @param sly_Model_User $user
+	 * @param  sly_Model_User $user
+	 * @param  sly_Model_User $manager  saving user or null for the current user
 	 * @return sly_Model_User $user
 	 */
-	public function save(sly_Model_Base $user) {
-		$event = ($user->getId() == sly_Model_Base_Id::NEW_ID) ? 'SLY_USER_ADDED' : 'SLY_USER_UPDATED';
-		$user  = parent::save($user);
+	public function save(sly_Model_Base $user, sly_Model_User $manager = null) {
+		$manager = $this->getActor($manager, __METHOD__);
+		$event   = ($user->getId() == sly_Model_Base_Id::NEW_ID) ? 'SLY_USER_ADDED' : 'SLY_USER_UPDATED';
+		$user    = parent::save($user);
 
 		sly_Core::cache()->flush('sly.user');
-		sly_Core::dispatcher()->notify($event, $user);
+		sly_Core::dispatcher()->notify($event, $user, array('user' => $manager));
 
 		return $user;
 	}

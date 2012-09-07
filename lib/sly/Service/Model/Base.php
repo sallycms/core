@@ -95,4 +95,16 @@ abstract class sly_Service_Model_Base {
 
 		return $count;
 	}
+
+	protected function getActor(sly_Model_User $user = null, $methodName = null) {
+		if ($user === null) {
+			$user = sly_Util_User::getCurrentUser();
+
+			if ($user === null) {
+				throw new sly_Exception($methodName ? t('operation_requires_user_context', $methodName) : t('an_operation_requires_user_context'));
+			}
+		}
+
+		return $user;
+	}
 }

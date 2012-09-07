@@ -129,15 +129,18 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id {
 
 	/**
 	 * @throws sly_Exception
-	 * @param  string $filename
-	 * @param  string $title
-	 * @param  string $title
-	 * @param  int    $categoryID
-	 * @param  string $mimetype
-	 * @param  string $originalName
+	 * @param  string         $filename
+	 * @param  string         $title
+	 * @param  string         $title
+	 * @param  int            $categoryID
+	 * @param  string         $mimetype
+	 * @param  string         $originalName
+	 * @param  sly_Model_User $user          creator or null for the current user
 	 * @return sly_Model_Medium
 	 */
-	public function add($filename, $title, $categoryID, $mimetype = null, $originalName = null) {
+	public function add($filename, $title, $categoryID, $mimetype = null, $originalName = null, sly_Model_User $user = null) {
+		$user = $this->getActor($user, __METHOD__);
+
 		// check file itself
 
 		$filename = basename($filename);
@@ -166,11 +169,11 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id {
 		$file->setOriginalName($originalName === null ? $filename : basename($originalName));
 		$file->setFilename($filename);
 		$file->setFilesize(filesize($fullname));
-		$file->setCategoryId((int) $categoryID);
+		$file->setCategoryId($categoryID);
 		$file->setRevision(0); // totally useless...
 		$file->setReFileId(0); // even more useless
 		$file->setAttributes('');
-		$file->setCreateColumns();
+		$file->setCreateColumns($user);
 
 		if ($size) {
 			$file->setWidth($size[0]);
@@ -186,22 +189,25 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id {
 		$this->save($file);
 
 		sly_Core::cache()->flush('sly.medium.list');
-		sly_Core::dispatcher()->notify('SLY_MEDIA_ADDED', $file);
+		sly_Core::dispatcher()->notify('SLY_MEDIA_ADDED', $file, compact('user'));
 
 		return $file;
 	}
 
 	/**
 	 * @param sly_Model_Medium $medium
+	 * @param sly_Model_User   $user    user or null for the current user
 	 */
-	public function update(sly_Model_Medium $medium) {
+	public function update(sly_Model_Medium $medium, sly_Model_User $user = null) {
+		$user = $this->getActor($user, __METHOD__);
+
 		// store data
-		$medium->setUpdateColumns();
+		$medium->setUpdateColumns($user);
 		$this->save($medium);
 
 		// notify the listeners and clear our own cache
 		sly_Core::cache()->delete('sly.medium', $medium->getId());
-		sly_Core::dispatcher()->notify('SLY_MEDIA_UPDATED', $medium);
+		sly_Core::dispatcher()->notify('SLY_MEDIA_UPDATED', $medium, compact('user'));
 	}
 
 	/**

@@ -129,12 +129,14 @@ class sly_Service_MediaCategory extends sly_Service_Model_Base_Id {
 	 * @throws sly_Exception
 	 * @param  string                  $title
 	 * @param  sly_Model_MediaCategory $parent
+	 * @param  sly_Model_User          $user    creator or null for the current user
 	 * @return sly_Model_MediaCategory
 	 */
-	public function add($title, sly_Model_MediaCategory $parent = null) {
+	public function add($title, sly_Model_MediaCategory $parent = null, sly_Model_User $user = null) {
 		$title = trim($title);
+		$user  = $this->getActor($user, __METHOD__);
 
-		if (strlen($title) === 0) {
+		if (mb_strlen($title) === 0) {
 			throw new sly_Exception(t('plase_enter_a_name'));
 		}
 
@@ -142,7 +144,7 @@ class sly_Service_MediaCategory extends sly_Service_Model_Base_Id {
 		$category->setName($title);
 		$category->setRevision(0);
 		$category->setAttributes('');
-		$category->setCreateColumns();
+		$category->setCreateColumns($user);
 
 		$this->setPath($category, $parent);
 		$this->save($category);
@@ -151,7 +153,7 @@ class sly_Service_MediaCategory extends sly_Service_Model_Base_Id {
 		sly_Core::cache()->flush('sly.mediacat.list');
 
 		// notify system
-		sly_Core::dispatcher()->notify('SLY_MEDIACAT_ADDED', $category);
+		sly_Core::dispatcher()->notify('SLY_MEDIACAT_ADDED', $category, compact('user'));
 
 		return $category;
 	}
@@ -159,13 +161,16 @@ class sly_Service_MediaCategory extends sly_Service_Model_Base_Id {
 	/**
 	 * @throws sly_Exception
 	 * @param  sly_Model_MediaCategory $cat
+	 * @param  sly_Model_User          $user  updateuser or null for the current user
 	 */
-	public function update(sly_Model_MediaCategory $cat) {
-		if (strlen($cat->getName()) === 0) {
+	public function update(sly_Model_MediaCategory $cat, sly_Model_User $user = null) {
+		$user = $this->getActor($user, __METHOD__);
+
+		if (mb_strlen($cat->getName()) === 0) {
 			throw new sly_Exception(t('title_cannot_be_empty'));
 		}
 
-		$cat->setUpdateColumns();
+		$cat->setUpdateColumns($user);
 
 		// ensure valid path & save it
 		$this->setPath($cat, $cat->getParent());
@@ -175,7 +180,7 @@ class sly_Service_MediaCategory extends sly_Service_Model_Base_Id {
 		sly_Core::cache()->flush('sly.mediacat');
 
 		// notify system
-		sly_Core::dispatcher()->notify('SLY_MEDIACAT_UPDATED', $cat);
+		sly_Core::dispatcher()->notify('SLY_MEDIACAT_UPDATED', $cat, compact('user'));
 	}
 
 	/**

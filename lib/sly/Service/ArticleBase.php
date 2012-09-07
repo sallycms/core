@@ -77,16 +77,18 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base {
 
 	/**
 	 *
-	 * @param  int $id
-	 * @param  int $clangID
-	 * @param  int $newStatus
+	 * @param  int            $id
+	 * @param  int            $clangID
+	 * @param  int            $newStatus
+	 * @param  sly_Model_User $user       updateuser or null for the current user
 	 * @return boolean
 	 */
-	public function changeStatus($id, $clangID, $newStatus = null) {
+	public function changeStatus($id, $clangID, $newStatus = null, sly_Model_User $user = null) {
 		$id      = (int) $id;
 		$clangID = (int) $clangID;
 		$obj     = $this->findById($id, $clangID);
 		$type    = $this->getModelType();
+		$user    = $this->getActor($user, __METHOD__);
 
 		if (!$obj) {
 			throw new sly_Exception(t($type.'_not_found'));
@@ -103,13 +105,13 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base {
 		// update the article/category
 
 		$obj->setStatus($newStatus);
-		$obj->setUpdateColumns();
+		$obj->setUpdateColumns($user);
 		$this->update($obj);
 
 		// notify the system
 
 		$dispatcher = sly_Core::dispatcher();
-		$dispatcher->notify($this->getEvent('STATUS'), $obj);
+		$dispatcher->notify($this->getEvent('STATUS'), $obj, array('user' => $user));
 
 		return true;
 	}
@@ -158,18 +160,20 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base {
 
 	/**
 	 * @throws sly_Exception
-	 * @param  int    $parentID
-	 * @param  string $name
-	 * @param  int    $status
-	 * @param  int    $position
+	 * @param  int            $parentID
+	 * @param  string         $name
+	 * @param  int            $status
+	 * @param  int            $position
+	 * @param  sly_Model_User $user      creator or null for the current user
 	 * @return int
 	 */
-	protected function addHelper($parentID, $name, $status, $position = -1) {
+	protected function addHelper($parentID, $name, $status, $position = -1, sly_Model_User $user = null) {
 		$parentID  = (int) $parentID;
 		$position  = (int) $position;
 		$status    = (int) $status;
 		$modelType = $this->getModelType();
 		$isArticle = $modelType === 'article';
+		$user      = $this->getActor($user, 'add');
 
 		///////////////////////////////////////////////////////////////
 		// check if parent exists
@@ -231,8 +235,8 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base {
 				   'clang' => $clangID
 			));
 
-			$obj->setUpdateColumns();
-			$obj->setCreateColumns();
+			$obj->setUpdateColumns($user);
+			$obj->setCreateColumns($user);
 			$db->insert($this->tablename, array_merge($obj->getPKHash(), $obj->toHash()));
 
 			$this->deleteListCache();
@@ -246,7 +250,8 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base {
 				'position' => $position,
 				'path'     => $path,
 				'status'   => $status,
-				'type'     => $type
+				'type'     => $type,
+				'user'     => $user
 			));
 		}
 
@@ -255,17 +260,19 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base {
 
 	/**
 	 * @throws sly_Exception
-	 * @param  int    $id
-	 * @param  int    $clangID
-	 * @param  string $name
-	 * @param  mixed  $position
+	 * @param  int            $id
+	 * @param  int            $clangID
+	 * @param  string         $name
+	 * @param  mixed          $position
+	 * @param  sly_Model_User $user      creator or null for the current user
 	 * @return boolean
 	 */
-	protected function editHelper($id, $clangID, $name, $position = false) {
+	protected function editHelper($id, $clangID, $name, $position = false, sly_Model_User $user = null) {
 		$id        = (int) $id;
 		$clangID   = (int) $clangID;
 		$modelType = $this->getModelType();
 		$isArticle = $modelType === 'article';
+		$user      = $this->getActor($user, 'edit');
 
 		///////////////////////////////////////////////////////////////
 		// check object
@@ -281,7 +288,7 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base {
 
 		$isArticle ? $obj->setName($name) : $obj->setCatName($name);
 
-		$obj->setUpdateColumns();
+		$obj->setUpdateColumns($user);
 		$this->update($obj);
 
 		///////////////////////////////////////////////////////////////
@@ -330,7 +337,7 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base {
 		$this->deleteListCache();
 
 		$dispatcher = sly_Core::dispatcher();
-		$dispatcher->notify($this->getEvent('UPDATED'), $obj);
+		$dispatcher->notify($this->getEvent('UPDATED'), $obj, array('user' => $user));
 
 		return true;
 	}
