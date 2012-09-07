@@ -162,20 +162,39 @@ class sly_Service_Category extends sly_Service_ArticleBase {
 		}
 
 		// re-position all following categories
+		$sql    = sly_DB_Persistence::getInstance();
+		$ownTrx = !$sql->isTransRunning();
 
-		$parent = $cat->getParentId();
-
-		foreach (sly_Util_Language::findAll(true) as $clangID) {
-			$catpos    = $this->findById($categoryID, $clangID)->getCatPosition();
-			$followers = $this->getFollowerQuery($parent, $clangID, $catpos);
-
-			$this->moveObjects('-', $followers);
+		if ($ownTrx) {
+			$sql->beginTransaction();
 		}
 
-		// remove the start article of this category (and this also kills the category itself)
+		try {
+			$parent = $cat->getParentId();
 
-		$service = sly_Service_Factory::getArticleService();
-		$service->deleteById($categoryID);
+			foreach (sly_Util_Language::findAll(true) as $clangID) {
+				$catpos    = $this->findById($categoryID, $clangID)->getCatPosition();
+				$followers = $this->getFollowerQuery($parent, $clangID, $catpos);
+
+				$this->moveObjects('-', $followers);
+			}
+
+			// remove the start article of this category (and this also kills the category itself)
+
+			$service = sly_Service_Factory::getArticleService();
+			$service->deleteById($categoryID);
+
+			if ($ownTrx) {
+				$sql->commit();
+			}
+		}
+		catch (Exception $e) {
+			if ($ownTrx) {
+				$sql->rollBack();
+			}
+
+			throw $e;
+		}
 
 		// fire event
 		$dispatcher = sly_Core::dispatcher();
@@ -251,43 +270,61 @@ class sly_Service_Category extends sly_Service_ArticleBase {
 		}
 
 		// prepare movement
+		$sql    = sly_DB_Persistence::getInstance();
+		$ownTrx = !$sql->isTransRunning();
 
-		$oldParent = $category->getParentId();
-		$languages = sly_Util_Language::findAll(true);
-		$newPos    = $this->getMaxPosition($targetID) + 1;
-		$oldPath   = $category->getPath();
-		$newPath   = $target ? ($target->getPath().$targetID.'|') : '|';
-
-		// move the $category in each language by itself
-
-		foreach ($languages as $clang) {
-			$cat = $this->findById($categoryID, $clang);
-			$pos = $cat->getCatPosition();
-
-			$cat->setParentId($targetID);
-			$cat->setCatPosition($newPos);
-			$cat->setPath($newPath);
-			$cat->setUpdateColumns($user);
-
-			// update the cat itself
-			$this->update($cat);
-
-			// move all followers one position up
-			$followers = $this->getFollowerQuery($oldParent, $clang, $pos);
-			$this->moveObjects('-', $followers);
+		if ($ownTrx) {
+			$sql->beginTransaction();
 		}
 
-		// update paths for all elements in the affected sub-tree
+		try {
+			$oldParent = $category->getParentId();
+			$languages = sly_Util_Language::findAll(true);
+			$newPos    = $this->getMaxPosition($targetID) + 1;
+			$oldPath   = $category->getPath();
+			$newPath   = $target ? ($target->getPath().$targetID.'|') : '|';
 
-		$from   = $oldPath.$categoryID.'|';
-		$to     = $newPath.$categoryID.'|';
-		$where  = 'path LIKE "'.$from.'%"';
-		$update = 'path = REPLACE(path, "'.$from.'", "'.$to.'")';
-		$sql    = sly_DB_Persistence::getInstance();
-		$prefix = sly_Core::getTablePrefix();
+			// move the $category in each language by itself
 
-		$sql->query('UPDATE '.$prefix.'article SET '.$update.' WHERE '.$where);
-		$this->clearCacheByQuery($where);
+			foreach ($languages as $clang) {
+				$cat = $this->findById($categoryID, $clang);
+				$pos = $cat->getCatPosition();
+
+				$cat->setParentId($targetID);
+				$cat->setCatPosition($newPos);
+				$cat->setPath($newPath);
+				$cat->setUpdateColumns($user);
+
+				// update the cat itself
+				$this->update($cat);
+
+				// move all followers one position up
+				$followers = $this->getFollowerQuery($oldParent, $clang, $pos);
+				$this->moveObjects('-', $followers);
+			}
+
+			// update paths for all elements in the affected sub-tree
+
+			$from   = $oldPath.$categoryID.'|';
+			$to     = $newPath.$categoryID.'|';
+			$where  = 'path LIKE "'.$from.'%"';
+			$update = 'path = REPLACE(path, "'.$from.'", "'.$to.'")';
+			$prefix = sly_Core::getTablePrefix();
+
+			$sql->query('UPDATE '.$prefix.'article SET '.$update.' WHERE '.$where);
+			$this->clearCacheByQuery($where);
+
+			if ($ownTrx) {
+				$sql->commit();
+			}
+		}
+		catch (Exception $e) {
+			if ($ownTrx) {
+				$sql->rollBack();
+			}
+
+			throw $e;
+		}
 
 		// notify system
 

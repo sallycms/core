@@ -52,8 +52,12 @@ class sly_Service_Language extends sly_Service_Model_Base_Id {
 			$newLanguage = parent::create($params);
 		}
 		else {
-			$sql = sly_DB_Persistence::getInstance();
-			$sql->beginTransaction();
+			$sql    = sly_DB_Persistence::getInstance();
+			$ownTrx = !$sql->isTransRunning();
+
+			if ($ownTrx) {
+				$sql->beginTransaction();
+			}
 
 			try {
 				$newLanguage = parent::create($params);
@@ -76,10 +80,15 @@ class sly_Service_Language extends sly_Service_Model_Base_Id {
 					array($newLanguage->getId(), $sourceID)
 				);
 
-				$sql->commit();
+				if ($ownTrx) {
+					$sql->commit();
+				}
 			}
 			catch (Exception $e) {
-				$sql->rollBack();
+				if ($ownTrx) {
+					$sql->rollBack();
+				}
+
 				throw $e;
 			}
 		}
@@ -125,15 +134,35 @@ class sly_Service_Language extends sly_Service_Model_Base_Id {
 		sly_Core::cache()->set('sly.language', 'all', $allLangs);
 
 		// remove
-		foreach ($toDelete as $language) {
-			$params = array('clang' => $language->getId());
-			$db->delete('article', $params);
-			$db->delete('article_slice', $params);
+		$db     = sly_DB_Persistence::getInstance();
+		$ownTrx = !$db->isTransRunning();
 
-			sly_Core::dispatcher()->notify('CLANG_DELETED', $language, array(
-				'id'   => $language->getId(),
-				'name' => $language->getName()
-			));
+		if ($ownTrx) {
+			$db->beginTransaction();
+		}
+
+		try {
+			foreach ($toDelete as $language) {
+				$params = array('clang' => $language->getId());
+				$db->delete('article', $params);
+				$db->delete('article_slice', $params);
+
+				sly_Core::dispatcher()->notify('CLANG_DELETED', $language, array(
+					'id'   => $language->getId(),
+					'name' => $language->getName()
+				));
+			}
+
+			if ($ownTrx) {
+				$db->commit();
+			}
+		}
+		catch (Exception $e) {
+			if ($ownTrx) {
+				$db->rollBack();
+			}
+
+			throw $e;
 		}
 
 		sly_Core::clearCache();
