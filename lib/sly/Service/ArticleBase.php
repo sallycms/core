@@ -16,6 +16,17 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base {
 	protected $artService;            ///< sly_Service_Article
 	protected $catService;            ///< sly_Service_Category
 
+	/**
+	 * Constructor
+	 *
+	 * Note that for having a fully-functional service, you *must* call the
+	 * serArticleService() and setCategoryService() afterwards. You cannot give
+	 * those services inside the constructor, as they depend on each other.
+	 *
+	 * @param sly_DB_Persistence   $persistence
+	 * @param BabelCache_Interface $cache
+	 * @param sly_Event_Dispatcher $dispatcher
+	 */
 	public function __construct(sly_DB_Persistence $persistence, BabelCache_Interface $cache, sly_Event_Dispatcher $dispatcher) {
 		parent::__construct($persistence);
 
@@ -23,10 +34,20 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base {
 		$this->dispatcher = $dispatcher;
 	}
 
+	/**
+	 * set article service
+	 *
+	 * @param sly_Service_Article $service
+	 */
 	public function setArticleService(sly_Service_Article $service) {
 		$this->artService = $service;
 	}
 
+	/**
+	 * set category service
+	 *
+	 * @param sly_Service_Category $service
+	 */
 	public function setCategoryService(sly_Service_Category $service) {
 		$this->catService = $service;
 	}

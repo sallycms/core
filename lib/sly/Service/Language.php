@@ -17,6 +17,13 @@ class sly_Service_Language extends sly_Service_Model_Base_Id {
 	protected $cache;               ///< BabelCache_Interface
 	protected $dispatcher;          ///< sly_Event_Dispatcher
 
+	/**
+	 * Constructor
+	 *
+	 * @param sly_DB_Persistence   $persistence
+	 * @param BabelCache_Interface $cache
+	 * @param sly_Event_Dispatcher $dispatcher
+	 */
 	public function __construct(sly_DB_Persistence $persistence, BabelCache_Interface $cache, sly_Event_Dispatcher $dispatcher) {
 		parent::__construct($persistence);
 

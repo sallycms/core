@@ -21,6 +21,13 @@ class sly_Service_ArticleType {
 	private $moduleService;    ///< sly_Service_Module
 	private $templateService;  ///< sly_Service_Template
 
+	/**
+	 * Constructor
+	 *
+	 * @param sly_Configuration    $config
+	 * @param sly_Service_Module   $moduleService
+	 * @param sly_Service_Template $templateService
+	 */
 	public function __construct(sly_Configuration $config, sly_Service_Module $moduleService, sly_Service_Template $templateService) {
 		$this->data            = (array) $config->get('ARTICLE_TYPES');
 		$this->moduleService   = $moduleService;

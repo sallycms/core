@@ -20,6 +20,14 @@ class sly_Service_Category extends sly_Service_ArticleBase {
 		return 'category';
 	}
 
+	/**
+	 * get WHERE statement for all category siblings
+	 *
+	 * @param  int     $categoryID
+	 * @param  int     $clang       clang or null for none (*not* the current one)
+	 * @param  boolean $asArray
+	 * @return mixed                the condition either as an array or as a string
+	 */
 	protected function getSiblingQuery($categoryID, $clang = null, $asArray = false) {
 		$where = array('re_id' => (int) $categoryID, 'startpage' => 1);
 
@@ -38,6 +46,12 @@ class sly_Service_Category extends sly_Service_ArticleBase {
 		return implode(' AND ', array_values($where));
 	}
 
+	/**
+	 * get max category position
+	 *
+	 * @param  int $parentID
+	 * @return int
+	 */
 	public function getMaxPosition($parentID) {
 		$db     = $this->getPersistence();
 		$where  = $this->getSiblingQuery($parentID);
@@ -46,6 +60,12 @@ class sly_Service_Category extends sly_Service_ArticleBase {
 		return $maxPos;
 	}
 
+	/**
+	 * build a new model from parameters
+	 *
+	 * @param  array  $params
+	 * @return sly_Model_Article
+	 */
 	protected function buildModel(array $params) {
 		return new sly_Model_Article(array(
 			        'id' => $params['id'],
