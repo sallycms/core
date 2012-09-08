@@ -19,6 +19,13 @@ class sly_Service_ArticleSlice extends sly_Service_Model_Base_Id {
 	protected $sliceService;                ///< sly_Service_Slice
 	protected $dispatcher;                  ///< sly_Event_Dispatcher
 
+	/**
+	 * Constructor
+	 *
+	 * @param sly_DB_Persistence   $persistence
+	 * @param sly_Event_Dispatcher $dispatcher
+	 * @param sly_Service_Slice    $sliceService
+	 */
 	public function __construct(sly_DB_Persistence $persistence, sly_Event_Dispatcher $dispatcher, sly_Service_Slice $sliceService) {
 		parent::__construct($persistence);
 

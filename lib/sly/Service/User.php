@@ -22,6 +22,14 @@ class sly_Service_User extends sly_Service_Model_Base_Id {
 	protected $dispatcher;         ///< sly_Event_Dispatcher
 	protected $config;             ///< sly_Configuration
 
+	/**
+	 * Constructor
+	 *
+	 * @param sly_DB_Persistence   $persistence
+	 * @param BabelCache_Interface $cache
+	 * @param sly_Event_Dispatcher $dispatcher
+	 * @param sly_Configuration    $config
+	 */
 	public function __construct(sly_DB_Persistence $persistence, BabelCache_Interface $cache, sly_Event_Dispatcher $dispatcher, sly_Configuration $config) {
 		parent::__construct($persistence);
 

@@ -28,6 +28,12 @@ class sly_Service_Asset {
 
 	private $forceGen = true; ///< boolean
 
+	/**
+	 * Constructor
+	 *
+	 * @param sly_Configuration    $config
+	 * @param sly_Event_Dispatcher $dispatcher
+	 */
 	public function __construct(sly_Configuration $config, sly_Event_Dispatcher $dispatcher) {
 		$this->initCache();
 

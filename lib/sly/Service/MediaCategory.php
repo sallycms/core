@@ -23,6 +23,16 @@ class sly_Service_MediaCategory extends sly_Service_Model_Base_Id {
 	const ERR_CAT_HAS_MEDIA   = 1; ///< int
 	const ERR_CAT_HAS_SUBCATS = 2; ///< int
 
+	/**
+	 * Constructor
+	 *
+	 * Note that you have to call setMediumService() afterwards to have a
+	 * fully-functional service.
+	 *
+	 * @param sly_DB_Persistence   $persistence
+	 * @param BabelCache_Interface $cache
+	 * @param sly_Event_Dispatcher $dispatcher
+	 */
 	public function __construct(sly_DB_Persistence $persistence, BabelCache_Interface $cache, sly_Event_Dispatcher $dispatcher) {
 		parent::__construct($persistence);
 
@@ -30,6 +40,11 @@ class sly_Service_MediaCategory extends sly_Service_Model_Base_Id {
 		$this->dispatcher = $dispatcher;
 	}
 
+	/**
+	 * Set medium service
+	 *
+	 * @param sly_Service_Medium $service
+	 */
 	public function setMediumService(sly_Service_Medium $service) {
 		$this->mediumService = $service;
 	}

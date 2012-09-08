@@ -17,6 +17,16 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 	protected $artSliceService; ///< sly_Service_ArticleSlice
 	protected $tplService;      ///< sly_Service_Template
 
+	/**
+	 * Constructor
+	 *
+	 * @param sly_DB_Persistence       $persistence
+	 * @param BabelCache_Interface     $cache
+	 * @param sly_Event_Dispatcher     $dispatcher
+	 * @param sly_Service_Slice        $sliceService
+	 * @param sly_Service_ArticleSlice $artSliceService
+	 * @param sly_Service_Template     $tplService
+	 */
 	public function __construct(
 		sly_DB_Persistence $persistence, BabelCache_Interface $cache, sly_Event_Dispatcher $dispatcher,
 		sly_Service_Slice $sliceService, sly_Service_ArticleSlice $artSliceService, sly_Service_Template $tplService

@@ -23,6 +23,12 @@ abstract class sly_Service_DevelopBase {
 	protected $config;                        ///< sly_Configuration
 	protected $dispatcher;                    ///< sly_Event_Dispatcher
 
+	/**
+	 * Constructor
+	 *
+	 * @param sly_Configuration    $config
+	 * @param sly_Event_Dispatcher $dispatcher
+	 */
 	public function __construct(sly_Configuration $config, sly_Event_Dispatcher $dispatcher) {
 		$this->config     = $config;
 		$this->dispatcher = $dispatcher;
