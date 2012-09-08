@@ -16,6 +16,15 @@
  */
 class sly_Service_ArticleSlice extends sly_Service_Model_Base_Id {
 	protected $tablename = 'article_slice'; ///< string
+	protected $sliceService;                ///< sly_Service_Slice
+	protected $dispatcher;                  ///< sly_Event_Dispatcher
+
+	public function __construct(sly_DB_Persistence $persistence, sly_Event_Dispatcher $dispatcher, sly_Service_Slice $sliceService) {
+		parent::__construct($persistence);
+
+		$this->sliceService = $sliceService;
+		$this->dispatcher   = $dispatcher;
+	}
 
 	/**
 	 * @param  array $params
@@ -79,9 +88,12 @@ class sly_Service_ArticleSlice extends sly_Service_Model_Base_Id {
 	 * @return boolean
 	 */
 	public function deleteById($id) {
-		$id = (int) $id;
-
+		$id           = (int) $id;
 		$articleSlice = $this->findById($id);
+
+		if (!$articleSlice) {
+			throw new sly_Exception(t('article_slice_not_found', $id));
+		}
 
 		$sql = $this->getPersistence();
 		$pre = sly_Core::getTablePrefix();
@@ -98,7 +110,7 @@ class sly_Service_ArticleSlice extends sly_Service_Model_Base_Id {
 		);
 
 		// delete slice
-		sly_Service_Factory::getSliceService()->deleteById($articleSlice->getSliceId());
+		$this->sliceService->deleteById($articleSlice->getSliceId());
 
 		// delete articleslice
 		$sql->delete($this->tablename, array('id' => $id));
@@ -182,7 +194,7 @@ class sly_Service_ArticleSlice extends sly_Service_Model_Base_Id {
 			}
 
 			// notify system
-			sly_Core::dispatcher()->notify('SLY_SLICE_MOVED', $articleSlice, array(
+			$this->dispatcher->notify('SLY_SLICE_MOVED', $articleSlice, array(
 				'clang'     => $clang,
 				'direction' => $direction,
 				'old_pos'   => $pos,

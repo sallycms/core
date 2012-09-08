@@ -61,8 +61,14 @@ abstract class sly_Service_Factory {
 					$service = new $serviceName(SLY_ADDONFOLDER, $cache);
 					break;
 
-				case 'Article':
 				case 'ArticleSlice':
+					$db         = sly_DB_Persistence::getInstance();
+					$dispatcher = sly_Core::dispatcher();
+					$sliceServ  = self::getService('Slice');
+					$service    = new $serviceName($db, $dispatcher, $sliceServ);
+					break;
+
+				case 'Article':
 				case 'Category':
 				case 'Language':
 				case 'MediaCategory':
