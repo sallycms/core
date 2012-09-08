@@ -20,6 +20,13 @@ abstract class sly_Service_DevelopBase {
 	private $lastRefreshTime;  ///< int
 
 	protected $conditionEvaluators = array(); ///< array
+	protected $config;                        ///< sly_Configuration
+	protected $dispatcher;                    ///< sly_Event_Dispatcher
+
+	public function __construct(sly_Configuration $config, sly_Event_Dispatcher $dispatcher) {
+		$this->config     = $config;
+		$this->dispatcher = $dispatcher;
+	}
 
 	/**
 	 * Get a list of files for this type of items
@@ -110,10 +117,10 @@ abstract class sly_Service_DevelopBase {
 		// der Datentyp geändert hat. Ansonsten wird sich sly_Configuration z. B.
 		// weigern, aus einem Skalar ein Array zu machen.
 		if ($modified || count($newData) != count($oldData)) {
-			sly_Core::config()->remove($this->getClassIdentifier());
+			$this->config->remove($this->getClassIdentifier());
 			$this->setData($newData);
 			$this->resetRefreshTime();
-			sly_Core::dispatcher()->notify('SLY_DEVELOP_REFRESHED');
+			$this->dispatcher->notify('SLY_DEVELOP_REFRESHED');
 		}
 	}
 
@@ -187,7 +194,7 @@ abstract class sly_Service_DevelopBase {
 	 */
 	protected function getData() {
 		if (!isset($this->data)) {
-			$this->data = sly_Core::config()->get($this->getClassIdentifier().'/data', array());
+			$this->data = $this->config->get($this->getClassIdentifier().'/data', array());
 		}
 
 		return $this->data;
@@ -197,7 +204,7 @@ abstract class sly_Service_DevelopBase {
 	 * @param array $data
 	 */
 	protected function setData($data) {
-		sly_Core::config()->set($this->getClassIdentifier().'/data', $data);
+		$this->config->set($this->getClassIdentifier().'/data', $data);
 		$this->data = $data;
 	}
 
@@ -231,7 +238,7 @@ abstract class sly_Service_DevelopBase {
 	 */
 	protected function getLastRefreshTime() {
 		if (!isset($this->lastRefreshTime)) {
-			$this->lastRefreshTime = sly_Core::config()->get($this->getClassIdentifier().'/last_refresh', 0);
+			$this->lastRefreshTime = $this->config->get($this->getClassIdentifier().'/last_refresh', 0);
 		}
 
 		return $this->lastRefreshTime;
@@ -244,7 +251,7 @@ abstract class sly_Service_DevelopBase {
 	 */
 	protected function resetRefreshTime($time = null) {
 		if ($time === null) $time = time();
-		sly_Core::config()->set($this->getClassIdentifier().'/last_refresh', $time);
+		$this->config->set($this->getClassIdentifier().'/last_refresh', $time);
 		$this->lastRefreshTime = $time;
 	}
 
