@@ -27,7 +27,7 @@ abstract class sly_Service_Model_Base_Id extends sly_Service_Model_Base {
 	 * @return sly_Model_Base
 	 */
 	public function save(sly_Model_Base $model) {
-		$persistence = sly_DB_Persistence::getInstance();
+		$persistence = $this->getPersistence();
 		$data        = $model->toHash();
 
 		if ($model->getId() == sly_Model_Base_Id::NEW_ID) {

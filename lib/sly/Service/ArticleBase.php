@@ -23,7 +23,7 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base {
 	 * @return sly_Model_Base_Article
 	 */
 	protected function update(sly_Model_Base_Article $obj) {
-		$persistence = sly_DB_Persistence::getInstance();
+		$persistence = $this->getPersistence();
 		$persistence->update($this->getTableName(), $obj->toHash(), $obj->getPKHash());
 
 		$this->deleteListCache();
@@ -38,9 +38,12 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base {
 	}
 
 	protected function clearCacheByQuery($where) {
-		$db = sly_DB_Persistence::getInstance();
+		$db = $this->getPersistence();
 		$db->select('article', 'id,clang', $where, 'id,clang');
-		foreach ($db as $row) $this->deleteCache($row['id'], $row['clang']);
+
+		foreach ($db as $row) {
+			$this->deleteCache($row['id'], $row['clang']);
+		}
 	}
 
 	/**
@@ -187,7 +190,7 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base {
 
 		$type          = sly_Core::getDefaultArticleType();
 		$parentArticle = sly_Util_Article::findById($parentID);
-		$db            = sly_DB_Persistence::getInstance();
+		$db            = $this->getPersistence();
 
 		if ($parentID !== 0) {
 			$type = $parentArticle->getType();
@@ -302,7 +305,7 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base {
 			throw new sly_Exception(t($modelType.'_not_found', $id));
 		}
 
-		$db     = sly_DB_Persistence::getInstance();
+		$db     = $this->getPersistence();
 		$ownTrx = !$db->isTransRunning();
 
 		if ($ownTrx) {
@@ -380,7 +383,7 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base {
 	}
 
 	protected function moveObjects($op, $where) {
-		$db     = sly_DB_Persistence::getInstance();
+		$db     = $this->getPersistence();
 		$prefix = sly_Core::getTablePrefix();
 		$field  = $this->getModelType() === 'article' ? 'pos' : 'catpos';
 
@@ -429,7 +432,7 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base {
 
 		if ($list === null) {
 			$list  = array();
-			$sql   = sly_DB_Persistence::getInstance();
+			$sql   = $this->getPersistence();
 			$where = $this->getSiblingQuery($categoryID, $clang);
 			$pos   = $prefix === 'art' ? 'pos' : 'catpos';
 

@@ -33,7 +33,7 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 	}
 
 	public function getMaxPosition($categoryID) {
-		$db     = sly_DB_Persistence::getInstance();
+		$db     = $this->getPersistence();
 		$where  = $this->getSiblingQuery($categoryID);
 		$maxPos = $db->magicFetch('article', 'MAX(pos)', $where);
 
@@ -136,7 +136,7 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 		}
 
 		// re-position all following articles
-		$sql    = sly_DB_Persistence::getInstance();
+		$sql    = $this->getPersistence();
 		$ownTrx = !$sql->isTransRunning();
 
 		if ($ownTrx) {
@@ -207,7 +207,7 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 
 		if ($alist === null) {
 			$alist = array();
-			$sql   = sly_DB_Persistence::getInstance();
+			$sql   = $this->getPersistence();
 			$where = array('type' => $type, 'clang' => $clangId);
 
 			if ($ignore_offlines) $where['status'] = 1;
@@ -235,13 +235,12 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 	 * @return boolean
 	 */
 	public function setType(sly_Model_Article $article, $type, sly_Model_User $user = null) {
-		$oldType   = $article->getType();
-		$langs     = sly_Util_Language::findAll(true);
-		$articleID = $article->getId();
 		$user      = $this->getActor($user, __METHOD__);
-
-		$sql    = sly_DB_Persistence::getInstance();
-		$ownTrx = !$sql->isTransRunning();
+		$oldType   = $article->getType();
+		$articleID = $article->getId();
+		$langs     = sly_Util_Language::findAll(true);
+		$sql       = $this->getPersistence();
+		$ownTrx    = !$sql->isTransRunning();
 
 		if ($ownTrx) {
 			$sql->beginTransaction();
@@ -319,7 +318,7 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 
 		// prepare infos
 
-		$sql   = sly_DB_Persistence::getInstance();
+		$sql   = $this->getPersistence();
 		$pos   = $this->getMaxPosition($target) + 1;
 		$newID = $sql->magicFetch('article', 'MAX(id)') + 1;
 		$disp  = sly_Core::dispatcher();
@@ -423,7 +422,7 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 		$pos  = $this->getMaxPosition($target) + 1;
 		$disp = sly_Core::dispatcher();
 
-		$sql    = sly_DB_Persistence::getInstance();
+		$sql    = $this->getPersistence();
 		$ownTrx = !$sql->isTransRunning();
 
 		if ($ownTrx) {
@@ -505,7 +504,7 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 		$newPath = $article->getPath();
 		$params  = array('path', 'catname', 'startpage', 'catpos', 're_id');
 
-		$sql    = sly_DB_Persistence::getInstance();
+		$sql    = $this->getPersistence();
 		$ownTrx = !$sql->isTransRunning();
 
 		if ($ownTrx) {
@@ -594,7 +593,7 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 		$sServ      = sly_Service_Factory::getSliceService();
 		$asServ     = sly_Service_Factory::getArticleSliceService();
 		$tplService = sly_Service_Factory::getTemplateService();
-		$sql        = sly_DB_Persistence::getInstance();
+		$sql        = $this->getPersistence();
 		$login      = $user->getLogin();
 		$srcSlots   = $tplService->getSlots($source->getTemplateName());
 		$dstSlots   = $tplService->getSlots($dest->getTemplateName());

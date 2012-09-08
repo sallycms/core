@@ -36,7 +36,7 @@ class sly_Service_Slice extends sly_Service_Model_Base_Id {
 	 * @return sly_Model_Slice
 	 */
 	public function save(sly_Model_Base $model) {
-		$persistence = sly_DB_Persistence::getInstance();
+		$persistence = $this->getPersistence();
 		$data        = $model->toHash();
 
 		$data['serialized_values'] = json_encode($data['values']);

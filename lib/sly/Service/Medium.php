@@ -58,7 +58,7 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id {
 		$id   = sly_Core::cache()->get('sly.medium', $hash, null);
 
 		if ($id === null) {
-			$db = sly_DB_Persistence::getInstance();
+			$db = $this->getPersistence();
 			$id = $db->magicFetch('file', 'id', array('filename' => $filename));
 
 			if ($id === false) {
@@ -80,7 +80,7 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id {
 		$list      = sly_Core::cache()->get($namespace, $extension, null);
 
 		if ($list === null) {
-			$sql  = sly_DB_Persistence::getInstance();
+			$sql  = $this->getPersistence();
 			$list = array();
 
 			$sql->select('file', 'id', array('SUBSTRING(filename, LOCATE(".", filename) + 1)' => $extension), null, 'filename');
@@ -109,7 +109,7 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id {
 
 		if ($list === null) {
 			$list  = array();
-			$sql   = sly_DB_Persistence::getInstance();
+			$sql   = $this->getPersistence();
 			$where = array('category_id' => $categoryId);
 
 			$sql->select('file', 'id', $where, null, 'filename');
@@ -232,7 +232,7 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id {
 		}
 
 		try {
-			$sql = sly_DB_Persistence::getInstance();
+			$sql = $this->getPersistence();
 			$sql->delete('file', array('id' => $medium->getId()));
 
 			if ($medium->exists()) {

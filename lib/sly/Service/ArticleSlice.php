@@ -26,13 +26,14 @@ class sly_Service_ArticleSlice extends sly_Service_Model_Base_Id {
 	}
 
 	public function save(sly_Model_Base $model) {
-		$sql = sly_DB_Persistence::getInstance();
+		$sql = $this->getPersistence();
+
 		return $sql->transactional(array($this, 'saveTrx'), array($model));
 	}
 
 	public function saveTrx(sly_Model_ArticleSlice $slice) {
 		if ($slice->getId() === sly_Model_Base_Id::NEW_ID) {
-			$sql = sly_DB_Persistence::getInstance();
+			$sql = $this->getPersistence();
 			$pre = sly_Core::getTablePrefix();
 
 			$sql->query(
@@ -51,7 +52,7 @@ class sly_Service_ArticleSlice extends sly_Service_Model_Base_Id {
 	}
 
 	public function delete($where) {
-		$sql = sly_DB_Persistence::getInstance();
+		$sql = $this->getPersistence();
 		$sql->select($this->tablename, 'id', $where);
 
 		foreach ($sql as $id) {
@@ -82,7 +83,7 @@ class sly_Service_ArticleSlice extends sly_Service_Model_Base_Id {
 
 		$articleSlice = $this->findById($id);
 
-		$sql = sly_DB_Persistence::getInstance();
+		$sql = $this->getPersistence();
 		$pre = sly_Core::getTablePrefix();
 
 		// fix order
@@ -147,7 +148,7 @@ class sly_Service_ArticleSlice extends sly_Service_Model_Base_Id {
 		}
 
 		$success    = false;
-		$sql        = sly_DB_Persistence::getInstance();
+		$sql        = $this->getPersistence();
 		$article_id = $articleSlice->getArticleId();
 		$clang      = $articleSlice->getClang();
 		$pos        = $articleSlice->getPosition();
