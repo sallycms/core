@@ -14,6 +14,15 @@
  */
 class sly_Service_Language extends sly_Service_Model_Base_Id {
 	protected $tablename = 'clang'; ///< string
+	protected $cache;               ///< BabelCache_Interface
+	protected $dispatcher;          ///< sly_Event_Dispatcher
+
+	public function __construct(sly_DB_Persistence $persistence, BabelCache_Interface $cache, sly_Event_Dispatcher $dispatcher) {
+		parent::__construct($persistence);
+
+		$this->cache      = $cache;
+		$this->dispatcher = $dispatcher;
+	}
 
 	/**
 	 * @param  array $params
@@ -28,12 +37,12 @@ class sly_Service_Language extends sly_Service_Model_Base_Id {
 	 * @return sly_Model_Base
 	 */
 	public function save(sly_Model_Base $model) {
-		sly_Core::cache()->delete('sly.language', 'all');
+		$this->cache->delete('sly.language', 'all');
 
 		$result = parent::save($model);
 
 		// notify listeners
-		sly_Core::dispatcher()->notify('CLANG_UPDATED', $model);
+		$this->dispatcher->notify('CLANG_UPDATED', $model);
 
 		return $result;
 	}
@@ -44,7 +53,7 @@ class sly_Service_Language extends sly_Service_Model_Base_Id {
 	 * @return sly_Model_Language
 	 */
 	public function create($params) {
-		$langs = sly_Util_Language::findAll();
+		$langs = sly_Util_Language::findAll(); // TODO: avoid wrapper around ourselves
 
 		// if there are no languages yet, don't attempt to copy anything
 
@@ -95,10 +104,10 @@ class sly_Service_Language extends sly_Service_Model_Base_Id {
 
 		// update cache before notifying the listeners (so that they can call findAll() and get fresh data)
 		$langs[$newLanguage->getId()] = $newLanguage;
-		sly_Core::cache()->set('sly.language', 'all', $langs);
+		$this->cache->set('sly.language', 'all', $langs);
 
 		// notify listeners
-		sly_Core::dispatcher()->notify('CLANG_ADDED', $newLanguage, array('id' => $newLanguage->getId(), 'language' => $newLanguage));
+		$this->dispatcher->notify('CLANG_ADDED', $newLanguage, array('id' => $newLanguage->getId(), 'language' => $newLanguage));
 
 		return $newLanguage;
 	}
@@ -121,7 +130,7 @@ class sly_Service_Language extends sly_Service_Model_Base_Id {
 
 		// find all languages first
 		$toDelete = $this->find($where);
-		$allLangs = sly_Util_Language::findAll();
+		$allLangs = sly_Util_Language::findAll(); // TODO: avoid wrapper around ourselves
 
 		// delete
 		$res = parent::delete($where);
@@ -131,10 +140,10 @@ class sly_Service_Language extends sly_Service_Model_Base_Id {
 			unset($allLangs[$language->getId()]);
 		}
 
-		sly_Core::cache()->set('sly.language', 'all', $allLangs);
+		$this->cache->set('sly.language', 'all', $allLangs);
 
 		// remove
-		$db     = sly_DB_Persistence::getInstance();
+		$db     = $this->getPersistence();
 		$ownTrx = !$db->isTransRunning();
 
 		if ($ownTrx) {
@@ -147,7 +156,7 @@ class sly_Service_Language extends sly_Service_Model_Base_Id {
 				$db->delete('article', $params);
 				$db->delete('article_slice', $params);
 
-				sly_Core::dispatcher()->notify('CLANG_DELETED', $language, array(
+				$this->dispatcher->notify('CLANG_DELETED', $language, array(
 					'id'   => $language->getId(),
 					'name' => $language->getName()
 				));

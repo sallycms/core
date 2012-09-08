@@ -16,9 +16,23 @@
  */
 class sly_Service_MediaCategory extends sly_Service_Model_Base_Id {
 	protected $tablename = 'file_category'; ///< string
+	protected $cache;                       ///< BabelCache_Interface
+	protected $dispatcher;                  ///< sly_Event_Dispatcher
+	protected $mediumService;               ///< sly_Service_Medium
 
 	const ERR_CAT_HAS_MEDIA   = 1; ///< int
 	const ERR_CAT_HAS_SUBCATS = 2; ///< int
+
+	public function __construct(sly_DB_Persistence $persistence, BabelCache_Interface $cache, sly_Event_Dispatcher $dispatcher) {
+		parent::__construct($persistence);
+
+		$this->cache      = $cache;
+		$this->dispatcher = $dispatcher;
+	}
+
+	public function setMediumService(sly_Service_Medium $service) {
+		$this->mediumService = $service;
+	}
 
 	/**
 	 * @param  array $params
@@ -39,13 +53,13 @@ class sly_Service_MediaCategory extends sly_Service_Model_Base_Id {
 			return null;
 		}
 
-		$cat = sly_Core::cache()->get('sly.mediacat', $id, null);
+		$cat = $this->cache->get('sly.mediacat', $id, null);
 
 		if ($cat === null) {
 			$cat = $this->findOne(array('id' => $id));
 
 			if ($cat !== null) {
-				sly_Core::cache()->set('sly.mediacat', $id, $cat);
+				$this->cache->set('sly.mediacat', $id, $cat);
 			}
 		}
 
@@ -100,7 +114,7 @@ class sly_Service_MediaCategory extends sly_Service_Model_Base_Id {
 	 */
 	protected function findBy($cacheKey, $where, $sortBy, $asObjects = true) {
 		$namespace = 'sly.mediacat.list';
-		$list      = sly_Core::cache()->get($namespace, $cacheKey, null);
+		$list      = $this->cache->get($namespace, $cacheKey, null);
 
 		if ($list === null) {
 			$sql  = $this->getPersistence();
@@ -109,7 +123,7 @@ class sly_Service_MediaCategory extends sly_Service_Model_Base_Id {
 			$sql->select('file_category', 'id', $where, null, $sortBy);
 			foreach ($sql as $row) $list[] = (int) $row['id'];
 
-			sly_Core::cache()->set($namespace, $cacheKey, $list);
+			$this->cache->set($namespace, $cacheKey, $list);
 		}
 
 		if (!$asObjects) {
@@ -150,10 +164,10 @@ class sly_Service_MediaCategory extends sly_Service_Model_Base_Id {
 		$this->save($category);
 
 		// update cache
-		sly_Core::cache()->flush('sly.mediacat.list');
+		$this->cache->flush('sly.mediacat.list');
 
 		// notify system
-		sly_Core::dispatcher()->notify('SLY_MEDIACAT_ADDED', $category, compact('user'));
+		$this->dispatcher->notify('SLY_MEDIACAT_ADDED', $category, compact('user'));
 
 		return $category;
 	}
@@ -177,10 +191,10 @@ class sly_Service_MediaCategory extends sly_Service_Model_Base_Id {
 		$this->save($cat);
 
 		// update cache
-		sly_Core::cache()->flush('sly.mediacat');
+		$this->cache->flush('sly.mediacat');
 
 		// notify system
-		sly_Core::dispatcher()->notify('SLY_MEDIACAT_UPDATED', $cat, compact('user'));
+		$this->dispatcher->notify('SLY_MEDIACAT_UPDATED', $cat, compact('user'));
 	}
 
 	/**
@@ -218,9 +232,14 @@ class sly_Service_MediaCategory extends sly_Service_Model_Base_Id {
 			throw new sly_Exception(t('category_is_not_empty'), self::ERR_CAT_HAS_MEDIA);
 		}
 
-		$service = sly_Service_Factory::getMediumService();
-		$db      = $this->getPersistence();
-		$ownTrx  = !$db->isTransRunning();
+		$service = $this->mediumService;
+
+		if (!($service instanceof sly_Service_Medium)) {
+			throw new LogicException('You must set the medium service with ->setMediumService() before you can delete categories.');
+		}
+
+		$db     = $this->getPersistence();
+		$ownTrx = !$db->isTransRunning();
 
 		if ($ownTrx) {
 			$db->beginTransaction();
@@ -253,11 +272,11 @@ class sly_Service_MediaCategory extends sly_Service_Model_Base_Id {
 		}
 
 		// update cache
-		sly_Core::cache()->flush('sly.mediacat');
-		sly_Core::cache()->flush('sly.mediacat.list');
+		$this->cache->flush('sly.mediacat');
+		$this->cache->flush('sly.mediacat.list');
 
 		// notify system
-		sly_Core::dispatcher()->notify('SLY_MEDIACAT_DELETED', $cat);
+		$this->dispatcher->notify('SLY_MEDIACAT_DELETED', $cat);
 	}
 
 	/**

@@ -161,6 +161,10 @@ class sly_Service_Category extends sly_Service_ArticleBase {
 			throw new sly_Exception(t('category_is_not_empty'));
 		}
 
+		if (!($this->artService instanceof sly_Service_Article)) {
+			throw new LogicException('You must set the article service with ->setArticleService() before you can delete categories.');
+		}
+
 		// re-position all following categories
 		$sql    = $this->getPersistence();
 		$ownTrx = !$sql->isTransRunning();
@@ -180,9 +184,7 @@ class sly_Service_Category extends sly_Service_ArticleBase {
 			}
 
 			// remove the start article of this category (and this also kills the category itself)
-
-			$service = sly_Service_Factory::getArticleService();
-			$service->deleteById($categoryID);
+			$this->artService->deleteById($categoryID);
 
 			if ($ownTrx) {
 				$sql->commit();
@@ -197,8 +199,7 @@ class sly_Service_Category extends sly_Service_ArticleBase {
 		}
 
 		// fire event
-		$dispatcher = sly_Core::dispatcher();
-		$dispatcher->notify('SLY_CAT_DELETED', $cat);
+		$this->dispatcher->notify('SLY_CAT_DELETED', $cat);
 
 		return true;
 	}
@@ -328,10 +329,8 @@ class sly_Service_Category extends sly_Service_ArticleBase {
 
 		// notify system
 
-		$dispatcher = sly_Core::dispatcher();
-
 		foreach ($languages as $clang) {
-			$dispatcher->notify('SLY_CAT_MOVED', $categoryID, array(
+			$this->dispatcher->notify('SLY_CAT_MOVED', $categoryID, array(
 				'clang'  => $clang,
 				'target' => $targetID,
 				'user'   => $user

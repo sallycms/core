@@ -11,6 +11,25 @@
 abstract class sly_Service_ArticleBase extends sly_Service_Model_Base {
 	protected $tablename = 'article'; ///< string
 	protected $states    = array();   ///< array
+	protected $cache;                 ///< BabelCache_Interface
+	protected $dispatcher;            ///< sly_Event_Dispatcher
+	protected $artService;            ///< sly_Service_Article
+	protected $catService;            ///< sly_Service_Category
+
+	public function __construct(sly_DB_Persistence $persistence, BabelCache_Interface $cache, sly_Event_Dispatcher $dispatcher) {
+		parent::__construct($persistence);
+
+		$this->cache      = $cache;
+		$this->dispatcher = $dispatcher;
+	}
+
+	public function setArticleService(sly_Service_Article $service) {
+		$this->artService = $service;
+	}
+
+	public function setCategoryService(sly_Service_Category $service) {
+		$this->catService = $service;
+	}
 
 	abstract protected function getModelType();
 	abstract protected function getSiblingQuery($id, $clang = null);
@@ -65,13 +84,13 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base {
 		$type      = $this->getModelType();
 		$namespace = 'sly.article';
 		$key       = substr($type, 0, 3).'_'.$id.'_'.$clangID;
-		$obj       = sly_Core::cache()->get($namespace, $key, null);
+		$obj       = $this->cache->get($namespace, $key, null);
 
 		if ($obj === null) {
 			$obj = $this->findOne(array('id' => $id, 'clang' => $clangID));
 
 			if ($obj !== null) {
-				sly_Core::cache()->set($namespace, $key, $obj);
+				$this->cache->set($namespace, $key, $obj);
 			}
 		}
 
@@ -113,8 +132,7 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base {
 
 		// notify the system
 
-		$dispatcher = sly_Core::dispatcher();
-		$dispatcher->notify($this->getEvent('STATUS'), $obj, array('user' => $user));
+		$this->dispatcher->notify($this->getEvent('STATUS'), $obj, array('user' => $user));
 
 		return true;
 	}
@@ -132,7 +150,7 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base {
 				array(t('status_online'),  'sly-online')
 			);
 
-			$s = sly_Core::dispatcher()->filter($this->getEvent('STATUS_TYPES'), $s);
+			$s = $this->dispatcher->filter($this->getEvent('STATUS_TYPES'), $s);
 			$this->states[$type] = $s;
 		}
 
@@ -144,21 +162,18 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base {
 	 * @param int $clang  language ID (give null to delete in all languages)
 	 */
 	public function deleteCache($id, $clang = null) {
-		$cache = sly_Core::cache();
-
 		foreach (sly_Util_Language::findAll(true) as $_clang) {
 			if ($clang !== null && $clang != $_clang) {
 				continue;
 			}
 
-			$cache->delete('sly.article', 'art_'.$id.'_'.$_clang);
-			$cache->delete('sly.article', 'cat_'.$id.'_'.$_clang);
+			$this->cache->delete('sly.article', 'art_'.$id.'_'.$_clang);
+			$this->cache->delete('sly.article', 'cat_'.$id.'_'.$_clang);
 		}
 	}
 
 	public function deleteListCache() {
-		$cache = sly_Core::cache();
-		$cache->flush('sly.article.list');
+		$this->cache->flush('sly.article.list');
 	}
 
 	/**
@@ -178,10 +193,18 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base {
 		$isArticle = $modelType === 'article';
 		$user      = $this->getActor($user, 'add');
 
+		if (!($this->artService instanceof sly_Service_Article)) {
+			throw new LogicException('You must set the article service with ->setArticleService() before you can add elements.');
+		}
+
+		if (!($this->catService instanceof sly_Service_Category)) {
+			throw new LogicException('You must set the category service with ->setCategoryService() before you can add elements.');
+		}
+
 		///////////////////////////////////////////////////////////////
 		// check if parent exists
 
-		if ($parentID !== 0 && !sly_Util_Category::exists($parentID)) {
+		if ($parentID !== 0 && $this->catService->findById($parentID) === null) {
 			throw new sly_Exception(t('parent_category_not_found'));
 		}
 
@@ -189,7 +212,7 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base {
 		// inherit type and catname from parent category
 
 		$type          = sly_Core::getDefaultArticleType();
-		$parentArticle = sly_Util_Article::findById($parentID);
+		$parentArticle = $this->artService->findById($parentID);
 		$db            = $this->getPersistence();
 
 		if ($parentID !== 0) {
@@ -230,8 +253,7 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base {
 		}
 
 		try {
-			$dispatcher = sly_Core::dispatcher();
-			$newID      = $db->magicFetch('article', 'MAX(id)') + 1;
+			$newID = $db->magicFetch('article', 'MAX(id)') + 1;
 
 			foreach (sly_Util_Language::findAll(true) as $clangID) {
 				$obj = $this->buildModel(array(
@@ -253,7 +275,7 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base {
 
 				// notify system
 
-				$dispatcher->notify($this->getEvent('ADDED'), $newID, array(
+				$this->dispatcher->notify($this->getEvent('ADDED'), $newID, array(
 					're_id'    => $parentID,
 					'clang'    => $clangID,
 					'name'     => $name,
@@ -376,8 +398,7 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base {
 			throw $e;
 		}
 
-		$dispatcher = sly_Core::dispatcher();
-		$dispatcher->notify($this->getEvent('UPDATED'), $obj, array('user' => $user));
+		$this->dispatcher->notify($this->getEvent('UPDATED'), $obj, array('user' => $user));
 
 		return true;
 	}
@@ -428,7 +449,7 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base {
 		$namespace  = 'sly.article.list';
 		$prefix     = substr($this->getModelType(), 0, 3);
 		$key        = $prefix.'sbycat_'.$categoryID.'_'.$clang.'_'.($ignoreOffline ? '1' : '0');
-		$list       = sly_Core::cache()->get($namespace, $key, null);
+		$list       = $this->cache->get($namespace, $key, null);
 
 		if ($list === null) {
 			$list  = array();
@@ -443,7 +464,7 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base {
 			$sql->select($this->tablename, 'id', $where, null, $pos.',name');
 			foreach ($sql as $row) $list[] = (int) $row['id'];
 
-			sly_Core::cache()->set($namespace, $key, $list);
+			$this->cache->set($namespace, $key, $list);
 		}
 
 		$objlist = array();

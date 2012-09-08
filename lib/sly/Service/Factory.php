@@ -79,13 +79,73 @@ abstract class sly_Service_Factory {
 					$service    = new $serviceName($db, $dispatcher, $sliceServ);
 					break;
 
-				case 'Article':
-				case 'Category':
 				case 'Language':
-				case 'MediaCategory':
-				case 'Medium':
-				case 'Slice':
+					$db         = sly_DB_Persistence::getInstance();
+					$cache      = sly_Core::cache();
+					$dispatcher = sly_Core::dispatcher();
+					$service    = new $serviceName($db, $cache, $dispatcher);
+					break;
+
 				case 'User':
+					$db         = sly_DB_Persistence::getInstance();
+					$cache      = sly_Core::cache();
+					$dispatcher = sly_Core::dispatcher();
+					$config     = sly_Core::config();
+					$service    = new $serviceName($db, $cache, $dispatcher, $config);
+					break;
+
+				case 'Medium':
+					$db         = sly_DB_Persistence::getInstance();
+					$cache      = sly_Core::cache();
+					$dispatcher = sly_Core::dispatcher();
+					$catService = self::getService('MediaCategory');
+					$service    = new $serviceName($db, $cache, $dispatcher, $catService);
+					break;
+
+				case 'MediaCategory':
+					$db         = sly_DB_Persistence::getInstance();
+					$cache      = sly_Core::cache();
+					$dispatcher = sly_Core::dispatcher();
+					$service    = new $serviceName($db, $cache, $dispatcher);
+
+					// make sure the circular dependency does not make the app die with an endless loop
+					self::$services[$modelName] = $service;
+
+					// now we can set the medium service, which in turn needs the mediacat service
+					$mediumService = self::getService('Medium');
+					$service->setMediumService($mediumService);
+					break;
+
+				case 'Article':
+					$db         = sly_DB_Persistence::getInstance();
+					$cache      = sly_Core::cache();
+					$dispatcher = sly_Core::dispatcher();
+					$slices     = self::getService('Slice');
+					$articles   = self::getService('ArticleSlice');
+					$templates  = self::getService('Template');
+					$service    = new $serviceName($db, $cache, $dispatcher, $slices, $articles, $templates);
+
+					// make sure the circular dependency does not make the app die with an endless loop
+					self::$services[$modelName] = $service;
+
+					$service->setArticleService($service);
+					$service->setCategoryService(self::getService('Category'));
+					break;
+
+				case 'Category':
+					$db         = sly_DB_Persistence::getInstance();
+					$cache      = sly_Core::cache();
+					$dispatcher = sly_Core::dispatcher();
+					$service    = new $serviceName($db, $cache, $dispatcher);
+
+					// make sure the circular dependency does not make the app die with an endless loop
+					self::$services[$modelName] = $service;
+
+					$service->setArticleService(self::getService('Article'));
+					$service->setCategoryService($service);
+					break;
+
+				case 'Slice':
 					$service = new $serviceName(sly_DB_Persistence::getInstance());
 					break;
 
