@@ -103,7 +103,7 @@ class sly_Service_MediaCategory extends sly_Service_Model_Base_Id {
 		$list      = sly_Core::cache()->get($namespace, $cacheKey, null);
 
 		if ($list === null) {
-			$sql  = sly_DB_Persistence::getInstance();
+			$sql  = $this->getPersistence();
 			$list = array();
 
 			$sql->select('file_category', 'id', $where, null, $sortBy);
@@ -219,7 +219,7 @@ class sly_Service_MediaCategory extends sly_Service_Model_Base_Id {
 		}
 
 		$service = sly_Service_Factory::getMediumService();
-		$db      = sly_DB_Persistence::getInstance();
+		$db      = $this->getPersistence();
 		$ownTrx  = !$db->isTransRunning();
 
 		if ($ownTrx) {

@@ -61,6 +61,17 @@ abstract class sly_Service_Factory {
 					$service = new $serviceName(SLY_ADDONFOLDER, $cache);
 					break;
 
+				case 'Article':
+				case 'ArticleSlice':
+				case 'Category':
+				case 'Language':
+				case 'MediaCategory':
+				case 'Medium':
+				case 'Slice':
+				case 'User':
+					$service = new $serviceName(sly_DB_Persistence::getInstance());
+					break;
+
 				default:
 					$service = new $serviceName();
 			}

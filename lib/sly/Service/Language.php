@@ -52,7 +52,7 @@ class sly_Service_Language extends sly_Service_Model_Base_Id {
 			$newLanguage = parent::create($params);
 		}
 		else {
-			$sql    = sly_DB_Persistence::getInstance();
+			$sql    = $this->getPersistence();
 			$ownTrx = !$sql->isTransRunning();
 
 			if ($ownTrx) {
@@ -117,7 +117,7 @@ class sly_Service_Language extends sly_Service_Model_Base_Id {
 	 * @return int
 	 */
 	public function delete($where) {
-		$db = sly_DB_Persistence::getInstance();
+		$db = $this->getPersistence();
 
 		// find all languages first
 		$toDelete = $this->find($where);

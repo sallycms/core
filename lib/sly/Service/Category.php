@@ -39,7 +39,7 @@ class sly_Service_Category extends sly_Service_ArticleBase {
 	}
 
 	public function getMaxPosition($parentID) {
-		$db     = sly_DB_Persistence::getInstance();
+		$db     = $this->getPersistence();
 		$where  = $this->getSiblingQuery($parentID);
 		$maxPos = $db->magicFetch('article', 'MAX(catpos)', $where);
 
@@ -162,7 +162,7 @@ class sly_Service_Category extends sly_Service_ArticleBase {
 		}
 
 		// re-position all following categories
-		$sql    = sly_DB_Persistence::getInstance();
+		$sql    = $this->getPersistence();
 		$ownTrx = !$sql->isTransRunning();
 
 		if ($ownTrx) {
@@ -270,7 +270,7 @@ class sly_Service_Category extends sly_Service_ArticleBase {
 		}
 
 		// prepare movement
-		$sql    = sly_DB_Persistence::getInstance();
+		$sql    = $this->getPersistence();
 		$ownTrx = !$sql->isTransRunning();
 
 		if ($ownTrx) {

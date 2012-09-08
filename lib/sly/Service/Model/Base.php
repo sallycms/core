@@ -14,6 +14,11 @@
 abstract class sly_Service_Model_Base {
 	protected $tablename;          ///< string
 	protected $hasCascade = false; ///< boolean
+	protected $persistence;        ///< sly_DB_Persistence
+
+	public function __construct(sly_DB_Persistence $persistence) {
+		$this->persistence = $persistence;
+	}
 
 	/**
 	 * @param  array $array
@@ -35,8 +40,7 @@ abstract class sly_Service_Model_Base {
 	 */
 	public function findOne($where = null, $having = null) {
 		$res = $this->find($where, null, null, null, 1, $having);
-		if (count($res) == 1) return $res[0];
-		return null;
+		return count($res) === 1 ? $res[0] : null;
 	}
 
 	/**
@@ -49,11 +53,12 @@ abstract class sly_Service_Model_Base {
 	 * @return array
 	 */
 	public function find($where = null, $group = null, $order = null, $offset = null, $limit = null, $having = null) {
-		$return      = array();
-		$persistence = sly_DB_Persistence::getInstance();
-		$persistence->select($this->getTableName(), '*', $where, $group, $order, $offset, $limit, $having);
+		$return  = array();
+		$db      = $this->getPersistence();
 
-		foreach ($persistence as $row) {
+		$db->select($this->getTableName(), '*', $where, $group, $order, $offset, $limit, $having);
+
+		foreach ($db as $row) {
 			$return[] = $this->makeInstance($row);
 		}
 
@@ -75,8 +80,7 @@ abstract class sly_Service_Model_Base {
 			}
 		}
 
-		$persistence = sly_DB_Persistence::getInstance();
-		return $persistence->delete($this->getTableName(), $where);
+		return $this->getPersistence()->delete($this->getTableName(), $where);
 	}
 
 	/**
@@ -85,11 +89,12 @@ abstract class sly_Service_Model_Base {
 	 * @return array
 	 */
 	public function count($where = null, $group = null) {
-		$count       = array();
-		$persistence = sly_DB_Persistence::getInstance();
-		$persistence->select($this->getTableName(), 'COUNT(*)', $where, $group);
+		$count = array();
+		$db    = $this->getPersistence();
 
-		foreach ($persistence as $row) {
+		$db->select($this->getTableName(), 'COUNT(*)', $where, $group);
+
+		foreach ($db as $row) {
 			$count = reset($row);
 		}
 
@@ -106,5 +111,9 @@ abstract class sly_Service_Model_Base {
 		}
 
 		return $user;
+	}
+
+	protected function getPersistence() {
+		return $this->persistence;
 	}
 }
