@@ -38,6 +38,12 @@ abstract class sly_Service_Factory {
 					$service = new $serviceName(sly_Core::config(), sly_Core::dispatcher());
 					break;
 
+				case 'ArticleType':
+					$modules   = self::getService('Module');
+					$templates = self::getService('Template');
+					$service   = new $serviceName(sly_Core::config(), $modules, $templates);
+					break;
+
 				case 'AddOn_Manager':
 					$aService = self::getService('AddOn');
 					$service  = new $serviceName($aService);
