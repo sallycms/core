@@ -16,7 +16,19 @@
  */
 class sly_Service_User extends sly_Service_Model_Base_Id {
 	private static $currentUser = false; ///< mixed
+
 	protected $tablename = 'user'; ///< string
+	protected $cache;              ///< BabelCache_Interface
+	protected $dispatcher;         ///< sly_Event_Dispatcher
+	protected $config;             ///< sly_Configuration
+
+	public function __construct(sly_DB_Persistence $persistence, BabelCache_Interface $cache, sly_Event_Dispatcher $dispatcher, sly_Configuration $config) {
+		parent::__construct($persistence);
+
+		$this->cache      = $cache;
+		$this->dispatcher = $dispatcher;
+		$this->config     = $config;
+	}
 
 	/**
 	 * @param  array $params
@@ -95,8 +107,8 @@ class sly_Service_User extends sly_Service_Model_Base_Id {
 		$event   = ($user->getId() == sly_Model_Base_Id::NEW_ID) ? 'SLY_USER_ADDED' : 'SLY_USER_UPDATED';
 		$user    = parent::save($user);
 
-		sly_Core::cache()->flush('sly.user');
-		sly_Core::dispatcher()->notify($event, $user, array('user' => $manager));
+		$this->cache->flush('sly.user');
+		$this->dispatcher->notify($event, $user, array('user' => $manager));
 
 		return $user;
 	}
@@ -113,8 +125,8 @@ class sly_Service_User extends sly_Service_Model_Base_Id {
 	public function delete($where) {
 		$retval = parent::delete($where);
 
-		sly_Core::cache()->flush('sly.user');
-		sly_Core::dispatcher()->notify('SLY_USER_DELETED', $where['id']);
+		$this->cache->flush('sly.user');
+		$this->dispatcher->notify('SLY_USER_DELETED', $where['id']);
 
 		return $retval;
 	}
@@ -141,13 +153,13 @@ class sly_Service_User extends sly_Service_Model_Base_Id {
 		}
 
 		$namespace = 'sly.user';
-		$obj       = sly_Core::cache()->get($namespace, $id, null);
+		$obj       = $this->cache->get($namespace, $id, null);
 
 		if ($obj === null) {
 			$obj = $this->findOne(array('id' => $id));
 
 			if ($obj !== null) {
-				sly_Core::cache()->set($namespace, $id, $obj);
+				$this->cache->set($namespace, $id, $obj);
 			}
 		}
 
@@ -161,7 +173,7 @@ class sly_Service_User extends sly_Service_Model_Base_Id {
 	 * @return sly_Model_User
 	 */
 	public function getCurrentUser($forceRefresh = false) {
-		if (sly_Core::config()->get('SETUP')) return null;
+		if ($this->config->get('SETUP')) return null;
 
 		if (self::$currentUser === false || $forceRefresh) {
 			$userID = sly_Util_Session::get('UID', 'int', -1);
@@ -191,7 +203,7 @@ class sly_Service_User extends sly_Service_Model_Base_Id {
 		$loginOK = false;
 
 		if ($user instanceof sly_Model_User) {
-			$loginOK = $user->getLastTryDate() < time()-sly_Core::config()->get('RELOGINDELAY')
+			$loginOK = $user->getLastTryDate() < time()-$this->config->get('RELOGINDELAY')
 					&& $user->getStatus() == 1
 					&& $this->checkPassword($user, $password);
 
