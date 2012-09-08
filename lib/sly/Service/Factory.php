@@ -67,6 +67,11 @@ abstract class sly_Service_Factory {
 					$service = new $serviceName(SLY_ADDONFOLDER, $cache);
 					break;
 
+				case 'Module':
+				case 'Template':
+					$service = new $serviceName(sly_Core::config(), sly_Core::dispatcher());
+					break;
+
 				case 'ArticleSlice':
 					$db         = sly_DB_Persistence::getInstance();
 					$dispatcher = sly_Core::dispatcher();
