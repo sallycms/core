@@ -126,9 +126,7 @@ class sly_Service_User extends sly_Service_Model_Base_Id {
 	 * @return sly_Model_User
 	 */
 	public function findByLogin($login) {
-		$res = $this->find(array('login' => $login));
-		if (count($res) == 1) return $res[0];
-		return null;
+		return $this->findOne(array('login' => $login));
 	}
 
 	/**
