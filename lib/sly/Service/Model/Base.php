@@ -16,8 +16,8 @@ abstract class sly_Service_Model_Base {
 	protected $hasCascade = false; ///< boolean
 	protected $persistence;        ///< sly_DB_Persistence
 
-	public function __construct(sly_DB_Persistence $persistence) {
-		$this->persistence = $persistence;
+	public function __construct(sly_DB_Persistence $persistence = null) {
+		$this->persistence = $persistence ? $persistence : sly_DB_Persistence::getInstance();
 	}
 
 	/**
