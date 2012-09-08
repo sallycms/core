@@ -9,7 +9,7 @@
  */
 
 /**
- * Service-Klasse for Article types
+ * Service class for article types
  *
  * @author  zozi@webvariants.de
  * @ingroup service
@@ -17,10 +17,14 @@
 class sly_Service_ArticleType {
 	const VIRTUAL_ALL_SLOT = '_ALL_'; ///< string
 
-	private $data; ///< array
+	private $data;             ///< array
+	private $moduleService;    ///< sly_Service_Module
+	private $templateService;  ///< sly_Service_Template
 
-	public function __construct() {
-		$this->data = (array) sly_Core::config()->get('ARTICLE_TYPES');
+	public function __construct(sly_Configuration $config, sly_Service_Module $moduleService, sly_Service_Template $templateService) {
+		$this->data            = (array) $config->get('ARTICLE_TYPES');
+		$this->moduleService   = $moduleService;
+		$this->templateService = $templateService;
 	}
 
 	/**
@@ -88,15 +92,13 @@ class sly_Service_ArticleType {
 	 * @return array                module names
 	 */
 	public function getModules($articleType, $slot = null) {
-		$moduleService   = sly_Service_Factory::getModuleService();
-		$templateService = sly_Service_Factory::getTemplateService();
-		$modules         = $this->get($articleType, 'modules', null);
-		$template        = $this->getTemplate($articleType);
-		$result          = array();
+		$modules  = $this->get($articleType, 'modules', null);
+		$template = $this->getTemplate($articleType);
+		$result   = array();
 
 		// check if slot is valid
-		if ($slot === null || $templateService->hasSlot($template, $slot)) {
-			$allModules = array_keys($moduleService->getModules());
+		if ($slot === null || $this->templateService->hasSlot($template, $slot)) {
+			$allModules = array_keys($this->moduleService->getModules());
 			$origDef    = $modules;
 			$modules    = sly_makeArray($modules);
 
@@ -120,7 +122,7 @@ class sly_Service_ArticleType {
 
 					foreach ($modules as $key => $value) {
 						// $key = 'slotName', $value = [mod,mod,...]
-						if ($slot === null || $slot === $key || ($key === $all && !$templateService->hasSlot($template, $all))) {
+						if ($slot === null || $slot === $key || ($key === $all && !$this->templateService->hasSlot($template, $all))) {
 							$value = sly_makeArray($value);
 							$tmp   = array_merge($tmp, array_values($value));
 						}
@@ -132,8 +134,8 @@ class sly_Service_ArticleType {
 
 			// only return existing modules
 			foreach ($modules as $module) {
-				if ($moduleService->exists($module)) {
-					$result[$module] = $moduleService->getTitle($module);
+				if ($this->moduleService->exists($module)) {
+					$result[$module] = $this->moduleService->getTitle($module);
 				}
 			}
 		}
