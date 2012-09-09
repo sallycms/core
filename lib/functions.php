@@ -73,30 +73,32 @@ function sly_request($name, $type, $default = null) {
 }
 
 function sly_getArray($name, $types, $default = array()) {
+	$cast   = isset($_GET[$name]);
 	$values = sly_makeArray(isset($_GET[$name]) ? $_GET[$name] : $default);
 
-	foreach ($values as &$value) {
+	foreach ($values as $idx => $value) {
 		if (is_array($value)) {
-			unset($value);
-			continue;
+			unset($values[$idx]);
 		}
-
-		$value = sly_settype($value, $types);
+		elseif ($cast) {
+			$values[$idx] = sly_settype($value, $types);
+		}
 	}
 
 	return $values;
 }
 
 function sly_postArray($name, $types, $default = array()) {
+	$cast   = isset($_POST[$name]);
 	$values = sly_makeArray(isset($_POST[$name]) ? $_POST[$name] : $default);
 
-	foreach ($values as $idx => &$value) {
+	foreach ($values as $idx => $value) {
 		if (is_array($value)) {
 			unset($values[$idx]);
-			continue;
 		}
-
-		$value = sly_settype($value, $types);
+		elseif ($cast) {
+			$values[$idx] = sly_settype($value, $types);
+		}
 	}
 
 	return $values;
