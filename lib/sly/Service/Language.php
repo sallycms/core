@@ -40,6 +40,39 @@ class sly_Service_Language extends sly_Service_Model_Base_Id {
 	}
 
 	/**
+	 * @param  int $articleId
+	 * @param  int $clang
+	 * @return sly_Model_Language
+	 */
+	public function findById($languageID) {
+		$languages  = $this->findAll();
+		$languageID = (int) $languageID;
+
+		return isset($languages[$languageID]) ? $languages[$languageID] : null;
+	}
+
+	/**
+	 * @param  boolean $keysOnly
+	 * @return array
+	 */
+	public function findAll($keysOnly = false) {
+		$languages = $this->cache->get('sly.language', 'all', null);
+
+		if ($languages === null) {
+			$list      = $this->find(null, null, 'id');
+			$languages = array();
+
+			foreach ($list as $language) {
+				$languages[$language->getId()] = $language;
+			}
+
+			$this->cache->set('sly.language', 'all', $languages);
+		}
+
+		return $keysOnly ? array_keys($languages) : $languages;
+	}
+
+	/**
 	 * @param  sly_Model_Base $model
 	 * @return sly_Model_Base
 	 */
