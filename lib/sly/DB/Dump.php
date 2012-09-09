@@ -134,20 +134,15 @@ class sly_DB_Dump {
 	 * This method will coordinate the main work. It reads the headers, extracts
 	 * version and prefix, gets the queries and so on.
 	 *
-	 * @return boolean  true if successful, else false
+	 * @return boolean  always true
 	 */
 	protected function parse() {
-		try {
-			$this->readHeaders();
+		$this->readHeaders();
 
-			$this->version = $this->findHeader('#^sally database dump version ([0-9*.]+)#i');
-			$this->prefix  = $this->findHeader('#^prefix ([a-z0-9_]+)#i');
+		$this->version = $this->findHeader('#^sally database dump version ([0-9*.]+)#i');
+		$this->prefix  = $this->findHeader('#^prefix ([a-z0-9_]+)#i');
 
-			return true;
-		}
-		catch (Exception $e) {
-			return false;
-		}
+		return true;
 	}
 
 	/**
