@@ -233,4 +233,62 @@ class sly_FunctionsTest extends PHPUnit_Framework_TestCase {
 			array('c', 'bool',   array(false)),
 		);
 	}
+
+	/**
+	 * @dataProvider  slyInitGetBasicProvider
+	 */
+	public function testSlyIniGetBasic($key, $default, $expected) {
+		$this->assertSame($expected, sly_ini_get($key, $default));
+	}
+
+	public function slyInitGetBasicProvider() {
+		return array(
+			array('register_argc_argv',  null,  '1'), // always on in CLI mode
+			array('html_errors',         null,  '0'), // always off in CLI mode
+			array('disable_functions',   null,  ''),
+			array('this.does.not.exist', null,  null),
+			array('this.does.not.exist', false, false)
+		);
+	}
+
+	/**
+	 * @dataProvider  slyInitGetNumericProvider
+	 */
+	public function testSlyIniGetNumeric($val, $expected) {
+		$dummyKey = 'default_socket_timeout';
+
+		ini_set($dummyKey, $val);
+		$this->assertSame($expected, sly_ini_get($dummyKey));
+	}
+
+	public function slyInitGetNumericProvider() {
+		return array(
+			// don't interpret those as numerical
+			array('10',           '10'),
+			array('10 m',         '10 m'),
+			array('value is 10m', 'value is 10m'),
+			array('  trim me!  ', 'trim me!'),
+
+			// return as bytes
+			array('10K', 10*1024),
+			array('10k', 10*1024),
+			array('10M', 10*1024*1024),
+			array('10m', 10*1024*1024),
+			array('2G',   2*1024*1024*1024),
+			array('2g',   2*1024*1024*1024),
+			array('6G',   6*1024*1024*1024),  // 64 bit from here on
+			array('6g',   6*1024*1024*1024),  // 64 bit from here on
+
+			// translate to booleans
+			array('on',   true),
+			array('ON',   true),
+			array('yes',  true),
+			array('Yes',  true),
+			array('true', true),
+
+			array('off',   false),
+			array('no',    false),
+			array('false', false)
+		);
+	}
 }
