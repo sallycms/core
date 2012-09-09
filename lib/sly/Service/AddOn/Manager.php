@@ -13,15 +13,24 @@
  * @ingroup service
  */
 class sly_Service_AddOn_Manager {
+	protected $config;       ///< sly_Configuration
+	protected $dispatcher;   ///< sly_Event_Dispatcher
+	protected $cache;        ///< BabelCache_Interface
 	protected $addOnService; ///< sly_Service_AddOn
 	protected $pkgService;   ///< sly_Service_Package
 	protected $loadInfo;     ///< array
 	protected $loaded;       ///< array
 
 	/**
-	 * @param sly_Service_AddOn $service
+	 * @param sly_Configuration    $config
+	 * @param sly_Event_Dispatcher $dispatcher
+	 * @param BabelCache_Interface $cache
+	 * @param sly_Service_AddOn    $service
 	 */
-	public function __construct(sly_Service_AddOn $service) {
+	public function __construct(sly_Configuration $config, sly_Event_Dispatcher $dispatcher, BabelCache_Interface $cache, sly_Service_AddOn $service) {
+		$this->config       = $config;
+		$this->dispatcher   = $dispatcher;
+		$this->cache        = $cache;
 		$this->addOnService = $service;
 		$this->pkgService   = $service->getPackageService();
 		$this->loadInfo     = array();
@@ -76,7 +85,7 @@ class sly_Service_AddOn_Manager {
 		$pservice = $this->pkgService;
 		$path     = $this->addOnService->getConfPath($addon);
 
-		sly_Core::config()->remove($path);
+		$this->config->remove($path);
 		sly_Util_Versions::remove($pservice->getVersionKey($addon));
 
 		$this->clearCache();
@@ -171,15 +180,20 @@ class sly_Service_AddOn_Manager {
 	/**
 	 * Install an addOn
 	 *
-	 * @throws sly_Exception         in case anything goes wrong
-	 * @param  string  $addon        addOn name
-	 * @param  boolean $installDump
+	 * @throws sly_Exception                    in case anything goes wrong
+	 * @param  string             $addon        addOn name
+	 * @param  boolean            $installDump
+	 * @param  sly_DB_Persistence $persistence  database to use when installing the dump (may only be null if $installDump is false)
 	 */
-	public function install($addon, $installDump = true) {
+	public function install($addon, $installDump = true, sly_DB_Persistence $persistence = null) {
 		$aservice = $this->addOnService;
 		$pservice = $this->pkgService;
 		$baseDir  = $pservice->baseDirectory($addon);
 		$bootFile = $baseDir.'boot.php';
+
+		if ($installDump && !$persistence) {
+			throw new LogicException('You must give a persistence instance when installing a dump.');
+		}
 
 		// return error message if an addon wants to stop the install process
 		$this->fireEvent('PRE', 'INSTALL', $addon);
@@ -221,7 +235,7 @@ class sly_Service_AddOn_Manager {
 
 		if ($installDump && is_readable($installSQL)) {
 			$mysiam = $pservice->getKey($addon, 'allow_non_innodb', false);
-			$this->installDump($installSQL, $mysiam, 'install');
+			$this->installDump($persistence, $installSQL, $mysiam, 'install');
 		}
 
 		// copy assets to data/dyn/public
@@ -247,10 +261,11 @@ class sly_Service_AddOn_Manager {
 	/**
 	 * Uninstall an addOn
 	 *
-	 * @throws sly_Exception  in case anything goes wrong
-	 * @param  string $addon  addOn name
+	 * @throws sly_Exception                    in case anything goes wrong
+	 * @param  string             $addon        addOn name
+	 * @param  sly_DB_Persistence $persistence  database to use when executing the uninstall.sql
 	 */
-	public function uninstall($addon) {
+	public function uninstall($addon, sly_DB_Persistence $persistence) {
 		$aservice = $this->addOnService;
 		$pservice = $this->pkgService;
 
@@ -286,7 +301,7 @@ class sly_Service_AddOn_Manager {
 		$uninstallSQL = $baseDir.'uninstall.sql';
 
 		if (is_readable($uninstallSQL)) {
-			$this->installDump($uninstallSQL, false, 'uninstall');
+			$this->installDump($persistence, $uninstallSQL, false, 'uninstall');
 		}
 
 		// mark addOn as not installed
@@ -419,15 +434,15 @@ class sly_Service_AddOn_Manager {
 	}
 
 	/**
-	 * @throws sly_Exception         in case anything goes wrong
-	 * @param  string  $file
-	 * @param  boolean $allowMyISAM
-	 * @param  string  $type         'install' or 'uninstall'
+	 * @throws sly_Exception                    in case anything goes wrong
+	 * @param  sly_DB_Persistence $persistence
+	 * @param  string             $file
+	 * @param  boolean            $allowMyISAM
+	 * @param  string             $type         'install' or 'uninstall'
 	 */
-	private function installDump($file, $allowMyISAM, $type) {
+	private function installDump(sly_DB_Persistence $persistence, $file, $allowMyISAM, $type) {
 		try {
 			$dump    = new sly_DB_Dump($file);
-			$sql     = sly_DB_Persistence::getInstance();
 			$queries = $dump->getQueries(true);
 
 			// check queries for bad (i.e. non-InnoDB) engines
@@ -444,11 +459,11 @@ class sly_Service_AddOn_Manager {
 				}
 
 				// force InnoDB for CREATE statements without an ENGINE declaration
-				$sql->exec('SET storage_engine = InnoDB');
+				$persistence->exec('SET storage_engine = InnoDB');
 			}
 
 			foreach ($queries as $query) {
-				$sql->query($query);
+				$persistence->query($query);
 			}
 		}
 		catch (sly_DB_Exception $e) {
@@ -470,8 +485,7 @@ class sly_Service_AddOn_Manager {
 
 		$aservice = $this->addOnService;
 		$pservice = $this->pkgService;
-		$cache    = sly_Core::cache();
-		$order    = $cache->get('sly.addon', 'order');
+		$order    = $this->cache->get('sly.addon', 'order');
 
 		// if there is no cache yet, we load all addons the slow way
 		if (!is_array($order)) {
@@ -483,7 +497,7 @@ class sly_Service_AddOn_Manager {
 			}
 
 			// and now we have a nice list that we can cache
-			$cache->set('sly.addon', 'order', $this->loadInfo);
+			$this->cache->set('sly.addon', 'order', $this->loadInfo);
 		}
 
 		// yay, a cache, let's skip the whole dependency stuff
@@ -563,7 +577,6 @@ class sly_Service_AddOn_Manager {
 		$pservice = $this->pkgService;
 
 		if ($installed || $activated) {
-			$config       = sly_Core::config();
 			$baseFolder   = $pservice->baseDirectory($addon);
 			$defaultsFile = $baseFolder.'defaults.yml';
 			$globalsFile  = $baseFolder.'globals.yml';
@@ -571,16 +584,16 @@ class sly_Service_AddOn_Manager {
 
 			if ($activated) {
 				if (file_exists($staticFile)) {
-					$config->loadStatic($staticFile, $aservice->getConfPath($addon));
+					$this->config->loadStatic($staticFile, $aservice->getConfPath($addon));
 				}
 
 				if (file_exists($defaultsFile)) {
-					$config->loadProjectDefaults($defaultsFile, false, $aservice->getConfPath($addon));
+					$this->config->loadProjectDefaults($defaultsFile, false, $aservice->getConfPath($addon));
 				}
 			}
 
 			if (file_exists($globalsFile)) {
-				$config->loadStatic($globalsFile);
+				$this->config->loadStatic($globalsFile);
 			}
 		}
 	}
@@ -625,6 +638,6 @@ class sly_Service_AddOn_Manager {
 	 * @param string $addon  the addOn that we operate on
 	 */
 	protected function fireEvent($time, $type, $addon) {
-		sly_Core::dispatcher()->notify('SLY_ADDON_'.$time.'_'.$type, $addon);
+		$this->dispatcher->notify('SLY_ADDON_'.$time.'_'.$type, $addon);
 	}
 }

@@ -35,7 +35,7 @@ class sly_Service_Package {
 	 * Clears the addOn metadata cache
 	 */
 	public function clearCache() {
-		sly_Core::cache()->flush('sly.package', true);
+		$this->cache->flush('sly.package', true);
 		$this->composers = array();
 		$this->refreshed = false;
 	}
