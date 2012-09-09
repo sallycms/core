@@ -13,6 +13,7 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base {
 	protected $states    = array();   ///< array
 	protected $cache;                 ///< BabelCache_Interface
 	protected $dispatcher;            ///< sly_Event_Dispatcher
+	protected $lngService;            ///< sly_Service_Language
 	protected $artService;            ///< sly_Service_Article
 	protected $catService;            ///< sly_Service_Category
 
@@ -26,12 +27,14 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base {
 	 * @param sly_DB_Persistence   $persistence
 	 * @param BabelCache_Interface $cache
 	 * @param sly_Event_Dispatcher $dispatcher
+	 * @param sly_Service_Language $lngService
 	 */
-	public function __construct(sly_DB_Persistence $persistence, BabelCache_Interface $cache, sly_Event_Dispatcher $dispatcher) {
+	public function __construct(sly_DB_Persistence $persistence, BabelCache_Interface $cache, sly_Event_Dispatcher $dispatcher, sly_Service_Language $lngService) {
 		parent::__construct($persistence);
 
 		$this->cache      = $cache;
 		$this->dispatcher = $dispatcher;
+		$this->lngService = $lngService;
 	}
 
 	/**
@@ -183,7 +186,7 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base {
 	 * @param int $clang  language ID (give null to delete in all languages)
 	 */
 	public function deleteCache($id, $clang = null) {
-		foreach (sly_Util_Language::findAll(true) as $_clang) {
+		foreach ($this->lngService->findAll(true) as $_clang) {
 			if ($clang !== null && $clang != $_clang) {
 				continue;
 			}
@@ -276,7 +279,7 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base {
 		try {
 			$newID = $db->magicFetch('article', 'MAX(id)') + 1;
 
-			foreach (sly_Util_Language::findAll(true) as $clangID) {
+			foreach ($this->lngService->findAll(true) as $clangID) {
 				$obj = $this->buildModel(array(
 					      'id' => $newID,
 					  'parent' => $parentID,

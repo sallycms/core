@@ -23,15 +23,17 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 	 * @param sly_DB_Persistence       $persistence
 	 * @param BabelCache_Interface     $cache
 	 * @param sly_Event_Dispatcher     $dispatcher
+	 * @param sly_Service_Language     $lngService
 	 * @param sly_Service_Slice        $sliceService
 	 * @param sly_Service_ArticleSlice $artSliceService
 	 * @param sly_Service_Template     $tplService
 	 */
 	public function __construct(
 		sly_DB_Persistence $persistence, BabelCache_Interface $cache, sly_Event_Dispatcher $dispatcher,
-		sly_Service_Slice $sliceService, sly_Service_ArticleSlice $artSliceService, sly_Service_Template $tplService
+		sly_Service_Language $lngService, sly_Service_Slice $sliceService, sly_Service_ArticleSlice $artSliceService,
+		sly_Service_Template $tplService
 	) {
-		parent::__construct($persistence, $cache, $dispatcher);
+		parent::__construct($persistence, $cache, $dispatcher, $lngService);
 
 		$this->sliceService    = $sliceService;
 		$this->artSliceService = $artSliceService;
@@ -171,7 +173,7 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 		try {
 			$parent = $article->getCategoryId();
 
-			foreach (sly_Util_Language::findAll(true) as $clangID) {
+			foreach ($this->lngService->findAll(true) as $clangID) {
 				$pos       = $this->findById($articleID, $clangID)->getPosition();
 				$followers = $this->getFollowerQuery($parent, $clangID, $pos);
 
@@ -262,7 +264,7 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 		$user      = $this->getActor($user, __METHOD__);
 		$oldType   = $article->getType();
 		$articleID = $article->getId();
-		$langs     = sly_Util_Language::findAll(true);
+		$langs     = $this->lngService->findAll(true);
 		$sql       = $this->getPersistence();
 		$ownTrx    = !$sql->isTransRunning();
 
@@ -350,7 +352,7 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 		}
 
 		try {
-			foreach (sly_Util_Language::findAll(true) as $clang) {
+			foreach ($this->lngService->findAll(true) as $clang) {
 				$source    = $this->findById($id, $clang);
 				$cat       = $target === 0 ? null : $this->catService->findById($target, $clang);
 				$duplicate = clone $source;
@@ -445,7 +447,7 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 		}
 
 		try {
-			foreach (sly_Util_Language::findAll(true) as $clang) {
+			foreach ($this->lngService->findAll(true) as $clang) {
 				$article = $this->findById($id, $clang);
 				$cat     = $target === 0 ? null : $this->catService->findById($target, $clang);
 				$moved   = clone $article;
@@ -527,7 +529,7 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 		}
 
 		try {
-			foreach (sly_Util_Language::findAll(true) as $clang) {
+			foreach ($this->lngService->findAll(true) as $clang) {
 				$newStarter = $this->findById($articleID, $clang)->toHash();
 				$oldStarter = $this->findById($oldCat, $clang)->toHash();
 

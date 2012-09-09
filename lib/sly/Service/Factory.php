@@ -125,10 +125,11 @@ abstract class sly_Service_Factory {
 					$db         = sly_DB_Persistence::getInstance();
 					$cache      = sly_Core::cache();
 					$dispatcher = sly_Core::dispatcher();
+					$languages  = self::getService('Language');
 					$slices     = self::getService('Slice');
 					$articles   = self::getService('ArticleSlice');
 					$templates  = self::getService('Template');
-					$service    = new $serviceName($db, $cache, $dispatcher, $slices, $articles, $templates);
+					$service    = new $serviceName($db, $cache, $dispatcher, $languages, $slices, $articles, $templates);
 
 					// make sure the circular dependency does not make the app die with an endless loop
 					self::$services[$modelName] = $service;
@@ -141,7 +142,8 @@ abstract class sly_Service_Factory {
 					$db         = sly_DB_Persistence::getInstance();
 					$cache      = sly_Core::cache();
 					$dispatcher = sly_Core::dispatcher();
-					$service    = new $serviceName($db, $cache, $dispatcher);
+					$languages  = self::getService('Language');
+					$service    = new $serviceName($db, $cache, $dispatcher, $languages);
 
 					// make sure the circular dependency does not make the app die with an endless loop
 					self::$services[$modelName] = $service;
