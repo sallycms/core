@@ -235,13 +235,18 @@ function sly_translate($text, $html = false) {
 
 function sly_ini_get($key, $default = null) {
 	$res = ini_get($key);
-	if (empty($res)) return $default;
+
+	// key not found
+	if ($res === false) {
+		return $default;
+	}
+
 	$res = trim($res);
 
 	// interpret numeric values
 	if (preg_match('#(^[0-9]+)([ptgmk])$#i', $res, $matches)) {
 		$last = strtolower($matches[2]);
-		$res  = strtolower($matches[1]);
+		$res  = (int) $matches[1];
 
 		switch ($last) {
 			case 'p': $res *= 1024;
