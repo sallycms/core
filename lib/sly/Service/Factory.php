@@ -45,14 +45,19 @@ abstract class sly_Service_Factory {
 					break;
 
 				case 'AddOn_Manager':
-					$aService = self::getService('AddOn');
-					$service  = new $serviceName($aService);
+					$cache      = sly_Core::cache();
+					$config     = sly_Core::config();
+					$dispatcher = sly_Core::dispatcher();
+					$aService   = self::getService('AddOn');
+					$service    = new $serviceName($config, $dispatcher, $cache, $aService);
 					break;
 
 				case 'AddOn':
+					$cache      = sly_Core::cache();
+					$config     = sly_Core::config();
 					$pkgService = self::getService('Package_AddOn');
 					$vndService = self::getService('Package_Vendor');
-					$service    = new $serviceName($pkgService, SLY_DYNFOLDER);
+					$service    = new $serviceName($config, $cache, $pkgService, SLY_DYNFOLDER);
 
 					$service->setVendorPackageService($vndService);
 					break;

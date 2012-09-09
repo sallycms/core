@@ -13,6 +13,8 @@
  * @ingroup service
  */
 class sly_Service_AddOn {
+	protected $config;     ///< sly_Configuration
+	protected $cache;      ///< BabelCache_Interface
 	protected $pkgService; ///< sly_Service_Package
 	protected $vndService; ///< sly_Service_Package  vendor package service (optional)
 	protected $dynDir;     ///< string
@@ -21,10 +23,14 @@ class sly_Service_AddOn {
 	const INSTALLER_PKGKEY = 'sallycms/composer-installer';
 
 	/**
-	 * @param sly_Service_Package $pkgService
-	 * @param string              $dynDir
+	 * @param sly_Configuration    $config
+	 * @param BabelCache_Interface $cache
+	 * @param sly_Service_Package  $pkgService
+	 * @param string               $dynDir
 	 */
-	public function __construct(sly_Service_Package $pkgService, $dynDir) {
+	public function __construct(sly_Configuration $config, BabelCache_Interface $cache, sly_Service_Package $pkgService, $dynDir) {
+		$this->config     = $config;
+		$this->cache     = $cache;
 		$this->pkgService = $pkgService;
 		$this->dynDir     = sly_Util_Directory::normalize($dynDir).DIRECTORY_SEPARATOR;
 	}
@@ -56,7 +62,7 @@ class sly_Service_AddOn {
 	 */
 	public function setProperty($addon, $property, $value) {
 		$this->clearCache();
-		return sly_Core::config()->set($this->getConfPath($addon).'/'.$property, $value);
+		return $this->config->set($this->getConfPath($addon).'/'.$property, $value);
 	}
 
 	/**
@@ -68,7 +74,7 @@ class sly_Service_AddOn {
 	 * @return string            found value or $default
 	 */
 	public function getProperty($addon, $property, $default = null) {
-		return sly_Core::config()->get($this->getConfPath($addon).'/'.$property, $default);
+		return $this->config->get($this->getConfPath($addon).'/'.$property, $default);
 	}
 
 	/**
@@ -96,7 +102,7 @@ class sly_Service_AddOn {
 	 * @return array                   list of addOns
 	 */
 	public function filterByProperty($property, $value = true, $isComposerKey = false) {
-		$cache  = sly_Core::cache();
+		$cache  = $this->cache;
 		$key    = sly_Cache::generateKey('filter', $property, $value, $isComposerKey);
 		$result = $cache->get('sly.addon', $key);
 
@@ -126,7 +132,7 @@ class sly_Service_AddOn {
 	 * @return array  list of addOns
 	 */
 	public function getRegisteredAddOns() {
-		$config = sly_Core::config();
+		$config = $this->config;
 		$addons = array_keys($config->get('addons', array()));
 
 		foreach ($addons as $idx => $pkg) {
@@ -329,7 +335,7 @@ class sly_Service_AddOn {
 	 * Clears the addOn metadata cache
 	 */
 	public function clearCache() {
-		sly_Core::cache()->flush('sly.addon', true);
+		$this->cache->flush('sly.addon', true);
 		$this->pkgService->clearCache();
 	}
 
