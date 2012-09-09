@@ -196,7 +196,7 @@ class sly_Service_Category extends sly_Service_ArticleBase {
 		try {
 			$parent = $cat->getParentId();
 
-			foreach (sly_Util_Language::findAll(true) as $clangID) {
+			foreach ($this->lngService->findAll(true) as $clangID) {
 				$catpos    = $this->findById($categoryID, $clangID)->getCatPosition();
 				$followers = $this->getFollowerQuery($parent, $clangID, $catpos);
 
@@ -300,7 +300,7 @@ class sly_Service_Category extends sly_Service_ArticleBase {
 
 		try {
 			$oldParent = $category->getParentId();
-			$languages = sly_Util_Language::findAll(true);
+			$languages = $this->lngService->findAll(true);
 			$newPos    = $this->getMaxPosition($targetID) + 1;
 			$oldPath   = $category->getPath();
 			$newPath   = $target ? ($target->getPath().$targetID.'|') : '|';
