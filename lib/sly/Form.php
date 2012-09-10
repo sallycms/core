@@ -68,7 +68,7 @@ class sly_Form extends sly_Form_Base {
 		$this->fieldsets       = array();
 		$this->currentFieldset = null;
 		$this->focussedElement = '';
-		$this->buttonClasses   = array('submit' => array(), 'reset' => array(), 'delete' => array(), 'apply' => array());
+		$this->buttonClasses   = array('submit' => array('sly-form-submit'), 'reset' => array(), 'delete' => array('sly-form-submit'), 'apply' => array('sly-form-submit'));
 	}
 
 	/**
