@@ -159,6 +159,11 @@ class sly_Util_String {
 
 		$return = mb_substr($text, 0, $maxLength);
 
+		// cut off trailing newlines (if input was something like "<p>foo</p>")
+		while (self::endsWith($return, '<br />')) {
+			$return = mb_substr($return, 0, -6);
+		}
+
 		if (mb_strlen($text) > $maxLength) {
 			$return .= $suffix;
 		}
