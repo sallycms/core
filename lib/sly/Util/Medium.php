@@ -76,7 +76,7 @@ class sly_Util_Medium {
 	 * @param  sly_Model_Medium $mediumToReplace
 	 * @return sly_Model_Medium
 	 */
-	public static function upload(array $fileData, $categoryID, $title, sly_Model_Medium $mediumToReplace = null) {
+	public static function upload(array $fileData, $categoryID, $title, sly_Model_Medium $mediumToReplace = null, sly_Model_User $user = null, $useRename = false) {
 		// check file data
 
 		if (!isset($fileData['tmp_name'])) {
@@ -111,8 +111,9 @@ class sly_Util_Medium {
 		$file        = null;
 
 		// move uploaded file
-
-		if (!@move_uploaded_file($fileData['tmp_name'], $dstFile)) {
+		$move = $useRename ? 'rename' : 'move_uploaded_file';
+		
+		if (!$move($fileData['tmp_name'], $dstFile)) {
 			throw new sly_Exception(t('error_moving_uploaded_file', basename($fileData['tmp_name'])), self::ERR_UPLOAD_FAILED);
 		}
 
@@ -137,14 +138,14 @@ class sly_Util_Medium {
 				$mediumToReplace->setHeight(0);
 			}
 
-			$file = $service->update($mediumToReplace);
+			$file = $service->update($mediumToReplace, $user);
 
 			// re-validate asset cache
 			$service = sly_Service_Factory::getAssetService();
 			$service->validateCache();
 		}
 		else {
-			$file = $service->add(basename($dstFile), $title, $categoryID, $fileData['type'], $filename);
+			$file = $service->add(basename($dstFile), $title, $categoryID, $fileData['type'], $filename, $user);
 		}
 
 		return $file;
