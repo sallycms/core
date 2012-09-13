@@ -1,0 +1,84 @@
+<?php
+/*
+ * Copyright (c) 2012, webvariants GbR, http://www.webvariants.de
+ *
+ * This file is released under the terms of the MIT license. You can find the
+ * complete text in the attached LICENSE file or online at:
+ *
+ * http://www.opensource.org/licenses/mit-license.php
+ */
+
+$tableID        = $this->id;
+$currentPage    = abs(sly_get('p_'.$tableID, 'int'));
+$hasPager       = $this->hasPager();
+$hasSearch      = $this->hasSearch();
+$hasDragAndDrop = $this->hasDragAndDrop();
+
+$this->surroundingHTML = '';
+ob_start();
+
+if (!sly_Table::isDragAndDropMode() && $hasPager) {
+	$pager = new sly_Util_Pager($currentPage, $this->totalElements, sly_Table::$perPage);
+	$pager = $pager->getHTMLString($_GET, 'p_'.$tableID);
+
+	print '<p class="sly-table-extras-pager">'.t('pages').': '.$pager.'</p>';
+}
+
+if ($this->enableDragAndDrop && ($hasSearch || $hasPager)) {
+	$params = $_GET;
+
+	unset($params['p_'.$tableID]);
+	unset($params['q_'.$tableID]);
+
+	if (sly_Table::isDragAndDropMode()) {
+		unset($params['tableswitch']);
+		$params = http_build_query($params, '', '&amp;');
+		print '<p class="sly-table-extras-sorting"><a href="index.php?'.$params.'">'.t('end_sorting').'</a></p>';
+	}
+	else {
+		$params['tableswitch'] = 'dodraganddrop';
+		$params = http_build_query($params, '', '&amp;');
+		print '<p class="sly-table-extras-sorting"><a href="index.php?'.$params.'">'.t('begin_sorting').'</a></p>';
+	}
+}
+
+if (!sly_Table::isDragAndDropMode() && $hasSearch) {
+	$key   = 'q_'.$tableID;
+	$query = sly_get($key, 'string');
+
+	print '<form method="get" action="index.php">';
+	print '<p class="sly-table-extras-filter">'.t('filter').': ';
+
+	$getParams = $this->searchParams === null ? $_GET : $this->searchParams;
+
+	foreach ($getParams as $name => $value) {
+		if ($name !== 'p_'.$this->id && $name !== $key && is_scalar($value)) {
+			print '<input type="hidden" name="'.sly_html($name).'" value="'.sly_html($value).'" />';
+		}
+	}
+
+	print '<input type="text" name="'.$key.'" value="'.sly_html($query).'" class="sly-form-text filter_input_'.$this->id.'" />';
+
+	print '</p>';
+	print '</form>';
+}
+
+$this->surroundingHTML = ob_get_clean();
+print $this->surroundingHTML;
+
+?>
+
+<table id="<?php echo $this->id ?>" class="<?php echo implode(' ', $this->classes) ?>">
+	<caption><?php echo $this->caption ? '<span>'.sly_html($this->caption).'</span>' : '' ?></caption>
+	<thead>
+		<tr class="nodrop nodrag">
+			<?php
+			foreach ($this->columns as $idx => $col) {
+				$col->setTable($this);
+				$col->setIndex($idx);
+				print $col->render();
+			}
+			?>
+		</tr>
+	</thead>
+	<tbody>
