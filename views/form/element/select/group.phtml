@@ -8,7 +8,21 @@
  * http://www.opensource.org/licenses/mit-license.php
  */
 ?>
-<span class="sly-select-<?php echo $type ?>-list sly-select-group" id="<?php echo sly_html($this->getID()) ?>">
+<?php 
+$groupAttr = array('id' => $this->getID());
+if (isset($this->groupAttr) && is_array($this->groupAttr)) {
+	$groupAttr = $this->groupAttr;
+}
+$groupAttr['class'] = 'sly-select-' . $type . '-list sly-select-group' . (array_key_exists('class', $groupAttr) ? ' ' . $groupAttr['class'] : '');
+if (array_key_exists('style', $groupAttr) && is_array($groupAttr['style'])) {
+	$new_style = '';
+	foreach ($groupAttr['style'] as $k => $v) {
+		$new_style .= $k . ':' . $v . ';';
+	}
+	$groupAttr['style'] = $new_style;
+}
+?>
+<span <?php echo sly_Util_HTML::buildAttributeString($groupAttr) ?>>
 	<?php
 	$selected  = sly_makeArray($this->getDisplayValue());
 	$elementID = $this->getID();
