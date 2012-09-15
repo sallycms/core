@@ -19,14 +19,14 @@ class sly_Util_Article {
 	const NOTFOUND_ARTICLE = -3; ///< int
 
 	/**
-	 * checks wheter an article exists or not
+	 * checks whether an article exists or not
 	 *
-	 * @param  int $articleId
+	 * @param  int $articleID
 	 * @param  int $clang
 	 * @return boolean
 	 */
-	public static function exists($articleId, $clang = null) {
-		return self::isValid(self::findById($articleId, $clang));
+	public static function exists($articleID, $clang = null) {
+		return self::isValid(self::findById($articleID, $clang));
 	}
 
 	/**
@@ -38,15 +38,16 @@ class sly_Util_Article {
 	}
 
 	/**
-	 * @param  int   $articleId
+	 * @throws sly_Exception
+	 * @param  int   $articleID
 	 * @param  int   $clang
 	 * @param  mixed $default
 	 * @return sly_Model_Article
 	 */
-	public static function findById($articleId, $clang = null, $default = null) {
+	public static function findById($articleID, $clang = null, $default = null) {
 		$service   = sly_Service_Factory::getArticleService();
-		$articleId = (int) $articleId;
-		$article   = $service->findById($articleId, $clang);
+		$articleID = (int) $articleID;
+		$article   = $service->findById($articleID, $clang);
 
 		if ($article) return $article;
 
@@ -83,32 +84,32 @@ class sly_Util_Article {
 	}
 
 	/**
-	 * @param  int     $categoryId
-	 * @param  boolean $ignore_offlines
-	 * @param  int     $clangId
+	 * @param  int     $categoryID
+	 * @param  boolean $ignoreOfflines
+	 * @param  int     $clang
 	 * @return array
 	 */
-	public static function findByCategory($categoryId, $ignore_offlines = false, $clangId = null) {
-		return sly_Service_Factory::getArticleService()->findArticlesByCategory($categoryId, $ignore_offlines, $clangId);
+	public static function findByCategory($categoryID, $ignoreOfflines = false, $clang = null) {
+		return sly_Service_Factory::getArticleService()->findArticlesByCategory($categoryID, $ignoreOfflines, $clang);
 	}
 
 	/**
 	 * @param  string  $type
-	 * @param  boolean $ignore_offlines
-	 * @param  int     $clangId
-	 * @return array
-	 */
-	public static function findByType($type, $ignore_offlines = false, $clangId = null) {
-		return sly_Service_Factory::getArticleService()->findArticlesByType($type, $ignore_offlines, $clangId);
-	}
-
-	/**
-	 * @param  boolean $ignore_offlines
+	 * @param  boolean $ignoreOfflines
 	 * @param  int     $clang
 	 * @return array
 	 */
-	public static function getRootArticles($ignore_offlines = false, $clang = null) {
-		return self::findByCategory(0, $ignore_offlines, $clang);
+	public static function findByType($type, $ignoreOfflines = false, $clang = null) {
+		return sly_Service_Factory::getArticleService()->findArticlesByType($type, $ignoreOfflines, $clang);
+	}
+
+	/**
+	 * @param  boolean $ignoreOfflines
+	 * @param  int     $clang
+	 * @return array
+	 */
+	public static function getRootArticles($ignoreOfflines = false, $clang = null) {
+		return self::findByCategory(0, $ignoreOfflines, $clang);
 	}
 
 	/**
@@ -116,7 +117,7 @@ class sly_Util_Article {
 	 * @return boolean
 	 */
 	public static function isSiteStartArticle(sly_Model_Article $article) {
-		return $article->getId() == sly_Core::getSiteStartArticleId();
+		return $article->getId() === sly_Core::getSiteStartArticleId();
 	}
 
 	/**
@@ -124,33 +125,60 @@ class sly_Util_Article {
 	 * @return boolean
 	 */
 	public static function isNotFoundArticle(sly_Model_Article $article) {
-		return $article->getId() == sly_Core::getNotFoundArticleId();
+		return $article->getId() === sly_Core::getNotFoundArticleId();
 	}
 
-	public static function canReadArticle(sly_Model_User $user, $articleId) {
-		return sly_Util_Category::canReadCategory($user, $articleId);
+	/**
+	 * @param  sly_Model_User $user
+	 * @param  int            $articleID
+	 * @return boolean
+	 */
+	public static function canReadArticle(sly_Model_User $user, $articleID) {
+		return sly_Util_Category::canReadCategory($user, $articleID);
 	}
 
-	public static function canEditArticle(sly_Model_User $user, $articleId) {
+	/**
+	 * @param  sly_Model_User $user
+	 * @param  int            $articleID
+	 * @return boolean
+	 */
+	public static function canEditArticle(sly_Model_User $user, $articleID) {
 		if ($user->isAdmin()) return true;
 		if ($user->hasRight('article', 'edit', 0)) return true;
-		return $user->hasRight('article', 'edit', $articleId);
+		return $user->hasRight('article', 'edit', $articleID);
 	}
 
-	public static function canEditContent(sly_Model_User $user, $articleId) {
+	/**
+	 * @param  sly_Model_User $user
+	 * @param  int            $articleID
+	 * @return boolean
+	 */
+	public static function canEditContent(sly_Model_User $user, $articleID) {
 		if ($user->isAdmin()) return true;
 		if ($user->hasRight('article', 'editcontent', 0)) return true;
-		return $user->hasRight('article', 'editcontent', $articleId);
+		return $user->hasRight('article', 'editcontent', $articleID);
 	}
 
-	public static function getUrl($articleId, $clang = null, $params = array(), $divider = '&amp;', $absolute = false, $secure = null) {
-		$article = self::findById($articleId, $clang);
+	/**
+	 * get an article's URL
+	 *
+	 * @throws UnexpectedValueException
+	 * @param  int     $articleID
+	 * @param  int     $clang
+	 * @param  array   $params
+	 * @param  string  $divider
+	 * @param  boolean $absolute
+	 * @param  boolean $secure     force HTTPS (true) or HTTP (false) URL, use null for the current protocol
+	 * @return string
+	 */
+	public static function getUrl($articleID, $clang = null, $params = array(), $divider = '&amp;', $absolute = false, $secure = null) {
+		$article = self::findById($articleID, $clang);
 
 		if (!$article) {
 			$clang     = $clang === null ? sly_Core::getCurrentClang() : (int) $clang;
-			$articleId = (int) $articleId;
+			$articleID = (int) $articleID;
 
-			throw new UnexpectedValueException('Could not find article '.$articleId.'/'.$clang.' in getUrl().');
+			throw new UnexpectedValueException('Could not find article '.$articleID.'/'.$clang.' in getUrl().');
 		}
 
 		return $absolute

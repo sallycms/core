@@ -19,13 +19,13 @@ class sly_Util_Medium {
 	const ERR_UPLOAD_FAILED    = 3; ///< int
 
 	/**
-	 * checks wheter a medium exists or not
+	 * checks whether a medium exists or not
 	 *
-	 * @param  int $mediumId
+	 * @param  int $mediumID
 	 * @return boolean
 	 */
-	public static function exists($mediumId) {
-		return self::isValid(self::findById($mediumId));
+	public static function exists($mediumID) {
+		return self::isValid(self::findById($mediumID));
 	}
 
 	/**
@@ -37,11 +37,11 @@ class sly_Util_Medium {
 	}
 
 	/**
-	 * @param  int $mediumId
+	 * @param  int $mediumID
 	 * @return sly_Model_Medium
 	 */
-	public static function findById($mediumId) {
-		return sly_Service_Factory::getMediumService()->findById($mediumId);
+	public static function findById($mediumID) {
+		return sly_Service_Factory::getMediumService()->findById($mediumID);
 	}
 
 	/**
@@ -53,11 +53,11 @@ class sly_Util_Medium {
 	}
 
 	/**
-	 * @param  int $categoryId
+	 * @param  int $categoryID
 	 * @return array
 	 */
-	public static function findByCategory($categoryId) {
-		return sly_Service_Factory::getMediumService()->findMediaByCategory($categoryId);
+	public static function findByCategory($categoryID) {
+		return sly_Service_Factory::getMediumService()->findMediaByCategory($categoryID);
 	}
 
 	/**
@@ -74,6 +74,7 @@ class sly_Util_Medium {
 	 * @param  int              $categoryID
 	 * @param  string           $title
 	 * @param  sly_Model_Medium $mediumToReplace
+	 * @param  boolean          $useRename        if true, rename() will be used to move the file into the mediapool (rather than move_uploaded_file())
 	 * @return sly_Model_Medium
 	 */
 	public static function upload(array $fileData, $categoryID, $title, sly_Model_Medium $mediumToReplace = null, sly_Model_User $user = null, $useRename = false) {
@@ -112,7 +113,7 @@ class sly_Util_Medium {
 
 		// move uploaded file
 		$move = $useRename ? 'rename' : 'move_uploaded_file';
-		
+
 		if (!$move($fileData['tmp_name'], $dstFile)) {
 			throw new sly_Exception(t('error_moving_uploaded_file', basename($fileData['tmp_name'])), self::ERR_UPLOAD_FAILED);
 		}

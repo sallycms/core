@@ -105,6 +105,14 @@ class sly_Util_HTML {
 		$value = strtolower(trim($key)).'="'.sly_html(trim($value)).'"';
 	}
 
+	/**
+	 * get an <img> tag
+	 *
+	 * @param  mixed   $image      image basename or sly_Model_Medium object
+	 * @param  array   $attributes
+	 * @param  boolean $forceUri
+	 * @return string
+	 */
 	public static function getImageTag($image, array $attributes = array(), $forceUri = false) {
 		$base = sly_Core::isBackend() ? '../' : '';
 

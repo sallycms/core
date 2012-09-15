@@ -12,14 +12,15 @@
  * @ingroup util
  */
 class sly_Util_Template {
-
 	/**
+	 * render a given template
+	 *
 	 * This method includes a template identified by its name.
 	 * A unlimited number of variabled can be given to the templates
-	 * through an associated array array('varname' => 'value' ...)
+	 * through an associated array like array('varname' => 'value' ...).
 	 *
-	 * @param string $name   The name param if the Template
-	 * @param array  $params Template variables as an associative array of parameters
+	 * @param string $name    the template name
+	 * @param array  $params  template variables as an associative array of parameters
 	 */
 	public static function render($name, $params = array()) {
 		try {
@@ -31,7 +32,7 @@ class sly_Util_Template {
 	}
 
 	/**
-	 * Checks if a template exists.
+	 * checks if a template exists
 	 *
 	 * @param  string $name
 	 * @return boolean

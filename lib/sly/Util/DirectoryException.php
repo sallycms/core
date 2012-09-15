@@ -14,11 +14,21 @@
 class sly_Util_DirectoryException extends sly_Exception {
 	protected $dir;
 
+	/**
+	 * constructor
+	 *
+	 * @param string $dir
+	 */
 	public function __construct($dir) {
 		parent::__construct('mkdir('.$dir.') failed.');
 		$this->dir = $dir;
 	}
 
+	/**
+	 * get directory
+	 *
+	 * @return string
+	 */
 	public function getDirectory() {
 		return $this->dir;
 	}

@@ -66,10 +66,10 @@ class sly_Util_Language {
 
 	/**
 	 * @param  sly_Model_User $user
-	 * @param  int            $clangID
+	 * @param  int            $clang
 	 * @return boolean
 	 */
-	public static function hasPermissionOnLanguage(sly_Model_User $user, $clangID) {
-		return $user->isAdmin() || $user->hasRight('language', 'access', $clangID);
+	public static function hasPermissionOnLanguage(sly_Model_User $user, $clang) {
+		return $user->isAdmin() || $user->hasRight('language', 'access', $clang);
 	}
 }

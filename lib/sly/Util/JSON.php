@@ -12,6 +12,11 @@
  * @ingroup util
  */
 class sly_Util_JSON {
+	/**
+	 * get JSON service
+	 *
+	 * @return sly_Service_File_JSON
+	 */
 	protected static function getService() {
 		return sly_Service_Factory::getService('File_JSON');
 	}
