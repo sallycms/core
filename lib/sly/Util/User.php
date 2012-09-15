@@ -10,7 +10,6 @@
 
 class sly_Util_User {
 	/**
-	/**
 	 * return current user object
 	 *
 	 * @param  boolean $forceRefresh
@@ -21,21 +20,21 @@ class sly_Util_User {
 	}
 
 	/**
-	 * @param  int $userId
+	 * @param  int $userID
 	 * @return sly_Model_User
 	 */
-	public static function findById($userId) {
-		return sly_Service_Factory::getUserService()->findById($userId);
+	public static function findById($userID) {
+		return sly_Service_Factory::getUserService()->findById($userID);
 	}
 
 	/**
-	 * checks wheter a user exists or not
+	 * checks whether a user exists or not
 	 *
-	 * @param  int $userId
+	 * @param  int $userID
 	 * @return boolean
 	 */
-	public static function exists($userId) {
-		return self::isValid(self::findById($userId));
+	public static function exists($userID) {
+		return self::isValid(self::findById($userID));
 	}
 
 	/**

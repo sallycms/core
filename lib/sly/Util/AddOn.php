@@ -9,6 +9,11 @@
  */
 
 class sly_Util_AddOn {
+	/**
+	 * get addOn service
+	 *
+	 * @return sly_Service_AddOn
+	 */
 	public static function getService() {
 		return sly_Service_Factory::getAddOnService();
 	}

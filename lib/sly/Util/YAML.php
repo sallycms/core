@@ -12,6 +12,11 @@
  * @ingroup util
  */
 class sly_Util_YAML {
+	/**
+	 * get YAML service
+	 *
+	 * @return sly_Service_File_YAML
+	 */
 	protected static function getService() {
 		return sly_Service_Factory::getService('File_YAML');
 	}

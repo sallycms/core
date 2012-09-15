@@ -15,13 +15,13 @@
  */
 class sly_Util_MediaCategory {
 	/**
-	 * checks wheter a category exists or not
+	 * checks whether a category exists or not
 	 *
-	 * @param  int $categoryId
+	 * @param  int $categoryID
 	 * @return boolean
 	 */
-	public static function exists($categoryId) {
-		return self::isValid(self::findById($categoryId));
+	public static function exists($categoryID) {
+		return self::isValid(self::findById($categoryID));
 	}
 
 	/**
@@ -33,11 +33,11 @@ class sly_Util_MediaCategory {
 	}
 
 	/**
-	 * @param  int $categoryId
+	 * @param  int $categoryID
 	 * @return sly_Model_MediaCategory
 	 */
-	public static function findById($categoryId) {
-		return sly_Service_Factory::getMediaCategoryService()->findById($categoryId);
+	public static function findById($categoryID) {
+		return sly_Service_Factory::getMediaCategoryService()->findById($categoryID);
 	}
 
 	/**
@@ -49,11 +49,11 @@ class sly_Util_MediaCategory {
 	}
 
 	/**
-	 * @param  int $parentId
+	 * @param  int $parentID
 	 * @return array
 	 */
-	public static function findByParentId($parentId) {
-		return sly_Service_Factory::getMediaCategoryService()->findByParentId($parentId);
+	public static function findByParentId($parentID) {
+		return sly_Service_Factory::getMediaCategoryService()->findByParentId($parentID);
 	}
 
 	/**

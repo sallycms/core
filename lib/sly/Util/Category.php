@@ -19,18 +19,18 @@ class sly_Util_Category {
 	const NOTFOUND_ARTICLE = -3; ///< int
 
 	/**
-	 * checks wheter a category exists or not
+	 * checks whether a category exists or not
 	 *
-	 * @param  int $categoryId
+	 * @param  int $categoryID
 	 * @param  int $clang
 	 * @return boolean
 	 */
-	public static function exists($categoryId, $clang = null) {
-		return self::isValid(self::findById($categoryId, $clang));
+	public static function exists($categoryID, $clang = null) {
+		return self::isValid(self::findById($categoryID, $clang));
 	}
 
 	/**
-	 * @param sly_Model_Category $category
+	 * @param  mixed $category
 	 * @return boolean
 	 */
 	public static function isValid($category) {
@@ -38,15 +38,16 @@ class sly_Util_Category {
 	}
 
 	/**
-	 * @param  int   $articleId
+	 * @throws sly_Exception
+	 * @param  int   $categoryID
 	 * @param  int   $clang
 	 * @param  mixed $default
 	 * @return sly_Model_Category
 	 */
-	public static function findById($categoryId, $clang = null, $default = null) {
+	public static function findById($categoryID, $clang = null, $default = null) {
 		$service    = sly_Service_Factory::getCategoryService();
-		$categoryId = (int) $categoryId;
-		$cat        = $service->findById($categoryId, $clang);
+		$categoryID = (int) $categoryID;
+		$cat        = $service->findById($categoryID, $clang);
 
 		if ($cat) return $cat;
 
@@ -67,43 +68,48 @@ class sly_Util_Category {
 	}
 
 	/**
-	 * @param  int     $parentId
-	 * @param  boolean $ignore_offlines
+	 * @param  int     $parentID
+	 * @param  boolean $ignoreOfflines
 	 * @param  int     $clang
 	 * @return array
 	 */
-	public static function findByParentId($parentId, $ignore_offlines = false, $clang = null) {
-		return sly_Service_Factory::getCategoryService()->findByParentId($parentId, $ignore_offlines, $clang);
+	public static function findByParentId($parentID, $ignoreOfflines = false, $clang = null) {
+		return sly_Service_Factory::getCategoryService()->findByParentId($parentID, $ignoreOfflines, $clang);
 	}
 
 	/**
-	 * @param  boolean $ignore_offlines
-	 * @param  int $clang
+	 * @param  boolean $ignoreOfflines
+	 * @param  int     $clang
 	 * @return array
 	 */
-	public static function getRootCategories($ignore_offlines = false, $clang = null) {
-		return self::findByParentId(0, $ignore_offlines, $clang);
+	public static function getRootCategories($ignoreOfflines = false, $clang = null) {
+		return self::findByParentId(0, $ignoreOfflines, $clang);
 	}
 
-	public static function canReadCategory(sly_Model_User $user, $categoryId) {
+	/**
+	 * @param  sly_Model_User $user
+	 * @param  int            $categoryID
+	 * @return boolean
+	 */
+	public static function canReadCategory(sly_Model_User $user, $categoryID) {
 		if ($user->isAdmin()) return true;
 		static $canReadCache;
 
-		$userId = $user->getId();
+		$userID = $user->getId();
 
-		if (!isset($canReadCache[$userId])) {
-			$canReadCache[$userId] = array();
+		if (!isset($canReadCache[$userID])) {
+			$canReadCache[$userID] = array();
 		}
 
-		if (!isset($canReadCache[$userId][$categoryId])) {
-			$canReadCache[$userId][$categoryId] = false;
+		if (!isset($canReadCache[$userID][$categoryID])) {
+			$canReadCache[$userID][$categoryID] = false;
 
-			if (sly_Util_Article::canEditContent($user, $categoryId)) {
-				$canReadCache[$userId][$categoryId] = true;
+			if (sly_Util_Article::canEditContent($user, $categoryID)) {
+				$canReadCache[$userID][$categoryID] = true;
 			}
 			else {
 				// check all children for write rights
-				$article = self::findById($categoryId);
+				$article = self::findById($categoryID);
 
 				if ($article) {
 					$path = $article->getPath().$article->getId().'|%';
@@ -118,13 +124,13 @@ class sly_Util_Category {
 
 				foreach ($query as $row) {
 					if (sly_Util_Article::canEditContent($user, $row['id'])) {
-						$canReadCache[$userId][$categoryId] = true;
+						$canReadCache[$userID][$categoryID] = true;
 						break;
 					}
 				}
 			}
 		}
 
-		return isset($canReadCache[$userId][$categoryId]) ? $canReadCache[$userId][$categoryId] : false;
+		return isset($canReadCache[$userID][$categoryID]) ? $canReadCache[$userID][$categoryID] : false;
 	}
 }

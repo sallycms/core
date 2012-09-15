@@ -12,6 +12,12 @@
  * @ingroup util
  */
 class sly_Util_Mime {
+	/**
+	 * get MIME type for a given file
+	 *
+	 * @param  string $filename  the file's name (can be a virtual file, as only the extension is relevant)
+	 * @return string            the found MIME type or 'application/octet-stream' as a fallback
+	 */
 	public static function getType($filename) {
 		/*
 		Using the new, fancy finfo extension can lead to serious problems on poorly-

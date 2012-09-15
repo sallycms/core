@@ -10,65 +10,72 @@
 
 class sly_Util_ArticleSlice {
 	/**
-	 * checks wheter an articleslice exists or not
+	 * checks whether an article slice exists or not
 	 *
-	 * @param  int $article_slice_id
+	 * @param  int $articleSliceID
 	 * @return boolean
 	 */
-	public static function exists($article_slice_id) {
-		$articleSlice = self::findById($article_slice_id);
+	public static function exists($articleSliceID) {
+		$articleSlice = self::findById($articleSliceID);
 		return is_object($articleSlice) && ($articleSlice instanceof sly_Model_ArticleSlice);
 	}
 
 	/**
 	 * return the module name for a given slice
 	 *
-	 * @param int $article_slice_id
+	 * @param  int $articleSliceID
 	 * @return string
 	 */
-	public static function getModuleNameForSlice($article_slice_id) {
-		$articleSlice = self::findById($article_slice_id);
-
-		if (is_null($articleSlice)) return '';
-		return $articleSlice->getSlice()->getModule();
+	public static function getModuleNameForSlice($articleSliceID) {
+		$articleSlice = self::findById($articleSliceID);
+		return $articleSlice ? $articleSlice->getSlice()->getModule() : '';
 	}
 
 	/**
-	 * @param int $article_slice_id
+	 * find an article slice by its ID
+	 *
+	 * @param  int $articleSliceID
 	 * @return sly_Model_ArticleSlice
 	 */
-	public static function findById($article_slice_id) {
-		$article_slice_id = (int) $article_slice_id;
-		return sly_Service_Factory::getArticleSliceService()->findById($article_slice_id);
+	public static function findById($articleSliceID) {
+		$articleSliceID = (int) $articleSliceID;
+		return sly_Service_Factory::getArticleSliceService()->findById($articleSliceID);
 	}
 
 	/**
 	 * tries to delete a slice
 	 *
-	 * @param int $article_slice_id
+	 * @param  int $articleSliceID
 	 * @return boolean
 	 */
-	public static function deleteById($article_slice_id) {
-		$article_slice_id = (int) $article_slice_id;
-		if (!self::exists($article_slice_id)) return false;
+	public static function deleteById($articleSliceID) {
+		$articleSliceID = (int) $articleSliceID;
+		if (!self::exists($articleSliceID)) return false;
 
-		return sly_Service_Factory::getArticleSliceService()->deleteById($article_slice_id);
+		return sly_Service_Factory::getArticleSliceService()->deleteById($articleSliceID);
 	}
 
-	public static function getModule($article_slice_id) {
-		$slice = self::findById($article_slice_id);
-
-		if (is_null($slice)) return false;
+	/**
+	 * get module used by an article slice
+	 *
+	 * @param  int $articleSliceID
+	 * @return mixed                the module name (string) or false if the module was not found
+	 */
+	public static function getModule($articleSliceID) {
+		$slice = self::findById($articleSliceID);
+		if (!$slice) return false;
 
 		$module = $slice->getModule();
 		return sly_Service_Factory::getModuleService()->exists($module) ? $module : false;
 	}
 
 	/**
+	 * find all slices within an article
+	 *
 	 * @param  int    $articleId
-	 * @param  int    $clang
+	 * @param  int    $clang      give null for the current language
 	 * @param  string $slot
-	 * @return array
+	 * @return array              list of sly_Model_ArticleSlice objects
 	 */
 	public static function findByArticle($articleId, $clang = null, $slot = null) {
 		$articleId = (int) $articleId;

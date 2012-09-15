@@ -20,6 +20,11 @@ class sly_Util_Composer {
 
 	const EXTRA_SUBKEY = 'sallycms';
 
+	/**
+	 * constructor
+	 *
+	 * @param string $filename
+	 */
 	public function __construct($filename) {
 		$this->filename = $filename;
 		$this->proxy    = null;
@@ -27,15 +32,32 @@ class sly_Util_Composer {
 		$this->data     = false;
 	}
 
+	/**
+	 * set the current package name
+	 *
+	 * @param  string $package
+	 * @return sly_Util_Composer  self
+	 */
 	public function setPackage($package) {
 		$this->package = $package;
 		return $this;
 	}
 
+	/**
+	 * get current composer.json filename
+	 *
+	 * @return string
+	 */
 	public function getFilename() {
 		return $this->filename;
 	}
 
+	/**
+	 * read composer.json
+	 *
+	 * @param  string $composerDir
+	 * @return array
+	 */
 	public function getContent($composerDir = null) {
 		if ($this->data === false) {
 			$found = false;
@@ -76,6 +98,11 @@ class sly_Util_Composer {
 		return $this->data;
 	}
 
+	/**
+	 * revalidate the internal cache
+	 *
+	 * @return boolean
+	 */
 	public function revalidate() {
 		if ($this->mtime !== null) {
 			$realFile = $this->proxy ? $this->proxy : $this->filename;

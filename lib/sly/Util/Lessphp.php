@@ -13,29 +13,40 @@
  */
 class sly_Util_Lessphp {
 	/**
-	 * This method processes a file with lessphp.
+	 * parse a LESS file with lessphp
 	 *
-	 * The generated css content will not be cached so care about is
-	 * by yourselves.
+	 * There is no caching. So make sure you don't call this over and over again.
 	 *
 	 * @uses   lessphp
-	 * @param  string $cssFile  the file to process
-	 * @return string           the processed css code
+	 * @param  string $lessFile  the file to process
+	 * @return string            the processed css code
 	 */
-	public static function process($cssFile) {
+	public static function process($lessFile) {
 		// Do not use ->compileFile() to have the $cssFile's dirname as the *first*
 		// importdir instead of the last, so users can use their own 'mixin.less'.
-		return self::getCompiler($cssFile)->compile(file_get_contents($cssFile));
+		return self::getCompiler($lessFile)->compile(file_get_contents($lessFile));
 	}
 
-	public static function processString($css) {
-		return self::getCompiler()->compile($css);
+	/**
+	 * parse a LESS string
+	 *
+	 * @param  string $lessCode
+	 * @return string            the generated CSS
+	 */
+	public static function processString($lessCode) {
+		return self::getCompiler()->compile($lessCode);
 	}
 
-	public static function getCompiler($fname = null) {
+	/**
+	 * get a new LESS compiler instance
+	 *
+	 * @param  string $filename  if given, the file's directory will be used as the first import directory
+	 * @return lessc             the LESS compiler
+	 */
+	public static function getCompiler($filename = null) {
 		require_once SLY_VENDORFOLDER.'/leafo/lessphp/lessc.inc.php';
 
-		$less = new lessc($fname);
+		$less = new lessc($filename);
 		$less->setFormatter('compressed');
 
 		// add custom mixin package to default import dir
@@ -43,7 +54,7 @@ class sly_Util_Lessphp {
 		$dir[] = SLY_VENDORFOLDER.'/sallycms/less-mixins/';
 
 		// always add the file's dir as the first import dir
-		if ($fname) array_unshift($dir, dirname($fname));
+		if ($filename) array_unshift($dir, dirname($filename));
 
 		$less->setImportDir(array_filter($dir));
 
