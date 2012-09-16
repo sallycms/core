@@ -233,12 +233,12 @@ function sly_translate($text, $html = false) {
 	return $html ? sly_html($text) : $text;
 }
 
-function sly_ini_get($key, $default = null) {
+function sly_ini_get($key) {
 	$res = ini_get($key);
 
-	// key not found
+	// key not found (only possible in PHP 5.3+, PHP 5.2 returns an empty string for missing keys)
 	if ($res === false) {
-		return $default;
+		return $res;
 	}
 
 	$res = trim($res);

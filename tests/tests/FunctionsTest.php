@@ -237,17 +237,18 @@ class sly_FunctionsTest extends PHPUnit_Framework_TestCase {
 	/**
 	 * @dataProvider  slyInitGetBasicProvider
 	 */
-	public function testSlyIniGetBasic($key, $default, $expected) {
-		$this->assertSame($expected, sly_ini_get($key, $default));
+	public function testSlyIniGetBasic($key, $expected) {
+		$this->assertSame($expected, sly_ini_get($key));
 	}
 
 	public function slyInitGetBasicProvider() {
+		$is52 = version_compare(PHP_VERSION, '5.3', '<');
+
 		return array(
-			array('register_argc_argv',  null,  '1'), // always on in CLI mode
-			array('html_errors',         null,  '0'), // always off in CLI mode
-			array('disable_functions',   null,  ''),
-			array('this.does.not.exist', null,  null),
-			array('this.does.not.exist', false, false)
+			array('register_argc_argv',  '1'), // always on in CLI mode
+			array('html_errors',         '0'), // always off in CLI mode
+			array('disable_functions',   ''),
+			array('this.does.not.exist', $is52 ? '' : false)
 		);
 	}
 
