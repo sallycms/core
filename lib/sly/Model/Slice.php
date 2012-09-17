@@ -16,9 +16,9 @@
  */
 class sly_Model_Slice extends sly_Model_Base_Id {
 	protected $module; ///< string
-	protected $values; ///< array
+	protected $serialized_values; ///< array
 
-	protected $_attributes = array('module' => 'string', 'values' => 'array'); ///< array
+	protected $_attributes = array('module' => 'string', 'serialized_values' => 'json'); ///< array
 
 	/**
 	 * @return string
@@ -39,7 +39,7 @@ class sly_Model_Slice extends sly_Model_Base_Id {
 	 * @param  string $value
 	 */
 	public function setValue($finder, $value = null) {
-		$this->values[$finder] = $value;
+		$this->serialized_values[$finder] = $value;
 	}
 
 	/**
@@ -48,18 +48,18 @@ class sly_Model_Slice extends sly_Model_Base_Id {
 	 * @return mixed
 	 */
 	public function getValue($finder, $default = null) {
-		return isset($this->values[$finder]) ? $this->values[$finder] : $default;
+		return isset($this->serialized_values[$finder]) ? $this->serialized_values[$finder] : $default;
 	}
 
 	public function setValues($values = array()) {
 		if(!sly_Util_Array::isAssoc($values)) {
 			throw new sly_Exception('Values must be assoc array!');
 		}
-		$this->values = sly_makeArray($values);
+		$this->serialized_values = sly_makeArray($values);
 	}
 
 	public function getValues() {
-		return $this->values;
+		return $this->serialized_values;
 	}
 
 	/**

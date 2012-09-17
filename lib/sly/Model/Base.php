@@ -23,37 +23,9 @@ abstract class sly_Model_Base {
 	 * @param array $params
 	 */
 	public function __construct($params = array()) {
-		foreach ($this->_pk as $name => $type) {
-			if (isset($params[$name])) {
-				// map SQL DATE and DATETIME to unix timestamps
-				if ($type === 'date' || $type === 'datetime') {
-					$type = 'int';
 
-					if (!sly_Util_String::isInteger($params[$name])) {
-						$params[$name] = strtotime($params[$name]);
-					}
-				}
-
-				$this->$name = $params[$name];
-				settype($this->$name, $type);
-			}
-		}
-
-		foreach ($this->_attributes as $name => $type) {
-			if (isset($params[$name])) {
-				// map SQL DATE and DATETIME to unix timestamps
-				if ($type === 'date' || $type === 'datetime') {
-					$type = 'int';
-
-					if (!sly_Util_String::isInteger($params[$name])) {
-						$params[$name] = strtotime($params[$name]);
-					}
-				}
-
-				$this->$name = $params[$name];
-				settype($this->$name, $type);
-			}
-		}
+		$this->attrsFromHash($this->_pk, $params);
+		$this->attrsFromHash($this->_attributes, $params);
 
 		// put left over values in $_values to allow access from __call
 
@@ -136,12 +108,42 @@ abstract class sly_Model_Base {
 				elseif ($type === 'datetime') {
 					$value = $value ? date('Y-m-d H:i:s', $value) : '0000-00-00 00:00:00';
 				}
+				elseif ($type === 'json') {
+					$value = json_encode($value);
+				}
 			}
 
 			$data[$name] = $value;
 		}
 
 		return $data;
+	}
+
+	protected function attrsFromHash($attrs, $hash) {
+		foreach ($attrs as $name => $type) {
+			if (isset($hash[$name])) {
+				// map SQL DATE and DATETIME to unix timestamps
+				if ($type === 'date' || $type === 'datetime') {
+					$type = 'int';
+
+					if (!sly_Util_String::isInteger($hash[$name])) {
+						$hash[$name] = strtotime($hash[$name]);
+					}
+				}
+				elseif ($type === 'json') {
+					$hash[$name] = json_decode($hash[$name], true);
+
+					if(is_array($hash[$name])) {
+						$type = 'array';
+					} else {
+						$type = 'string';
+					}
+				}
+
+				$this->$name = $hash[$name];
+				settype($this->$name, $type);
+			}
+		}
 	}
 
 	/**
