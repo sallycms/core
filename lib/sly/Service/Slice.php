@@ -22,37 +22,8 @@ class sly_Service_Slice extends sly_Service_Model_Base_Id {
 	 * @return sly_Model_Slice
 	 */
 	protected function makeInstance(array $params) {
-		if (isset($params['serialized_values'])) {
-			$params['values'] = json_decode($params['serialized_values'], true);
-			if ($params['values'] === null) $params['values'] = array();
-			unset($params['serialized_values']);
-		}
-
 		return new sly_Model_Slice($params);
 	}
-
-	/**
-	 * @param  sly_Model_Slice $model
-	 * @return sly_Model_Slice
-	 */
-	public function save(sly_Model_Base $model) {
-		$persistence = $this->getPersistence();
-		$data        = $model->toHash();
-
-		$data['serialized_values'] = json_encode($data['values']);
-		unset($data['values']);
-
-		if ($model->getId() == sly_Model_Base_Id::NEW_ID) {
-			$persistence->insert($this->getTableName(), $data);
-			$model->setId($persistence->lastId());
-		}
-		else {
-			$persistence->update($this->getTableName(), $data, $model->getPKHash());
-		}
-
-		return $model;
-	}
-
 
 	/**
 	 * Kopiert einen Slice und seine Values
