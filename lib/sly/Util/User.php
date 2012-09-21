@@ -16,7 +16,8 @@ class sly_Util_User {
 	 * @return sly_Model_User
 	 */
 	public static function getCurrentUser($forceRefresh = false) {
-		return sly_Service_Factory::getUserService()->getCurrentUser($forceRefresh);
+		// make sure to not fail during setup (a number of components use this method during the setup)
+		return sly_Core::config()->get('SETUP') ? null : sly_Service_Factory::getUserService()->getCurrentUser($forceRefresh);
 	}
 
 	/**
