@@ -67,51 +67,34 @@ class sly_ConfigurationTest extends PHPUnit_Framework_TestCase {
 		$this->assertFalse($exception_thrown, 'reasing scalar to scalar failed');
 	}
 
+
 	public function testOverwriteScalarWithArray() {
 		$config = $this->newConfig();
-
 		$config->setStatic('unittest', 'scalar_value');
-		$exception_thrown = false;
-		try {
-			$config->setStatic('unittest', array('unit' => 'test'));
-		} catch (sly_Exception $e) {
-			$exception_thrown = true;
-		}
-		$this->assertTrue($exception_thrown, 'reasing array to scalar should fail');
+		$config->setStatic('unittest', array('unit' => 'test'));
+		$this->assertEquals('scalar_value', $config->get('unittest'), 'setting array should fail');
 	}
 
 	public function testOverwriteStaticWithLocal() {
 		$config = $this->newConfig();
 
 		$config->setStatic('unittest', 'scalar_value');
+		$config->setLocal('unittest', 'other_scalar');
 
-		$exception_thrown = false;
-		try {
-			$config->setLocal('unittest', 'other_scalar');
-
-		} catch (sly_Exception $e) {
-			$exception_thrown = true;
-		}
-
-		$this->assertFalse($exception_thrown, 'asing of key existing in other facility failed');
 		$this->assertEquals('other_scalar', $config->get('unittest'), 'setting scalar failed');
 	}
 
+
+	/**
+	 * @expectedException sly_Exception
+	 */
 	public function testOverwriteLocalWithStatic() {
 		$config = $this->newConfig();
 
 		$config->setLocal('unittest', 'scalar_value');
+		$config->setStatic('unittest', 'other_scalar');
 
-		$exception_thrown = false;
-		try {
-			$config->setStatic('unittest', 'other_scalar');
-
-		} catch (sly_Exception $e) {
-			$exception_thrown = true;
-		}
-
-		$this->assertFalse($exception_thrown, 'asing of key existing in other facility failed');
-		$this->assertEquals('scalar_value', $config->get('unittest'), 'setting scalar failed');
+		$this->assertEquals('scalar_value', $config->get('unittest'), 'setting scalar should fail');
 	}
 
 
@@ -217,6 +200,9 @@ class sly_ConfigurationTest extends PHPUnit_Framework_TestCase {
 		), $config->get('unittest'), 'overwriting scalar failed');
 	}
 
+	/**
+	 * @expectedException sly_Exception
+	 */
 	public function testOverwriteScalarDeepStatic() {
 		$config = $this->newConfig();
 		$base_array = array(
@@ -224,13 +210,7 @@ class sly_ConfigurationTest extends PHPUnit_Framework_TestCase {
 			'assocArray' => array('red' => 'rot', 'blue' => 'blau')
 		);
 		$config->setLocal('unittest', $base_array);
-
 		$config->setStatic('unittest/assocArray/blue', 'heckiheckipatang');
-
-		$this->assertNotEquals($config->get('unittest') == array(
-			'numArray' => array('red', 'green', 'blue'),
-			'assocArray' => array('red' => 'rot', 'blue' => 'heckiheckipatang')
-		), 'overwriting scalar from local over static should fail');
 	}
 
 }
