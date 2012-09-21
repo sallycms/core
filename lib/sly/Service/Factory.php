@@ -81,7 +81,8 @@ abstract class sly_Service_Factory {
 					$db         = sly_DB_Persistence::getInstance();
 					$dispatcher = sly_Core::dispatcher();
 					$sliceServ  = self::getService('Slice');
-					$service    = new $serviceName($db, $dispatcher, $sliceServ);
+					$tplService = self::getService('Template');
+					$service    = new $serviceName($db, $dispatcher, $sliceServ, $tplService);
 					break;
 
 				case 'Language':
