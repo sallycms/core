@@ -177,6 +177,14 @@ class sly_Table extends sly_Viewable {
 	}
 
 	/**
+	 * @param  int $idx
+	 * @return sly_Table_Column
+	 */
+	public function getColumn($idx) {
+		return sly_setarraytype($this->columns, $idx, 'raw', null);
+	}
+
+	/**
 	 * @param boolean $enable
 	 * @param array   $getParams  override default detection of GET parameters by giving an array instead of null
 	 */
