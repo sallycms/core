@@ -30,4 +30,14 @@ class sly_DB_PDO_Driver_OCI extends sly_DB_PDO_Driver {
 		// http://www.dba-oracle.com/oracle_create_database.htm
 		throw new sly_DB_Exception('Not yet implemented, too complex.');
 	}
+
+	/**
+	 * @return array
+	 */
+	public function getVersionConstraints() {
+		return array(
+			sly_Util_Requirements::OK      => '1.0', // ???
+			sly_Util_Requirements::WARNING => '1.0'  // ???
+		);
+	}
 }

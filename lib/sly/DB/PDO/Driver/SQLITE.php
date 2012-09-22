@@ -37,4 +37,14 @@ class sly_DB_PDO_Driver_SQLITE extends sly_DB_PDO_Driver {
 	public function getCreateDatabaseSQL($name) {
 		throw new sly_DB_PDO_Exception('Creating databases by SQL is not meaningful in SQLite.');
 	}
+
+	/**
+	 * @return array
+	 */
+	public function getVersionConstraints() {
+		return array(
+			sly_Util_Requirements::OK      => '3.0',
+			sly_Util_Requirements::WARNING => '2.0'
+		);
+	}
 }

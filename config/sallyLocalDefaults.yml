@@ -9,3 +9,5 @@ DATABASE:
   NAME: sally_base
   PERSISTENT: false
   TABLE_PREFIX: sly_
+babelcache:
+  memcached: [localhost, 11211]

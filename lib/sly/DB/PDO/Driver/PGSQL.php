@@ -28,4 +28,14 @@ class sly_DB_PDO_Driver_PGSQL extends sly_DB_PDO_Driver {
 	public function getCreateDatabaseSQL($name) {
 		return 'CREATE DATABASE `'.$name.'` WITH ENCODING \'UNICODE\'';
 	}
+
+	/**
+	 * @return array
+	 */
+	public function getVersionConstraints() {
+		return array(
+			sly_Util_Requirements::OK      => '8.0',
+			sly_Util_Requirements::WARNING => '8.0'
+		);
+	}
 }

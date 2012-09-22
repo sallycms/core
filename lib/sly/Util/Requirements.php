@@ -31,19 +31,19 @@ class sly_Util_Requirements {
 	/**
 	 * @return array
 	 */
-	public function mySQLVersion() {
-		if (function_exists('mysqli_get_client_version')) {
-			$versionNum = mysqli_get_client_version();
-			$version    = sprintf('%d.%d.%d', floor($versionNum / 10000), floor($versionNum / 100) % 100, $versionNum % 10000);
-			return $this->result($version.' (MySQLi)', $versionNum >= 50100 ? self::OK : ($versionNum >= 50000 ? self::WARNING : self::FAILED));
+	public function pdoDriverVersion(sly_DB_PDO_Connection $connection, array $constraints) {
+		$pdo     = $connection->getPDO();
+		$version = $pdo->getAttribute(PDO::ATTR_SERVER_VERSION);
+
+		if (version_compare($version, $constraints[self::WARNING], '<')) {
+			return $this->failed(t('setup_database_server_too_old', $version, $constraints[self::WARNING]));
 		}
-		elseif (function_exists('mysql_get_client_info')) {
-			$version = mysql_get_client_info();
-			return $this->result($version.' (MySQL)', version_compare($version, '5.1', '>=') ? self::OK : self::FAILED);
+
+		if (version_compare($version, $constraints[self::WARNING], '>=') && version_compare($version, $constraints[self::OK], '<')) {
+			return $this->warning(t('setup_database_server_old_but_okay', $version, $constraints[self::OK]));
 		}
-		else {
-			return $this->failed(t('no_mysql_mysqli'));
-		}
+
+		return $this->ok(t('setup_database_server_is_up_to_date', $version, $constraints[self::OK]));
 	}
 
 	/**

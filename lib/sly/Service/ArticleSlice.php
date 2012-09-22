@@ -17,6 +17,7 @@
 class sly_Service_ArticleSlice extends sly_Service_Model_Base_Id {
 	protected $tablename = 'article_slice'; ///< string
 	protected $sliceService;                ///< sly_Service_Slice
+	protected $templateService;             ///< sly_Service_Template
 	protected $dispatcher;                  ///< sly_Event_Dispatcher
 
 	/**
@@ -25,12 +26,14 @@ class sly_Service_ArticleSlice extends sly_Service_Model_Base_Id {
 	 * @param sly_DB_Persistence   $persistence
 	 * @param sly_Event_Dispatcher $dispatcher
 	 * @param sly_Service_Slice    $sliceService
+	 * @param sly_Service_Template $templateService
 	 */
-	public function __construct(sly_DB_Persistence $persistence, sly_Event_Dispatcher $dispatcher, sly_Service_Slice $sliceService) {
+	public function __construct(sly_DB_Persistence $persistence, sly_Event_Dispatcher $dispatcher, sly_Service_Slice $sliceService, sly_Service_Template $templateService) {
 		parent::__construct($persistence);
 
-		$this->sliceService = $sliceService;
-		$this->dispatcher   = $dispatcher;
+		$this->sliceService    = $sliceService;
+		$this->templateService = $templateService;
+		$this->dispatcher      = $dispatcher;
 	}
 
 	/**
@@ -141,6 +144,95 @@ class sly_Service_ArticleSlice extends sly_Service_Model_Base_Id {
 		}
 
 		return $this->find($where, null, $order);
+	}
+
+	/**
+	 * add a new article slice to an article
+	 *
+	 * The new slice will be placed after the existing slices by default, but you
+	 * can give an explicit position to override this.
+	 *
+	 * @throws sly_Exception               if the article has no template or not the requested slot
+	 * @param  sly_Model_Article $article  the target article
+	 * @param  string            $slot     the target slot
+	 * @param  string            $module   module name
+	 * @param  array             $values   slice values
+	 * @param  int               $pos      explicit position or null for the end
+	 * @param  sly_Model_User    $creator  the createuser or null for the current user
+	 * @return sly_Model_ArticleSlice
+	 */
+	public function add(sly_Model_Article $article, $slot, $module, array $values, $pos = null, sly_Model_User $creator = null) {
+		if (!$article->hasTemplate()) {
+			throw new sly_Exception(t('article_has_no_template'));
+		}
+
+		$tpl = $article->getTemplateName();
+
+		if (!$this->templateService->hasSlot($tpl, $slot)) {
+			throw new sly_Exception(t('article_has_no_such_slot', $slot));
+		}
+
+		$creator = $this->getActor($creator, __METHOD__);
+		$now     = time();
+		$artID   = $article->getId();
+		$clang   = $article->getClang();
+
+		// prepare database transaction
+
+		$sql    = $this->getPersistence();
+		$ownTrx = !$sql->isTransRunning();
+
+		if ($ownTrx) {
+			$sql->beginTransaction();
+		}
+
+		// here we go
+
+		try {
+			$maxPos = $sql->magicFetch('article_slice', 'MAX(pos)', array('article_id' => $artID, 'clang' => $clang, 'slot' => $slot));
+			$target = $maxPos + 1;
+
+			if ($pos !== null) {
+				if ($pos < 0) {
+					$target = 0;
+				}
+				elseif ($pos <= $target) {
+					$target = $pos;
+				}
+			}
+
+			// build the models
+
+			$slice = new sly_Model_Slice();
+			$slice->setModule($module);
+			$slice->setValues($values);
+			$slice = $this->sliceService->save($slice);
+
+			$articleSlice = new sly_Model_ArticleSlice();
+			$articleSlice->setPosition($target);
+			$articleSlice->setCreateColumns($creator);
+			$articleSlice->setSlice($slice);
+			$articleSlice->setSlot($slot);
+			$articleSlice->setArticle($article);
+			$articleSlice->setRevision(0);
+
+			$this->save($articleSlice);
+
+			// commit changes
+
+			if ($ownTrx) {
+				$sql->commit();
+			}
+
+			return $articleSlice;
+		}
+		catch (Exception $e) {
+			if ($ownTrx) {
+				$sql->rollBack();
+			}
+
+			throw $e;
+		}
 	}
 
 	/**

@@ -22,12 +22,32 @@ class sly_Util_Template {
 	 * @param string $name    the template name
 	 * @param array  $params  template variables as an associative array of parameters
 	 */
-	public static function render($name, $params = array()) {
+	public static function render($name, array $params = array()) {
 		try {
 			sly_Service_Factory::getTemplateService()->includeFile($name, $params);
 		}
 		catch (sly_Service_Template_Exception $e) {
 			print $e->getMessage();
+		}
+	}
+
+	/**
+	 * render a template and return its content
+	 *
+	 * @throws sly_Exception   if an exception is thrown inside the template
+	 * @param  string $name    template name
+	 * @param  array  $params  template variables as an associative array of parameters
+	 * @return string          rendered content
+	 */
+	public static function renderAsString($name, array $params = array()) {
+		try {
+			ob_start();
+			self::render($name, $params);
+			return ob_get_clean();
+		}
+		catch (Exception $e) {
+			ob_end_clean();
+			throw $e;
 		}
 	}
 

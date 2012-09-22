@@ -72,6 +72,10 @@ function sly_request($name, $type, $default = null) {
 	return sly_setarraytype($_REQUEST, $name, $type, $default);
 }
 
+function sly_cookie($name, $type, $default = null) {
+	return sly_setarraytype($_COOKIE, $name, $type, $default);
+}
+
 function sly_getArray($name, $types, $default = array()) {
 	$cast   = isset($_GET[$name]);
 	$values = sly_makeArray(isset($_GET[$name]) ? $_GET[$name] : $default);
