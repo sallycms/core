@@ -16,35 +16,36 @@ class sly_ConfigurationTest extends PHPUnit_Framework_TestCase {
 		$this->config->setFlushOnDestruct(false);
 	}
 
-
 	private function setBaseArray($mode = sly_Configuration::STORE_STATIC) {
 		$base_array = array(
-			'numArray' => array('red', 'green', 'blue'),
+			'numArray'   => array('red', 'green', 'blue'),
 			'assocArray' => array('red' => 'rot', 'blue' => 'blau')
 		);
+
 		$this->config->set('unittest', $base_array, $mode);
 	}
 
 	public function testAssignScalar() {
 		$this->config->setStatic('unittest', 'scalar_value');
 		$this->assertTrue($this->config->has('unittest'), 'setting scalar failed');
-		$this->assertEquals('scalar_value', $this->config->get('unittest'), 'setting scalar failed');
+		$this->assertSame('scalar_value', $this->config->get('unittest'), 'setting scalar failed');
 	}
 
 	public function testAssignArray() {
 		$this->config->setStatic('unittest', array('unit' => 'test'));
-		$this->assertEquals(array('unit' => 'test'), $this->config->get('unittest'), 'setting array failed');
+		$this->assertSame(array('unit' => 'test'), $this->config->get('unittest'), 'setting array failed');
 	}
 
 	public function testAssingDeep() {
 		$this->config->setStatic('unittest/deep/thought', 'scalar_value');
-		$this->assertEquals(array('deep' => array('thought' => 'scalar_value')), $this->config->get('unittest'), 'setting scalar in the deep failed');
+		$this->assertSame(array('deep' => array('thought' => 'scalar_value')), $this->config->get('unittest'), 'setting scalar in the deep failed');
 	}
 
 	public function testOverwriteScalarWithScalar() {
 		$this->config->setStatic('unittest', 'scalar_value');
 		$this->config->setStatic('unittest', 'other_scalar');
-		$this->assertTrue($this->config->get('unittest') == 'other_scalar');
+
+		$this->assertSame('other_scalar', $this->config->get('unittest'));
 	}
 
 	/**
@@ -53,15 +54,14 @@ class sly_ConfigurationTest extends PHPUnit_Framework_TestCase {
 	public function testOverwriteScalarWithArray() {
 		$this->config->setStatic('unittest', 'scalar_value');
 		$this->config->setStatic('unittest', array('unit' => 'test'));
-		$this->assertEquals('scalar_value', $this->config->get('unittest'), 'setting array should fail');
 	}
 
 	public function testOverwriteStaticWithLocal() {
 		$this->config->setStatic('unittest', 'scalar_value');
 		$this->config->setLocal('unittest', 'other_scalar');
-		$this->assertEquals('other_scalar', $this->config->get('unittest'), 'setting scalar failed');
-	}
 
+		$this->assertSame('other_scalar', $this->config->get('unittest'), 'setting scalar failed');
+	}
 
 	/**
 	 * @expectedException sly_Exception
@@ -69,27 +69,28 @@ class sly_ConfigurationTest extends PHPUnit_Framework_TestCase {
 	public function testOverwriteLocalWithStatic() {
 		$this->config->setLocal('unittest', 'scalar_value');
 		$this->config->setStatic('unittest', 'other_scalar');
-		$this->assertEquals('scalar_value', $this->config->get('unittest'), 'setting scalar should fail');
 	}
-
 
 	public function testOverwriteStaticWithProject() {
 		$this->config->setStatic('unittest', 'scalar_value');
 		$this->config->set('unittest', 'other_scalar');
-		$this->assertEquals('other_scalar', $this->config->get('unittest'), 'setting scalar failed');
+
+		$this->assertSame('other_scalar', $this->config->get('unittest'), 'setting scalar failed');
 	}
 
 	public function testOverwriteLocalWithProject() {
 		$this->config->setLocal('unittest', 'scalar_value');
 		$this->config->set('unittest', 'other_scalar');
-		$this->assertEquals('other_scalar', $this->config->get('unittest'), 'setting scalar failed');
+
+		$this->assertSame('other_scalar', $this->config->get('unittest'), 'setting scalar failed');
 	}
 
 	public function testMergeArrayKeys() {
 		$this->setBaseArray();
 		$this->config->setStatic('unittest/numArray', array('1', '2', '3'));
-		$this->assertEquals(array(
-			'numArray' => array('1', '2', '3'),
+
+		$this->assertSame(array(
+			'numArray'   => array('1', '2', '3'),
 			'assocArray' => array('red' => 'rot', 'blue' => 'blau')
 		), $this->config->get('unittest'), 'array merging by key failed');
 	}
@@ -97,8 +98,9 @@ class sly_ConfigurationTest extends PHPUnit_Framework_TestCase {
 	public function testMergeArrayValues() {
 		$this->setBaseArray();
 		$this->config->setStatic('unittest/assocArray', array('yellow' => 'gelb'));
+
 		$this->assertEquals(array(
-			'numArray' => array('red', 'green', 'blue'),
+			'numArray'   => array('red', 'green', 'blue'),
 			'assocArray' => array('red' => 'rot', 'blue' => 'blau', 'yellow' => 'gelb')
 		), $this->config->get('unittest'), 'array value merging failed');
 	}
