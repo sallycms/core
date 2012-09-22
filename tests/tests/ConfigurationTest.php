@@ -157,12 +157,17 @@ class sly_ConfigurationTest extends PHPUnit_Framework_TestCase {
 	}
 
 	public function testStoreDefault() {
+		$result = $this->config->setLocalDefault('unittest/assocArray', 'heckiheckipatang');
+		$this->assertEquals('heckiheckipatang', $result, 'setting the local default should fail');
+	}
+
+	public function testOverwriteWithDefault() {
 		$this->setBaseArray(sly_Configuration::STORE_LOCAL);
-		$result = $this->config->setLocalDefault('unittest/assocArray/blue', 'heckiheckipatang');
+		$result = $this->config->setLocalDefault('unittest/assocArray/red', 'heckiheckipatang');
 		$this->assertFalse($result, 'setting the local default should fail');
 	}
 
-	public function testStoreDefaultForce() {
+	public function testOverwriteWithForce() {
 		$this->setBaseArray(sly_Configuration::STORE_LOCAL);
 		$result = $this->config->setLocalDefault('unittest/assocArray/blue', 'heckiheckipatang', true);
 		$this->assertEquals('heckiheckipatang', $result, 'setting the local default failed');
