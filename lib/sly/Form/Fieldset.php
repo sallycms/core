@@ -109,6 +109,28 @@ class sly_Form_Fieldset extends sly_Viewable {
 	}
 
 	/**
+	 * Replace an existing element
+	 *
+	 * @param  int $rowIdx        the row number (0-based)
+	 * @param  int $columnIdx     the column number (0-based) (always 0 for single-column fieldsets)
+	 * @param  sly_Form_IElement  the new element
+	 * @return sly_Form_IElement  the replaced element or null if not found
+	 */
+	public function replaceElement($rowIdx, $columnIdx, sly_Form_IElement $element) {
+		$rowIdx    = (int) $rowIdx;
+		$columnIdx = (int) $columnIdx;
+
+		if (!isset($this->rows[$rowIdx][$columnIdx])) {
+			return null;
+		}
+
+		$old = $this->rows[$rowIdx][$columnIdx];
+		$this->rows[$rowIdx][$columnIdx] = $element;
+
+		return $old;
+	}
+
+	/**
 	 * Render the form
 	 *
 	 * Renders the form and returns the generated XHTML.
