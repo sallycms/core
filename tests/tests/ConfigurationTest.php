@@ -9,79 +9,57 @@
  */
 
 class sly_ConfigurationTest extends PHPUnit_Framework_TestCase {
+	private $config;
 
-	private function newConfig() {
-		$config = new sly_Configuration();
-		$config->setFlushOnDestruct(false);
-		return $config;
+	public function setUp() {
+		$this->config = new sly_Configuration();
+		$this->config->setFlushOnDestruct(false);
 	}
 
-	private function newConfigWithStaticBase() {
-		$config = new sly_Configuration();
-		$config->setFlushOnDestruct(false);
+
+	private function setBaseArray($mode = sly_Configuration::STORE_STATIC) {
 		$base_array = array(
 			'numArray' => array('red', 'green', 'blue'),
 			'assocArray' => array('red' => 'rot', 'blue' => 'blau')
 		);
-		$config->setStatic('unittest', $base_array);
-
-		return $config;
+		$this->config->set('unittest', $base_array, $mode);
 	}
 
 	public function testAssignScalar() {
-		$config = $this->newConfig();
-
-		$config->setStatic('unittest', 'scalar_value');
-
-		$this->assertEquals('scalar_value', $config->get('unittest'), 'setting scalar failed');
+		$this->config->setStatic('unittest', 'scalar_value');
+		$this->assertTrue($this->config->has('unittest'), 'setting scalar failed');
+		$this->assertEquals('scalar_value', $this->config->get('unittest'), 'setting scalar failed');
 	}
 
 	public function testAssignArray() {
-		$config = $this->newConfig();
-
-		$config->setStatic('unittest', array('unit' => 'test'));
-
-		$this->assertEquals(array('unit' => 'test'), $config->get('unittest'), 'setting array failed');
+		$this->config->setStatic('unittest', array('unit' => 'test'));
+		$this->assertEquals(array('unit' => 'test'), $this->config->get('unittest'), 'setting array failed');
 	}
 
 	public function testAssingDeep() {
-		$config = $this->newConfig();
-
-		$config->setStatic('unittest/deep/thought', 'scalar_value');
-
-		$this->assertEquals(array('deep' => array('thought' => 'scalar_value')), $config->get('unittest'), 'setting scalar in the deep failed');
+		$this->config->setStatic('unittest/deep/thought', 'scalar_value');
+		$this->assertEquals(array('deep' => array('thought' => 'scalar_value')), $this->config->get('unittest'), 'setting scalar in the deep failed');
 	}
 
 	public function testOverwriteScalarWithScalar() {
-		$config = $this->newConfig();
-
-		$config->setStatic('unittest', 'scalar_value');
-
-		$exception_thrown = false;
-		try {
-			$config->setStatic('unittest', 'other_scalar');
-		} catch (sly_Exception $e) {
-			$exception_thrown = true;
-		}
-		$this->assertTrue($config->get('unittest') == 'other_scalar');
-		$this->assertFalse($exception_thrown, 'reasing scalar to scalar failed');
+		$this->config->setStatic('unittest', 'scalar_value');
+		$this->config->setStatic('unittest', 'other_scalar');
+		$this->assertTrue($this->config->get('unittest') == 'other_scalar');
 	}
 
-
+	/**
+	 * @expectedException sly_Exception
+	 */
 	public function testOverwriteScalarWithArray() {
-		$config = $this->newConfig();
-		$config->setStatic('unittest', 'scalar_value');
-		$config->setStatic('unittest', array('unit' => 'test'));
-		$this->assertEquals('scalar_value', $config->get('unittest'), 'setting array should fail');
+		$this->config->setStatic('unittest', 'scalar_value');
+		$this->config->setStatic('unittest', array('unit' => 'test'));
+		$this->assertEquals('scalar_value', $this->config->get('unittest'), 'setting array should fail');
 	}
 
 	public function testOverwriteStaticWithLocal() {
-		$config = $this->newConfig();
-
-		$config->setStatic('unittest', 'scalar_value');
-		$config->setLocal('unittest', 'other_scalar');
-
-		$this->assertEquals('other_scalar', $config->get('unittest'), 'setting scalar failed');
+		$this->config->setStatic('unittest', 'scalar_value');
+		$this->config->setLocal('unittest', 'other_scalar');
+		$this->assertEquals('other_scalar', $this->config->get('unittest'), 'setting scalar failed');
 	}
 
 
@@ -89,128 +67,105 @@ class sly_ConfigurationTest extends PHPUnit_Framework_TestCase {
 	 * @expectedException sly_Exception
 	 */
 	public function testOverwriteLocalWithStatic() {
-		$config = $this->newConfig();
-
-		$config->setLocal('unittest', 'scalar_value');
-		$config->setStatic('unittest', 'other_scalar');
-
-		$this->assertEquals('scalar_value', $config->get('unittest'), 'setting scalar should fail');
+		$this->config->setLocal('unittest', 'scalar_value');
+		$this->config->setStatic('unittest', 'other_scalar');
+		$this->assertEquals('scalar_value', $this->config->get('unittest'), 'setting scalar should fail');
 	}
 
 
 	public function testOverwriteStaticWithProject() {
-		$config = $this->newConfig();
-
-		$config->setStatic('unittest', 'scalar_value');
-
-		$exception_thrown = false;
-		try {
-			$config->set('unittest', 'other_scalar');
-
-		} catch (sly_Exception $e) {
-			$exception_thrown = true;
-		}
-
-		$this->assertFalse($exception_thrown, 'asing of key existing in other facility failed');
-		$this->assertEquals('other_scalar', $config->get('unittest'), 'setting scalar failed');
+		$this->config->setStatic('unittest', 'scalar_value');
+		$this->config->set('unittest', 'other_scalar');
+		$this->assertEquals('other_scalar', $this->config->get('unittest'), 'setting scalar failed');
 	}
 
 	public function testOverwriteLocalWithProject() {
-		$config = $this->newConfig();
-
-		$config->setLocal('unittest', 'scalar_value');
-
-		$exception_thrown = false;
-		try {
-			$config->set('unittest', 'other_scalar');
-
-		} catch (sly_Exception $e) {
-			$exception_thrown = true;
-		}
-
-		$this->assertFalse($exception_thrown, 'asing of key existing in other facility failed');
-		$this->assertEquals('other_scalar', $config->get('unittest'), 'setting scalar failed');
+		$this->config->setLocal('unittest', 'scalar_value');
+		$this->config->set('unittest', 'other_scalar');
+		$this->assertEquals('other_scalar', $this->config->get('unittest'), 'setting scalar failed');
 	}
 
 	public function testMergeArrayKeys() {
-		$config = $this->newConfigWithStaticBase();
-
-		$config->setStatic('unittest/numArray', array('1', '2', '3'));
-
+		$this->setBaseArray();
+		$this->config->setStatic('unittest/numArray', array('1', '2', '3'));
 		$this->assertEquals(array(
 			'numArray' => array('1', '2', '3'),
 			'assocArray' => array('red' => 'rot', 'blue' => 'blau')
-		), $config->get('unittest'), 'array merging by key failed');
+		), $this->config->get('unittest'), 'array merging by key failed');
 	}
 
 	public function testMergeArrayValues() {
-		$config = $this->newConfigWithStaticBase();
-
-		$config->setStatic('unittest/assocArray', array('yellow' => 'gelb'));
-
+		$this->setBaseArray();
+		$this->config->setStatic('unittest/assocArray', array('yellow' => 'gelb'));
 		$this->assertEquals(array(
 			'numArray' => array('red', 'green', 'blue'),
 			'assocArray' => array('red' => 'rot', 'blue' => 'blau', 'yellow' => 'gelb')
-		), $config->get('unittest'), 'array value merging failed');
+		), $this->config->get('unittest'), 'array value merging failed');
 	}
 
 	public function testMergeScalarToAssoc() {
-		$config = $this->newConfigWithStaticBase();
-
-		$config->setStatic('unittest/assocArray', 'gelb');
-
+		$this->setBaseArray();
+		$this->config->setStatic('unittest/assocArray', 'gelb');
 		$this->assertEquals(array(
 			'numArray' => array('red', 'green', 'blue'),
 			'assocArray' => 'gelb'),
-			$config->get('unittest'),
+			$this->config->get('unittest'),
 		 'merging scalar to assoc array failed');
 	}
 
 	public function testMergeNumArrayToAssoc() {
-		$config = $this->newConfigWithStaticBase();
-
-		$config->setStatic('unittest/assocArray', array('gelb'));
-
+		$this->setBaseArray();
+		$this->config->setStatic('unittest/assocArray', array('gelb'));
 		$this->assertEquals(array(
 			'numArray' => array('red', 'green', 'blue'),
 			'assocArray' => array('gelb')),
-			$config->get('unittest'),
+			$this->config->get('unittest'),
 		 'merging scalar to assoc array failed');
 	}
 
 	public function testOverwriteScalarDeep() {
-		$config = $this->newConfigWithStaticBase();
-
-		$config->setStatic('unittest/assocArray/blue', 'heckiheckipatang');
-
-		$this->assertEquals($config->get('unittest'), array(
+		$this->setBaseArray();
+		$this->config->setStatic('unittest/assocArray/blue', 'heckiheckipatang');
+		$this->assertEquals($this->config->get('unittest'), array(
 			'numArray' => array('red', 'green', 'blue'),
 			'assocArray' => array('red' => 'rot', 'blue' => 'heckiheckipatang')
 		), 'overwriting scalar failed');
 	}
 
 	public function testOverwriteScalarDeepLocal() {
-		$config = $this->newConfigWithStaticBase();
-
-		$config->setLocal('unittest/assocArray/blue', 'heckiheckipatang');
-
+		$this->setBaseArray();
+		$this->config->setLocal('unittest/assocArray/blue', 'heckiheckipatang');
 		$this->assertEquals(array(
 			'numArray' => array('red', 'green', 'blue'),
 			'assocArray' => array('red' => 'rot', 'blue' => 'heckiheckipatang')
-		), $config->get('unittest'), 'overwriting scalar failed');
+		), $this->config->get('unittest'), 'overwriting scalar failed');
 	}
 
 	/**
 	 * @expectedException sly_Exception
 	 */
 	public function testOverwriteScalarDeepStatic() {
-		$config = $this->newConfig();
-		$base_array = array(
-			'numArray' => array('red', 'green', 'blue'),
-			'assocArray' => array('red' => 'rot', 'blue' => 'blau')
-		);
-		$config->setLocal('unittest', $base_array);
-		$config->setStatic('unittest/assocArray/blue', 'heckiheckipatang');
+		$this->setBaseArray(sly_Configuration::STORE_LOCAL);
+		$this->config->setStatic('unittest/assocArray/blue', 'heckiheckipatang');
+	}
+
+	/**
+	 * @expectedException sly_Exception
+	 */
+	public function testInvalidKey() {
+		$this->config->setStatic('', 'heckiheckipatang');
+	}
+
+	public function testStoreDefault() {
+		$this->setBaseArray(sly_Configuration::STORE_LOCAL);
+		$result = $this->config->setLocalDefault('unittest/assocArray/blue', 'heckiheckipatang');
+		$this->assertFalse($result, 'setting the local default should fail');
+	}
+
+	public function testStoreDefaultForce() {
+		$this->setBaseArray(sly_Configuration::STORE_LOCAL);
+		$result = $this->config->setLocalDefault('unittest/assocArray/blue', 'heckiheckipatang', true);
+		$this->assertEquals('heckiheckipatang', $result, 'setting the local default failed');
 	}
 
 }
