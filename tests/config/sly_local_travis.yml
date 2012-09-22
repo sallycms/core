@@ -1,0 +1,11 @@
+SETUP: false
+INSTNAME: sly59f008fea53fb4447830
+CACHING_STRATEGY: BabelCache_Blackhole
+DATABASE:
+  DRIVER: mysql
+  HOST: localhost
+  LOGIN: root
+  PASSWORD: ''
+  NAME: sally_test
+  PERSISTENT: false
+  TABLE_PREFIX: sly_

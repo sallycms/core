@@ -1,0 +1,68 @@
+<?php
+/*
+ * Copyright (c) 2012, webvariants GbR, http://www.webvariants.de
+ *
+ * This file is released under the terms of the MIT license. You can find the
+ * complete text in the attached LICENSE file or online at:
+ *
+ * http://www.opensource.org/licenses/mit-license.php
+ */
+
+$name   = sly_html($this->getName());
+$id     = sly_html($this->getID());
+$files  = sly_makeArray($this->getDisplayValue());
+$files  = empty($files) ? array() : array_filter($files);
+$values = array();
+$list   = array();
+
+foreach ($files as $filename) {
+	$fullName = sly_Form_Widget_Media::getFullName($filename);
+	if (empty($fullName)) continue;
+
+	$values[] = $filename;
+	$list[]   = array($filename, $fullName);
+}
+
+$filetypeFilter = '';
+$categoryFilter = '';
+
+if (!empty($this->filetypes)) {
+	$filetypeFilter = ' data-filetypes="'.implode('|', $this->filetypes).'"';
+}
+
+if (!empty($this->categories)) {
+	$categoryFilter = ' data-categories="'.implode('|', $this->categories).'"';
+}
+
+$cls = 'sly-widget sly-medialist'.(isset($this->attributes['class']) ? ' '.sly_html($this->attributes['class']) : '');
+$min = $this->getMinElements();
+$max = $this->getMaxElements();
+$cur = count($values);
+
+if ($max !== -1 && $cur >= $max) $cls .= ' at-max';
+if ($cur <= $min) $cls .= ' at-min';
+
+$minMax = ' data-min="'.$min.'" data-max="'.$max.'"';
+
+?>
+<span class="<?php echo $cls ?>"<?php echo $filetypeFilter.$categoryFilter.$minMax ?>>
+	<input type="hidden" name="<?php echo $name ?>" value="<?php echo sly_html(implode(',', $values)) ?>" />
+	<select size="8" class="sly-form-select sly-no-chosen" id="<?php echo $id ?>">
+		<?php foreach ($list as $element): ?>
+		<option value="<?php echo sly_html($element[0]) ?>"><?php echo sly_html($element[1]) ?></option>
+		<?php endforeach ?>
+	</select>
+
+	<span class="sly-icons move">
+		<a href="#" class="fct-top" title="<?php echo t('move_top') ?>"></a>
+		<a href="#" class="fct-up" title="<?php echo t('move_up') ?>"></a>
+		<a href="#" class="fct-down" title="<?php echo t('move_down') ?>"></a>
+		<a href="#" class="fct-bottom" title="<?php echo t('move_bottom') ?>" style="margin-right:2em"></a>
+	</span>
+
+	<span class="sly-icons edit">
+		<a href="#" class="fct-open" title="<?php echo t('select_medium') ?>"></a>
+		<a href="#" class="fct-add" title="<?php echo t('upload_medium') ?>"></a>
+		<a href="#" class="fct-delete" title="<?php echo t('remove_medium') ?>"></a>
+	</span>
+</span>
