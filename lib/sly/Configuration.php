@@ -299,9 +299,12 @@ class sly_Configuration {
 			return $value;
 		}
 
-		$mode = $this->getMode($key, $mode, $force);
-		$this->mode[$key] = $mode;
+		$mode = $this->getStoreMode($key, $mode, $force);
 
+		if($mode === null) return false;
+
+		$this->mode[$key] = $mode;
+		$this->cache = null;
 		$result = false;
 
 		switch ($mode) {
@@ -325,18 +328,20 @@ class sly_Configuration {
 	 * @throws sly_Exception  if the mode is wrong
 	 * @param  string  $key   the key to set the mode of
 	 * @param  int     $mode  one of the classes MODE constants
-	 * @return int            one of the classes MODE constants
+	 * @return int            one of the classes MODE constants or null
 	 */
-	protected function getMode($key, $mode, $force) {
+	protected function getStoreMode($key, $mode, $force) {
 		//handle default facilities
 		if($mode === self::STORE_LOCAL_DEFAULT || $mode === self::STORE_PROJECT_DEFAULT) {
-			// if it is okay to write move default to matching facility
-			if($force || !isset($this->mode[$key]) || $this->mode[$key] > $mode-1) {
-				return $mode-1;
+			$mode--; //move to real facility
+			// if  the key does not exists or else it is in our real facility and we force override
+			if(!isset($this->mode[$key]) || ($force && $this->mode[$key] === $mode)) {
+				return $mode;
 			}
+			return null;
 		}
 		else {
-			// for all others allow duplicate setting of a key only in a higher facility
+			// for all others allow duplicate setting of a key only in a higher level facility
 			if (isset($this->mode[$key]) && $this->mode[$key] < $mode) {
 				throw new sly_Exception('Mode für '.$key.' wurde bereits auf '.$this->mode[$key].' gesetzt.');
 			}
@@ -344,6 +349,9 @@ class sly_Configuration {
 		return $mode;
 	}
 
+	/**
+	 * write the local and projectconfiguration to disc
+	 */
 	protected function flush() {
 		if ($this->localConfigModified) {
 			sly_Util_YAML::dump($this->getLocalConfigFile(), $this->localConfig->get(null));
@@ -354,6 +362,9 @@ class sly_Configuration {
 		}
 	}
 
+	/**
+	 * warm up the internal cache for get/has operations
+	 */
 	protected function warmUp() {
 		if ($this->cache === null) {
 			// build merged config cache
