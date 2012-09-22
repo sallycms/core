@@ -47,7 +47,7 @@ class sly_Util_HTML {
 			return sprintf('<span %s><span>%s</span></span>', self::buildAttributeString($span), sly_html($text));
 		}
 
-		$a = array('href' => $target, 'class' => 'sly-sprite sly-sprite-'.$class);
+		$a = array('href' => $target, 'class' => 'sly-sprite sly-sprite-'.$class, 'title' => $text);
 		return sprintf('<a %s><span>%s</span></a>', self::buildAttributeString($a), sly_html($text));
 	}
 
