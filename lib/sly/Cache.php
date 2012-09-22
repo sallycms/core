@@ -160,4 +160,16 @@ class sly_Cache extends BabelCache_Factory {
 
 		return BabelCache_SQLite::connect($db);
 	}
+
+	/**
+	 * Return memcache address
+	 *
+	 * This method should return the memcache server address as a single
+	 * array(host, port).
+	 *
+	 * @return array  array(host, port)
+	 */
+	protected function getMemcacheAddress() {
+		return sly_Core::config()->get('babelcache/memcached');
+	}
 }

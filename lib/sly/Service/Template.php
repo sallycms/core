@@ -186,11 +186,12 @@ class sly_Service_Template extends sly_Service_DevelopBase {
 	 * A given params array will be extracted to variables and is available
 	 * in the template code.
 	 *
-	 * @param string $name    Unique template name
-	 * @param array  $params  Array of params to be available in the template
+	 * @param string $name    template name
+	 * @param array  $params  array of params to be available in the template
 	 */
-	public function includeFile($name, $params = array()) {
+	public function includeFile($name, array $params = array()) {
 		unset($name);
+
 		if (!empty($params)) {
 			unset($params);
 			extract(func_get_arg(1));
@@ -198,6 +199,7 @@ class sly_Service_Template extends sly_Service_DevelopBase {
 		else {
 			unset($params);
 		}
-		include SLY_DEVELOPFOLDER.'/templates/'. $this->getFilename(func_get_arg(0));
+
+		include SLY_DEVELOPFOLDER.'/templates/'.$this->getFilename(func_get_arg(0));
 	}
 }
