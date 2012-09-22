@@ -34,31 +34,33 @@ class sly_Util_Array {
 	 * @return mixed
 	 */
 	public function set($key, $value) {
-		$key = trim($key, '/');
-
-		if (strlen($key) == 0) {
+		if (strlen($key) === 0) {
 			throw new sly_Exception('Key must not be empty!');
 		}
 
-		if (strpos($key, '/') === false) {
-			$this->array[$key] = $value;
-			return $value;
+		$key = trim($key, '/');
+
+		if (strlen($key) === 0) {
+			$this->array = $value;
+		}
+		else {
+			// Da wir Schreibvorgänge anstoßen werden, arbeiten wir hier explizit
+			// mit Referenzen. Ja, Referenzen sind i.d.R. böse, deshalb werden sie auch
+			// in get() und has() nicht benutzt. Copy-on-Write und so.
+
+			$path = self::getPath($key);
+
+			$res  = &$this->array;
+
+			foreach ($path as $step) {
+				if (!is_array($res)) throw new sly_Exception('Cannot make an array out of a scalar value.');
+				if (!array_key_exists($step, $res)) $res[$step] = array();
+				$res = &$res[$step];
+			}
+
+			$res = $value;
 		}
 
-		// Da wir Schreibvorgänge anstoßen werden, arbeiten wir hier explizit
-		// mit Referenzen. Ja, Referenzen sind i.d.R. böse, deshalb werden sie auch
-		// in get() und has() nicht benutzt. Copy-on-Write und so.
-
-		$path = self::getPath($key);
-		$res  = &$this->array;
-
-		foreach ($path as $step) {
-			if (!is_array($res)) throw new sly_Exception('Cannot make an array out of a scalar value.');
-			if (!array_key_exists($step, $res)) $res[$step] = array();
-			$res = &$res[$step];
-		}
-
-		$res = $value;
 		$this->resultCache = array();
 
 		return $value;
@@ -143,7 +145,7 @@ class sly_Util_Array {
 		$res  = $this->array;
 
 		foreach ($path as $step) {
-			if (!array_key_exists($step, $res)) {
+			if (!is_array($res) || !array_key_exists($step, $res)) {
 				return array(false, $default);
 			}
 
@@ -234,7 +236,7 @@ class sly_Util_Array {
 	 * @return boolean       true, if the array is associative
 	 */
 	public static function isAssoc($array) {
-		return is_array($array) && (empty($array) || 0 !== count(array_diff_key($array, array_keys(array_keys($array)))));
+		return is_array($array) && (empty($array) || array_diff_key($array, range(0, count($array) - 1)));
 	}
 
 	/**
