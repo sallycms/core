@@ -323,8 +323,8 @@ class sly_Form extends sly_Form_Base {
 	/**
 	 * Get element by name
 	 *
-	 * @param  string $name          the element's name
-	 * @return sly_Form_ElementBase  the found element or null
+	 * @param  string $name       the element's name
+	 * @return sly_Form_IElement  the found element or null
 	 */
 	public function findElementByName($name) {
 		return $this->findElement('name', $name);
@@ -333,8 +333,8 @@ class sly_Form extends sly_Form_Base {
 	/**
 	 * Get element by ID
 	 *
-	 * @param  string $name          the element's ID
-	 * @return sly_Form_ElementBase  the found element or null
+	 * @param  string $name       the element's ID
+	 * @return sly_Form_IElement  the found element or null
 	 */
 	public function findElementByID($id) {
 		return $this->findElement('id', $id);
@@ -343,17 +343,45 @@ class sly_Form extends sly_Form_Base {
 	/**
 	 * Get element by name
 	 *
-	 * @param  string $criterium     'id' or 'name'
-	 * @param  string $value         the value to find
-	 * @return sly_Form_ElementBase  the found element or null
+	 * @param  string $criterium  'id' or 'name'
+	 * @param  string $value      the value to find
+	 * @return sly_Form_IElement  the found element or null
 	 */
 	protected function findElement($criterium, $value) {
 		foreach ($this->fieldsets as $fieldset) {
 			foreach ($fieldset->getRows() as $row) {
 				foreach ($row as $element) {
-					if ($element instanceof sly_Form_ElementBase) {
+					if ($element instanceof sly_Form_IElement) {
 						if ($criterium === 'name' && $element->getName() === $value) return $element;
 						if ($criterium === 'id'   && $element->getID() === $value)   return $element;
+					}
+				}
+			}
+		}
+
+		return null;
+	}
+
+	/**
+	 * Replace an existing element
+	 *
+	 * @param  string $criterium  'id' or 'name'
+	 * @param  string $value      the value to find
+	 * @param  sly_Form_IElement  the new element
+	 * @return sly_Form_IElement  the replaced element or null if not found
+	 */
+	public function replaceElement($criterium, $value, sly_Form_IElement $element) {
+		foreach ($this->fieldsets as $fIdx => $fieldset) {
+			foreach ($fieldset->getRows() as $rowIdx => $row) {
+				foreach ($row as $elemIdx => $elem) {
+
+					if ($elem instanceof sly_Form_IElement) {
+						if (
+							($criterium === 'name' && $elem->getName() === $value) ||
+							($criterium === 'id'   && $elem->getID()   === $value)
+						) {
+							return $fieldset->replaceElement($rowIdx, $elemIdx, $element);
+						}
 					}
 				}
 			}
