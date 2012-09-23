@@ -138,7 +138,6 @@ class sly_Configuration {
 
 		if (file_exists($filename)) {
 			$config = sly_Util_YAML::load($filename, false, true);
-			$this->localConfig = new sly_Util_Array();
 			$this->setInternal('/', $config, self::STORE_LOCAL);
 			$this->cache = null;
 		}
@@ -149,7 +148,6 @@ class sly_Configuration {
 
 		if (file_exists($filename)) {
 			$config = sly_Util_YAML::load($filename, false, true);
-			$this->projectConfig = new sly_Util_Array();
 			$this->setInternal('/', $config, self::STORE_PROJECT);
 			$this->cache = null;
 		}
