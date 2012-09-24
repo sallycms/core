@@ -167,7 +167,6 @@ class sly_Configuration {
 		}
 
 		if (empty($filename) || !is_string($filename)) throw new sly_Exception('Keine Konfigurationsdatei angegeben.');
-		if (!file_exists($filename)) throw new sly_Exception('Konfigurationsdatei '.$filename.' konnte nicht gefunden werden.');
 
 		$isStatic = $mode == self::STORE_STATIC;
 
