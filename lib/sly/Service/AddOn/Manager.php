@@ -254,6 +254,11 @@ class sly_Service_AddOn_Manager {
 			$pservice->setKnownVersion($addon, $version);
 		}
 
+		$defaultsFile = $baseDir.'defaults.yml';
+		if (file_exists($defaultsFile)) {
+			$this->config->loadProjectDefaults($defaultsFile, true, $aservice->getConfPath($addon));
+		}
+
 		// notify listeners
 		$this->fireEvent('POST', 'INSTALL', $addon);
 	}
@@ -578,17 +583,12 @@ class sly_Service_AddOn_Manager {
 
 		if ($installed || $activated) {
 			$baseFolder   = $pservice->baseDirectory($addon);
-			$defaultsFile = $baseFolder.'defaults.yml';
 			$globalsFile  = $baseFolder.'globals.yml';
 			$staticFile   = $baseFolder.'static.yml';
 
 			if ($activated) {
 				if (file_exists($staticFile)) {
 					$this->config->loadStatic($staticFile, $aservice->getConfPath($addon));
-				}
-
-				if (file_exists($defaultsFile)) {
-					$this->config->loadProjectDefaults($defaultsFile, false, $aservice->getConfPath($addon));
 				}
 			}
 
