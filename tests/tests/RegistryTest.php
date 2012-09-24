@@ -43,6 +43,11 @@ class RegistryTest extends sly_BaseTest {
 		$this->assertInstanceOf('sly_Form_ButtonBar', $val);
 	}
 
+	protected function _testReturnDefault(sly_Registry_Registry $reg) {
+		$val = $reg->get('notavailable', 'undefined');
+		$this->assertEquals('undefined', $val);
+	}
+
 	public function testTempHas() {
 		$this->_testHas(sly_Registry_Temp::getInstance());
 	}
@@ -53,6 +58,10 @@ class RegistryTest extends sly_BaseTest {
 
 	public function testTempRemove() {
 		$this->_testRemove(sly_Registry_Temp::getInstance());
+	}
+
+	public function testTempReturnDefault() {
+		$this->_testReturnDefault(sly_Registry_Temp::getInstance());
 	}
 
 	public function testPersistentHas() {
@@ -69,6 +78,10 @@ class RegistryTest extends sly_BaseTest {
 
 	public function testPersistentSerialisation() {
 		$this->_testSerialisation(sly_Registry_Persistent::getInstance());
+	}
+
+	public function testPersistentReturnDefault() {
+		$this->_testReturnDefault(sly_Registry_Persistent::getInstance());
 	}
 
 	public function testPersistentFlush() {
