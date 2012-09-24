@@ -292,4 +292,11 @@ class sly_FunctionsTest extends PHPUnit_Framework_TestCase {
 			array('false', false)
 		);
 	}
+
+	public function testSlyMerge() {
+		$array1   = array('data' => 'sets', 'to' => 'test');
+		$array2   = array('data' => 'sets2', 'and' => 'check');
+		$expected = array('data' => 'sets', 'to' => 'test', 'and' => 'check');
+		$this->assertEquals($expected, sly_merge($array1, $array2));
+	}
 }
