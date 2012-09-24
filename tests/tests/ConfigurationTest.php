@@ -10,19 +10,19 @@
 
 class sly_ConfigurationTest extends PHPUnit_Framework_TestCase {
 	private $config;
+	private $test_array;
 
 	public function setUp() {
 		$this->config = new sly_Configuration();
 		$this->config->setFlushOnDestruct(false);
-	}
-
-	private function setBaseArray($mode = sly_Configuration::STORE_STATIC) {
-		$base_array = array(
+		$this->test_array = array(
 			'numArray'   => array('red', 'green', 'blue'),
 			'assocArray' => array('red' => 'rot', 'blue' => 'blau')
 		);
+	}
 
-		$this->config->set('unittest', $base_array, $mode);
+	private function setBaseArray($mode = sly_Configuration::STORE_STATIC) {
+		$this->config->set('unittest', $this->test_array, $mode);
 	}
 
 	public function testAssignScalar() {
@@ -183,6 +183,36 @@ class sly_ConfigurationTest extends PHPUnit_Framework_TestCase {
 		$this->config->loadLocalConfig();
 		$this->config->loadLocalDefaults(SLY_COREFOLDER.'/config/sallyLocalDefaults.yml');
 		$this->assertFalse($this->config->get('SETUP'), 'setting SETUP should be false when localconfig is loaded');
+	}
+
+	public function testLoadStatic() {
+		$testfile  = SLY_TESTING_ROOT.'/sally/tests/files/staticConfig.yml';
+		$this->config->loadStatic($testfile);
+		$this->assertEquals($this->test_array, $this->config->get('static'), 'loading static file failed');
+	}
+
+	/**
+	 * @expectedException sly_Exception
+	 */
+	public function testLoadStaticFileMissing() {
+		$testfile  = SLY_TESTING_ROOT.'/sally/tests/files/staticConfigMissing.yml';
+		$this->config->loadStatic($testfile);
+	}
+
+	/**
+	 * @expectedException sly_Exception
+	 */
+	public function testLoadStaticFileEmpty() {
+		$this->config->loadStatic('');
+	}
+
+	/**
+	 * @expectedException PHPUnit_Framework_Error_Warning
+	 */
+	public function testLoadStaticFileTwice() {
+		$testfile  = SLY_TESTING_ROOT.'/sally/tests/files/staticConfig.yml';
+		$this->config->loadStatic($testfile);
+		$this->config->loadStatic($testfile);
 	}
 
 }
