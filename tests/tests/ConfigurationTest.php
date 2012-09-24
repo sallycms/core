@@ -175,4 +175,14 @@ class sly_ConfigurationTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals('heckiheckipatang', $result, 'setting the local default failed');
 	}
 
+	public function testDefaultFileLoading() {
+		$this->config->loadProjectConfig();
+		$this->config->loadProjectDefaults(SLY_COREFOLDER.'/config/sallyProjectDefaults.yml');
+		$this->assertEquals('Sally Trunk', $this->config->get('PROJECTNAME'), 'setting SETUP should be false when localconfig is loaded');
+
+		$this->config->loadLocalConfig();
+		$this->config->loadLocalDefaults(SLY_COREFOLDER.'/config/sallyLocalDefaults.yml');
+		$this->assertFalse($this->config->get('SETUP'), 'setting SETUP should be false when localconfig is loaded');
+	}
+
 }
