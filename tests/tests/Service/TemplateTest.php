@@ -10,12 +10,13 @@
 
 class sly_Service_TemplateTest extends PHPUnit_Framework_TestCase {
 	private static $filename;
+	private static $filepath;
 	private static $uniqid;
 
 	public static function setUpBeforeClass() {
-		$uniqid   = 'abc'.uniqid();
-		$filename = 'template.'.$uniqid.'.php';
-		$testfile = <<<TESTFILE
+		$uniqid         = 'abc'.uniqid();
+		self::$filename = 'template.'.$uniqid.'.php';
+		$testfile       = <<<TESTFILE
 <?php
 
 print "Hallo Welt!";
@@ -41,11 +42,10 @@ TESTFILE;
 		$folder  = $service->getFolder();
 
 		// create test template file
-
-		self::$filename = sly_Util_Directory::join($folder, $filename);
+		self::$filepath = sly_Util_Directory::join($folder, self::$filename);
 		self::$uniqid   = $uniqid;
 
-		file_put_contents(self::$filename, $testfile);
+		file_put_contents(self::$filepath, $testfile);
 
 		try {
 			// PHPUnit converts all notices to Exceptions, but in this case we don't really care.
@@ -57,7 +57,7 @@ TESTFILE;
 	}
 
 	public static function tearDownAfterClass() {
-		unlink(self::$filename);
+		unlink(self::$filepath);
 	}
 
 	public function testGetParams() {
@@ -65,6 +65,8 @@ TESTFILE;
 
 		$this->assertEquals(self::$uniqid, $service->get(self::$uniqid, 'name'));
 		$this->assertEquals('Mein super tolles Template!!!1elf', $service->getTitle(self::$uniqid));
+		$this->assertEquals(self::$filename, $service->getFilename(self::$uniqid));
+		$this->assertEquals(array('article', 'meta'), $service->getClass(self::$uniqid));
 		$this->assertEquals(42, $service->get(self::$uniqid, 'custom'));
 	}
 }
