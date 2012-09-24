@@ -23,7 +23,7 @@ if ($this->isTransitional):
 	print "\n\t<title>".sly_html(trim($this->title))."</title>\n";
 
 	// notify old listeners
-	sly_Core::dispatcher()->notify('PAGE_HEADER', '');
+	sly_Core::dispatcher()->notify('PAGE_HEADER', $this);
 
 	if ($this->favIcon !== null) {
 		$this->addLink('shortcut icon', $this->favIcon, 'image/x-icon');
