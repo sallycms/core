@@ -117,10 +117,6 @@ if ($config->get('SETUP') === false) {
 	// Cache-Util initialisieren
 	sly_Util_Cache::registerListener();
 }
-else {
-	$config->loadProjectDefaults(SLY_COREFOLDER.'/config/sallyProjectDefaults.yml');
-	$config->loadLocalDefaults(SLY_COREFOLDER.'/config/sallyLocalDefaults.yml');
-}
 
 // Check for system updates
 $coreVersion  = sly_Core::getVersion('X.Y.Z');
