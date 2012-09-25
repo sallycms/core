@@ -427,9 +427,15 @@ class sly_Service_AddOn_Manager {
 		$pservice = $this->pkgService;
 		$version  = $pservice->getVersion($addon);
 		$known    = $pservice->getKnownVersion($addon);
+		$baseDir  = $pservice->baseDirectory($addon);
 
 		if ($known !== null && $version !== null && $known !== $version) {
-			$updateFile = $pservice->baseDirectory($addon).'update.php';
+			$updateFile   = $baseDir.'update.php';
+			$defaultsFile = $baseDir.'defaults.yml';
+
+			if (file_exists($defaultsFile)) {
+				$this->config->loadProjectDefaults($defaultsFile, true, $aservice->getConfPath($addon));
+			}
 
 			if (file_exists($updateFile)) {
 				$this->req($updateFile);
