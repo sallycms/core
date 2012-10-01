@@ -113,9 +113,16 @@ $errorHandler->init();
 sly_Core::setErrorHandler($errorHandler);
 
 // Sync?
-if ($config->get('SETUP') === false) {
+$setup = $config->get('SETUP');
+
+if ($setup === false) {
 	// Cache-Util initialisieren
 	sly_Util_Cache::registerListener();
+}
+elseif ($setup === null) {
+	// load default core config when the config has never been initialized
+	$config->loadProjectDefaults(SLY_COREFOLDER.'/config/sallyProjectDefaults.yml');
+	$config->loadLocalDefaults(SLY_COREFOLDER.'/config/sallyLocalDefaults.yml');
 }
 
 // Check for system updates
