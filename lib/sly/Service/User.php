@@ -181,7 +181,7 @@ class sly_Service_User extends sly_Service_Model_Base_Id {
 	 * @return sly_Model_User
 	 */
 	public function getCurrentUser($forceRefresh = false) {
-		if ($this->config->get('SETUP')) return null;
+		if (sly_Core::isSetup()) return null;
 
 		if (self::$currentUser === false || $forceRefresh) {
 			$userID = sly_Util_Session::get('UID', 'int', -1);

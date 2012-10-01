@@ -113,7 +113,7 @@ $errorHandler->init();
 sly_Core::setErrorHandler($errorHandler);
 
 // Sync?
-if ($config->get('SETUP') === false) {
+if (!sly_Core::isSetup()) {
 	// Cache-Util initialisieren
 	sly_Util_Cache::registerListener();
 }
