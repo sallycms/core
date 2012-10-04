@@ -142,6 +142,11 @@ class sly_Service_Category extends sly_Service_ArticleBase {
 			throw new sly_Exception(t('category_not_found'));
 		}
 
+		// allow external code to stop the delete operation
+
+		$dispatcher = sly_Core::dispatcher();
+		$dispatcher->notify('SLY_PRE_CAT_DELETE', $cat);
+
 		// check if this category still has children (both articles and categories)
 
 		$children = $this->findByParentId($categoryID, false);
@@ -167,7 +172,6 @@ class sly_Service_Category extends sly_Service_ArticleBase {
 		$service->delete($categoryID);
 
 		// fire event
-		$dispatcher = sly_Core::dispatcher();
 		$dispatcher->notify('SLY_CAT_DELETED', $cat);
 
 		return true;
