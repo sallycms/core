@@ -1,5 +1,6 @@
 INSTNAME: sly20100511212501
-CACHING_STRATEGY: "BabelCache_Blackhole"
+CACHING_STRATEGY: BabelCache_Blackhole
+DEVELOPER_MODE: true
 DATABASE:
   DRIVER: mysql
   HOST: localhost
