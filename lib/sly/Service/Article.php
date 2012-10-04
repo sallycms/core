@@ -162,6 +162,9 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 			throw new sly_Exception(t('article_not_found', $articleID));
 		}
 
+		// allow external code to stop the delete operation
+		$this->dispatcher->notify('SLY_PRE_ART_DELETE', $article);
+
 		// re-position all following articles
 		$sql    = $this->getPersistence();
 		$ownTrx = !$sql->isTransRunning();
@@ -198,7 +201,7 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 			throw $e;
 		}
 
-		// Event auslösen
+		// notify system about the deleted article
 		$this->dispatcher->notify('SLY_ART_DELETED', $article);
 
 		return true;
