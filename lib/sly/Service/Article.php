@@ -124,6 +124,11 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 			throw new sly_Exception(t('article_not_found', $articleID));
 		}
 
+		// allow external code to stop the delete operation
+
+		$dispatcher = sly_Core::dispatcher();
+		$dispatcher->notify('SLY_PRE_ART_DELETE', $article);
+
 		// re-position all following articles
 
 		$parent = $article->getCategoryId();
@@ -142,8 +147,7 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 
 		$this->deleteCache($articleID);
 
-		// Event auslösen
-		$dispatcher = sly_Core::dispatcher();
+		// notify system about the deleted article
 		$dispatcher->notify('SLY_ART_DELETED', $article);
 
 		return true;
