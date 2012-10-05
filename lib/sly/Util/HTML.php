@@ -148,6 +148,25 @@ class sly_Util_HTML {
 			$attributes['title'] = $title;
 		}
 
-		return sprintf('<img %s />', sly_Util_HTML::buildAttributeString($attributes, array('alt')));
+		return self::buildNode('img', '', $attributes, array('alt'), true);
+	}
+
+	/**
+	 * return a html node a string
+	 *
+	 * @param  string  $name            the nodename
+	 * @param  string  $innerHtml       the nodes content
+	 * @param  array   $attributes      all attributes as assoc array
+	 * @param  array   $forceAttributes attributed to add even is thay are empty
+	 * @param  boolean $closeInline     whether the node is closed inline
+	 * @return string
+	 */
+	public static function buildNode($name, $innerHtml = '', array $attributes = array(), array $forceAttributes = array(), $closeInline = false) {
+		$attributeString = sly_Util_HTML::buildAttributeString($attributes, $forceAttributes);
+		if($closeInline) {
+			return sprintf('<%s %s />', $name, $attributeString);
+		} else {
+			return sprintf('<%s $s>%s</%s>', $name, $innerHtml, $attributeString, $name);
+		}
 	}
 }
