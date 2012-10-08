@@ -29,6 +29,14 @@ class sly_Util_User {
 	}
 
 	/**
+	 * @param  string $login
+	 * @return sly_Model_User
+	 */
+	public static function findByLogin($login) {
+		return sly_Service_Factory::getUserService()->findByLogin($login);
+	}
+
+	/**
 	 * checks whether a user exists or not
 	 *
 	 * @param  int $userID
