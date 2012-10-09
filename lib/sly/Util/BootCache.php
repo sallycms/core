@@ -54,7 +54,7 @@ class sly_Util_BootCache {
 	public static function recreate($environment) {
 		// when in developer mode, only remove a possibly existing cache file
 
-		if (sly_Core::isDeveloperMode()) {
+		if (sly_Core::isDeveloperMode() || !sly_Core::config()->get('bootcache')) {
 			$target = self::getCacheFile($environment);
 
 			if (file_exists($target)) {
