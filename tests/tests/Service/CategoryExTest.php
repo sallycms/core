@@ -190,6 +190,23 @@ class sly_Service_CategoryExTest extends sly_Service_CategoryTestBase {
 		}
 	}
 
+	/**
+	 * @dataProvider       statusProvider
+	 * @expectedException  sly_Exception
+	 */
+	public function testDeleteCancelledIfChildArticlesExist($status) {
+		$cservice = $this->getService();
+		$aservice = sly_Service_Factory::getArticleService();
+		$parent   = 2;
+
+		// create some children
+		$aservice->add($parent, 'A', $status, -1);
+		$aservice->add($parent, 'B', $status, -1);
+
+		// boom
+		$cservice->delete($parent);
+	}
+
 	public function statusProvider() {
 		return array(
 			array(0),

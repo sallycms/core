@@ -155,6 +155,13 @@ class sly_Service_Category extends sly_Service_ArticleBase {
 			throw new sly_Exception(t('category_is_not_empty'));
 		}
 
+		$service  = sly_Service_Factory::getArticleService();
+		$children = $service->findArticlesByCategory($categoryID, false);
+
+		if (count($children) > 1 /* one child is expected, it's the category's start article */) {
+			throw new sly_Exception(t('category_is_not_empty'));
+		}
+
 		// re-position all following categories
 
 		$parent = $cat->getParentId();
@@ -168,7 +175,6 @@ class sly_Service_Category extends sly_Service_ArticleBase {
 
 		// remove the start article of this category (and this also kills the category itself)
 
-		$service = sly_Service_Factory::getArticleService();
 		$service->delete($categoryID);
 
 		// fire event
