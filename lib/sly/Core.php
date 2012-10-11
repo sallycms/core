@@ -472,4 +472,8 @@ class sly_Core {
 
 		self::dispatcher()->notify('SLY_CACHE_CLEARED');
 	}
+
+	public static function isSetup() {
+		return self::config()->get('SETUP', true) === true;
+	}
 }
