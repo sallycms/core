@@ -184,9 +184,7 @@ class sly_Core {
 	 * @return boolean  true if developer mode, else false
 	 */
 	public static function isDeveloperMode() {
-		static $var = null;
-		if ($var === null) $var = (boolean) self::config()->get('DEVELOPER_MODE');
-		return $var;
+		return (boolean) self::config()->get('DEVELOPER_MODE');
 	}
 
 	/**

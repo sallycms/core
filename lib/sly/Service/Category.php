@@ -188,6 +188,12 @@ class sly_Service_Category extends sly_Service_ArticleBase {
 			throw new LogicException('You must set the article service with ->setArticleService() before you can delete categories.');
 		}
 
+		$children = $this->artService->findArticlesByCategory($categoryID, false);
+
+		if (count($children) > 1 /* one child is expected, it's the category's start article */) {
+			throw new sly_Exception(t('category_is_not_empty'));
+		}
+
 		// re-position all following categories
 		$sql    = $this->getPersistence();
 		$ownTrx = !$sql->isTransRunning();
