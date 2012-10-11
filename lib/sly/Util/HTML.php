@@ -163,12 +163,12 @@ class sly_Util_HTML {
 	 */
 	public static function buildNode($name, $innerHtml = '', array $attributes = array(), array $forceAttributes = array(), $closeInline = false) {
 		$attributeString = sly_Util_HTML::buildAttributeString($attributes, $forceAttributes);
-		
+
 		if ($closeInline) {
 			return sprintf('<%s %s />', $name, $attributeString);
 		}
 		else {
-			return sprintf('<%s $s>%s</%s>', $name, $innerHtml, $attributeString, $name);
+			return sprintf('<%s %s>%s</%s>', $name, $attributeString, $innerHtml, $name);
 		}
 	}
 }
