@@ -424,6 +424,7 @@ class sly_Service_AddOn_Manager {
 	 * @param string $addon  addOn name
 	 */
 	public function checkUpdate($addon) {
+		$aservice = $this->addOnService;
 		$pservice = $this->pkgService;
 		$version  = $pservice->getVersion($addon);
 		$known    = $pservice->getKnownVersion($addon);
