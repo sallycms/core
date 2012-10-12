@@ -95,7 +95,7 @@ abstract class sly_Service_Model_Base {
 		$db->select($this->getTableName(), 'COUNT(*)', $where, $group);
 
 		foreach ($db as $row) {
-			$count = reset($row);
+			$count = (int) reset($row);
 		}
 
 		return $count;
