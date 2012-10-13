@@ -20,7 +20,7 @@ class sly_Response_Stream extends sly_Response {
 	 */
 	public function __construct($file, $status = 200, array $headers = array()) {
 		parent::__construct(null, $status, $headers);
-		
+
 		if (is_resource($file)) {
 			if (get_resource_type ($file) == 'stream') {
 				$this->file = $file;

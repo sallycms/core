@@ -371,44 +371,44 @@ abstract class sly_Layout extends sly_Viewable {
 	/**
 	 * Print the inline CSS code
 	 */
-	protected abstract function printCSSConcrete();
+	abstract protected function printCSSConcrete();
 
 	/**
 	 * Print the list of CSS files
 	 */
-	protected abstract function printCSSFilesConcrete();
+	abstract protected function printCSSFilesConcrete();
 
 	/**
 	 * Print the inline JavaScript code
 	 */
-	protected abstract function printJavaScriptConcrete();
+	abstract protected function printJavaScriptConcrete();
 
 	/**
 	 * Print the list of JS files
 	 */
-	protected abstract function printJavaScriptFilesConcrete();
+	abstract protected function printJavaScriptFilesConcrete();
 
 	/**
 	 * Print the body attributes
 	 */
-	protected abstract function printBodyAttrs();
+	abstract protected function printBodyAttrs();
 
 	/**
 	 * Print regular meta tag
 	 */
-	protected abstract function printMetas();
+	abstract protected function printMetas();
 
 	/**
 	 * Print HTTP meta tag
 	 */
-	protected abstract function printHttpMetas();
+	abstract protected function printHttpMetas();
 
 	/**
 	 * Prints a <link> tag
 	 *
 	 * @param array $attributes  a hash with all attributes (name => value)
 	 */
-	protected abstract function printLink($attributes);
+	abstract protected function printLink($attributes);
 
 	/**
 	 * Print the header
