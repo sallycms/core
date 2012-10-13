@@ -21,15 +21,15 @@ abstract class sly_Service_DevelopBase {
 
 	protected $conditionEvaluators = array(); ///< array
 	protected $config;                        ///< sly_Configuration
-	protected $dispatcher;                    ///< sly_Event_Dispatcher
+	protected $dispatcher;                    ///< sly_Event_IDispatcher
 
 	/**
 	 * Constructor
 	 *
-	 * @param sly_Configuration    $config
-	 * @param sly_Event_Dispatcher $dispatcher
+	 * @param sly_Configuration     $config
+	 * @param sly_Event_IDispatcher $dispatcher
 	 */
-	public function __construct(sly_Configuration $config, sly_Event_Dispatcher $dispatcher) {
+	public function __construct(sly_Configuration $config, sly_Event_IDispatcher $dispatcher) {
 		$this->config     = $config;
 		$this->dispatcher = $dispatcher;
 	}

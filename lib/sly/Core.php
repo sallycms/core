@@ -16,7 +16,7 @@ class sly_Core {
 	private $app;              ///< sly_App_Interface
 	private $cache;            ///< BabelCache_Interface
 	private $configuration;    ///< sly_Configuration
-	private $dispatcher;       ///< sly_Event_Dispatcher
+	private $dispatcher;       ///< sly_Event_IDispatcher
 	private $curClang;         ///< int
 	private $curArticleId;     ///< int
 	private $layout;           ///< sly_Layout
