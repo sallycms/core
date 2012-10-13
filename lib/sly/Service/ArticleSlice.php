@@ -18,17 +18,17 @@ class sly_Service_ArticleSlice extends sly_Service_Model_Base_Id {
 	protected $tablename = 'article_slice'; ///< string
 	protected $sliceService;                ///< sly_Service_Slice
 	protected $templateService;             ///< sly_Service_Template
-	protected $dispatcher;                  ///< sly_Event_Dispatcher
+	protected $dispatcher;                  ///< sly_Event_IDispatcher
 
 	/**
 	 * Constructor
 	 *
-	 * @param sly_DB_Persistence   $persistence
-	 * @param sly_Event_Dispatcher $dispatcher
-	 * @param sly_Service_Slice    $sliceService
-	 * @param sly_Service_Template $templateService
+	 * @param sly_DB_Persistence    $persistence
+	 * @param sly_Event_IDispatcher $dispatcher
+	 * @param sly_Service_Slice     $sliceService
+	 * @param sly_Service_Template  $templateService
 	 */
-	public function __construct(sly_DB_Persistence $persistence, sly_Event_Dispatcher $dispatcher, sly_Service_Slice $sliceService, sly_Service_Template $templateService) {
+	public function __construct(sly_DB_Persistence $persistence, sly_Event_IDispatcher $dispatcher, sly_Service_Slice $sliceService, sly_Service_Template $templateService) {
 		parent::__construct($persistence);
 
 		$this->sliceService    = $sliceService;
