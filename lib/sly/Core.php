@@ -316,7 +316,7 @@ class sly_Core {
 	public static function getVersion($pattern = 'X.Y.Z') {
 		static $version = null;
 
-		if ($version === null)  {
+		if ($version === null) {
 			$config  = self::config();
 			$version = $config->get('VERSION');
 		}

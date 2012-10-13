@@ -33,7 +33,7 @@ class sly_Response {
 	 *
 	 * @var array
 	 */
-	static public $statusTexts = array(
+	public static $statusTexts = array(
 		100 => 'Continue',
 		101 => 'Switching Protocols',
 		102 => 'Processing',            // RFC2518
