@@ -31,10 +31,10 @@ class sly_Service_Asset {
 	/**
 	 * Constructor
 	 *
-	 * @param sly_Configuration    $config
-	 * @param sly_Event_Dispatcher $dispatcher
+	 * @param sly_Configuration     $config
+	 * @param sly_Event_IDispatcher $dispatcher
 	 */
-	public function __construct(sly_Configuration $config, sly_Event_Dispatcher $dispatcher) {
+	public function __construct(sly_Configuration $config, sly_Event_IDispatcher $dispatcher) {
 		$this->initCache();
 
 		$this->dispatcher = $dispatcher;

@@ -22,7 +22,7 @@
  * @since   0.2
  * @ingroup event
  */
-class sly_Event_Dispatcher {
+class sly_Event_Dispatcher implements sly_Event_IDispatcher {
 	private $listeners; ///< array  list of listeners
 
 	/**

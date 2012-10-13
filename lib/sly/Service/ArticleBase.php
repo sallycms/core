@@ -12,7 +12,7 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base {
 	protected $tablename = 'article'; ///< string
 	protected $states    = array();   ///< array
 	protected $cache;                 ///< BabelCache_Interface
-	protected $dispatcher;            ///< sly_Event_Dispatcher
+	protected $dispatcher;            ///< sly_Event_IDispatcher
 	protected $lngService;            ///< sly_Service_Language
 	protected $artService;            ///< sly_Service_Article
 	protected $catService;            ///< sly_Service_Category
@@ -24,12 +24,12 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base {
 	 * serArticleService() and setCategoryService() afterwards. You cannot give
 	 * those services inside the constructor, as they depend on each other.
 	 *
-	 * @param sly_DB_Persistence   $persistence
-	 * @param BabelCache_Interface $cache
-	 * @param sly_Event_Dispatcher $dispatcher
-	 * @param sly_Service_Language $lngService
+	 * @param sly_DB_Persistence    $persistence
+	 * @param BabelCache_Interface  $cache
+	 * @param sly_Event_IDispatcher $dispatcher
+	 * @param sly_Service_Language  $lngService
 	 */
-	public function __construct(sly_DB_Persistence $persistence, BabelCache_Interface $cache, sly_Event_Dispatcher $dispatcher, sly_Service_Language $lngService) {
+	public function __construct(sly_DB_Persistence $persistence, BabelCache_Interface $cache, sly_Event_IDispatcher $dispatcher, sly_Service_Language $lngService) {
 		parent::__construct($persistence);
 
 		$this->cache      = $cache;

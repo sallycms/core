@@ -17,7 +17,7 @@
 class sly_Service_Medium extends sly_Service_Model_Base_Id {
 	protected $tablename = 'file'; ///< string
 	protected $cache;              ///< BabelCache_Interface
-	protected $dispatcher;         ///< sly_Event_Dispatcher
+	protected $dispatcher;         ///< sly_Event_IDispatcher
 	protected $catService;         ///< sly_Service_MediaCategory
 
 	/**
@@ -25,10 +25,10 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id {
 	 *
 	 * @param sly_DB_Persistence        $persistence
 	 * @param BabelCache_Interface      $cache
-	 * @param sly_Event_Dispatcher      $dispatcher
+	 * @param sly_Event_IDispatcher     $dispatcher
 	 * @param sly_Service_MediaCategory $catService
 	 */
-	public function __construct(sly_DB_Persistence $persistence, BabelCache_Interface $cache, sly_Event_Dispatcher $dispatcher, sly_Service_MediaCategory $catService) {
+	public function __construct(sly_DB_Persistence $persistence, BabelCache_Interface $cache, sly_Event_IDispatcher $dispatcher, sly_Service_MediaCategory $catService) {
 		parent::__construct($persistence);
 
 		$this->cache      = $cache;
