@@ -7,6 +7,7 @@ static:
   - sly_Controller_Base
   - sly_Loader
   - sly_Core
+  - sly_Event_IDispatcher
   - sly_Event_Dispatcher
   - sly_Configuration
   - sly_Util_Array
