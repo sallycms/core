@@ -16,7 +16,7 @@ class sly_Core {
 	private $app;              ///< sly_App_Interface
 	private $cache;            ///< BabelCache_Interface
 	private $configuration;    ///< sly_Configuration
-	private $dispatcher;       ///< sly_Event_Dispatcher
+	private $dispatcher;       ///< sly_Event_IDispatcher
 	private $curClang;         ///< int
 	private $curArticleId;     ///< int
 	private $layout;           ///< sly_Layout
@@ -143,10 +143,23 @@ class sly_Core {
 	}
 
 	/**
-	 * @return sly_Event_Dispatcher  the event dispatcher
+	 * @return sly_Event_IDispatcher  the event dispatcher
 	 */
 	public static function dispatcher() {
 		return self::getInstance()->dispatcher;
+	}
+
+	/**
+	 * @param  sly_Event_IDispatcher $dispatcher  the new dispatcher
+	 * @return sly_Event_IDispatcher              the previous dispatcher
+	 */
+	public static function setDispatcher(sly_Event_IDispatcher $dispatcher) {
+		$instance = self::getInstance();
+		$previous = $instance->dispatcher;
+
+		$instance->dispatcher = $dispatcher;
+
+		return $previous;
 	}
 
 	/**

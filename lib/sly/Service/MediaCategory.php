@@ -17,7 +17,7 @@
 class sly_Service_MediaCategory extends sly_Service_Model_Base_Id {
 	protected $tablename = 'file_category'; ///< string
 	protected $cache;                       ///< BabelCache_Interface
-	protected $dispatcher;                  ///< sly_Event_Dispatcher
+	protected $dispatcher;                  ///< sly_Event_IDispatcher
 	protected $mediumService;               ///< sly_Service_Medium
 
 	const ERR_CAT_HAS_MEDIA   = 1; ///< int
@@ -29,11 +29,11 @@ class sly_Service_MediaCategory extends sly_Service_Model_Base_Id {
 	 * Note that you have to call setMediumService() afterwards to have a
 	 * fully-functional service.
 	 *
-	 * @param sly_DB_Persistence   $persistence
-	 * @param BabelCache_Interface $cache
-	 * @param sly_Event_Dispatcher $dispatcher
+	 * @param sly_DB_Persistence    $persistence
+	 * @param BabelCache_Interface  $cache
+	 * @param sly_Event_IDispatcher $dispatcher
 	 */
-	public function __construct(sly_DB_Persistence $persistence, BabelCache_Interface $cache, sly_Event_Dispatcher $dispatcher) {
+	public function __construct(sly_DB_Persistence $persistence, BabelCache_Interface $cache, sly_Event_IDispatcher $dispatcher) {
 		parent::__construct($persistence);
 
 		$this->cache      = $cache;

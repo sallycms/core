@@ -204,7 +204,7 @@ class sly_Service_CategoryExTest extends sly_Service_CategoryTestBase {
 		$aservice->add($parent, 'B', $status, -1);
 
 		// boom
-		$cservice->delete($parent);
+		$cservice->deleteById($parent);
 	}
 
 	public function statusProvider() {

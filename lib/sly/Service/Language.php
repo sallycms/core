@@ -15,16 +15,16 @@
 class sly_Service_Language extends sly_Service_Model_Base_Id {
 	protected $tablename = 'clang'; ///< string
 	protected $cache;               ///< BabelCache_Interface
-	protected $dispatcher;          ///< sly_Event_Dispatcher
+	protected $dispatcher;          ///< sly_Event_IDispatcher
 
 	/**
 	 * Constructor
 	 *
-	 * @param sly_DB_Persistence   $persistence
-	 * @param BabelCache_Interface $cache
-	 * @param sly_Event_Dispatcher $dispatcher
+	 * @param sly_DB_Persistence    $persistence
+	 * @param BabelCache_Interface  $cache
+	 * @param sly_Event_IDispatcher $dispatcher
 	 */
-	public function __construct(sly_DB_Persistence $persistence, BabelCache_Interface $cache, sly_Event_Dispatcher $dispatcher) {
+	public function __construct(sly_DB_Persistence $persistence, BabelCache_Interface $cache, sly_Event_IDispatcher $dispatcher) {
 		parent::__construct($persistence);
 
 		$this->cache      = $cache;
