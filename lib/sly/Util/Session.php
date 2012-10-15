@@ -77,13 +77,4 @@ class sly_Util_Session {
 	public static function regenerate_id() {
 		return sly_Core::getSession()->regenerateID();
 	}
-
-	/**
-	 * Check if a valid token was submitted
-	 *
-	 * @param string $token  a token from whatever source or null to get the token from POST data
-	 */
-	public static function checkCsrfToken($token = null) {
-		return sly_Core::getSession()->checkCsrfToken($token);
-	}
 }

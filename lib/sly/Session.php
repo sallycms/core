@@ -11,8 +11,6 @@
 class sly_Session {
 	protected $installID; ///< string
 
-	const CSRF_TOKEN_NAME = 'sly-csrf-token';
-
 	public function __construct($installID) {
 		$this->installID = $installID;
 	}
@@ -39,15 +37,6 @@ class sly_Session {
 	}
 
 	/**
-	 * Get the CSRF token
-	 *
-	 * @return string  the token or null if not set
-	 */
-	public function getCsrfToken() {
-		return $this->get(self::CSRF_TOKEN_NAME, 'string');
-	}
-
-	/**
 	 * Set the value of a session var
 	 *
 	 * @param string $key
@@ -55,19 +44,6 @@ class sly_Session {
 	 */
 	public function set($key, $value) {
 		$_SESSION[$this->installID][$key] = $value;
-	}
-
-	/**
-	 * Set the CSRF token
-	 *
-	 * @param string $token  a pregenerated token or null to create one
-	 */
-	public function setCsrfToken($token = null) {
-		if (!is_string($token) || empty($token)) {
-			$token = sly_Util_Password::getRandomData(40, true);
-		}
-
-		$this->set(self::CSRF_TOKEN_NAME, $token);
 	}
 
 	/**
@@ -102,38 +78,5 @@ class sly_Session {
 	 */
 	public function regenerateID() {
 		session_regenerate_id(true);
-	}
-
-	/**
-	 * Check if a valid token was submitted
-	 *
-	 * @param string $token  a token from whatever source or null to get the token from POST data
-	 */
-	public function checkCsrfToken($token = null) {
-		$ref = $this->getCsrfToken();
-
-		if ($ref === null) {
-			throw new sly_Exception('Cannot check CSRF token because it has not yet been set.');
-		}
-
-		if (!is_string($token)) {
-			$token = sly_post(self::CSRF_TOKEN_NAME, 'string', null);
-		}
-
-		return sly_Util_Password::equals($ref, $token);
-	}
-
-	public function prepareForm(sly_Form $form) {
-		if ($form->getMethod() === 'GET') {
-			throw new sly_Exception('Cannot attach a CSRF token to a form that is submitted via GET.');
-		}
-
-		$token = $this->getCsrfToken();
-
-		if ($token === null) {
-			throw new sly_Exception('Cannot set CSRF token because it has not yet been defined in the session.');
-		}
-
-		$form->addHiddenValue(self::CSRF_TOKEN_NAME, $token);
 	}
 }
