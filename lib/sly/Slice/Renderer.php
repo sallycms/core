@@ -52,6 +52,7 @@ class sly_Slice_Renderer {
 			if ($form instanceof sly_Form) {
 				$form->setSubmitButton(null);
 				$form->setResetButton(null);
+				$form->setCsrfEnabled(false);
 
 				print $form->render($dataIndex);
 			}
