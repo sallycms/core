@@ -83,4 +83,14 @@ abstract class sly_Util_Csrf {
 
 		$form->addHiddenValue(self::TOKEN_NAME, $token);
 	}
+
+	public static function renderInputTag(sly_Session $session = null) {
+		$token = self::getToken($session);
+
+		if ($token === null) {
+			throw new sly_Exception('Cannot render CSRF token because it has not yet been defined in the session.');
+		}
+
+		return sprintf('<input type="hidden" name="%s" value="%s" />', self::TOKEN_NAME, sly_html($token));
+	}
 }
