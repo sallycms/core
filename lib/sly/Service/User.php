@@ -226,8 +226,10 @@ class sly_Service_User extends sly_Service_Model_Base_Id {
 					&& $this->checkPassword($user, $password);
 
 			if ($loginOK) {
-				sly_Util_Session::set('UID', $user->getId());
-				sly_Util_Session::regenerate_id();
+				$session = sly_Core::getSession();
+				$session->set('UID', $user->getId());
+				$session->setCsrfToken();
+				$session->regenerateID();
 
 				// upgrade hash if possible
 				$current  = $user->getPassword();
@@ -248,7 +250,7 @@ class sly_Service_User extends sly_Service_Model_Base_Id {
 	}
 
 	public function logout() {
-		sly_Util_Session::set('UID', '');
+		sly_Core::getSession()->flush();
 		self::$currentUser = null;
 	}
 

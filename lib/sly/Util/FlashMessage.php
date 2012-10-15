@@ -43,8 +43,8 @@ class sly_Util_FlashMessage {
 	 *
 	 * @param string $name
 	 */
-	public static function readFromSession($name) {
-		$data = sly_Util_Session::get('flashmsg_'.$name, 'array', null);
+	public static function readFromSession($name, sly_Session $session) {
+		$data = $session->get('flashmsg_'.$name, 'array', null);
 		$msg  = new self($name);
 
 		if (is_array($data)) {
@@ -57,15 +57,17 @@ class sly_Util_FlashMessage {
 	/**
 	 * store
 	 */
-	public function store() {
-		sly_Util_Session::set('flashmsg_'.$this->name, $this->messages);
+	public function store(sly_Session $session = null) {
+		$session = $session ? $session : sly_Core::getSession();
+		$session->set('flashmsg_'.$this->name, $this->messages);
 	}
 
 	/**
 	 * remove from session
 	 */
-	public function removeFromSession() {
-		sly_Util_Session::reset('flashmsg_'.$this->name);
+	public function removeFromSession(sly_Session $session = null) {
+		$session = $session ? $session : sly_Core::getSession();
+		$session->delete('flashmsg_'.$this->name);
 	}
 
 	/**

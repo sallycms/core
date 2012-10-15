@@ -433,8 +433,10 @@ class sly_Core {
 		if (!$instance->flashMessage) {
 			sly_Util_Session::start();
 
-			$msg = sly_Util_FlashMessage::readFromSession('sally');
-			$msg->removeFromSession();
+			$session = self::getSession();
+			$msg     = sly_Util_FlashMessage::readFromSession('sally', $session);
+
+			$msg->removeFromSession($session);
 			$msg->setAutoStore(true);
 
 			$instance->flashMessage = $msg;

@@ -65,6 +65,7 @@ backend:
   - sly_Layout_Navigation_Page
   - sly_Layout_Navigation_Subpage
   - sly_Util_Session
+  - sly_Session
   - sly_Service_Model_Base_Id
   - sly_Service_User
   - sly_Util_User
