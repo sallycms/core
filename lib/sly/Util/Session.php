@@ -12,8 +12,6 @@
  * @ingroup util
  */
 class sly_Util_Session {
-	private static $uniqueInstallationId; ///< string
-
 	/**
 	 * Start a session if it is not already started
 	 */
@@ -32,59 +30,60 @@ class sly_Util_Session {
 	}
 
 	/**
-	 * Gets the value of a session var casted to $type.
+	 * Get the value of a session var casted to $type.
 	 *
 	 * @param  string $key      the key where to find the var in superglobal aray $_SESSION
 	 * @param  string $type     the type to cast to
 	 * @param  mixed  $default  the default value to return if session var is not set
 	 * @return mixed            $value casted to $type
 	 */
-	public static function get($key, $type = '', $default = '') {
-		$uid = self::getUID();
-
-		if (isset($_SESSION[$uid][$key])) {
-			return sly_settype($_SESSION[$uid][$key], $type);
-		}
-
-		return sly_settype($default, $type);
+	public static function get($key, $type = '', $default = null) {
+		return sly_Core::getSession()->get($key, $type, $default);
 	}
 
 	/**
-	 * Sets the value of a session var
+	 * Set the value of a session var
 	 *
 	 * @param string $key
 	 * @param mixed  $value
 	 */
 	public static function set($key, $value) {
-		$_SESSION[self::getUID()][$key] = $value;
+		return sly_Core::getSession()->set($key, $value);
 	}
 
 	/**
-	 * Unsets a session var
+	 * Unset a session var
+	 *
+	 * @deprecated use delete() instead
 	 *
 	 * @param string $key
 	 */
 	public static function reset($key) {
-		unset($_SESSION[self::getUID()][$key]);
+		return sly_Core::getSession()->delete($key);
+	}
+
+	/**
+	 * Delete a session var
+	 *
+	 * @param string $key
+	 */
+	public static function delete($key) {
+		return sly_Core::getSession()->delete($key);
 	}
 
 	/**
 	 * Prevent session fixation
 	 */
 	public static function regenerate_id() {
-		session_regenerate_id(true);
+		return sly_Core::getSession()->regenerateID();
 	}
 
 	/**
-	 * return the unique installation id of this sally instance
+	 * Check if a valid token was submitted
 	 *
-	 * @return string
+	 * @param string $token  a token from whatever source or null to get the token from POST data
 	 */
-	private static function getUID() {
-		if (!self::$uniqueInstallationId) {
-			self::$uniqueInstallationId = sly_Core::config()->get('INSTNAME');
-		}
-
-		return self::$uniqueInstallationId;
+	public static function checkCsrfToken($token = null) {
+		return sly_Core::getSession()->checkCsrfToken($token);
 	}
 }
