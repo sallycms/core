@@ -228,8 +228,9 @@ class sly_Service_User extends sly_Service_Model_Base_Id {
 			if ($loginOK) {
 				$session = sly_Core::getSession();
 				$session->set('UID', $user->getId());
-				$session->setCsrfToken();
 				$session->regenerateID();
+
+				sly_Util_Csrf::setToken(null, $session);
 
 				// upgrade hash if possible
 				$current  = $user->getPassword();
