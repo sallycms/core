@@ -70,7 +70,7 @@ class sly_Form extends sly_Form_Base {
 		$this->currentFieldset = null;
 		$this->focussedElement = '';
 		$this->buttonClasses   = array('submit' => array('sly-form-submit'), 'reset' => array(), 'delete' => array('sly-form-submit'), 'apply' => array('sly-form-submit'));
-		$this->addCsrfToken    = false;
+		$this->addCsrfToken    = true;
 	}
 
 	/**
@@ -280,7 +280,7 @@ class sly_Form extends sly_Form_Base {
 	 */
 	public function render($omitFormTag = false) {
 		if ($this->addCsrfToken) {
-			sly_Core::getSession()->prepareForm($this);
+			sly_Util_Csrf::prepareForm($this);
 		}
 
 		return $this->renderView('form.phtml', array('form' => $this, 'omitFormTag' => $omitFormTag));
