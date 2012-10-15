@@ -122,4 +122,18 @@ class sly_Session {
 
 		return sly_Util_Password::equals($ref, $token);
 	}
+
+	public function prepareForm(sly_Form $form) {
+		if ($form->getMethod() === 'GET') {
+			throw new sly_Exception('Cannot attach a CSRF token to a form that is submitted via GET.');
+		}
+
+		$token = $this->getCsrfToken();
+
+		if ($token === null) {
+			throw new sly_Exception('Cannot set CSRF token because it has not yet been defined in the session.');
+		}
+
+		$form->addHiddenValue(self::CSRF_TOKEN_NAME, $token);
+	}
 }
