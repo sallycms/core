@@ -13,7 +13,7 @@ $bootcache   = SLY_DYNFOLDER.'/internal/sally/bootcache.'.(IS_SALLY_BACKEND ? 'b
 $cacheExists = SLY_IS_TESTING ? false : file_exists($bootcache);
 
 if ($cacheExists) {
-	require $bootcache;
+	require_once $bootcache;
 }
 else {
 	require_once SLY_COREFOLDER.'/lib/sly/Loader.php';
