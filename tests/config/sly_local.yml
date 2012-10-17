@@ -1,6 +1,7 @@
 SETUP: false
 INSTNAME: sly59f008fea53fb4447830
 CACHING_STRATEGY: BabelCache_Blackhole
+DEVELOPER_MODE: true
 DATABASE:
   DRIVER: mysql
   HOST: localhost
@@ -9,3 +10,7 @@ DATABASE:
   NAME: sally_test
   PERSISTENT: false
   TABLE_PREFIX: sly_
+babelcache:
+  memcached:
+    - localhost
+    - 11211
