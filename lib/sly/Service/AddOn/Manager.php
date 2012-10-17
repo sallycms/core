@@ -319,8 +319,11 @@ class sly_Service_AddOn_Manager {
 		// remove version data
 		sly_Util_Versions::remove($pservice->getVersion($addon));
 
-		//remove configuration defaults (and a poorly little bit more)
-		$this->config->remove($aservice->getConfPath($addon));
+		// remove configuration defaults (and a poorly little bit more)
+		$this->remove($addon);
+
+		// restore empty default config (if you want the config to be deleted, delete the addon)
+		$this->add($addon);
 
 		// notify listeners
 		$this->fireEvent('POST', 'UNINSTALL', $addon);
