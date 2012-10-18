@@ -116,7 +116,7 @@ class sly_Request {
 		$this->cookies    = new sly_Util_Array($cookies);
 		$this->files      = $files;
 		$this->server     = new sly_Util_Array($server);
-		$this->headers    = new sly_Util_Array($this->server->getHeaders());
+		$this->headers    = $this->getHeadersFromServer($this->server);
 		$this->content    = $content;
 		$this->languages  = null;
 		$this->charsets   = null;
@@ -632,6 +632,28 @@ class sly_Request {
 		reset($values);
 
 		return $values;
+	}
+
+	/**
+	 * Gets the HTTP headers
+	 *
+	 * @return array
+	 */
+	protected function getHeadersFromServer(sly_Util_Array $server) {
+		$parameters = $server->get('/');
+		$headers    = array();
+
+		foreach ($parameters as $key => $value) {
+			if (0 === strpos($key, 'HTTP_')) {
+				$headers[substr($key, 5)] = $value;
+			}
+			// CONTENT_* are not prefixed with HTTP_
+			elseif (in_array($key, array('CONTENT_LENGTH', 'CONTENT_MD5', 'CONTENT_TYPE'))) {
+				$headers[$key] = $value;
+			}
+		}
+
+		return new sly_Util_Array($headers);
 	}
 
 	/*
