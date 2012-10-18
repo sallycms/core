@@ -45,6 +45,53 @@ class sly_Request {
 		$this->initialize($get, $post, $cookies, $files, $server, $content);
 	}
 
+	public function get($key, $type, $default) {
+		return $this->getParameter($this->get, $key, $type, $default);
+	}
+
+	public function post($key, $type, $default) {
+		return $this->getParameter($this->post, $key, $type, $default);
+	}
+
+	public function cookie($key, $type, $default) {
+		return $this->getParameter($this->cookies, $key, $type, $default);
+	}
+
+	public function request($key, $type, $default) {
+		$request = $this->buildRequestArray(
+			$this->get->get('/'),
+			$this->post->get('/'),
+			$this->cookies->get('/')
+		);
+
+		return sly_setarraytype($request, $key, $type, $default);
+	}
+
+	protected function getParameter(sly_Util_Array $source, $key, $type, $default) {
+		if (!$this->source->has($key)) {
+			return $default;
+		}
+
+		return sly_settype($this->source->get($key), $type);
+	}
+
+	protected function buildRequestArray(array $get, array $post, array $cookie) {
+		$requests     = array('g' => $get, 'p' => $post, 'c' => $cookie);
+		$requestOrder = sly_ini_get('request_order') ? sly_ini_get('request_order') : sly_ini_get('variable_order');
+		$requestOrder = preg_replace('#[^cgp]#', '', strtolower($requestOrder));
+		$request      = array();
+
+		if (!$requestOrder) {
+			 $requestOrder = 'gp';
+		}
+
+		foreach (str_split($requestOrder) as $order) {
+			$request = array_merge($request, $requests[$order]);
+		}
+
+		return $request;
+	}
+
 	/*
 	 * The following methods are mostly derived from code of Symfony2 (2.1.2)
 	 * Code subject to the MIT license (http://symfony.com/doc/2.1/contributing/code/license.html).
@@ -126,10 +173,11 @@ class sly_Request {
 	 * $_FILES is never override, see rfc1867
 	 */
 	public function overrideGlobals() {
-		$_GET    = $this->query->get('/');
-		$_POST   = $this->request->get('/');
-		$_SERVER = $this->server->get('/');
-		$_COOKIE = $this->cookies->get('/');
+		$_GET     = $this->query->get('/');
+		$_POST    = $this->request->get('/');
+		$_SERVER  = $this->server->get('/');
+		$_COOKIE  = $this->cookies->get('/');
+		$_REQUEST = $this->buildRequestArray($_GET, $_POST, $_COOKIE);
 
 		foreach ($this->headers->get('/') as $key => $value) {
 			$key = strtoupper(str_replace('-', '_', $key));
@@ -140,19 +188,6 @@ class sly_Request {
 			else {
 				$_SERVER['HTTP_'.$key] = implode(', ', $value);
 			}
-		}
-
-		$request      = array('g' => $_GET, 'p' => $_POST, 'c' => $_COOKIE);
-		$requestOrder = sly_ini_get('request_order') ? sly_ini_get('request_order') : sly_ini_get('variable_order');
-		$requestOrder = preg_replace('#[^cgp]#', '', strtolower($requestOrder));
-		$_REQUEST     = array();
-
-		if (!$requestOrder) {
-			 $requestOrder = 'gp';
-		}
-
-		foreach (str_split($requestOrder) as $order) {
-			$_REQUEST = array_merge($_REQUEST, $request[$order]);
 		}
 	}
 
