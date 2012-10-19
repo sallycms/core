@@ -104,7 +104,7 @@ class sly_Service_ArticleType {
 		$result   = array();
 
 		// check if slot is valid
-		if ($slot === null || $this->templateService->hasSlot($template, $slot)) {
+		if (!empty($template) && ($slot === null || $this->templateService->hasSlot($template, $slot))) {
 			$allModules = array_keys($this->moduleService->getModules());
 			$origDef    = $modules;
 			$modules    = sly_makeArray($modules);
