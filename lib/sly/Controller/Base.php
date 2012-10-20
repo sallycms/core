@@ -83,17 +83,19 @@ abstract class sly_Controller_Base {
 	 * @return string                 the generated output if $returnOutput, else null
 	 */
 	protected function render($filename, array $params = array(), $returnOutput = true) {
-		// make sure keys in $params won't overwrite our variables
-		$filenameHtuG50hNCdikAvf7CZ1F = $filename;
-		$paramsHtuG50hNCdikAvf7CZ1F   = $params;
-		$bufferHtuG50hNCdikAvf7CZ1F   = $returnOutput;
+		unset($filename, $returnOutput);
 
-		unset($filename, $params, $returnOutput);
-		extract($paramsHtuG50hNCdikAvf7CZ1F);
+		if (!empty($params)) {
+			unset($params);
+			extract(func_get_arg(1));
+		}
+		else {
+			unset($params);
+		}
 
-		if ($bufferHtuG50hNCdikAvf7CZ1F) ob_start();
-		include $this->getViewFolder().$filenameHtuG50hNCdikAvf7CZ1F;
-		if ($bufferHtuG50hNCdikAvf7CZ1F) return ob_get_clean();
+		if (func_get_arg(2)) ob_start();
+		include $this->getViewFolder().func_get_arg(0);
+		if (func_get_arg(2)) return ob_get_clean();
 	}
 
 	/**
