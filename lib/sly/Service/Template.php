@@ -177,6 +177,7 @@ class sly_Service_Template extends sly_Service_DevelopBase {
 		if (!$this->exists($name)) {
 			throw new sly_Exception("Template '$name' does not exist.");
 		}
+
 		return $this->filterByCondition($name, $this->getFileType());
 	}
 
@@ -190,16 +191,7 @@ class sly_Service_Template extends sly_Service_DevelopBase {
 	 * @param array  $params  array of params to be available in the template
 	 */
 	public function includeFile($name, array $params = array()) {
-		unset($name);
-
-		if (!empty($params)) {
-			unset($params);
-			extract(func_get_arg(1));
-		}
-		else {
-			unset($params);
-		}
-
-		include SLY_DEVELOPFOLDER.'/templates/'.$this->getFilename(func_get_arg(0));
+		$file = SLY_DEVELOPFOLDER.'/templates/'.$this->getFilename($name);
+		sly_Util_Template::renderFile($file, $params);
 	}
 }
