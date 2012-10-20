@@ -15,7 +15,7 @@ $containerID  = $element->getDisplayName();
 $values       = sly_makeArray($element->getAttribute('value'));
 $origElement  = $element;
 $elements     = array();
-$isEqual      = sly_post('equal__'.$origElement->getDisplayName(), 'boolean', false);
+$isEqual      = $request->post('equal__'.$origElement->getDisplayName(), 'boolean', false);
 
 if (method_exists($element, 'getChecks')) {
 	$values = $element->getChecks();

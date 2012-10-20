@@ -67,10 +67,12 @@ class sly_Table extends sly_Viewable {
 	}
 
 	/**
+	 * @param  sly_Request $request   the request to use or null for the global one
 	 * @return boolean
 	 */
-	public static function isDragAndDropMode() {
-		return sly_get('tableswitch', 'string') == 'dodraganddrop';
+	public static function isDragAndDropMode(sly_Request $request = null) {
+		$request = $request ? $request : sly_Core::getRequest();
+		return $request->get('tableswitch', 'string') === 'dodraganddrop';
 	}
 
 	/**
@@ -92,12 +94,13 @@ class sly_Table extends sly_Viewable {
 	}
 
 	/**
-	 * @param  int $totalElements  leave this to null to disable the pager
-	 * @return string              the rendered header
+	 * @param  int         $totalElements  leave this to null to disable the pager
+	 * @param  sly_Request $request        the request to use
+	 * @return string                      the rendered header
 	 */
-	protected function renderHeader($totalElements = null) {
+	protected function renderHeader($totalElements = null, sly_Request $request) {
 		$this->totalElements = $totalElements;
-		return $this->renderView('header.phtml', compact('totalElements'));
+		return $this->renderView('header.phtml', compact('totalElements', 'request'));
 	}
 
 	/**
@@ -116,12 +119,14 @@ class sly_Table extends sly_Viewable {
 	}
 
 	/**
-	 * @param  int $totalElements  leave this to null to disable the pager
-	 * @return string              the rendered content
+	 * @param  int         $totalElements  leave this to null to disable the pager
+	 * @param  sly_Request $request        the request to use or null for the global one
+	 * @return string                      the rendered content
 	 */
-	public function render($totalElements = null) {
+	public function render($totalElements = null, sly_Request $request = null) {
 		ob_start();
-		print $this->renderHeader($totalElements);
+		$request = $request ? $request : sly_Core::getRequest();
+		print $this->renderHeader($totalElements, $request);
 		print $this->content;
 		print $this->renderFooter();
 		return ob_get_clean();
@@ -208,19 +213,23 @@ class sly_Table extends sly_Viewable {
 	}
 
 	/**
-	 * @param  string $default
+	 * @param  string      $default
+	 * @param  sly_Request $request   the request to use or null for the global one
 	 * @return string
 	 */
-	public function getSortKey($default = null) {
-		return sly_get($this->id.'_sortby', 'string', $default);
+	public function getSortKey($default = null, sly_Request $request = null) {
+		$request = $request ? $request : sly_Core::getRequest();
+		return $request->get($this->id.'_sortby', 'string', $default);
 	}
 
 	/**
-	 * @param  string $default
+	 * @param  string      $default
+	 * @param  sly_Request $request   the request to use or null for the global one
 	 * @return string
 	 */
-	public function getDirection($default = 'asc') {
-		return sly_get($this->id.'_direction', 'string', $default);
+	public function getDirection($default = 'asc', sly_Request $request = null) {
+		$request = $request ? $request : sly_Core::getRequest();
+		return $request->get($this->id.'_direction', 'string', $default);
 	}
 
 	/**
@@ -261,15 +270,17 @@ class sly_Table extends sly_Viewable {
 	}
 
 	/**
-	 * @param  string  $tableName
-	 * @param  boolean $hasPager
-	 * @param  boolean $hasDragAndDrop
+	 * @param  string      $tableName
+	 * @param  boolean     $hasPager
+	 * @param  boolean     $hasDragAndDrop
+	 * @param  sly_Request $request         the request to use or null for the global one
 	 * @return array
 	 */
-	public static function getPagingParameters($tableName = 'table', $hasPager = false, $hasDragAndDrop = false) {
+	public static function getPagingParameters($tableName = 'table', $hasPager = false, $hasDragAndDrop = false, sly_Request $request = null) {
 		$perPage = self::$perPage;
 
-		$page     = sly_get('p_'.$tableName, 'int', 0);
+		$request  = $request ? $request : sly_Core::getRequest();
+		$page     = $request->get('p_'.$tableName, 'int', 0);
 		$start    = $page * $perPage;
 		$elements = $perPage;
 		$end      = $start + $perPage;
@@ -283,21 +294,24 @@ class sly_Table extends sly_Viewable {
 	}
 
 	/**
-	 * @param  string $tableName
+	 * @param  string      $tableName
+	 * @param  sly_Request $request    the request to use or null for the global one
 	 * @return string
 	 */
-	public static function getSearchParameters($tableName = 'table') {
-		return sly_get('q_'.$tableName, 'string');
+	public static function getSearchParameters($tableName = 'table', sly_Request $request = null) {
+		$request = $request ? $request : sly_Core::getRequest();
+		return $request->get('q_'.$tableName, 'string');
 	}
 
 	/**
-	 * @param  string $tableName
-	 * @param  string $defaultColumn
-	 * @param  array  $enabledColumns
-	 * @param  string $defaultDirection
+	 * @param  string      $tableName
+	 * @param  string      $defaultColumn
+	 * @param  array       $enabledColumns
+	 * @param  string      $defaultDirection
+	 * @param  sly_Request $request           the request to use or null for the global one
 	 * @return array
 	 */
-	public static function getSortingParameters($tableName, $defaultColumn, $enabledColumns = array(), $defaultDirection = 'asc') {
+	public static function getSortingParameters($tableName, $defaultColumn, $enabledColumns = array(), $defaultDirection = 'asc', sly_Request $request = null) {
 		// support the old interface: get($defaultColumn, $enabledColumns)
 		if (empty($enabledColumns) && is_array($defaultColumn)) {
 			$enabledColumns = $defaultColumn;
@@ -305,8 +319,9 @@ class sly_Table extends sly_Viewable {
 			$tableName      = 'table';
 		}
 
-		$sortby    = sly_get($tableName.'_sortby', 'string', $defaultColumn);
-		$direction = strtolower(sly_get($tableName.'_direction', 'string', $defaultDirection)) === 'desc' ? 'DESC' : 'ASC';
+		$request   = $request ? $request : sly_Core::getRequest();
+		$sortby    = $request->get($tableName.'_sortby', 'string', $defaultColumn);
+		$direction = strtolower($request->get($tableName.'_direction', 'string', $defaultDirection)) === 'desc' ? 'DESC' : 'ASC';
 
 		if (!in_array($sortby, $enabledColumns)) {
 			$sortby = $defaultColumn;

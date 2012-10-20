@@ -275,15 +275,17 @@ class sly_Form extends sly_Form_Base {
 	 *
 	 * Renders the form and returns its content.
 	 *
-	 * @param  boolean $omitFormTag  set this to true if you want to use your own <form> tag
-	 * @return string                the generated XHTML
+	 * @param  boolean     $omitFormTag  set this to true if you want to use your own <form> tag
+	 * @param  sly_Request $request      the request to use or null for the global one
+	 * @return string                    the generated XHTML
 	 */
-	public function render($omitFormTag = false) {
+	public function render($omitFormTag = false, sly_Request $request = null) {
 		if ($this->addCsrfToken) {
 			sly_Util_Csrf::prepareForm($this);
 		}
 
-		return $this->renderView('form.phtml', array('form' => $this, 'omitFormTag' => $omitFormTag));
+		$request = $request ? $request : sly_Core::getRequest();
+		return $this->renderView('form.phtml', array('form' => $this, 'omitFormTag' => $omitFormTag, 'request' => $request));
 	}
 
 	/**

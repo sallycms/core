@@ -336,22 +336,25 @@ abstract class sly_Form_ElementBase extends sly_Viewable {
 	 * shown instead of those that were given when the form elements are
 	 * initialized.
 	 *
-	 * @param  string  $type     the param to use in sly_post()
-	 * @param  boolean $asArray  true to get an array, or else false
-	 * @return mixed             the value(s) to display
+	 * @param  string      $type     the variable type to cast to
+	 * @param  boolean     $asArray  true to get an array, or else false
+	 * @param  sly_Request $request  the request to use or null for the global one
+	 * @return mixed                 the value(s) to display
 	 */
-	public function getDisplayValueHelper($type = 'string', $asArray = false) {
+	public function getDisplayValueHelper($type = 'string', $asArray = false, sly_Request $request = null) {
 		// Prüfen, ob das Formular bereits abgeschickt und noch einmal angezeigt
 		// werden soll. Falls ja, übernehmen wir den Wert aus den POST-Daten.
 
-		$name = $this->attributes['name'];
+		$name    = $this->attributes['name'];
+		$request = $request ? $request : sly_Core::getRequest();
+		$isSet   = $request->post->has($name);
 
-		if (isset($_POST[$name]) && !$asArray) {
-			return sly_post($name, $type);
+		if ($isSet && !$asArray) {
+			return $request->post($name, $type);
 		}
 
-		if (isset($_POST[$name]) && $asArray) {
-			return sly_postArray($name, $type);
+		if ($isSet && $asArray) {
+			return $request->postArray($name, $type);
 		}
 
 		return $this->attributes['value'];
