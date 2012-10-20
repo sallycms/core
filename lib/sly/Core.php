@@ -22,6 +22,7 @@ class sly_Core {
 	private $layout;           ///< sly_Layout
 	private $i18n;             ///< sly_I18N
 	private $errorHandler;     ///< sly_ErrorHandler
+	private $request;          ///< sly_Request
 	private $response;         ///< sly_Response
 	private $flashMessage;     ///< sly_Util_FlashMessage
 	private $session;          ///< sly_Session
@@ -396,6 +397,26 @@ class sly_Core {
 		}
 
 		return $instance->response;
+	}
+
+	/**
+	 * @param sly_Request $request  the new request instance
+	 */
+	public static function setRequest(sly_Request $request) {
+		self::getInstance()->request = $request;
+	}
+
+	/**
+	 * @return sly_Request  the current request
+	 */
+	public static function getRequest() {
+		$instance = self::getInstance();
+
+		if (!$instance->request) {
+			$instance->request = sly_Request::createFromGlobals();
+		}
+
+		return $instance->request;
 	}
 
 	/**
