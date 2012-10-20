@@ -45,19 +45,19 @@ class sly_Request {
 		$this->initialize($get, $post, $cookies, $files, $server, $content);
 	}
 
-	public function get($key, $type, $default) {
+	public function get($key, $type, $default = null) {
 		return $this->getParameter($this->get, $key, $type, $default);
 	}
 
-	public function post($key, $type, $default) {
+	public function post($key, $type, $default = null) {
 		return $this->getParameter($this->post, $key, $type, $default);
 	}
 
-	public function cookie($key, $type, $default) {
+	public function cookie($key, $type, $default = null) {
 		return $this->getParameter($this->cookies, $key, $type, $default);
 	}
 
-	public function request($key, $type, $default) {
+	public function request($key, $type, $default = null) {
 		$request = $this->buildRequestArray(
 			$this->get->get('/'),
 			$this->post->get('/'),
@@ -68,11 +68,11 @@ class sly_Request {
 	}
 
 	protected function getParameter(sly_Util_Array $source, $key, $type, $default) {
-		if (!$this->source->has($key)) {
+		if (!$source->has($key)) {
 			return $default;
 		}
 
-		return sly_settype($this->source->get($key), $type);
+		return sly_settype($source->get($key), $type);
 	}
 
 	protected function buildRequestArray(array $get, array $post, array $cookie) {
@@ -442,7 +442,7 @@ class sly_Request {
 			$this->method = strtoupper($this->server->get('REQUEST_METHOD', 'GET'));
 
 			if ('POST' === $this->method) {
-				$this->method = strtoupper($this->headers->get('X-HTTP-METHOD-OVERRIDE', $this->request->get('_method', $this->query->get('_method', 'POST'))));
+				$this->method = strtoupper($this->headers->get('X-HTTP-METHOD-OVERRIDE', $this->request('_method', 'string', 'POST')));
 			}
 		}
 
