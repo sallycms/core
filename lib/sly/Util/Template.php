@@ -52,6 +52,39 @@ class sly_Util_Template {
 	}
 
 	/**
+	 * render a generic file
+	 *
+	 * This method includes a file, making all keys in $params available as
+	 * variables.
+	 *
+	 * @param  string  $name          the absolute path to the file to include
+	 * @param  array   $params        variables as an associative array of parameters
+	 * @param  boolean $returnOutput  set to false to not use an output buffer
+	 * @return string                 the generated output if $returnOutput, else null
+	 */
+	public static function renderFile($filename, array $params = array(), $returnOutput = true) {
+		unset($filename, $returnOutput);
+
+		if (!empty($params)) {
+			unset($params);
+			extract(func_get_arg(1));
+		}
+		else {
+			unset($params);
+		}
+
+		try {
+			if (func_get_arg(2)) ob_start();
+			include func_get_arg(0);
+			if (func_get_arg(2)) return ob_get_clean();
+		}
+		catch (Exception $e) {
+			if (func_get_arg(2)) ob_end_clean();
+			throw $e;
+		}
+	}
+
+	/**
 	 * checks if a template exists
 	 *
 	 * @param  string $name
