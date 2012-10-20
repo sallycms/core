@@ -67,12 +67,41 @@ class sly_Request {
 		return sly_setarraytype($request, $key, $type, $default);
 	}
 
+	public function getArray($key, $type, $default = array()) {
+		return $this->getParameterArray($this->get, $key, $type, $default);
+	}
+
+	public function postArray($key, $type, $default = array()) {
+		return $this->getParameterArray($this->post, $key, $type, $default);
+	}
+
+	public function requestArray($key, $type, $default = array()) {
+		$source = $this->post->has($key) ? $this->post : $this->get;
+		return $this->getParameterArray($source, $key, $type, $default);
+	}
+
 	protected function getParameter(sly_Util_Array $source, $key, $type, $default) {
 		if (!$source->has($key)) {
 			return $default;
 		}
 
 		return sly_settype($source->get($key), $type);
+	}
+
+	public function getParameterArray(sly_Util_Array $source, $key, $type, $default) {
+		$cast   = $source->has($key);
+		$values = sly_makeArray($source->get($key, 'raw', $default));
+
+		foreach ($values as $idx => $value) {
+			if (is_array($value)) {
+				unset($values[$idx]);
+			}
+			elseif ($cast) {
+				$values[$idx] = sly_settype($value, $type);
+			}
+		}
+
+		return $values;
 	}
 
 	protected function buildRequestArray(array $get, array $post, array $cookie) {
