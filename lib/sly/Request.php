@@ -597,7 +597,7 @@ class sly_Request {
 	 * @return boolean  true if the request is an XMLHttpRequest, false otherwise
 	 */
 	public function isAjax() {
-		return 'XMLHttpRequest' === $this->headers->get('X-Requested-With');
+		return 'XMLHttpRequest' === $this->headers->get('X_REQUESTED_WITH');
 	}
 
 	/**
