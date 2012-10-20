@@ -9,7 +9,7 @@
  */
 
 $tableID        = $this->id;
-$currentPage    = abs(sly_get('p_'.$tableID, 'int'));
+$currentPage    = abs($request->get('p_'.$tableID, 'int', 0));
 $hasPager       = $this->hasPager();
 $hasSearch      = $this->hasSearch();
 $hasDragAndDrop = $this->hasDragAndDrop();
@@ -25,7 +25,7 @@ if (!sly_Table::isDragAndDropMode() && $hasPager) {
 }
 
 if ($this->enableDragAndDrop && ($hasSearch || $hasPager)) {
-	$params = $_GET;
+	$params = $request->get->get('/');
 
 	unset($params['p_'.$tableID]);
 	unset($params['q_'.$tableID]);
@@ -44,7 +44,7 @@ if ($this->enableDragAndDrop && ($hasSearch || $hasPager)) {
 
 if (!sly_Table::isDragAndDropMode() && $hasSearch) {
 	$key   = 'q_'.$tableID;
-	$query = sly_get($key, 'string');
+	$query = $request->get($key, 'string', '');
 
 	print '<form method="get" action="index.php">';
 	print '<p class="sly-table-extras-filter">'.t('filter').': ';

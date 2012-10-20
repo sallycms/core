@@ -48,9 +48,10 @@ abstract class sly_Util_Csrf {
 	 * @param  string      $token    a token from whatever source or null to get the token from POST data
 	 * @param  sly_Session $session  a concrete session or null to use the current one
 	 * @param  boolean     $throwUp  true throws an exception on invalid tokens, false returns a boolean
+	 * @param  sly_Request $request  the request to use or null for the global one
 	 * @return boolean               true if the token was valid, else invalid
 	 */
-	public static function checkToken($token = null, sly_Session $session = null, $throwUp = true) {
+	public static function checkToken($token = null, sly_Session $session = null, $throwUp = true, sly_Request $request = null) {
 		$ref = self::getToken($session);
 
 		if ($ref === null) {
@@ -58,7 +59,8 @@ abstract class sly_Util_Csrf {
 		}
 
 		if (!is_string($token)) {
-			$token = sly_post(self::TOKEN_NAME, 'string', null);
+			$request = $request ? $request : sly_Core::getRequest();
+			$token   = $request->post(self::TOKEN_NAME, 'string', null);
 		}
 
 		$ok = sly_Util_Password::equals($ref, $token);
