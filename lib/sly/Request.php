@@ -15,7 +15,7 @@
  * taking away the PHP 5.3, formats and path stuff.
  */
 class sly_Request {
-	protected static $trustProxy = false;
+	protected static $trustProxy = true;
 
 	public $get;
 	public $post;
@@ -46,22 +46,22 @@ class sly_Request {
 	}
 
 	public function get($key, $type, $default = null) {
-		return $this->getParameter($this->get, $key, $type, $default);
+		return $this->get->get($key, $type, $default);
 	}
 
 	public function post($key, $type, $default = null) {
-		return $this->getParameter($this->post, $key, $type, $default);
+		return $this->post->get($key, $type, $default);
 	}
 
 	public function cookie($key, $type, $default = null) {
-		return $this->getParameter($this->cookies, $key, $type, $default);
+		return $this->cookies->get($key, $type, $default);
 	}
 
 	public function request($key, $type, $default = null) {
 		$request = $this->buildRequestArray(
-			$this->get->get('/'),
-			$this->post->get('/'),
-			$this->cookies->get('/')
+			$this->get->all(),
+			$this->post->all(),
+			$this->cookies->all()
 		);
 
 		return sly_setarraytype($request, $key, $type, $default);
@@ -80,15 +80,7 @@ class sly_Request {
 		return $this->getParameterArray($source, $key, $type, $default);
 	}
 
-	protected function getParameter(sly_Util_Array $source, $key, $type, $default) {
-		if (!$source->has($key)) {
-			return $default;
-		}
-
-		return sly_settype($source->get($key), $type);
-	}
-
-	public function getParameterArray(sly_Util_Array $source, $key, $type, $default) {
+	public function getParameterArray(sly_Util_ArrayObject $source, $key, $type, $default) {
 		$cast   = $source->has($key);
 		$values = sly_makeArray($source->get($key, 'raw', $default));
 
@@ -140,11 +132,11 @@ class sly_Request {
 	 * @param string $content  the raw body data
 	 */
 	public function initialize(array $get = array(), array $post = array(), array $cookies = array(), array $files = array(), array $server = array(), $content = null) {
-		$this->get        = new sly_Util_Array($get);
-		$this->post       = new sly_Util_Array($post);
-		$this->cookies    = new sly_Util_Array($cookies);
+		$this->get        = new sly_Util_ArrayObject($get);
+		$this->post       = new sly_Util_ArrayObject($post);
+		$this->cookies    = new sly_Util_ArrayObject($cookies);
 		$this->files      = $files;
-		$this->server     = new sly_Util_Array($server);
+		$this->server     = new sly_Util_ArrayObject($server, sly_Util_ArrayObject::NORMALIZE_UPPERCASE);
 		$this->headers    = $this->getHeadersFromServer($this->server);
 		$this->content    = $content;
 		$this->languages  = null;
@@ -168,7 +160,7 @@ class sly_Request {
 
 		if ($isUrlEnc && in_array($method, array('PUT', 'DELETE', 'PATCH'))) {
 			parse_str($request->getContent(), $data);
-			$request->request = new sly_Util_Array($data);
+			$request->post = new sly_Util_ArrayObject($data);
 		}
 
 		return $request;
@@ -178,12 +170,11 @@ class sly_Request {
 	 * Clones the current request
 	 */
 	public function __clone() {
-		$this->query      = clone $this->query;
-		$this->request    = clone $this->request;
-		$this->attributes = clone $this->attributes;
-		$this->cookies    = clone $this->cookies;
-		$this->server     = clone $this->server;
-		$this->headers    = clone $this->headers;
+		$this->get     = clone $this->get;
+		$this->post    = clone $this->post;
+		$this->cookies = clone $this->cookies;
+		$this->server  = clone $this->server;
+		$this->headers = clone $this->headers;
 	}
 
 	/**
@@ -202,13 +193,13 @@ class sly_Request {
 	 * $_FILES is never override, see rfc1867
 	 */
 	public function overrideGlobals() {
-		$_GET     = $this->query->get('/');
-		$_POST    = $this->request->get('/');
-		$_SERVER  = $this->server->get('/');
-		$_COOKIE  = $this->cookies->get('/');
+		$_GET     = $this->query->all();
+		$_POST    = $this->request->all();
+		$_SERVER  = $this->server->all();
+		$_COOKIE  = $this->cookies->all();
 		$_REQUEST = $this->buildRequestArray($_GET, $_POST, $_COOKIE);
 
-		foreach ($this->headers->get('/') as $key => $value) {
+		foreach ($this->headers as $key => $value) {
 			$key = strtoupper(str_replace('-', '_', $key));
 
 			if (in_array($key, array('CONTENT_TYPE', 'CONTENT_LENGTH'))) {
@@ -225,9 +216,11 @@ class sly_Request {
 	 *
 	 * You should only call this method if your application
 	 * is hosted behind a reverse proxy that you manage.
+	 *
+	 * @param boolean $flag
 	 */
-	public static function trustProxyData() {
-		self::$trustProxy = true;
+	public static function trustProxyData($flag) {
+		self::$trustProxy = (boolean) $flag;
 	}
 
 	/**
@@ -315,7 +308,7 @@ class sly_Request {
 	 * @return string
 	 */
 	public function getScriptName() {
-		return $this->server->get('SCRIPT_NAME', $this->server->get('ORIG_SCRIPT_NAME', ''));
+		return $this->server->get('SCRIPT_NAME', $this->server->get('ORIG_SCRIPT_NAME', 'string', ''));
 	}
 
 	/**
@@ -337,7 +330,7 @@ class sly_Request {
 			return $this->headers->get('X-Forwarded-Port');
 		}
 
-		return $this->server->get('SERVER_PORT');
+		return $this->server->get('SERVER_PORT', 'string', '');
 	}
 
 	/**
@@ -414,7 +407,7 @@ class sly_Request {
 	 * @return string|null  a normalized query string for the Request
 	 */
 	public function getQueryString() {
-		$qs = self::normalizeQueryString($this->server->get('QUERY_STRING', ''));
+		$qs = self::normalizeQueryString($this->server->get('QUERY_STRING', 'string', ''));
 
 		return '' === $qs ? null : $qs;
 	}
@@ -426,11 +419,11 @@ class sly_Request {
 	 */
 	public function isSecure() {
 		return (
-			(strtolower($this->server->get('HTTPS')) == 'on' || $this->server->get('HTTPS') == 1)
+			(strtolower($this->server->get('HTTPS')) === 'on' || $this->server->get('HTTPS') == 1)
 			||
-			(self::$trustProxy && strtolower($this->headers->get('SSL_HTTPS')) == 'on' || $this->headers->get('SSL_HTTPS') == 1)
+			(self::$trustProxy && strtolower($this->headers->get('SSL-HTTPS')) == 'on' || $this->headers->get('SSL-HTTPS') == 1)
 			||
-			(self::$trustProxy && strtolower($this->headers->get('X_FORWARDED_PROTO')) == 'https')
+			(self::$trustProxy && strtolower($this->headers->get('X-Forwarded-Proto')) == 'https')
 		);
 	}
 
@@ -440,12 +433,12 @@ class sly_Request {
 	 * @return string
 	 */
 	public function getHost() {
-		if (self::$trustProxy && $host = $this->headers->get('X_FORWARDED_HOST')) {
+		if (self::$trustProxy && $host = $this->headers->get('X-Forwarded-Host')) {
 			$elements = explode(',', $host);
 			$host     = trim($elements[count($elements) - 1]);
 		}
 		else {
-			if (!$host = $this->headers->get('HOST')) {
+			if (!$host = $this->headers->get('Host')) {
 				if (!$host = $this->server->get('SERVER_NAME')) {
 					$host = $this->server->get('SERVER_ADDR', '');
 				}
@@ -468,10 +461,10 @@ class sly_Request {
 	 */
 	public function getMethod() {
 		if (null === $this->method) {
-			$this->method = strtoupper($this->server->get('REQUEST_METHOD', 'GET'));
+			$this->method = strtoupper($this->server->get('REQUEST_METHOD', 'string', 'GET'));
 
 			if ('POST' === $this->method) {
-				$this->method = strtoupper($this->headers->get('X-HTTP-METHOD-OVERRIDE', $this->request('_method', 'string', 'POST')));
+				$this->method = strtoupper($this->headers->get('X-HTTP-Method-Override', 'string', 'POST'));
 			}
 		}
 
@@ -526,7 +519,7 @@ class sly_Request {
 	 * @return array  the entity tags
 	 */
 	public function getETags() {
-		return preg_split('/\s*,\s*/', $this->headers->get('if_none_match'), null, PREG_SPLIT_NO_EMPTY);
+		return preg_split('/\s*,\s*/', $this->headers->get('If-None-Match'), null, PREG_SPLIT_NO_EMPTY);
 	}
 
 	/**
@@ -626,7 +619,7 @@ class sly_Request {
 	 * @return boolean  true if the request is an XMLHttpRequest, false otherwise
 	 */
 	public function isAjax() {
-		return 'XMLHttpRequest' === $this->headers->get('X_REQUESTED_WITH');
+		return 'XMLHttpRequest' === $this->headers->get('X-Requested-With');
 	}
 
 	/**
@@ -666,13 +659,12 @@ class sly_Request {
 	/**
 	 * Gets the HTTP headers
 	 *
-	 * @return array
+	 * @return sly_Util_ArrayObject
 	 */
-	protected function getHeadersFromServer(sly_Util_Array $server) {
-		$parameters = $server->get('/');
-		$headers    = array();
+	protected function getHeadersFromServer(sly_Util_ArrayObject $server) {
+		$headers = array();
 
-		foreach ($parameters as $key => $value) {
+		foreach ($server as $key => $value) {
 			if (0 === strpos($key, 'HTTP_')) {
 				$headers[substr($key, 5)] = $value;
 			}
@@ -682,7 +674,7 @@ class sly_Request {
 			}
 		}
 
-		return new sly_Util_Array($headers);
+		return new sly_Util_ArrayObject($headers, sly_Util_ArrayObject::NORMALIZE_HTTP_HEADER);
 	}
 
 	/*
@@ -699,9 +691,9 @@ class sly_Request {
 	protected function prepareRequestUri() {
 		$requestUri = '';
 
-		if ($this->headers->has('X_REWRITE_URL') && false !== stripos(PHP_OS, 'WIN')) {
+		if ($this->headers->has('X-Rewrite-Url') && false !== stripos(PHP_OS, 'WIN')) {
 			// check this first so IIS will catch
-			$requestUri = $this->headers->get('X_REWRITE_URL');
+			$requestUri = $this->headers->get('X-Rewrite-Url');
 		}
 		elseif ($this->server->get('IIS_WasUrlRewritten') == '1' && $this->server->get('UNENCODED_URL') != '') {
 			// IIS7 with URL Rewrite: make sure we get the unencoded url (double slash problem)
