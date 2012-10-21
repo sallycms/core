@@ -104,7 +104,7 @@ class sly_Response {
 	 * @param array   $headers An array of response headers
 	 */
 	public function __construct($content = '', $status = 200, array $headers = array()) {
-		$this->headers = new sly_Util_Array($headers);
+		$this->headers = new sly_Util_ArrayObject($headers, sly_Util_ArrayObject::NORMALIZE_HTTP_HEADER);
 		$this->setContent($content);
 		$this->setStatusCode($status);
 	}
@@ -124,24 +124,24 @@ class sly_Response {
 	}
 
 	public function setContentType($type, $charset = null) {
-		$this->headers->set('content-type', $type);
+		$this->headers->set('Content-Type', $type);
 		if ($charset !== null) $this->setCharset($charset);
 	}
 
 	public function setHeader($name, $value) {
-		$this->headers->set(mb_strtolower($name), $value);
+		$this->headers->set($name, $value);
 	}
 
 	public function hasHeader($name) {
-		$this->headers->has(mb_strtolower($name));
+		$this->headers->has($name);
 	}
 
 	public function getHeader($name, $default = null) {
-		$this->headers->get(mb_strtolower($name), $default);
+		$this->headers->get($name, 'string', $default);
 	}
 
 	public function removeHeader($name) {
-		$this->headers->remove(mb_strtolower($name));
+		$this->headers->remove($name);
 	}
 
 	/**
@@ -158,18 +158,18 @@ class sly_Response {
 		// Fix Content-Type
 		$charset = $this->charset ? $this->charset : 'UTF-8';
 
-		if ($this->headers->has('content-type')) {
-			$type = $this->headers->get('content-type');
+		if ($this->headers->has('Content-Type')) {
+			$type = $this->headers->get('Content-Type');
 
 			if ((0 === strpos($type, 'text/') || $type === 'application/javascript') && false === strpos($type, 'charset')) {
 				// add the charset
-				$this->headers->set('content-type', $this->headers->get('content-type').'; charset='.$charset);
+				$this->headers->set('Content-Type', $this->headers->get('Content-Type').'; charset='.$charset);
 			}
 		}
 
 		// Fix Content-Length
-		if ($this->headers->has('transfer-encoding')) {
-			$this->headers->remove('content-length');
+		if ($this->headers->has('Transfer-Encoding')) {
+			$this->headers->remove('Content-Length');
 		}
 	}
 
@@ -186,9 +186,7 @@ class sly_Response {
 		header(sprintf('HTTP/1.1 %s %s', $this->statusCode, $this->statusText));
 
 		// headers
-		foreach ($this->headers->get('') as $name => $value) {
-			// 'content-length' => 'Content-Length'
-			$name = implode('-', array_map('ucfirst', explode('-', $name)));
+		foreach ($this->headers as $name => $value) {
 			header($name.': '.$value, false);
 		}
 
@@ -208,11 +206,13 @@ class sly_Response {
 	/**
 	 * Sends HTTP headers and content
 	 *
-	 * @param sly_Request $request  the request that is responded to (used to determine keep-alive status)
+	 * @param sly_Request           $request     the request that is responded to (used to determine keep-alive status)
+	 * @param sly_Event_IDispatcher $dispatcher  the dispatcher to use to notify on SLY_SEND_RESPONSE
 	 */
-	public function send(sly_Request $request = null) {
+	public function send(sly_Request $request = null, sly_Event_IDispatcher $dispatcher = null) {
 		// give listeners a very last chance to tamper with this response
-		sly_Core::dispatcher()->notify('SLY_SEND_RESPONSE', $this);
+		if (!$dispatcher) $dispatcher = sly_Core::dispatcher();
+		$dispatcher->notify('SLY_SEND_RESPONSE', $this);
 
 		// safely enable gzip output
 		if (!sly_ini_get('zlib.output_compression')) {
@@ -317,7 +317,7 @@ class sly_Response {
 	 * @return string  the date as a string
 	 */
 	public function getDate() {
-		return $this->headers->getDate('date');
+		return $this->headers->get('Date');
 	}
 
 	/**
@@ -326,7 +326,7 @@ class sly_Response {
 	 * @param int $date  the date as a timestamp
 	 */
 	public function setDate($date) {
-		$this->headers->set('date', date('D, d M Y H:i:s', $date).' GMT');
+		$this->headers->set('Date', date('D, d M Y H:i:s', $date).' GMT');
 	}
 
 	/**
@@ -335,7 +335,7 @@ class sly_Response {
 	 * @return string  the expire time as a string
 	 */
 	public function getExpires() {
-		return $this->headers->getDate('expires');
+		return $this->headers->get('Expires');
 	}
 
 	/**
@@ -347,10 +347,10 @@ class sly_Response {
 	 */
 	public function setExpires($date = null) {
 		if (null === $date) {
-			$this->headers->remove('expires');
+			$this->headers->remove('Expires');
 		}
 		else {
-			$this->headers->set('expires', date('D, d M Y H:i:s', $date).' GMT');
+			$this->headers->set('Expires', date('D, d M Y H:i:s', $date).' GMT');
 		}
 	}
 
@@ -360,7 +360,7 @@ class sly_Response {
 	 * @return string  the last modified time as a string
 	 */
 	public function getLastModified() {
-		return $this->headers->remove('last-modified');
+		return $this->headers->remove('Last-Modified');
 	}
 
 	/**
@@ -372,10 +372,10 @@ class sly_Response {
 	 */
 	public function setLastModified($date = null) {
 		if (null === $date) {
-			$this->headers->remove('last-modified');
+			$this->headers->remove('Last-Modified');
 		}
 		else {
-			$this->headers->set('last-modified', date('D, d M Y H:i:s', $date).' GMT');
+			$this->headers->set('Last-Modified', date('D, d M Y H:i:s', $date).' GMT');
 		}
 	}
 
@@ -385,7 +385,7 @@ class sly_Response {
 	 * @return string  the ETag HTTP header
 	 */
 	public function getEtag() {
-		return $this->headers->get('etag');
+		return $this->headers->get('ETag');
 	}
 
 	/**
@@ -396,14 +396,14 @@ class sly_Response {
 	 */
 	public function setEtag($etag = null, $weak = false) {
 		if (null === $etag) {
-			$this->headers->remove('etag');
+			$this->headers->remove('ETag');
 		}
 		else {
 			if (0 !== strpos($etag, '"')) {
 				$etag = '"'.$etag.'"';
 			}
 
-			$this->headers->set('etag', (true === $weak ? 'W/' : '').$etag);
+			$this->headers->set('ETag', (true === $weak ? 'W/' : '').$etag);
 		}
 	}
 
@@ -441,7 +441,7 @@ class sly_Response {
 		$this->setContent(null);
 
 		// remove headers that MUST NOT be included with 304 Not Modified responses
-		foreach (array('allow', 'content-encoding', 'content-language', 'content-length', 'content-md5', 'content-type', 'last-modified') as $header) {
+		foreach (array('Allow', 'Content-Encoding', 'Content-Language', 'Content-Length', 'Content-MD5', 'Content-Type', 'Last-Modified') as $header) {
 			$this->headers->remove($header);
 		}
 	}
@@ -453,23 +453,23 @@ class sly_Response {
 	 * If the Response is not modified, it sets the status code to 304 and
 	 * remove the actual content by calling the setNotModified() method.
 	 *
-	 * @return boolean  true if not modified, else false
+	 * @param  sly_Request $request  the request to work on
+	 * @return boolean               true if not modified, else false
 	 */
-	public function isNotModified() {
-		$notModified  = false;
-		$selfModified = $this->headers->get('last-modified');
-		$selfModified = $selfModified ? strtotime($this->headers->get('last-modified')) : null;
-		$lastModified = isset($_SERVER['HTTP_IF_MODIFIED_SINCE']) ? @strtotime($_SERVER['HTTP_IF_MODIFIED_SINCE']) : null;
-		$eTags        = isset($_SERVER['HTTP_IF_NONE_MATCH']) ? isset($_SERVER['HTTP_IF_NONE_MATCH']) : '';
-		$eTags        = preg_split('/\s*,\s*/', $eTags, null, PREG_SPLIT_NO_EMPTY);
+	public function isNotModified(sly_Request $request = null) {
+		if (!$request) {
+			$request = sly_Core::getRequest();
+		}
 
-		if ($eTags) {
-			$notModified =
-				(in_array($this->getEtag(), $eTags, true) || in_array('*', $eTags)) &&
-				(!$lastModified || $selfModified === $lastModified);
+		$lastModified = $request->headers->get('If-Modified-Since');
+		$notModified  = false;
+		$etags        = $request->getEtags();
+
+		if ($etags) {
+			$notModified = (in_array($this->getEtag(), $etags) || in_array('*', $etags)) && (!$lastModified || $this->headers->get('Last-Modified') == $lastModified);
 		}
 		elseif ($lastModified) {
-			$notModified = $lastModified === $selfModified;
+			$notModified = $lastModified == $this->headers->get('Last-Modified');
 		}
 
 		if ($notModified) {
