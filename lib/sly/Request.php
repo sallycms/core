@@ -57,6 +57,14 @@ class sly_Request {
 		return $this->cookies->get($key, $type, $default);
 	}
 
+	public function server($key, $default = null) {
+		return $this->servers->get($key, 'string', $default);
+	}
+
+	public function header($key, $default = null) {
+		return $this->headers->get($key, 'string', $default);
+	}
+
 	public function request($key, $type, $default = null) {
 		$request = $this->buildRequestArray(
 			$this->get->all(),
