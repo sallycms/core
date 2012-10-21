@@ -311,7 +311,7 @@ class sly_Response {
 	 * @return string  the date as a string
 	 */
 	public function getDate() {
-		return $this->headers->getDate('date');
+		return $this->headers->get('date');
 	}
 
 	/**
@@ -329,7 +329,7 @@ class sly_Response {
 	 * @return string  the expire time as a string
 	 */
 	public function getExpires() {
-		return $this->headers->getDate('expires');
+		return $this->headers->get('expires');
 	}
 
 	/**
