@@ -133,7 +133,7 @@ abstract class sly_Model_Base {
 				elseif ($type === 'json') {
 					$hash[$name] = json_decode($hash[$name], true);
 
-					if(is_array($hash[$name])) {
+					if (is_array($hash[$name])) {
 						$type = 'array';
 					} else {
 						$type = 'string';

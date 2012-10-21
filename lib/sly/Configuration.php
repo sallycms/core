@@ -331,10 +331,10 @@ class sly_Configuration {
 	 */
 	protected function getStoreMode($key, $mode, $force) {
 		//handle default facilities
-		if($mode === self::STORE_LOCAL_DEFAULT || $mode === self::STORE_PROJECT_DEFAULT) {
+		if ($mode === self::STORE_LOCAL_DEFAULT || $mode === self::STORE_PROJECT_DEFAULT) {
 			$mode--; //move to real facility
 			// if  the key does not exists or else it is in our real facility and we force override
-			if(!isset($this->mode[$key]) || ($force && $this->mode[$key] === $mode)) {
+			if (!isset($this->mode[$key]) || ($force && $this->mode[$key] === $mode)) {
 				return $mode;
 			}
 			return null;
