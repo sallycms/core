@@ -93,7 +93,7 @@ class sly_Util_ArrayObject implements Countable, IteratorAggregate, ArrayAccess 
 	public function remove($key) {
 		$key = $this->normalize($key);
 
-		if (array_key_exists($this->array, $key)) {
+		if (array_key_exists($key, $this->array)) {
 			unset($this->array[$key]);
 		}
 
@@ -119,7 +119,7 @@ class sly_Util_ArrayObject implements Countable, IteratorAggregate, ArrayAccess 
 	 * @return boolean
 	 */
 	public function has($key) {
-		return array_key_exists($this->array, $this->normalize($key));
+		return array_key_exists($this->normalize($key), $this->array);
 	}
 
 	/**
