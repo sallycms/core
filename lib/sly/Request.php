@@ -472,12 +472,21 @@ class sly_Request {
 	}
 
 	/**
+	 * Get the user agent
+	 *
+	 * @return string|null  the user agent string (null if no UA is present)
+	 */
+	public function getUserAgent() {
+		return $this->headers->get('User-Agent');
+	}
+
+	/**
 	 * Gets the format associated with the request
 	 *
 	 * @return string|null  the format (null if no content type is present)
 	 */
 	public function getContentType() {
-		return $this->server->get('CONTENT_TYPE');
+		return $this->headers->get('Content-Type');
 	}
 
 	/**
