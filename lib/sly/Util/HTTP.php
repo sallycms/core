@@ -109,7 +109,8 @@ class sly_Util_HTTP {
 	 * @return string
 	 */
 	public static function getBaseUrl($addScriptPath = false, $forceProtocol = null) {
-		$protocol = $forceProtocol === null ? (self::isSecure() ? 'https': 'http') : $forceProtocol;
+		$request  = sly_Core::getRequest();
+		$protocol = $forceProtocol === null ? $request->getScheme() : $forceProtocol;
 		$host     = self::getHost();
 		$path     = '';
 
@@ -119,7 +120,8 @@ class sly_Util_HTTP {
 				$path = '/sally';
 			}
 			else {
-				$path = dirname($_SERVER['SCRIPT_NAME']); // '/foo' or '/foo/sally/backend'
+				$path = $request->getScriptName();
+				$path = dirname($path); // '/foo' or '/foo/sally/backend'
 
 				if (IS_SALLY_BACKEND) {
 					$path = dirname(dirname($path));
@@ -170,29 +172,13 @@ class sly_Util_HTTP {
 	 */
 	public static function getHost() {
 		// return a well defined value if run on CLI to make unit tests possible
-		if (PHP_SAPI === 'cli') return 'cli';
-
-		$host = '';
-
-		if     (isset($_SERVER['HTTP_X_FORWARDED_HOST']))   $host = $_SERVER['HTTP_X_FORWARDED_HOST'];
-		elseif (isset($_SERVER['HTTP_HOST']))               $host = $_SERVER['HTTP_HOST'];
-		elseif (isset($_SERVER['HTTP_X_FORWARDED_SERVER'])) $host = $_SERVER['HTTP_X_FORWARDED_SERVER'];
-		elseif (isset($_SERVER['SERVER_NAME']))             $host = $_SERVER['SERVER_NAME'];
-
-		// remove port if present
-		if ($host && strpos($host, ':') !== false) {
-			$host = substr($host, 0, strpos($host, ':'));
-		}
-
-		return $host;
+		return PHP_SAPI === 'cli' ? 'cli' : sly_Core::getRequest()->getHost();
 	}
 
 	/**
 	 * @return boolean
 	 */
 	public static function isSecure() {
-		return
-			(isset($_SERVER['HTTPS']) && (strtolower($_SERVER['HTTPS']) === 'on' || $_SERVER['HTTPS'] == 1)) ||
-			(isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && strtolower($_SERVER['HTTP_X_FORWARDED_PROTO']) === 'https');
+		return sly_Core::getRequest()->isSecure();
 	}
 }
