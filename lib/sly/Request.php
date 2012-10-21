@@ -58,7 +58,7 @@ class sly_Request {
 	}
 
 	public function server($key, $default = null) {
-		return $this->servers->get($key, 'string', $default);
+		return $this->server->get($key, 'string', $default);
 	}
 
 	public function header($key, $default = null) {
