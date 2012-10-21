@@ -105,33 +105,14 @@ class sly_Util_HTTP {
 	}
 
 	/**
+	 * Get the absolute base URL to the project's root (frontend)
+	 *
 	 * @param  boolean $addScriptPath
+	 * @param  mixed   $forceProtocol  a concrete protocol like 'http' or null for the current one
 	 * @return string
 	 */
 	public static function getBaseUrl($addScriptPath = false, $forceProtocol = null) {
-		$request  = sly_Core::getRequest();
-		$protocol = $forceProtocol === null ? $request->getScheme() : $forceProtocol;
-		$host     = self::getHost();
-		$path     = '';
-
-		if ($addScriptPath) {
-			// in CLI, the SCRIPT_NAME would be something like 'C:\xamp\php\phpunit'...
-			if (PHP_SAPI === 'cli') {
-				$path = '/sally';
-			}
-			else {
-				$path = $request->getScriptName();
-				$path = dirname($path); // '/foo' or '/foo/sally/backend'
-
-				if (IS_SALLY_BACKEND) {
-					$path = dirname(dirname($path));
-				}
-
-				$path = str_replace('\\', '/', $path);
-			}
-		}
-
-		return rtrim(sprintf('%s://%s%s', $protocol, $host, $path), '/');
+		return sly_Core::getRequest()->getBaseUrl($addScriptPath, $forceProtocol);
 	}
 
 	/**
@@ -171,8 +152,7 @@ class sly_Util_HTTP {
 	 * @return string
 	 */
 	public static function getHost() {
-		// return a well defined value if run on CLI to make unit tests possible
-		return PHP_SAPI === 'cli' ? 'cli' : sly_Core::getRequest()->getHost();
+		return sly_Core::getRequest()->getHost();
 	}
 
 	/**

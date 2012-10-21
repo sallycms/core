@@ -121,6 +121,38 @@ class sly_Request {
 		return $request;
 	}
 
+	/**
+	 * Get the absolute base URL to the project's root (frontend)
+	 *
+	 * @param  boolean $addScriptPath
+	 * @param  mixed   $forceProtocol  a concrete protocol like 'http' or null for the current one
+	 * @return string
+	 */
+	public function getBaseUrl($addScriptPath = false, $forceProtocol = null) {
+		$protocol = $forceProtocol === null ? $this->getScheme() : $forceProtocol;
+		$host     = $this->getHost();
+		$path     = '';
+
+		if ($addScriptPath) {
+			// in CLI, the SCRIPT_NAME would be something like 'C:\xamp\php\phpunit'...
+			if (PHP_SAPI === 'cli') {
+				$path = '/sally';
+			}
+			else {
+				$path = $this->getScriptName();
+				$path = dirname($path); // '/foo' or '/foo/sally/backend'
+
+				if (IS_SALLY_BACKEND) {
+					$path = dirname(dirname($path));
+				}
+
+				$path = str_replace('\\', '/', $path);
+			}
+		}
+
+		return rtrim(sprintf('%s://%s%s', $protocol, $host, $path), '/');
+	}
+
 	/*
 	 * The following methods are mostly derived from code of Symfony2 (2.1.2)
 	 * Code subject to the MIT license (http://symfony.com/doc/2.1/contributing/code/license.html).
@@ -447,8 +479,13 @@ class sly_Request {
 		}
 		else {
 			if (!$host = $this->headers->get('Host')) {
-				if (!$host = $this->server->get('SERVER_NAME')) {
-					$host = $this->server->get('SERVER_ADDR', '');
+				$server = $this->server;
+
+				if (!$host = $server->get('SERVER_NAME')) {
+					if (!$host = $server->get('SERVER_ADDR')) {
+						// return a well defined value if run on CLI to make unit tests possible
+						$host = PHP_SAPI;
+					}
 				}
 			}
 		}
