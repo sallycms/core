@@ -207,8 +207,10 @@ class sly_Response {
 
 	/**
 	 * Sends HTTP headers and content
+	 *
+	 * @param sly_Request $request  the request that is responded to (used to determine keep-alive status)
 	 */
-	public function send() {
+	public function send(sly_Request $request = null) {
 		// give listeners a very last chance to tamper with this response
 		sly_Core::dispatcher()->notify('SLY_SEND_RESPONSE', $this);
 
@@ -222,9 +224,13 @@ class sly_Response {
 			}
 		}
 
+		if (!$request) {
+			$request = sly_Core::getRequest();
+		}
+
 		// RFC 2616 said every not explicitly keep-alive Connection should receice a Connection: close,
 		// but at least Apache Websever breaks this, if the client sends just nothing (which is also not compliant).
-		if (empty($_SERVER['HTTP_CONNECTION']) || strtolower($_SERVER['HTTP_CONNECTION']) !== 'keep-alive') {
+		if ($server->header('Connection') !== 'keep-alive') {
 			$this->setHeader('Connection', 'close');
 		}
 
