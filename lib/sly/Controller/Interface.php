@@ -23,4 +23,13 @@ interface sly_Controller_Interface {
 	 * @return boolean         true if access is granted, else false
 	 */
 	public function checkPermission($action);
+
+	/**
+	 * Set request
+	 *
+	 * This method is called by the application before the action is executed.
+	 *
+	 * @param sly_Request $request  the request the controller should act upon
+	 */
+	public function setRequest(sly_Request $request);
 }

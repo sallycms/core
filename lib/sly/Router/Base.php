@@ -87,13 +87,15 @@ class sly_Router_Base implements sly_Router_Interface {
 	}
 
 	public function getRequestUri() {
-		if (!isset($_SERVER['REQUEST_URI'])) {
+		$requestUri = sly_Core::getRequest()->getRequestUri();
+
+		if (empty($requestUri)) {
 			throw new LogicException('Cannot route without a request URI.');
 		}
 
 		$host    = sly_Util_HTTP::getBaseUrl();     // 'http://example.com'
 		$base    = sly_Util_HTTP::getBaseUrl(true); // 'http://example.com/sallyinstall'
-		$request = $host.$_SERVER['REQUEST_URI'];   // 'http://example.com/sallyinstall/backend/system'
+		$request = $host.$requestUri;               // 'http://example.com/sallyinstall/backend/system'
 
 		if (mb_substr($request, 0, mb_strlen($base)) !== $base) {
 			throw new LogicException('Base URI mismatch.');

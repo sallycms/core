@@ -242,22 +242,24 @@ abstract class sly_Form_Helper {
 	 *                                (used for complex elements that append strings to the element name, like
 	 *                                the old datepicker or the varisale money input which consists of an input
 	 *                                and a select field)
+	 * @param  sly_Request $request   the request to use or null for the global one
 	 * @return mixed                  the value as described above
 	 */
-	public static function parseFormValue($name, $default = null, $multilingual = false, $nameSuffix = '') {
+	public static function parseFormValue($name, $default = null, $multilingual = false, $nameSuffix = '', sly_Request $request = null) {
 		$monoName  = $name.$nameSuffix;
-		$monoValue = isset($_POST[$monoName]) ? $_POST[$monoName] : $default;
+		$request   = $request ? $request : sly_Core::getRequest();
+		$monoValue = $request->post($monoName, 'raw', $default);
 
 		if (!$multilingual) {
 			return $monoValue;
 		}
 
-		$equal  = !sly_Util_Language::isMultilingual() || sly_post('equal__'.$name, 'boolean', false);
+		$equal  = !sly_Util_Language::isMultilingual() || $request->post('equal__'.$name, 'boolean', false);
 		$values = array();
 
 		foreach (sly_Util_Language::findAll(true) as $clangID) {
 			$key              = $name.'__clang_'.$clangID.$nameSuffix;
-			$values[$clangID] = $equal ? $monoValue : (isset($_POST[$key]) ? $_POST[$key] : $default);
+			$values[$clangID] = $equal ? $monoValue : $request->post($key, 'raw', $default);
 		}
 
 		return $values;

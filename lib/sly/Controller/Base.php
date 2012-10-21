@@ -24,8 +24,29 @@
  * @since   0.1
  */
 abstract class sly_Controller_Base {
-	protected $content_type = null; ///< string  the content type
-	protected $charset      = null; ///< string  the character set
+	protected $content_type = null; ///< string       the content type
+	protected $charset      = null; ///< string       the character set
+	protected $request      = null; ///< sly_Request  the current request
+
+	/**
+	 * Set request
+	 *
+	 * This method is called by the application before the action is executed.
+	 *
+	 * @param sly_Request $request  the request the controller should act upon
+	 */
+	public function setRequest(sly_Request $request) {
+		$this->request = $request;
+	}
+
+	/**
+	 * get request
+	 *
+	 * @return sly_Request
+	 */
+	public function getRequest() {
+		return $this->request;
+	}
 
 	/**
 	 * Set the content type

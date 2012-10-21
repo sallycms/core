@@ -63,6 +63,9 @@ abstract class sly_App_Base implements sly_App_Interface {
 				$controller = $this->getController($className);
 			}
 
+			// inject current request
+			$controller->setRequest(sly_Core::getRequest());
+
 			if (!$controller->checkPermission($action)) {
 				throw new sly_Authorisation_Exception(t('page_not_allowed', $action, get_class($controller)), 403);
 			}
