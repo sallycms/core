@@ -121,7 +121,7 @@ abstract class sly_Form_Select_Base extends sly_Form_ElementBase {
 	public function setSelected($selected) {
 		return $this->setAttribute('value', $selected);
 	}
-	
+
 	public function setGroupAttr($attr) {
 		$this->groupAttr = $attr;
 	}

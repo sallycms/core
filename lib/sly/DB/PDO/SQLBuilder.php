@@ -389,10 +389,10 @@ abstract class sly_DB_PDO_SQLBuilder {
 	 * @param  int    $limit
 	 * @return string
 	 */
-	protected abstract function build_limit($sql, $offset = 0, $limit = -1);
+	abstract protected function build_limit($sql, $offset = 0, $limit = -1);
 
 	/**
 	 * @return string
 	 */
-	protected abstract function build_list_tables();
+	abstract protected function build_list_tables();
 }

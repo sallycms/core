@@ -24,7 +24,7 @@ abstract class sly_Service_Model_Base {
 	 * @param  array $array
 	 * @return sly_Model_Base
 	 */
-	protected abstract function makeInstance(array $params);
+	abstract protected function makeInstance(array $params);
 
 	/**
 	 * @return string
