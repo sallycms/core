@@ -23,4 +23,13 @@ interface sly_Controller_Interface {
 	 * @return boolean         true if access is granted, else false
 	 */
 	public function checkPermission($action);
+
+	/**
+	 * Set DI container
+	 *
+	 * This method is called by the application before the action is executed.
+	 *
+	 * @param sly_Container $container  the container the controller should use
+	 */
+	public function setContainer(sly_Container $container);
 }
