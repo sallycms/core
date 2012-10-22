@@ -20,7 +20,16 @@ class sly_Container implements ArrayAccess, Countable {
 	 * @param array $values  initial values
 	 */
 	public function __construct(array $values = array()) {
-		$this->values = $values;
+		$this->values = array_merge(array(
+			'sly-config'              => array($this, 'buildConfig'),
+			'sly-dispatcher'          => array($this, 'buildDispatcher'),
+			'sly-registry-temp'       => array($this, 'buildTempRegistry'),
+			'sly-registry-persistent' => array($this, 'buildPersistentRegistry'),
+			'sly-response'            => array($this, 'buildResponse'),
+			'sly-session'             => array($this, 'buildSession'),
+			'sly-persistence'         => array($this, 'buildPersistence'),
+			'sly-cache'               => array($this, 'buildCache'),
+		), $values);
 	}
 
 	/**
@@ -92,7 +101,7 @@ class sly_Container implements ArrayAccess, Countable {
 	}
 
 	/**
-	 * @return sly_Event_Dispatcher
+	 * @return sly_Event_IDispatcher
 	 */
 	public function getDispatcher() {
 		return $this['sly-dispatcher'];
@@ -131,13 +140,6 @@ class sly_Container implements ArrayAccess, Countable {
 	 */
 	public function getErrorHandler() {
 		return $this['sly-error-handler'];
-	}
-
-	/**
-	 * @return sly_Request
-	 */
-	public function getRequest() {
-		return $this['sly-request'];
 	}
 
 	/**
@@ -205,5 +207,99 @@ class sly_Container implements ArrayAccess, Countable {
 	 */
 	public function offsetGet($id) {
 		return $this->get($id);
+	}
+
+	/*     factory methods     */
+
+	/**
+	 * @return sly_Configuration
+	 */
+	protected function buildConfig() {
+		if (!isset($this->values['sly-config'])) {
+			$this['sly-config'] = new sly_Configuration();
+		}
+
+		return $this['sly-config'];
+	}
+
+	/**
+	 * @return sly_Event_IDispatcher
+	 */
+	protected function buildDispatcher() {
+		if (!isset($this->values['sly-dispatcher'])) {
+			$this['sly-dispatcher'] = new sly_Event_Dispatcher();
+		}
+
+		return $this['sly-dispatcher'];
+	}
+
+	/**
+	 * @return sly_Registry_Temp
+	 */
+	protected function buildTempRegistry() {
+		if (!isset($this->values['sly-registry-temp'])) {
+			$this['sly-registry-temp'] = sly_Registry_Temp::getInstance();
+		}
+
+		return $this['sly-registry-temp'];
+	}
+
+	/**
+	 * @return sly_Registry_Persistent
+	 */
+	protected function buildPersistentRegistry() {
+		if (!isset($this->values['sly-registry-persistent'])) {
+			$this['sly-registry-persistent'] = sly_Registry_Persistent::getInstance();
+		}
+
+		return $this['sly-registry-persistent'];
+	}
+
+	/**
+	 * @return sly_Response
+	 */
+	protected function buildResponse() {
+		if (!isset($this->values['sly-response'])) {
+			$response = new sly_Response('', 200);
+			$response->setContentType('text/html', 'UTF-8');
+
+			$this->values['sly-response'] = $response;
+		}
+
+		return $this['sly-response'];
+	}
+
+	/**
+	 * @param  sly_Container $container
+	 * @return sly_Session
+	 */
+	protected function buildSession(sly_Container $container) {
+		if (!isset($this->values['sly-session'])) {
+			$this['sly-session'] = new sly_Session($container['config']->get('INSTNAME'));
+		}
+
+		return $this['sly-session'];
+	}
+
+	/**
+	 * @return sly_DB_PDO_Persistence
+	 */
+	protected function buildPersistence() {
+		if (!isset($this->values['sly-persistence'])) {
+			$this['sly-persistence'] = sly_DB_Persistence::getInstance();
+		}
+
+		return $this['sly-persistence'];
+	}
+
+	/**
+	 * @return BabelCache_Interface
+	 */
+	protected function buildCache() {
+		if (!isset($this->values['sly-cache'])) {
+			$this['sly-cache'] = sly_Cache::factory();
+		}
+
+		return $this['sly-cache'];
 	}
 }
