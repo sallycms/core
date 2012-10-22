@@ -21,6 +21,8 @@ class sly_Container implements ArrayAccess, Countable {
 	 */
 	public function __construct(array $values = array()) {
 		$this->values = array_merge(array(
+			'sly-current-article-id'  => null,
+			'sly-current-lang-id'     => null,
 			'sly-config'              => array($this, 'buildConfig'),
 			'sly-dispatcher'          => array($this, 'buildDispatcher'),
 			'sly-registry-temp'       => array($this, 'buildTempRegistry'),
@@ -29,6 +31,7 @@ class sly_Container implements ArrayAccess, Countable {
 			'sly-session'             => array($this, 'buildSession'),
 			'sly-persistence'         => array($this, 'buildPersistence'),
 			'sly-cache'               => array($this, 'buildCache'),
+			'sly-flash-message'       => array($this, 'buildFlashMessage')
 		), $values);
 	}
 
@@ -91,6 +94,20 @@ class sly_Container implements ArrayAccess, Countable {
 		}
 
 		return $value;
+	}
+
+	/**
+	 * @return int|null
+	 */
+	public function getCurrentArticleID() {
+		return $this['sly-current-article-id'];
+	}
+
+	/**
+	 * @return int|null
+	 */
+	public function getCurrentLanguageID() {
+		return $this['sly-current-lang-id'];
 	}
 
 	/**
@@ -175,6 +192,13 @@ class sly_Container implements ArrayAccess, Countable {
 	 */
 	public function getApplication() {
 		return $this['sly-app'];
+	}
+
+	/**
+	 * @return sly_Util_FlashMessage
+	 */
+	public function getFlashMessage() {
+		return $this['sly-flash-message'];
 	}
 
 	/**
@@ -301,5 +325,25 @@ class sly_Container implements ArrayAccess, Countable {
 		}
 
 		return $this['sly-cache'];
+	}
+
+	/**
+	 * @param  sly_Container $container
+	 * @return sly_Util_FlashMessage
+	 */
+	protected function buildFlashMessage(sly_Container $container) {
+		if (!isset($this->values['sly-flash-message'])) {
+			sly_Util_Session::start();
+
+			$session = $container['session'];
+			$msg     = sly_Util_FlashMessage::readFromSession('sally', $session);
+
+			$msg->removeFromSession($session);
+			$msg->setAutoStore(true);
+
+			$this->values['sly-flash-message'] = $msg;
+		}
+
+		return $this['sly-flash-message'];
 	}
 }
