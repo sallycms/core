@@ -33,7 +33,6 @@ static:
   - sly_Util_Versions
   - sly_I18N_Base
   - sly_I18N
-  - sly_Service_Factory
   - sly_Service_Asset
   - sly_Service_Package
   - sly_Service_AddOn

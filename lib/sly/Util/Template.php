@@ -24,7 +24,7 @@ class sly_Util_Template {
 	 */
 	public static function render($name, array $params = array()) {
 		try {
-			sly_Service_Factory::getTemplateService()->includeFile($name, $params);
+			sly_Core::getContainer()->getTemplateService()->includeFile($name, $params);
 		}
 		catch (sly_Service_Template_Exception $e) {
 			print $e->getMessage();
@@ -91,6 +91,6 @@ class sly_Util_Template {
 	 * @return boolean
 	 */
 	public static function exists($name) {
-		return sly_Service_Factory::getTemplateService()->exists($name);
+		return sly_Core::getContainer()->getTemplateService()->exists($name);
 	}
 }
