@@ -21,8 +21,10 @@ class sly_Container implements ArrayAccess, Countable {
 	 */
 	public function __construct(array $values = array()) {
 		$this->values = array_merge(array(
-			'sly-current-article-id'  => null,
-			'sly-current-lang-id'     => null,
+			'sly-current-article-id' => null,
+			'sly-current-lang-id'    => null,
+
+			// core objects
 			'sly-config'              => array($this, 'buildConfig'),
 			'sly-dispatcher'          => array($this, 'buildDispatcher'),
 			'sly-registry-temp'       => array($this, 'buildTempRegistry'),
@@ -31,7 +33,25 @@ class sly_Container implements ArrayAccess, Countable {
 			'sly-session'             => array($this, 'buildSession'),
 			'sly-persistence'         => array($this, 'buildPersistence'),
 			'sly-cache'               => array($this, 'buildCache'),
-			'sly-flash-message'       => array($this, 'buildFlashMessage')
+			'sly-flash-message'       => array($this, 'buildFlashMessage'),
+
+			// services
+			'sly-service-addon'          => array($this, 'buildAddOnService'),
+			'sly-service-addon-manager'  => array($this, 'buildAddOnManagerService'),
+			'sly-service-article'        => array($this, 'buildArticleService'),
+			'sly-service-articleslice'   => array($this, 'buildArticleSliceService'),
+			'sly-service-articletype'    => array($this, 'buildArticleTypeService'),
+			'sly-service-asset'          => array($this, 'buildAssetService'),
+			'sly-service-category'       => array($this, 'buildCategoryService'),
+			'sly-service-language'       => array($this, 'buildLanguageService'),
+			'sly-service-mediacategory'  => array($this, 'buildMediaCategoryService'),
+			'sly-service-medium'         => array($this, 'buildMediumService'),
+			'sly-service-module'         => array($this, 'buildModuleService'),
+			'sly-service-package-addon'  => array($this, 'buildAddOnPackageService'),
+			'sly-service-package-vendor' => array($this, 'buildVendorPackageService'),
+			'sly-service-slice'          => array($this, 'buildSliceService'),
+			'sly-service-template'       => array($this, 'buildTemplateService'),
+			'sly-service-user'           => array($this, 'buildUserService')
 		), $values);
 	}
 
@@ -195,6 +215,150 @@ class sly_Container implements ArrayAccess, Countable {
 	}
 
 	/**
+	 * get addOn service
+	 *
+	 * @return sly_Service_AddOn
+	 */
+	public function getAddOnService() {
+		return $this->get('sly-service-addon');
+	}
+
+	/**
+	 * get addOn manager service
+	 *
+	 * @return sly_Service_AddOnManager
+	 */
+	public function getAddOnManagerService() {
+		return $this->get('sly-service-addon-manager');
+	}
+
+	/**
+	 * get article service
+	 *
+	 * @return sly_Service_Article
+	 */
+	public function getArticleService() {
+		return $this->get('sly-service-article');
+	}
+
+	/**
+	 * get article slice service
+	 *
+	 * @return sly_Service_ArticleSlice
+	 */
+	public function getArticleSliceService() {
+		return $this->get('sly-service-articleslice');
+	}
+
+	/**
+	 * get article type service
+	 *
+	 * @return sly_Service_ArticleType
+	 */
+	public function getArticleTypeService() {
+		return $this->get('sly-service-articletype');
+	}
+
+	/**
+	 * get asset service
+	 *
+	 * @return sly_Service_Asset
+	 */
+	public function getAssetService() {
+		return $this->get('sly-service-asset');
+	}
+
+	/**
+	 * get category service
+	 *
+	 * @return sly_Service_Category
+	 */
+	public function getCategoryService() {
+		return $this->get('sly-service-category');
+	}
+
+	/**
+	 * get language service
+	 *
+	 * @return sly_Service_Language
+	 */
+	public function getLanguageService() {
+		return $this->get('sly-service-language');
+	}
+
+	/**
+	 * get media category service
+	 *
+	 * @return sly_Service_MediaCategory
+	 */
+	public function getMediaCategoryService() {
+		return $this->get('sly-service-mediacategory');
+	}
+
+	/**
+	 * get medium service
+	 *
+	 * @return sly_Service_Medium
+	 */
+	public function getMediumService() {
+		return $this->get('sly-service-medium');
+	}
+
+	/**
+	 * get module service
+	 *
+	 * @return sly_Service_Module
+	 */
+	public function getModuleService() {
+		return $this->get('sly-service-module');
+	}
+
+	/**
+	 * get addOn package service
+	 *
+	 * @return sly_Service_AddOnPackage
+	 */
+	public function getAddOnPackageService() {
+		return $this->get('sly-service-package-addon');
+	}
+
+	/**
+	 * get vendor package service
+	 *
+	 * @return sly_Service_VendorPackage
+	 */
+	public function getVendorPackageService() {
+		return $this->get('sly-service-package-vendor');
+	}
+
+	/**
+	 * get slice service
+	 *
+	 * @return sly_Service_Slice
+	 */
+	public function getSliceService() {
+		return $this->get('sly-service-slice');
+	}
+
+	/**
+	 * get template service
+	 *
+	 * @return sly_Service_Template
+	 */
+	public function getTemplateService() {
+		return $this->get('sly-service-template');
+	}
+
+	/**
+	 * get user service
+	 *
+	 * @return sly_Service_User
+	 */
+	public function getUserService() {
+		return $this->get('sly-service-user');
+	}
+
+	/**
 	 * @return sly_Util_FlashMessage
 	 */
 	public function getFlashMessage() {
@@ -309,5 +473,197 @@ class sly_Container implements ArrayAccess, Countable {
 		$msg->setAutoStore(true);
 
 		return $this->values['sly-flash-message'] = $msg;
+	}
+
+	/**
+	 * @param  sly_Container $container
+	 * @return sly_Service_AddOn
+	 */
+	protected function buildAddOnService(sly_Container $container) {
+		return $this->values['sly-service-addon'] = new sly_Service_AddOn($container['sly-config'], $container['sly-dispatcher']);
+	}
+
+	/**
+	 * @param  sly_Container $container
+	 * @return sly_Service_AddOn_Manager
+	 */
+	protected function buildAddOnManagerService(sly_Container $container) {
+		$config     = $container['sly-config'];
+		$dispatcher = $container['sly-dispatcher'];
+		$cache      = $container['sly-cache'];
+		$service    = $container['sly-service-addon'];
+
+		return $this->values['sly-service-addon-manager'] = new sly_Service_AddOn_Manager($config, $dispatcher, $cache, $service);
+	}
+
+	/**
+	 * @param  sly_Container $container
+	 * @return sly_Service_Article
+	 */
+	protected function buildArticleService(sly_Container $container) {
+		$persistence = $container['sly-persistence'];
+		$cache       = $container['sly-cache'];
+		$dispatcher  = $container['sly-dispatcher'];
+		$languages   = $container['sly-service-language'];
+		$slices      = $container['sly-service-slice'];
+		$articles    = $container['sly-service-articleslice'];
+		$templates   = $container['sly-service-template'];
+		$service     = new sly_Service_Article($persistence, $cache, $dispatcher, $languages, $slices, $articles, $templates);
+
+		// make sure the circular dependency does not make the app die with an endless loop
+		$this->values['sly-service-article'] = $service;
+
+		$service->setArticleService($service);
+		$service->setCategoryService($container['sly-service-category']);
+
+		return $service;
+	}
+
+	/**
+	 * @param  sly_Container $container
+	 * @return sly_Service_ArticleSlice
+	 */
+	protected function buildArticleSliceService(sly_Container $container) {
+		$persistence = $container['sly-persistence'];
+		$dispatcher  = $container['sly-dispatcher'];
+		$slices      = $container['sly-service-slice'];
+		$templates   = $container['sly-service-template'];
+
+		return $this->values['sly-service-articleslice'] = new sly_Service_ArticleSlice($persistence, $dispatcher, $slices, $templates);
+	}
+
+	/**
+	 * @param  sly_Container $container
+	 * @return sly_Service_ArticleType
+	 */
+	protected function buildArticleTypeService(sly_Container $container) {
+		$config    = $container['sly-config'];
+		$modules   = $container['sly-service-module'];
+		$templates = $container['sly-service-template'];
+
+		return $this->values['sly-service-articletype'] = new sly_Service_ArticleType($config, $modules, $templates);
+	}
+
+	/**
+	 * @param  sly_Container $container
+	 * @return sly_Service_Asset
+	 */
+	protected function buildAssetService(sly_Container $container) {
+		return $this->values['sly-service-asset'] = new sly_Service_Asset($container['sly-config'], $container['sly-dispatcher']);
+	}
+
+	/**
+	 * @param  sly_Container $container
+	 * @return sly_Service_Category
+	 */
+	protected function buildCategoryService(sly_Container $container) {
+		$persistence = $container['sly-persistence'];
+		$cache       = $container['sly-cache'];
+		$dispatcher  = $container['sly-dispatcher'];
+		$languages   = $container['sly-service-language'];
+		$service     = new sly_Service_Category($persistence, $cache, $dispatcher, $languages);
+
+		// make sure the circular dependency does not make the app die with an endless loop
+		$this->values['sly-service-category'] = $service;
+
+		$service->setArticleService($container['sly-service-article']);
+		$service->setCategoryService($service);
+
+		return $service;
+	}
+
+	/**
+	 * @param  sly_Container $container
+	 * @return sly_Service_Language
+	 */
+	protected function buildLanguageService(sly_Container $container) {
+		$persistence = $container['sly-persistence'];
+		$cache       = $container['sly-cache'];
+		$dispatcher  = $container['sly-dispatcher'];
+
+		return $this->values['sly-service-language'] = new sly_Service_Language($persistence, $cache, $dispatcher);
+	}
+
+	/**
+	 * @param  sly_Container $container
+	 * @return sly_Service_MediaCategory
+	 */
+	protected function buildMediaCategoryService(sly_Container $container) {
+		$persistence = $container['sly-persistence'];
+		$cache       = $container['sly-cache'];
+		$dispatcher  = $container['sly-dispatcher'];
+		$service     = new sly_Service_MediaCategory($persistence, $cache, $dispatcher);
+
+		// make sure the circular dependency does not make the app die with an endless loop
+		$this->values['sly-service-mediacategory'] = $service;
+		$service->setMediumService($container['sly-service-medium']);
+
+		return $service;
+	}
+
+	/**
+	 * @param  sly_Container $container
+	 * @return sly_Service_Medium
+	 */
+	protected function buildMediumService(sly_Container $container) {
+		$persistence = $container['sly-persistence'];
+		$cache       = $container['sly-cache'];
+		$dispatcher  = $container['sly-dispatcher'];
+		$categories  = $container['sly-service-mediacategory'];
+
+		return $this->values['sly-service-medium'] = new sly_Service_Medium($persistence, $cache, $dispatcher, $categories);
+	}
+
+	/**
+	 * @param  sly_Container $container
+	 * @return sly_Service_Module
+	 */
+	protected function buildModuleService(sly_Container $container) {
+		return $this->values['sly-service-module'] = new sly_Service_Module($container['sly-config'], $container['sly-dispatcher']);
+	}
+
+	/**
+	 * @param  sly_Container $container
+	 * @return sly_Service_Package_AddOn
+	 */
+	protected function buildAddOnPackageService(sly_Container $container) {
+		return $this->values['sly-service-package-addon'] = new sly_Service_Package_AddOn(SLY_ADDONFOLDER, $container['sly-cache']);
+	}
+
+	/**
+	 * @param  sly_Container $container
+	 * @return sly_Service_Package_Vendor
+	 */
+	protected function buildVendorPackageService(sly_Container $container) {
+		return $this->values['sly-service-package-vendor'] = new sly_Service_Package_Vendor(SLY_VENDORFOLDER, $container['sly-cache']);
+	}
+
+	/**
+	 * @param  sly_Container $container
+	 * @return sly_Service_Slice
+	 */
+	protected function buildSliceService(sly_Container $container) {
+		return $this->values['sly-service-slice'] = new sly_Service_Slice($container['sly-persistence']);
+	}
+
+	/**
+	 * @param  sly_Container $container
+	 * @return sly_Service_Template
+	 */
+	protected function buildTemplateService(sly_Container $container) {
+		return $this->values['sly-service-template'] = new sly_Service_Template($container['sly-config'], $container['sly-dispatcher']);
+	}
+
+	/**
+	 * @param  sly_Container $container
+	 * @return sly_Service_User
+	 */
+	protected function buildUserService(sly_Container $container) {
+		$cache       = $container['sly-cache'];
+		$config      = $container['sly-config'];
+		$dispatcher  = $container['sly-dispatcher'];
+		$persistence = $container['sly-persistence'];
+
+		return $this->values['sly-service-user'] = new sly_Service_User($persistence, $cache, $dispatcher, $config);
 	}
 }
