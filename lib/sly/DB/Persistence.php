@@ -13,7 +13,8 @@
  */
 abstract class sly_DB_Persistence implements Iterator {
 	/**
-	 * @return sly_DB_PDO_Persistence
+	 * @deprecated use sly_Container to get the persistence
+	 * @return     sly_DB_PDO_Persistence
 	 */
 	public static function getInstance() {
 		return sly_Core::getContainer()->getPersistence();
