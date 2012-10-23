@@ -16,7 +16,9 @@ abstract class sly_Service_Factory {
 	/**
 	 * Return a instance of a service
 	 *
-	 * @throws sly_Exception      if service could not be found
+	 * @deprecated use sly_Container->getService() instead
+	 * @throws     sly_Exception if service could not be found
+	 *
 	 * @param  string $modelName  service name (like 'Category' or 'User')
 	 * @return sly_Service_Base   an implementation of sly_Service_Base
 	 */
@@ -25,6 +27,10 @@ abstract class sly_Service_Factory {
 	}
 
 	/**
+	 * get Slice service
+	 *
+	 * @deprecated use sly_Container->getSliceService() instead
+	 *
 	 * @return sly_Service_Slice  The slice service instance
 	 */
 	public static function getSliceService() {
@@ -32,6 +38,10 @@ abstract class sly_Service_Factory {
 	}
 
 	/**
+	 * get SliceValue service
+	 *
+	 * @deprecated use sly_Container->getSliceValueService() instead
+	 *
 	 * @return sly_Service_SliceValue  The slice value service instance
 	 */
 	public static function getSliceValueService() {
@@ -39,6 +49,10 @@ abstract class sly_Service_Factory {
 	}
 
 	/**
+	 * get Template service
+	 *
+	 * @deprecated use sly_Container->getTemplateService() instead
+	 *
 	 * @return sly_Service_Template  The template service instance
 	 */
 	public static function getTemplateService() {
@@ -46,6 +60,10 @@ abstract class sly_Service_Factory {
 	}
 
 	/**
+	 * get Module service
+	 *
+	 * @deprecated use sly_Container->getModuleService() instead
+	 *
 	 * @return sly_Service_Module  The module service instance
 	 */
 	public static function getModuleService() {
@@ -53,6 +71,10 @@ abstract class sly_Service_Factory {
 	}
 
 	/**
+	 * get VendorPackage service
+	 *
+	 * @deprecated use sly_Container->getVendorPackageService() instead
+	 *
 	 * @return sly_Service_Package  The package service instance initiliazed on SLY_VENDORFOLDER
 	 */
 	public static function getVendorPackageService() {
@@ -60,6 +82,10 @@ abstract class sly_Service_Factory {
 	}
 
 	/**
+	 * get AddOnPackage service
+	 *
+	 * @deprecated use sly_Container->getAddOnPackageService() instead
+	 *
 	 * @return sly_Service_Package  The package service instance initiliazed on SLY_ADDONFOLDER
 	 */
 	public static function getAddOnPackageService() {
@@ -67,6 +93,10 @@ abstract class sly_Service_Factory {
 	}
 
 	/**
+	 * get AddOn service
+	 *
+	 * @deprecated use sly_Container->getAddOnService() instead
+	 *
 	 * @return sly_Service_AddOn  The addOn service instance
 	 */
 	public static function getAddOnService() {
@@ -74,6 +104,10 @@ abstract class sly_Service_Factory {
 	}
 
 	/**
+	 * get AddOnManager service
+	 *
+	 * @deprecated use sly_Container->getAddOnManagerService() instead
+	 *
 	 * @return sly_Service_AddOn_Manager  The addOn manager service instance
 	 */
 	public static function getAddOnManagerService() {
@@ -81,6 +115,10 @@ abstract class sly_Service_Factory {
 	}
 
 	/**
+	 * get User service
+	 *
+	 * @deprecated use sly_Container->getUserService() instead
+	 *
 	 * @return sly_Service_User  The user service instance
 	 */
 	public static function getUserService() {
@@ -88,6 +126,10 @@ abstract class sly_Service_Factory {
 	}
 
 	/**
+	 * get ArticleType service
+	 *
+	 * @deprecated use sly_Container->getArticleTypeService() instead
+	 *
 	 * @return sly_Service_ArticleType  The user service instance
 	 */
 	public static function getArticleTypeService() {
@@ -95,6 +137,10 @@ abstract class sly_Service_Factory {
 	}
 
 	/**
+	 * get Category service
+	 *
+	 * @deprecated use sly_Container->getCategoryService() instead
+	 *
 	 * @return sly_Service_Category
 	 */
 	public static function getCategoryService() {
@@ -102,6 +148,10 @@ abstract class sly_Service_Factory {
 	}
 
 	/**
+	 * get Article service
+	 *
+	 * @deprecated use sly_Container->getArticleService() instead
+	 *
 	 * @return sly_Service_Article
 	 */
 	public static function getArticleService() {
@@ -109,6 +159,10 @@ abstract class sly_Service_Factory {
 	}
 
 	/**
+	 * get Language service
+	 *
+	 * @deprecated use sly_Container->getLanguageService() instead
+	 *
 	 * @return sly_Service_Language
 	 */
 	public static function getLanguageService() {
@@ -116,6 +170,10 @@ abstract class sly_Service_Factory {
 	}
 
 	/**
+	 * get Asset service
+	 *
+	 * @deprecated use sly_Container->getAssetService() instead
+	 *
 	 * @return sly_Service_Asset  The asset service instance
 	 */
 	public static function getAssetService() {
@@ -123,6 +181,10 @@ abstract class sly_Service_Factory {
 	}
 
 	/**
+	 * get Medium service
+	 *
+	 * @deprecated use sly_Container->getMediumService() instead
+	 *
 	 * @return sly_Service_Medium  The medium service instance
 	 */
 	public static function getMediumService() {
@@ -130,6 +192,10 @@ abstract class sly_Service_Factory {
 	}
 
 	/**
+	 * get MediaCategory service
+	 *
+	 * @deprecated use sly_Container->getMediaCategoryService() instead
+	 *
 	 * @return sly_Service_MediaCategory  The media category service instance
 	 */
 	public static function getMediaCategoryService() {
@@ -137,6 +203,10 @@ abstract class sly_Service_Factory {
 	}
 
 	/**
+	 * get ArticleSlice service
+	 *
+	 * @deprecated use sly_Container->getArticleSliceService() instead
+	 *
 	 * @return sly_Service_ArticleSlice  The articleslice service instance
 	 */
 	public static function getArticleSliceService() {
