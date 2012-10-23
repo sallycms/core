@@ -39,7 +39,7 @@ class sly_Util_ArticleSlice {
 	 */
 	public static function findById($articleSliceID) {
 		$articleSliceID = (int) $articleSliceID;
-		return sly_Service_Factory::getArticleSliceService()->findById($articleSliceID);
+		return sly_Core::getContainer()->getArticleSliceService()->findById($articleSliceID);
 	}
 
 	/**
@@ -52,7 +52,7 @@ class sly_Util_ArticleSlice {
 		$articleSliceID = (int) $articleSliceID;
 		if (!self::exists($articleSliceID)) return false;
 
-		return sly_Service_Factory::getArticleSliceService()->deleteById($articleSliceID);
+		return sly_Core::getContainer()->getArticleSliceService()->deleteById($articleSliceID);
 	}
 
 	/**
@@ -66,7 +66,7 @@ class sly_Util_ArticleSlice {
 		if (!$slice) return false;
 
 		$module = $slice->getModule();
-		return sly_Service_Factory::getModuleService()->exists($module) ? $module : false;
+		return sly_Core::getContainer()->getModuleService()->exists($module) ? $module : false;
 	}
 
 	/**
@@ -88,6 +88,6 @@ class sly_Util_ArticleSlice {
 			$order         = 'slot ASC, pos ASC';
 		}
 
-		return sly_Service_Factory::getArticleSliceService()->find($where, null, $order);
+		return sly_Core::getContainer()->getArticleSliceService()->find($where, null, $order);
 	}
 }

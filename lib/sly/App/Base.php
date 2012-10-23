@@ -63,8 +63,9 @@ abstract class sly_App_Base implements sly_App_Interface {
 				$controller = $this->getController($className);
 			}
 
-			// inject current request
+			// inject current request and container
 			$controller->setRequest(sly_Core::getRequest());
+			$controller->setContainer(sly_Core::getContainer());
 
 			if (!$controller->checkPermission($action)) {
 				throw new sly_Authorisation_Exception(t('page_not_allowed', $action, get_class($controller)), 403);
@@ -123,9 +124,10 @@ abstract class sly_App_Base implements sly_App_Interface {
 		$user = sly_Core::isBackend() ? sly_Util_User::getCurrentUser() : null;
 
 		if (sly_Core::isDeveloperMode() || ($user && $user->isAdmin())) {
-			sly_Service_Factory::getTemplateService()->refresh();
-			sly_Service_Factory::getModuleService()->refresh();
-			sly_Service_Factory::getAssetService()->validateCache();
+			$container = sly_Core::getContainer();
+			$container->getTemplateService()->refresh();
+			$container->getModuleService()->refresh();
+			$container->getAssetService()->validateCache();
 		}
 	}
 

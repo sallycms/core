@@ -45,7 +45,7 @@ class sly_Util_Article {
 	 * @return sly_Model_Article
 	 */
 	public static function findById($articleID, $clang = null, $default = null) {
-		$service   = sly_Service_Factory::getArticleService();
+		$service   = sly_Core::getContainer()->getArticleService();
 		$articleID = (int) $articleID;
 		$article   = $service->findById($articleID, $clang);
 
@@ -90,7 +90,7 @@ class sly_Util_Article {
 	 * @return array
 	 */
 	public static function findByCategory($categoryID, $ignoreOfflines = false, $clang = null) {
-		return sly_Service_Factory::getArticleService()->findArticlesByCategory($categoryID, $ignoreOfflines, $clang);
+		return sly_Core::getContainer()->getArticleService()->findArticlesByCategory($categoryID, $ignoreOfflines, $clang);
 	}
 
 	/**
@@ -100,7 +100,7 @@ class sly_Util_Article {
 	 * @return array
 	 */
 	public static function findByType($type, $ignoreOfflines = false, $clang = null) {
-		return sly_Service_Factory::getArticleService()->findArticlesByType($type, $ignoreOfflines, $clang);
+		return sly_Core::getContainer()->getArticleService()->findArticlesByType($type, $ignoreOfflines, $clang);
 	}
 
 	/**

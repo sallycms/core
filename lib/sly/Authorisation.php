@@ -39,7 +39,7 @@ class sly_Authorisation {
 	 */
 	public static function hasPermission($userId, $context, $token, $value = true) {
 		if (!self::$provider) {
-			$user = sly_Service_Factory::getUserService()->findById($userId);
+			$user = sly_Core::getContainer()->getUserService()->findById($userId);
 			return $user && $user->isAdmin();
 		}
 

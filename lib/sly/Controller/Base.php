@@ -24,9 +24,30 @@
  * @since   0.1
  */
 abstract class sly_Controller_Base {
-	protected $content_type = null; ///< string       the content type
-	protected $charset      = null; ///< string       the character set
-	protected $request      = null; ///< sly_Request  the current request
+	protected $content_type = null; ///< string         the content type
+	protected $charset      = null; ///< string         the character set
+	protected $request      = null; ///< sly_Request    the current request
+	protected $container    = null; ///< sly_Container  the DI container
+
+	/**
+	 * Set DI container
+	 *
+	 * This method is called by the application before the action is executed.
+	 *
+	 * @param sly_Container $container  the container the controller should use
+	 */
+	public function setContainer(sly_Container $container) {
+		$this->container = $container;
+	}
+
+	/**
+	 * get DI container
+	 *
+	 * @return sly_Container
+	 */
+	public function getContainer() {
+		return $this->container;
+	}
 
 	/**
 	 * Set request

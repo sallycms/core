@@ -17,7 +17,7 @@ class sly_Util_User {
 	 */
 	public static function getCurrentUser($forceRefresh = false) {
 		// make sure to not fail during setup (a number of components use this method during the setup)
-		return sly_Core::isSetup() ? null : sly_Service_Factory::getUserService()->getCurrentUser($forceRefresh);
+		return sly_Core::isSetup() ? null : sly_Core::getContainer()->getUserService()->getCurrentUser($forceRefresh);
 	}
 
 	/**
@@ -25,7 +25,7 @@ class sly_Util_User {
 	 * @return sly_Model_User
 	 */
 	public static function findById($userID) {
-		return sly_Service_Factory::getUserService()->findById($userID);
+		return sly_Core::getContainer()->getUserService()->findById($userID);
 	}
 
 	/**
@@ -33,7 +33,7 @@ class sly_Util_User {
 	 * @return sly_Model_User
 	 */
 	public static function findByLogin($login) {
-		return sly_Service_Factory::getUserService()->findByLogin($login);
+		return sly_Core::getContainer()->getUserService()->findByLogin($login);
 	}
 
 	/**

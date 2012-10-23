@@ -18,7 +18,7 @@ class sly_Util_JSON {
 	 * @return sly_Service_File_JSON
 	 */
 	protected static function getService() {
-		return sly_Service_Factory::getService('File_JSON');
+		return sly_Core::getContainer()->getService('File_JSON');
 	}
 
 	/**

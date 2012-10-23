@@ -34,7 +34,7 @@ class sly_Model_Article extends sly_Model_Base_Article {
 	 * @return sly_Model_Category
 	 */
 	public function getCategory() {
-		return sly_Service_Factory::getCategoryService()->findById($this->getCategoryId(), $this->getClang());
+		return sly_Core::getContainer()->getCategoryService()->findById($this->getCategoryId(), $this->getClang());
 	}
 
 	/**
@@ -52,7 +52,7 @@ class sly_Model_Article extends sly_Model_Base_Article {
 	public function hasTemplate() {
 		if ($this->hasType()) {
 			$templateName    = $this->getTemplateName();
-			$templateService = sly_Service_Factory::getTemplateService();
+			$templateService = sly_Core::getContainer()->getTemplateService();
 
 			return !empty($templateName) && $templateService->exists($templateName);
 		}
@@ -66,7 +66,7 @@ class sly_Model_Article extends sly_Model_Base_Article {
 	 * @return string  the template name
 	 */
 	public function getTemplateName() {
-		return sly_Service_Factory::getArticleTypeService()->getTemplate($this->type);
+		return sly_Core::getContainer()->getArticleTypeService()->getTemplate($this->type);
 	}
 
 	/**
@@ -76,19 +76,24 @@ class sly_Model_Article extends sly_Model_Base_Article {
 	 * @return string
 	 */
 	public function getContent($slot = null) {
-		$content = '';
-		$moduleService = sly_Service_Factory::getModuleService();
-		$typeService   = sly_Service_Factory::getArticleTypeService();
+		$content       = '';
+		$container     = sly_Core::getContainer();
+		$moduleService = $container->getModuleService();
+		$typeService   = $container->getArticleTypeService();
+
 		foreach ($this->getSlices($slot) as $slice) {
 			$module = $slice->getModule();
+
 			if (!$moduleService->exists($module)) {
 				trigger_error('Module '.$module.' does not exists in article/clang '.$this->getId().'/'.$this->getClang(), E_USER_WARNING);
 				continue;
 			}
+
 			if (!$typeService->hasModule($this->getType(), $module, $slice->getSlot())) {
 				trigger_error('Module '.$module.' is not allowed in type/slot '.$this->getType().'/'.$slice->getSlot(), E_USER_WARNING);
 				continue;
 			}
+
 			$content .= $slice->getOutput();
 		}
 

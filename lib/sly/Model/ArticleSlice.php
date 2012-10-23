@@ -145,21 +145,23 @@ class sly_Model_ArticleSlice extends sly_Model_Base_Id implements sly_Model_ISli
 	 */
 	public function getSlice() {
 		if (empty($this->slice)) {
-			$this->slice = sly_Service_Factory::getSliceService()->findById($this->getSliceId());
+			$this->slice = sly_Core::getContainer()->getSliceService()->findById($this->getSliceId());
 		}
 		return $this->slice;
 	}
 
 	public function getPrevious() {
-		$service = sly_Service_Factory::getArticleSliceService();
-		$db      = sly_DB_Persistence::getInstance();
+		$container = sly_Core::getContainer();
+		$service   = $container->getArticleSliceService();
+		$db        = $container->getPersistence();
 
 		return $service->findOne(sprintf('slot = %s AND pos < %d AND article_id = %d AND clang = %d ORDER BY pos DESC', $db->quote($this->getSlot()), $this->getPosition(), $this->getArticleId(), $this->getClang()));
 	}
 
 	public function getNext() {
-		$service = sly_Service_Factory::getArticleSliceService();
-		$db      = sly_DB_Persistence::getInstance();
+		$container = sly_Core::getContainer();
+		$service   = $container->getArticleSliceService();
+		$db        = $container->getPersistence();
 
 		return $service->findOne(sprintf('slot = %s AND pos > %d AND article_id = %d AND clang = %d ORDER BY pos ASC', $db->quote($this->getSlot()), $this->getPosition(), $this->getArticleId(), $this->getClang()));
 	}
@@ -171,7 +173,7 @@ class sly_Model_ArticleSlice extends sly_Model_Base_Id implements sly_Model_ISli
 	public function setModule($module) {
 		$slice = $this->getSlice();
 		$slice->setModule($module);
-		$this->slice = sly_Service_Factory::getSliceService()->save($slice);
+		$this->slice = sly_Core::getContainer()->getSliceService()->save($slice);
 	}
 
 	/**
@@ -179,7 +181,7 @@ class sly_Model_ArticleSlice extends sly_Model_Base_Id implements sly_Model_ISli
 	 * @param sly_Model_Slice $slice
 	 */
 	public function setSlice(sly_Model_Slice $slice) {
-		$this->slice = $slice;
+		$this->slice    = $slice;
 		$this->slice_id = $slice->getId();
 	}
 

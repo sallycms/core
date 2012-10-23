@@ -87,7 +87,7 @@ class sly_Model_Medium extends sly_Model_Base_Id {
 	 * @return sly_Model_MediaCategory
 	 */
 	public function getCategory() {
-		$service = sly_Service_Factory::getMediaCategoryService();
+		$service = sly_Core::getContainer()->getMediaCategoryService();
 		return $service->findById($this->category_id);
 	}
 

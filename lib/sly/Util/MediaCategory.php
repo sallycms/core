@@ -37,7 +37,7 @@ class sly_Util_MediaCategory {
 	 * @return sly_Model_MediaCategory
 	 */
 	public static function findById($categoryID) {
-		return sly_Service_Factory::getMediaCategoryService()->findById($categoryID);
+		return sly_Core::getContainer()->getMediaCategoryService()->findById($categoryID);
 	}
 
 	/**
@@ -45,7 +45,7 @@ class sly_Util_MediaCategory {
 	 * @return array
 	 */
 	public static function findByName($name) {
-		return sly_Service_Factory::getMediaCategoryService()->findByName($name);
+		return sly_Core::getContainer()->getMediaCategoryService()->findByName($name);
 	}
 
 	/**
@@ -53,7 +53,7 @@ class sly_Util_MediaCategory {
 	 * @return array
 	 */
 	public static function findByParentId($parentID) {
-		return sly_Service_Factory::getMediaCategoryService()->findByParentId($parentID);
+		return sly_Core::getContainer()->getMediaCategoryService()->findByParentId($parentID);
 	}
 
 	/**
