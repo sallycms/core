@@ -366,6 +366,25 @@ class sly_Container implements ArrayAccess, Countable {
 	}
 
 	/**
+	 * get generic model service
+	 *
+	 * @return sly_Service_Base
+	 */
+	public function getService($modelName) {
+		$id = 'sly-service-model-'.$modelName;
+
+		if (!$this->has($id)) {
+			$persistence = $this['sly-persistence'];
+			$className   = 'sly_Service_'.$modelName;
+			$service     = new $className($persistence);
+
+			$this->set($id, $service);
+		}
+
+		return $this->get($id);
+	}
+
+	/**
 	 * @param string $id
 	 * @param mixed  $value
 	 */
