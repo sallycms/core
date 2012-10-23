@@ -193,16 +193,18 @@ abstract class sly_Model_Base {
 	 * @return mixed
 	 */
 	public function __call($method, $arguments) {
+		$container = sly_Core::getContainer();
+
 		if (isset($this->_hasMany) && is_array($this->_hasMany)) {
 			foreach ($this->_hasMany as $model => $config) {
 				if ($method == 'get'.$model.'s') {
-					return sly_Service_Factory::getService($model)->find($this->getForeignKeyForHasMany($model));
+					return $container->getService($model)->find($this->getForeignKeyForHasMany($model));
 				}
 			}
 		}
 
 		$event      = strtoupper(get_class($this).'_'.$method);
-		$dispatcher = sly_Core::dispatcher();
+		$dispatcher = $container->getDispatcher();
 
 		if (!$dispatcher->hasListeners($event)) {
 			throw new sly_Exception('Call to undefined method '.get_class($this).'::'.$method.'()');

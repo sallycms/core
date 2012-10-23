@@ -123,9 +123,10 @@ abstract class sly_App_Base implements sly_App_Interface {
 		$user = sly_Core::isBackend() ? sly_Util_User::getCurrentUser() : null;
 
 		if (sly_Core::isDeveloperMode() || ($user && $user->isAdmin())) {
-			sly_Service_Factory::getTemplateService()->refresh();
-			sly_Service_Factory::getModuleService()->refresh();
-			sly_Service_Factory::getAssetService()->validateCache();
+			$container = sly_Core::getContainer();
+			$container->getTemplateService()->refresh();
+			$container->getModuleService()->refresh();
+			$container->getAssetService()->validateCache();
 		}
 	}
 

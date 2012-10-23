@@ -45,7 +45,7 @@ class sly_Util_Category {
 	 * @return sly_Model_Category
 	 */
 	public static function findById($categoryID, $clang = null, $default = null) {
-		$service    = sly_Service_Factory::getCategoryService();
+		$service    = sly_Core::getContainer()->getCategoryService();
 		$categoryID = (int) $categoryID;
 		$cat        = $service->findById($categoryID, $clang);
 
@@ -74,7 +74,7 @@ class sly_Util_Category {
 	 * @return array
 	 */
 	public static function findByParentId($parentID, $ignoreOfflines = false, $clang = null) {
-		return sly_Service_Factory::getCategoryService()->findByParentId($parentID, $ignoreOfflines, $clang);
+		return sly_Core::getContainer()->getCategoryService()->findByParentId($parentID, $ignoreOfflines, $clang);
 	}
 
 	/**

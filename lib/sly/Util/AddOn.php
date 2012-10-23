@@ -15,7 +15,7 @@ class sly_Util_AddOn {
 	 * @return sly_Service_AddOn
 	 */
 	public static function getService() {
-		return sly_Service_Factory::getAddOnService();
+		return sly_Core::getContainer()->getAddOnService();
 	}
 
 	/**

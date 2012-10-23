@@ -71,11 +71,12 @@ abstract class sly_Service_Model_Base {
 	 */
 	public function delete($where) {
 		if ($this->hasCascade) {
-			$models = $this->find($where);
+			$models    = $this->find($where);
+			$container = sly_Core::getContainer();
 
 			foreach ($models as $model) {
 				foreach ($model->getDeleteCascades() as $cascadeModel => $foreign_key) {
-					sly_Service_Factory::getService($cascadeModel)->delete($foreign_key);
+					$container->getService($cascadeModel)->delete($foreign_key);
 				}
 			}
 		}

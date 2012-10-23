@@ -68,7 +68,7 @@ abstract class sly_Form_Helper {
 			$rootCats = sly_Util_MediaCategory::getRootCategories();
 		}
 		else {
-			$service  = sly_Service_Factory::getMediaCategoryService();
+			$service  = sly_Core::getContainer()->getMediaCategoryService();
 			$rootCat  = $service->findById((int) $root);
 			$rootCats = $rootCat ? array($rootCat) : null;
 		}
