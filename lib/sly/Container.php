@@ -374,10 +374,13 @@ class sly_Container implements ArrayAccess, Countable {
 		$id = 'sly-service-model-'.$modelName;
 
 		if (!$this->has($id)) {
-			$persistence = $this['sly-persistence'];
-			$className   = 'sly_Service_'.$modelName;
-			$service     = new $className($persistence);
+			$className = 'sly_Service_'.$modelName;
 
+			if (!class_exists($className)) {
+				throw new sly_Exception(t('service_not_found', $modelName));
+			}
+
+			$service = new $className();
 			$this->set($id, $service);
 		}
 
