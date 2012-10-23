@@ -41,7 +41,7 @@ class sly_Util_Medium {
 	 * @return sly_Model_Medium
 	 */
 	public static function findById($mediumID) {
-		return sly_Service_Factory::getMediumService()->findById($mediumID);
+		return sly_Core::getContainer()->getMediumService()->findById($mediumID);
 	}
 
 	/**
@@ -49,7 +49,7 @@ class sly_Util_Medium {
 	 * @return sly_Model_Medium
 	 */
 	public static function findByFilename($filename) {
-		return sly_Service_Factory::getMediumService()->findByFilename($filename);
+		return sly_Core::getContainer()->getMediumService()->findByFilename($filename);
 	}
 
 	/**
@@ -57,7 +57,7 @@ class sly_Util_Medium {
 	 * @return array
 	 */
 	public static function findByCategory($categoryID) {
-		return sly_Service_Factory::getMediumService()->findMediaByCategory($categoryID);
+		return sly_Core::getContainer()->getMediumService()->findMediaByCategory($categoryID);
 	}
 
 	/**
@@ -65,7 +65,7 @@ class sly_Util_Medium {
 	 * @return array
 	 */
 	public static function findByExtension($extension) {
-		return sly_Service_Factory::getMediumService()->findMediaByExtension($extension);
+		return sly_Core::getContainer()->getMediumService()->findMediaByExtension($extension);
 	}
 
 	/**
@@ -122,7 +122,7 @@ class sly_Util_Medium {
 
 		// create and save our file
 
-		$service = sly_Service_Factory::getMediumService();
+		$service = sly_Core::getContainer()->getMediumService();
 
 		if ($mediumToReplace) {
 			$mediumToReplace->setFiletype($newType);
@@ -142,7 +142,7 @@ class sly_Util_Medium {
 			$file = $service->update($mediumToReplace, $user);
 
 			// re-validate asset cache
-			$service = sly_Service_Factory::getAssetService();
+			$service = sly_Core::getContainer()->getAssetService();
 			$service->validateCache();
 		}
 		else {

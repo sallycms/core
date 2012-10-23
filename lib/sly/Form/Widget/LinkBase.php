@@ -44,7 +44,7 @@ abstract class sly_Form_Widget_LinkBase extends sly_Form_ElementBase {
 			}
 		}
 		else {
-			$serv = sly_Service_Factory::getCategoryService();
+			$serv = sly_Core::getContainer()->getCategoryService();
 			$tree = $serv->findTree($catID);
 
 			foreach ($tree as $cat) {

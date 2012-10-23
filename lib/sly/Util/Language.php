@@ -17,7 +17,7 @@ class sly_Util_Language {
 	 * @return sly_Model_Language
 	 */
 	public static function findById($languageID) {
-		return sly_Service_Factory::getLanguageService()->findById($languageID);
+		return sly_Core::getContainer()->getLanguageService()->findById($languageID);
 	}
 
 	/**
@@ -25,7 +25,7 @@ class sly_Util_Language {
 	 * @return array
 	 */
 	public static function findAll($keysOnly = false) {
-		return sly_Service_Factory::getLanguageService()->findAll($keysOnly);
+		return sly_Core::getContainer()->getLanguageService()->findAll($keysOnly);
 	}
 
 	/**
@@ -52,7 +52,7 @@ class sly_Util_Language {
 		}
 
 		$languageID = (int) $languageID;
-		$language   = sly_Service_Factory::getLanguageService()->findById($languageID);
+		$language   = sly_Core::getContainer()->getLanguageService()->findById($languageID);
 
 		return $language->getLocale();
 	}

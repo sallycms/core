@@ -102,7 +102,7 @@ class sly_Core {
 	 */
 	public static function getCurrentLanguage() {
 		$clang = self::getCurrentClang();
-		return $clang > 0 ? sly_Service_Factory::getLanguageService()->findById($clang) : null;
+		return $clang > 0 ? self::getContainer()->getLanguageService()->findById($clang) : null;
 	}
 
 	/**
@@ -339,8 +339,10 @@ class sly_Core {
 	 * loads all known addOns into Sally
 	 */
 	public static function loadAddOns() {
-		sly_Service_Factory::getAddOnManagerService()->loadAddOns();
-		self::dispatcher()->notify('SLY_ADDONS_LOADED');
+		$container = self::getContainer();
+
+		$container->getAddOnManagerService()->loadAddOns();
+		$container->getDispatcher()->notify('SLY_ADDONS_LOADED');
 	}
 
 	public static function registerListeners() {
@@ -455,18 +457,20 @@ class sly_Core {
 		// clear loader cache
 		sly_Loader::clearCache();
 
+		$container = self::getContainer();
+
 		// clear our own data caches
-		self::cache()->flush('sly', true);
+		$container->getCache()->flush('sly', true);
 
 		// sync develop files
-		sly_Service_Factory::getTemplateService()->refresh();
-		sly_Service_Factory::getModuleService()->refresh();
+		$container->getTemplateService()->refresh();
+		$container->getModuleService()->refresh();
 
 		// clear asset cache
-		sly_Service_Factory::getAssetService()->clearCache();
+		$container->getAssetService()->clearCache();
 
 		// refresh addOns
-		sly_Service_Factory::getAddOnManagerService()->refresh();
+		$container->getAddOnManagerService()->refresh();
 
 		// create bootcache
 		sly_Util_BootCache::recreate('frontend');
