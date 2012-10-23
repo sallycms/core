@@ -468,10 +468,13 @@ class sly_Container implements ArrayAccess, Countable {
 	}
 
 	/**
+	 * @param  sly_Container $container
 	 * @return sly_DB_PDO_Persistence
 	 */
-	protected function buildPersistence() {
-		return $this['sly-persistence'] = sly_DB_Persistence::getInstance();
+	protected function buildPersistence(sly_Container $container) {
+		$config = $container['sly-config']->get('DATABASE');
+
+		return $this['sly-persistence'] = new sly_DB_PDO_Persistence($config['DRIVER'], $config['HOST'], $config['LOGIN'], $config['PASSWORD'], $config['NAME']);
 	}
 
 	/**
