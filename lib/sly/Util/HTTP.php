@@ -16,6 +16,15 @@ class sly_Util_HTTP {
 	 * @param mixed  $target      URL, article ID or article model
 	 * @param array  $parameters
 	 * @param string $noticeText
+	 */
+	public static function tempRedirect($target, $parameters = array(), $noticeText = '') {
+		self::redirect($target, $parameters, $noticeText, 302);
+	}
+
+	/**
+	 * @param mixed  $target      URL, article ID or article model
+	 * @param array  $parameters
+	 * @param string $noticeText
 	 * @param int    $status
 	 */
 	public static function redirect($target, $parameters = array(), $noticeText = '', $status = 301) {
