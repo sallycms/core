@@ -505,7 +505,15 @@ class sly_Container implements ArrayAccess, Countable {
 	 * @return sly_Service_AddOn
 	 */
 	protected function buildAddOnService(sly_Container $container) {
-		return $this->values['sly-service-addon'] = new sly_Service_AddOn($container['sly-config'], $container['sly-dispatcher']);
+		$cache      = $container['sly-cache'];
+		$config     = $container['sly-config'];
+		$adnService = $container['sly-service-package-addon'];
+		$vndService = $container['sly-service-package-vendor'];
+		$service    = new sly_Service_AddOn($config, $cache, $adnService, SLY_DYNFOLDER);
+
+		$service->setVendorPackageService($vndService);
+
+		return $this->values['sly-service-addon'] = $service;
 	}
 
 	/**
@@ -652,7 +660,7 @@ class sly_Container implements ArrayAccess, Countable {
 	 * @return sly_Service_Package_AddOn
 	 */
 	protected function buildAddOnPackageService(sly_Container $container) {
-		return $this->values['sly-service-package-addon'] = new sly_Service_Package_AddOn(SLY_ADDONFOLDER, $container['sly-cache']);
+		return $this->values['sly-service-package-addon'] = new sly_Service_Package(SLY_ADDONFOLDER, $container['sly-cache']);
 	}
 
 	/**
@@ -660,7 +668,7 @@ class sly_Container implements ArrayAccess, Countable {
 	 * @return sly_Service_Package_Vendor
 	 */
 	protected function buildVendorPackageService(sly_Container $container) {
-		return $this->values['sly-service-package-vendor'] = new sly_Service_Package_Vendor(SLY_VENDORFOLDER, $container['sly-cache']);
+		return $this->values['sly-service-package-vendor'] = new sly_Service_Package(SLY_VENDORFOLDER, $container['sly-cache']);
 	}
 
 	/**
