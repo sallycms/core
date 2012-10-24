@@ -395,6 +395,58 @@ class sly_Container implements ArrayAccess, Countable {
 		return $this->get($id);
 	}
 
+	/*          setters for objects that are commonly set          */
+
+	/**
+	 * @param  int $articleID  the new current article
+	 * @return sly_Container   reference to self
+	 */
+	public function setCurrentArticleId($articleID) {
+		return $this->set('sly-current-article-id', (int) $articleID);
+	}
+
+	/**
+	 * @param  int $langID    the new current language
+	 * @return sly_Container  reference to self
+	 */
+	public function setCurrentLanguageId($langID) {
+		return $this->set('sly-current-lang-id', (int) $langID);
+	}
+
+	/**
+	 * @param  sly_ErrorHandler_Interface $handler  the new error handler
+	 * @return sly_Container                        reference to self
+	 */
+	public function setErrorHandler(sly_ErrorHandler_Interface $handler) {
+		return $this->set('sly-error-handler', $handler);
+	}
+
+	/**
+	 * @param  sly_I18N $i18n  the new translation service
+	 * @return sly_Container   reference to self
+	 */
+	public function setI18N(sly_I18N $i18n) {
+		return $this->set('sly-i18n', $i18n);
+	}
+
+	/**
+	 * @param  sly_Layout $layout  the new Layout
+	 * @return sly_Container       reference to self
+	 */
+	public function setLayout(sly_Layout $layout) {
+		return $this->set('sly-layout', $layout);
+	}
+
+	/**
+	 * @param  sly_Response $response  the new response
+	 * @return sly_Container           reference to self
+	 */
+	public function setResponse(sly_Response $response) {
+		return $this->set('sly-response', $response);
+	}
+
+	/*          arrayaccess interface          */
+
 	/**
 	 * @param string $id
 	 * @param mixed  $value
@@ -427,7 +479,7 @@ class sly_Container implements ArrayAccess, Countable {
 		return $this->get($id);
 	}
 
-	/*     factory methods     */
+	/*          factory methods          */
 
 	/**
 	 * @return sly_Configuration
