@@ -27,3 +27,6 @@ sly_Loader::addLoadPath(SLY_COREFOLDER.'/lib');
 sly_Loader::addLoadPath(SLY_VENDORFOLDER.'/fabpot/yaml/lib');
 sly_Loader::addLoadPath(SLY_VENDORFOLDER.'/webvariants/babelcache');
 sly_Loader::register();
+
+// cleanup
+unset($bootcache, $cacheExists);
