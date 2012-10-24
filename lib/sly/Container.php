@@ -27,6 +27,7 @@ class sly_Container implements ArrayAccess, Countable {
 			// core objects
 			'sly-config'              => array($this, 'buildConfig'),
 			'sly-dispatcher'          => array($this, 'buildDispatcher'),
+			'sly-error-handler'       => array($this, 'buildErrorHandler'),
 			'sly-registry-temp'       => array($this, 'buildTempRegistry'),
 			'sly-registry-persistent' => array($this, 'buildPersistentRegistry'),
 			'sly-request'             => array($this, 'buildRequest'),
@@ -507,6 +508,17 @@ class sly_Container implements ArrayAccess, Countable {
 	 */
 	protected function buildPersistentRegistry() {
 		return $this['sly-registry-persistent'] = sly_Registry_Persistent::getInstance();
+	}
+
+	/**
+	 * @param  sly_Container $container
+	 * @return sly_ErrorHandler_Interface
+	 */
+	protected function buildErrorHandler(sly_Container $container) {
+		$config  = $container['sly-config'];
+		$devMode = $config->get('DEVELOPER_MODE', false);
+
+		return $this['sly-error-handler'] = $devMode ? new sly_ErrorHandler_Development() : new sly_ErrorHandler_Production();
 	}
 
 	/**
