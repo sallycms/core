@@ -23,7 +23,7 @@ class sly_Core {
 	const DEFAULT_DIRPERM  = 0777; ///< int
 
 	private function __construct() {
-		$this->container = new sly_Container();
+		// do nothing
 	}
 
 	/**
@@ -42,7 +42,22 @@ class sly_Core {
 	 * @return sly_Container  the DI container instance
 	 */
 	public static function getContainer() {
-		return self::getInstance()->container;
+		$instance = self::getInstance();
+
+		if (!$instance->container) {
+			throw new LogicException('The DI container has not yet been set.');
+		}
+
+		return $instance->container;
+	}
+
+	/**
+	 * Set the DI container
+	 *
+	 * @param sly_Container $container  the new DI container instance
+	 */
+	public static function setContainer(sly_Container $container) {
+		self::getInstance()->container = $container;
 	}
 
 	/**
