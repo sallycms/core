@@ -31,15 +31,20 @@ class sly_Authorisation {
 	}
 
 	/**
-	 * @param  int $userId
-	 * @param  string $context
-	 * @param  string $token
-	 * @param  mixed $value
+	 * @param  int              $userId
+	 * @param  string           $context
+	 * @param  string           $token
+	 * @param  mixed            $value
+	 * @param  sly_Service_User $userService
 	 * @return boolean
 	 */
-	public static function hasPermission($userId, $context, $token, $value = true) {
+	public static function hasPermission($userId, $context, $token, $value = true, sly_Service_User $userService = null) {
 		if (!self::$provider) {
-			$user = sly_Core::getContainer()->getUserService()->findById($userId);
+			if (!$userService) {
+				$userService = sly_Core::getContainer()->getUserService();
+			}
+
+			$user = $userService->findById($userId);
 			return $user && $user->isAdmin();
 		}
 
