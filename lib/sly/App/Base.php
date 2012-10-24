@@ -9,6 +9,26 @@
  */
 
 abstract class sly_App_Base implements sly_App_Interface {
+	protected $container;
+
+	/**
+	 * Constructor
+	 *
+	 * @param sly_Container $container
+	 */
+	public function __construct(sly_Container $container = null) {
+		$this->container = $container ? $container : sly_Core::getContainer();
+	}
+
+	/**
+	 * get DI container
+	 *
+	 * @return sly_Container
+	 */
+	public function getContainer() {
+		return $this->container;
+	}
+
 	/**
 	 * initialize the app
 	 */
@@ -37,7 +57,7 @@ abstract class sly_App_Base implements sly_App_Interface {
 
 		// register the new response, if the controller returned one
 		if ($pageResponse instanceof sly_Response) {
-			sly_Core::setResponse($pageResponse);
+			$this->getContainer()->setResponse($pageResponse);
 		}
 
 		// if the controller returned another action, execute it
@@ -64,8 +84,10 @@ abstract class sly_App_Base implements sly_App_Interface {
 			}
 
 			// inject current request and container
-			$controller->setRequest(sly_Core::getRequest());
-			$controller->setContainer(sly_Core::getContainer());
+			$container = $this->getContainer();
+
+			$controller->setRequest($container->getRequest());
+			$controller->setContainer($container);
 
 			if (!$controller->checkPermission($action)) {
 				throw new sly_Authorisation_Exception(t('page_not_allowed', $action, get_class($controller)), 403);
@@ -121,10 +143,14 @@ abstract class sly_App_Base implements sly_App_Interface {
 	}
 
 	protected function syncDevelopFiles() {
-		$user = sly_Core::isBackend() ? sly_Util_User::getCurrentUser() : null;
+		$user      = null;
+		$container = $this->getContainer();
+
+		if (sly_Core::isBackend()) {
+			$user = $container->getUserService()->getCurrentUser();
+		}
 
 		if (sly_Core::isDeveloperMode() || ($user && $user->isAdmin())) {
-			$container = sly_Core::getContainer();
 			$container->getTemplateService()->refresh();
 			$container->getModuleService()->refresh();
 			$container->getAssetService()->validateCache();
@@ -171,17 +197,18 @@ abstract class sly_App_Base implements sly_App_Interface {
 	protected function notifySystemOfController($useCompatibility = false) {
 		$name       = $this->getCurrentControllerName();
 		$controller = $this->getCurrentController();
+		$dispatcher = $this->getContainer()->getDispatcher();
 		$params     = array(
 			'app'    => $this,
 			'name'   => $name,
 			'action' => $this->getCurrentAction()
 		);
 
-		sly_Core::dispatcher()->notify('SLY_CONTROLLER_FOUND', $controller, $params);
+		$dispatcher->notify('SLY_CONTROLLER_FOUND', $controller, $params);
 
 		if ($useCompatibility) {
 			// backwards compatibility for pre-0.6 code
-			sly_Core::dispatcher()->notify('PAGE_CHECKED', $name);
+			$dispatcher->notify('PAGE_CHECKED', $name);
 		}
 	}
 
@@ -196,8 +223,9 @@ abstract class sly_App_Base implements sly_App_Interface {
 		// collect additional output (warnings and notices from the bootstrapping)
 		while (ob_get_level()) $content = ob_get_clean().$content;
 
-		$config     = sly_Core::config();
-		$dispatcher = sly_Core::dispatcher();
+		$container  = $this->getContainer();
+		$config     = $container->getConfig();
+		$dispatcher = $container->getDispatcher();
 		$content    = $dispatcher->filter('OUTPUT_FILTER', $content, array('environment' => $appName));
 		$etag       = substr(md5($content), 0, 12);
 		$useEtag    = $config->get('USE_ETAG');
