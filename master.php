@@ -81,10 +81,14 @@ if (!defined('E_USER_DEPRECATED')) define('E_USER_DEPRECATED', 16384); // PHP 5.
 // init loader
 require_once SLY_COREFOLDER.'/loader.php';
 
+// init container
+$container = new sly_Container();
+sly_Core::setContainer($container);
+
 // load core config (be extra careful because this is the first attempt to write
 // to the filesystem on new installations)
 try {
-	$config = sly_Core::config();
+	$config = $container->getConfig();
 	$config->loadStatic(SLY_COREFOLDER.'/config/sallyStatic.yml');
 	$config->loadLocalConfig();
 	$config->loadProjectConfig();
@@ -107,10 +111,8 @@ catch (Exception $e) {
 }
 
 // init basic error handling
-$errorHandler = sly_Core::isDeveloperMode() ? new sly_ErrorHandler_Development() : new sly_ErrorHandler_Production();
+$errorHandler = $container->getErrorHandler();
 $errorHandler->init();
-
-sly_Core::setErrorHandler($errorHandler);
 
 // Sync?
 if (!sly_Core::isSetup()) {
@@ -126,3 +128,6 @@ if ($knownVersion !== $coreVersion) {
 	// TODO: implement some clever update mechanism
 	sly_Util_Versions::set('sally', $coreVersion);
 }
+
+// cleanup
+unset($container, $config, $errorHandler, $coreVersion, $knownVersion);
