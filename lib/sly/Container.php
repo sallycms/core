@@ -485,7 +485,7 @@ class sly_Container implements ArrayAccess, Countable {
 	 * @return sly_Configuration
 	 */
 	protected function buildConfig() {
-		return $this['sly-config'] = new sly_Configuration();
+		return $this['sly-config'] = new sly_Configuration($this->getService('File_YAML'));
 	}
 
 	/**
