@@ -25,6 +25,7 @@
  * @since   0.3
  */
 class sly_I18N implements sly_I18N_Base {
+	protected $paths;
 	protected $locale;
 	protected $texts;
 
@@ -81,7 +82,11 @@ class sly_I18N implements sly_I18N_Base {
 	 * @return boolean       true if the file was found, else false
 	 */
 	public function appendFile($path, $prefix = '') {
-		$filename = $path.'/'.$this->locale.'.yml';
+		// if the file is already included return
+		if(in_array($path, $this->paths)) return true;
+
+		$this->paths[] = $path;
+		$filename      = $path.'/'.$this->locale.'.yml';
 
 		if (is_readable($filename)) {
 			$lines = sly_Util_YAML::load($filename);
@@ -117,6 +122,8 @@ class sly_I18N implements sly_I18N_Base {
 	 * @return string       translated message or the key like in translate:key when not found
 	 */
 	public function msg($key) {
+		//var_dump($this->locale);
+		//var_dump($this->paths);
 		if (!$this->hasMsg($key)) {
 			return '[translate:'.$key.']';
 		}
@@ -207,6 +214,12 @@ class sly_I18N implements sly_I18N_Base {
 	 * @param string $locale  the new locale code (like 'de_de')
 	 */
 	public function setLocale($locale) {
+		$paths        = $this->paths;
 		$this->locale = $locale;
+		$this->texts  = array();
+		$this->paths  = array();
+		foreach ($paths as $path) {
+			$this->appendFile($path);
+		}
 	}
 }
