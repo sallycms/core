@@ -553,7 +553,7 @@ class sly_Container implements ArrayAccess, Countable {
 	protected function buildPersistence(sly_Container $container) {
 		$config = $container['sly-config']->get('DATABASE');
 
-		return $this['sly-persistence'] = new sly_DB_PDO_Persistence($config['DRIVER'], $config['HOST'], $config['LOGIN'], $config['PASSWORD'], $config['NAME']);
+		return $this['sly-persistence'] = new sly_DB_PDO_Persistence($config['DRIVER'], $config['HOST'], $config['LOGIN'], $config['PASSWORD'], $config['NAME'], $config['TABLE_PREFIX']);
 	}
 
 	/**
