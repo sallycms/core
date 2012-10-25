@@ -41,6 +41,7 @@ class sly_I18N implements sly_I18N_Base {
 	 */
 	public function __construct($locale, $path, $setlocale = true) {
 		$this->texts  = array();
+		$this->paths  = array();
 		$this->locale = $locale;
 
 		$this->appendFile($path);
