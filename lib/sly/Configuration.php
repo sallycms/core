@@ -217,11 +217,8 @@ class sly_Configuration {
 	 * @param string $key  the key to remove
 	 */
 	public function remove($key) {
-		$this->localConfig->remove($key);
-		$this->localConfigModified = true;
-		$this->projectConfig->remove($key);
-		$this->projectConfigModified = true;
-
+		$this->localConfigModified   = $this->localConfig->remove($key);;
+		$this->projectConfigModified = $this->projectConfig->remove($key);
 		$this->cache = null;
 	}
 
