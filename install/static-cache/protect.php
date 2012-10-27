@@ -8,6 +8,16 @@
  * http://www.opensource.org/licenses/mit-license.php
  */
 
+if (PHP_SAPI === 'cli') {
+	return;
+}
+
+// bad request?
+if (!isset($_SERVER['HTTP_ENCODING_CACHEDIR']) || !is_string($_SERVER['HTTP_ENCODING_CACHEDIR'])) {
+	header('HTTP/1.0 400 Bad Request');
+	die;
+}
+
 // get client encoding (attention: use the one set by htaccess for mod_headers awareness)
 
 $enc = trim($_SERVER['HTTP_ENCODING_CACHEDIR'], '/');

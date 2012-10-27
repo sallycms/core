@@ -32,8 +32,8 @@ class sly_DB_PDO_Expression {
 		$values = null;
 
 		if (is_array($expressions)) {
-			$glue = func_num_args() > 1 ? func_get_arg(1) : ' AND ';
-			list($expressions, $values) = $this->build_sql_from_hash($expressions,$glue);
+			$glue = func_num_args() > 1 ? ' '.trim(func_get_arg(1)).' ' : ' AND ';
+			list($expressions, $values) = $this->build_sql_from_hash($expressions, $glue);
 		}
 
 		if ($expressions != '') {
@@ -142,16 +142,33 @@ class sly_DB_PDO_Expression {
 	 * @return array
 	 */
 	private function build_sql_from_hash(&$hash, $glue) {
-		$sql = $g = '';
+		$conditions = array();
+		$params     = array();
 
 		foreach ($hash as $name => $value) {
-			if (is_array($value)) $sql .= "$g$name IN (?)";
-			else $sql .= "$g$name = ?";
+			if (is_array($value)) {
+				if (count($value) === 0) {
+					throw new sly_DB_PDO_Expression_Exception('Invalid condition: array must not be empty for "'.$name.'".');
+				}
+				elseif (count($value) === 1) {
+					$conditions[] = $name.' = ?';
+				}
+				else {
+					$conditions[] = $name.' IN (?)';
+				}
 
-			$g = $glue;
+				$params[] = $value;
+			}
+			elseif ($value === null) {
+				$conditions[] = $name.' IS NULL';
+			}
+			else {
+				$conditions[] = $name.' = ?';
+				$params[]     = $value;
+			}
 		}
 
-		return array($sql, array_values($hash));
+		return array(empty($conditions) ? '1' : implode($glue, $conditions), $params);
 	}
 
 	/**

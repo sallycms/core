@@ -50,15 +50,83 @@ class sly_Service_MediaCategoryTest extends sly_BaseTest {
 	/**
 	 * @depends testAdd
 	 */
-	public function testDelete() {
+	public function testDeleteById() {
 		$service = $this->getService();
 		$catID   = $service->add('Meine Kategorie', null)->getId();
 
-		$service->delete($catID);
+		$service->deleteById($catID);
 		$this->assertNull($service->findById($catID));
 
 		$cats = $service->findByParentId(0);
 		$this->assertEmpty($cats);
+	}
+
+	/**
+	 * @depends testDeleteById
+	 */
+	public function testDeleteByCategory() {
+		$service = $this->getService();
+		$catID   = $service->add('Meine Kategorie', null)->getId();
+
+		$service->deleteByCategory($service->findById($catID));
+		$this->assertNull($service->findById($catID));
+
+		$cats = $service->findByParentId(0);
+		$this->assertEmpty($cats);
+	}
+
+	/**
+	 * @depends testDeleteById
+	 */
+	public function testDeleteOnlyOneById() {
+		$service = $this->getService();
+
+		// create some dummy categories
+		$service->add('D', null);
+		$service->add('C', $service->add('B', $service->add('A', null)));
+		$service->add('E', null);
+
+		// the category to delete
+		$catID = $service->add('Meine Kategorie', null)->getId();
+
+		// make sure all categories are existing
+		$all = $service->findTree(0);
+		$this->assertCount(6, $all);
+
+		// and now delete a category
+		$service->deleteById($catID);
+		$this->assertNull($service->findById($catID));
+
+		// make sure the other categories still exist
+		$all = $service->findTree(0);
+		$this->assertCount(5, $all);
+	}
+
+	/**
+	 * @depends testDeleteOnlyOneById
+	 */
+	public function testDeleteOnlyOneByCategory() {
+		$service = $this->getService();
+
+		// create some dummy categories
+		$service->add('D', null);
+		$service->add('C', $service->add('B', $service->add('A', null)));
+		$service->add('E', null);
+
+		// the category to delete
+		$catID = $service->add('Meine Kategorie', null)->getId();
+
+		// make sure all categories are existing
+		$all = $service->findTree(0);
+		$this->assertCount(6, $all);
+
+		// and now delete a category
+		$service->deleteByCategory($service->findById($catID));
+		$this->assertNull($service->findById($catID));
+
+		// make sure the other categories still exist
+		$all = $service->findTree(0);
+		$this->assertCount(5, $all);
 	}
 
 	/**
@@ -114,13 +182,13 @@ class sly_Service_MediaCategoryTest extends sly_BaseTest {
 
 		// easy deletions
 
-		$service->delete($catB);
-		$service->delete($catC);
+		$service->deleteById($catB);
+		$service->deleteById($catC);
 
 		// complex cases
 
 		try {
-			$service->delete($catD);
+			$service->deleteById($catD);
 			$this->fail('Deleting categories with children should not be possible without $force.');
 		}
 		catch (sly_Exception $e) {
@@ -128,7 +196,7 @@ class sly_Service_MediaCategoryTest extends sly_BaseTest {
 		}
 
 		// and now use the $force
-		$service->delete($catD, true);
-		$service->delete($catA, true);
+		$service->deleteById($catD, true);
+		$service->deleteById($catA, true);
 	}
 }

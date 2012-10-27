@@ -12,21 +12,12 @@
  * @ingroup util
  */
 class sly_Util_Language {
-
 	/**
-	 * @param  int $articleId
-	 * @param  int $clang
+	 * @param  int $languageID
 	 * @return sly_Model_Language
 	 */
 	public static function findById($languageID) {
-		$languages  = self::findAll();
-		$languageID = (int) $languageID;
-
-		if (isset($languages[$languageID])) {
-			return $languages[$languageID];
-		}
-
-		return null;
+		return sly_Service_Factory::getLanguageService()->findById($languageID);
 	}
 
 	/**
@@ -34,21 +25,7 @@ class sly_Util_Language {
 	 * @return array
 	 */
 	public static function findAll($keysOnly = false) {
-		$cache     = sly_Core::cache();
-		$languages = $cache->get('sly.language', 'all', null);
-
-		if ($languages === null) {
-			$list      = sly_Service_Factory::getLanguageService()->find(null, null, 'id');
-			$languages = array();
-
-			foreach ($list as $language) {
-				$languages[$language->getId()] = $language;
-			}
-
-			$cache->set('sly.language', 'all', $languages);
-		}
-
-		return $keysOnly ? array_keys($languages) : $languages;
+		return sly_Service_Factory::getLanguageService()->findAll($keysOnly);
 	}
 
 	/**
@@ -71,7 +48,7 @@ class sly_Util_Language {
 			$languageID = sly_Core::getCurrentClang();
 		}
 		elseif (!self::exists($languageID)) {
-			throw new sly_Exception(t('language_not_found'));
+			throw new sly_Exception(t('language_not_found', $languageID));
 		}
 
 		$languageID = (int) $languageID;
@@ -89,10 +66,10 @@ class sly_Util_Language {
 
 	/**
 	 * @param  sly_Model_User $user
-	 * @param  int            $clangID
+	 * @param  int            $clang
 	 * @return boolean
 	 */
-	public static function hasPermissionOnLanguage(sly_Model_User $user, $clangID) {
-		return $user->isAdmin() || $user->hasRight('language', 'access', $clangID);
+	public static function hasPermissionOnLanguage(sly_Model_User $user, $clang) {
+		return $user->isAdmin() || $user->hasRight('language', 'access', $clang);
 	}
 }

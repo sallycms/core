@@ -54,7 +54,7 @@ class sly_Service_ArticleBaseTest extends sly_Service_ArticleTestBase {
 		$service = $this->getService();
 		$id      = $service->add(0, 'tmp', 1, -1);
 
-		$service->delete($id);
+		$service->deleteById($id);
 
 		$this->assertNull($service->findById($id));
 	}

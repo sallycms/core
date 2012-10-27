@@ -43,7 +43,7 @@ if (ini_get('register_globals')) {
 	$keys         = array_keys($GLOBALS);
 
 	foreach ($keys as $key) {
-		if (!in_array($key, $superglobals) && $key != 'GLOBALS') {
+		if (!in_array($key, $superglobals) && $key !== 'GLOBALS') {
 			unset($$key);
 		}
 	}
@@ -63,9 +63,10 @@ if (!SLY_IS_TESTING) {
 	define('SLY_DEVELOPFOLDER', SLY_BASE.DIRECTORY_SEPARATOR.'develop');
 }
 
-define('SLY_COREFOLDER', SLY_SALLYFOLDER.DIRECTORY_SEPARATOR.'core');
-define('SLY_DATAFOLDER', SLY_BASE.DIRECTORY_SEPARATOR.'data');
-define('SLY_DYNFOLDER',  SLY_DATAFOLDER.DIRECTORY_SEPARATOR.'dyn');
+define('SLY_COREFOLDER',   SLY_SALLYFOLDER.DIRECTORY_SEPARATOR.'core');
+define('SLY_VENDORFOLDER', SLY_SALLYFOLDER.DIRECTORY_SEPARATOR.'vendor');
+define('SLY_DATAFOLDER',   SLY_BASE.DIRECTORY_SEPARATOR.'data');
+define('SLY_DYNFOLDER',    SLY_DATAFOLDER.DIRECTORY_SEPARATOR.'dyn');
 
 if (!SLY_IS_TESTING) {
 	define('SLY_MEDIAFOLDER', SLY_DATAFOLDER.DIRECTORY_SEPARATOR.'mediapool');
@@ -112,11 +113,14 @@ $errorHandler->init();
 sly_Core::setErrorHandler($errorHandler);
 
 // Sync?
-if ($config->get('SETUP') === false) {
+$setup = $config->get('SETUP');
+
+if ($setup === false) {
 	// Cache-Util initialisieren
 	sly_Util_Cache::registerListener();
 }
-else {
+elseif ($setup === null) {
+	// load default core config when the config has never been initialized
 	$config->loadProjectDefaults(SLY_COREFOLDER.'/config/sallyProjectDefaults.yml');
 	$config->loadLocalDefaults(SLY_COREFOLDER.'/config/sallyLocalDefaults.yml');
 }

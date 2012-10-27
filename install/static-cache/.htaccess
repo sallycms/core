@@ -4,6 +4,8 @@ RewriteEngine On
 # Set it the the base of your frontend plus '/data/dyn/public/sally/static-cache/'.
 # RewriteBase /.../data/dyn/public/sally/static-cache/
 
+AddType text/css less
+
 SetEnvIfNoCase ^Accept-Encoding$ ".*" HTTP_ENCODING_CACHEDIR=plain/
 
 <IfModule mod_headers.c>

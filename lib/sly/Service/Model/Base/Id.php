@@ -27,15 +27,15 @@ abstract class sly_Service_Model_Base_Id extends sly_Service_Model_Base {
 	 * @return sly_Model_Base
 	 */
 	public function save(sly_Model_Base $model) {
-		$persistence = sly_DB_Persistence::getInstance();
+		$persistence = $this->getPersistence();
+		$data        = $model->toHash();
 
 		if ($model->getId() == sly_Model_Base_Id::NEW_ID) {
-			$data = $model->toHash();
 			$persistence->insert($this->getTableName(), $data);
 			$model->setId($persistence->lastId());
 		}
 		else {
-			$persistence->update($this->getTableName(), $model->toHash(), $model->getPKHash());
+			$persistence->update($this->getTableName(), $data, $model->getPKHash());
 		}
 
 		return $model;
@@ -49,5 +49,13 @@ abstract class sly_Service_Model_Base_Id extends sly_Service_Model_Base {
 		if (isset($params['id'])) unset($params['id']);
 		$model = $this->makeInstance($params);
 		return $this->save($model);
+	}
+
+	/**
+	 * @param  int $id
+	 * @return int
+	 */
+	public function deleteById($id) {
+		return $this->delete(array('id' => (int) $id));
 	}
 }

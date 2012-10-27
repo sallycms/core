@@ -35,24 +35,117 @@ class sly_Table_Column extends sly_Viewable {
 	}
 
 	/**
-	 * @param string $content
+	 * @param  string $content
+	 * @param  mixed  $classes     CSS classes as either a string or an array
+	 * @param  string $sortkey
+	 * @param  array  $attributes
+	 * @param  string $width
+	 * @return sly_Table_Column
+	 */
+	public static function factory($content, $classes = '', $sortkey = '', array $attributes = null, $width = '') {
+		$attributes = (array) $attributes;
+
+		if (!empty($classes)) {
+			$classes = is_string($classes) ? trim($classes) : implode(' ', array_filter(array_unique($classes)));
+			$attributes['class'] = $classes;
+		}
+
+		return new self($content, $width, $sortkey, $attributes);
+	}
+
+	/**
+	 * @param  string $uri       URI to the icon
+	 * @param  string $link      optional URI to link to
+	 * @param  mixed  $classes   CSS classes as either a string or an array
+	 * @param  string $sortkey
+	 * @return sly_Table_Column
+	 */
+	public static function icon($uri, $link = null, $title = null, $classes = '', $sortkey = '') {
+		$attributes = array('class' => 'sly-icon');
+		$icon       = sprintf('<img src="" alt="" title="%s" />', $uri, sly_html($title));
+
+		if ($link) {
+			$icon = sprintf('<a href="%s">%s</a>', sly_html($link), $icon);
+		}
+
+		if (!empty($classes)) {
+			$classes = is_string($classes) ? trim($classes) : implode(' ', array_filter(array_unique($classes)));
+			$attributes['class'] .= ' '.$classes;
+		}
+
+		return new self($icon, '', $sortkey, $attributes);
+	}
+
+	/**
+	 * @param  string $uri       URI to the icon
+	 * @param  string $link      optional URI to link to
+	 * @param  mixed  $classes   CSS classes as either a string or an array
+	 * @param  string $sortkey
+	 * @return sly_Table_Column
+	 */
+	public static function sprite($spriteClass, $link = null, $title = null, $classes = '', $sortkey = '') {
+		$attributes = array('class' => 'sly-icon');
+		$sprite     = sly_Util_HTML::getSpriteLink($link, $title, $spriteClass);
+
+		if (!empty($classes)) {
+			$classes = is_string($classes) ? trim($classes) : implode(' ', array_filter(array_unique($classes)));
+			$attributes['class'] .= ' '.$classes;
+		}
+
+		return new self($sprite, '', $sortkey, $attributes);
+	}
+
+	/**
+	 * @param  string $name
+	 * @param  string $value
+	 * @return sly_Table_Column  self
+	 */
+	public function setAttribute($name, $value) {
+		$this->htmlAttributes[$name] = trim($value);
+		return $this;
+	}
+
+	/**
+	 * @param  string $name
+	 * @param  string $value
+	 * @return string         found attribute value or null
+	 */
+	public function getAttribute($name) {
+		return sly_setarraytype($this->htmlAttributes, $name, 'string', null);
+	}
+
+	/**
+	 * @param  string $content
+	 * @return sly_Table_Column  self
 	 */
 	public function setContent($content) {
 		$this->content = $content;
+		return $this;
 	}
 
 	/**
-	 * @param sly_Table $table
+	 * @param  sly_Table $table
+	 * @return sly_Table_Column  self
 	 */
 	public function setTable(sly_Table $table) {
 		$this->table = $table;
+		return $this;
 	}
 
 	/**
-	 * @param int $idx
+	 * @param  int $idx
+	 * @return sly_Table_Column  self
 	 */
 	public function setIndex($idx) {
 		$this->idx = (int) $idx;
+		return $this;
+	}
+
+	/**
+	 * @return int
+	 */
+	public function getColspan() {
+		return sly_setarraytype($this->htmlAttributes, 'colspan', 'int', 1);
 	}
 
 	/**
