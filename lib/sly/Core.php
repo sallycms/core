@@ -502,8 +502,7 @@ class sly_Core {
 		$container->getAddOnManagerService()->refresh();
 
 		// create bootcache
-		sly_Util_BootCache::recreate('frontend');
-		sly_Util_BootCache::recreate('backend');
+		sly_Util_BootCache::recreate();
 
 		self::dispatcher()->notify('SLY_CACHE_CLEARED');
 	}
