@@ -40,11 +40,11 @@ class sly_Response_Stream extends sly_Response {
 		}
 	}
 
-	public function send() {
+	public function send(sly_Request $request = null, sly_Event_IDispatcher $dispatcher = null) {
 		// make sure there is no output buffer blocking our chunked response
 		while (@ob_end_clean());
 
-		parent::send();
+		parent::send($request, $dispatcher);
 	}
 
 	public function sendContent() {
