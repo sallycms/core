@@ -14,8 +14,6 @@ if (!defined('SLY_IS_TESTING')) {
 	define('SLY_IS_TESTING', false);
 }
 
-define('SLY_HTDOCS_PATH', SLY_IS_TESTING ? SLY_TESTING_ROOT : '../');
-
 // start output buffering
 if (!SLY_IS_TESTING) {
 	ob_start();
