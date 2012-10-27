@@ -141,11 +141,6 @@ class sly_Request {
 			else {
 				$path = $this->getScriptName();
 				$path = dirname($path); // '/foo' or '/foo/sally/backend'
-
-				if (IS_SALLY_BACKEND) {
-					$path = dirname(dirname($path));
-				}
-
 				$path = str_replace('\\', '/', $path);
 			}
 		}
