@@ -23,19 +23,9 @@ abstract class sly_Model_Base {
 	 * @param array $params
 	 */
 	public function __construct($params = array()) {
-		foreach ($this->_pk as $name => $type) {
-			if (isset($params[$name])) {
-				$this->$name = $params[$name];
-				settype($this->$name, $type);
-			}
-		}
 
-		foreach ($this->_attributes as $name => $type) {
-			if (isset($params[$name])) {
-				$this->$name = $params[$name];
-				settype($this->$name, $type);
-			}
-		}
+		$this->attrsFromHash($this->_pk, $params);
+		$this->attrsFromHash($this->_attributes, $params);
 
 		// put left over values in $_values to allow access from __call
 
@@ -61,11 +51,19 @@ abstract class sly_Model_Base {
 	}
 
 	/**
-	 * @param sly_Model_User $user
+	 * @param mixed $user  sly_Model_User or username as a string
 	 */
 	public function setUpdateColumns($user = null) {
-		if (!$user) {
-			$user = sly_Util_User::getCurrentUser()->getLogin();
+		if (!is_string($user) && !($user instanceof sly_Model_User)) {
+			$user = sly_Util_User::getCurrentUser();
+
+			if (!$user) {
+				throw new sly_Exception(t('operation_requires_user_context', __METHOD__));
+			}
+		}
+
+		if ($user instanceof sly_Model_User) {
+			$user = $user->getLogin();
 		}
 
 		$this->setUpdateDate(time());
@@ -73,11 +71,19 @@ abstract class sly_Model_Base {
 	}
 
 	/**
-	 * @param sly_Model_User $user
+	 * @param mixed $user  sly_Model_User or username as a string
 	 */
 	public function setCreateColumns($user = null) {
-		if (!$user) {
-			$user = sly_Util_User::getCurrentUser()->getLogin();
+		if (!is_string($user) && !($user instanceof sly_Model_User)) {
+			$user = sly_Util_User::getCurrentUser();
+
+			if (!$user) {
+				throw new sly_Exception(t('operation_requires_user_context', __METHOD__));
+			}
+		}
+
+		if ($user instanceof sly_Model_User) {
+			$user = $user->getLogin();
 		}
 
 		$this->setCreateDate(time());
@@ -93,10 +99,51 @@ abstract class sly_Model_Base {
 		$data = array();
 
 		foreach ($attrs as $name => $type) {
-			$data[$name] = $this->$name;
+			$value = $this->$name;
+
+			if ($value !== null) {
+				if ($type === 'date') {
+					$value = $value ? date('Y-m-d', $value) : '0000-00-00';
+				}
+				elseif ($type === 'datetime') {
+					$value = $value ? date('Y-m-d H:i:s', $value) : '0000-00-00 00:00:00';
+				}
+				elseif ($type === 'json') {
+					$value = json_encode($value);
+				}
+			}
+
+			$data[$name] = $value;
 		}
 
 		return $data;
+	}
+
+	protected function attrsFromHash($attrs, $hash) {
+		foreach ($attrs as $name => $type) {
+			if (isset($hash[$name])) {
+				// map SQL DATE and DATETIME to unix timestamps
+				if ($type === 'date' || $type === 'datetime') {
+					$type = 'int';
+
+					if (!sly_Util_String::isInteger($hash[$name])) {
+						$hash[$name] = strtotime($hash[$name]);
+					}
+				}
+				elseif ($type === 'json') {
+					$hash[$name] = json_decode($hash[$name], true);
+
+					if(is_array($hash[$name])) {
+						$type = 'array';
+					} else {
+						$type = 'string';
+					}
+				}
+
+				$this->$name = $hash[$name];
+				settype($this->$name, $type);
+			}
+		}
 	}
 
 	/**

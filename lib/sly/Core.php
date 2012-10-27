@@ -16,13 +16,14 @@ class sly_Core {
 	private $app;              ///< sly_App_Interface
 	private $cache;            ///< BabelCache_Interface
 	private $configuration;    ///< sly_Configuration
-	private $dispatcher;       ///< sly_Event_Dispatcher
+	private $dispatcher;       ///< sly_Event_IDispatcher
 	private $curClang;         ///< int
 	private $curArticleId;     ///< int
 	private $layout;           ///< sly_Layout
 	private $i18n;             ///< sly_I18N
 	private $errorHandler;     ///< sly_ErrorHandler
 	private $response;         ///< sly_Response
+	private $flashMessage;     ///< sly_Util_FlashMessage
 
 	// Use the following constants when you don't have access to the real
 	// config values (i.e. when in setup mode). They should map the values
@@ -142,10 +143,23 @@ class sly_Core {
 	}
 
 	/**
-	 * @return sly_Event_Dispatcher  the event dispatcher
+	 * @return sly_Event_IDispatcher  the event dispatcher
 	 */
 	public static function dispatcher() {
 		return self::getInstance()->dispatcher;
+	}
+
+	/**
+	 * @param  sly_Event_IDispatcher $dispatcher  the new dispatcher
+	 * @return sly_Event_IDispatcher              the previous dispatcher
+	 */
+	public static function setDispatcher(sly_Event_IDispatcher $dispatcher) {
+		$instance = self::getInstance();
+		$previous = $instance->dispatcher;
+
+		$instance->dispatcher = $dispatcher;
+
+		return $previous;
 	}
 
 	/**
@@ -183,9 +197,7 @@ class sly_Core {
 	 * @return boolean  true if developer mode, else false
 	 */
 	public static function isDeveloperMode() {
-		static $var = null;
-		if ($var === null) $var = (boolean) self::config()->get('DEVELOPER_MODE');
-		return $var;
+		return (boolean) self::config()->get('DEVELOPER_MODE');
 	}
 
 	/**
@@ -328,11 +340,11 @@ class sly_Core {
 	}
 
 	/**
-	 * loads all known addons into Sally
+	 * loads all known addOns into Sally
 	 */
-	public static function loadAddons() {
-		sly_Service_Factory::getAddOnService()->loadComponents();
-		self::dispatcher()->notify('ADDONS_INCLUDED');
+	public static function loadAddOns() {
+		sly_Service_Factory::getAddOnManagerService()->loadAddOns();
+		self::dispatcher()->notify('SLY_ADDONS_LOADED');
 	}
 
 	public static function registerListeners() {
@@ -383,6 +395,31 @@ class sly_Core {
 		}
 
 		return $instance->response;
+	}
+
+	/**
+	 * Returns the flash message
+	 *
+	 * An existing message is removed upon first call from session, so the
+	 * message will not be available on the next HTTP request. Manipulating the
+	 * message object will re-store it again, however.
+	 *
+	 * @return sly_Util_FlashMessage  the flash message
+	 */
+	public static function getFlashMessage() {
+		$instance = self::getInstance();
+
+		if (!$instance->flashMessage) {
+			sly_Util_Session::start();
+
+			$msg = sly_Util_FlashMessage::readFromSession('sally');
+			$msg->removeFromSession();
+			$msg->setAutoStore(true);
+
+			$instance->flashMessage = $msg;
+		}
+
+		return $instance->flashMessage;
 	}
 
 	/**
@@ -439,10 +476,13 @@ class sly_Core {
 		// clear asset cache
 		sly_Service_Factory::getAssetService()->clearCache();
 
+		// refresh addOns
+		sly_Service_Factory::getAddOnManagerService()->refresh();
+
 		// create bootcache
 		sly_Util_BootCache::recreate('frontend');
 		sly_Util_BootCache::recreate('backend');
 
-		return self::dispatcher()->filter('SLY_CACHE_CLEARED', t('delete_cache_message'));
+		self::dispatcher()->notify('SLY_CACHE_CLEARED');
 	}
 }

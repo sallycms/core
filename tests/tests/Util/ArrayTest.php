@@ -113,7 +113,8 @@ class sly_Util_ArrayTest extends PHPUnit_Framework_TestCase {
 	}
 
 	public function testAny() {
-		$predicate = function($x) { return $x % 2 == 0; }; // match even
+		// function($x) { return $x % 2 == 0; };
+		$predicate = create_function('$x', 'return $x % 2 == 0;');
 
 		$this->assertTrue(sly_Util_Array::any($predicate,  array(1,2,3)));
 		$this->assertTrue(sly_Util_Array::any($predicate,  array(2)));
@@ -122,14 +123,16 @@ class sly_Util_ArrayTest extends PHPUnit_Framework_TestCase {
 	}
 
 	public function testAnyAll() {
-		$predicate = function($x) { return true; }; // match all
+		// function($x) { return true; };
+		$predicate = create_function('$x', 'return true;');
 
 		$this->assertTrue(sly_Util_Array::any($predicate,  array(null)));
 		$this->assertFalse(sly_Util_Array::any($predicate, array()));
 	}
 
 	public function testAnyNone() {
-		$predicate = function($x) { return false; }; // match none
+		// function($x) { return false; };
+		$predicate = create_function('$x', 'return false;');
 
 		$this->assertFalse(sly_Util_Array::any($predicate,  array(null)));
 		$this->assertFalse(sly_Util_Array::any($predicate, array()));

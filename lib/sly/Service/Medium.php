@@ -16,6 +16,25 @@
  */
 class sly_Service_Medium extends sly_Service_Model_Base_Id {
 	protected $tablename = 'file'; ///< string
+	protected $cache;              ///< BabelCache_Interface
+	protected $dispatcher;         ///< sly_Event_IDispatcher
+	protected $catService;         ///< sly_Service_MediaCategory
+
+	/**
+	 * Constructor
+	 *
+	 * @param sly_DB_Persistence        $persistence
+	 * @param BabelCache_Interface      $cache
+	 * @param sly_Event_IDispatcher     $dispatcher
+	 * @param sly_Service_MediaCategory $catService
+	 */
+	public function __construct(sly_DB_Persistence $persistence, BabelCache_Interface $cache, sly_Event_IDispatcher $dispatcher, sly_Service_MediaCategory $catService) {
+		parent::__construct($persistence);
+
+		$this->cache      = $cache;
+		$this->dispatcher = $dispatcher;
+		$this->catService = $catService;
+	}
 
 	/**
 	 * @param  array $params
@@ -36,13 +55,13 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id {
 			return null;
 		}
 
-		$medium = sly_Core::cache()->get('sly.medium', $id, null);
+		$medium = $this->cache->get('sly.medium', $id, null);
 
 		if ($medium === null) {
 			$medium = $this->findOne(array('id' => $id));
 
 			if ($medium !== null) {
-				sly_Core::cache()->set('sly.medium', $id, $medium);
+				$this->cache->set('sly.medium', $id, $medium);
 			}
 		}
 
@@ -55,17 +74,17 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id {
 	 */
 	public function findByFilename($filename) {
 		$hash = md5($filename);
-		$id   = sly_Core::cache()->get('sly.medium', $hash, null);
+		$id   = $this->cache->get('sly.medium', $hash, null);
 
 		if ($id === null) {
-			$db = sly_DB_Persistence::getInstance();
+			$db = $this->getPersistence();
 			$id = $db->magicFetch('file', 'id', array('filename' => $filename));
 
 			if ($id === false) {
 				return null;
 			}
 
-			sly_Core::cache()->set('sly.medium', $hash, $id);
+			$this->cache->set('sly.medium', $hash, $id);
 		}
 
 		return $this->findById($id);
@@ -77,16 +96,16 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id {
 	 */
 	public function findMediaByExtension($extension) {
 		$namespace = 'sly.medium.list';
-		$list      = sly_Core::cache()->get($namespace, $extension, null);
+		$list      = $this->cache->get($namespace, $extension, null);
 
 		if ($list === null) {
-			$sql  = sly_DB_Persistence::getInstance();
+			$sql  = $this->getPersistence();
 			$list = array();
 
 			$sql->select('file', 'id', array('SUBSTRING(filename, LOCATE(".", filename) + 1)' => $extension), null, 'filename');
 			foreach ($sql as $row) $list[] = (int) $row['id'];
 
-			sly_Core::cache()->set($namespace, $extension, $list);
+			$this->cache->set($namespace, $extension, $list);
 		}
 
 		$objlist = array();
@@ -105,17 +124,17 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id {
 	public function findMediaByCategory($categoryId) {
 		$categoryId = (int) $categoryId;
 		$namespace  = 'sly.medium.list';
-		$list       = sly_Core::cache()->get($namespace, $categoryId, null);
+		$list       = $this->cache->get($namespace, $categoryId, null);
 
 		if ($list === null) {
 			$list  = array();
-			$sql   = sly_DB_Persistence::getInstance();
+			$sql   = $this->getPersistence();
 			$where = array('category_id' => $categoryId);
 
 			$sql->select('file', 'id', $where, null, 'filename');
 			foreach ($sql as $row) $list[] = (int) $row['id'];
 
-			sly_Core::cache()->set($namespace, $categoryId, $list);
+			$this->cache->set($namespace, $categoryId, $list);
 		}
 
 		$objlist = array();
@@ -129,15 +148,18 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id {
 
 	/**
 	 * @throws sly_Exception
-	 * @param  string $filename
-	 * @param  string $title
-	 * @param  string $title
-	 * @param  int    $categoryID
-	 * @param  string $mimetype
-	 * @param  string $originalName
+	 * @param  string         $filename
+	 * @param  string         $title
+	 * @param  string         $title
+	 * @param  int            $categoryID
+	 * @param  string         $mimetype
+	 * @param  string         $originalName
+	 * @param  sly_Model_User $user          creator or null for the current user
 	 * @return sly_Model_Medium
 	 */
-	public function add($filename, $title, $categoryID, $mimetype = null, $originalName = null) {
+	public function add($filename, $title, $categoryID, $mimetype = null, $originalName = null, sly_Model_User $user = null) {
+		$user = $this->getActor($user, __METHOD__);
+
 		// check file itself
 
 		$filename = basename($filename);
@@ -151,7 +173,7 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id {
 
 		$categoryID = (int) $categoryID;
 
-		if (!sly_Util_MediaCategory::exists($categoryID)) {
+		if ($this->catService->findById($categoryID) === null) {
 			$categoryID = 0;
 		}
 
@@ -166,11 +188,11 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id {
 		$file->setOriginalName($originalName === null ? $filename : basename($originalName));
 		$file->setFilename($filename);
 		$file->setFilesize(filesize($fullname));
-		$file->setCategoryId((int) $categoryID);
+		$file->setCategoryId($categoryID);
 		$file->setRevision(0); // totally useless...
 		$file->setReFileId(0); // even more useless
 		$file->setAttributes('');
-		$file->setCreateColumns();
+		$file->setCreateColumns($user);
 
 		if ($size) {
 			$file->setWidth($size[0]);
@@ -185,23 +207,35 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id {
 
 		$this->save($file);
 
-		sly_Core::cache()->flush('sly.medium.list');
-		sly_Core::dispatcher()->notify('SLY_MEDIA_ADDED', $file);
+		$this->cache->flush('sly.medium.list');
+		$this->dispatcher->notify('SLY_MEDIA_ADDED', $file, compact('user'));
 
 		return $file;
 	}
 
 	/**
 	 * @param sly_Model_Medium $medium
+	 * @param sly_Model_User   $user    user or null for the current user
 	 */
-	public function update(sly_Model_Medium $medium) {
+	public function update(sly_Model_Medium $medium, sly_Model_User $user = null) {
+		$user = $this->getActor($user, __METHOD__);
+
 		// store data
-		$medium->setUpdateColumns();
+		$medium->setUpdateColumns($user);
 		$this->save($medium);
 
 		// notify the listeners and clear our own cache
-		sly_Core::cache()->delete('sly.medium', $medium->getId());
-		sly_Core::dispatcher()->notify('SLY_MEDIA_UPDATED', $medium);
+		$this->cache->delete('sly.medium', $medium->getId());
+		$this->dispatcher->notify('SLY_MEDIA_UPDATED', $medium, compact('user'));
+	}
+
+	/**
+	 * @throws sly_Exception
+	 * @param  sly_Model_Medium $medium
+	 * @return boolean
+	 */
+	public function deleteByMedium(sly_Model_Medium $medium) {
+		return $this->deleteById($medium->getId());
 	}
 
 	/**
@@ -209,15 +243,15 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id {
 	 * @param  int $mediumID
 	 * @return boolean
 	 */
-	public function delete($mediumID) {
+	public function deleteById($mediumID) {
 		$medium = $this->findById($mediumID);
 
 		if (!$medium) {
-			throw new sly_Exception(t('medium_not_found'));
+			throw new sly_Exception(t('medium_not_found', $mediumID));
 		}
 
 		try {
-			$sql = sly_DB_Persistence::getInstance();
+			$sql = $this->getPersistence();
 			$sql->delete('file', array('id' => $medium->getId()));
 
 			if ($medium->exists()) {
@@ -229,11 +263,10 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id {
 			throw new sly_Exception($e->getMessage());
 		}
 
-		$cache = sly_Core::cache();
-		$cache->flush('sly.medium.list');
-		$cache->delete('sly.medium', $medium->getId());
+		$this->cache->flush('sly.medium.list');
+		$this->cache->delete('sly.medium', $medium->getId());
 
-		sly_Core::dispatcher()->notify('SLY_MEDIA_DELETED', $medium);
+		$this->dispatcher->notify('SLY_MEDIA_DELETED', $medium);
 
 		return true;
 	}

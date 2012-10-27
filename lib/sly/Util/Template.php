@@ -12,16 +12,17 @@
  * @ingroup util
  */
 class sly_Util_Template {
-
 	/**
+	 * render a given template
+	 *
 	 * This method includes a template identified by its name.
 	 * A unlimited number of variabled can be given to the templates
-	 * through an associated array array('varname' => 'value' ...)
+	 * through an associated array like array('varname' => 'value' ...).
 	 *
-	 * @param string $name   The name param if the Template
-	 * @param array  $params Template variables as an associative array of parameters
+	 * @param string $name    the template name
+	 * @param array  $params  template variables as an associative array of parameters
 	 */
-	public static function render($name, $params = array()) {
+	public static function render($name, array $params = array()) {
 		try {
 			sly_Service_Factory::getTemplateService()->includeFile($name, $params);
 		}
@@ -31,7 +32,27 @@ class sly_Util_Template {
 	}
 
 	/**
-	 * Checks if a template exists.
+	 * render a template and return its content
+	 *
+	 * @throws sly_Exception   if an exception is thrown inside the template
+	 * @param  string $name    template name
+	 * @param  array  $params  template variables as an associative array of parameters
+	 * @return string          rendered content
+	 */
+	public static function renderAsString($name, array $params = array()) {
+		try {
+			ob_start();
+			self::render($name, $params);
+			return ob_get_clean();
+		}
+		catch (Exception $e) {
+			ob_end_clean();
+			throw $e;
+		}
+	}
+
+	/**
+	 * checks if a template exists
 	 *
 	 * @param  string $name
 	 * @return boolean

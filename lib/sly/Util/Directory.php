@@ -87,8 +87,12 @@ class sly_Util_Directory {
 			throw new sly_Exception(t('sort_function_not_found', $sortFunction));
 		}
 
-		$handle = opendir($this->directory);
+		$handle = @opendir($this->directory);
 		$list   = array();
+
+		if (!$handle) {
+			return false;
+		}
 
 		while ($file = readdir($handle)) {
 			if ($file == '.' || $file == '..') continue;
@@ -105,7 +109,11 @@ class sly_Util_Directory {
 		}
 
 		closedir($handle);
-		if (!empty($sortFunction)) $sortFunction($list);
+
+		if (!empty($sortFunction)) {
+			$sortFunction($list);
+			$list = array_values($list);
+		}
 
 		return $list;
 	}
@@ -139,7 +147,8 @@ class sly_Util_Directory {
 			$list[] = $absolute ? $filename : substr($filename, $baselen);
 		}
 
-		return $list;
+		natcasesort($list);
+		return array_values($list);
 	}
 
 	/**

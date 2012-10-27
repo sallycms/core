@@ -9,7 +9,13 @@
  */
 
 if ($this->isEmpty) {
-	print '<tr><td class="center" colspan="'.count($this->columns).'">'.sly_html($this->emptyNotice).'</td></tr>';
+	$colspan = 0;
+
+	foreach ($this->columns as $col) {
+		$colspan += $col->getColspan();
+	}
+
+	print '<tr><td class="center" colspan="'.$colspan.'">'.sly_html($this->emptyNotice).'</td></tr>';
 }
 
 print '</tbody></table>';

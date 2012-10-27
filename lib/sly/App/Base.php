@@ -9,11 +9,14 @@
  */
 
 abstract class sly_App_Base implements sly_App_Interface {
+	/**
+	 * initialize the app
+	 */
 	public function initialize() {
 		$setup = sly_Core::config()->get('SETUP') === true;
 
-		// include addOns
-		if (!$setup) sly_Core::loadAddons();
+		// boot addOns
+		if (!$setup) sly_Core::loadAddOns();
 
 		// register listeners
 		sly_Core::registerListeners();
@@ -22,6 +25,13 @@ abstract class sly_App_Base implements sly_App_Interface {
 		if (!$setup) $this->syncDevelopFiles();
 	}
 
+	/**
+	 * call an action on a controller
+	 *
+	 * @param  mixed  $controller  a controller name (string) or a prebuilt controller instance
+	 * @param  string $action
+	 * @return sly_Response
+	 */
 	public function dispatch($controller, $action) {
 		$pageResponse = $this->tryController($controller, $action);
 
@@ -38,7 +48,35 @@ abstract class sly_App_Base implements sly_App_Interface {
 		return $pageResponse;
 	}
 
+	/**
+	 * call an action on a controller
+	 *
+	 * @param  mixed  $controller  a controller name (string) or a prebuilt controller instance
+	 * @param  string $action
+	 * @return sly_Response
+	 */
 	public function tryController($controller, $action) {
+		// build controller instance and check permissions
+		try {
+			if (!($controller instanceof sly_Controller_Interface)) {
+				$className  = $this->getControllerClass($controller);
+				$controller = $this->getController($className);
+			}
+
+			if (!$controller->checkPermission($action)) {
+				throw new sly_Authorisation_Exception(t('page_not_allowed', $action, get_class($controller)), 403);
+			}
+		}
+		catch (Exception $e) {
+			return $this->handleControllerError($e, $controller, $action);
+		}
+
+		// generic controllers should have no safety net and *must not* throw exceptions.
+		if ($controller instanceof sly_Controller_Generic) {
+			return $this->runController($controller, 'generic', $action);
+		}
+
+		// classic controllers should have a basic exception handling provided by us.
 		try {
 			return $this->runController($controller, $action);
 		}
@@ -47,32 +85,27 @@ abstract class sly_App_Base implements sly_App_Interface {
 		}
 	}
 
-	protected function runController($controller, $action) {
+	/**
+	 * call an action on a controller
+	 *
+	 * @param  mixed  $controller  a controller name (string) or a prebuilt controller instance
+	 * @param  string $action
+	 * @param  mixed  $param       a single parameter for the action method
+	 * @return sly_Response
+	 */
+	protected function runController($controller, $action, $param = null) {
+		ob_start();
+
 		// prepare controller
 		$method = $action.'Action';
 
-		if (!($controller instanceof sly_Controller_Interface)) {
-			$className  = $this->getControllerClass($controller);
-			$controller = $this->getController($className);
-		}
-
-		if (!method_exists($controller, $method)) {
-			if (!method_exists($controller, 'slyGetActionFallback')) {
-				throw new sly_Controller_Exception(t('unknown_action', $method, $className), 404);
-			}
-
-			$action = $controller->slyGetActionFallback();
-			$method = $action.'Action';
-		}
-
-		if (!$controller->checkPermission($action)) {
-			throw new sly_Authorisation_Exception(t('page_not_allowed', $action, get_class($controller)), 403);
-		}
-
-		ob_start();
-
 		// run the action method
-		$r = $controller->$method();
+		if ($param === null) {
+			$r = $controller->$method();
+		}
+		else {
+			$r = $controller->$method($param);
+		}
 
 		if ($r instanceof sly_Response || $r instanceof sly_Response_Action) {
 			ob_end_clean();
@@ -93,6 +126,12 @@ abstract class sly_App_Base implements sly_App_Interface {
 		}
 	}
 
+	/**
+	 * check if a controller exists
+	 *
+	 * @param  string $controller
+	 * @return boolean
+	 */
 	public function isControllerAvailable($controller) {
 		return class_exists($this->getControllerClass($controller));
 	}
@@ -117,6 +156,13 @@ abstract class sly_App_Base implements sly_App_Interface {
 		return $className;
 	}
 
+	/**
+	 * fire an event about the current controller
+	 *
+	 * This fires the SLY_CONTROLLER_FOUND event.
+	 *
+	 * @param boolean $useCompatibility  if true, PAGE_CHECKED will be fired as well
+	 */
 	protected function notifySystemOfController($useCompatibility = false) {
 		$name       = $this->getCurrentControllerName();
 		$controller = $this->getCurrentController();
@@ -134,6 +180,13 @@ abstract class sly_App_Base implements sly_App_Interface {
 		}
 	}
 
+	/**
+	 * handle a controller that printed its output
+	 *
+	 * @param sly_Response $response
+	 * @param string       $content
+	 * @param string       $appName
+	 */
 	protected function handleStringResponse(sly_Response $response, $content, $appName) {
 		// collect additional output (warnings and notices from the bootstrapping)
 		while (ob_get_level()) $content = ob_get_clean().$content;
@@ -152,6 +205,13 @@ abstract class sly_App_Base implements sly_App_Interface {
 		$response->isNotModified();
 	}
 
+	/**
+	 * get controller by name
+	 *
+	 * @throws sly_Controller_Exception
+	 * @param  string $className
+	 * @return sly_Controller_Interface  the controller
+	 */
 	protected function getController($className) {
 		static $instances = array();
 
@@ -180,6 +240,11 @@ abstract class sly_App_Base implements sly_App_Interface {
 		return $instances[$className];
 	}
 
+	/**
+	 * get the current controller
+	 *
+	 * @return sly_Controller_Interface
+	 */
 	public function getCurrentController() {
 		$name = $this->getCurrentControllerName();
 

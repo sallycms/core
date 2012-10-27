@@ -33,21 +33,19 @@ interface sly_Model_ISlice {
 	/**
 	 * add a SliceValue
 	 *
-	 * @param  string $type
 	 * @param  string $finder
 	 * @param  string $value
-	 * @return sly_Model_SliceValue
 	 */
-	public function addValue($finder, $value = null);
+	public function setValue($finder, $value = null);
 
 	/**
 	 * return a SliceValue
 	 *
-	 * @param  string $type
 	 * @param  string $finder
+	 * @param  mixed  $default
 	 * @return mixed
 	 */
-	public function getValue($finder);
+	public function getValue($finder, $default = null);
 
 	/**
 	 * clear all current SliceValues and sert the new values
@@ -65,15 +63,8 @@ interface sly_Model_ISlice {
 	public function getValues();
 
 	/**
-	 * remove all SliceValues
-	 *
-	 * @return int number of removed values
-	 */
-	public function flushValues();
-
-	/**
 	 * get the rendered output
-	 * 
+	 *
 	 * @return string
 	 */
 	public function getOutput();

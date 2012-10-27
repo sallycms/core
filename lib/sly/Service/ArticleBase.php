@@ -11,6 +11,49 @@
 abstract class sly_Service_ArticleBase extends sly_Service_Model_Base {
 	protected $tablename = 'article'; ///< string
 	protected $states    = array();   ///< array
+	protected $cache;                 ///< BabelCache_Interface
+	protected $dispatcher;            ///< sly_Event_IDispatcher
+	protected $lngService;            ///< sly_Service_Language
+	protected $artService;            ///< sly_Service_Article
+	protected $catService;            ///< sly_Service_Category
+
+	/**
+	 * Constructor
+	 *
+	 * Note that for having a fully-functional service, you *must* call the
+	 * serArticleService() and setCategoryService() afterwards. You cannot give
+	 * those services inside the constructor, as they depend on each other.
+	 *
+	 * @param sly_DB_Persistence    $persistence
+	 * @param BabelCache_Interface  $cache
+	 * @param sly_Event_IDispatcher $dispatcher
+	 * @param sly_Service_Language  $lngService
+	 */
+	public function __construct(sly_DB_Persistence $persistence, BabelCache_Interface $cache, sly_Event_IDispatcher $dispatcher, sly_Service_Language $lngService) {
+		parent::__construct($persistence);
+
+		$this->cache      = $cache;
+		$this->dispatcher = $dispatcher;
+		$this->lngService = $lngService;
+	}
+
+	/**
+	 * set article service
+	 *
+	 * @param sly_Service_Article $service
+	 */
+	public function setArticleService(sly_Service_Article $service) {
+		$this->artService = $service;
+	}
+
+	/**
+	 * set category service
+	 *
+	 * @param sly_Service_Category $service
+	 */
+	public function setCategoryService(sly_Service_Category $service) {
+		$this->catService = $service;
+	}
 
 	abstract protected function getModelType();
 	abstract protected function getSiblingQuery($id, $clang = null);
@@ -23,7 +66,7 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base {
 	 * @return sly_Model_Base_Article
 	 */
 	protected function update(sly_Model_Base_Article $obj) {
-		$persistence = sly_DB_Persistence::getInstance();
+		$persistence = $this->getPersistence();
 		$persistence->update($this->getTableName(), $obj->toHash(), $obj->getPKHash());
 
 		$this->deleteListCache();
@@ -38,9 +81,12 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base {
 	}
 
 	protected function clearCacheByQuery($where) {
-		$db = sly_DB_Persistence::getInstance();
+		$db = $this->getPersistence();
 		$db->select('article', 'id,clang', $where, 'id,clang');
-		foreach ($db as $row) $this->deleteCache($row['id'], $row['clang']);
+
+		foreach ($db as $row) {
+			$this->deleteCache($row['id'], $row['clang']);
+		}
 	}
 
 	/**
@@ -62,13 +108,13 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base {
 		$type      = $this->getModelType();
 		$namespace = 'sly.article';
 		$key       = substr($type, 0, 3).'_'.$id.'_'.$clangID;
-		$obj       = sly_Core::cache()->get($namespace, $key, null);
+		$obj       = $this->cache->get($namespace, $key, null);
 
 		if ($obj === null) {
 			$obj = $this->findOne(array('id' => $id, 'clang' => $clangID));
 
 			if ($obj !== null) {
-				sly_Core::cache()->set($namespace, $key, $obj);
+				$this->cache->set($namespace, $key, $obj);
 			}
 		}
 
@@ -77,16 +123,18 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base {
 
 	/**
 	 *
-	 * @param  int $id
-	 * @param  int $clangID
-	 * @param  int $newStatus
+	 * @param  int            $id
+	 * @param  int            $clangID
+	 * @param  int            $newStatus
+	 * @param  sly_Model_User $user       updateuser or null for the current user
 	 * @return boolean
 	 */
-	public function changeStatus($id, $clangID, $newStatus = null) {
+	public function changeStatus($id, $clangID, $newStatus = null, sly_Model_User $user = null) {
 		$id      = (int) $id;
 		$clangID = (int) $clangID;
 		$obj     = $this->findById($id, $clangID);
 		$type    = $this->getModelType();
+		$user    = $this->getActor($user, __METHOD__);
 
 		if (!$obj) {
 			throw new sly_Exception(t($type.'_not_found'));
@@ -103,13 +151,12 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base {
 		// update the article/category
 
 		$obj->setStatus($newStatus);
-		$obj->setUpdateColumns();
+		$obj->setUpdateColumns($user);
 		$this->update($obj);
 
 		// notify the system
 
-		$dispatcher = sly_Core::dispatcher();
-		$dispatcher->notify($this->getEvent('STATUS'), $obj);
+		$this->dispatcher->notify($this->getEvent('STATUS'), $obj, array('user' => $user));
 
 		return true;
 	}
@@ -127,7 +174,7 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base {
 				array(t('status_online'),  'sly-online')
 			);
 
-			$s = sly_Core::dispatcher()->filter($this->getEvent('STATUS_TYPES'), $s);
+			$s = $this->dispatcher->filter($this->getEvent('STATUS_TYPES'), $s);
 			$this->states[$type] = $s;
 		}
 
@@ -139,42 +186,49 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base {
 	 * @param int $clang  language ID (give null to delete in all languages)
 	 */
 	public function deleteCache($id, $clang = null) {
-		$cache = sly_Core::cache();
-
-		foreach (sly_Util_Language::findAll(true) as $_clang) {
+		foreach ($this->lngService->findAll(true) as $_clang) {
 			if ($clang !== null && $clang != $_clang) {
 				continue;
 			}
 
-			$cache->delete('sly.article', 'art_'.$id.'_'.$_clang);
-			$cache->delete('sly.article', 'cat_'.$id.'_'.$_clang);
+			$this->cache->delete('sly.article', 'art_'.$id.'_'.$_clang);
+			$this->cache->delete('sly.article', 'cat_'.$id.'_'.$_clang);
 		}
 	}
 
 	public function deleteListCache() {
-		$cache = sly_Core::cache();
-		$cache->flush('sly.article.list');
+		$this->cache->flush('sly.article.list');
 	}
 
 	/**
 	 * @throws sly_Exception
-	 * @param  int    $parentID
-	 * @param  string $name
-	 * @param  int    $status
-	 * @param  int    $position
+	 * @param  int            $parentID
+	 * @param  string         $name
+	 * @param  int            $status
+	 * @param  int            $position
+	 * @param  sly_Model_User $user      creator or null for the current user
 	 * @return int
 	 */
-	protected function addHelper($parentID, $name, $status, $position = -1) {
+	protected function addHelper($parentID, $name, $status, $position = -1, sly_Model_User $user = null) {
 		$parentID  = (int) $parentID;
 		$position  = (int) $position;
 		$status    = (int) $status;
 		$modelType = $this->getModelType();
 		$isArticle = $modelType === 'article';
+		$user      = $this->getActor($user, 'add');
+
+		if (!($this->artService instanceof sly_Service_Article)) {
+			throw new LogicException('You must set the article service with ->setArticleService() before you can add elements.');
+		}
+
+		if (!($this->catService instanceof sly_Service_Category)) {
+			throw new LogicException('You must set the category service with ->setCategoryService() before you can add elements.');
+		}
 
 		///////////////////////////////////////////////////////////////
 		// check if parent exists
 
-		if ($parentID !== 0 && !sly_Util_Category::exists($parentID)) {
+		if ($parentID !== 0 && $this->catService->findById($parentID) === null) {
 			throw new sly_Exception(t('parent_category_not_found'));
 		}
 
@@ -182,8 +236,8 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base {
 		// inherit type and catname from parent category
 
 		$type          = sly_Core::getDefaultArticleType();
-		$parentArticle = sly_Util_Article::findById($parentID);
-		$db            = sly_DB_Persistence::getInstance();
+		$parentArticle = $this->artService->findById($parentID);
+		$db            = $this->getPersistence();
 
 		if ($parentID !== 0) {
 			$type = $parentArticle->getType();
@@ -216,38 +270,57 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base {
 		///////////////////////////////////////////////////////////////
 		// create article/category rows for all languages
 
-		$dispatcher = sly_Core::dispatcher();
-		$newID      = $db->magicFetch('article', 'MAX(id)') + 1;
+		$ownTrx = !$db->isTransRunning();
 
-		foreach (sly_Util_Language::findAll(true) as $clangID) {
-			$obj = $this->buildModel(array(
-				      'id' => $newID,
-				  'parent' => $parentID,
-				    'name' => $name,
-				'position' => $position,
-				    'path' => $path,
-				  'status' => $status ? 1 : 0,
-				    'type' => $type,
-				   'clang' => $clangID
-			));
+		if ($ownTrx) {
+			$db->beginTransaction();
+		}
 
-			$obj->setUpdateColumns();
-			$obj->setCreateColumns();
-			$db->insert($this->tablename, array_merge($obj->getPKHash(), $obj->toHash()));
+		try {
+			$newID = $db->magicFetch('article', 'MAX(id)') + 1;
 
-			$this->deleteListCache();
+			foreach ($this->lngService->findAll(true) as $clangID) {
+				$obj = $this->buildModel(array(
+					      'id' => $newID,
+					  'parent' => $parentID,
+					    'name' => $name,
+					'position' => $position,
+					    'path' => $path,
+					  'status' => $status ? 1 : 0,
+					    'type' => $type,
+					   'clang' => $clangID
+				));
 
-			// notify system
+				$obj->setUpdateColumns($user);
+				$obj->setCreateColumns($user);
+				$db->insert($this->tablename, array_merge($obj->getPKHash(), $obj->toHash()));
 
-			$dispatcher->notify($this->getEvent('ADDED'), $newID, array(
-				're_id'    => $parentID,
-				'clang'    => $clangID,
-				'name'     => $name,
-				'position' => $position,
-				'path'     => $path,
-				'status'   => $status,
-				'type'     => $type
-			));
+				$this->deleteListCache();
+
+				// notify system
+
+				$this->dispatcher->notify($this->getEvent('ADDED'), $newID, array(
+					're_id'    => $parentID,
+					'clang'    => $clangID,
+					'name'     => $name,
+					'position' => $position,
+					'path'     => $path,
+					'status'   => $status,
+					'type'     => $type,
+					'user'     => $user
+				));
+			}
+
+			if ($ownTrx) {
+				$db->commit();
+			}
+		}
+		catch (Exception $e) {
+			if ($ownTrx) {
+				$db->rollBack();
+			}
+
+			throw $e;
 		}
 
 		return $newID;
@@ -255,17 +328,19 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base {
 
 	/**
 	 * @throws sly_Exception
-	 * @param  int    $id
-	 * @param  int    $clangID
-	 * @param  string $name
-	 * @param  mixed  $position
+	 * @param  int            $id
+	 * @param  int            $clangID
+	 * @param  string         $name
+	 * @param  mixed          $position
+	 * @param  sly_Model_User $user      creator or null for the current user
 	 * @return boolean
 	 */
-	protected function editHelper($id, $clangID, $name, $position = false) {
+	protected function editHelper($id, $clangID, $name, $position = false, sly_Model_User $user = null) {
 		$id        = (int) $id;
 		$clangID   = (int) $clangID;
 		$modelType = $this->getModelType();
 		$isArticle = $modelType === 'article';
+		$user      = $this->getActor($user, 'edit');
 
 		///////////////////////////////////////////////////////////////
 		// check object
@@ -276,67 +351,84 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base {
 			throw new sly_Exception(t($modelType.'_not_found', $id));
 		}
 
-		///////////////////////////////////////////////////////////////
-		// update the object itself
+		$db     = $this->getPersistence();
+		$ownTrx = !$db->isTransRunning();
 
-		$isArticle ? $obj->setName($name) : $obj->setCatName($name);
-
-		$obj->setUpdateColumns();
-		$this->update($obj);
-
-		///////////////////////////////////////////////////////////////
-		// change catname of all children
-
-		$db = sly_DB_Persistence::getInstance();
-
-		if (!$isArticle) {
-			$where = array('re_id' => $id, 'startpage' => 0, 'clang' => $clangID);
-			$db->update('article', array('catname' => $name), $where);
-
-			// and remove them from the cache
-			$this->clearCacheByQuery($where);
+		if ($ownTrx) {
+			$db->beginTransaction();
 		}
 
-		///////////////////////////////////////////////////////////////
-		// move object if required
+		try {
+			///////////////////////////////////////////////////////////////
+			// update the object itself
 
-		$curPos = $isArticle ? $obj->getPosition() : $obj->getCatPosition();
+			$isArticle ? $obj->setName($name) : $obj->setCatName($name);
 
-		if ($position !== false && $position != $curPos) {
-			$position = (int) $position;
-			$parentID = $isArticle ? $obj->getCategoryId() : $obj->getParentId();
-			$maxPos   = $this->getMaxPosition($parentID);
-			$newPos   = ($position <= 0 || $position > $maxPos) ? $maxPos : $position;
+			$obj->setUpdateColumns($user);
+			$this->update($obj);
 
-			// only do something if the position really changed
+			///////////////////////////////////////////////////////////////
+			// change catname of all children
 
-			if ($newPos != $curPos) {
-				$relation    = $newPos < $curPos ? '+' : '-';
-				list($a, $b) = $newPos < $curPos ? array($newPos, $curPos) : array($curPos, $newPos);
+			if (!$isArticle) {
+				$where = array('re_id' => $id, 'startpage' => 0, 'clang' => $clangID);
+				$db->update('article', array('catname' => $name), $where);
 
-				// move all other objects
+				// and remove them from the cache
+				$this->clearCacheByQuery($where);
+			}
 
-				$followers = $this->getFollowerQuery($parentID, $clangID, $a, $b);
-				$this->moveObjects($relation, $followers);
+			///////////////////////////////////////////////////////////////
+			// move object if required
 
-				// save own, new position
+			$curPos = $isArticle ? $obj->getPosition() : $obj->getCatPosition();
 
-				$isArticle ? $obj->setPosition($newPos) : $obj->setCatPosition($newPos);
-				$this->update($obj);
+			if ($position !== false && $position != $curPos) {
+				$position = (int) $position;
+				$parentID = $isArticle ? $obj->getCategoryId() : $obj->getParentId();
+				$maxPos   = $this->getMaxPosition($parentID);
+				$newPos   = ($position <= 0 || $position > $maxPos) ? $maxPos : $position;
+
+				// only do something if the position really changed
+
+				if ($newPos != $curPos) {
+					$relation    = $newPos < $curPos ? '+' : '-';
+					list($a, $b) = $newPos < $curPos ? array($newPos, $curPos) : array($curPos, $newPos);
+
+					// move all other objects
+
+					$followers = $this->getFollowerQuery($parentID, $clangID, $a, $b);
+					$this->moveObjects($relation, $followers);
+
+					// save own, new position
+
+					$isArticle ? $obj->setPosition($newPos) : $obj->setCatPosition($newPos);
+					$this->update($obj);
+				}
+			}
+
+			// be safe and clear all lists
+			$this->deleteListCache();
+
+			if ($ownTrx) {
+				$db->commit();
 			}
 		}
+		catch (Exception $e) {
+			if ($ownTrx) {
+				$db->rollBack();
+			}
 
-		// be safe and clear all lists
-		$this->deleteListCache();
+			throw $e;
+		}
 
-		$dispatcher = sly_Core::dispatcher();
-		$dispatcher->notify($this->getEvent('UPDATED'), $obj);
+		$this->dispatcher->notify($this->getEvent('UPDATED'), $obj, array('user' => $user));
 
 		return true;
 	}
 
 	protected function moveObjects($op, $where) {
-		$db     = sly_DB_Persistence::getInstance();
+		$db     = $this->getPersistence();
 		$prefix = sly_Core::getTablePrefix();
 		$field  = $this->getModelType() === 'article' ? 'pos' : 'catpos';
 
@@ -381,11 +473,11 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base {
 		$namespace  = 'sly.article.list';
 		$prefix     = substr($this->getModelType(), 0, 3);
 		$key        = $prefix.'sbycat_'.$categoryID.'_'.$clang.'_'.($ignoreOffline ? '1' : '0');
-		$list       = sly_Core::cache()->get($namespace, $key, null);
+		$list       = $this->cache->get($namespace, $key, null);
 
 		if ($list === null) {
 			$list  = array();
-			$sql   = sly_DB_Persistence::getInstance();
+			$sql   = $this->getPersistence();
 			$where = $this->getSiblingQuery($categoryID, $clang);
 			$pos   = $prefix === 'art' ? 'pos' : 'catpos';
 
@@ -396,7 +488,7 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base {
 			$sql->select($this->tablename, 'id', $where, null, $pos.',name');
 			foreach ($sql as $row) $list[] = (int) $row['id'];
 
-			sly_Core::cache()->set($namespace, $key, $list);
+			$this->cache->set($namespace, $key, $list);
 		}
 
 		$objlist = array();

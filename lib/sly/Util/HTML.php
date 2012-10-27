@@ -47,7 +47,7 @@ class sly_Util_HTML {
 			return sprintf('<span %s><span>%s</span></span>', self::buildAttributeString($span), sly_html($text));
 		}
 
-		$a = array('href' => $target, 'class' => 'sly-sprite sly-sprite-'.$class);
+		$a = array('href' => $target, 'class' => 'sly-sprite sly-sprite-'.$class, 'title' => $text);
 		return sprintf('<a %s><span>%s</span></a>', self::buildAttributeString($a), sly_html($text));
 	}
 
@@ -105,6 +105,14 @@ class sly_Util_HTML {
 		$value = strtolower(trim($key)).'="'.sly_html(trim($value)).'"';
 	}
 
+	/**
+	 * get an <img> tag
+	 *
+	 * @param  mixed   $image      image basename or sly_Model_Medium object
+	 * @param  array   $attributes
+	 * @param  boolean $forceUri
+	 * @return string
+	 */
 	public static function getImageTag($image, array $attributes = array(), $forceUri = false) {
 		$base = sly_Core::isBackend() ? '../' : '';
 
@@ -140,6 +148,27 @@ class sly_Util_HTML {
 			$attributes['title'] = $title;
 		}
 
-		return sprintf('<img %s />', sly_Util_HTML::buildAttributeString($attributes, array('alt')));
+		return self::buildNode('img', '', $attributes, array('alt'), true);
+	}
+
+	/**
+	 * return a html node a string
+	 *
+	 * @param  string  $name             the nodename
+	 * @param  string  $innerHtml        the nodes content
+	 * @param  array   $attributes       all attributes as assoc array
+	 * @param  array   $forceAttributes  attributed to add even is thay are empty
+	 * @param  boolean $closeInline      whether the node is closed inline
+	 * @return string
+	 */
+	public static function buildNode($name, $innerHtml = '', array $attributes = array(), array $forceAttributes = array(), $closeInline = false) {
+		$attributeString = sly_Util_HTML::buildAttributeString($attributes, $forceAttributes);
+
+		if ($closeInline) {
+			return sprintf('<%s %s />', $name, $attributeString);
+		}
+		else {
+			return sprintf('<%s %s>%s</%s>', $name, $attributeString, $innerHtml, $name);
+		}
 	}
 }

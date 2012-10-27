@@ -56,47 +56,53 @@ function sly_settype($var, $type) {
  * @param  string $default   the default value if $key was not found
  * @return mixed             the new variable value
  */
-function sly_setarraytype(array $haystack, $key, $type, $default = '') {
+function sly_setarraytype(array $haystack, $key, $type, $default = null) {
 	return array_key_exists($key, $haystack) ? sly_settype($haystack[$key], $type) : $default;
 }
 
-function sly_get($name, $type, $default = '') {
+function sly_get($name, $type, $default = null) {
 	return sly_setarraytype($_GET, $name, $type, $default);
 }
 
-function sly_post($name, $type, $default = '') {
+function sly_post($name, $type, $default = null) {
 	return sly_setarraytype($_POST, $name, $type, $default);
 }
 
-function sly_request($name, $type, $default = '') {
+function sly_request($name, $type, $default = null) {
 	return sly_setarraytype($_REQUEST, $name, $type, $default);
 }
 
+function sly_cookie($name, $type, $default = null) {
+	return sly_setarraytype($_COOKIE, $name, $type, $default);
+}
+
 function sly_getArray($name, $types, $default = array()) {
+	$cast   = isset($_GET[$name]);
 	$values = sly_makeArray(isset($_GET[$name]) ? $_GET[$name] : $default);
 
-	foreach ($values as &$value) {
+	foreach ($values as $idx => $value) {
 		if (is_array($value)) {
-			unset($value);
-			continue;
+			unset($values[$idx]);
 		}
-
-		$value = sly_settype($value, $types);
+		elseif ($cast) {
+			$values[$idx] = sly_settype($value, $types);
+		}
 	}
 
 	return $values;
 }
 
 function sly_postArray($name, $types, $default = array()) {
+	$cast   = isset($_POST[$name]);
 	$values = sly_makeArray(isset($_POST[$name]) ? $_POST[$name] : $default);
 
-	foreach ($values as $idx => &$value) {
+	foreach ($values as $idx => $value) {
 		if (is_array($value)) {
 			unset($values[$idx]);
-			continue;
 		}
-
-		$value = sly_settype($value, $types);
+		elseif ($cast) {
+			$values[$idx] = sly_settype($value, $types);
+		}
 	}
 
 	return $values;
@@ -231,15 +237,20 @@ function sly_translate($text, $html = false) {
 	return $html ? sly_html($text) : $text;
 }
 
-function sly_ini_get($key, $default = null) {
+function sly_ini_get($key) {
 	$res = ini_get($key);
-	if (empty($res)) return $default;
+
+	// key not found (only possible in PHP 5.3+, PHP 5.2 returns an empty string for missing keys)
+	if ($res === false) {
+		return $res;
+	}
+
 	$res = trim($res);
 
 	// interpret numeric values
 	if (preg_match('#(^[0-9]+)([ptgmk])$#i', $res, $matches)) {
 		$last = strtolower($matches[2]);
-		$res  = strtolower($matches[1]);
+		$res  = (int) $matches[1];
 
 		switch ($last) {
 			case 'p': $res *= 1024;

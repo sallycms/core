@@ -320,10 +320,21 @@ class sly_DB_PDO_Persistence extends sly_DB_Persistence {
 		$this->connection->setTransRunning(false);
 	}
 
+	/**
+	 * Check if there is an active transaction
+	 *
+	 * Note that this only means that there was a transaction started by using
+	 * the dedicated API methods. This does *not* detect transactions started by
+	 * direct queries or other PDO wrappers.
+	 *
+	 * @return boolean  true if a transaction is running, else false
+	 */
+	public function isTransRunning() {
+		return $this->connection->isTransRunning();
+	}
+
 	public function transactional($callback, array $params = array()) {
-		$conn   = $this->connection;
-		$pdo    = $conn->getPDO();
-		$ownTrx = !$conn->isTransRunning();
+		$ownTrx = !$this->isTransRunning();
 
 		if ($ownTrx) {
 			$this->beginTransaction();

@@ -15,10 +15,10 @@
  */
 class sly_Configuration {
 	const STORE_PROJECT         = 1; ///< int
-	const STORE_LOCAL           = 2; ///< int
-	const STORE_LOCAL_DEFAULT   = 3; ///< int
-	const STORE_STATIC          = 4; ///< int
-	const STORE_PROJECT_DEFAULT = 5; ///< int
+	const STORE_PROJECT_DEFAULT = 2; ///< int
+	const STORE_LOCAL           = 3; ///< int
+	const STORE_LOCAL_DEFAULT   = 4; ///< int
+	const STORE_STATIC          = 5; ///< int
 
 	private $mode              = array(); ///< array
 	private $loadedConfigFiles = array(); ///< array
@@ -139,8 +139,8 @@ class sly_Configuration {
 		$filename = $this->getLocalConfigFile();
 
 		if (file_exists($filename)) {
-			$config = sly_Util_YAML::load($filename);
-			$this->localConfig = new sly_Util_Array($config);
+			$config = sly_Util_YAML::load($filename, false, true);
+			$this->setInternal('/', $config, self::STORE_LOCAL);
 			$this->cache = null;
 		}
 	}
@@ -149,8 +149,8 @@ class sly_Configuration {
 		$filename = $this->getProjectConfigFile();
 
 		if (file_exists($filename)) {
-			$config = sly_Util_YAML::load($filename);
-			$this->projectConfig = new sly_Util_Array($config);
+			$config = sly_Util_YAML::load($filename, false, true);
+			$this->setInternal('/', $config, self::STORE_PROJECT);
 			$this->cache = null;
 		}
 	}
@@ -169,7 +169,6 @@ class sly_Configuration {
 		}
 
 		if (empty($filename) || !is_string($filename)) throw new sly_Exception('Keine Konfigurationsdatei angegeben.');
-		if (!file_exists($filename)) throw new sly_Exception('Konfigurationsdatei '.$filename.' konnte nicht gefunden werden.');
 
 		$isStatic = $mode == self::STORE_STATIC;
 
@@ -185,7 +184,7 @@ class sly_Configuration {
 			return false;
 		}
 
-		$config = sly_Util_YAML::load($filename);
+		$config = sly_Util_YAML::load($filename, false, true);
 
 		// geladene konfiguration in globale konfiguration mergen
 		$this->setInternal($key, $config, $mode, $force);
@@ -201,12 +200,7 @@ class sly_Configuration {
 	 * @return mixed            the found value or $default
 	 */
 	public function get($key, $default = null) {
-		if ($this->cache === null) {
-			// build merged config cache
-			$this->cache = array_replace_recursive($this->staticConfig->get('/', array()), $this->localConfig->get('/', array()), $this->projectConfig->get('/', array()));
-			$this->cache = new sly_Util_Array($this->cache);
-		}
-
+		$this->warmUp();
 		return $this->cache->get($key, $default);
 	}
 
@@ -215,7 +209,8 @@ class sly_Configuration {
 	 * @return boolean      true if found, else false
 	 */
 	public function has($key) {
-		return $this->projectConfig->has($key) || $this->localConfig->has($key) || $this->staticConfig->has($key);
+		$this->warmUp();
+		return $this->cache->has($key);
 	}
 
 	/**
@@ -296,84 +291,68 @@ class sly_Configuration {
 			throw new sly_Exception('Key '.$key.' ist nicht erlaubt!');
 		}
 
-		$this->cache = null;
-
 		if (!empty($value) && sly_Util_Array::isAssoc($value)) {
+			$key = trim($key, '/');
 			foreach ($value as $ikey => $val) {
-				$currentPath = trim($key.'/'.$ikey, '/');
+				$currentPath = $key.'/'.$ikey;
 				$this->setInternal($currentPath, $val, $mode, $force);
 			}
 			return $value;
 		}
 
-		if (empty($mode)) $mode = self::STORE_PROJECT;
+		$mode = $this->getStoreMode($key, $mode, $force);
 
-		$this->setMode($key, $mode);
+		if($mode === null) return false;
 
-		if ($mode == self::STORE_STATIC) {
-			return $this->staticConfig->set($key, $value);
-		}
+		$this->mode[$key] = $mode;
+		$this->cache = null;
+		$result = false;
 
-		if ($mode == self::STORE_LOCAL) {
-			$this->localConfigModified = true;
-			return $this->localConfig->set($key, $value);
-		}
-
-		if ($mode == self::STORE_LOCAL_DEFAULT) {
-			if ($force || !$this->localConfig->has($key)) {
+		switch ($mode) {
+			case self::STORE_STATIC:
+				$result = $this->staticConfig->set($key, $value);
+				break;
+			case self::STORE_LOCAL:
 				$this->localConfigModified = true;
-				return $this->localConfig->set($key, $value);
-			}
-			return false;
-		}
-
-		if ($mode == self::STORE_PROJECT_DEFAULT) {
-			if ($force || !$this->projectConfig->has($key)) {
+				$result = $this->localConfig->set($key, $value);
+				break;
+			case self::STORE_PROJECT:
 				$this->projectConfigModified = true;
-				return $this->projectConfig->set($key, $value);
-			}
-			return false;
+				$result = $this->projectConfig->set($key, $value);
+
 		}
 
-		// case: sly_Configuration::STORE_PROJECT
-		$this->projectConfigModified = true;
-		return $this->projectConfig->set($key, $value);
+		return $result;
 	}
 
 	/**
 	 * @throws sly_Exception  if the mode is wrong
-	 * @param  string $key    the key to set the mode of
-	 * @param  int    $mode   one of the classes MODE constants
+	 * @param  string  $key   the key to set the mode of
+	 * @param  int     $mode  one of the classes MODE constants
+	 * @return int            one of the classes MODE constants or null
 	 */
-	protected function setMode($key, $mode) {
-		if ($mode == self::STORE_LOCAL_DEFAULT) $mode = self::STORE_LOCAL;
-		if ($this->checkMode($key, $mode)) return;
-		if (isset($this->mode[$key])) {
-			throw new sly_Exception('Mode für '.$key.' wurde bereits auf '.$this->mode[$key].' gesetzt.');
+	protected function getStoreMode($key, $mode, $force) {
+		//handle default facilities
+		if($mode === self::STORE_LOCAL_DEFAULT || $mode === self::STORE_PROJECT_DEFAULT) {
+			$mode--; //move to real facility
+			// if  the key does not exists or else it is in our real facility and we force override
+			if(!isset($this->mode[$key]) || ($force && $this->mode[$key] === $mode)) {
+				return $mode;
+			}
+			return null;
 		}
-
-		$this->mode[$key] = $mode;
+		else {
+			// for all others allow duplicate setting of a key only in a higher level facility
+			if (isset($this->mode[$key]) && $this->mode[$key] < $mode) {
+				throw new sly_Exception('Mode für '.$key.' wurde bereits auf '.$this->mode[$key].' gesetzt.');
+			}
+		}
+		return $mode;
 	}
 
 	/**
-	 * @param  string $key  the key to look for
-	 * @return mixed        the found mode (int) or null if the key does not exist
+	 * write the local and projectconfiguration to disc
 	 */
-	protected function getMode($key) {
-		if (!isset($this->mode[$key])) return null;
-		return $this->mode[$key];
-	}
-
-	/**
-	 * @param  string $key   the key to look for
-	 * @param  int    $mode  one of the classes MODE constants
-	 * @return boolean       if the mode matches or the key has no mode yet
-	 */
-	protected function checkMode($key, $mode) {
-		if ($mode == self::STORE_LOCAL_DEFAULT) $mode = self::STORE_LOCAL;
-		return !isset($this->mode[$key]) || $this->mode[$key] == $mode;
-	}
-
 	protected function flush() {
 		if ($this->localConfigModified) {
 			sly_Util_YAML::dump($this->getLocalConfigFile(), $this->localConfig->get(null));
@@ -381,6 +360,17 @@ class sly_Configuration {
 
 		if ($this->projectConfigModified) {
 			sly_Util_YAML::dump($this->getProjectConfigFile(), $this->projectConfig->get(null));
+		}
+	}
+
+	/**
+	 * warm up the internal cache for get/has operations
+	 */
+	protected function warmUp() {
+		if ($this->cache === null) {
+			// build merged config cache
+			$this->cache = array_replace_recursive($this->staticConfig->get('/', array()), $this->localConfig->get('/', array()), $this->projectConfig->get('/', array()));
+			$this->cache = new sly_Util_Array($this->cache);
 		}
 	}
 }

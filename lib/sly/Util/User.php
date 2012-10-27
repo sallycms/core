@@ -10,47 +10,40 @@
 
 class sly_Util_User {
 	/**
-	 * Generates a password hash for a given user and a given password sting.
-	 *
-	 * The given user must have set at least the createdate
-	 *
-	 * @throws sly_Exception             When createdate is empty
-	 * @param  sly_Model_User $user      The user object
-	 * @param  string         $password  The plain password string
-	 * @return string                    The hashed password
-	 */
-	public static function getPasswordHash(sly_Model_User $user, $password) {
-		$createdate = $user->getCreateDate();
-		if (empty($createdate)) throw new sly_Exception(t('password_needs_valid_createdate'));
-		return sly_Util_Password::hash($password, $createdate);
-	}
-
-	/**
 	 * return current user object
 	 *
 	 * @param  boolean $forceRefresh
 	 * @return sly_Model_User
 	 */
 	public static function getCurrentUser($forceRefresh = false) {
-		return sly_Service_Factory::getUserService()->getCurrentUser($forceRefresh);
+		// make sure to not fail during setup (a number of components use this method during the setup)
+		return sly_Core::config()->get('SETUP') ? null : sly_Service_Factory::getUserService()->getCurrentUser($forceRefresh);
 	}
 
 	/**
-	 * @param  int $userId
+	 * @param  int $userID
 	 * @return sly_Model_User
 	 */
-	public static function findById($userId) {
-		return sly_Service_Factory::getUserService()->findById($userId);
+	public static function findById($userID) {
+		return sly_Service_Factory::getUserService()->findById($userID);
 	}
 
 	/**
-	 * checks wheter a user exists or not
+	 * @param  string $login
+	 * @return sly_Model_User
+	 */
+	public static function findByLogin($login) {
+		return sly_Service_Factory::getUserService()->findByLogin($login);
+	}
+
+	/**
+	 * checks whether a user exists or not
 	 *
-	 * @param  int $userId
+	 * @param  int $userID
 	 * @return boolean
 	 */
-	public static function exists($userId) {
-		return self::isValid(self::findById($userId));
+	public static function exists($userID) {
+		return self::isValid(self::findById($userID));
 	}
 
 	/**

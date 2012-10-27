@@ -16,9 +16,9 @@
  */
 class sly_Model_Slice extends sly_Model_Base_Id {
 	protected $module; ///< string
+	protected $serialized_values; ///< array
 
-	protected $_attributes = array('module' => 'string'); ///< array
-	protected $_hasMany    = array('SliceValue' => array('delete_cascade' => true, 'foreign_key' => array('slice_id' => 'id'))); ///< array
+	protected $_attributes = array('module' => 'string', 'serialized_values' => 'json'); ///< array
 
 	/**
 	 * @return string
@@ -35,14 +35,11 @@ class sly_Model_Slice extends sly_Model_Base_Id {
 	}
 
 	/**
-	 * @param  string $type
 	 * @param  string $finder
 	 * @param  string $value
-	 * @return sly_Model_SliceValue
 	 */
-	public function addValue($finder, $value = null) {
-		$service = sly_Service_Factory::getSliceValueService();
-		return $service->create(array('slice_id' => $this->getId(), 'finder' => $finder, 'value' => $value));
+	public function setValue($finder, $value = null) {
+		$this->serialized_values[$finder] = $value;
 	}
 
 	/**
@@ -50,44 +47,19 @@ class sly_Model_Slice extends sly_Model_Base_Id {
 	 * @param  string $finder
 	 * @return mixed
 	 */
-	public function getValue($finder) {
-		$service    = sly_Service_Factory::getSliceValueService();
-		$sliceValue = $service->findBySliceFinder($this->getId(), $finder);
-
-		return $sliceValue ? $sliceValue->getValue() : null;
+	public function getValue($finder, $default = null) {
+		return isset($this->serialized_values[$finder]) ? $this->serialized_values[$finder] : $default;
 	}
 
 	public function setValues($values = array()) {
-		$sql = sly_DB_Persistence::getInstance();
-		try {
-			$sql->beginTransaction();
-			$this->flushValues();
-			foreach($values as $finder => $value) {
-				$this->addValue($finder, $value);
-			}
-			$sql->commit();
-		}catch(Exception $e) {
-			$sql->rollBack();
-			throw $e;
+		if(!sly_Util_Array::isAssoc($values)) {
+			throw new sly_Exception('Values must be assoc array!');
 		}
+		$this->serialized_values = sly_makeArray($values);
 	}
 
 	public function getValues() {
-		$values      = array();
-		$service     = sly_Service_Factory::getSliceValueService();
-		$sliceValues = $service->find(array('slice_id' => $this->getId()));
-		foreach($sliceValues as $value) {
-			$values[$value->getFinder()] = $value->getValue();
-		}
-		return $values;
-	}
-
-	/**
-	 * @return int
-	 */
-	public function flushValues() {
-		$service = sly_Service_Factory::getSliceValueService();
-		return $service->delete(array('slice_id' => $this->getId()));
+		return $this->serialized_values;
 	}
 
 	/**

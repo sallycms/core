@@ -72,7 +72,7 @@ class sly_DB_PDO_PersistenceTest extends sly_BaseTest {
 		$tables   = self::$pers->listTables();
 		$expected = array(
 			'sly_article', 'sly_article_slice', 'sly_clang', 'sly_file', 'sly_file_category',
-			'sly_registry', 'sly_slice', 'sly_slice_value', 'sly_user'
+			'sly_registry', 'sly_slice', 'sly_user'
 		);
 
 		$this->assertGreaterThanOrEqual(count($expected), count($tables));
