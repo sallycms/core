@@ -199,7 +199,7 @@ class sly_Core {
 	 * @return boolean  true if backend, else false
 	 */
 	public static function isBackend() {
-		return defined('IS_SALLY_BACKEND') && IS_SALLY_BACKEND == true;
+		return self::getApplication()->isBackend();
 	}
 
 	/**
