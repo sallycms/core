@@ -13,7 +13,7 @@ class sly_ConfigurationTest extends PHPUnit_Framework_TestCase {
 	private $test_array;
 
 	public function setUp() {
-		$this->config = new sly_Configuration();
+		$this->config = new sly_Configuration(new sly_Service_File_YAML());
 		$this->config->setFlushOnDestruct(false);
 		$this->test_array = array(
 			'numArray'   => array('red', 'green', 'blue'),

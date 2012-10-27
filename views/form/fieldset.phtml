@@ -33,10 +33,10 @@ $legend = sly_translate($this->legend);
 			}
 			else {
 				if ($this->isMultilingual($elements)) {
-					print $this->renderView('row_i18n.phtml', compact('rowNum', 'elements', 'columns'));
+					print $this->renderView('row_i18n.phtml', compact('rowNum', 'elements', 'columns', 'request'));
 				}
 				else {
-					print $this->renderView('row.phtml', compact('rowNum', 'elements', 'columns'));
+					print $this->renderView('row.phtml', compact('rowNum', 'elements', 'columns', 'request'));
 				}
 			}
 		}

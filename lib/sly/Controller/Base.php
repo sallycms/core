@@ -24,8 +24,50 @@
  * @since   0.1
  */
 abstract class sly_Controller_Base {
-	protected $content_type = null; ///< string  the content type
-	protected $charset      = null; ///< string  the character set
+	protected $content_type = null; ///< string         the content type
+	protected $charset      = null; ///< string         the character set
+	protected $request      = null; ///< sly_Request    the current request
+	protected $container    = null; ///< sly_Container  the DI container
+
+	/**
+	 * Set DI container
+	 *
+	 * This method is called by the application before the action is executed.
+	 *
+	 * @param sly_Container $container  the container the controller should use
+	 */
+	public function setContainer(sly_Container $container) {
+		$this->container = $container;
+	}
+
+	/**
+	 * get DI container
+	 *
+	 * @return sly_Container
+	 */
+	public function getContainer() {
+		return $this->container;
+	}
+
+	/**
+	 * Set request
+	 *
+	 * This method is called by the application before the action is executed.
+	 *
+	 * @param sly_Request $request  the request the controller should act upon
+	 */
+	public function setRequest(sly_Request $request) {
+		$this->request = $request;
+	}
+
+	/**
+	 * get request
+	 *
+	 * @return sly_Request
+	 */
+	public function getRequest() {
+		return $this->request;
+	}
 
 	/**
 	 * Set the content type
@@ -83,17 +125,19 @@ abstract class sly_Controller_Base {
 	 * @return string                 the generated output if $returnOutput, else null
 	 */
 	protected function render($filename, array $params = array(), $returnOutput = true) {
-		// make sure keys in $params won't overwrite our variables
-		$filenameHtuG50hNCdikAvf7CZ1F = $filename;
-		$paramsHtuG50hNCdikAvf7CZ1F   = $params;
-		$bufferHtuG50hNCdikAvf7CZ1F   = $returnOutput;
+		unset($filename, $returnOutput);
 
-		unset($filename, $params, $returnOutput);
-		extract($paramsHtuG50hNCdikAvf7CZ1F);
+		if (!empty($params)) {
+			unset($params);
+			extract(func_get_arg(1));
+		}
+		else {
+			unset($params);
+		}
 
-		if ($bufferHtuG50hNCdikAvf7CZ1F) ob_start();
-		include $this->getViewFolder().$filenameHtuG50hNCdikAvf7CZ1F;
-		if ($bufferHtuG50hNCdikAvf7CZ1F) return ob_get_clean();
+		if (func_get_arg(2)) ob_start();
+		include $this->getViewFolder().func_get_arg(0);
+		if (func_get_arg(2)) return ob_get_clean();
 	}
 
 	/**
