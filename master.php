@@ -24,7 +24,6 @@ if (!SLY_IS_TESTING) {
 
 // remove magic quotes (function is deprecated as of PHP 5.4, so we either
 // have to check the PHP version or suppress the E_DEPRECATED warning)
-
 if (@get_magic_quotes_gpc()) {
 	function stripslashes_ref(&$value) {
 		$value = stripslashes($value);
@@ -37,13 +36,12 @@ if (@get_magic_quotes_gpc()) {
 }
 
 // remove all globals
-
 if (ini_get('register_globals')) {
 	$superglobals = array('_GET', '_POST', '_REQUEST', '_ENV', '_FILES', '_SESSION', '_COOKIE', '_SERVER');
 	$keys         = array_keys($GLOBALS);
 
 	foreach ($keys as $key) {
-		if (!in_array($key, $superglobals) && $key !== 'GLOBALS') {
+		if (!in_array($key, $superglobals) && $key !== 'GLOBALS' && $key !== 'slyAppName') {
 			unset($$key);
 		}
 	}
