@@ -1,70 +1,51 @@
-# A list of files that are required for (nearly) all requests to Sally.
-# They will be cached using the bootcache, together with addOn files.
+# order is important!
 
-static:
-  - sly_App_Interface
-  - sly_App_Base
-  - sly_Controller_Base
-  - sly_Loader
-  - sly_Core
-  - sly_Event_IDispatcher
-  - sly_Event_Dispatcher
-  - sly_Configuration
-  - sly_Util_Array
-  - sly_Util_YAML
-  - sly_Util_Directory
-  - sly_Util_String
-  - sly_ErrorHandler
-  - sly_ErrorHandler_Base
-  - sly_ErrorHandler_Production
-  - sly_Log
-  - BabelCache
-  - BabelCache_Interface
-  - BabelCache_Factory
-  - BabelCache_Abstract
-  - sly_DB_Persistence
-  - sly_DB_PDO_Persistence
-  - sly_DB_PDO_Connection
-  - sly_DB_PDO_Driver
-  - sly_DB_PDO_SQLBuilder
-  - sly_DB_PDO_Expression
-  - sly_Cache
-  - sly_Util_Cache
-  - sly_Util_Versions
-  - sly_I18N_Base
-  - sly_I18N
-  - sly_Service_Asset
-  - sly_Service_Package
-  - sly_Service_AddOn
-  - sly_Service_AddOnManager
-  - sly_Util_Article
-  - sly_Service_Model_Base
-  - sly_Service_ArticleBase
-  - sly_Service_Article
-  - sly_Model_Base
-  - sly_Model_Base_Article
-  - sly_Model_Article
-  - sly_Response
-frontend:
-  - sly_App_Frontend
-  - sly_Router_Base
-  - sly_Router_Interface
-  - sly_Controller_Interface
-  - sly_Controller_Frontend_Base
-  - sly_Controller_Frontend_Article  # 99% of all requests will be article requests
-backend:
-  - sly_App_Backend
-  - sly_Viewable
-  - sly_Layout
-  - sly_Layout_XHTML
-  - sly_Layout_XHTML5
-  - sly_Layout_Backend
-  - sly_Layout_Navigation_Backend
-  - sly_Layout_Navigation_Group
-  - sly_Layout_Navigation_Page
-  - sly_Layout_Navigation_Subpage
-  - sly_Util_Session
-  - sly_Session
-  - sly_Service_Model_Base_Id
-  - sly_Service_User
-  - sly_Util_User
+- BabelCache
+- BabelCache_Abstract
+- BabelCache_Factory
+- BabelCache_Interface
+- sly_App_Base
+- sly_App_Interface
+- sly_Cache
+- sly_Configuration
+- sly_Controller_Base
+- sly_Controller_Interface
+- sly_Core
+- sly_DB_Persistence # required by sly_DB_PDO_Connection
+- sly_DB_PDO_Connection
+- sly_DB_PDO_Driver
+- sly_DB_PDO_Expression
+- sly_DB_PDO_Persistence
+- sly_DB_PDO_SQLBuilder
+- sly_ErrorHandler
+- sly_ErrorHandler_Base
+- sly_ErrorHandler_Production
+- sly_Event_Dispatcher
+- sly_Event_IDispatcher
+- sly_I18N
+- sly_I18N_Base
+- sly_Layout
+- sly_Loader
+- sly_Log
+- sly_Model_Article
+- sly_Model_Base
+- sly_Model_Base_Article
+- sly_Response
+- sly_Service_AddOn
+- sly_Service_AddOnManager
+- sly_Service_ArticleBase # required by sly_Service_Article
+- sly_Service_Article
+- sly_Service_Category
+- sly_Service_Asset
+- sly_Service_Model_Base
+- sly_Service_Package
+- sly_Session
+- sly_Util_Array
+- sly_Util_Article
+- sly_Util_Cache
+- sly_Util_Directory
+- sly_Util_Session
+- sly_Util_String
+- sly_Util_Versions
+- sly_Util_YAML
+- sly_Viewable

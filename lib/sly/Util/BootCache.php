@@ -14,17 +14,10 @@
 class sly_Util_BootCache {
 	protected static $classes = array(); ///< array
 
-	/**
-	 * @param string $environment
-	 */
-	public static function init($environment) {
+	public static function init() {
 		// add core classes
 		$list = sly_Util_YAML::load(SLY_COREFOLDER.'/config/bootcache.yml');
-		self::$classes = $list['static'];
-
-		if (isset($list[$environment])) {
-			self::$classes = array_merge(self::$classes, $list[$environment]);
-		}
+		self::$classes = $list;
 
 		// add current cache instance
 		$cacheClass = get_class(sly_Core::cache());
@@ -48,14 +41,11 @@ class sly_Util_BootCache {
 		self::addClass($cacheClass);
 	}
 
-	/**
-	 * @param string $environment
-	 */
-	public static function recreate($environment) {
+	public static function recreate() {
 		// when in developer mode, only remove a possibly existing cache file
 
 		if (sly_Core::isDeveloperMode() || !sly_Core::config()->get('bootcache')) {
-			$target = self::getCacheFile($environment);
+			$target = self::getCacheFile();
 
 			if (file_exists($target)) {
 				unlink($target);
@@ -66,9 +56,9 @@ class sly_Util_BootCache {
 
 		// create the file
 
-		self::init($environment);
-		sly_Core::dispatcher()->notify('SLY_BOOTCACHE_CLASSES_'.strtoupper($environment));
-		self::createCacheFile($environment);
+		self::init();
+		sly_Core::dispatcher()->notify('SLY_BOOTCACHE_CLASSES');
+		self::createCacheFile();
 	}
 
 	/**
@@ -80,18 +70,14 @@ class sly_Util_BootCache {
 	}
 
 	/**
-	 * @param  string $environment
 	 * @return string
 	 */
-	public static function getCacheFile($environment) {
-		return SLY_DYNFOLDER.'/internal/sally/bootcache.'.$environment.'.php';
+	public static function getCacheFile() {
+		return SLY_DYNFOLDER.'/internal/sally/bootcache.php';
 	}
 
-	/**
-	 * @param string $environment
-	 */
-	public static function createCacheFile($environment) {
-		$target = self::getCacheFile($environment);
+	public static function createCacheFile() {
+		$target = self::getCacheFile();
 
 		if (file_exists($target)) {
 			unlink($target);
@@ -128,7 +114,7 @@ class sly_Util_BootCache {
 		$code   = file_get_contents($filename);
 		$result = trim($code);
 
-		// remove comments and collapse whitespace into single spaces
+		// remove comments
 
 		if (function_exists('token_get_all')) {
 			$tokens = token_get_all($code);
@@ -144,10 +130,6 @@ class sly_Util_BootCache {
 					switch ($id) {
 						case T_COMMENT:
 						case T_DOC_COMMENT:
-							break;
-
-						case T_WHITESPACE:
-							$result .= ' ';
 							break;
 
 						default:
