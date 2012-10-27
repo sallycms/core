@@ -85,7 +85,9 @@ class sly_Configuration {
 
 		if ($dir->exists()) {
 			foreach ($dir->listPlain() as $file) {
-				$this->loadStatic($dir.DIRECTORY_SEPARATOR.$file);
+				if (fnmatch('*.yml', $file) || fnmatch('*.yaml', $file)) {
+					$this->loadStatic($dir.DIRECTORY_SEPARATOR.$file);
+				}
 			}
 		}
 	}
