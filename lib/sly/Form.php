@@ -38,6 +38,7 @@ class sly_Form extends sly_Form_Base {
 	protected $currentFieldset;  ///< sly_Form_Fieldset
 	protected $focussedElement;  ///< string
 	protected $buttonClasses;    ///< array
+	protected $addCsrfToken;     ///< boolean
 
 	/**
 	 * Constructor
@@ -69,6 +70,16 @@ class sly_Form extends sly_Form_Base {
 		$this->currentFieldset = null;
 		$this->focussedElement = '';
 		$this->buttonClasses   = array('submit' => array('sly-form-submit'), 'reset' => array(), 'delete' => array('sly-form-submit'), 'apply' => array('sly-form-submit'));
+		$this->addCsrfToken    = true;
+	}
+
+	/**
+	 * Get the form's method (GET or POST)
+	 *
+	 * @return string  the method
+	 */
+	public function getMethod() {
+		return $this->method;
 	}
 
 	/**
@@ -264,11 +275,17 @@ class sly_Form extends sly_Form_Base {
 	 *
 	 * Renders the form and returns its content.
 	 *
-	 * @param  boolean $omitFormTag  set this to true if you want to use your own <form> tag
-	 * @return string                the generated XHTML
+	 * @param  boolean     $omitFormTag  set this to true if you want to use your own <form> tag
+	 * @param  sly_Request $request      the request to use or null for the global one
+	 * @return string                    the generated XHTML
 	 */
-	public function render($omitFormTag = false) {
-		return $this->renderView('form.phtml', array('form' => $this, 'omitFormTag' => $omitFormTag));
+	public function render($omitFormTag = false, sly_Request $request = null) {
+		if ($this->addCsrfToken) {
+			sly_Util_Csrf::prepareForm($this);
+		}
+
+		$request = $request ? $request : sly_Core::getRequest();
+		return $this->renderView('form.phtml', array('form' => $this, 'omitFormTag' => $omitFormTag, 'request' => $request));
 	}
 
 	/**
@@ -428,5 +445,10 @@ class sly_Form extends sly_Form_Base {
 	 */
 	public function getClasses() {
 		return $this->classes;
+	}
+
+	public function setCsrfEnabled($flag = true) {
+		$this->addCsrfToken = (boolean) $flag;
+		return $this;
 	}
 }

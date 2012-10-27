@@ -73,7 +73,7 @@ class sly_FunctionsTest extends PHPUnit_Framework_TestCase {
 	 * @dataProvider  slyGPCProvider
 	 */
 	public function testSlyGPC($name, $type, $default, $expected) {
-		$_GET = $_POST = $_REQUEST = array(
+		$data = array(
 			'a' => 1,
 			'b' => 12.34,
 			'c' => 'foo',
@@ -83,6 +83,9 @@ class sly_FunctionsTest extends PHPUnit_Framework_TestCase {
 			'h' => '1whoops',
 			'i' => 'whoops1'
 		);
+
+		$request = new sly_Request($data, $data);
+		sly_Core::setRequest($request);
 
 		$this->assertSame($expected, sly_get($name, $type, $default));
 		$this->assertSame($expected, sly_post($name, $type, $default));
@@ -151,13 +154,16 @@ class sly_FunctionsTest extends PHPUnit_Framework_TestCase {
 	 * @dataProvider  slyGetArrayProvider
 	 */
 	public function testSlyGetArray($name, $types, $default, $expected) {
-		$_GET = $_POST = array(
+		$data = array(
 			'a' => array(1, 2, 0, 'a', '42'),
 			'b' => array(),
 			'c' => array(array(), '99', 'abc'),
 			'd' => array('foo', array(1, 2, 3), 23),
 			'e' => array('a' => array(1), 'b' => 23, 'c' => -8, 'd' => 'foo', 'e' => '', 'f' => array('x' => 'y'))
 		);
+
+		$request = new sly_Request($data, $data);
+		sly_Core::setRequest($request);
 
 		$this->assertSame($expected, sly_getArray($name, $types, $default));
 		$this->assertSame($expected, sly_postArray($name, $types, $default));
@@ -199,7 +205,7 @@ class sly_FunctionsTest extends PHPUnit_Framework_TestCase {
 	 * @dataProvider  slyRequestArrayProvider
 	 */
 	public function testSlyRequestArray($name, $types, $expected) {
-		$_GET = array(
+		$GET = array(
 			'a' => array(1, 2, 0),
 			'b' => array(),
 			'c' => true,
@@ -207,13 +213,16 @@ class sly_FunctionsTest extends PHPUnit_Framework_TestCase {
 			'v' => 'value'
 		);
 
-		$_POST = array(
+		$POST = array(
 			'x' => 'mum',
 			'y' => 'ble',
 			'c' => false,
 			'u' => 0,
 			'v' => ''
 		);
+
+		$request = new sly_Request($GET, $POST);
+		sly_Core::setRequest($request);
 
 		$this->assertSame($expected, sly_requestArray($name, $types));
 	}

@@ -47,11 +47,11 @@ if (!empty($focus)) {
 		if ($hasButtonBar) {
 			$fieldset = end($this->fieldsets);
 			if (!$fieldset) $fieldset = $this->beginFieldset($this->title);
-			print $this->renderView('buttons.phtml', array('fieldset' => $fieldset));
+			print $this->renderView('buttons.phtml', array('fieldset' => $fieldset, 'request' => $request));
 		}
 
 		foreach ($this->fieldsets as $i => $fieldset) {
-			print $fieldset->render();
+			print $fieldset->render($request);
 		}
 		?>
 	<?php if (!$omitFormTag): ?>

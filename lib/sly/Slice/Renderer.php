@@ -38,7 +38,7 @@ class sly_Slice_Renderer {
 	}
 
 	public function renderInput($dataIndex) {
-		$service  = sly_Service_Factory::getModuleService();
+		$service  = sly_Core::getContainer()->getModuleService();
 		$filename = $service->getFolder().DIRECTORY_SEPARATOR.$service->getInputFilename($this->moduleName);
 		$values   = new sly_Slice_Values($this->values);
 		$form     = new sly_Slice_Form();
@@ -52,6 +52,7 @@ class sly_Slice_Renderer {
 			if ($form instanceof sly_Form) {
 				$form->setSubmitButton(null);
 				$form->setResetButton(null);
+				$form->setCsrfEnabled(false);
 
 				print $form->render($dataIndex);
 			}
@@ -65,7 +66,7 @@ class sly_Slice_Renderer {
 	}
 
 	public function renderOutput(sly_Model_ISlice $slice) {
-		$service  = sly_Service_Factory::getModuleService();
+		$service  = sly_Core::getContainer()->getModuleService();
 		$filename = $service->getFolder().DIRECTORY_SEPARATOR.$service->getOutputFilename($this->moduleName);
 		$values   = new sly_Slice_Values($this->values);
 

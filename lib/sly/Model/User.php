@@ -178,6 +178,6 @@ class sly_Model_User extends sly_Model_Base_Id {
 	 * @return int
 	 */
 	public function delete() {
-		return sly_Service_Factory::getUserService()->deleteById($this->id);
+		return sly_Core::getContainer()->getUserService()->deleteById($this->id);
 	}
 }

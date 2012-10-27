@@ -263,29 +263,31 @@ class sly_Util_Password {
 	/**
 	 * Collect pseudo random bytes
 	 *
-	 * @param  int $bytes
+	 * @param  int     $bytes
+	 * @param  boolean $base64Encode  set to true to encode the random data automatically
 	 * @return string
 	 */
-	public static function getRandomData($bytes) {
+	public static function getRandomData($bytes, $base64Encode = false) {
 		// PHP 5.3 + openssl FTW
 		if (function_exists('openssl_random_pseudo_bytes')) {
-			return openssl_random_pseudo_bytes($bytes);
+			$data = openssl_random_pseudo_bytes($bytes);
+		}
+		else {
+			$data = '';
+
+			// *nix FTW
+			if (@is_readable('/dev/urandom') && ($fh = @fopen('/dev/urandom', 'rb'))) {
+				$data = fread($fh, $bytes);
+				fclose($fh);
+			}
+
+			// append kind of random data to the already available data
+			// (not cryptographically strong, but we're out of options here)
+			for ($i = strlen($data); $i < $bytes; ++$i) {
+				$data .= chr(mt_rand(0, 255));
+			}
 		}
 
-		$data = '';
-
-		// *nix FTW
-		if (@is_readable('/dev/urandom') && ($fh = @fopen('/dev/urandom', 'rb'))) {
-			$data = fread($fh, $bytes);
-			fclose($fh);
-		}
-
-		// append kind of random data to the already available data
-		// (not cryptographically strong, but we're out of options here)
-		for ($i = strlen($data); $i < $bytes; ++$i) {
-			$data .= chr(mt_rand(0, 255));
-		}
-
-		return $data;
+		return $base64Encode ? base64_encode($data) : $data;
 	}
 }
