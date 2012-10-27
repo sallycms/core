@@ -143,7 +143,7 @@ class sly_Request {
 				$path = dirname($path); // '/foo' or '/foo/sally/backend'
 
 				// TODO: This is ugly. We should try to automatically detect the base URL.
-				if (sly_Core::getApplication()->isBackend()) {
+				if (sly_Core::getCurrentApp()->isBackend()) {
 					$path = dirname(dirname($path));
 				}
 
