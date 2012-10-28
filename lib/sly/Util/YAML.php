@@ -18,7 +18,7 @@ class sly_Util_YAML {
 	 * @return sly_Service_File_YAML
 	 */
 	protected static function getService() {
-		return sly_Service_Factory::getService('File_YAML');
+		return sly_Core::getContainer()->getService('File_YAML');
 	}
 
 	/**

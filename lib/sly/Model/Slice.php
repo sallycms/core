@@ -52,7 +52,7 @@ class sly_Model_Slice extends sly_Model_Base_Id {
 	}
 
 	public function setValues($values = array()) {
-		if(!sly_Util_Array::isAssoc($values)) {
+		if (!sly_Util_Array::isAssoc($values)) {
 			throw new sly_Exception('Values must be assoc array!');
 		}
 		$this->serialized_values = sly_makeArray($values);

@@ -27,8 +27,9 @@ class sly_DB_PDO_Persistence extends sly_DB_Persistence {
 	 * @param string $password
 	 * @param string $database
 	 */
-	public function __construct($driver, $host, $login, $password, $database = null) {
+	public function __construct($driver, $host, $login, $password, $database = null, $prefix = '') {
 		$this->driver     = $driver;
+		$this->prefix     = $prefix;
 		$this->connection = sly_DB_PDO_Connection::getInstance($driver, $host, $login, $password, $database);
 	}
 
@@ -81,7 +82,7 @@ class sly_DB_PDO_Persistence extends sly_DB_Persistence {
 	 * @return int
 	 */
 	public function insert($table, $values) {
-		$sql = $this->getSQLbuilder(self::getPrefix().$table);
+		$sql = $this->getSQLbuilder($this->getPrefix().$table);
 		$sql->insert($values);
 		$this->query($sql->to_s(), $sql->bind_values());
 
@@ -95,7 +96,7 @@ class sly_DB_PDO_Persistence extends sly_DB_Persistence {
 	 * @return int
 	 */
 	public function update($table, $newValues, $where = null) {
-		$sql = $this->getSQLbuilder(self::getPrefix().$table);
+		$sql = $this->getSQLbuilder($this->getPrefix().$table);
 		$sql->update($newValues);
 		$sql->where($where);
 		$this->query($sql->to_s(), $sql->bind_values());
@@ -143,7 +144,7 @@ class sly_DB_PDO_Persistence extends sly_DB_Persistence {
 	 * @return boolean         always true
 	 */
 	public function select($table, $select = '*', $where = null, $group = null, $order = null, $offset = null, $limit = null, $having = null, $joins = null) {
-		$sql = $this->getSQLbuilder(self::getPrefix().$table);
+		$sql = $this->getSQLbuilder($this->getPrefix().$table);
 		$sql->select($select);
 
 		if ($where) $sql->where($where);
@@ -165,7 +166,7 @@ class sly_DB_PDO_Persistence extends sly_DB_Persistence {
 	 * @return int            affected rows
 	 */
 	public function delete($table, $where = null) {
-		$sql = $this->getSQLbuilder(self::getPrefix().$table);
+		$sql = $this->getSQLbuilder($this->getPrefix().$table);
 		$sql->delete($where);
 		$this->query($sql->to_s(), $sql->bind_values());
 
@@ -212,14 +213,8 @@ class sly_DB_PDO_Persistence extends sly_DB_Persistence {
 	/**
 	 * @return string
 	 */
-	private static function getPrefix() {
-		static $prefix = null;
-
-		if ($prefix === null) {
-			$prefix = sly_Core::getTablePrefix();
-		}
-
-		return $prefix;
+	protected function getPrefix() {
+		return $this->prefix;
 	}
 
 	/**
