@@ -261,29 +261,6 @@ class sly_Service_Asset {
 	}
 
 	/**
-	 * @param string $origFile
-	 * @param string $file
-	 */
-	protected function printCacheFile($file) {
-		$fp = @fopen($file, 'rb');
-
-		if (!$fp) {
-			$errors = 'Cannot open file.';
-		}
-
-		if (empty($errors)) {
-			while (!feof($fp)) {
-				print fread($fp, 65536);
-			}
-
-			fclose($fp);
-		}
-		else {
-			throw new sly_Exception($errors);
-		}
-	}
-
-	/**
 	 * @param  array $params
 	 * @return string
 	 */
