@@ -224,6 +224,13 @@ class sly_Container implements ArrayAccess, Countable {
 	}
 
 	/**
+	 * @return string
+	 */
+	public function getApplicationName() {
+		return $this->get('sly-app-name');
+	}
+
+	/**
 	 * get addOn service
 	 *
 	 * @return sly_Service_AddOn
