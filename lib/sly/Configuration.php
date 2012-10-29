@@ -20,26 +20,28 @@ class sly_Configuration {
 	const STORE_LOCAL_DEFAULT   = 4; ///< int
 	const STORE_STATIC          = 5; ///< int
 
-	private $mode              = array(); ///< array
-	private $loadedConfigFiles = array(); ///< array
-
-	private $staticConfig;  ///< sly_Util_Array
-	private $localConfig;   ///< sly_Util_Array
-	private $projectConfig; ///< sly_Util_Array
-	private $cache;         ///< sly_Util_Array
-	private $flush;         ///< boolean
-	private $fileService;   ///< sly_Service_File_Base
-
-	private $localConfigModified   = false; ///< boolean
-	private $projectConfigModified = false; ///< boolean
+	private $mode;                  ///< array
+	private $loadedConfigFiles;     ///< array
+	private $staticConfig;          ///< sly_Util_Array
+	private $localConfig;           ///< sly_Util_Array
+	private $projectConfig;         ///< sly_Util_Array
+	private $cache;                 ///< sly_Util_Array
+	private $fileService;           ///< sly_Service_File_Base
+	private $flush;                 ///< boolean
+	private $localConfigModified;   ///< boolean
+	private $projectConfigModified; ///< boolean
 
 	public function __construct(sly_Service_File_Base $fileService) {
-		$this->staticConfig  = new sly_Util_Array();
-		$this->localConfig   = new sly_Util_Array();
-		$this->projectConfig = new sly_Util_Array();
-		$this->fileService   = $fileService;
-		$this->cache         = null;
-		$this->flush         = true;
+		$this->mode                  = array();
+		$this->loadedConfigFiles     = array();
+		$this->staticConfig          = new sly_Util_Array();
+		$this->localConfig           = new sly_Util_Array();
+		$this->projectConfig         = new sly_Util_Array();
+		$this->fileService           = $fileService;
+		$this->cache                 = null;
+		$this->flush                 = true;
+		$this->localConfigModified   = false;
+		$this->projectConfigModified = false;
 	}
 
 	public function __destruct() {
@@ -219,11 +221,8 @@ class sly_Configuration {
 	 * @param string $key  the key to remove
 	 */
 	public function remove($key) {
-		$this->localConfig->remove($key);
-		$this->localConfigModified = true;
-		$this->projectConfig->remove($key);
-		$this->projectConfigModified = true;
-
+		$this->localConfigModified   = $this->localConfig->remove($key);;
+		$this->projectConfigModified = $this->projectConfig->remove($key);
 		$this->cache = null;
 	}
 
