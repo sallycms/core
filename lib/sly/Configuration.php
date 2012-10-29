@@ -316,22 +316,21 @@ class sly_Configuration {
 		}
 
 		$this->mode[$key] = $mode;
-		$this->cache = null;
-		$result = false;
+		$this->cache      = null;
 
 		switch ($mode) {
 			case self::STORE_STATIC:
-				$result = $this->staticConfig->set($key, $value);
+				$this->staticConfig->set($key, $value);
 				break;
 
 			case self::STORE_LOCAL:
 				$this->localConfigModified = true;
-				$result = $this->localConfig->set($key, $value);
+				$this->localConfig->set($key, $value);
 				break;
 
 			case self::STORE_PROJECT:
 				$this->projectConfigModified = true;
-				$result = $this->projectConfig->set($key, $value);
+				$this->projectConfig->set($key, $value);
 		}
 
 		return true;
