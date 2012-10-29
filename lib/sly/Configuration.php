@@ -298,10 +298,6 @@ class sly_Configuration {
 
 		$mode = $this->getStoreMode($key, $mode, $force);
 
-		if ($mode === null) {
-			return false;
-		}
-
 		$this->mode[$key] = $mode;
 		$this->cache      = null;
 
@@ -327,7 +323,7 @@ class sly_Configuration {
 	 * @throws sly_Exception  if the mode is wrong
 	 * @param  string  $key   the key to set the mode of
 	 * @param  int     $mode  one of the classes MODE constants
-	 * @return int            one of the classes MODE constants or null
+	 * @return int            one of the classes MODE constants
 	 */
 	protected function getStoreMode($key, $mode, $force) {
 		// handle default facilities
@@ -339,12 +335,12 @@ class sly_Configuration {
 				return $mode;
 			}
 
-			return null;
+			throw new sly_Exception('Can not load defaults for '.$key.'. The value is already set.');
 		}
 		else {
 			// for all others allow duplicate setting of a key only in a higher level facility
 			if (isset($this->mode[$key]) && $this->mode[$key] < $mode) {
-				throw new sly_Exception('Mode für '.$key.' wurde bereits auf '.$this->mode[$key].' gesetzt.');
+				throw new sly_Exception('Mode for '.$key.' is already set to '.$this->mode[$key].'.');
 			}
 		}
 
