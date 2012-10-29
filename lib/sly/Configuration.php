@@ -97,17 +97,6 @@ class sly_Configuration {
 	}
 
 	/**
-	 * @throws sly_Exception      when something is fucked up (file not found, bad parameters, ...)
-	 * @param  string  $filename  the file to load
-	 * @param  boolean $force     force reloading the config or not
-	 * @param  string  $key       where to mount the loaded config
-	 * @return boolean            false when an error occured, true if everything went fine
-	 */
-	public function loadProject($filename, $force = false, $key = '/') {
-		return $this->loadInternal($filename, self::STORE_PROJECT_DEFAULT, $force, $key);
-	}
-
-	/**
 	 * @throws sly_Exception     when something is fucked up (file not found, bad parameters, ...)
 	 * @param  string $filename  the file to load
 	 * @param  string $key       where to mount the loaded config
