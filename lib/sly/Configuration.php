@@ -139,22 +139,34 @@ class sly_Configuration {
 		return $this->loadInternal($filename, self::STORE_PROJECT_DEFAULT, $force, $key);
 	}
 
+	/**
+	 * load the sally local config
+	 *
+	 * @return boolean  false when an error occured, true if everything went fin
+	 */
 	public function loadLocalConfig() {
 		$filename = $this->getLocalConfigFile();
 
 		//do not hickup if the file does not exist
 		if (file_exists($filename)) {
-			$this->loadInternal($filename, self::STORE_LOCAL);
+			return $this->loadInternal($filename, self::STORE_LOCAL);
 		}
+		return false;
 	}
 
+	/**
+	 * load the sally project config
+	 *
+	 * @return boolean  false when an error occured, true if everything went fin
+	 */
 	public function loadProjectConfig() {
 		$filename = $this->getProjectConfigFile();
-		
+
 		//do not hickup if the file does not exist
 		if (file_exists($filename)) {
-			$this->loadInternal($filename, self::STORE_PROJECT);
+			return $this->loadInternal($filename, self::STORE_PROJECT);
 		}
+		return false;
 	}
 
 	/**
