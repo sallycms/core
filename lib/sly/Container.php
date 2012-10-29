@@ -553,7 +553,10 @@ class sly_Container implements ArrayAccess, Countable {
 	protected function buildPersistence(sly_Container $container) {
 		$config = $container['sly-config']->get('DATABASE');
 
-		return $this['sly-persistence'] = new sly_DB_PDO_Persistence($config['DRIVER'], $config['HOST'], $config['LOGIN'], $config['PASSWORD'], $config['NAME'], $config['TABLE_PREFIX']);
+		// TODO: to support the iterator inside the persistence, we need to create
+		// a fresh instance for every access. We should refactor the database access
+		// to allow for a single persistence instance.
+		return new sly_DB_PDO_Persistence($config['DRIVER'], $config['HOST'], $config['LOGIN'], $config['PASSWORD'], $config['NAME'], $config['TABLE_PREFIX']);
 	}
 
 	/**

@@ -26,7 +26,8 @@ class sly_Service_Asset {
 	protected $dispatcher;
 	protected $config;
 
-	private $forceGen = true; ///< boolean
+	private $forceGen    = true;     ///< boolean
+	private $accessCache = array();  ///< array
 
 	/**
 	 * Constructor
@@ -147,7 +148,7 @@ class sly_Service_Asset {
 		}
 
 		// do the work
-		$isProtected = $this->dispatcher->filter(self::EVENT_IS_PROTECTED_ASSET, false, compact('file'));
+		$isProtected = $this->isProtected($file);
 		$access      = $isProtected ? self::ACCESS_PROTECTED : self::ACCESS_PUBLIC;
 
 		// "/../data/dyn/public/sally/static-cache/[access]/gzip/assets/css/main.css"
@@ -174,6 +175,14 @@ class sly_Service_Asset {
 
 		// return the plain, unencoded file to the asset controller
 		return $tmpFile;
+	}
+
+	public function isProtected($file) {
+		if (!isset($this->accessCache[$file])) {
+			$this->accessCache[$file] = $this->dispatcher->filter(self::EVENT_IS_PROTECTED_ASSET, false, compact('file'));
+		}
+
+		return $this->accessCache[$file];
 	}
 
 	public function removeCacheFiles($file) {
@@ -258,29 +267,6 @@ class sly_Service_Asset {
 		}
 
 		error_reporting($level);
-	}
-
-	/**
-	 * @param string $origFile
-	 * @param string $file
-	 */
-	protected function printCacheFile($file) {
-		$fp = @fopen($file, 'rb');
-
-		if (!$fp) {
-			$errors = 'Cannot open file.';
-		}
-
-		if (empty($errors)) {
-			while (!feof($fp)) {
-				print fread($fp, 65536);
-			}
-
-			fclose($fp);
-		}
-		else {
-			throw new sly_Exception($errors);
-		}
 	}
 
 	/**

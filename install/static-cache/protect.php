@@ -18,28 +18,33 @@ if (!isset($_SERVER['HTTP_ENCODING_CACHEDIR']) || !is_string($_SERVER['HTTP_ENCO
 	die;
 }
 
+if (!isset($_GET['file']) || !is_string($_GET['file'])) {
+	header('HTTP/1.0 400 Bad Request');
+	die;
+}
+
 // get client encoding (attention: use the one set by htaccess for mod_headers awareness)
 
 $enc = trim($_SERVER['HTTP_ENCODING_CACHEDIR'], '/');
 
 // check file
 
-$file = isset($_GET['file']) ? $_GET['file'] : '';
+$file = trim($_GET['file']);
 define('FILE', $file);
 define('ENC', $enc);
 
 $realfile = realpath('protected/'.$enc.'/'.$file);   // path or false
 $index    = dirname(realpath(__FILE__));             // /var/www/home/cust/data/dyn/public/sally/static-cache/
 
-// append '/' if missing
-if ($index[mb_strlen($index)-1] === DIRECTORY_SEPARATOR) {
-	$index .= DIRECTORY_SEPARATOR;
-}
-
 // file not found?
 if ($realfile === false) {
 	header('HTTP/1.0 404 Not Found');
 	die;
+}
+
+// append '/' if missing
+if ($index[mb_strlen($index)-1] === DIRECTORY_SEPARATOR) {
+	$index .= DIRECTORY_SEPARATOR;
 }
 
 // file outside of cache dir?
@@ -53,8 +58,14 @@ chdir('___JUMPER___');
 
 // include project specific access rules
 ob_start();
+
 $allowAccess = false;
-include 'develop/checkpermission.php';
+$checkScript = 'develop/checkpermission.php';
+
+if (file_exists($checkScript)) {
+	include $checkScript;
+}
+
 $errors = ob_get_clean();
 
 // jump back (at 88 mph)
@@ -75,20 +86,30 @@ $pos   = mb_strrpos($file, '.');
 $ext   = strtolower($pos === false ? $file : mb_substr($file, $pos + 1));
 $types = array(
 	'css'  => 'text/css',
+	'less' => 'text/css',
 	'js'   => 'text/javascript',
 	'ico'  => 'image/x-icon',
 	'jpg'  => 'image/jpeg',
 	'jpeg' => 'image/jpeg',
 	'png'  => 'image/png',
 	'gif'  => 'image/gif',
-	'swf'  => 'application/x-shockwave-flash'
+	'webp' => 'image/webp',
+	'swf'  => 'application/x-shockwave-flash',
+	'pdf'  => 'application/pdf'
 );
 
 if (!isset($mime)) {
-	$mime = (isset($types[$ext]) ? $types[$ext] : 'application/octet-stream').'; charset=UTF-8';
+	$mime = isset($types[$ext]) ? $types[$ext] : 'application/octet-stream';
+
+	if (substr($mime, 0, 5) === 'text/' && strpos($mime, 'charset=') === false) {
+		$mime .= '; charset=UTF-8';
+	}
 }
 
 header('Content-Type: '.$mime);
+
+// make sure intermediate servers don't cache the asset
+header('Cache-Control: private');
 
 if (ENC !== 'plain') {
 	header('Content-Encoding: '.ENC);

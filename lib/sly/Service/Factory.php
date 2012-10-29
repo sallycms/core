@@ -38,21 +38,6 @@ abstract class sly_Service_Factory {
 	}
 
 	/**
-	 * get SliceValue service
-	 *
-	 * @deprecated use sly_Container->getSliceValueService() instead
-	 *
-	 * @return sly_Service_SliceValue  The slice value service instance
-	 */
-	public static function getSliceValueService() {
-		return sly_Core::getContainer()->getSliceValueService();
-	}
-
-	/**
-	 * get Template service
-	 *
-	 * @deprecated use sly_Container->getTemplateService() instead
-	 *
 	 * @return sly_Service_Template  The template service instance
 	 */
 	public static function getTemplateService() {
