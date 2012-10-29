@@ -187,10 +187,8 @@ class sly_Configuration {
 
 		// prüfen ob konfiguration in diesem request bereits geladen wurde
 		if (!$force && isset($this->loadedConfigFiles[$filename])) {
-			// statisch geladene konfigurationsdaten werden innerhalb des requests nicht mehr überschrieben
-			if ($isStatic) {
-				trigger_error('Statische Konfigurationsdatei '.$filename.' wurde bereits in einer anderen Version geladen! Daten wurden nicht überschrieben.', E_USER_WARNING);
-			}
+			// geladene konfigurationsdaten werden innerhalb des requests nicht mehr überschrieben
+			trigger_error('Konfigurationsdatei '.$filename.' wurde bereits in einer anderen Version geladen! Daten wurden nicht überschrieben.', E_USER_WARNING);
 			return false;
 		}
 
