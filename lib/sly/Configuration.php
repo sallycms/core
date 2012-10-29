@@ -142,20 +142,18 @@ class sly_Configuration {
 	public function loadLocalConfig() {
 		$filename = $this->getLocalConfigFile();
 
+		//do not hickup if the file does not exist
 		if (file_exists($filename)) {
-			$config = $this->fileService->load($filename, false, true);
-			$this->setInternal('/', $config, self::STORE_LOCAL);
-			$this->cache = null;
+			$this->loadInternal($filename, self::STORE_LOCAL);
 		}
 	}
 
 	public function loadProjectConfig() {
 		$filename = $this->getProjectConfigFile();
-
+		
+		//do not hickup if the file does not exist
 		if (file_exists($filename)) {
-			$config = $this->fileService->load($filename, false, true);
-			$this->setInternal('/', $config, self::STORE_PROJECT);
-			$this->cache = null;
+			$this->loadInternal($filename, self::STORE_PROJECT);
 		}
 	}
 
@@ -168,10 +166,6 @@ class sly_Configuration {
 	 * @return boolean            false when an error occured, true if everything went fine
 	 */
 	protected function loadInternal($filename, $mode, $force = false, $key = '/') {
-		if ($mode != self::STORE_LOCAL_DEFAULT && $mode != self::STORE_STATIC && $mode != self::STORE_PROJECT_DEFAULT) {
-			throw new sly_Exception('Konfigurationsdateien können nur mit STORE_STATIC, STORE_LOCAL_DEFAULT oder STORE_PROJECT_DEFAULT geladen werden.');
-		}
-
 		if (empty($filename) || !is_string($filename)) throw new sly_Exception('Keine Konfigurationsdatei angegeben.');
 
 		$isStatic = $mode == self::STORE_STATIC;
