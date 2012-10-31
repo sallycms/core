@@ -119,8 +119,8 @@ class sly_Router_Base implements sly_Router_Interface {
 	// transform '/:controller/' into '/(?P<controller>[a-z0-9_-])/'
 	protected function buildRegex($route) {
 		$route = rtrim($route, '/');
-		$ident = '[a-z_][a-z0-9-_]*';
-		$regex = preg_replace("#:($ident)#iu", "(?P<\$1>$ident)", $route);
+		$ident = '[a-z_][a-z0-9_]*';
+		$regex = preg_replace("#:($ident)#iu", "(?P<\$1>[a-z0-9_]*)", $route);
 
 		return str_replace('#', '\\#', $regex);
 	}
