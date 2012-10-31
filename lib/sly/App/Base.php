@@ -217,15 +217,15 @@ abstract class sly_App_Base implements sly_App_Interface {
 	 *
 	 * @param sly_Response $response
 	 * @param string       $content
-	 * @param string       $appName
 	 */
-	protected function handleStringResponse(sly_Response $response, $content, $appName) {
+	protected function handleStringResponse(sly_Response $response, $content) {
 		// collect additional output (warnings and notices from the bootstrapping)
 		while (ob_get_level()) $content = ob_get_clean().$content;
 
 		$container  = $this->getContainer();
 		$config     = $container->getConfig();
 		$dispatcher = $container->getDispatcher();
+		$appName    = $container->getApplicationName();
 		$content    = $dispatcher->filter('OUTPUT_FILTER', $content, array('environment' => $appName));
 		$etag       = substr(md5($content), 0, 12);
 		$useEtag    = $config->get('USE_ETAG');

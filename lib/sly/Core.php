@@ -199,7 +199,7 @@ class sly_Core {
 	 * @return boolean  true if backend, else false
 	 */
 	public static function isBackend() {
-		return defined('IS_SALLY_BACKEND') && IS_SALLY_BACKEND == true;
+		return self::getCurrentApp()->isBackend();
 	}
 
 	/**
@@ -502,8 +502,7 @@ class sly_Core {
 		$container->getAddOnManagerService()->refresh();
 
 		// create bootcache
-		sly_Util_BootCache::recreate('frontend');
-		sly_Util_BootCache::recreate('backend');
+		sly_Util_BootCache::recreate();
 
 		self::dispatcher()->notify('SLY_CACHE_CLEARED');
 	}
