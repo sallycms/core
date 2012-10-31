@@ -1,0 +1,410 @@
+# This is the Sally demopage. It contains 5 categories, 3 articles
+# and 2 languages (5 & 7). The language IDs have been chosen to
+# detect broken static queries like 'WHERE clang = 1', since in the
+# old days clang 0 and later clang 1 were always available, which
+# is not the case for quite a time now.
+
+# Dates must be quoted or else they will be converted into UNIX timestamps!
+
+sly_article:
+   -
+      id: 1
+      re_id: 0
+      name: 'Was Sally für Sie tun kann'
+      catname: 'Was Sally für Sie tun kann'
+      catpos: 1
+      attributes: ''
+      startpage: 1
+      pos: 1
+      path: '|'
+      status: 1
+      type: default
+      clang: 5
+      createdate: '2011-07-30 15:08:10'
+      updatedate: '2011-08-19 00:32:59'
+      createuser: admin
+      updateuser: admin
+      revision: 0
+   -
+      id: 2
+      re_id: 0
+      name: 'Wie Sally für Sie arbeitet'
+      catname: 'Wie Sally für Sie arbeitet'
+      catpos: 2
+      attributes: ''
+      startpage: 1
+      pos: 1
+      path: '|'
+      status: 1
+      type: default
+      clang: 5
+      createdate: '2011-07-30 15:08:20'
+      updatedate: '2011-08-02 04:21:06'
+      createuser: admin
+      updateuser: admin
+      revision: 0
+   -
+      id: 3
+      re_id: 0
+      name: 'Was Sally einfach besser macht'
+      catname: 'Was Sally einfach besser macht'
+      catpos: 3
+      attributes: ''
+      startpage: 1
+      pos: 1
+      path: '|'
+      status: 1
+      type: default
+      clang: 5
+      createdate: '2011-07-30 15:08:25'
+      updatedate: '2011-08-02 04:44:28'
+      createuser: admin
+      updateuser: admin
+      revision: 0
+   -
+      id: 4
+      re_id: 0
+      name: 'Warum unsere Sally?'
+      catname: 'Warum unsere Sally?'
+      catpos: 4
+      attributes: ''
+      startpage: 1
+      pos: 1
+      path: '|'
+      status: 0                            # <-- an offline cat in clang 5
+      type: ''
+      clang: 5
+      createdate: '2011-08-01 22:20:14'
+      updatedate: '2011-08-01 22:20:26'
+      createuser: admin
+      updateuser: admin
+      revision: 0
+   -
+      id: 5
+      re_id: 0
+      name: 'Antwort auf Ihre Fragen'
+      catname: 'Antwort auf Ihre Fragen'
+      catpos: 5
+      attributes: ''
+      startpage: 1
+      pos: 1
+      path: '|'
+      status: 1
+      type: ''
+      clang: 5
+      createdate: '2011-08-01 22:20:23'
+      updatedate: '2011-08-01 22:20:28'
+      createuser: admin
+      updateuser: admin
+      revision: 0
+   -
+      id: 6
+      re_id: 0
+      name: 'Kontakt'
+      catname: ''
+      catpos: 0
+      attributes: ''
+      startpage: 0
+      pos: 1
+      path: '|'
+      status: 1
+      type: default
+      clang: 5
+      createdate: '2011-08-01 22:20:47'
+      updatedate: '2011-08-29 19:26:19'
+      createuser: admin
+      updateuser: admin
+      revision: 0
+   -
+      id: 7
+      re_id: 0
+      name: 'Über Sally'
+      catname: ''
+      catpos: 0
+      attributes: ''
+      startpage: 0
+      pos: 2
+      path: '|'
+      status: 1
+      type: ''
+      clang: 5
+      createdate: '2011-08-01 22:20:54'
+      updatedate: '2011-08-01 22:21:03'
+      createuser: admin
+      updateuser: admin
+      revision: 0
+   -
+      id: 8
+      re_id: 0
+      name: 'Impressum'
+      catname: ''
+      catpos: 0
+      attributes: ''
+      startpage: 0
+      pos: 3
+      path: '|'
+      status: 1
+      type: ''
+      clang: 5
+      createdate: '2011-08-01 22:21:00'
+      updatedate: '2011-08-01 22:21:04'
+      createuser: admin
+      updateuser: admin
+      revision: 0
+   -
+      id: 1
+      re_id: 0
+      name: 'Was Sally für Sie tun kann'
+      catname: 'Was Sally für Sie tun kann'
+      catpos: 1
+      attributes: ''
+      startpage: 1
+      pos: 1
+      path: '|'
+      status: 0
+      type: default
+      clang: 7
+      createdate: '2011-07-30 15:08:10'
+      updatedate: '2011-08-19 00:32:07'
+      createuser: admin
+      updateuser: admin
+      revision: 0
+   -
+      id: 2
+      re_id: 0
+      name: 'Wie Sally für Sie arbeitet'
+      catname: 'Wie Sally für Sie arbeitet'
+      catpos: 2
+      attributes: ''
+      startpage: 1
+      pos: 1
+      path: '|'
+      status: 0
+      type: default
+      clang: 7
+      createdate: '2011-07-30 15:08:20'
+      updatedate: '2011-08-02 04:21:06'
+      createuser: admin
+      updateuser: admin
+      revision: 0
+   -
+      id: 3
+      re_id: 0
+      name: 'Was Sally einfach besser macht'
+      catname: 'Was Sally einfach besser macht'
+      catpos: 3
+      attributes: ''
+      startpage: 1
+      pos: 1
+      path: '|'
+      status: 0
+      type: default
+      clang: 7
+      createdate: '2011-07-30 15:08:25'
+      updatedate: '2011-08-02 04:44:28'
+      createuser: admin
+      updateuser: admin
+      revision: 0
+   -
+      id: 4
+      re_id: 0
+      name: 'Warum unsere Sally?'
+      catname: 'Warum unsere Sally?'
+      catpos: 4
+      attributes: ''
+      startpage: 1
+      pos: 1
+      path: '|'
+      status: 0
+      type: ''
+      clang: 7
+      createdate: '2011-08-01 22:20:14'
+      updatedate: '2011-08-01 22:20:26'
+      createuser: admin
+      updateuser: admin
+      revision: 0
+   -
+      id: 5
+      re_id: 0
+      name: 'Antwort auf Ihre Fragen'
+      catname: 'Antwort auf Ihre Fragen'
+      catpos: 5
+      attributes: ''
+      startpage: 1
+      pos: 1
+      path: '|'
+      status: 0
+      type: ''
+      clang: 7
+      createdate: '2011-08-01 22:20:23'
+      updatedate: '2011-08-01 22:20:28'
+      createuser: admin
+      updateuser: admin
+      revision: 0
+   -
+      id: 6
+      re_id: 0
+      name: 'Kontakt'
+      catname: ''
+      catpos: 0
+      attributes: ''
+      startpage: 0
+      pos: 1
+      path: '|'
+      status: 0
+      type: default
+      clang: 7
+      createdate: '2011-08-01 22:20:47'
+      updatedate: '2011-08-19 00:37:15'
+      createuser: admin
+      updateuser: admin
+      revision: 0
+   -
+      id: 7
+      re_id: 0
+      name: 'Über Sally'
+      catname: ''
+      catpos: 0
+      attributes: ''
+      startpage: 0
+      pos: 2
+      path: '|'
+      status: 0
+      type: ''
+      clang: 7
+      createdate: '2011-08-01 22:20:54'
+      updatedate: '2011-08-01 22:21:03'
+      createuser: admin
+      updateuser: admin
+      revision: 0
+   -
+      id: 8
+      re_id: 0
+      name: 'Impressum'
+      catname: ''
+      catpos: 0
+      attributes: ''
+      startpage: 0
+      pos: 3
+      path: '|'
+      status: 0
+      type: ''
+      clang: 7
+      createdate: '2011-08-01 22:21:00'
+      updatedate: '2011-08-01 22:21:04'
+      createuser: admin
+      updateuser: admin
+      revision: 0
+sly_article_slice:
+   -
+      id: 1
+      clang: 5
+      slot: main
+      pos: 2
+      slice_id: 1
+      article_id: 1
+      createdate: '2011-08-04 18:29:40'
+      updatedate: '2012-04-13 14:36:57'
+      createuser: admin
+      updateuser: admin
+      revision: 0
+   -
+      id: 2
+      clang: 5
+      slot: main
+      pos: 0
+      slice_id: 2
+      article_id: 2
+      createdate: '2011-08-04 18:40:40'
+      updatedate: '2012-01-28 06:14:21'
+      createuser: admin
+      updateuser: admin
+      revision: 0
+   -
+      id: 4
+      clang: 5
+      slot: main
+      pos: 1
+      slice_id: 4
+      article_id: 1
+      createdate: '2012-04-13 14:35:08'
+      updatedate: '2012-04-13 14:35:08'
+      createuser: admin
+      updateuser: admin
+      revision: 0
+   -
+      id: 5
+      clang: 5
+      slot: main
+      pos: 0
+      slice_id: 5
+      article_id: 1
+      createdate: '2012-04-13 14:35:17'
+      updatedate: '2012-04-13 14:35:17'
+      createuser: admin
+      updateuser: admin
+      revision: 0
+   -
+      id: 6
+      clang: 5
+      slot: main
+      pos: 3
+      slice_id: 6
+      article_id: 1
+      createdate: '2012-04-13 14:35:39'
+      updatedate: '2012-04-13 14:35:39'
+      createuser: admin
+      updateuser: admin
+      revision: 0
+sly_clang:
+   -
+      id: 5
+      name: deutsch
+      locale: de_DE
+      revision: 0
+   -
+      id: 7
+      name: english
+      locale: en_US
+      revision: 0
+sly_file: []
+sly_file_category: []
+sly_registry: []
+sly_slice:
+   -
+      id: 1
+      module: wymeditor
+      serialized_values: '{"html":"<p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.<\/p>"}'
+   -
+      id: 2
+      module: image
+      serialized_values: '{"image":"fish2.jpg"}'
+   -
+      id: 4
+      module: image
+      serialized_values: '{"image":"fish2.jpg"}'
+   -
+      id: 5
+      module: wymeditor
+      serialized_values: '{"html":"<p>Hallo Welt!<\/p>"}'
+   -
+      id: 6
+      module: image
+      serialized_values: '{"image":"fish2.jpg"}'
+sly_user:
+   -
+      id: 1
+      name: Admin
+      description: ''
+      login: admin
+      # make sure to use a compatible hash here
+      password: c5e4335577bb89540b15e2f5251e8bc02ced5b32
+      status: 1
+      rights: '#admin[]#'
+      createuser: setup
+      updateuser: admin
+      createdate: '2011-04-13 02:37:08'
+      updatedate: '2011-07-22 02:05:11'
+      lasttrydate: '2011-10-03 04:15:32'
+      timezone: Europe/Berlin
+      revision: 0
