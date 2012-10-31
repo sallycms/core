@@ -84,10 +84,7 @@ abstract class sly_App_Base implements sly_App_Interface {
 			}
 
 			// inject current request and container
-			$container = $this->getContainer();
-
-			$controller->setRequest($container->getRequest());
-			$controller->setContainer($container);
+			$this->setupController($controller);
 
 			if (!$controller->checkPermission($action)) {
 				throw new sly_Authorisation_Exception(t('page_not_allowed', $action, get_class($controller)), 403);
@@ -109,6 +106,14 @@ abstract class sly_App_Base implements sly_App_Interface {
 		catch (Exception $e) {
 			return $this->handleControllerError($e, $controller, $action);
 		}
+	}
+
+	protected function setupController(sly_Controller_Interface $controller) {
+		// inject current request and container
+		$container = $this->getContainer();
+
+		$controller->setRequest($container->getRequest());
+		$controller->setContainer($container);
 	}
 
 	/**
