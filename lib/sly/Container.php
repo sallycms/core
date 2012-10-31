@@ -231,6 +231,13 @@ class sly_Container implements ArrayAccess, Countable {
 	}
 
 	/**
+	 * @return string
+	 */
+	public function getApplicationBaseUrl() {
+		return $this->get('sly-app-baseurl');
+	}
+
+	/**
 	 * get addOn service
 	 *
 	 * @return sly_Service_AddOn
@@ -451,6 +458,21 @@ class sly_Container implements ArrayAccess, Countable {
 	 */
 	public function setResponse(sly_Response $response) {
 		return $this->set('sly-response', $response);
+	}
+
+	/**
+	 * @param  string $name      the new application name
+	 * @param  string $baseUrl   the new base URL (will be normalized to '/base')
+	 * @return sly_Container     reference to self
+	 */
+	public function setApplicationInfo($name, $baseUrl) {
+		$baseUrl = trim($baseUrl, '/');
+
+		if (strlen($baseUrl) > 0) {
+			$baseUrl = '/'.$baseUrl;
+		}
+
+		return $this->set('sly-app-name', $name)->set('sly-app-baseurl', $baseUrl);
 	}
 
 	/*          arrayaccess interface          */
