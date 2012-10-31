@@ -80,7 +80,7 @@ abstract class sly_App_Base implements sly_App_Interface {
 		try {
 			if (!($controller instanceof sly_Controller_Interface)) {
 				$className  = $this->getControllerClass($controller);
-				$controller = $this->getController($className);
+				$controller = $this->getController($className, $action);
 			}
 
 			// inject current request and container
@@ -243,9 +243,10 @@ abstract class sly_App_Base implements sly_App_Interface {
 	 *
 	 * @throws sly_Controller_Exception
 	 * @param  string $className
+	 * @param  string $action
 	 * @return sly_Controller_Interface  the controller
 	 */
-	protected function getController($className) {
+	protected function getController($className, $action = null) {
 		static $instances = array();
 
 		if (!isset($instances[$className])) {
@@ -253,12 +254,10 @@ abstract class sly_App_Base implements sly_App_Interface {
 				throw new sly_Controller_Exception(t('unknown_controller', $className), 404);
 			}
 
-			if (class_exists('ReflectionClass')) {
-				$reflector = new ReflectionClass($className);
+			$reflector = new ReflectionClass($className);
 
-				if ($reflector->isAbstract()) {
-					throw new sly_Controller_Exception(t('unknown_controller', $className), 404);
-				}
+			if ($reflector->isAbstract()) {
+				throw new sly_Controller_Exception(t('unknown_controller', $className), 404);
 			}
 
 			$instance = new $className();
@@ -270,7 +269,39 @@ abstract class sly_App_Base implements sly_App_Interface {
 			$instances[$className] = $instance;
 		}
 
+		if ($action) {
+			$this->checkActionMethod($className, $action);
+		}
+
 		return $instances[$className];
+	}
+
+	protected function checkActionMethod($className, $action) {
+		$reflector = new ReflectionClass($className);
+		$methods   = $reflector->getMethods(ReflectionMethod::IS_PUBLIC);
+		$parent    = $reflector->getParentClass();
+
+		foreach ($methods as $idx => $method) {
+			$methods[$idx] = $method->getName();
+		}
+
+		$own = $methods;
+
+		if ($parent) {
+			$pmethods = $parent->getMethods(ReflectionMethod::IS_PUBLIC);
+
+			foreach ($pmethods as $idx => $method) {
+				$pmethods[$idx] = $method->getName();
+			}
+
+			$own = array_diff($own, $pmethods);
+		}
+
+		$method = $action.'Action';
+
+		if (!in_array($method, $own)) {
+			throw new sly_Controller_Exception(t('unknown_action', $method, $className), 404);
+		}
 	}
 
 	/**
