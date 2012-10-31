@@ -79,7 +79,7 @@ require_once SLY_COREFOLDER.'/loader.php';
 
 // init container
 $container = new sly_Container();
-$container['sly-app-name'] = $slyAppName;
+$container->setApplicationInfo($slyAppName, $slyAppBase);
 sly_Core::setContainer($container);
 
 // load core config (be extra careful because this is the first attempt to write
