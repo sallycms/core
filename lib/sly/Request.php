@@ -148,6 +148,20 @@ class sly_Request {
 		return rtrim(sprintf('%s://%s%s', $protocol, $host, $path), '/');
 	}
 
+	/**
+	 * Get the absolute base URL to the current app's base URL
+	 *
+	 * @param  mixed   $forceProtocol  a concrete protocol like 'http' or null for the current one
+	 * @return string
+	 */
+	public function getAppBaseUrl($forceProtocol = null, sly_Container $container = null) {
+		$container = $container ? $container : sly_Core::getContainer();
+		$base      = $this->getBaseUrl(true, $forceProtocol);
+		$appBase   = $container->getApplicationBaseUrl();
+
+		return $base.$appBase;
+	}
+
 	/*
 	 * The following methods are mostly derived from code of Symfony2 (2.1.2)
 	 * Code subject to the MIT license (http://symfony.com/doc/2.1/contributing/code/license.html).
