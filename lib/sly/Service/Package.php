@@ -246,6 +246,7 @@ class sly_Service_Package {
 		}
 
 		$stack  = array($package);
+		$stack  = array_merge($stack, array_keys($this->getKey($package, 'require', array())));
 		$result = array();
 
 		// don't add self
@@ -256,7 +257,7 @@ class sly_Service_Package {
 			$pkg = array_shift($stack);
 
 			// add its requirements
-			if ($this->exists($pkg)) {
+			if ($this->exists($pkg) && $recursive) {
 				$stack = array_merge($stack, array_keys($this->getKey($pkg, 'require', array())));
 				$stack = array_unique($stack);
 			}
@@ -277,7 +278,7 @@ class sly_Service_Package {
 				$result[] = $pkg;
 			}
 		}
-		while ($recursive && !empty($stack));
+		while (!empty($stack));
 
 		natcasesort($result);
 		$this->setCache($package, $cacheKey, $result);

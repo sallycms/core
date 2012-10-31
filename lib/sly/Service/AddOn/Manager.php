@@ -565,7 +565,7 @@ class sly_Service_AddOn_Manager {
 		}
 
 		if ($activated || $force) {
-			$requires = $pservice->getRequirements($addon, false);
+			$requires = $aservice->getRequirements($addon, false);
 
 			foreach ($requires as $required) {
 				$this->load($required, $force);
