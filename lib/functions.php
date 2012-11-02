@@ -60,57 +60,88 @@ function sly_setarraytype(array $haystack, $key, $type, $default = null) {
 	return array_key_exists($key, $haystack) ? sly_settype($haystack[$key], $type) : $default;
 }
 
+/**
+ * @deprecated  use sly_Request->get() instead
+ *
+ * @param  mixed  $name      the key to find
+ * @param  string $type      the new variable type or 'raw' of no casting should happen
+ * @param  string $default   the default value if $name was not found
+ * @return mixed             the casted value or default
+ */
 function sly_get($name, $type, $default = null) {
-	return sly_setarraytype($_GET, $name, $type, $default);
+	return sly_Core::getRequest()->get($name, $type, $default);
 }
 
+/**
+ * @deprecated  use sly_Request->post() instead
+ *
+ * @param  mixed  $name      the key to find
+ * @param  string $type      the new variable type or 'raw' of no casting should happen
+ * @param  string $default   the default value if $name was not found
+ * @return mixed             the casted value or default
+ */
 function sly_post($name, $type, $default = null) {
-	return sly_setarraytype($_POST, $name, $type, $default);
+	return sly_Core::getRequest()->post($name, $type, $default);
 }
 
+/**
+ * @deprecated  use sly_Request->request() instead
+ *
+ * @param  mixed  $name      the key to find
+ * @param  string $type      the new variable type or 'raw' of no casting should happen
+ * @param  string $default   the default value if $name was not found
+ * @return mixed             the casted value or default
+ */
 function sly_request($name, $type, $default = null) {
-	return sly_setarraytype($_REQUEST, $name, $type, $default);
+	return sly_Core::getRequest()->request($name, $type, $default);
 }
 
+/**
+ * @deprecated  use sly_Request->cookie() instead
+ *
+ * @param  mixed  $name      the key to find
+ * @param  string $type      the new variable type or 'raw' of no casting should happen
+ * @param  string $default   the default value if $name was not found
+ * @return mixed             the casted value or default
+ */
 function sly_cookie($name, $type, $default = null) {
-	return sly_setarraytype($_COOKIE, $name, $type, $default);
+	return sly_Core::getRequest()->cookie($name, $type, $default);
 }
 
+/**
+ * @deprecated  use sly_Request->getArray() instead
+ *
+ * @param  mixed  $name      the key to find
+ * @param  string $types     the new variable type or 'raw' of no casting should happen
+ * @param  string $default   the default value if $name was not found
+ * @return mixed             the casted values or default
+ */
 function sly_getArray($name, $types, $default = array()) {
-	$cast   = isset($_GET[$name]);
-	$values = sly_makeArray(isset($_GET[$name]) ? $_GET[$name] : $default);
-
-	foreach ($values as $idx => $value) {
-		if (is_array($value)) {
-			unset($values[$idx]);
-		}
-		elseif ($cast) {
-			$values[$idx] = sly_settype($value, $types);
-		}
-	}
-
-	return $values;
+	return sly_Core::getRequest()->getArray($name, $types, $default);
 }
 
+/**
+ * @deprecated  use sly_Request->postArray() instead
+ *
+ * @param  mixed  $name      the key to find
+ * @param  string $types     the new variable type or 'raw' of no casting should happen
+ * @param  string $default   the default value if $name was not found
+ * @return mixed             the casted values or default
+ */
 function sly_postArray($name, $types, $default = array()) {
-	$cast   = isset($_POST[$name]);
-	$values = sly_makeArray(isset($_POST[$name]) ? $_POST[$name] : $default);
-
-	foreach ($values as $idx => $value) {
-		if (is_array($value)) {
-			unset($values[$idx]);
-		}
-		elseif ($cast) {
-			$values[$idx] = sly_settype($value, $types);
-		}
-	}
-
-	return $values;
+	return sly_Core::getRequest()->postArray($name, $types, $default);
 }
 
+/**
+ * @deprecated  use sly_Request->requestArray() instead
+ *
+ * @param  mixed  $name      the key to find
+ * @param  string $types     the new variable type or 'raw' of no casting should happen
+ * @param  string $default   the default value if $name was not found
+ * @return mixed             the casted values or default
+ */
 function sly_requestArray($name, $types, $default = array()) {
-	return isset($_POST[$name]) ?
-		sly_postArray($name, $types, $default) : sly_getArray($name, $types, $default);
+	return sly_Core::getRequest()->requestArray($name, $types, $default);
 }
 
 function sly_html($string) {

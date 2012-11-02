@@ -14,8 +14,6 @@ if (!defined('SLY_IS_TESTING')) {
 	define('SLY_IS_TESTING', false);
 }
 
-define('SLY_HTDOCS_PATH', SLY_IS_TESTING ? SLY_TESTING_ROOT : '../');
-
 // start output buffering
 if (!SLY_IS_TESTING) {
 	ob_start();
@@ -24,7 +22,6 @@ if (!SLY_IS_TESTING) {
 
 // remove magic quotes (function is deprecated as of PHP 5.4, so we either
 // have to check the PHP version or suppress the E_DEPRECATED warning)
-
 if (@get_magic_quotes_gpc()) {
 	function stripslashes_ref(&$value) {
 		$value = stripslashes($value);
@@ -37,13 +34,12 @@ if (@get_magic_quotes_gpc()) {
 }
 
 // remove all globals
-
 if (ini_get('register_globals')) {
 	$superglobals = array('_GET', '_POST', '_REQUEST', '_ENV', '_FILES', '_SESSION', '_COOKIE', '_SERVER');
 	$keys         = array_keys($GLOBALS);
 
 	foreach ($keys as $key) {
-		if (!in_array($key, $superglobals) && $key !== 'GLOBALS') {
+		if (!in_array($key, $superglobals) && $key !== 'GLOBALS' && $key !== 'slyAppName') {
 			unset($$key);
 		}
 	}
@@ -81,10 +77,15 @@ if (!defined('E_USER_DEPRECATED')) define('E_USER_DEPRECATED', 16384); // PHP 5.
 // init loader
 require_once SLY_COREFOLDER.'/loader.php';
 
+// init container
+$container = new sly_Container();
+$container->setApplicationInfo($slyAppName, $slyAppBase);
+sly_Core::setContainer($container);
+
 // load core config (be extra careful because this is the first attempt to write
 // to the filesystem on new installations)
 try {
-	$config = sly_Core::config();
+	$config = $container->getConfig();
 	$config->loadStatic(SLY_COREFOLDER.'/config/sallyStatic.yml');
 	$config->loadLocalConfig();
 	$config->loadProjectConfig();
@@ -107,22 +108,13 @@ catch (Exception $e) {
 }
 
 // init basic error handling
-$errorHandler = sly_Core::isDeveloperMode() ? new sly_ErrorHandler_Development() : new sly_ErrorHandler_Production();
+$errorHandler = $container->getErrorHandler();
 $errorHandler->init();
 
-sly_Core::setErrorHandler($errorHandler);
-
 // Sync?
-$setup = $config->get('SETUP');
-
-if ($setup === false) {
+if (!sly_Core::isSetup()) {
 	// Cache-Util initialisieren
 	sly_Util_Cache::registerListener();
-}
-elseif ($setup === null) {
-	// load default core config when the config has never been initialized
-	$config->loadProjectDefaults(SLY_COREFOLDER.'/config/sallyProjectDefaults.yml');
-	$config->loadLocalDefaults(SLY_COREFOLDER.'/config/sallyLocalDefaults.yml');
 }
 
 // Check for system updates
@@ -133,3 +125,6 @@ if ($knownVersion !== $coreVersion) {
 	// TODO: implement some clever update mechanism
 	sly_Util_Versions::set('sally', $coreVersion);
 }
+
+// cleanup
+unset($container, $config, $errorHandler, $coreVersion, $knownVersion);

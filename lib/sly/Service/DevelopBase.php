@@ -476,7 +476,7 @@ abstract class sly_Service_DevelopBase {
 	 * @param  string $filename  The Filename
 	 * @return boolean           true, when the file is a valid development resource
 	 */
-	protected abstract function isFileValid($filename);
+	abstract protected function isFileValid($filename);
 
 	/**
 	 * Gets the filetype of the current file
@@ -491,7 +491,7 @@ abstract class sly_Service_DevelopBase {
 	 * @param  string  $filename  The filename (may be empty)
 	 * @return string             The filetype for the current filename
 	 */
-	protected abstract function getFileType($filename = '');
+	abstract protected function getFileType($filename = '');
 
 	/**
 	 * Gets a list with possible filetypes
@@ -500,7 +500,7 @@ abstract class sly_Service_DevelopBase {
 	 *
 	 * @return array  Array of strings with possible filetypes
 	 */
-	public abstract function getFileTypes();
+	abstract public function getFileTypes();
 
 	/**
 	 * Get a unique identifier for this implementor
@@ -511,7 +511,7 @@ abstract class sly_Service_DevelopBase {
 	 *
 	 * @return string  The unique class identifier
 	 */
-	protected abstract function getClassIdentifier();
+	abstract protected function getClassIdentifier();
 
 	/**
 	 * Gets the implementor-specific data array from the parsed data from file
@@ -541,6 +541,6 @@ abstract class sly_Service_DevelopBase {
 	 * @param  array   $data      An associative array with all parameters, parsed from the resource
 	 * @return array              The parameter structure for this specific resource
 	 */
-	protected abstract function buildData($filename, $mtime, $data);
+	abstract protected function buildData($filename, $mtime, $data);
 
 }

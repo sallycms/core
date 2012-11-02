@@ -149,17 +149,19 @@ class sly_Table_Column extends sly_Viewable {
 	}
 
 	/**
+	 * @param  sly_Request $request  the request to use or null for the global one
 	 * @return string
 	 */
-	public function render() {
+	public function render(sly_Request $request = null) {
 		if (!empty($this->width)) {
 			$this->htmlAttributes['style'] = 'width:'.$this->width;
 		}
 
-		$id = $this->table->getID();
+		$request = $request ? $request : sly_Core::getRequest();
+		$id      = $this->table->getID();
 
-		if (sly_get($id.'_sortby', 'string') === $this->sortkey) {
-			$this->direction = sly_get($id.'_direction', 'string') == 'desc' ? 'desc' : 'asc';
+		if ($request->get($id.'_sortby', 'string') === $this->sortkey) {
+			$this->direction = $request->get($id.'_direction', 'string') === 'desc' ? 'desc' : 'asc';
 		}
 		else {
 			$this->direction = 'none';

@@ -41,7 +41,7 @@ abstract class sly_Form_Widget_MediaBase extends sly_Form_ElementBase {
 			}
 		}
 		else {
-			$serv = sly_Service_Factory::getMediaCategoryService();
+			$serv = sly_Core::getContainer()->getMediaCategoryService();
 			$tree = $serv->findTree($catID, false);
 
 			foreach ($tree as $id) {

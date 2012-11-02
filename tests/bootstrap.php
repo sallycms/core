@@ -17,7 +17,6 @@ $here      = dirname(__FILE__);
 $sallyRoot = realpath($here.'/../../');
 
 define('SLY_IS_TESTING',        true);
-define('IS_SALLY_BACKEND',      true);
 define('SLY_TESTING_USER_ID',   1);
 define('SLY_TESTING_ROOT',      $sallyRoot);
 define('SLY_TESTING_USE_CACHE', $travis ? false : true);

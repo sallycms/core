@@ -15,4 +15,6 @@ interface sly_App_Interface {
 	public function getControllerClass($controller);
 	public function getCurrentController();
 	public function getCurrentAction();
+	public function getContainer();
+	public function isBackend();
 }

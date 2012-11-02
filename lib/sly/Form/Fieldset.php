@@ -135,10 +135,12 @@ class sly_Form_Fieldset extends sly_Viewable {
 	 *
 	 * Renders the form and returns the generated XHTML.
 	 *
-	 * @return string  the XHTML
+	 * @param  sly_Request $request  the request to use or null for the global one
+	 * @return string                the XHTML
 	 */
-	public function render() {
-		return $this->renderView('fieldset.phtml');
+	public function render(sly_Request $request = null) {
+		$request = $request ? $request : sly_Core::getRequest();
+		return $this->renderView('fieldset.phtml', compact('request'));
 	}
 
 	/**

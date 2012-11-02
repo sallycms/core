@@ -9,7 +9,7 @@
  */
 
 // load boot cache (frontend or backend, but never when in testing mode)
-$bootcache   = SLY_DYNFOLDER.'/internal/sally/bootcache.'.(IS_SALLY_BACKEND ? 'backend' : 'frontend').'.php';
+$bootcache   = SLY_DYNFOLDER.'/internal/sally/bootcache.php';
 $cacheExists = SLY_IS_TESTING ? false : file_exists($bootcache);
 
 if ($cacheExists) {
@@ -27,3 +27,6 @@ sly_Loader::addLoadPath(SLY_COREFOLDER.'/lib');
 sly_Loader::addLoadPath(SLY_VENDORFOLDER.'/fabpot/yaml/lib');
 sly_Loader::addLoadPath(SLY_VENDORFOLDER.'/webvariants/babelcache');
 sly_Loader::register();
+
+// cleanup
+unset($bootcache, $cacheExists);
