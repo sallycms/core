@@ -79,11 +79,16 @@ class sly_Loader {
 	 * @return boolean            true if the class was loaded, else false
 	 */
 	public static function loadClass($className) {
-		/*if (class_exists($className, false)) {
-			return true;
-		}*/
-
 		$found = false;
+
+		if (strlen($className) === 0) {
+			throw new sly_Exception('No class name given.');
+		}
+
+		// remove leading \
+		if ($className[0] === '\\') {
+			$className = substr($className, 1);
+		}
 
 		if (isset(self::$pathCache[$className])) {
 			$fullPath = self::$pathCache[$className];
@@ -145,12 +150,17 @@ class sly_Loader {
 				$shortClass = $className;
 			}
 
-			$file = str_replace('_', DIRECTORY_SEPARATOR, $shortClass).'.php';
+			if (strpos($className, '\\') !== false) {
+				$file = str_replace('\\', DIRECTORY_SEPARATOR, $shortClass).'.php';
+			}
+			else {
+				$file = str_replace('_', DIRECTORY_SEPARATOR, $shortClass).'.php';
 
-			// allow class names to be prefixed with a single underscore
+				// allow class names to be prefixed with a single underscore
 
-			if ($file[0] === DIRECTORY_SEPARATOR) {
-				$file[0] = '_';
+				if ($file[0] === DIRECTORY_SEPARATOR) {
+					$file[0] = '_';
+				}
 			}
 
 			$fullPath = $path.DIRECTORY_SEPARATOR.$file;
