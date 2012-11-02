@@ -279,27 +279,19 @@ abstract class sly_App_Base implements sly_App_Interface {
 	protected function checkActionMethod($className, $action) {
 		$reflector = new ReflectionClass($className);
 		$methods   = $reflector->getMethods(ReflectionMethod::IS_PUBLIC);
-		$parent    = $reflector->getParentClass();
 
 		foreach ($methods as $idx => $method) {
-			$methods[$idx] = $method->getName();
-		}
-
-		$own = $methods;
-
-		if ($parent) {
-			$pmethods = $parent->getMethods(ReflectionMethod::IS_PUBLIC);
-
-			foreach ($pmethods as $idx => $method) {
-				$pmethods[$idx] = $method->getName();
+			if ($method->getDeclaringClass()->getName() === $className) {
+				$methods[$idx] = strtolower($method->getName());
 			}
-
-			$own = array_diff($own, $pmethods);
+			else {
+				unset($methods[$idx]);
+			}
 		}
 
-		$method = $action.'Action';
+		$method = $action.'action';
 
-		if (!in_array($method, $own)) {
+		if (!in_array($method, $methods)) {
 			throw new sly_Controller_Exception(t('unknown_action', $method, $className), 404);
 		}
 	}
