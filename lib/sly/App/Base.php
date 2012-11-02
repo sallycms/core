@@ -258,6 +258,18 @@ abstract class sly_App_Base implements sly_App_Interface {
 		return $controller;
 	}
 
+	protected function setDefaultTimezone($isSetup) {
+		$timezone = $isSetup ? @date_default_timezone_get() : sly_Core::getTimezone();
+
+		// fix badly configured servers where the get function doesn't even return a guessed default timezone
+		if (empty($timezone)) {
+			$timezone = sly_Core::getTimezone();
+		}
+
+		// set the determined timezone
+		date_default_timezone_set($timezone);
+	}
+
 	abstract public function getControllerClassPrefix();
 
 	abstract protected function handleControllerError(Exception $e, $controller, $action);
