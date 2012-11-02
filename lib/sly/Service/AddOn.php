@@ -175,10 +175,11 @@ class sly_Service_AddOn {
 	/**
 	 * Return a list of required addOns
 	 *
-	 * @param  string $addon  addOn name
-	 * @return array          list of required addOns
+	 * @param  string  $addon      addOn name
+	 * @param  boolean $recursive  whether or not to fetch the requirement's requirements
+	 * @return array               list of required addOns
 	 */
-	public function getRequirements($addon) {
+	public function getRequirements($addon, $recursive = true) {
 		$ignore = array(self::INSTALLER_PKGKEY, self::SALLY_PKGKEY);
 
 		// filter out vendor packages
@@ -187,7 +188,7 @@ class sly_Service_AddOn {
 			$ignore  = array_merge($ignore, $vendors);
 		}
 
-		return $this->pkgService->getRequirements($addon, true, $ignore);
+		return $this->pkgService->getRequirements($addon, $recursive, $ignore);
 	}
 
 	/**

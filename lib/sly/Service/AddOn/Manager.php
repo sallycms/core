@@ -561,11 +561,10 @@ class sly_Service_AddOn_Manager {
 
 		if ($installed || $force) {
 			$this->loadConfig($addon, $installed, $activated);
-			$this->loadInfo[$addon] = array($installed, $activated);
 		}
 
 		if ($activated || $force) {
-			$requires = $pservice->getRequirements($addon, false);
+			$requires = $aservice->getRequirements($addon, false);
 
 			foreach ($requires as $required) {
 				$this->load($required, $force);
@@ -577,6 +576,10 @@ class sly_Service_AddOn_Manager {
 			$this->req($bootFile);
 
 			$this->loaded[$addon] = 1;
+		}
+
+		if ($installed || $activated || $force) {
+			$this->loadInfo[$addon] = array($installed, $activated);
 		}
 	}
 
