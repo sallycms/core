@@ -1,0 +1,3 @@
+static:
+  numArray: [red, green, blue]
+  assocArray: {red: rot, blue: blau}
