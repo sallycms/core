@@ -11,8 +11,6 @@
 interface sly_App_Interface {
 	public function initialize();
 	public function run();
-	public function dispatch($controller, $action);
-	public function getControllerClass($controller);
 	public function getCurrentController();
 	public function getCurrentAction();
 	public function getContainer();
