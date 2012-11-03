@@ -9,6 +9,8 @@
  */
 
 interface sly_Router_Interface {
+	public function match();
+	public function hasMatch();
 	public function getController();
 	public function getAction();
 }
