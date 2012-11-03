@@ -51,6 +51,8 @@ $files = glob($sallyRoot.'/data/dyn/internal/sally/yaml-cache/*');
 if (is_array($files)) array_map('unlink', $files);
 
 // load core system
+$slyAppName = 'tests';
+$slyAppBase = 'tests';
 require SLY_SALLYFOLDER.'/core/master.php';
 
 // add the backend app
