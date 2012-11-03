@@ -76,7 +76,7 @@ class sly_Dispatcher {
 		try {
 			if (!($controller instanceof sly_Controller_Interface)) {
 				$className  = $this->getControllerClass($controller);
-				$controller = $this->getController($className, $action);
+				$controller = $this->getController($className);
 			}
 
 			// inject current request and container
@@ -90,6 +90,9 @@ class sly_Dispatcher {
 			if ($controller instanceof sly_Controller_Generic) {
 				return $this->runController($controller, 'generic', $action);
 			}
+
+			// check if the action is valid
+			$this->checkActionMethod($controller, $action);
 
 			// classic controllers should have a basic exception handling provided by us.
 			return $this->runController($controller, $action);
@@ -202,10 +205,11 @@ class sly_Dispatcher {
 	 * check if an action's method exists and is not just inherited
 	 *
 	 * @throws sly_Controller_Exception  if the action is invalid
-	 * @param  string $className
+	 * @param  string $controllerOrClassName
 	 * @param  string $action
 	 */
-	protected function checkActionMethod($className, $action) {
+	protected function checkActionMethod($controllerOrClassName, $action) {
+		$className = is_object($controllerOrClassName) ? get_class($controllerOrClassName) : $controllerOrClassName;
 		$reflector = new ReflectionClass($className);
 		$methods   = $reflector->getMethods(ReflectionMethod::IS_PUBLIC);
 
@@ -218,7 +222,7 @@ class sly_Dispatcher {
 			}
 		}
 
-		$method = $action.'action';
+		$method = strtolower($action).'action';
 
 		if (!in_array($method, $methods)) {
 			throw new sly_Controller_Exception(t('unknown_action', $method, $className), 404);

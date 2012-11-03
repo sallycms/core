@@ -9,5 +9,5 @@
  */
 
 interface sly_Response_Action {
-	public function execute(sly_App_Backend $app);
+	public function execute(sly_Dispatcher $dispatcher);
 }
