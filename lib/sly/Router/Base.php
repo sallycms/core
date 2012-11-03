@@ -14,11 +14,9 @@
  */
 class sly_Router_Base implements sly_Router_Interface {
 	protected $routes;
-	protected $match;
 
 	public function __construct(array $routes = array()) {
 		$this->routes = $routes;
-		$this->match  = false;
 	}
 
 	public function addRoute($route, array $values) {
@@ -33,69 +31,46 @@ class sly_Router_Base implements sly_Router_Interface {
 		return $this->routes;
 	}
 
-	public function match() {
-		if ($this->match === false) {
-			$this->match = null;
-			$requestUri  = $this->getRequestUri();
+	public function match(sly_Request $request) {
+		$requestUri = $this->getRequestUri($request);
 
-			foreach ($this->routes as $route => $values) {
-				$regex = $this->buildRegex($route);
-				$match = null;
+		foreach ($this->routes as $route => $values) {
+			$regex = $this->buildRegex($route);
+			$match = null;
 
-				if (preg_match("#^$regex#u", $requestUri, $match)) {
-					$this->match = array($match, $values);
-					break;
-				}
+			if (preg_match("#^$regex#u", $requestUri, $match)) {
+				$this->setupRequest($request, $match, $values);
+				return true;
 			}
 		}
 
-		return $this->match;
+		return false;
 	}
 
-	public function hasMatch() {
-		return is_array($this->match());
-	}
-
-	public function getController() {
-		$controller = $this->get('controller', null);
-
-		if ($controller === null) {
-			throw new sly_Exception('Matched route contains neither a :controller placeholder not a controller value.');
+	protected function setupRequest(sly_Request $request, array $routeMatch, array $routeValues) {
+		foreach ($routeValues as $key => $value) {
+			$request->get->set($key, $value);
 		}
 
-		return $controller;
-	}
+		foreach ($routeMatch as $key => $value) {
+			if (ctype_digit($key)) {
+				$key = 'match'.$key;
+			}
 
-	public function getAction() {
-		return $this->get('action', 'index');
-	}
-
-	public function get($key, $default = null) {
-		$this->match();
-
-		if (!is_array($this->match)) {
-			return $default;
+			$request->get->set($key, $value);
 		}
-
-		list($match, $values) = $this->match;
-
-		if (array_key_exists($key, $match)) {
-			return $match[$key];
-		}
-
-		return array_key_exists($key, $values) ? $values[$key] : $default;
 	}
 
-	public function getRequestUri() {
-		$requestUri = sly_Core::getRequest()->getRequestUri();
+	protected function getRequestUri(sly_Request $request) {
+		$requestUri = $request->getRequestUri();
 
 		if (empty($requestUri)) {
 			throw new LogicException('Cannot route without a request URI.');
 		}
 
-		$host    = sly_Util_HTTP::getBaseUrl();     // 'http://example.com'
-		$base    = sly_Util_HTTP::getBaseUrl(true); // 'http://example.com/sallyinstall'
-		$request = $host.$requestUri;               // 'http://example.com/sallyinstall/backend/system'
+		$host    = $request->getBaseUrl();     // 'http://example.com'
+		$base    = $request->getBaseUrl(true); // 'http://example.com/sallyinstall'
+		$request = $host.$requestUri;          // 'http://example.com/sallyinstall/backend/system'
 
 		if (mb_substr($request, 0, mb_strlen($base)) !== $base) {
 			throw new LogicException('Base URI mismatch.');

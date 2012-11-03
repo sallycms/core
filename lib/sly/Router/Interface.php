@@ -9,8 +9,8 @@
  */
 
 interface sly_Router_Interface {
-	public function match();
-	public function hasMatch();
-	public function getController();
-	public function getAction();
+	public function match(sly_Request $request);
+	public function addRoute($route, array $values);
+	public function getRoutes();
+	public function clearRoutes();
 }
