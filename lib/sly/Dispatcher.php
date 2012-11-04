@@ -92,7 +92,7 @@ class sly_Dispatcher {
 			}
 
 			// check if the action is valid
-			$this->checkActionMethod($controller, $action);
+			$this->checkAction($controller, $action);
 
 			// classic controllers should have a basic exception handling provided by us.
 			return $this->runController($controller, $action);
@@ -114,30 +114,66 @@ class sly_Dispatcher {
 		static $instances = array();
 
 		if (!isset($instances[$className])) {
-			if (!class_exists($className)) {
-				throw new sly_Controller_Exception(t('unknown_controller', $className), 404);
-			}
-
-			$reflector = new ReflectionClass($className);
-
-			if ($reflector->isAbstract()) {
-				throw new sly_Controller_Exception(t('unknown_controller', $className), 404);
-			}
-
-			$instance = new $className();
-
-			if (!($instance instanceof sly_Controller_Interface)) {
-				throw new sly_Controller_Exception(t('does_not_implement', $className, 'sly_Controller_Interface'), 404);
-			}
-
-			$instances[$className] = $instance;
+			$this->checkController($className);
+			$instances[$className] = new $className();
 		}
 
 		if ($action) {
-			$this->checkActionMethod($className, $action);
+			$this->checkAction($className, $action);
 		}
 
 		return $instances[$className];
+	}
+
+	public function checkController($controllerOrClass) {
+		if (is_string($controllerOrClass)) {
+			if (!class_exists($controllerOrClass)) {
+				throw new sly_Controller_Exception(t('unknown_controller', $controllerOrClass), 404);
+			}
+
+			$reflector = new ReflectionClass($controllerOrClass);
+
+			if ($reflector->isAbstract()) {
+				throw new sly_Controller_Exception(t('unknown_controller', $controllerOrClass), 404);
+			}
+
+			if (!$reflector->implementsInterface('sly_Controller_Interface')) {
+				throw new sly_Controller_Exception(t('does_not_implement', $controllerOrClass, 'sly_Controller_Interface'), 404);
+			}
+		}
+		elseif (!($controllerOrClass instanceof sly_Controller_Interface)) {
+			throw new sly_Controller_Exception(t('does_not_implement', $controllerOrClass, 'sly_Controller_Interface'), 404);
+		}
+	}
+
+	/**
+	 * check if an action's method exists and is not just inherited
+	 *
+	 * @throws sly_Controller_Exception  if the action is invalid
+	 * @param  string $controllerOrClassName
+	 * @param  string $action
+	 */
+	public function checkAction($controllerOrClass, $action) {
+		$this->checkController($controllerOrClass);
+
+		$className = is_object($controllerOrClass) ? get_class($controllerOrClass) : $controllerOrClass;
+		$reflector = new ReflectionClass($className);
+		$methods   = $reflector->getMethods(ReflectionMethod::IS_PUBLIC);
+
+		foreach ($methods as $idx => $method) {
+			if ($method->getDeclaringClass()->getName() === $className) {
+				$methods[$idx] = strtolower($method->getName());
+			}
+			else {
+				unset($methods[$idx]);
+			}
+		}
+
+		$method = strtolower($action).'action';
+
+		if (!in_array($method, $methods)) {
+			throw new sly_Controller_Exception(t('unknown_action', $method, $className), 404);
+		}
 	}
 
 	/**
@@ -156,12 +192,20 @@ class sly_Dispatcher {
 	 * It will return sly_Controller_System for &page=system
 	 * and sly_Controller_System_Languages for &page=system_languages
 	 *
-	 * @param  string $controller  controller name like 'structure'
+	 * @throws sly_Controller_Exception  if the controller name is invalid
+	 * @param  string $controller        controller name like 'structure'
 	 * @return string
 	 */
 	public function getControllerClass($controller) {
+		// controller names make start with a number because we have our prefix,
+		// so sly_Controller_23 is perfectly valid (but still stupid). They are
+		// not allowed to start or end with an underscore, however.
+		if (mb_strlen($controller) === 0 || !preg_match('#^[0-9a-z][0-9a-z_]*$#is', $controller) || mb_substr($controller, -1) === '_') {
+			throw new sly_Controller_Exception(t('unknown_controller', $controller), 404);
+		}
+
 		$className = $this->prefix;
-		$parts     = explode('_', $controller);
+		$parts     = explode('_', strtolower($controller));
 
 		foreach ($parts as $part) {
 			$className .= '_'.ucfirst($part);
@@ -199,34 +243,6 @@ class sly_Dispatcher {
 
 		// collect output
 		return ob_get_clean();
-	}
-
-	/**
-	 * check if an action's method exists and is not just inherited
-	 *
-	 * @throws sly_Controller_Exception  if the action is invalid
-	 * @param  string $controllerOrClassName
-	 * @param  string $action
-	 */
-	protected function checkActionMethod($controllerOrClassName, $action) {
-		$className = is_object($controllerOrClassName) ? get_class($controllerOrClassName) : $controllerOrClassName;
-		$reflector = new ReflectionClass($className);
-		$methods   = $reflector->getMethods(ReflectionMethod::IS_PUBLIC);
-
-		foreach ($methods as $idx => $method) {
-			if ($method->getDeclaringClass()->getName() === $className) {
-				$methods[$idx] = strtolower($method->getName());
-			}
-			else {
-				unset($methods[$idx]);
-			}
-		}
-
-		$method = strtolower($action).'action';
-
-		if (!in_array($method, $methods)) {
-			throw new sly_Controller_Exception(t('unknown_action', $method, $className), 404);
-		}
 	}
 
 	protected function setupController(sly_Controller_Interface $controller) {
