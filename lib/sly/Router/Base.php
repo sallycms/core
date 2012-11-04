@@ -69,7 +69,7 @@ class sly_Router_Base implements sly_Router_Interface {
 		}
 
 		$host    = $request->getBaseUrl();     // 'http://example.com'
-		$base    = $request->getBaseUrl(true); // 'http://example.com/sallyinstall'
+		$base    = $request->getAppBaseUrl();  // 'http://example.com/sallyinstall/backend'
 		$request = $host.$requestUri;          // 'http://example.com/sallyinstall/backend/system'
 
 		if (mb_substr($request, 0, mb_strlen($base)) !== $base) {
