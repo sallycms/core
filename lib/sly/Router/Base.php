@@ -38,7 +38,7 @@ class sly_Router_Base implements sly_Router_Interface {
 			$regex = $this->buildRegex($route);
 			$match = null;
 
-			if (preg_match("#^$regex#u", $requestUri, $match)) {
+			if (preg_match("#^$regex$#u", $requestUri, $match)) {
 				$this->setupRequest($request, $match, $values);
 				return true;
 			}
