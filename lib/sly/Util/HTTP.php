@@ -146,10 +146,10 @@ class sly_Util_HTTP {
 	 * @param  string $divider  only used if $params is array
 	 * @return string           the host or an empty string if none found
 	 */
-	public static function queryString($params, $divider = '&amp;') {
+	public static function queryString($params, $divider = '&amp;', $prependDivider = true) {
 		if (!empty($params)) {
 			if (is_array($params)) {
-				return $divider.http_build_query($params, '', $divider);
+				return ($prependDivider ? $divider : '').http_build_query($params, '', $divider);
 			}
 			else {
 				return $params;
