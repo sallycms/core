@@ -192,6 +192,6 @@ class sly_Service_Template extends sly_Service_DevelopBase {
 	 */
 	public function includeFile($name, array $params = array()) {
 		$file = SLY_DEVELOPFOLDER.'/templates/'.$this->getFilename($name);
-		sly_Util_Template::renderFile($file, $params);
+		sly_Util_Template::renderFile($file, $params, false);
 	}
 }

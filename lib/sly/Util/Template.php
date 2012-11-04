@@ -63,6 +63,21 @@ class sly_Util_Template {
 	 * @return string                 the generated output if $returnOutput, else null
 	 */
 	public static function renderFile($filename, array $params = array(), $returnOutput = true) {
+		return self::renderHelper($filename, $params, $returnOutput);
+	}
+
+	/**
+	 * Internal include helper
+	 *
+	 * This method exists merely becaues when you call renderFile() without the
+	 * second or third argument, func_get_arg() will issue warnings.
+	 *
+	 * @param  string  $name          the absolute path to the file to include
+	 * @param  array   $params        variables as an associative array of parameters
+	 * @param  boolean $returnOutput  set to false to not use an output buffer
+	 * @return string                 the generated output if $returnOutput, else null
+	 */
+	private static function renderHelper($filename, array $params, $returnOutput) {
 		unset($filename, $returnOutput);
 
 		if (!empty($params)) {
