@@ -119,6 +119,19 @@ abstract class sly_App_Base implements sly_App_Interface {
 		return $controller;
 	}
 
+	/**
+	 * Get the absolute base URL to the current app's base URL
+	 *
+	 * @param  mixed   $forceProtocol  a concrete protocol like 'http' or null for the current one
+	 * @return string
+	 */
+	public function getBaseUrl($forceProtocol = null) {
+		$container = $this->getContainer();
+		$request   = $container->getRequest();
+
+		return $controller->getAppBaseUrl($forceProtocol, $container);
+	}
+
 	protected function setDefaultTimezone($isSetup) {
 		$timezone = $isSetup ? @date_default_timezone_get() : sly_Core::getTimezone();
 
