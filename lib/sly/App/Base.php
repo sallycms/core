@@ -11,6 +11,8 @@
 abstract class sly_App_Base implements sly_App_Interface {
 	protected $container;
 	protected $dispatcher;
+	protected $controller;
+	protected $action;
 
 	/**
 	 * Constructor
@@ -129,34 +131,23 @@ abstract class sly_App_Base implements sly_App_Interface {
 		date_default_timezone_set($timezone);
 	}
 
-	protected function performRouting() {
+	protected function performRouting(sly_Request $request) {
 		// create new router and hand it to all addOns
 		$container = $this->getContainer();
 		$router    = $this->prepareRouter($container);
-		$request   = $container->getRequest();
 
 		if (!($router instanceof sly_Router_Interface)) {
 			throw new LogicException('Expected a sly_Router_Interface as the result from prepareRouter().');
 		}
 
 		// use the router to prepare the request and setup proper query string values
-		$routeMatched = $router->match($request);
+		$retval = $router->match($request);
 
-		// let the subclass translate the routed values to controller and action name
-		$controller = $this->getControllerFromRequest($request);
-		$action     = $this->getActionFromRequest($request);
+		// setup app state
+		$this->controller = $this->getControllerFromRequest($request);
+		$this->action     = $this->getActionFromRequest($request);
 
-		// test the controller name
-		$dispatcher = $this->getDispatcher();
-		$className  = $dispatcher->getControllerClass($controller);
-
-		// boom
-		$dispatcher->getController($className, $action);
-
-		$this->controller = $controller;
-		$this->action     = $action;
-
-		return $routeMatched;
+		return $retval;
 	}
 
 	abstract protected function prepareRouter(sly_Container $container);
