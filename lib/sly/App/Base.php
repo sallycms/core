@@ -129,7 +129,7 @@ abstract class sly_App_Base implements sly_App_Interface {
 		$container = $this->getContainer();
 		$request   = $container->getRequest();
 
-		return $controller->getAppBaseUrl($forceProtocol, $container);
+		return $request->getAppBaseUrl($forceProtocol, $container);
 	}
 
 	protected function setDefaultTimezone($isSetup) {
