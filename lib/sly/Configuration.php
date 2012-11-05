@@ -197,6 +197,11 @@ class sly_Configuration {
 
 		$config = $this->fileService->load($filename, false, true);
 
+		//do not try to merge empty files
+		if (empty($config)) {
+			trigger_error('Konfigurationsdatei '.$filename.' ist leer.', E_USER_WARNING);
+			return false;
+		}
 		// geladene konfiguration in globale konfiguration mergen
 		$this->setInternal($key, $config, $mode, $force);
 
