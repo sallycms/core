@@ -33,3 +33,4 @@ authorisation:
   apps:
     title: 'translate:applications'
     token: {  }
+LESS_IMPORT_DIRS: ['sally/vendor/sallycms/less-mixins/']

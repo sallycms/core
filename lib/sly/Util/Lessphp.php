@@ -50,8 +50,8 @@ class sly_Util_Lessphp {
 		$less->setFormatter('compressed');
 
 		// add custom mixin package to default import dir
-		$dir   = (array) $less->importDir;
-		$dir[] = SLY_VENDORFOLDER.'/sallycms/less-mixins/';
+		$dir = (array) $less->importDir;
+		$dir = array_merge($dir, sly_Core::config()->get('LESS_IMPORT_DIRS'));
 
 		// always add the file's dir as the first import dir
 		if ($filename) array_unshift($dir, dirname($filename));
