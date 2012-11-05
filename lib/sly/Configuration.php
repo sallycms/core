@@ -31,6 +31,12 @@ class sly_Configuration {
 	private $localConfigModified;   ///< boolean
 	private $projectConfigModified; ///< boolean
 
+	/**
+	 * Create a new instance. Having more than one instance with
+	 * flush enabled can be very dangerous. Take care.
+	 *
+	 * @param sly_Service_File_Base $fileService
+	 */
 	public function __construct(sly_Service_File_Base $fileService) {
 		$this->mode                  = array();
 		$this->loadedConfigFiles     = array();
@@ -50,6 +56,11 @@ class sly_Configuration {
 		}
 	}
 
+	/**
+	 * activate/deactivate writing of configuration
+	 *
+	 * @param boolean $enabled
+	 */
 	public function setFlushOnDestruct($enabled) {
 		$this->flush = (boolean) $enabled;
 	}
@@ -84,18 +95,6 @@ class sly_Configuration {
 		return $this->getConfigDir().DIRECTORY_SEPARATOR.'sly_project.yml';
 	}
 
-	public function loadDevelop() {
-		$dir = new sly_Util_Directory(SLY_DEVELOPFOLDER.DIRECTORY_SEPARATOR.'config');
-
-		if ($dir->exists()) {
-			foreach ($dir->listPlain() as $file) {
-				if (fnmatch('*.yml', $file) || fnmatch('*.yaml', $file)) {
-					$this->loadStatic($dir.DIRECTORY_SEPARATOR.$file);
-				}
-			}
-		}
-	}
-
 	/**
 	 * @throws sly_Exception     when something is fucked up (file not found, bad parameters, ...)
 	 * @param  string $filename  the file to load
@@ -126,6 +125,21 @@ class sly_Configuration {
 	 */
 	public function loadProjectDefaults($filename, $force = false, $key = '/') {
 		return $this->loadInternal($filename, self::STORE_PROJECT_DEFAULT, $force, $key);
+	}
+
+	/**
+	 * loads all YAML files in SLY_DEVELOPFOLDER./config to STATIC facility
+	 */
+	public function loadDevelopConfig() {
+		$dir = new sly_Util_Directory(SLY_DEVELOPFOLDER.DIRECTORY_SEPARATOR.'config');
+
+		if ($dir->exists()) {
+			foreach ($dir->listPlain() as $file) {
+				if (fnmatch('*.yml', $file) || fnmatch('*.yaml', $file)) {
+					$this->loadStatic($dir.DIRECTORY_SEPARATOR.$file);
+				}
+			}
+		}
 	}
 
 	/**

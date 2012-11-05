@@ -89,7 +89,7 @@ try {
 	$config->loadStatic(SLY_COREFOLDER.'/config/sallyStatic.yml');
 	$config->loadLocalConfig();
 	$config->loadProjectConfig();
-	$config->loadDevelop();
+	$config->loadDevelopConfig();
 }
 catch (sly_Util_DirectoryException $e) {
 	$dir = sly_html($e->getDirectory());
