@@ -226,4 +226,11 @@ class sly_ConfigurationTest extends PHPUnit_Framework_TestCase {
 		$this->config->loadStatic($testfile);
 	}
 
+	/**
+	 * @expectedException PHPUnit_Framework_Error_Warning
+	 */
+	public function testLoadEmptyFile() {
+		$testfile  = SLY_TESTING_ROOT.'/sally/tests/files/empty.yml';
+		$this->config->loadStatic($testfile);
+	}
 }
