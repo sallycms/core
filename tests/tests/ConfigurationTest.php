@@ -160,9 +160,12 @@ class sly_ConfigurationTest extends PHPUnit_Framework_TestCase {
 
 	public function testStoreDefault() {
 		$result = $this->config->setLocalDefault('unittest/assocArray', 'heckiheckipatang');
-		$this->assertEquals('heckiheckipatang', $result, 'setting the local default should fail');
+		$this->assertTrue($result, 'setting the local default failed');
 	}
 
+	/**
+	 * @expectedException sly_Exception
+	 */
 	public function testOverwriteWithDefault() {
 		$this->setBaseArray(sly_Configuration::STORE_LOCAL);
 		$result = $this->config->setLocalDefault('unittest/assocArray/red', 'heckiheckipatang');
@@ -172,14 +175,22 @@ class sly_ConfigurationTest extends PHPUnit_Framework_TestCase {
 	public function testOverwriteWithForce() {
 		$this->setBaseArray(sly_Configuration::STORE_LOCAL);
 		$result = $this->config->setLocalDefault('unittest/assocArray/blue', 'heckiheckipatang', true);
-		$this->assertEquals('heckiheckipatang', $result, 'setting the local default failed');
+		$this->assertTrue($result, 'setting the local default failed');
 	}
 
-	public function testDefaultFileLoading() {
+	/**
+	 * @expectedException sly_Exception
+	 */
+	public function testProjectDefaultFileLoading() {
 		$this->config->loadProjectConfig();
 		$this->config->loadProjectDefaults(SLY_COREFOLDER.'/config/sallyProjectDefaults.yml');
-		$this->assertEquals('Sally Trunk', $this->config->get('PROJECTNAME'), 'setting SETUP should be false when localconfig is loaded');
+		$this->assertEquals('Sally Trunk', $this->config->get('PROJECTNAME'), 'setting PROJECTNAME should be Sally Trunk');
+	}
 
+	/**
+	 * @expectedException sly_Exception
+	 */
+	public function testLocalDefaultFileLoading() {
 		$this->config->loadLocalConfig();
 		$this->config->loadLocalDefaults(SLY_COREFOLDER.'/config/sallyLocalDefaults.yml');
 		$this->assertFalse($this->config->get('SETUP'), 'setting SETUP should be false when localconfig is loaded');
