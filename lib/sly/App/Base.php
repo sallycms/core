@@ -169,5 +169,4 @@ abstract class sly_App_Base implements sly_App_Interface {
 
 	abstract public function getControllerClassPrefix();
 	abstract public function getCurrentControllerName();
-	abstract public function getCurrentAction();
 }
