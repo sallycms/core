@@ -51,8 +51,10 @@ class sly_Util_Lessphp {
 
 		// add custom mixin package to default import dir
 		$dir = (array) $less->importDir;
-		$dir = array_merge($dir, sly_Core::config()->get('LESS_IMPORT_DIRS'));
 
+		foreach (sly_Core::config()->get('LESS_IMPORT_DIRS') as $includeDir) {
+			$dir[] = SLY_BASE.DIRECTORY_SEPARATOR.trim($includeDir, DIRECTORY_SEPARATOR);
+		}
 		// always add the file's dir as the first import dir
 		if ($filename) array_unshift($dir, dirname($filename));
 
