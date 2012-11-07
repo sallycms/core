@@ -217,13 +217,11 @@ class sly_ConfigurationTest extends PHPUnit_Framework_TestCase {
 		$this->config->loadStatic('');
 	}
 
-	/**
-	 * @expectedException PHPUnit_Framework_Error_Warning
-	 */
 	public function testLoadStaticFileTwice() {
 		$testfile  = SLY_TESTING_ROOT.'/sally/tests/files/staticConfig.yml';
-		$this->config->loadStatic($testfile);
-		$this->config->loadStatic($testfile);
+		$res = $this->config->loadStatic($testfile);
+		$res = $this->config->loadStatic($testfile);
+		$this->assertFalse($res, 'loading a static file twice should fail');
 	}
 
 	/**
