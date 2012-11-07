@@ -148,6 +148,19 @@ abstract class sly_Service_File_Base {
 		return $config;
 	}
 
+	public function remove($filename) {
+		$cacheFile   = $this->getCacheFile($filename);
+		$exists      = file_exists($filename);
+		$cacheExists = file_exists($cacheFile);
+		if ($exists) {
+			unlink($filename);
+		}
+		if ($cacheExists) {
+			unlink($cacheFile);
+		}
+		$this->clearCache();
+	}
+
 	/**
 	 * @param string $filename
 	 * @param mixed  $data

@@ -38,21 +38,25 @@ class sly_Configuration {
 	 * @param sly_Service_File_Base $fileService
 	 */
 	public function __construct(sly_Service_File_Base $fileService) {
-		$this->mode                  = array();
-		$this->loadedConfigFiles     = array();
-		$this->staticConfig          = new sly_Util_Array();
-		$this->localConfig           = new sly_Util_Array();
-		$this->projectConfig         = new sly_Util_Array();
 		$this->fileService           = $fileService;
 		$this->cache                 = null;
 		$this->flush                 = true;
 		$this->localConfigModified   = false;
 		$this->projectConfigModified = false;
+
+		if (!$this->loadFromCacheFile()) {
+			$this->mode              = array();
+			$this->loadedConfigFiles = array();
+			$this->staticConfig      = new sly_Util_Array();
+			$this->localConfig       = new sly_Util_Array();
+			$this->projectConfig     = new sly_Util_Array();
+		}
 	}
 
 	public function __destruct() {
 		if ($this->flush) {
 			$this->flush();
+			$this->createCacheFile();
 		}
 	}
 
@@ -191,7 +195,6 @@ class sly_Configuration {
 		// prüfen ob konfiguration in diesem request bereits geladen wurde
 		if (!$force && isset($this->loadedConfigFiles[$filename])) {
 			// geladene konfigurationsdaten werden innerhalb des requests nicht mehr überschrieben
-			trigger_error('Konfigurationsdatei '.$filename.' wurde bereits in einer anderen Version geladen! Daten wurden nicht überschrieben.', E_USER_WARNING);
 			return false;
 		}
 
@@ -319,6 +322,7 @@ class sly_Configuration {
 
 		$this->mode[$key] = $mode;
 		$this->cache      = null;
+		$this->dropCacheFile();
 
 		switch ($mode) {
 			case self::STORE_STATIC:
@@ -364,6 +368,57 @@ class sly_Configuration {
 		}
 
 		return $mode;
+	}
+
+	protected function createCacheFile() {
+		$file = $this->getCacheFile();
+
+		if (!file_exists($file)) {
+			$data = array(
+				'mode'              => $this->mode,
+				'loadedConfigFiles' => $this->loadedConfigFiles,
+				'staticConfig'      => $this->staticConfig->get('/'),
+				'localConfig'       => $this->localConfig->get('/'),
+				'projectConfig'     => $this->projectConfig->get('/')
+			);
+			$this->fileService->dump($file, $data);
+		}
+	}
+
+	protected function loadFromCacheFile() {
+		$file = $this->getCacheFile();
+
+		if (!file_exists($file)) {
+			return false;
+		}
+
+		$data = $this->fileService->load($file, false, true);
+
+		$this->mode              = $data['mode'];
+		$this->loadedConfigFiles = $data['loadedConfigFiles'];
+		$this->staticConfig      = new sly_Util_Array($data['staticConfig']);
+		$this->localConfig       = new sly_Util_Array($data['localConfig']);
+		$this->projectConfig     = new sly_Util_Array($data['projectConfig']);
+		return true;
+	}
+
+	protected function getCacheFile() {
+		static $file = false;
+
+		if ($file === false) {
+			$dir = SLY_DYNFOLDER.'/internal/sally/configuration';
+			sly_Util_Directory::create($dir, null, true);
+			$file = $dir.'/cache';
+		}
+
+		return $file;
+	}
+
+	protected function dropCacheFile() {
+		$file = $this->getCacheFile();
+		if (file_exists($file)) {
+			$this->fileService->remove($file);
+		}
 	}
 
 	/**
