@@ -1,6 +1,7 @@
 {
     "name": "sallycms/core",
     "description": "Core Framework for SallyCMS",
+    "type": "sallycms-app",
     "keywords": [
         "cms",
         "php",
