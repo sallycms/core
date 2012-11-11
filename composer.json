@@ -1,0 +1,61 @@
+{
+    "name": "sallycms/core",
+    "description": "Core Framework for SallyCMS",
+    "keywords": [
+        "cms",
+        "php",
+        "mysql",
+        "framework",
+        "sallycms"
+    ],
+    "authors": [
+        {
+            "name": "webvariants GbR",
+            "homepage": "http://www.webvariants.de/"
+        }
+    ],
+    "homepage": "http://www.sallycms.de/",
+    "license": "MIT",
+    "repositories": [
+        {
+            "type": "package",
+            "package": {
+                "name": "fabpot/yaml",
+                "version": "1.0.6",
+                "autoload": {
+                    "psr-0": {
+                        "sfYaml": ""
+                    }
+                },
+                "dist": {
+                    "type": "zip",
+                    "url": "https://github.com/fabpot/yaml/zipball/8a266aadce"
+                }
+            }
+        },
+        {
+            "type": "pear",
+            "url": "http://pear.phpunit.de/"
+        },
+        {
+            "type": "pear",
+            "url": "http://pear.symfony-project.com/"
+        }
+    ],
+    "require": {
+        "php": ">=5.2.1",
+        "fabpot/yaml": "1.0.6",
+        "leafo/lessphp": "0.3.*@stable",
+        "webvariants/babelcache": "1.2.*",
+        "sallycms/composer-installer": "*"
+    },
+    "require-dev": {
+        "pear-phpunit/phpunit": ">=3.6.10,<3.8",
+        "pear-phpunit/dbunit": ">=1.1,<1.2"
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-default": "0.8.x-dev"
+        }
+    }
+}
