@@ -26,7 +26,14 @@ class sly_Util_Session {
 		To work around this limitation, we check for $_SESSION. This var will be
 		explicitely unset() by FullPageCache.
 		*/
-		if (!isset($_SESSION) || !session_id()) session_start();
+
+		if (!isset($_SESSION) || !session_id()) {
+			// force httponly flag but leave other stuff unchanged
+			$params = session_get_cookie_params();
+			session_set_cookie_params($params['lifetime'], $params['path'], $params['domain'], $params['secure'], true);
+
+			session_start();
+		}
 	}
 
 	/**

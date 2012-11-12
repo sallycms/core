@@ -149,6 +149,24 @@ class sly_Request {
 	}
 
 	/**
+	 * Get the base URL path to the project's root (e.g. '/myproject')
+	 *
+	 * @return string
+	 */
+	public function getBasePath() {
+		// in CLI, the SCRIPT_NAME would be something like 'C:\xamp\php\phpunit'...
+		if (PHP_SAPI === 'cli') {
+			return '/sally';
+		}
+
+		$path = $this->getScriptName();
+		$path = dirname($path); // '/foo' or '/foo/sally/backend'
+		$path = str_replace('\\', '/', $path);
+
+		return $path ? $path : '/';
+	}
+
+	/**
 	 * Get the absolute base URL to the current app's base URL
 	 *
 	 * @param  mixed   $forceProtocol  a concrete protocol like 'http' or null for the current one
