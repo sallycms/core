@@ -1,0 +1,60 @@
+<?php
+/*
+ * Copyright (c) 2012, webvariants GbR, http://www.webvariants.de
+ *
+ * This file is released under the terms of the MIT license. You can find the
+ * complete text in the attached LICENSE file or online at:
+ *
+ * http://www.opensource.org/licenses/mit-license.php
+ */
+
+$attributes = array(
+	'class'   => implode(' ', $this->classes),
+	'method'  => strtolower($this->method),
+	'action'  => $this->action,
+	'id'      => $this->id,
+	'enctype' => $this->enctype
+);
+
+$focus = $this->focussedElement;
+
+if (!empty($focus)) {
+	$el = $focus instanceof sly_Form_ElementBase ? $focus : $this->findElementByID($focus);
+	if ($el) $el->setAttribute('autofocus', 'autofocus');
+}
+
+?>
+
+<div class="sly-form">
+	<?php if (!$omitFormTag): ?>
+	<form <?php echo sly_Util_HTML::buildAttributeString($attributes) ?>>
+	<?php endif ?>
+		<?php if (!empty($this->hiddenValues)): ?>
+		<div>
+			<?php
+			foreach ($this->hiddenValues as $name => $value) {
+				$value['type'] = 'hidden';
+				$value['name'] = $name;
+				print '<input '.sly_Util_HTML::buildAttributeString($value).' />';
+			}
+			?>
+		</div>
+		<?php endif ?>
+
+		<?php
+		$hasButtonBar = $this->submitButton || $this->resetButton || $this->applyButton || $this->deleteButton;
+
+		if ($hasButtonBar) {
+			$fieldset = end($this->fieldsets);
+			if (!$fieldset) $fieldset = $this->beginFieldset($this->title);
+			print $this->renderView('buttons.phtml', array('fieldset' => $fieldset, 'request' => $request));
+		}
+
+		foreach ($this->fieldsets as $i => $fieldset) {
+			print $fieldset->render($request);
+		}
+		?>
+	<?php if (!$omitFormTag): ?>
+	</form>
+	<?php endif ?>
+</div>
