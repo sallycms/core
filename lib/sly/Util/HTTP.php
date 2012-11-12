@@ -125,6 +125,13 @@ class sly_Util_HTTP {
 	}
 
 	/**
+	 * @return string
+	 */
+	public static function getBasePath() {
+		return sly_Core::getRequest()->getBasePath();
+	}
+
+	/**
 	 * Ermitteln einer Artikel-ID
 	 *
 	 * Diese Methode ermittelt zu einem Artikel die dazugehörige ID.
