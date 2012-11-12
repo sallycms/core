@@ -79,6 +79,7 @@ require_once SLY_COREFOLDER.'/loader.php';
 
 // init container
 $container = new sly_Container();
+$container->setConfigDir(SLY_DATAFOLDER.DIRECTORY_SEPARATOR.'config');
 $container->setApplicationInfo($slyAppName, $slyAppBase);
 sly_Core::setContainer($container);
 

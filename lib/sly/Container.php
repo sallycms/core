@@ -24,6 +24,9 @@ class sly_Container implements ArrayAccess, Countable {
 			'sly-current-article-id' => null,
 			'sly-current-lang-id'    => null,
 
+			// needed variables
+			'sly-config-dir'         => array($this, 'missingValue'),
+
 			// core objects
 			'sly-config'              => array($this, 'buildConfig'),
 			'sly-dispatcher'          => array($this, 'buildDispatcher'),
@@ -112,7 +115,7 @@ class sly_Container implements ArrayAccess, Countable {
 		}
 
 		if (is_callable($value)) {
-			return call_user_func_array($value, array($this));
+			return call_user_func_array($value, array($this, $id));
 		}
 
 		return $value;
@@ -475,6 +478,14 @@ class sly_Container implements ArrayAccess, Countable {
 		return $this->set('sly-app-name', $name)->set('sly-app-baseurl', $baseUrl);
 	}
 
+	/**
+	 * @param  string $dir       the sally config dir
+	 * @return sly_Container     reference to self
+	 */
+	public function setConfigDir($dir) {
+		return $this->set('sly-config-dir', $dir);
+	}
+
 	/*          arrayaccess interface          */
 
 	/**
@@ -514,8 +525,8 @@ class sly_Container implements ArrayAccess, Countable {
 	/**
 	 * @return sly_Configuration
 	 */
-	protected function buildConfig() {
-		return $this['sly-config'] = new sly_Configuration($this->getService('File_YAML'));
+	protected function buildConfig(sly_Container $container) {
+		return $this['sly-config'] = new sly_Configuration($this->getService('File_YAML'), $container['sly-config-dir']);
 	}
 
 	/**
@@ -809,5 +820,9 @@ class sly_Container implements ArrayAccess, Countable {
 		$persistence = $container['sly-persistence'];
 
 		return $this->values['sly-service-user'] = new sly_Service_User($persistence, $cache, $dispatcher, $config);
+	}
+
+	protected function missingValue(sly_Container $container, $id) {
+		throw new sly_Exception('You have to set the value for "'.$id.'" first!');
 	}
 }
