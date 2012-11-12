@@ -27,6 +27,7 @@ class sly_Configuration {
 	private $projectConfig;         ///< sly_Util_Array
 	private $cache;                 ///< sly_Util_Array
 	private $fileService;           ///< sly_Service_File_Base
+	private $dir;                    ///< string
 	private $flush;                 ///< boolean
 	private $localConfigModified;   ///< boolean
 	private $projectConfigModified; ///< boolean
@@ -37,8 +38,9 @@ class sly_Configuration {
 	 *
 	 * @param sly_Service_File_Base $fileService
 	 */
-	public function __construct(sly_Service_File_Base $fileService) {
+	public function __construct(sly_Service_File_Base $fileService, $configDir) {
 		$this->fileService           = $fileService;
+		$this->dir                   = $configDir;
 		$this->cache                 = null;
 		$this->flush                 = true;
 		$this->localConfigModified   = false;
@@ -75,14 +77,12 @@ class sly_Configuration {
 	protected function getConfigDir() {
 		static $protected = false;
 
-		$dir = SLY_DATAFOLDER.DIRECTORY_SEPARATOR.'config';
-
 		if (!$protected) {
-			sly_Util_Directory::createHttpProtected($dir, true);
+			sly_Util_Directory::createHttpProtected($this->dir, true);
 		}
 
 		$protected = true;
-		return $dir;
+		return $this->dir;
 	}
 
 	/**
