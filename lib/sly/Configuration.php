@@ -407,7 +407,7 @@ class sly_Configuration {
 
 		if ($file === false) {
 			$dir = SLY_DYNFOLDER.'/internal/sally/configuration';
-			sly_Util_Directory::create($dir, null, true);
+			sly_Util_Directory::create($dir, sly_Core::DEFAULT_DIRPERM, true);
 			$file = $dir.'/cache';
 		}
 
