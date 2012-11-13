@@ -47,10 +47,12 @@ if (is_array($files)) array_map('unlink', $files);
 $slyAppName = 'tests';
 $slyAppBase = 'tests';
 require $sallyRoot.'/master.php';
-//do not overwrite config, write the cachefile
+//do not overwrite config or write the cachefile
 sly_Core::config()->setFlushOnDestruct(false);
 // add the dummy lib
 sly_Loader::addLoadPath($here.DIRECTORY_SEPARATOR.'lib');
+// make tests autoloadable
+sly_Loader::addLoadPath(dirname(__FILE__).'/tests', 'sly_');
 
 // add DbUnit
 if ($travis) {
@@ -68,8 +70,9 @@ $app = new sly_App_Tests();
 sly_Core::setCurrentApp($app);
 $app->initialize();
 
-// make tests autoloadable
-sly_Loader::addLoadPath(dirname(__FILE__).'/tests', 'sly_');
+//add a dummy i18n
+$i18n = new sly_I18N('de', $here.DIRECTORY_SEPARATOR.'addons');
+sly_Core::setI18N($i18n);
 
 // clear current cache
 sly_Core::cache()->flush('sly');
