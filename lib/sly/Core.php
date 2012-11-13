@@ -340,17 +340,6 @@ class sly_Core {
 	}
 
 	/**
-	 * Returns the backend navigation
-	 *
-	 * @deprecated
-	 *
-	 * @return sly_Layout_Navigation_Backend  the navigation object used for the backend menu
-	 */
-	public static function getNavigation() {
-		return self::getLayout()->getNavigation();
-	}
-
-	/**
 	 * loads all known addOns into Sally
 	 */
 	public static function loadAddOns() {
@@ -440,17 +429,6 @@ class sly_Core {
 	 */
 	public static function getFlashMessage() {
 		return self::getContainer()->getFlashMessage();
-	}
-
-	/**
-	 * Returns the current backend page
-	 *
-	 * @deprecated as of 0.6, use getCurrentControllerName()
-	 *
-	 * @return string  current page or null if in frontend
-	 */
-	public static function getCurrentPage() {
-		return self::isBackend() ? self::getCurrentControllerName() : null;
 	}
 
 	/**
