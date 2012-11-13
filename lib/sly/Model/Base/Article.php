@@ -77,13 +77,6 @@ class sly_Model_Base_Article extends sly_Model_Base {
 	}
 
 	/**
-	 * @deprecated  since 0.6
-	 */
-	public function getCatPrior() {
-		return $this->catpos;
-	}
-
-	/**
 	 * @return int
 	 */
 	public function getCreateDate() {
@@ -108,13 +101,6 @@ class sly_Model_Base_Article extends sly_Model_Base {
 	 * @return int
 	 */
 	public function getPosition() {
-		return $this->pos;
-	}
-
-	/**
-	 * @deprecated  since 0.6
-	 */
-	public function getPrior() {
 		return $this->pos;
 	}
 
@@ -210,13 +196,6 @@ class sly_Model_Base_Article extends sly_Model_Base {
 	}
 
 	/**
-	 * @deprecated  since 0.6
-	 */
-	public function setCatPrior($position) {
-		$this->catpos = (int) $position;
-	}
-
-	/**
 	 * @param mixed $updatedate  unix timestamp or date using 'YYYY-MM-DD HH:MM:SS' format
 	 */
 	public function setCreateDate($createdate) {
@@ -242,13 +221,6 @@ class sly_Model_Base_Article extends sly_Model_Base {
 	 */
 	public function setPosition($position) {
 		$this->pos = (int) $position;
-	}
-
-	/**
-	 * @deprecated  since 0.6
-	 */
-	public function setPrior($position) {
-		$this->catpos = (int) $position;
 	}
 
 	/**
