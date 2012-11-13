@@ -50,24 +50,18 @@ if (ini_get('register_globals')) {
 // we're using UTF-8 everywhere
 mb_internal_encoding('UTF-8');
 
-// define constants for system wide important paths
-define('SLY_BASE', realpath(dirname(__FILE__).'/../../'));
+// define that the path to the core is here
+define('SLY_COREFOLDER', realpath(dirname(__FILE__)));
 
-// the unit tests have their own paths
-if (!SLY_IS_TESTING) {
-	define('SLY_SALLYFOLDER',   SLY_BASE.DIRECTORY_SEPARATOR.'sally');
-	define('SLY_DEVELOPFOLDER', SLY_BASE.DIRECTORY_SEPARATOR.'develop');
-}
-
-define('SLY_COREFOLDER',   SLY_SALLYFOLDER.DIRECTORY_SEPARATOR.'core');
-define('SLY_VENDORFOLDER', SLY_SALLYFOLDER.DIRECTORY_SEPARATOR.'vendor');
-define('SLY_DATAFOLDER',   SLY_BASE.DIRECTORY_SEPARATOR.'data');
-define('SLY_DYNFOLDER',    SLY_DATAFOLDER.DIRECTORY_SEPARATOR.'dyn');
-
-if (!SLY_IS_TESTING) {
-	define('SLY_MEDIAFOLDER', SLY_DATAFOLDER.DIRECTORY_SEPARATOR.'mediapool');
-	define('SLY_ADDONFOLDER', SLY_SALLYFOLDER.DIRECTORY_SEPARATOR.'addons');
-}
+// define constants for system wide important paths if they are not set already
+if (!defined('SLY_BASE'))          define('SLY_BASE',          realpath(SLY_COREFOLDER.'/../../'));
+if (!defined('SLY_SALLYFOLDER'))   define('SLY_SALLYFOLDER',   SLY_BASE.DIRECTORY_SEPARATOR.'sally');
+if (!defined('SLY_DEVELOPFOLDER')) define('SLY_DEVELOPFOLDER', SLY_BASE.DIRECTORY_SEPARATOR.'develop');
+if (!defined('SLY_VENDORFOLDER'))  define('SLY_VENDORFOLDER',  SLY_SALLYFOLDER.DIRECTORY_SEPARATOR.'vendor');
+if (!defined('SLY_DATAFOLDER'))    define('SLY_DATAFOLDER',    SLY_BASE.DIRECTORY_SEPARATOR.'data');
+if (!defined('SLY_DYNFOLDER'))     define('SLY_DYNFOLDER',     SLY_DATAFOLDER.DIRECTORY_SEPARATOR.'dyn');
+if (!defined('SLY_MEDIAFOLDER'))   define('SLY_MEDIAFOLDER',   SLY_DATAFOLDER.DIRECTORY_SEPARATOR.'mediapool');
+if (!defined('SLY_ADDONFOLDER'))   define('SLY_ADDONFOLDER',   SLY_SALLYFOLDER.DIRECTORY_SEPARATOR.'addons');
 
 // define these PHP 5.3 constants here so that they can be used in YAML files
 // (if someone really decides to put PHP code in their config files).
