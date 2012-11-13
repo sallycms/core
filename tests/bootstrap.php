@@ -69,9 +69,9 @@ $user    = $service->findById(SLY_TESTING_USER_ID);
 $service->setCurrentUser($user);
 
 // init the app
-$app = new sly_App_Backend();
-sly_Core::setCurrentApp($app);
-$app->initialize();
+//$app = new sly_App_Backend();
+//sly_Core::setCurrentApp($app);
+//$app->initialize();
 
 // make tests autoloadable
 sly_Loader::addLoadPath(dirname(__FILE__).'/tests', 'sly_');
