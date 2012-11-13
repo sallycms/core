@@ -106,13 +106,19 @@ class sly_Service_User extends sly_Service_Model_Base_Id {
 			if ($this->count(array('login' => $user->getLogin())) > 0) {
 				throw new sly_Exception(t('user_login_already_exists'));
 			}
+
 			$user->setCreateColumns($manager);
 		}
 
 		$user->setUpdateColumns($manager);
 
-		$event   = ($user->getId() === sly_Model_Base_Id::NEW_ID) ? 'SLY_USER_ADDED' : 'SLY_USER_UPDATED';
-		$user    = parent::save($user);
+		// notify addOns
+		$event = ($user->getId() == sly_Model_Base_Id::NEW_ID) ? 'SLY_PRE_USER_ADD' : 'SLY_PRE_USER_UPDATE';
+		$this->dispatcher->notify($event, $user, compact('manager'));
+
+		// save the changes
+		$event = ($user->getId() === sly_Model_Base_Id::NEW_ID) ? 'SLY_USER_ADDED' : 'SLY_USER_UPDATED';
+		$user  = parent::save($user);
 
 		$this->cache->flush('sly.user');
 		$this->dispatcher->notify($event, $user, array('user' => $manager));
