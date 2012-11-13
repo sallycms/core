@@ -197,7 +197,7 @@ class sly_ConfigurationTest extends PHPUnit_Framework_TestCase {
 	}
 
 	public function testLoadStatic() {
-		$testfile  = SLY_TESTING_ROOT.'/sally/tests/files/staticConfig.yml';
+		$testfile  = SLY_COREFOLDER.'/tests/files/staticConfig.yml';
 		$this->config->loadStatic($testfile);
 		$this->assertEquals($this->test_array, $this->config->get('static'), 'loading static file failed');
 	}
@@ -206,7 +206,7 @@ class sly_ConfigurationTest extends PHPUnit_Framework_TestCase {
 	 * @expectedException sly_Exception
 	 */
 	public function testLoadStaticFileMissing() {
-		$testfile  = SLY_TESTING_ROOT.'/sally/tests/files/staticConfigMissing.yml';
+		$testfile  = SLY_COREFOLDER.'/tests/files/staticConfigMissing.yml';
 		$this->config->loadStatic($testfile);
 	}
 
@@ -218,7 +218,7 @@ class sly_ConfigurationTest extends PHPUnit_Framework_TestCase {
 	}
 
 	public function testLoadStaticFileTwice() {
-		$testfile  = SLY_TESTING_ROOT.'/sally/tests/files/staticConfig.yml';
+		$testfile  = SLY_COREFOLDER.'/tests/files/staticConfig.yml';
 		$res = $this->config->loadStatic($testfile);
 		$res = $this->config->loadStatic($testfile);
 		$this->assertFalse($res, 'loading a static file twice should fail');
@@ -228,7 +228,7 @@ class sly_ConfigurationTest extends PHPUnit_Framework_TestCase {
 	 * @expectedException PHPUnit_Framework_Error_Warning
 	 */
 	public function testLoadEmptyFile() {
-		$testfile  = SLY_TESTING_ROOT.'/sally/tests/files/empty.yml';
+		$testfile  = SLY_COREFOLDER.'/tests/files/empty.yml';
 		$this->config->loadStatic($testfile);
 	}
 }
