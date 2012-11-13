@@ -24,6 +24,7 @@ if (!defined('SLY_DATAFOLDER'))    define('SLY_DATAFOLDER',    $sallyRoot.DIRECT
 if (!defined('SLY_DEVELOPFOLDER')) define('SLY_DEVELOPFOLDER', $here.DIRECTORY_SEPARATOR.'develop');
 if (!defined('SLY_MEDIAFOLDER'))   define('SLY_MEDIAFOLDER',   $here.DIRECTORY_SEPARATOR.'mediapool');
 if (!defined('SLY_ADDONFOLDER'))   define('SLY_ADDONFOLDER',   $here.DIRECTORY_SEPARATOR.'addons');
+if (!defined('SLY_VENDORFOLDER'))  define('SLY_VENDORFOLDER',  $sallyRoot.DIRECTORY_SEPARATOR.'vendor');
 
 if (!is_dir(SLY_MEDIAFOLDER)) mkdir(SLY_MEDIAFOLDER);
 if (!is_dir(SLY_ADDONFOLDER)) mkdir(SLY_ADDONFOLDER);
@@ -48,8 +49,8 @@ $slyAppBase = 'tests';
 require $sallyRoot.'/master.php';
 //do not overwrite config, write the cachefile
 sly_Core::config()->setFlushOnDestruct(false);
-// add the backend app
-sly_Loader::addLoadPath(SLY_SALLYFOLDER.'/backend/lib/', 'sly_');
+// add the dummy lib
+sly_Loader::addLoadPath($here.DIRECTORY_SEPARATOR.'lib');
 
 // add DbUnit
 if ($travis) {
@@ -63,7 +64,7 @@ $user    = $service->findById(SLY_TESTING_USER_ID);
 $service->setCurrentUser($user);
 
 // init the app
-$app = new sly_App_Backend();
+$app = new sly_App_Tests();
 sly_Core::setCurrentApp($app);
 $app->initialize();
 
