@@ -14,14 +14,13 @@ if (PHP_SAPI !== 'cli') {
 
 $travis    = getenv('TRAVIS') !== false;
 $here      = dirname(__FILE__);
-$sallyRoot = realpath($here.'/../../');
+$sallyRoot = realpath($here.'/../');
 
 define('SLY_IS_TESTING',        true);
 define('SLY_TESTING_USER_ID',   1);
-define('SLY_TESTING_ROOT',      $sallyRoot);
 define('SLY_TESTING_USE_CACHE', $travis ? false : true);
 
-if (!defined('SLY_SALLYFOLDER'))   define('SLY_SALLYFOLDER',   $sallyRoot.'/sally');
+if (!defined('SLY_DATAFOLDER'))    define('SLY_DATAFOLDER',    $sallyRoot.'/data');
 if (!defined('SLY_DEVELOPFOLDER')) define('SLY_DEVELOPFOLDER', $here.'/develop');
 if (!defined('SLY_MEDIAFOLDER'))   define('SLY_MEDIAFOLDER',   $here.'/mediapool');
 if (!defined('SLY_ADDONFOLDER'))   define('SLY_ADDONFOLDER',   $here.'/addons');
@@ -34,7 +33,7 @@ foreach (array('local', 'project') as $conf) {
 	$constant   = 'SLY_TESTING_'.strtoupper($conf).'_CONFIG';
 	$liveFile   = $sallyRoot.'/data/config/sly_'.$conf.'.yml';
 	$backupFile = $sallyRoot.'/data/config/sly_'.$conf.'.yml.bak';
-	$testFile   = defined($constant) ? constant($constant) : $sallyRoot.'/sally/tests/config/sly_'.$conf.($travis ? '_travis' : '').'.yml';
+	$testFile   = defined($constant) ? constant($constant) : $here.'/config/sly_'.$conf.($travis ? '_travis' : '').'.yml';
 
 	if (file_exists($liveFile)) {
 		rename($liveFile, $backupFile);
@@ -53,7 +52,7 @@ if (is_array($files)) array_map('unlink', $files);
 // load core system
 $slyAppName = 'tests';
 $slyAppBase = 'tests';
-require SLY_SALLYFOLDER.'/core/master.php';
+require $sallyRoot.'/master.php';
 
 // add the backend app
 sly_Loader::addLoadPath(SLY_SALLYFOLDER.'/backend/lib/', 'sly_');

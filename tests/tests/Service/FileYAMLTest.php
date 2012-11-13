@@ -21,19 +21,19 @@ class sly_Service_FileYAMLTest extends PHPUnit_Framework_TestCase {
 	 * @expectedException InvalidArgumentException
 	 */
 	public function testLoadBroken() {
-		$this->service->load(SLY_TESTING_ROOT.'/sally/tests/files/fuckedUpYaml.yml');
+		$this->service->load(SLY_COREFOLDER.'/tests/files/fuckedUpYaml.yml');
 	}
 
 	public function testDump() {
-		$testfile  = SLY_TESTING_ROOT.'/sally/tests/files/goodYamldump.yml';
-		$checkfile = SLY_TESTING_ROOT.'/sally/tests/files/goodYaml.yml';
+		$testfile  = SLY_COREFOLDER.'/tests/files/goodYamldump.yml';
+		$checkfile = SLY_COREFOLDER.'/tests/files/goodYaml.yml';
 		$this->service->dump($testfile, $this->data);
 		$this->assertFileEquals($checkfile, $testfile, 'Dumping YAML failed.');
 		unlink($testfile);
 	}
 
 	public function testLoad() {
-		$data = $this->service->load(SLY_TESTING_ROOT.'/sally/tests/files/goodYaml.yml');
+		$data = $this->service->load(SLY_COREFOLDER.'/tests/files/goodYaml.yml');
 		$this->assertEquals($this->data, $data, 'loading YAML file failed');
 	}
 }
