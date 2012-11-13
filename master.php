@@ -55,6 +55,7 @@ if (!defined('SLY_VENDORFOLDER'))  define('SLY_VENDORFOLDER',  SLY_SALLYFOLDER.D
 if (!defined('SLY_DATAFOLDER'))    define('SLY_DATAFOLDER',    SLY_BASE.DIRECTORY_SEPARATOR.'data');
 if (!defined('SLY_DYNFOLDER'))     define('SLY_DYNFOLDER',     SLY_DATAFOLDER.DIRECTORY_SEPARATOR.'dyn');
 if (!defined('SLY_MEDIAFOLDER'))   define('SLY_MEDIAFOLDER',   SLY_DATAFOLDER.DIRECTORY_SEPARATOR.'mediapool');
+if (!defined('SLY_CONFIGFOLDER'))  define('SLY_CONFIGFOLDER',  SLY_DATAFOLDER.DIRECTORY_SEPARATOR.'config');
 if (!defined('SLY_ADDONFOLDER'))   define('SLY_ADDONFOLDER',   SLY_SALLYFOLDER.DIRECTORY_SEPARATOR.'addons');
 
 // define these PHP 5.3 constants here so that they can be used in YAML files
@@ -67,7 +68,7 @@ require_once SLY_COREFOLDER.'/loader.php';
 
 // init container
 $container = new sly_Container();
-$container->setConfigDir(SLY_DATAFOLDER.DIRECTORY_SEPARATOR.'config');
+$container->setConfigDir(SLY_CONFIGFOLDER);
 $container->setApplicationInfo($slyAppName, $slyAppBase);
 sly_Core::setContainer($container);
 

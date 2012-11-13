@@ -20,29 +20,22 @@ define('SLY_IS_TESTING',        true);
 define('SLY_TESTING_USER_ID',   1);
 define('SLY_TESTING_USE_CACHE', $travis ? false : true);
 
-if (!defined('SLY_DATAFOLDER'))    define('SLY_DATAFOLDER',    $sallyRoot.'/data');
-if (!defined('SLY_DEVELOPFOLDER')) define('SLY_DEVELOPFOLDER', $here.'/develop');
-if (!defined('SLY_MEDIAFOLDER'))   define('SLY_MEDIAFOLDER',   $here.'/mediapool');
-if (!defined('SLY_ADDONFOLDER'))   define('SLY_ADDONFOLDER',   $here.'/addons');
+if (!defined('SLY_DATAFOLDER'))    define('SLY_DATAFOLDER',    $sallyRoot.DIRECTORY_SEPARATOR.'data');
+if (!defined('SLY_DEVELOPFOLDER')) define('SLY_DEVELOPFOLDER', $here.DIRECTORY_SEPARATOR.'develop');
+if (!defined('SLY_MEDIAFOLDER'))   define('SLY_MEDIAFOLDER',   $here.DIRECTORY_SEPARATOR.'mediapool');
+if (!defined('SLY_ADDONFOLDER'))   define('SLY_ADDONFOLDER',   $here.DIRECTORY_SEPARATOR.'addons');
 
 if (!is_dir(SLY_MEDIAFOLDER)) mkdir(SLY_MEDIAFOLDER);
 if (!is_dir(SLY_ADDONFOLDER)) mkdir(SLY_ADDONFOLDER);
 
-// prepare our own config files
-foreach (array('local', 'project') as $conf) {
-	$constant   = 'SLY_TESTING_'.strtoupper($conf).'_CONFIG';
-	$liveFile   = $sallyRoot.'/data/config/sly_'.$conf.'.yml';
-	$backupFile = $sallyRoot.'/data/config/sly_'.$conf.'.yml.bak';
-	$testFile   = defined($constant) ? constant($constant) : $here.'/config/sly_'.$conf.($travis ? '_travis' : '').'.yml';
-
-	if (file_exists($liveFile)) {
-		rename($liveFile, $backupFile);
+// set our own config folder
+if (!defined('SLY_CONFIGFOLDER')) {
+	if ($travis) {
+		define('SLY_CONFIGFOLDER', $here.DIRECTORY_SEPARATOR.'config'.DIRECTORY_SEPARATOR.'travis');
 	}
 	else {
-		@mkdir(dirname($liveFile), 0777, true);
+		define('SLY_CONFIGFOLDER', $here.DIRECTORY_SEPARATOR.'config');
 	}
-
-	copy($testFile, $liveFile);
 }
 
 // kill YAML cache
@@ -53,7 +46,8 @@ if (is_array($files)) array_map('unlink', $files);
 $slyAppName = 'tests';
 $slyAppBase = 'tests';
 require $sallyRoot.'/master.php';
-
+//do not overwrite config, write the cachefile
+sly_Core::config()->setFlushOnDestruct(false);
 // add the backend app
 sly_Loader::addLoadPath(SLY_SALLYFOLDER.'/backend/lib/', 'sly_');
 
@@ -69,33 +63,12 @@ $user    = $service->findById(SLY_TESTING_USER_ID);
 $service->setCurrentUser($user);
 
 // init the app
-//$app = new sly_App_Backend();
-//sly_Core::setCurrentApp($app);
-//$app->initialize();
+$app = new sly_App_Backend();
+sly_Core::setCurrentApp($app);
+$app->initialize();
 
 // make tests autoloadable
 sly_Loader::addLoadPath(dirname(__FILE__).'/tests', 'sly_');
 
 // clear current cache
 sly_Core::cache()->flush('sly');
-
-// clean up later on
-if (!$travis) {
-	function sallyTestsShutdown() {
-		$sallyRoot  = realpath(dirname(__FILE__).'/../../');
-		$configRoot = $sallyRoot.'/data/config/';
-
-		foreach (array('local', 'project') as $conf) {
-			$liveFile   = $configRoot.'sly_'.$conf.'.yml';
-			$backupFile = $configRoot.'sly_'.$conf.'.yml.bak';
-
-			if (file_exists($backupFile)) {
-				@unlink($liveFile);
-				rename($backupFile, $liveFile);
-				@unlink($backupFile);
-			}
-		}
-	}
-
-	register_shutdown_function('sallyTestsShutdown');
-}
