@@ -54,8 +54,8 @@ class sly_Util_DirectoryExTest extends PHPUnit_Framework_TestCase {
 	}
 
 	public function testGetRelative() {
-		$result   = sly_Util_Directory::getRelative(__FILE__, SLY_BASE);
-		$expected = str_replace('/', self::S, 'sally/tests/tests/Util/DirectoryExTest.php');
+		$result   = sly_Util_Directory::getRelative(__FILE__, SLY_COREFOLDER);
+		$expected = str_replace('/', self::S, 'tests/tests/Util/DirectoryExTest.php');
 
 		$this->assertEquals($expected, $result);
 	}
