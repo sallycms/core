@@ -20,7 +20,7 @@ define('SLY_IS_TESTING',        true);
 define('SLY_TESTING_USER_ID',   1);
 define('SLY_TESTING_USE_CACHE', $travis ? false : true);
 
-if (!defined('SLY_DATAFOLDER'))    define('SLY_DATAFOLDER',    $sallyRoot.DIRECTORY_SEPARATOR.'data');
+if (!defined('SLY_BASE'))          define('SLY_BASE',          $sallyRoot);
 if (!defined('SLY_DEVELOPFOLDER')) define('SLY_DEVELOPFOLDER', $here.DIRECTORY_SEPARATOR.'develop');
 if (!defined('SLY_MEDIAFOLDER'))   define('SLY_MEDIAFOLDER',   $here.DIRECTORY_SEPARATOR.'mediapool');
 if (!defined('SLY_ADDONFOLDER'))   define('SLY_ADDONFOLDER',   $here.DIRECTORY_SEPARATOR.'addons');

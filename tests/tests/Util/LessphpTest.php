@@ -27,8 +27,15 @@ class sly_Util_LessphpTest extends PHPUnit_Framework_TestCase {
 	}
 
 	public function testImports() {
-		$input  = "@import 'layout.less'; a { .clear; }";
+		$here  = dirname(__FILE__);
+		$rel   = sly_Util_Directory::getRelative($here);
+		$mixin = '.clear() { overflow: auto; }';
+		file_put_contents($here.DIRECTORY_SEPARATOR.'mixin.less', $mixin);
+		sly_Core::config()->setStatic('LESS_IMPORT_DIRS', array($rel));
+
+		$input  = "@import 'mixin.less'; a { .clear; }";
 		$output = sly_Util_Lessphp::processString($input);
+		unlink($here.DIRECTORY_SEPARATOR.'mixin.less');
 
 		$this->assertEquals('a{overflow:auto;}', $output);
 	}

@@ -11,7 +11,9 @@
 class sly_App_Tests implements sly_App_Interface {
 
 	public function initialize() {
-
+		$container = $this->getContainer();
+		$container->getTemplateService()->refresh();
+		$container->getModuleService()->refresh();
 	}
 
 	public function run() {
