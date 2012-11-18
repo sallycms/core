@@ -172,7 +172,7 @@ class sly_Util_Article {
 	 * @return string
 	 */
 	public static function getUrl($articleID, $clang = null, $params = array(), $divider = '&amp;', $absolute = false, $secure = null) {
-		$article = self::findById($articleID, $clang);
+		$article = self::findById($articleID, $clang, $articleID);
 
 		if (!$article) {
 			$clang     = $clang === null ? sly_Core::getCurrentClang() : (int) $clang;
