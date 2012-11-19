@@ -171,4 +171,40 @@ class sly_Util_HTML {
 			return sprintf('<%s %s>%s</%s>', $name, $attributeString, $innerHtml, $name);
 		}
 	}
+
+	/**
+	 * Replaces sally://ARTICLEID and sally://ARTICLEID-CLANGID in
+	 * the $content by article http URLs.
+	 *
+	 * @param  string $content
+	 * @return string
+	 */
+	public static function replaceSallyLinks($content) {
+		preg_match_all('#sally://([0-9]+)(?:-([0-9]+))?/?#', $content, $matches, PREG_OFFSET_CAPTURE | PREG_SET_ORDER);
+
+		$skew = 0;
+
+		foreach ($matches as $match) {
+			$complete = $match[0];
+			$length   = strlen($complete[0]);
+			$offset   = $complete[1];
+			$id       = (int) $match[1][0];
+			$clang    = isset($match[2]) ? (int) $match[2][0] : null;
+
+			try {
+				$repl = sly_Util_Article::getUrl($id, $clang);
+			}
+			catch (Exception $e) {
+				$repl = '#';
+			}
+
+			// replace the match
+			$content = substr_replace($content, $repl, $offset + $skew, $length);
+
+			// ensure the next replacements get the correct offset
+			$skew += strlen($repl) - $length;
+		}
+
+		return $content;
+	}
 }
