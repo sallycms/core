@@ -38,6 +38,10 @@ class sly_Util_HTTP {
 			$targetUrl = $target;
 		}
 
+		if (empty($targetUrl)) {
+			$noticeText = t('redirect_notfound');
+		}
+
 		if (empty($noticeText)) {
 			$noticeText = t('redirect_to', sly_html($targetUrl));
 		}
