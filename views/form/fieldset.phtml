@@ -9,7 +9,7 @@
  */
 
 $attrs    = $this->attrs;
-$classes  = isset($attrs['class']) ? $attrs['class'] : '';
+$classes  = isset($attrs['class']) ? trim($attrs['class']).' ' : '';
 $classes .= sprintf('sly-form-col-%d sly-num%d', $this->columns, $this->num-1);
 
 $attrs['class'] = $classes;
