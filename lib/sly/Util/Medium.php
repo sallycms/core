@@ -163,7 +163,12 @@ class sly_Util_Medium {
 		$filename     = str_replace(array('ä', 'ö', 'ü', 'ß'), array('ae', 'oe', 'ue', 'ss'), $filename);
 		$filename     = sly_Core::dispatcher()->filter('SLY_MEDIUM_FILENAME', $filename, array('orig' => $origFilename));
 		$filename     = preg_replace('#[^a-z0-9.+-]#i', '_', $filename);
+		$filename     = trim(preg_replace('#_+#i', '_', $filename), '_');
 		$extension    = sly_Util_String::getFileExtension($filename);
+
+		if (strlen($filename) === 0) {
+			$filename = 'unnamed';
+		}
 
 		if ($extension) {
 			$filename  = substr($filename, 0, -(strlen($extension)+1));
