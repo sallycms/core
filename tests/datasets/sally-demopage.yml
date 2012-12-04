@@ -400,7 +400,7 @@ sly_user:
       # make sure to use a compatible hash here
       password: c5e4335577bb89540b15e2f5251e8bc02ced5b32
       status: 1
-      rights: '#admin[]#'
+      attributes: '{"isAdmin":true}'
       createuser: setup
       updateuser: admin
       createdate: '2011-04-13 02:37:08'
