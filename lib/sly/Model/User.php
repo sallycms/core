@@ -20,7 +20,7 @@ class sly_Model_User extends sly_Model_Base_Id {
 	protected $login;         ///< string
 	protected $password;      ///< string
 	protected $status;        ///< int
-	protected $rights;        ///< string
+	protected $attributes;    ///< array
 	protected $createuser;    ///< string
 	protected $updateuser;    ///< string
 	protected $createdate;    ///< int
@@ -35,7 +35,7 @@ class sly_Model_User extends sly_Model_Base_Id {
 
 	protected $_attributes = array(
 		'name' => 'string', 'description' => 'string', 'login' => 'string', 'password' => 'string',
-		'status' => 'int', 'rights' => 'string', 'updateuser' => 'string',
+		'status' => 'int', 'attributes' => 'json', 'updateuser' => 'string',
 		'updatedate' => 'datetime', 'createuser' => 'string', 'createdate' => 'datetime',
 		'lasttrydate' => 'datetime', 'timezone' => 'string', 'revision' => 'int'
 	); ///< array
@@ -50,22 +50,19 @@ class sly_Model_User extends sly_Model_Base_Id {
 
 	protected function evalRights() {
 		$config      = sly_Core::config();
-		$rightsArray = array_filter(explode('#', $this->getRights()));
 
 		$this->startpage     = $config->get('START_PAGE');
 		$this->backendLocale = sly_Core::getDefaultLocale();
 		$this->isAdmin       = false;
 
-		foreach ($rightsArray as $right) {
-			if ($right == 'admin[]') {
-				$this->isAdmin = true;
-			}
-			elseif (substr($right, 0, 10) == 'startpage[') {
-				$this->startpage = substr($right, 10, -1);
-			}
-			elseif (substr($right, 0, 8) == 'be_lang[') {
-				$this->backendLocale = substr($right, 8, -1);
-			}
+		if (isset($this->attributes['isAdmin'])) {
+			$this->isAdmin = $this->attributes['isAdmin'];
+		}
+		if (isset($this->attributes['startpage'])) {
+			$this->startpage = $this->attributes['startpage'];
+		}
+		if (isset($this->attributes['backendLocale'])) {
+			$this->backendLocale = $this->attributes['backendLocale'];
 		}
 	}
 
@@ -140,11 +137,39 @@ class sly_Model_User extends sly_Model_Base_Id {
 	 * @param string $rights
 	 */
 	public function setRights($rights) {
-		$this->rights = '#'.trim($rights, '#').'#';
+		$this->rights = $rights;
 		$this->evalRights();
 	}
 
 	// Hilfsfunktionen für abgeleitete Attribute
+
+	/**
+	 *
+	 * @param boolean $isAdmin
+	 */
+	public function setIsAdmin($isAdmin) {
+		$isAdmin                 = (boolean) $isAdmin;
+		$this->isAdmin           = $isAdmin;
+		$this->attributes['isAdmin'] = $isAdmin;
+	}
+
+	/**
+	 *
+	 * @param string $startPage
+	 */
+	public function setStartPage($startPage) {
+		$this->startpage           = $startPage;
+		$this->attributes['startpage'] = $startPage;
+	}
+
+	/**
+	 *
+	 * @param string $backendLocale
+	 */
+	public function setBackendLocale($backendLocale) {
+		$this->backendLocale           = $backendLocale;
+		$this->attributes['backendLocale'] = $backendLocale;
+	}
 
 	public function getStartPage()     { return $this->startpage;     } ///< @return string
 	public function getBackendLocale() { return $this->backendLocale; } ///< @return string
