@@ -10,7 +10,7 @@
 
 class sly_Util_ComposerTest extends PHPUnit_Framework_TestCase {
 	private function getFile() {
-		return realpath(dirname(__FILE__).'/../../../../composer.json');
+		return realpath(dirname(__FILE__).'/../../../composer.json');
 	}
 
 	public function testSimpleStuff() {
@@ -19,8 +19,8 @@ class sly_Util_ComposerTest extends PHPUnit_Framework_TestCase {
 
 		$this->assertEquals($file, $util->getFilename());
 		$this->assertInternalType('array', $util->getContent());
-		$this->assertEquals('sallycms/sallycms', $util->getKey('name'));
-		$this->assertEquals(array('cms', 'php', 'mysql'), $util->getKey('keywords'));
+		$this->assertEquals('sallycms/core', $util->getKey('name'));
+		$this->assertEquals(array('cms', 'php', 'mysql', 'framework', 'sallycms'), $util->getKey('keywords'));
 		$this->assertEquals(null, $util->getKey('mumblefoo'));
 	}
 }
