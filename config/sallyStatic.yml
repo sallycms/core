@@ -1,0 +1,36 @@
+VERSION:
+  MAJOR: 0
+  MINOR: 8
+  BUGFIX: 0
+FILEPERM: 436
+DIRPERM: 511
+USE_ETAG: never
+USE_LAST_MODIFIED: never
+BLOCKED_EXTENSIONS:
+  - .php
+  - .php3
+  - .php4
+  - .php5
+  - .php6
+  - .phtml
+  - .pl
+  - .asp
+  - .aspx
+  - .cfm
+  - .jsp
+  - .htaccess
+FALLBACK_CACHING_STRATEGY: BabelCache_Filesystem_Plain
+ASSETS_CACHE_CONTROL: max-age=29030401
+ASSETS_DIRECTORIES:
+  - assets/
+  - data/mediapool/
+  - data/dyn/public/
+  - sally/backend/assets/
+authorisation:
+  article:
+    title: 'translate:article'
+    list: sly_Authorisation_ArticleListProvider
+  apps:
+    title: 'translate:applications'
+    token: {  }
+LESS_IMPORT_DIRS: ['sally/vendor/sallycms/less-mixins/']
