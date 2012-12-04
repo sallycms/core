@@ -315,10 +315,26 @@ class sly_Model_Base_Article extends sly_Model_Base {
 			return $urlCache[$cacheKey];
 		}
 
+		$dispatcher = sly_Core::dispatcher();
+		$redirect   = $dispatcher->filter('SLY_URL_REDIRECT', $this, array(
+			'params'       => $paramString,
+			'divider'      => $divider,
+			'disableCache' => $disableCache
+		));
+
+		// the listener must return an article_id (int) or URL (string) to modify the returned URL
+		if ($redirect && $redirect !== $this) {
+			if (is_integer($redirect)) {
+				$id = $redirect;
+			}
+			else {
+				return $redirect;
+			}
+		}
+
 		// check for any fancy URL addOns
 
 		$paramString = sly_Util_HTTP::queryString($params, $divider);
-		$dispatcher  = sly_Core::dispatcher();
 		$url         = $dispatcher->filter('URL_REWRITE', '', array(
 			'id'            => $id,
 			'clang'         => $clang,
