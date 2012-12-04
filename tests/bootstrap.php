@@ -20,10 +20,11 @@ define('SLY_IS_TESTING',        true);
 define('SLY_TESTING_USER_ID',   1);
 define('SLY_TESTING_USE_CACHE', $travis ? false : true);
 
-if (!defined('SLY_DATAFOLDER'))    define('SLY_DATAFOLDER',    $sallyRoot.DIRECTORY_SEPARATOR.'data');
+if (!defined('SLY_BASE'))          define('SLY_BASE',          $sallyRoot);
 if (!defined('SLY_DEVELOPFOLDER')) define('SLY_DEVELOPFOLDER', $here.DIRECTORY_SEPARATOR.'develop');
 if (!defined('SLY_MEDIAFOLDER'))   define('SLY_MEDIAFOLDER',   $here.DIRECTORY_SEPARATOR.'mediapool');
 if (!defined('SLY_ADDONFOLDER'))   define('SLY_ADDONFOLDER',   $here.DIRECTORY_SEPARATOR.'addons');
+if (!defined('SLY_VENDORFOLDER'))  define('SLY_VENDORFOLDER',  $sallyRoot.DIRECTORY_SEPARATOR.'vendor');
 
 if (!is_dir(SLY_MEDIAFOLDER)) mkdir(SLY_MEDIAFOLDER);
 if (!is_dir(SLY_ADDONFOLDER)) mkdir(SLY_ADDONFOLDER);
@@ -46,10 +47,12 @@ if (is_array($files)) array_map('unlink', $files);
 $slyAppName = 'tests';
 $slyAppBase = 'tests';
 require $sallyRoot.'/master.php';
-//do not overwrite config, write the cachefile
+//do not overwrite config or write the cachefile
 sly_Core::config()->setFlushOnDestruct(false);
-// add the backend app
-sly_Loader::addLoadPath(SLY_SALLYFOLDER.'/backend/lib/', 'sly_');
+// add the dummy lib
+sly_Loader::addLoadPath($here.DIRECTORY_SEPARATOR.'lib');
+// make tests autoloadable
+sly_Loader::addLoadPath(dirname(__FILE__).'/tests', 'sly_');
 
 // add DbUnit
 if ($travis) {
@@ -63,12 +66,13 @@ $user    = $service->findById(SLY_TESTING_USER_ID);
 $service->setCurrentUser($user);
 
 // init the app
-$app = new sly_App_Backend();
+$app = new sly_App_Tests();
 sly_Core::setCurrentApp($app);
 $app->initialize();
 
-// make tests autoloadable
-sly_Loader::addLoadPath(dirname(__FILE__).'/tests', 'sly_');
+//add a dummy i18n
+$i18n = new sly_I18N('de', $here.DIRECTORY_SEPARATOR.'addons');
+sly_Core::setI18N($i18n);
 
 // clear current cache
 sly_Core::cache()->flush('sly');

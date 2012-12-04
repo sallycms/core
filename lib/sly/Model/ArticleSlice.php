@@ -74,13 +74,6 @@ class sly_Model_ArticleSlice extends sly_Model_Base_Id implements sly_Model_ISli
 	}
 
 	/**
-	 * @deprecated  since 0.6
-	 */
-	public function getPrior() {
-		return $this->pos;
-	}
-
-	/**
 	 *
 	 * @return int
 	 */
