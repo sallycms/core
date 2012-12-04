@@ -35,7 +35,7 @@ class sly_Model_User extends sly_Model_Base_Id {
 
 	protected $_attributes = array(
 		'name' => 'string', 'description' => 'string', 'login' => 'string', 'password' => 'string',
-		'status' => 'int', 'attributes' => 'json', 'updateuser' => 'string',
+		'status' => 'int', 'attributes' => 'array', 'updateuser' => 'string',
 		'updatedate' => 'datetime', 'createuser' => 'string', 'createdate' => 'datetime',
 		'lasttrydate' => 'datetime', 'timezone' => 'string', 'revision' => 'int'
 	); ///< array

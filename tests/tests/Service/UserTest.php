@@ -29,7 +29,8 @@ class sly_Service_UserTest extends sly_BaseTest {
 			'status'      => true,
 			'createuser'  => 'phpunit',
 			'updateuser'  => 'phpunit',
-			'psw'         => 'mumblefoo'
+			'psw'         => 'mumblefoo',
+			'attributes'  => array('startpage' => 'structure')
 		));
 
 		$this->assertInstanceOf('sly_Model_User', $user);
