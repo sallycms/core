@@ -108,7 +108,7 @@ abstract class sly_Model_Base {
 				elseif ($type === 'datetime') {
 					$value = $value ? date('Y-m-d H:i:s', $value) : '0000-00-00 00:00:00';
 				}
-				elseif ($type === 'json') {
+				elseif ($type === 'array') {
 					$value = json_encode($value);
 				}
 			}
@@ -130,14 +130,17 @@ abstract class sly_Model_Base {
 						$hash[$name] = strtotime($hash[$name]);
 					}
 				}
-				elseif ($type === 'json') {
-					$hash[$name] = json_decode($hash[$name], true);
-
-					if (is_array($hash[$name])) {
-						$type = 'array';
-					} else {
-						$type = 'string';
+				elseif ($type === 'array') {
+					$value = $hash[$name];
+					
+					if (is_string($value)) {
+						$value = json_decode($value, true);
 					}
+					if (!is_array($value)) {
+						$value = array();
+					}
+
+					$hash[$name] = $value;
 				}
 
 				$this->$name = $hash[$name];

@@ -18,7 +18,7 @@ class sly_Model_Slice extends sly_Model_Base_Id {
 	protected $module; ///< string
 	protected $serialized_values; ///< array
 
-	protected $_attributes = array('module' => 'string', 'serialized_values' => 'json'); ///< array
+	protected $_attributes = array('module' => 'string', 'serialized_values' => 'array'); ///< array
 
 	/**
 	 * @return string
