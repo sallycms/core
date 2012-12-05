@@ -17,6 +17,8 @@
 class sly_Service_Template extends sly_Service_DevelopBase {
 	const DEFAULT_TYPE = 'default'; ///< string
 
+	protected $wraps = array();
+
 	private static $defaultSlots = array('default' => ''); ///< array
 
 	/**
@@ -191,7 +193,37 @@ class sly_Service_Template extends sly_Service_DevelopBase {
 	 * @param array  $params  array of params to be available in the template
 	 */
 	public function includeFile($name, array $params = array()) {
+		array_push($this->wraps, null);
+
 		$file = SLY_DEVELOPFOLDER.'/templates/'.$this->getFilename($name);
 		sly_Util_Template::renderFile($file, $params, false);
+
+		$wrap = array_pop($this->wraps);
+
+		if ($wrap) {
+			$content = ob_get_contents();
+			ob_end_clean();
+
+			$params = $wrap[1];
+			$params[$wrap[2]] = $content;
+
+			$this->includeFile($wrap[0], $params);
+		}
 	}
+
+	/**
+	 * Can be called inside of a template and wraps the given outer template ($name, $params)
+	 * around the inner template. The outer template gets the content of the inner template
+	 * by the paramater named by $contentName.
+	 * This must be called before the first output of the inner template.
+	 *
+	 * @param string $name         template name
+	 * @param array  $params       array of params to be available in the template
+	 * @param string $contentName  name of the content variable
+	 */
+	public function wrapFile($name, array $params = array(), $contentName = 'content') {
+		ob_start();
+		array_pop($this->wraps);
+		array_push($this->wraps, array($name, $params, $contentName));
+ 	}
 }
