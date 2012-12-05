@@ -32,6 +32,25 @@ class sly_Util_Template {
 	}
 
 	/**
+	 * Can be called inside of a template and wraps the given outer template ($name, $params)
+	 * around the inner template. The outer template gets the content of the inner template
+	 * by the paramater named by $contentName.
+	 * This must be called before the first output of the inner template.
+	 *
+	 * @param string $name         template name
+	 * @param array  $params       array of params to be available in the template
+	 * @param string $contentName  name of the content variable
+	 */
+	public static function wrap($name, array $params = array(), $contentName = 'content') {
+		try {
+			sly_Service_Factory::getTemplateService()->wrapFile($name, $params, $contentName);
+		}
+		catch (sly_Service_Template_Exception $e) {
+			print $e->getMessage();
+		}
+	}
+
+	/**
 	 * render a template and return its content
 	 *
 	 * @throws sly_Exception   if an exception is thrown inside the template
