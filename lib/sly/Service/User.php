@@ -54,29 +54,13 @@ class sly_Service_User extends sly_Service_Model_Base_Id {
 	public function create($params, sly_Model_User $creator = null) {
 		$creator = $this->getActor($creator, __METHOD__);
 
-		if (!isset($params['login']) || mb_strlen($params['login']) === 0) {
-			throw new sly_Exception(t('no_username_given'));
-		}
-
-		if (!isset($params['psw']) || mb_strlen($params['psw']) === 0) {
-			throw new sly_Exception(t('no_password_given'));
-		}
-
-		if ($this->find(array('login' => $params['login']))) {
-			throw new sly_Exception(t('user_login_already_exists'));
-		}
-
 		$defaults = array(
 			'status'      => false,
-			'rights'      => '',
+			'attributes'  => array(),
 			'name'        => '',
 			'description' => '',
 			'lasttrydate' => null,
-			'revision'    => 0,
-			'updatedate'  => time(),
-			'createdate'  => time(),
-			'updateuser'  => $creator->getLogin(),
-			'createuser'  => $creator->getLogin(),
+			'revision'    => 0
 		);
 
 		$params = array_merge($defaults, $params);
@@ -90,16 +74,16 @@ class sly_Service_User extends sly_Service_Model_Base_Id {
 	 * @param  string         $login
 	 * @param  string         $password
 	 * @param  boolean        $active
-	 * @param  string         $rights
+	 * @param  array          $attributes
 	 * @param  sly_Model_User $creator   creator or null for the current user
 	 * @return sly_Model_User $user
 	 */
-	public function add($login, $password, $active, $rights, sly_Model_User $creator = null) {
+	public function add($login, $password, $active, $attributes, sly_Model_User $creator = null) {
 		return $this->create(array(
 			'login'  => $login,
 			'psw'    => $password,
 			'status' => (boolean) $active,
-			'rights' => $rights
+			'attributes' => $attributes
 		), $creator);
 	}
 
@@ -112,7 +96,25 @@ class sly_Service_User extends sly_Service_Model_Base_Id {
 	 */
 	public function save(sly_Model_Base $user, sly_Model_User $manager = null) {
 		$manager = $this->getActor($manager, __METHOD__);
-		$event   = ($user->getId() == sly_Model_Base_Id::NEW_ID) ? 'SLY_USER_ADDED' : 'SLY_USER_UPDATED';
+
+		if (mb_strlen($user->getLogin()) === 0) {
+			throw new sly_Exception(t('no_username_given'));
+		}
+
+		if (mb_strlen($user->getPassword()) === 0) {
+			throw new sly_Exception(t('no_password_given'));
+		}
+
+		if ($user->getId() === sly_Model_Base_Id::NEW_ID) {
+			if ($this->findOne(array('login' => $user->getLogin()))) {
+				throw new sly_Exception(t('user_login_already_exists'));
+			}
+			$user->setCreateColumns($manager);
+		}
+
+		$user->setUpdateColumns($manager);
+
+		$event   = ($user->getId() === sly_Model_Base_Id::NEW_ID) ? 'SLY_USER_ADDED' : 'SLY_USER_UPDATED';
 		$user    = parent::save($user);
 
 		$this->cache->flush('sly.user');
