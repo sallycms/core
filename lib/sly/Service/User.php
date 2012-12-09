@@ -58,6 +58,7 @@ class sly_Service_User extends sly_Service_Model_Base_Id {
 			'status'      => false,
 			'attributes'  => array(),
 			'name'        => '',
+			'psw'         => '',
 			'description' => '',
 			'lasttrydate' => null,
 			'revision'    => 0
@@ -99,10 +100,6 @@ class sly_Service_User extends sly_Service_Model_Base_Id {
 
 		if (mb_strlen($user->getLogin()) === 0) {
 			throw new sly_Exception(t('no_username_given'));
-		}
-
-		if (mb_strlen($user->getPassword()) === 0) {
-			throw new sly_Exception(t('no_password_given'));
 		}
 
 		if ($user->getId() === sly_Model_Base_Id::NEW_ID) {
