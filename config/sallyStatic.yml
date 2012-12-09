@@ -26,6 +26,8 @@ ASSETS_DIRECTORIES:
   - data/mediapool/
   - data/dyn/public/
   - sally/backend/assets/
+  - sally/setup/assets/
+  - sally/noir/assets/
 authorisation:
   article:
     title: 'translate:article'

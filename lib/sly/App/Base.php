@@ -49,16 +49,14 @@ abstract class sly_App_Base implements sly_App_Interface {
 	 * initialize the app
 	 */
 	public function initialize() {
-		$isSetup = sly_Core::isSetup();
-
 		// boot addOns
-		if (!$isSetup) sly_Core::loadAddOns();
+		sly_Core::loadAddOns();
 
 		// register listeners
 		sly_Core::registerListeners();
 
 		// synchronize develop
-		if (!$isSetup) $this->syncDevelopFiles();
+		$this->syncDevelopFiles();
 	}
 
 	/**
@@ -132,16 +130,8 @@ abstract class sly_App_Base implements sly_App_Interface {
 		return $request->getAppBaseUrl($forceProtocol, $container);
 	}
 
-	protected function setDefaultTimezone($isSetup) {
-		$timezone = $isSetup ? @date_default_timezone_get() : sly_Core::getTimezone();
-
-		// fix badly configured servers where the get function doesn't even return a guessed default timezone
-		if (empty($timezone)) {
-			$timezone = sly_Core::getTimezone();
-		}
-
-		// set the determined timezone
-		date_default_timezone_set($timezone);
+	protected function setDefaultTimezone() {
+		date_default_timezone_set(sly_Core::getTimezone());
 	}
 
 	protected function performRouting(sly_Request $request) {
