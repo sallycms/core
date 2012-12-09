@@ -138,6 +138,31 @@ class sly_Model_User extends sly_Model_Base_Id {
 	// helpers for attributes
 
 	/**
+	 * sets an attribute
+	 *
+	 * @param string $key
+	 * @param mixed $value
+	 */
+	public function setAttrubute($key, $value) {
+		$this->attributes[(string)$key] = $value;
+	}
+
+	/**
+	 * gets an attribute
+	 *
+	 * @param string $key
+	 * @param mixed  $default
+	 */
+	public function getAttribute($key, $default = null) {
+		$key = (string) $key;
+		if (isset($this->attributes[$key]))
+		{
+			return $this->attributes[$key];
+		}
+		return $default;
+	}
+
+	/**
 	 *
 	 * @param boolean $isAdmin
 	 */
