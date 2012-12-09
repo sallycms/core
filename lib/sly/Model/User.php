@@ -131,25 +131,16 @@ class sly_Model_User extends sly_Model_Base_Id {
 	public function getTimeZone()    { return $this->timezone;    } ///< @return string
 	public function getRevision()    { return $this->revision;    } ///< @return int
 
-	// Wenn Rechte gesetzt werden, müssen wir etwas mehr arbeiten.
 
-	/**
-	 * @param string $rights
-	 */
-	public function setRights($rights) {
-		$this->rights = $rights;
-		$this->evalRights();
-	}
-
-	// Hilfsfunktionen für abgeleitete Attribute
+	// helpers for attributes
 
 	/**
 	 *
 	 * @param boolean $isAdmin
 	 */
 	public function setIsAdmin($isAdmin) {
-		$isAdmin                 = (boolean) $isAdmin;
-		$this->isAdmin           = $isAdmin;
+		$isAdmin       = (boolean) $isAdmin;
+		$this->isAdmin = $isAdmin;
 		$this->attributes['isAdmin'] = $isAdmin;
 	}
 
@@ -158,7 +149,7 @@ class sly_Model_User extends sly_Model_Base_Id {
 	 * @param string $startPage
 	 */
 	public function setStartPage($startPage) {
-		$this->startpage           = $startPage;
+		$this->startpage = $startPage;
 		$this->attributes['startpage'] = $startPage;
 	}
 
@@ -167,7 +158,7 @@ class sly_Model_User extends sly_Model_Base_Id {
 	 * @param string $backendLocale
 	 */
 	public function setBackendLocale($backendLocale) {
-		$this->backendLocale           = $backendLocale;
+		$this->backendLocale = $backendLocale;
 		$this->attributes['backendLocale'] = $backendLocale;
 	}
 
