@@ -185,11 +185,21 @@ class sly_Model_User extends sly_Model_Base_Id {
 	}
 
 	/**
+	 * @deprecated since 0.8 use hasPermission() instead
 	 * @param  string $context
 	 * @param  string $right
 	 * @return boolean
 	 */
 	public function hasRight($context, $right, $value = true) {
+		return $this->hasPermission($context, $right, $value);
+	}
+
+	/**
+	 * @param  string $context
+	 * @param  string $right
+	 * @return boolean
+	 */
+	public function hasPermission($context, $right, $value = true) {
 		return sly_Authorisation::hasPermission($this->getId(), $context, $right, $value);
 	}
 
