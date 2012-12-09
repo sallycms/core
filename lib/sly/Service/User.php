@@ -103,7 +103,7 @@ class sly_Service_User extends sly_Service_Model_Base_Id {
 		}
 
 		if ($user->getId() === sly_Model_Base_Id::NEW_ID) {
-			if ($this->findOne(array('login' => $user->getLogin()))) {
+			if ($this->count(array('login' => $user->getLogin())) > 0) {
 				throw new sly_Exception(t('user_login_already_exists'));
 			}
 			$user->setCreateColumns($manager);
