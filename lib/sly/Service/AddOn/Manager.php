@@ -207,9 +207,9 @@ class sly_Service_AddOn_Manager {
 		$this->checkRequirements($addon);
 
 		// check Sally version
-		$sallyVersions = $aservice->getRequiredSallyVersions($addon);
+		$sallyVersion = $aservice->getRequiredSallyVersion($addon);
 
-		if (!empty($sallyVersions)) {
+		if (!empty($sallyVersion)) {
 			if (!$aservice->isCompatible($addon)) {
 				throw new sly_Exception(t('addon_incompatible', $addon, sly_Core::getVersion('X.Y.Z')));
 			}

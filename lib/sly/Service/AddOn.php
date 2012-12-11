@@ -222,16 +222,11 @@ class sly_Service_AddOn {
 	 * Return a list of Sally versions the addOn is compatible with
 	 *
 	 * @param  string $addon  addOn name
-	 * @return array          list of sally versions (can be empty for badly defined composer.json files)
+	 * @return string         the version constraint like ">=0.7,<0.9" or null if nothing is defined
 	 */
-	public function getRequiredSallyVersions($addon) {
+	public function getRequiredSallyVersion($addon) {
 		$requirements = $this->pkgService->getKey($addon, 'require', array());
-
-		// nothing given
-		if (!isset($requirements[self::SALLY_PKGKEY])) return array();
-
-		// split up the Composer-style definition
-		return explode(',', $requirements[self::SALLY_PKGKEY]);
+		return isset($requirements[self::SALLY_PKGKEY]) ? $requirements[self::SALLY_PKGKEY] : null;
 	}
 
 	/**
@@ -241,13 +236,8 @@ class sly_Service_AddOn {
 	 * @return boolean        true if compatible, else false
 	 */
 	public function isCompatible($addon) {
-		$sallyVersions = $this->getRequiredSallyVersions($addon);
-
-		foreach ($sallyVersions as $version) {
-			if (sly_Util_Versions::isCompatible($version)) return true;
-		}
-
-		return false;
+		$version = $this->getRequiredSallyVersion($addon);
+		return sly_Util_Versions::isCompatible($version);
 	}
 
 	/**
