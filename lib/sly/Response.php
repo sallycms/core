@@ -123,13 +123,27 @@ class sly_Response {
 			$this->getContent();
 	}
 
+	/**
+	 *
+	 * @param string $type
+	 * @param strinf $charset
+	 * @return sly_Response
+	 */
 	public function setContentType($type, $charset = null) {
 		$this->headers->set('Content-Type', $type);
 		if ($charset !== null) $this->setCharset($charset);
+		return $this;
 	}
 
+	/**
+	 *
+	 * @param string $name
+	 * @param string $value
+	 * @return sly_Response
+	 */
 	public function setHeader($name, $value) {
 		$this->headers->set($name, $value);
+		return $this;
 	}
 
 	public function hasHeader($name) {
@@ -140,8 +154,14 @@ class sly_Response {
 		$this->headers->get($name, 'string', $default);
 	}
 
+	/**
+	 *
+	 * @param string $name
+	 * @return sly_Response
+	 */
 	public function removeHeader($name) {
 		$this->headers->remove($name);
+		return $this;
 	}
 
 	/**
@@ -249,6 +269,7 @@ class sly_Response {
 	 * __toString() method.
 	 *
 	 * @param mixed  $content
+	 * @return sly_Response
 	 */
 	public function setContent($content) {
 		if (null !== $content && !is_string($content) && !is_numeric($content) && !is_callable(array($content, '__toString'))) {
@@ -256,6 +277,7 @@ class sly_Response {
 		}
 
 		$this->content = (string) $content;
+		return $this;
 	}
 
 	/**
@@ -273,6 +295,7 @@ class sly_Response {
 	 * @throws InvalidArgumentException  when the HTTP status code is not valid
 	 * @param  integer $code             HTTP status code
 	 * @param  string  $text             HTTP status text
+	 * @return sly_Response
 	 */
 	public function setStatusCode($code, $text = null) {
 		$this->statusCode = (int) $code;
@@ -282,6 +305,7 @@ class sly_Response {
 		}
 
 		$this->statusText = false === $text ? '' : (null === $text ? self::$statusTexts[$this->statusCode] : $text);
+		return $this;
 	}
 
 	/**
@@ -324,9 +348,11 @@ class sly_Response {
 	 * Sets the Date header
 	 *
 	 * @param int $date  the date as a timestamp
+	 * @return sly_Response
 	 */
 	public function setDate($date) {
 		$this->headers->set('Date', date('D, d M Y H:i:s', $date).' GMT');
+		return $this;
 	}
 
 	/**
@@ -344,6 +370,7 @@ class sly_Response {
 	 * If passed a null value, it removes the header.
 	 *
 	 * @param int $date  the date as a timestamp
+	 * @return sly_Response
 	 */
 	public function setExpires($date = null) {
 		if (null === $date) {
@@ -352,6 +379,7 @@ class sly_Response {
 		else {
 			$this->headers->set('Expires', date('D, d M Y H:i:s', $date).' GMT');
 		}
+		return $this;
 	}
 
 	/**
@@ -360,7 +388,7 @@ class sly_Response {
 	 * @return string  the last modified time as a string
 	 */
 	public function getLastModified() {
-		return $this->headers->remove('Last-Modified');
+		return $this->headers->get('Last-Modified');
 	}
 
 	/**
@@ -369,6 +397,7 @@ class sly_Response {
 	 * If passed a null value, it removes the header.
 	 *
 	 * @param int $date  the date as a timestamp
+	 * @return sly_Response
 	 */
 	public function setLastModified($date = null) {
 		if (null === $date) {
@@ -377,6 +406,7 @@ class sly_Response {
 		else {
 			$this->headers->set('Last-Modified', date('D, d M Y H:i:s', $date).' GMT');
 		}
+		return $this;
 	}
 
 	/**
@@ -393,6 +423,7 @@ class sly_Response {
 	 *
 	 * @param string  $etag  the ETag unique identifier
 	 * @param boolean $weak  whether you want a weak ETag or not
+	 * @return sly_Response
 	 */
 	public function setEtag($etag = null, $weak = false) {
 		if (null === $etag) {
@@ -405,6 +436,7 @@ class sly_Response {
 
 			$this->headers->set('ETag', (true === $weak ? 'W/' : '').$etag);
 		}
+		return $this;
 	}
 
 	/**
@@ -413,6 +445,7 @@ class sly_Response {
 	 * Available options are etag and last_modified.
 	 *
 	 * @param array $options  an array of cache options
+	 * @return sly_Response
 	 */
 	public function setCache(array $options) {
 		if ($diff = array_diff(array_keys($options), array('etag', 'last_modified'))) {
@@ -426,6 +459,7 @@ class sly_Response {
 		if (isset($options['last_modified'])) {
 			$this->setLastModified($options['last_modified']);
 		}
+		return $this;
 	}
 
 	/**
@@ -435,6 +469,7 @@ class sly_Response {
 	 * NOT be included in 304 responses.
 	 *
 	 * @see http://tools.ietf.org/html/rfc2616#section-10.3.5
+	 * @return sly_Response
 	 */
 	public function setNotModified() {
 		$this->setStatusCode(304);
@@ -444,6 +479,7 @@ class sly_Response {
 		foreach (array('Allow', 'Content-Encoding', 'Content-Language', 'Content-Length', 'Content-MD5', 'Content-Type', 'Last-Modified') as $header) {
 			$this->headers->remove($header);
 		}
+		return $this;
 	}
 
 	/**
