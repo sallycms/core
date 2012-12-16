@@ -237,7 +237,7 @@ class sly_Model_ArticleSlice extends sly_Model_Base_Id implements sly_Model_ISli
 	 * @param  string $value
 	 */
 	public function setValue($finder, $value = null) {
-		$this->getSlice()->addValue($finder, $value);
+		$this->getSlice()->setValue($finder, $value);
 	}
 
 	public function setValues($values = array()) {
