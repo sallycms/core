@@ -126,26 +126,28 @@ class sly_Request {
 	 *
 	 * @param  boolean $addScriptPath
 	 * @param  mixed   $forceProtocol  a concrete protocol like 'http' or null for the current one
+	 * @param  mixed   $forcePort      a concrete port or null for the current one
 	 * @return string
 	 */
-	public function getBaseUrl($addScriptPath = false, $forceProtocol = null) {
+	public function getBaseUrl($addScriptPath = false, $forceProtocol = null, $forcePort = null) {
 		$protocol = $forceProtocol === null ? $this->getScheme() : $forceProtocol;
 		$host     = $this->getHost();
-		$path     = '';
+		$port     = $this->getPort();
+		$path     = $addScriptPath ? $this->getBasePath() : '';
 
-		if ($addScriptPath) {
-			// in CLI, the SCRIPT_NAME would be something like 'C:\xamp\php\phpunit'...
-			if (PHP_SAPI === 'cli') {
-				$path = '/sally';
+		if ($forcePort === true) {
+			$port = ':'.$port;
+		}
+		else {
+			if ($forcePort === false) {
+				$port = '';
 			}
 			else {
-				$path = $this->getScriptName();
-				$path = dirname($path); // '/foo' or '/foo/sally/backend'
-				$path = str_replace('\\', '/', $path);
+				$port = (($port === 80 && !$secure) || ($port === 443 && $secure)) ? '' : ':'.$port;
 			}
 		}
 
-		return rtrim(sprintf('%s://%s%s', $protocol, $host, $path), '/');
+		return rtrim(sprintf('%s://%s%s%s', $protocol, $host, $port, $path), '/');
 	}
 
 	/**
@@ -390,14 +392,14 @@ class sly_Request {
 	/**
 	 * Returns the port on which the request is made
 	 *
-	 * @return string
+	 * @return int
 	 */
 	public function getPort() {
 		if (self::$trustProxy && $this->headers->has('X-Forwarded-Port')) {
-			return $this->headers->get('X-Forwarded-Port');
+			return (int) $this->headers->get('X-Forwarded-Port', 'int', 80);
 		}
 
-		return $this->server->get('SERVER_PORT', 'string', '');
+		return $this->server->get('SERVER_PORT', 'int', 80);
 	}
 
 	/**
