@@ -122,10 +122,11 @@ class sly_Util_HTTP {
 	 *
 	 * @param  boolean $addScriptPath
 	 * @param  mixed   $forceProtocol  a concrete protocol like 'http' or null for the current one
+	 * @param  mixed   $forcePort      a concrete port or null for the current one
 	 * @return string
 	 */
-	public static function getBaseUrl($addScriptPath = false, $forceProtocol = null) {
-		return sly_Core::getRequest()->getBaseUrl($addScriptPath, $forceProtocol);
+	public static function getBaseUrl($addScriptPath = false, $forceProtocol = null, $forcePort = null) {
+		return sly_Core::getRequest()->getBaseUrl($addScriptPath, $forceProtocol, $forcePort);
 	}
 
 	/**
@@ -173,6 +174,13 @@ class sly_Util_HTTP {
 	 */
 	public static function getHost() {
 		return sly_Core::getRequest()->getHost();
+	}
+
+	/**
+	 * @return int
+	 */
+	public static function getPort() {
+		return sly_Core::getRequest()->getPort();
 	}
 
 	/**
