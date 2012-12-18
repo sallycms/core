@@ -4,6 +4,7 @@
 - BabelCache_Abstract
 - BabelCache_Factory
 - BabelCache_Interface
+- sly_ClassLoader
 - sly_App_Base
 - sly_App_Interface
 - sly_Cache
