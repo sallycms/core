@@ -16,16 +16,17 @@ if ($cacheExists) {
 	require_once $bootcache;
 }
 else {
+	require_once SLY_COREFOLDER.'/lib/sly/ClassLoader.php';
 	require_once SLY_COREFOLDER.'/lib/sly/Loader.php';
 	require_once SLY_COREFOLDER.'/lib/compatibility.php';
 	require_once SLY_COREFOLDER.'/lib/functions.php';
 }
 
+// the Composer autoloader should be first
+sly_ClassLoader::getLoader(SLY_VENDORFOLDER);
+
 sly_Loader::enablePathCache();
 sly_Loader::addLoadPath(SLY_DEVELOPFOLDER.'/lib');
-sly_Loader::addLoadPath(SLY_COREFOLDER.'/lib');
-sly_Loader::addLoadPath(SLY_VENDORFOLDER.'/fabpot/yaml/lib');
-sly_Loader::addLoadPath(SLY_VENDORFOLDER.'/webvariants/babelcache');
 sly_Loader::register();
 
 // cleanup
