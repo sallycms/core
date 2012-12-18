@@ -23,7 +23,10 @@ else {
 }
 
 // the Composer autoloader should be first
-sly_ClassLoader::getLoader(SLY_VENDORFOLDER);
+// since Composer still requires __DIR__, this is only used if possible (yet)
+if (version_compare(PHP_VERSION, '5.3', '>=')) {
+	sly_ClassLoader::getLoader(SLY_VENDORFOLDER);
+}
 
 sly_Loader::enablePathCache();
 sly_Loader::addLoadPath(SLY_DEVELOPFOLDER.'/lib');
