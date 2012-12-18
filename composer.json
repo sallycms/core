@@ -43,6 +43,15 @@
             "url": "http://pear.symfony-project.com/"
         }
     ],
+    "autoload": {
+        "psr-0": {
+            "sly_": "lib/"
+        },
+        "files": [
+            "lib/functions.php",
+            "lib/compatibility.php"
+        ]
+    },
     "require": {
         "php": ">=5.2.1",
         "fabpot/yaml": "1.0.6",
