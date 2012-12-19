@@ -25,7 +25,7 @@
                 "version": "1.0.6",
                 "autoload": {
                     "psr-0": {
-                        "sfYaml": ""
+                        "sfYaml": "lib/"
                     }
                 },
                 "dist": {
