@@ -17,6 +17,7 @@
  */
 class sly_Response {
 	protected $headers;
+	protected $cacheControl;
 	protected $content;
 	protected $statusCode;
 	protected $statusText;
@@ -104,7 +105,9 @@ class sly_Response {
 	 * @param array   $headers An array of response headers
 	 */
 	public function __construct($content = '', $status = 200, array $headers = array()) {
-		$this->headers = new sly_Util_ArrayObject($headers, sly_Util_ArrayObject::NORMALIZE_HTTP_HEADER);
+		$this->headers      = new sly_Util_ArrayObject($headers, sly_Util_ArrayObject::NORMALIZE_HTTP_HEADER);
+		$this->cacheControl = array();
+
 		$this->setContent($content);
 		$this->setStatusCode($status);
 	}
@@ -130,28 +133,58 @@ class sly_Response {
 	 * @return sly_Response
 	 */
 	public function setContentType($type, $charset = null) {
-		$this->headers->set('Content-Type', $type);
+		$this->setHeader('content-type', $type);
 		if ($charset !== null) $this->setCharset($charset);
 		return $this;
 	}
 
 	/**
+	 * Set or adds a header value
 	 *
-	 * @param string $name
-	 * @param string $value
+	 * @param  string  $name
+	 * @param  string  $value
+	 * @param  boolean $replace
 	 * @return sly_Response
 	 */
-	public function setHeader($name, $value) {
-		$this->headers->set($name, $value);
+	public function setHeader($name, $values, $replace = true) {
+		$name   = strtr(strtolower($name), '_', '-');
+		$values = array_values((array) $values);
+
+		if (true === $replace || !$this->headers->has($name)) {
+			$this->headers->set($name, $values);
+		}
+		else {
+			$this->headers->set($name, array_merge($this->headers->get($name), $values));
+		}
+
+		if ('cache-control' === $name) {
+			$this->cacheControl = $this->parseCacheControl($values[0]);
+		}
+
 		return $this;
 	}
 
 	public function hasHeader($name) {
-		$this->headers->has($name);
+		$name = strtr(strtolower($name), '_', '-');
+		return $this->headers->has($name);
 	}
 
-	public function getHeader($name, $default = null) {
-		$this->headers->get($name, 'string', $default);
+	public function getHeader($name, $default = null, $first = true) {
+		if (!$this->headers->has($name)) {
+			if (null === $default) {
+				return $first ? null : array();
+			}
+
+			return $first ? $default : array($default);
+		}
+
+		$values = $this->headers->get($name);
+
+		if ($first) {
+			return count($values) ? $values[0] : $default;
+		}
+
+		return $values;
 	}
 
 	/**
@@ -160,7 +193,14 @@ class sly_Response {
 	 * @return sly_Response
 	 */
 	public function removeHeader($name) {
+		$name = strtr(strtolower($name), '_', '-');
+
 		$this->headers->remove($name);
+
+		if ('cache-control' === $name) {
+			$this->cacheControl = array();
+		}
+
 		return $this;
 	}
 
@@ -179,17 +219,17 @@ class sly_Response {
 		$charset = $this->charset ? $this->charset : 'UTF-8';
 
 		if ($this->headers->has('Content-Type')) {
-			$type = $this->headers->get('Content-Type');
+			$type = $this->getHeader('Content-Type');
 
 			if ((0 === strpos($type, 'text/') || $type === 'application/javascript') && false === strpos($type, 'charset')) {
 				// add the charset
-				$this->headers->set('Content-Type', $this->headers->get('Content-Type').'; charset='.$charset);
+				$this->setHeader('Content-Type', $type.'; charset='.$charset);
 			}
 		}
 
 		// Fix Content-Length
 		if ($this->headers->has('Transfer-Encoding')) {
-			$this->headers->remove('Content-Length');
+			$this->removeHeader('Content-Length');
 		}
 	}
 
@@ -206,8 +246,12 @@ class sly_Response {
 		header(sprintf('HTTP/1.1 %s %s', $this->statusCode, $this->statusText));
 
 		// headers
-		foreach ($this->headers as $name => $value) {
-			header($name.': '.$value, false);
+		foreach ($this->headers as $name => $values) {
+			$name = implode('-', array_map('ucfirst', explode('-', $name)));
+
+			foreach ($values as $value) {
+				header($name.': '.$value, false);
+			}
 		}
 
 		// cookies
@@ -341,7 +385,7 @@ class sly_Response {
 	 * @return string  the date as a string
 	 */
 	public function getDate() {
-		return $this->headers->get('Date');
+		return $this->getHeader('date');
 	}
 
 	/**
@@ -351,7 +395,7 @@ class sly_Response {
 	 * @return sly_Response
 	 */
 	public function setDate($date) {
-		$this->headers->set('Date', date('D, d M Y H:i:s', $date).' GMT');
+		$this->setHeader('Date', date('D, d M Y H:i:s', $date).' GMT');
 		return $this;
 	}
 
@@ -361,7 +405,7 @@ class sly_Response {
 	 * @return string  the expire time as a string
 	 */
 	public function getExpires() {
-		return $this->headers->get('Expires');
+		return $this->getHeader('Expires');
 	}
 
 	/**
@@ -374,10 +418,10 @@ class sly_Response {
 	 */
 	public function setExpires($date = null) {
 		if (null === $date) {
-			$this->headers->remove('Expires');
+			$this->removeHeader('Expires');
 		}
 		else {
-			$this->headers->set('Expires', date('D, d M Y H:i:s', $date).' GMT');
+			$this->setHeader('Expires', date('D, d M Y H:i:s', $date).' GMT');
 		}
 		return $this;
 	}
@@ -388,7 +432,7 @@ class sly_Response {
 	 * @return string  the last modified time as a string
 	 */
 	public function getLastModified() {
-		return $this->headers->get('Last-Modified');
+		return $this->getHeader('Last-Modified');
 	}
 
 	/**
@@ -401,10 +445,10 @@ class sly_Response {
 	 */
 	public function setLastModified($date = null) {
 		if (null === $date) {
-			$this->headers->remove('Last-Modified');
+			$this->removeHeader('Last-Modified');
 		}
 		else {
-			$this->headers->set('Last-Modified', date('D, d M Y H:i:s', $date).' GMT');
+			$this->setHeader('Last-Modified', date('D, d M Y H:i:s', $date).' GMT');
 		}
 		return $this;
 	}
@@ -415,7 +459,7 @@ class sly_Response {
 	 * @return string  the ETag HTTP header
 	 */
 	public function getEtag() {
-		return $this->headers->get('ETag');
+		return $this->getHeader('ETag');
 	}
 
 	/**
@@ -427,14 +471,14 @@ class sly_Response {
 	 */
 	public function setEtag($etag = null, $weak = false) {
 		if (null === $etag) {
-			$this->headers->remove('ETag');
+			$this->removeHeader('ETag');
 		}
 		else {
 			if (0 !== strpos($etag, '"')) {
 				$etag = '"'.$etag.'"';
 			}
 
-			$this->headers->set('ETag', (true === $weak ? 'W/' : '').$etag);
+			$this->setHeader('ETag', (true === $weak ? 'W/' : '').$etag);
 		}
 		return $this;
 	}
@@ -477,7 +521,7 @@ class sly_Response {
 
 		// remove headers that MUST NOT be included with 304 Not Modified responses
 		foreach (array('Allow', 'Content-Encoding', 'Content-Language', 'Content-Length', 'Content-MD5', 'Content-Type', 'Last-Modified') as $header) {
-			$this->headers->remove($header);
+			$this->removeHeader($header);
 		}
 		return $this;
 	}
@@ -497,15 +541,20 @@ class sly_Response {
 			$request = sly_Core::getRequest();
 		}
 
-		$lastModified = $request->headers->get('If-Modified-Since');
-		$notModified  = false;
-		$etags        = $request->getEtags();
+		$notModified = false;
+		$etags       = $request->getEtags();
+		$localMod    = $this->getHeader('last-modified');
+		$remoteMod   = $request->headers->get('if-modified-since');
+		$localMod    = $localMod  ? strtotime($localMod) : null;
+		$remoteMod   = $remoteMod ? @strtotime($remoteMod) : null;
 
 		if ($etags) {
-			$notModified = (in_array($this->getEtag(), $etags) || in_array('*', $etags)) && (!$lastModified || $this->headers->get('Last-Modified') == $lastModified);
+			$notModified =
+				(in_array($this->getEtag(), $etags) || in_array('*', $etags)) &&
+				(!$remoteMod || $localMod === $remoteMod);
 		}
-		elseif ($lastModified) {
-			$notModified = $lastModified == $this->headers->get('Last-Modified');
+		elseif ($remoteMod) {
+			$notModified = $remoteMod === $localMod;
 		}
 
 		if ($notModified) {
@@ -532,5 +581,62 @@ class sly_Response {
 
 	public function isRedirect($location = null) {
 		return in_array($this->statusCode, array(201, 301, 302, 303, 307, 308)) && (null === $location ? true : ($location == $this->headers->get('location')));
+	}
+
+	public function addCacheControlDirective($key, $value = true) {
+		$this->cacheControl[$key] = $value;
+
+		$this->setHeader('Cache-Control', $this->getCacheControlHeader());
+	}
+
+	public function hasCacheControlDirective($key) {
+		return array_key_exists($key, $this->cacheControl);
+	}
+
+	public function getCacheControlDirective($key) {
+		return array_key_exists($key, $this->cacheControl) ? $this->cacheControl[$key] : null;
+	}
+
+	public function removeCacheControlDirective($key) {
+		unset($this->cacheControl[$key]);
+
+		$this->setHeader('Cache-Control', $this->getCacheControlHeader());
+	}
+
+	protected function getCacheControlHeader() {
+		$parts = array();
+		ksort($this->cacheControl);
+
+		foreach ($this->cacheControl as $key => $value) {
+			if (true === $value) {
+				$parts[] = $key;
+			}
+			else {
+				if (preg_match('#[^a-zA-Z0-9._-]#', $value)) {
+					$value = '"' . $value . '"';
+				}
+
+				$parts[] = "$key=$value";
+			}
+		}
+
+		return implode(', ', $parts);
+	}
+
+	/**
+	 * Parses a Cache-Control HTTP header
+	 *
+	 * @param  string $header the value of the Cache-Control HTTP header
+	 * @return array          an array representing the attribute values
+	 */
+	protected function parseCacheControl($header) {
+		$cacheControl = array();
+
+		preg_match_all('#([a-zA-Z][a-zA-Z_-]*)\s*(?:=(?:"([^"]*)"|([^ \t",;]*)))?#', $header, $matches, PREG_SET_ORDER);
+		foreach ($matches as $match) {
+			$cacheControl[strtolower($match[1])] = isset($match[3]) ? $match[3] : (isset($match[2]) ? $match[2] : true);
+		}
+
+		return $cacheControl;
 	}
 }
