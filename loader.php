@@ -30,6 +30,9 @@ if (version_compare(PHP_VERSION, '5.3', '>=')) {
 
 sly_Loader::enablePathCache();
 sly_Loader::addLoadPath(SLY_DEVELOPFOLDER.'/lib');
+sly_Loader::addLoadPath(SLY_COREFOLDER.'/lib');
+sly_Loader::addLoadPath(SLY_VENDORFOLDER.'/fabpot/yaml/lib');
+sly_Loader::addLoadPath(SLY_VENDORFOLDER.'/webvariants/babelcache');
 sly_Loader::register();
 
 // cleanup
