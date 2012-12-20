@@ -56,6 +56,8 @@ class sly_Service_Asset {
 		$protected = $this->dispatcher->filter(self::EVENT_GET_PROTECTED_ASSETS, array());
 		$protected = array_unique(array_filter($protected));
 
+		$removeAll = !sly_Core::config()->get('asset_cache/file_cache', true);
+
 		foreach (array(self::ACCESS_PUBLIC, self::ACCESS_PROTECTED) as $access) {
 			foreach (array('plain', 'gzip', 'deflate') as $encoding) {
 				$dir  = new sly_Util_Directory(realpath($this->getCacheDir($access, $encoding)));
@@ -83,8 +85,8 @@ class sly_Service_Asset {
 					$relative = str_replace('\\', '/', $relative);
 					$relative = trim($relative, '/');
 
-					// delete cache file if original is missing or outdated
-					if (!file_exists($realfile) || filemtime($cacheFile) < filemtime($realfile)) {
+					// delete cache file if original is missing or outdated or file cache is disabled
+					if ($removeAll || !file_exists($realfile) || filemtime($cacheFile) < filemtime($realfile)) {
 						unlink($cacheFile);
 					}
 
@@ -166,11 +168,13 @@ class sly_Service_Asset {
 		// now we can check if a listener has generated a valid file
 		if (!is_file($tmpFile)) return null;
 
-		// create the encoded file
-		$this->generateCacheFile($tmpFile, $cacheFile, $encoding);
+		if (sly_Core::config()->get('asset_cache/file_cache', true)) {
+			// create the encoded file
+			$this->generateCacheFile($tmpFile, $cacheFile, $encoding);
 
-		if (!file_exists($cacheFile)) {
-			return null;
+			if (!file_exists($cacheFile)) {
+				return null;
+			}
 		}
 
 		// return the plain, unencoded file to the asset controller
