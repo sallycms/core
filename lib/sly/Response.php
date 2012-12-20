@@ -108,6 +108,10 @@ class sly_Response {
 		$this->headers      = new sly_Util_ArrayObject($headers, sly_Util_ArrayObject::NORMALIZE_HTTP_HEADER);
 		$this->cacheControl = array();
 
+		if ($this->hasHeader('Cache-Control')) {
+			$this->setHeader('Cache-Control', $this->getHeader('Cache-Control'));
+		}
+
 		$this->setContent($content);
 		$this->setStatusCode($status);
 	}
@@ -391,11 +395,11 @@ class sly_Response {
 	/**
 	 * Sets the Date header
 	 *
-	 * @param int $date  the date as a timestamp
+	 * @param  int $date  the date as a timestamp
 	 * @return sly_Response
 	 */
 	public function setDate($date) {
-		$this->setHeader('Date', date('D, d M Y H:i:s', $date).' GMT');
+		$this->setHeader('Date', gmdate('D, d M Y H:i:s', $date).' GMT');
 		return $this;
 	}
 
@@ -413,7 +417,7 @@ class sly_Response {
 	 *
 	 * If passed a null value, it removes the header.
 	 *
-	 * @param int $date  the date as a timestamp
+	 * @param  int $date  the date as a timestamp
 	 * @return sly_Response
 	 */
 	public function setExpires($date = null) {
@@ -421,7 +425,7 @@ class sly_Response {
 			$this->removeHeader('Expires');
 		}
 		else {
-			$this->setHeader('Expires', date('D, d M Y H:i:s', $date).' GMT');
+			$this->setHeader('Expires', gmdate('D, d M Y H:i:s', $date).' GMT');
 		}
 		return $this;
 	}
@@ -440,7 +444,7 @@ class sly_Response {
 	 *
 	 * If passed a null value, it removes the header.
 	 *
-	 * @param int $date  the date as a timestamp
+	 * @param  int $date  the date as a timestamp
 	 * @return sly_Response
 	 */
 	public function setLastModified($date = null) {
@@ -448,7 +452,7 @@ class sly_Response {
 			$this->removeHeader('Last-Modified');
 		}
 		else {
-			$this->setHeader('Last-Modified', date('D, d M Y H:i:s', $date).' GMT');
+			$this->setHeader('Last-Modified', gmdate('D, d M Y H:i:s', $date).' GMT');
 		}
 		return $this;
 	}
