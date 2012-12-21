@@ -25,7 +25,7 @@ class sly_Container implements ArrayAccess, Countable {
 			'sly-current-lang-id'    => null,
 
 			// needed variables
-			'sly-config-dir'         => array($this, 'missingValue'),
+			'sly-config-dir' => array($this, 'missingValue'),
 
 			// core objects
 			'sly-config'              => array($this, 'buildConfig'),
