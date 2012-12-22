@@ -385,23 +385,24 @@ class sly_Service_Package {
 			}
 		}
 
-		// Or else scan the filesystem.
-		else {
-			$dirs = $this->readDir($root);
+		// In addition to the installed.json, we should also scan the filesystem
+		// for valid packages. This makes it *much* easier to develop addOns
+		// and not modify and update your composer files over and over again.
 
-			foreach ($dirs as $dir) {
-				// evil package not conforming to naming convention
-				if ($this->exists($dir, true)) {
-					$packages[] = $dir;
-				}
-				else {
-					$subdirs = $this->readDir($root.$dir);
+		$dirs = $this->readDir($root);
 
-					foreach ($subdirs as $subdir) {
-						// good package
-						if ($this->exists($dir.'/'.$subdir, true)) {
-							$packages[] = $dir.'/'.$subdir;
-						}
+		foreach ($dirs as $dir) {
+			// evil package not conforming to naming convention
+			if ($this->exists($dir, true)) {
+				$packages[] = $dir;
+			}
+			else {
+				$subdirs = $this->readDir($root.$dir);
+
+				foreach ($subdirs as $subdir) {
+					// good package
+					if ($this->exists($dir.'/'.$subdir, true)) {
+						$packages[] = $dir.'/'.$subdir;
 					}
 				}
 			}
