@@ -600,10 +600,15 @@ class sly_Container implements ArrayAccess, Countable {
 	}
 
 	/**
+	 * @param  sly_Container $container
 	 * @return BabelCache_Interface
 	 */
-	protected function buildCache() {
-		return $this['sly-cache'] = sly_Cache::factory();
+	protected function buildCache(sly_Container $container) {
+		$config   = $container['sly-config'];
+		$strategy = $config->get('CACHING_STRATEGY');
+		$fallback = $config->get('FALLBACK_CACHING_STRATEGY', 'sly_Cache_Blackhole');
+
+		return $this['sly-cache'] = sly_Cache::factory($strategy, $fallback);
 	}
 
 	/**

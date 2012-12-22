@@ -14,9 +14,6 @@
  * @ingroup cache
  */
 class sly_Cache extends BabelCache_Factory {
-	private static $cachingStrategy = null;   ///< string
-	private static $instance        = null;   ///< sly_Cache
-
 	private static $cacheImpls = array(
 		'BabelCache_APC'              => 'APC',
 		'BabelCache_Blackhole'        => 'Blackhole',
@@ -31,6 +28,15 @@ class sly_Cache extends BabelCache_Factory {
 		'BabelCache_ZendServer'       => 'ZendServer'
 	); ///< array
 
+	public function getCache($className) {
+		if ($className === 'BabelCache_Filesystem' || $className === 'BabelCache_Filesystem_Plain') {
+			BabelCache_Filesystem::setDirPermissions(sly_Core::getDirPerm());
+			BabelCache_Filesystem::setFilePermissions(sly_Core::getFilePerm());
+		}
+
+		return parent::getCache($className);
+	}
+
 	/**
 	 * @return array  list of implementations ({className: title, className: title})
 	 */
@@ -43,74 +49,21 @@ class sly_Cache extends BabelCache_Factory {
 		return $result;
 	}
 
-	public static function disable() {
-		self::getInstance()->disableCaching();
-	}
-
-	public static function enable() {
-		self::getInstance()->enableCaching();
-	}
-
 	/**
-	 * @return string
-	 */
-	public static function getStrategy() {
-		return sly_Core::getCachingStrategy();
-	}
-
-	/**
-	 * @return string
-	 */
-	public static function getFallbackStrategy() {
-		return sly_Core::config()->get('FALLBACK_CACHING_STRATEGY', 'sly_Cache_Blackhole');
-	}
-
-	/**
-	 * @param  string $forceCache    overwrites the configured strategy
+	 * @param  string $className     class name of the desired caching strategy
+	 * @param  string $fallback      fallback in case $strategy is not available
 	 * @return BabelCache_Interface  the caching instance to use
 	 */
-	public static function factory($forceCache = null) {
-		if (self::$cachingStrategy === null) {
-			self::$cachingStrategy = self::getStrategy();
-		}
-
-		if (SLY_IS_TESTING && (!defined('SLY_TESTING_USE_CACHE') || !SLY_TESTING_USE_CACHE)) {
-			$forceCache = 'BabelCache_Blackhole';
-		}
-
-		if ($forceCache !== null) {
-			$cachingStrategy = $forceCache;
-		}
-		else {
-			$cachingStrategy = self::$cachingStrategy;
-		}
-
-		// Prüfen, ob der Cache verfügbar ist
-
-		$available = call_user_func(array($cachingStrategy, 'isAvailable'));
+	public static function factory($className, $fallback = 'BabelCache_Blackhole') {
+		$available = call_user_func(array($className, 'isAvailable'));
 
 		if (!$available) {
-			$fallback = self::getFallbackStrategy();
-			// Warnung auslösen, um jemanden auf das Problem aufmerksam zu machen
-			trigger_error('Bad caching strategy. Falling back to '.$fallback, E_USER_WARNING);
-			$cachingStrategy = $fallback;
+			trigger_error('Bad caching strategy ('.$className.'), falling back to '.$fallback.'.', E_USER_WARNING);
+			$className = $fallback;
 		}
 
-		// Wir merken uns den aktuell gewählten Cache.
-
-		if ($forceCache === null) {
-			self::$cachingStrategy = $cachingStrategy;
-		}
-
-		if ($cachingStrategy === 'BabelCache_Filesystem' || $cachingStrategy === 'BabelCache_Filesystem_Plain') {
-			BabelCache_Filesystem::setDirPermissions(sly_Core::getDirPerm());
-			BabelCache_Filesystem::setFilePermissions(sly_Core::getFilePerm());
-		}
-
-		return self::getInstance()->getCache($cachingStrategy);
-	}
-
-	private function __construct() {
+		$factory = new self();
+		return $factory->getCache($className);
 	}
 
 	/**
@@ -121,14 +74,6 @@ class sly_Cache extends BabelCache_Factory {
 	public static function generateKey($vars) {
 		$vars = func_get_args();
 		return call_user_func_array(array('BabelCache', 'generateKey'), $vars);
-	}
-
-	/**
-	 * @return sly_Cache
-	 */
-	public static function getInstance() {
-		if (!self::$instance) self::$instance = new self();
-		return self::$instance;
 	}
 
 	/**
