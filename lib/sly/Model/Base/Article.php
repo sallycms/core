@@ -317,7 +317,7 @@ class sly_Model_Base_Article extends sly_Model_Base {
 
 		$dispatcher = sly_Core::dispatcher();
 		$redirect   = $dispatcher->filter('SLY_URL_REDIRECT', $this, array(
-			'params'       => $paramString,
+			'params'       => $params,
 			'divider'      => $divider,
 			'disableCache' => $disableCache
 		));
