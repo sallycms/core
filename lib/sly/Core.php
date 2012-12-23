@@ -479,6 +479,9 @@ class sly_Core {
 		// refresh addOns
 		$container->getAddOnManagerService()->refresh();
 
+		// clear config cache
+		$container->getConfig()->clearCache();
+
 		// create bootcache
 		sly_Util_BootCache::recreate();
 
