@@ -77,7 +77,8 @@ class sly_Util_BootCache {
 	}
 
 	public static function createCacheFile() {
-		$target = self::getCacheFile();
+		$target    = self::getCacheFile();
+		$container = sly_Core::getContainer();
 
 		if (file_exists($target)) {
 			unlink($target);
@@ -87,6 +88,9 @@ class sly_Util_BootCache {
 
 		foreach (self::$classes as $class) {
 			$filename = sly_Loader::findClass($class);
+			if (!$filename) {
+				$filename = $container['sly-classloader']->findfile($class);
+			}
 			if (!$filename) continue;
 
 			$code = self::getCode($filename);
