@@ -294,6 +294,11 @@ class sly_Configuration {
 		return $this->setInternal($key, $value, $mode);
 	}
 
+	public function clearCache() {
+		$this->cache = null;
+		$this->dropCacheFile();
+	}
+
 	/**
 	 * @throws sly_Exception   if the key is invalid or has the wrong mode
 	 * @param  string  $key    the key to set the value to
