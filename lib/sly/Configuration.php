@@ -58,7 +58,12 @@ class sly_Configuration {
 	public function __destruct() {
 		if ($this->flush) {
 			$this->flush();
-			$this->createCacheFile();
+			if ($this->get('DEVELOPER_MODE') === true) {
+				$this->dropCacheFile();
+			}
+			else {
+				$this->createCacheFile();
+			}
 		}
 	}
 
@@ -377,7 +382,7 @@ class sly_Configuration {
 
 	protected function createCacheFile() {
 		// disabled for now, as there seem to be some bugs still unresolved
-		return false;
+		//return false;
 
 		$file = $this->getCacheFile();
 
@@ -395,7 +400,7 @@ class sly_Configuration {
 
 	protected function loadFromCacheFile() {
 		// disabled for now, as there seem to be some bugs still unresolved
-		return false;
+		//return false;
 
 		$file = $this->getCacheFile();
 
