@@ -8,6 +8,7 @@
 - sly_App_Base
 - sly_App_Interface
 - sly_Cache
+- sly_Container
 - sly_Configuration
 - sly_Controller_Base
 - sly_Controller_Interface
@@ -31,6 +32,7 @@
 - sly_Model_Article
 - sly_Model_Base
 - sly_Model_Base_Article
+- sly_Request
 - sly_Response
 - sly_Service_AddOn
 - sly_Service_AddOnManager
