@@ -93,17 +93,6 @@ class sly_Util_BootCache {
 			file_put_contents($target, $code."\n", FILE_APPEND);
 		}
 
-		// add functions
-
-		$functionFiles = array(
-			'lib/compatibility.php',
-			'lib/functions.php'
-		);
-
-		foreach ($functionFiles as $fctFile) {
-			$code = self::getCode(SLY_COREFOLDER.'/'.$fctFile);
-			file_put_contents($target, $code."\n", FILE_APPEND);
-		}
 	}
 
 	/**
