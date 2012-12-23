@@ -371,6 +371,9 @@ class sly_Configuration {
 	}
 
 	protected function createCacheFile() {
+		// disabled for now, as there seem to be some bugs still unresolved
+		return false;
+
 		$file = $this->getCacheFile();
 
 		if (!file_exists($file)) {
@@ -386,6 +389,9 @@ class sly_Configuration {
 	}
 
 	protected function loadFromCacheFile() {
+		// disabled for now, as there seem to be some bugs still unresolved
+		return false;
+
 		$file = $this->getCacheFile();
 
 		if (!file_exists($file)) {
