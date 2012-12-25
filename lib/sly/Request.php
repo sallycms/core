@@ -143,7 +143,8 @@ class sly_Request {
 				$port = '';
 			}
 			else {
-				$port = (($port === 80 && !$secure) || ($port === 443 && $secure)) ? '' : ':'.$port;
+				$secure = $this->isSecure();
+				$port   = (($port === 80 && !$secure) || ($port === 443 && $secure)) ? '' : ':'.$port;
 			}
 		}
 
