@@ -39,9 +39,13 @@ class sly_ClassLoader {
 			$loader->add($namespace, $path);
 		}
 
-		$classMap = require $vendorDir.'/composer/autoload_classmap.php';
-		if ($classMap) {
-			$loader->addClassMap($classMap);
+		$classMap = $vendorDir.'/composer/autoload_classmap.php';
+
+		if (file_exists($classMap)) {
+			$classMap = require $classMap;
+			if ($classMap) {
+				$loader->addClassMap($classMap);
+			}
 		}
 
 		$loader->register();

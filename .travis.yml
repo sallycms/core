@@ -6,6 +6,7 @@ php:
    - 5.4
 
 install:
+   - mysql --version
    - chmod +x tests/setup-travis.sh
    - ./tests/setup-travis.sh
 
