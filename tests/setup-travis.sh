@@ -18,6 +18,3 @@ if [ $resetVersion -eq 1 ]
 then
   phpenv global 5.2
 fi
-
-php --version
-mysql --version
