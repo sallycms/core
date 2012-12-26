@@ -52,7 +52,7 @@ sly_Core::config()->setFlushOnDestruct(false);
 sly_Loader::addLoadPath($here.DIRECTORY_SEPARATOR.'lib');
 
 // make tests autoloadable
-sly_Loader::addLoadPath(dirname(__FILE__).'/tests');
+sly_Loader::addLoadPath($here.'/tests', 'sly_');
 
 // add DbUnit
 if ($travis) {
