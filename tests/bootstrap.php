@@ -12,47 +12,47 @@ if (PHP_SAPI !== 'cli') {
 	die('This script must be run from CLI.');
 }
 
-$travis    = getenv('TRAVIS') !== false;
-$here      = dirname(__FILE__);
-$sallyRoot = realpath($here.'/../');
+$travis = getenv('TRAVIS') !== false;
+$here   = dirname(__FILE__);
+$root   = dirname($here);
 
 define('SLY_IS_TESTING',        true);
 define('SLY_TESTING_USER_ID',   1);
 define('SLY_TESTING_USE_CACHE', $travis ? false : true);
 
-if (!defined('SLY_BASE'))          define('SLY_BASE',          $sallyRoot);
-if (!defined('SLY_DEVELOPFOLDER')) define('SLY_DEVELOPFOLDER', $here.DIRECTORY_SEPARATOR.'develop');
-if (!defined('SLY_MEDIAFOLDER'))   define('SLY_MEDIAFOLDER',   $here.DIRECTORY_SEPARATOR.'mediapool');
-if (!defined('SLY_ADDONFOLDER'))   define('SLY_ADDONFOLDER',   $here.DIRECTORY_SEPARATOR.'addons');
-if (!defined('SLY_VENDORFOLDER'))  define('SLY_VENDORFOLDER',  $sallyRoot.DIRECTORY_SEPARATOR.'vendor');
+// define vital paths
+define('SLY_BASE',          $root);
+define('SLY_DEVELOPFOLDER', $here.DIRECTORY_SEPARATOR.'develop');
+define('SLY_MEDIAFOLDER',   $here.DIRECTORY_SEPARATOR.'mediapool');
+define('SLY_ADDONFOLDER',   $here.DIRECTORY_SEPARATOR.'addons');
+define('SLY_VENDORFOLDER',  $root.DIRECTORY_SEPARATOR.'vendor');
+define('SLY_DATAFOLDER',    $here.DIRECTORY_SEPARATOR.'data'.DIRECTORY_SEPARATOR.'run-'.uniqid());
 
 if (!is_dir(SLY_MEDIAFOLDER)) mkdir(SLY_MEDIAFOLDER);
 if (!is_dir(SLY_ADDONFOLDER)) mkdir(SLY_ADDONFOLDER);
+if (!is_dir(SLY_DATAFOLDER))  mkdir(SLY_DATAFOLDER, 0777, true);
 
 // set our own config folder
-if (!defined('SLY_CONFIGFOLDER')) {
-	if ($travis) {
-		define('SLY_CONFIGFOLDER', $here.DIRECTORY_SEPARATOR.'config'.DIRECTORY_SEPARATOR.'travis');
-	}
-	else {
-		define('SLY_CONFIGFOLDER', $here.DIRECTORY_SEPARATOR.'config');
-	}
+if ($travis) {
+	define('SLY_CONFIGFOLDER', $here.DIRECTORY_SEPARATOR.'config'.DIRECTORY_SEPARATOR.'travis');
 }
-
-// kill YAML cache
-$files = glob($sallyRoot.'/data/dyn/internal/sally/yaml-cache/*');
-if (is_array($files)) array_map('unlink', $files);
+else {
+	define('SLY_CONFIGFOLDER', $here.DIRECTORY_SEPARATOR.'config');
+}
 
 // load core system
 $slyAppName = 'tests';
 $slyAppBase = 'tests';
-require $sallyRoot.'/master.php';
-//do not overwrite config or write the cachefile
+require $here.'/../master.php';
+
+// do not overwrite config or write the cachefile
 sly_Core::config()->setFlushOnDestruct(false);
+
 // add the dummy lib
 sly_Loader::addLoadPath($here.DIRECTORY_SEPARATOR.'lib');
+
 // make tests autoloadable
-sly_Loader::addLoadPath(dirname(__FILE__).'/tests', 'sly_');
+sly_Loader::addLoadPath(dirname(__FILE__).'/tests');
 
 // add DbUnit
 if ($travis) {
@@ -70,7 +70,7 @@ $app = new sly_App_Tests();
 sly_Core::setCurrentApp($app);
 $app->initialize();
 
-//add a dummy i18n
+// add a dummy i18n
 $i18n = new sly_I18N('de', $here.DIRECTORY_SEPARATOR.'addons');
 sly_Core::setI18N($i18n);
 
