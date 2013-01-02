@@ -16,9 +16,6 @@ if ($cacheExists) {
 	require_once $bootcache;
 }
 
-// load PHP <5.3 compat functions
-require_once SLY_COREFOLDER.'/lib/compatibility.php';
-
 // init the Composer autoloader
 $loader = require SLY_VENDORFOLDER.'/autoload_52.php';
 
