@@ -61,11 +61,20 @@
     },
     "require-dev": {
         "pear-phpunit/phpunit": ">=3.6.10,<3.8",
-        "pear-phpunit/dbunit": ">=1.1,<1.2"
+        "pear-phpunit/dbunit": ">=1.1,<1.2",
+        "xrstf/composer-php52": "~1.0"
     },
     "extra": {
         "branch-alias": {
             "dev-default": "0.8.x-dev"
         }
+    },
+    "scripts": {
+        "post-install-cmd": [
+            "xrstf\\Composer52\\Generator::onPostInstallCmd"
+        ],
+        "post-update-cmd": [
+            "xrstf\\Composer52\\Generator::onPostInstallCmd"
+        ]
     }
 }

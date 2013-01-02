@@ -25,7 +25,8 @@ class sly_Container implements ArrayAccess, Countable {
 			'sly-current-lang-id'    => null,
 
 			// needed variables
-			'sly-config-dir' => array($this, 'missingValue'),
+			'sly-config-dir'  => array($this, 'missingValue'),
+			'sly-classloader' => array($this, 'missingValue'),
 
 			// core objects
 			'sly-config'              => array($this, 'buildConfig'),
@@ -56,8 +57,7 @@ class sly_Container implements ArrayAccess, Countable {
 			'sly-service-package-vendor' => array($this, 'buildVendorPackageService'),
 			'sly-service-slice'          => array($this, 'buildSliceService'),
 			'sly-service-template'       => array($this, 'buildTemplateService'),
-			'sly-service-user'           => array($this, 'buildUserService'),
-			'sly-classloader'            => array($this, 'buildClassloader')
+			'sly-service-user'           => array($this, 'buildUserService')
 		), $values);
 	}
 
@@ -826,10 +826,6 @@ class sly_Container implements ArrayAccess, Countable {
 		$persistence = $container['sly-persistence'];
 
 		return $this->values['sly-service-user'] = new sly_Service_User($persistence, $cache, $dispatcher, $config);
-	}
-
-	protected function buildClassloader(sly_Container $container) {
-		return $this->values['sly-classloader'] = sly_getClassloader();
 	}
 
 	protected function missingValue(sly_Container $container, $id) {
