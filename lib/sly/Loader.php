@@ -13,7 +13,6 @@
  */
 class sly_Loader {
 	protected static $loadPaths       = array();  ///< array
-	protected static $counter         = 0;        ///< int
 	protected static $pathHash        = 0;        ///< int
 	protected static $pathCache       = array();  ///< array
 	protected static $enablePathCache = false;    ///< boolean
@@ -118,19 +117,13 @@ class sly_Loader {
 					break;
 			}
 
-			++self::$counter;
 			return true;
 		}
 
 		$dispatcher = sly_Core::dispatcher();
 		$dispatcher->notifyUntil('__AUTOLOAD', $className);
 
-		if (class_exists($className, false)) {
-			++self::$counter;
-			return true;
-		}
-
-		return false;
+		return class_exists($className, false);
 	}
 
 	/**
@@ -175,13 +168,6 @@ class sly_Loader {
 		}
 
 		return false;
-	}
-
-	/**
-	 * @return int  number of loaded classes
-	 */
-	public static function getClassCount() {
-		return self::$counter;
 	}
 
 	/**
