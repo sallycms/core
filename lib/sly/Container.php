@@ -393,6 +393,13 @@ class sly_Container implements ArrayAccess, Countable {
 	}
 
 	/**
+	 * @return xrstf_Composer52_ClassLoader
+	 */
+	public function getClassLoader() {
+		return $this->get('sly-classloader');
+	}
+
+	/**
 	 * get generic model service
 	 *
 	 * @return sly_Service_Base
