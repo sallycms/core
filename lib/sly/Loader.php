@@ -63,14 +63,7 @@ class sly_Loader {
 	}
 
 	public static function register() {
-		if (function_exists('spl_autoload_register')) {
-			spl_autoload_register(array('sly_Loader', 'loadClass'));
-		}
-		else {
-			function __autoload($className) {
-				self::loadClass($className);
-			}
-		}
+		spl_autoload_register(array('sly_Loader', 'loadClass'));
 	}
 
 	/**
