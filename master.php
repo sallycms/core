@@ -64,12 +64,13 @@ if (!defined('E_DEPRECATED'))      define('E_DEPRECATED',      8192);  // PHP 5.
 if (!defined('E_USER_DEPRECATED')) define('E_USER_DEPRECATED', 16384); // PHP 5.3
 
 // init loader
-require_once SLY_COREFOLDER.'/loader.php';
+$loader = require_once SLY_COREFOLDER.'/loader.php';
 
 // init container
 $container = new sly_Container();
 $container->setConfigDir(SLY_CONFIGFOLDER);
 $container->setApplicationInfo($slyAppName, $slyAppBase);
+$container->set('sly-classloader', $loader);
 sly_Core::setContainer($container);
 
 // load core config (be extra careful because this is the first attempt to write
