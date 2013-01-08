@@ -58,10 +58,11 @@ class sly_Service_ArticleSlice extends sly_Service_Model_Base_Id {
 			$sql->query(
 				'UPDATE '.$pre.$this->tablename.' SET pos = pos + 1 ' .
 				'WHERE article_id = ? AND clang = ? AND slot = ? ' .
-				'AND pos >= ?', array(
+				'AND revision = ? AND pos >= ?', array(
 					$slice->getArticleId(),
 					$slice->getClang(),
 					$slice->getSlot(),
+					$slice->getRevision(),
 					$slice->getPosition()
 				)
 			);
@@ -110,11 +111,12 @@ class sly_Service_ArticleSlice extends sly_Service_Model_Base_Id {
 
 		// fix order
 		$sql->query('UPDATE '.$pre.'article_slice SET pos = pos -1 WHERE
-			article_id = ? AND clang = ? AND slot = ? AND pos > ?',
+			article_id = ? AND clang = ? AND slot = ? AND revision = ? AND pos > ?',
 			array(
 				$articleSlice->getArticleId(),
 				$articleSlice->getClang(),
 				$articleSlice->getSlot(),
+				$articleSlice->getRevision(),
 				$articleSlice->getPosition()
 			)
 		);
@@ -126,24 +128,6 @@ class sly_Service_ArticleSlice extends sly_Service_Model_Base_Id {
 		$sql->delete($this->tablename, array('id' => $id));
 
 		return $sql->affectedRows() == 1;
-	}
-
-	public function findByArticleClangSlot($articleID, $clang = null, $slot = null) {
-		if ($clang === null) {
-			$clang = sly_Core::getCurrentClang();
-		}
-
-		$where = array('article_id' => $articleID, 'clang' => $clang);
-		$order = 'pos ASC';
-
-		if ($slot !== null) {
-			$where['slot'] = $slot;
-		}
-		else {
-			$order = 'slot ASC, '.$order;
-		}
-
-		return $this->find($where, null, $order);
 	}
 
 	/**
@@ -172,10 +156,10 @@ class sly_Service_ArticleSlice extends sly_Service_Model_Base_Id {
 			throw new sly_Exception(t('article_has_no_such_slot', $slot));
 		}
 
-		$creator = $this->getActor($creator, __METHOD__);
-		$now     = time();
-		$artID   = $article->getId();
-		$clang   = $article->getClang();
+		$creator  = $this->getActor($creator, __METHOD__);
+		$artID    = $article->getId();
+		$clang    = $article->getClang();
+		$revision = $article->getRevision();
 
 		// prepare database transaction
 
@@ -189,7 +173,7 @@ class sly_Service_ArticleSlice extends sly_Service_Model_Base_Id {
 		// here we go
 
 		try {
-			$maxPos = $sql->magicFetch('article_slice', 'MAX(pos)', array('article_id' => $artID, 'clang' => $clang, 'slot' => $slot));
+			$maxPos = $sql->magicFetch('article_slice', 'MAX(pos)', array('article_id' => $artID, 'clang' => $clang, 'slot' => $slot, 'revision' => $revision));
 			$target = $maxPos + 1;
 
 			if ($pos !== null) {
@@ -214,7 +198,7 @@ class sly_Service_ArticleSlice extends sly_Service_Model_Base_Id {
 			$articleSlice->setSlice($slice);
 			$articleSlice->setSlot($slot);
 			$articleSlice->setArticle($article);
-			$articleSlice->setRevision(0);
+			$articleSlice->setRevision($revision);
 
 			$this->save($articleSlice);
 
@@ -264,8 +248,9 @@ class sly_Service_ArticleSlice extends sly_Service_Model_Base_Id {
 		$clang      = $articleSlice->getClang();
 		$pos        = $articleSlice->getPosition();
 		$slot       = $articleSlice->getSlot();
+		$revision   = $articleSlice->getRevision();
 		$newpos     = $direction === 'up' ? $pos - 1 : $pos + 1;
-		$sliceCount = $this->count(array('article_id' => $article_id, 'clang' => $clang, 'slot' => $slot));
+		$sliceCount = $this->count(array('article_id' => $article_id, 'clang' => $clang, 'slot' => $slot, 'revision' => $revision));
 
 		if ($newpos > -1 && $newpos < $sliceCount) {
 			$ownTrx = !$sql->isTransRunning();
@@ -275,7 +260,7 @@ class sly_Service_ArticleSlice extends sly_Service_Model_Base_Id {
 			}
 
 			try {
-				$sql->update('article_slice', array('pos' => $pos), array('article_id' => $article_id, 'clang' => $clang, 'slot' => $slot, 'pos' => $newpos));
+				$sql->update('article_slice', array('pos' => $pos), array('article_id' => $article_id, 'clang' => $clang, 'slot' => $slot, 'pos' => $newpos, 'revision' => $revision));
 				$articleSlice->setPosition($newpos);
 				$articleSlice->setUpdateColumns($user);
 				$this->save($articleSlice);
