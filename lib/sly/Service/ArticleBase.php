@@ -61,6 +61,11 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base {
 
 	abstract public function getMaxPosition($id);
 
+	public function findOne($where = null, $having = null) {
+		$res = $this->find($where, null, 'revision DESC', null, 1, $having);
+		return count($res) === 1 ? $res[0] : null;
+	}
+
 	/**
 	 * @param  sly_Model_Base_Article $article
 	 * @return sly_Model_Base_Article
@@ -72,6 +77,12 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base {
 		$this->deleteListCache();
 		$this->deleteCache($obj->getId(), $obj->getClang());
 
+		return $obj;
+	}
+
+	protected function insert(sly_Model_Base_Article $obj) {
+		$persistence = $this->getPersistence();
+		$persistence->insert($this->getTableName(), array_merge($obj->toHash(), $obj->getPKHash()));
 		return $obj;
 	}
 
@@ -90,6 +101,8 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base {
 	}
 
 	/**
+	 * finds latest revision of article
+	 *
 	 * @param  int $id
 	 * @param  int $clang
 	 * @return sly_Model_Base_Article
@@ -132,11 +145,12 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base {
 	public function changeStatus($id, $clangID, $newStatus = null, sly_Model_User $user = null) {
 		$id      = (int) $id;
 		$clangID = (int) $clangID;
-		$obj     = $this->findById($id, $clangID);
+		$all     = $this->find(array('id' => $id, 'clang' => $clangID), null, 'revision');
+		$obj     = $all[0];
 		$type    = $this->getModelType();
 		$user    = $this->getActor($user, __METHOD__);
 
-		if (!$obj) {
+		if (empty($all)) {
 			throw new sly_Exception(t($type.'_not_found'));
 		}
 
@@ -149,10 +163,11 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base {
 		}
 
 		// update the article/category
-
-		$obj->setStatus($newStatus);
-		$obj->setUpdateColumns($user);
-		$this->update($obj);
+		foreach ($all as $obj) {
+			$obj->setStatus($newStatus);
+			$obj->setUpdateColumns($user);
+			$this->update($obj);
+		}
 
 		// notify the system
 
@@ -213,8 +228,6 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base {
 		$parentID  = (int) $parentID;
 		$position  = (int) $position;
 		$status    = (int) $status;
-		$modelType = $this->getModelType();
-		$isArticle = $modelType === 'article';
 		$user      = $this->getActor($user, 'add');
 
 		if (!($this->artService instanceof sly_Service_Article)) {
@@ -288,7 +301,8 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base {
 					    'path' => $path,
 					  'status' => $status ? 1 : 0,
 					    'type' => $type,
-					   'clang' => $clangID
+					   'clang' => $clangID,
+					'revision' => 0
 				));
 
 				$obj->setUpdateColumns($user);
@@ -307,7 +321,8 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base {
 					'path'     => $path,
 					'status'   => $status,
 					'type'     => $type,
-					'user'     => $user
+					'user'     => $user,
+					'revision' => 0
 				));
 			}
 
@@ -365,7 +380,8 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base {
 			$isArticle ? $obj->setName($name) : $obj->setCatName($name);
 
 			$obj->setUpdateColumns($user);
-			$this->update($obj);
+			$obj->setRevision($obj->getRevision()+1);
+			$obj = $this->insert($obj);
 
 			///////////////////////////////////////////////////////////////
 			// change catname of all children
@@ -400,10 +416,10 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base {
 					$followers = $this->getFollowerQuery($parentID, $clangID, $a, $b);
 					$this->moveObjects($relation, $followers);
 
-					// save own, new position
-
-					$isArticle ? $obj->setPosition($newPos) : $obj->setCatPosition($newPos);
-					$this->update($obj);
+					// save own, new position for all revisions
+					$field = $isArticle ? 'pos' : 'catpos';
+					$where = array('id' => $obj->getId(), 'clang' => $obj->getClang());
+					$this->getPersistence()->update($this->getTableName(), array($field => $newPos), $where);
 				}
 			}
 
@@ -485,7 +501,7 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base {
 				$where .= ' AND status = 1';
 			}
 
-			$sql->select($this->tablename, 'id', $where, null, $pos.',name');
+			$sql->select($this->tablename, 'id', $where, 'id', $pos.',name');
 			foreach ($sql as $row) $list[] = (int) $row['id'];
 
 			$this->cache->set($namespace, $key, $list);
