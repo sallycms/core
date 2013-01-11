@@ -309,8 +309,10 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 	 * @param sly_Model_User    $user
 	 */
 	public function touch(sly_Model_Article $article, sly_Model_User $user) {
+		$article->setRevision($article->getRevision()+1);
 		$article->setUpdateColumns($user);
-		$this->update($article);
+		$this->deleteCache($article->getId(), $article->getClang());
+		return $this->insert($article);
 	}
 
 	/**
@@ -368,6 +370,7 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 				$duplicate->setPath($cat ? ($cat->getPath().$target.'|') : '|');
 				$duplicate->setUpdateColumns($user);
 				$duplicate->setCreateColumns($user);
+				$duplicate->setRevision(0);
 
 				// make sure that when copying start articles
 				// we actually create an article and not a category
@@ -375,12 +378,13 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 				$duplicate->setCatPosition(0);
 
 				// store it
-				$sql->insert($this->tablename, array_merge($duplicate->getPKHash(), $duplicate->toHash()));
+				$this->insert($duplicate);
+
 				$this->deleteListCache();
 
 				// copy slices
 				if ($source->hasType()) {
-					$this->copyContent($id, $newID, $clang, $clang);
+					$this->copyContent($article, $duplicate, $user);
 				}
 
 				// notify system
@@ -586,37 +590,24 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 	 * article. Slots not present in the target are simply skipped. Existing
 	 * content remains the same.
 	 *
-	 * @param int            $srcID     source article ID
-	 * @param int            $dstID     target article ID
-	 * @param int            $srcClang  source clang
-	 * @param int            $dstClang  target clang
-	 * @param int            $revision  revision (unused)
-	 * @param sly_Model_User $user      author or null for the current user
+	 * @param sly_Model_Article  $source    source article
+	 * @param sly_Model_Article  $dest      target article
+	 * @param sly_Model_User     $user      author or null for the current user
 	 */
-	public function copyContent($srcID, $dstID, $srcClang = 0, $dstClang = 0, $revision = 0, sly_Model_User $user = null) {
-		$srcClang = (int) $srcClang;
-		$dstClang = (int) $dstClang;
-		$srcID    = (int) $srcID;
-		$dstID    = (int) $dstID;
-		$revision = (int) $revision;
-		$user     = $this->getActor($user, __METHOD__);
+	public function copyContent(sly_Model_Article $source, sly_Model_Article $dest, sly_Model_User $user = null) {
+		$user = $this->getActor($user, __METHOD__);
 
-		if ($srcID === $dstID && $srcClang === $dstClang) {
+		if (!array_diff($source->getPKHash(), $dest->getPKHash())) {
 			throw new sly_Exception(t('source_and_target_are_equal'));
 		}
 
-		$source = $this->findById($srcID, $srcClang);
-		$dest   = $this->findById($dstID, $dstClang);
+		$dest = $this->touch($dest, $user);
 
 		// copy the slices by their slots
-
 		$asServ   = $this->artSliceService;
 		$sql      = $this->getPersistence();
 		$login    = $user->getLogin();
-		$srcSlots = $this->tplService->getSlots($source->getTemplateName());
 		$dstSlots = $this->tplService->getSlots($dest->getTemplateName());
-		$where    = array('article_id' => $srcID, 'clang' => $srcClang, 'revision' => $revision);
-		$dstWhere = array('article_id' => $dstID, 'clang' => $dstClang, 'revision' => $revision);
 		$changes  = false;
 
 		$ownTrx = !$sql->isTransRunning();
@@ -626,39 +617,34 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 		}
 
 		try {
-			foreach ($srcSlots as $srcSlot) {
-				// skip slots not present in the destination article
-				if (!in_array($srcSlot, $dstSlots)) continue;
+			$slices = $source->getSlices();
 
-				// find start position in target article
-				$dstWhere['slot'] = $srcSlot;
-				$slices           = $asServ->find($dstWhere);
-				$position         = count($slices);
+			foreach ($slices as $articleSlice) {
+				$srcSlot = $articleSlice->getSlot();
+				// skip slots not present in the destination article
+				if (!in_array($articleSlice->getSlot(), $dstSlots)) continue;
+
+				// find position in target article
+				$position = $dest->countSlices($srcSlot);
 
 				// find slices to copy
-				$where['slot'] = $srcSlot;
-				$slices        = $asServ->find($where, null, 'pos ASC');
+				$slice = $articleSlice->getSlice();
+				$slice = $this->sliceService->copy($slice);
 
-				foreach ($slices as $articleSlice) {
-					$slice = $articleSlice->getSlice();
-					$slice = $this->sliceService->copy($slice);
+				$asServ->create(array(
+					'clang'      => $dest->getClang(),
+					'slot'       => $srcSlot,
+					'pos'        => $position,
+					'slice_id'   => $slice->getId(),
+					'article_id' => $dest->getId(),
+					'revision'   => $dest->getRevision(),
+					'createdate' => time(),
+					'createuser' => $login,
+					'updatedate' => time(),
+					'updateuser' => $login
+				));
 
-					$asServ->create(array(
-						'clang'      => $dstClang,
-						'slot'       => $srcSlot,
-						'pos'        => $position,
-						'slice_id'   => $slice->getId(),
-						'article_id' => $dstID,
-						'revision'   => $revision,
-						'createdate' => time(),
-						'createuser' => $login,
-						'updatedate' => time(),
-						'updateuser' => $login
-					));
-
-					++$position;
-					$changes = true;
-				}
+				$changes = true;
 			}
 
 			if ($ownTrx) {
@@ -674,14 +660,12 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 		}
 
 		if ($changes) {
-			$this->deleteCache($dstID, $dstClang);
+			$this->deleteCache($dest->getId(), $dest->getClang());
 
 			// notify system
 			$this->dispatcher->notify('SLY_ART_CONTENT_COPIED', null, array(
-				'from_id'     => $srcID,
-				'from_clang'  => $srcClang,
-				'to_id'       => $dstID,
-				'to_clang'    => $dstClang,
+				'from'     => $source,
+				'to'       => $dest,
 				'user'        => $user
 			));
 		}

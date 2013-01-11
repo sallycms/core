@@ -82,6 +82,10 @@ class sly_Service_ArticleExTest extends sly_Service_ArticleTestBase {
 		$this->move($c, 1, $lang); $this->assertPositions(array($c, $b, $a), $lang);
 		$this->move($a, 2, $lang); $this->assertPositions(array($c, $a, $b), $lang);
 		$this->move($c, 2, $lang); $this->assertPositions(array($a, $c, $b), $lang);
+
+		//check if revision increased 7 times
+		$t = $service->findById($a, $lang);
+		$this->assertEquals($t->getRevision(), 7);
 	}
 
 	/**
@@ -134,6 +138,7 @@ class sly_Service_ArticleExTest extends sly_Service_ArticleTestBase {
 		$this->assertGreaterThanOrEqual($before, $article->getUpdateDate());
 		$this->assertLessThanOrEqual($after, $article->getUpdateDate());
 		$this->assertEquals($user->getLogin(), $article->getUpdateUser());
+		$this->assertEquals(1, $article->getRevision(), 'Touch should increase revision');
 	}
 
 	public function testSetType() {
