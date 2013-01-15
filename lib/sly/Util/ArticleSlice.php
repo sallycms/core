@@ -90,4 +90,83 @@ class sly_Util_ArticleSlice {
 
 		return sly_Core::getContainer()->getArticleSliceService()->find($where, null, $order);
 	}
+
+	/**
+	 * @param  sly_Model_User $user
+	 * @param  mixed          $slice  sly_Model_ArticleSlice or slice ID
+	 * @return boolean
+	 */
+	public static function canEditSlice(sly_Model_User $user, $slice) {
+		return self::hasSlicePermission($user, $slice, 'edit');
+	}
+
+	/**
+	 * @param  sly_Model_User $user
+	 * @param  mixed          $slice  sly_Model_ArticleSlice or slice ID
+	 * @return boolean
+	 */
+	public static function canMoveSlice(sly_Model_User $user, $slice) {
+		return self::hasSlicePermission($user, $slice, 'move');
+	}
+
+	/**
+	 * @param  sly_Model_User $user
+	 * @param  string         $module  module name
+	 * @return boolean
+	 */
+	public static function canAddModule(sly_Model_User $user, $module) {
+		return self::hasModulePermission($user, $module, 'add');
+	}
+
+	/**
+	 * @param  sly_Model_User $user
+	 * @param  string         $module  module name
+	 * @return boolean
+	 */
+	public static function canEditModule(sly_Model_User $user, $module) {
+		return self::hasModulePermission($user, $module, 'edit');
+	}
+
+	/**
+	 * @param  sly_Model_User $user
+	 * @param  string         $module  module name
+	 * @return boolean
+	 */
+	public static function canDeleteModule(sly_Model_User $user, $module) {
+		return self::hasModulePermission($user, $module, 'delete');
+	}
+
+	/**
+	 * @param  sly_Model_User $user
+	 * @param  mixed          $slice       sly_Model_ArticleSlice or slice ID
+	 * @param  string         $permission
+	 * @return boolean
+	 */
+	private static function hasSlicePermission(sly_Model_User $user, $slice, $permission) {
+		if (!($slice instanceof sly_Model_ArticleSlice)) {
+			$sliceObj = self::findById($slice);
+
+			if (!$sliceObj) {
+				throw new sly_Exception(t('slice_not_found', $slice));
+			}
+
+			$slice = $sliceObj;
+		}
+
+		return self::hasModulePermission($user, $slice->getModule(), $permission);
+	}
+
+	/**
+	 * @param  sly_Model_User $user
+	 * @param  string         $module      module name
+	 * @param  string         $permission
+	 * @return boolean
+	 */
+	private static function hasModulePermission(sly_Model_User $user, $module, $permission) {
+		return
+			$user->isAdmin() ||
+			$user->hasRight('module', $permission, sly_Authorisation_ModuleListProvider::ALL) ||
+			$user->hasRight('module', $permission, $module)
+		;
+	}
 }
