@@ -15,6 +15,12 @@ abstract class sly_Service_ArticleTestBase extends sly_StructureTest {
 		return $service;
 	}
 
+	protected function getDeletedArticleService() {
+		static $dservice = null;
+		if (!$dservice) $dservice = sly_Core::getContainer()->getDeletedArticleService();
+		return $dservice;
+	}
+
 	protected function assertPosition($id, $pos, $clang = 1) {
 		$service = $this->getService();
 		$art     = $service->findById($id, $clang);

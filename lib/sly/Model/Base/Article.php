@@ -31,6 +31,7 @@ class sly_Model_Base_Article extends sly_Model_Base {
 	protected $path;        ///< string
 	protected $type;        ///< string
 	protected $revision;    ///< int
+	protected $deleted;     ///< int
 
 	protected $_pk = array('id' => 'int', 'clang' => 'int', 'revision' => 'int'); ///< array
 	protected $_attributes = array(
@@ -38,7 +39,7 @@ class sly_Model_Base_Article extends sly_Model_Base {
 		'catpos' => 'int', 'createdate' => 'datetime', 're_id' => 'int', 'pos' => 'int',
 		'catname' => 'string', 'startpage' => 'int', 'updatedate' => 'datetime',
 		'createuser' => 'string', 'attributes' => 'string', 'path' => 'string',
-		'type' => 'string'
+		'type' => 'string', 'deleted' => 'int'
 	); ///< array
 
 	/**
@@ -283,7 +284,7 @@ class sly_Model_Base_Article extends sly_Model_Base {
 	 * @return boolean
 	 */
 	public function isOnline() {
-		return $this->getStatus() == 1;
+		return $this->getStatus() == 1 && !$this->isDeleted();
 	}
 
 	/**
@@ -291,6 +292,10 @@ class sly_Model_Base_Article extends sly_Model_Base {
 	 */
 	public function isOffline() {
 		return!$this->isOnline();
+	}
+
+	public function isDeleted() {
+		return $this->deleted == 1;
 	}
 
 	/**
