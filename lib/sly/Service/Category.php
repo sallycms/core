@@ -80,6 +80,7 @@ class sly_Service_Category extends sly_Service_ArticleBase {
 			    'status' => $params['status'],
 			      'type' => $params['type'],
 			     'clang' => $params['clang'],
+			   'deleted' => 0,
 			  'revision' => 0
 		));
 	}
@@ -97,7 +98,7 @@ class sly_Service_Category extends sly_Service_ArticleBase {
 	 * @param  int $clang
 	 * @return sly_Model_Category
 	 */
-	public function findById($id, $clang = null) {
+	public function findById($id, $clang) {
 		return parent::findById($id, $clang);
 	}
 
@@ -237,12 +238,12 @@ class sly_Service_Category extends sly_Service_ArticleBase {
 	 * return all categories of a parent
 	 *
 	 * @param  int     $parentId
-	 * @param  boolean $ignore_offlines
+	 * @param  boolean $ignoreOfflines
 	 * @param  int     $clang
 	 * @return array
 	 */
-	public function findByParentId($parentId, $ignore_offlines = false, $clang = null) {
-		return $this->findElementsInCategory($parentId, $ignore_offlines, $clang);
+	public function findByParentId($parentId, $ignoreOfflines = false, $clang = null) {
+		return $this->findElementsInCategory($parentId, $ignoreOfflines, $clang);
 	}
 
 	/**
@@ -273,11 +274,12 @@ class sly_Service_Category extends sly_Service_ArticleBase {
 	 * @param sly_Model_User $user         updateuser or null for the current user
 	 */
 	public function move($categoryID, $targetID, sly_Model_User $user = null) {
-		$categoryID = (int) $categoryID;
-		$targetID   = (int) $targetID;
-		$user       = $this->getActor($user, __METHOD__);
-		$category   = $this->findById($categoryID);
-		$target     = $this->findById($targetID);
+		$categoryID  = (int) $categoryID;
+		$targetID    = (int) $targetID;
+		$defaultLang = $this->getDefaultLanguageId();
+		$user        = $this->getActor($user, __METHOD__);
+		$category    = $this->findById($categoryID, $defaultLang);
+		$target      = $this->findById($targetID, $defaultLang);
 
 		// check categories
 
@@ -365,5 +367,15 @@ class sly_Service_Category extends sly_Service_ArticleBase {
 				'user'   => $user
 			));
 		}
+	}
+
+	/**
+	 *
+	 * @param  int      $id   The Category id
+	 * @return boolean        Whether the article exists or not. Deleted equals not existing.
+	 */
+	public function exists($id) {
+		$count = $this->getPersistence()->fetch($this->getTableName(), 'COUNT(id) as c', array('id' => $id, 'startpage' => 1, 'deleted' => 0));
+		return ((int) $count['c'] > 0);
 	}
 }

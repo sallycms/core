@@ -163,14 +163,14 @@ class sly_Service_ArticleExTest extends sly_Service_ArticleTestBase {
 
 		// make A & B special articles
 
-		$service->setType($service->findById($artA), 'special');
-		$service->setType($service->findById($artB), 'special');
+		$service->setType($service->findById($artA, self::$clangA), 'special');
+		$service->setType($service->findById($artB, self::$clangA), 'special');
 		$result = $service->findArticlesByType('special');
 
 		$this->assertCount(2, $result);
 
 		foreach (array($artA, $artB) as $idx => $artId) {
-			$article = $service->findById($artId);
+			$article = $service->findById($artId, self::$clangA);
 			$this->assertEquals($article, $result[$idx]);
 		}
 
@@ -182,7 +182,7 @@ class sly_Service_ArticleExTest extends sly_Service_ArticleTestBase {
 		$this->assertCount(2, $result);
 
 		foreach (array($artA, $artB) as $idx => $artId) {
-			$article = $service->findById($artId);
+			$article = $service->findById($artId, self::$clangA);
 			$this->assertEquals($article, $result[$idx]);
 		}
 
@@ -191,7 +191,7 @@ class sly_Service_ArticleExTest extends sly_Service_ArticleTestBase {
 		$result = $service->findArticlesByType('special', true);
 
 		$this->assertCount(1, $result);
-		$this->assertEquals($service->findById($artB), $result[0]);
+		$this->assertEquals($service->findById($artB, self::$clangA), $result[0]);
 	}
 
 	public function testCopy() {
@@ -266,7 +266,7 @@ class sly_Service_ArticleExTest extends sly_Service_ArticleTestBase {
 
 		$this->assertInternalType('int', $newID);
 
-		$art = $service->findById($newID);
+		$art = $service->findById($newID, self::$clangA);
 		$this->assertEquals(0, $art->getStartpage());
 		$this->assertEquals(0, $art->getCatPosition());
 	}
@@ -307,7 +307,6 @@ class sly_Service_ArticleExTest extends sly_Service_ArticleTestBase {
 
 	public function testMove() {
 		$service  = $this->getService();
-		$articles = array(6,7,8);
 
 		////////////////////////////////////////////////////////////
 		// move one article to the first cat
@@ -316,8 +315,8 @@ class sly_Service_ArticleExTest extends sly_Service_ArticleTestBase {
 		$this->assertPositions(array(6,8), self::$clangA);
 		$this->assertPositions(array(1,7), self::$clangA);
 
-		$art = $service->findById(7);
-		$this->assertEquals($service->findById(1)->getCatName(), $art->getCatName());
+		$art = $service->findById(7, self::$clangA);
+		$this->assertEquals($service->findById(1, self::$clangA)->getCatName(), $art->getCatName());
 		$this->assertEquals(2, $art->getPosition());
 
 		$this->assertCount(2, $service->findArticlesByCategory(0, false));
@@ -334,5 +333,29 @@ class sly_Service_ArticleExTest extends sly_Service_ArticleTestBase {
 		$this->assertCount(3, $service->findArticlesByCategory(0, false));
 		$this->assertCount(2, $service->findArticlesByCategory(0, true));
 		$this->assertCount(1, $service->findArticlesByCategory(1, false));
+	}
+
+	public function testDelete() {
+		$service = $this->getService();
+		$new     = $service->add(1, 'Test', 1);
+		$user    = sly_Service_Factory::getUserService()->findById(1);
+
+		$article = $service->findById($new, self::$clangA);
+		$service->touch($article, $user);
+
+
+		$service->deleteById($new);
+
+		$dservice = $this->getDeletedArticleService();
+		$deleted = $dservice->find(array('id' => $new));
+
+		$this->assertCount(3, $deleted);
+
+		foreach($deleted as $x) {
+			$this->assertTrue($x->isDeleted());
+		}
+
+		$deleted = $dservice->findLatest(array('id' => $new));
+		$this->assertCount(1, $deleted);
 	}
 }

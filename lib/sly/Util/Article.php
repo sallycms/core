@@ -58,6 +58,10 @@ class sly_Util_Article {
 			// no default case by design
 		}
 
+		if ($clang === false || $clang === null) {
+			$clang = sly_Core::getCurrentClang();
+		}
+
 		if (isset($id)) {
 			$article = $service->findById($id, $clang);
 			if ($article) return $article;

@@ -60,10 +60,31 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base {
 	abstract protected function buildModel(array $params);
 
 	abstract public function getMaxPosition($id);
+	abstract public function exists($id);
 
 	public function findOne($where = null, $having = null) {
 		$res = $this->find($where, null, 'revision DESC', null, 1, $having);
 		return count($res) === 1 ? $res[0] : null;
+	}
+
+	/**
+	 * @param  mixed  $where
+	 * @param  string $group
+	 * @param  string $order
+	 * @param  int    $offset
+	 * @param  int    $limit
+	 * @param  string $having
+	 * @return array
+	 */
+	public function find($where = null, $group = null, $order = null, $offset = null, $limit = null, $having = null) {
+		if (is_array($where)) {
+			$where['deleted'] = 0;
+		}
+		else {
+			$where = "($where) AND deleted = 0";
+		}
+
+		return parent::find($where, $group, $order, $offset, $limit, $having);
 	}
 
 	/**
@@ -107,15 +128,11 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base {
 	 * @param  int $clang
 	 * @return sly_Model_Base_Article
 	 */
-	protected function findById($id, $clangID = null) {
+	protected function findById($id, $clangID) {
 		$id = (int) $id;
 
 		if ($id <= 0) {
 			return null;
-		}
-
-		if ($clangID === null || $clangID === false) {
-			$clangID = sly_Core::getCurrentClang();
 		}
 
 		$type      = $this->getModelType();
@@ -225,10 +242,11 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base {
 	 * @return int
 	 */
 	protected function addHelper($parentID, $name, $status, $position = -1, sly_Model_User $user = null) {
-		$parentID  = (int) $parentID;
-		$position  = (int) $position;
-		$status    = (int) $status;
-		$user      = $this->getActor($user, 'add');
+		$parentID    = (int) $parentID;
+		$position    = (int) $position;
+		$status      = (int) $status;
+		$defaultLang = $this->getDefaultLanguageId();
+		$user        = $this->getActor($user, 'add');
 
 		if (!($this->artService instanceof sly_Service_Article)) {
 			throw new LogicException('You must set the article service with ->setArticleService() before you can add elements.');
@@ -238,19 +256,21 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base {
 			throw new LogicException('You must set the category service with ->setCategoryService() before you can add elements.');
 		}
 
+		// get the parent
+		$parentArticle = $this->artService->findById($parentID, $defaultLang);
+
 		///////////////////////////////////////////////////////////////
 		// check if parent exists
 
-		if ($parentID !== 0 && $this->catService->findById($parentID) === null) {
+		if ($parentID !== 0 && $parentArticle === null) {
 			throw new sly_Exception(t('parent_category_not_found'));
 		}
 
 		///////////////////////////////////////////////////////////////
 		// inherit type and catname from parent category
 
-		$type          = sly_Core::getDefaultArticleType();
-		$parentArticle = $this->artService->findById($parentID);
-		$db            = $this->getPersistence();
+		$type = sly_Core::getDefaultArticleType();
+		$db   = $this->getPersistence();
 
 		if ($parentID !== 0) {
 			$type = $parentArticle->getType();
@@ -527,5 +547,9 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base {
 		if ($objID === sly_Core::getNotFoundArticleId()) {
 			throw new sly_Exception(t('cannot_delete_not_found_article'));
 		}
+	}
+
+	protected function getDefaultLanguageId() {
+		return (int) sly_Core::getDefaultClangId();
 	}
 }

@@ -117,7 +117,7 @@ abstract class sly_Service_Model_Base {
 	/**
 	 * gets a persistence object
 	 *
-	 * @return sly_DB_Persistence
+	 * @return sly_DB_PDO_Persistence
 	 */
 	protected function getPersistence() {
 		return $this->persistence;

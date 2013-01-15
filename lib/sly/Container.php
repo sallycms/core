@@ -45,6 +45,7 @@ class sly_Container implements ArrayAccess, Countable {
 			'sly-service-addon'          => array($this, 'buildAddOnService'),
 			'sly-service-addon-manager'  => array($this, 'buildAddOnManagerService'),
 			'sly-service-article'        => array($this, 'buildArticleService'),
+			'sly-service-deletedarticle' => array($this, 'buildDeletedArticleService'),
 			'sly-service-articleslice'   => array($this, 'buildArticleSliceService'),
 			'sly-service-articletype'    => array($this, 'buildArticleTypeService'),
 			'sly-service-asset'          => array($this, 'buildAssetService'),
@@ -266,6 +267,15 @@ class sly_Container implements ArrayAccess, Countable {
 	 */
 	public function getArticleService() {
 		return $this->get('sly-service-article');
+	}
+
+	/**
+	 * get article service for deleted articles
+	 *
+	 * @return sly_Service_DeletedArticle
+	 */
+	public function getDeletedArticleService() {
+		return $this->get('sly-service-deletedarticle');
 	}
 
 	/**
@@ -685,6 +695,17 @@ class sly_Container implements ArrayAccess, Countable {
 		$service->setCategoryService($container['sly-service-category']);
 
 		return $service;
+	}
+
+	/**
+	 * @param  sly_Container $container
+	 * @return sly_Service_Article
+	 */
+	protected function buildDeletedArticleService(sly_Container $container) {
+		$persistence = $container['sly-persistence'];
+		$service     = new sly_Service_DeletedArticle($persistence);
+
+		return $this->values['sly-service-deletedarticle'] = $service;
 	}
 
 	/**
