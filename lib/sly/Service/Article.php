@@ -49,7 +49,7 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 
 	protected function getSiblingQuery($categoryID, $clang = null) {
 		$categoryID = (int) $categoryID;
-		$where      = '((re_id = '.$categoryID.' AND startpage = 0) OR id = '.$categoryID.')';
+		$where      = '((re_id = '.$categoryID.' AND startpage = 0) OR id = '.$categoryID.') AND deleted = 0';
 
 		if ($clang !== null) {
 			$clang = (int) $clang;
@@ -62,7 +62,7 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 	public function getMaxPosition($categoryID) {
 		$db     = $this->getPersistence();
 		$where  = $this->getSiblingQuery($categoryID);
-		$maxPos = $db->magicFetch('article', 'MAX(pos)', $where);
+		$maxPos = $db->magicFetch($this->getTableName(), 'MAX(pos)', $where);
 
 		return $maxPos;
 	}
@@ -279,11 +279,11 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 		try {
 			foreach ($langs as $clangID) {
 				$article = $this->findById($articleID, $clangID);
+				//create new revision
+				$article = $this->touch($article, $user);
 
 				// update the article
-
 				$article->setType($type);
-				$article->setUpdateColumns($user);
 				$this->update($article);
 			}
 
@@ -434,7 +434,7 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 
 		// check category
 
-		if ($target !== 0 && $this->catService->findById($target, $defaultLang) === null) {
+		if ($target !== 0 && !$this->catService->exists($target)) {
 			throw new sly_Exception(t('category_not_found', $target));
 		}
 
@@ -501,8 +501,9 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 	 * The article will be converted to an category and all articles and
 	 * categories will be moved to be its children.
 	 *
-	 * @param int            $articleID  article ID
-	 * @param sly_Model_User $user       updateuser or null for the current user
+	 * @param  int            $articleID  article ID
+	 * @param  sly_Model_User $user       updateuser or null for the current user
+	 * @throws sly_Exception
 	 */
 	public function convertToStartArticle($articleID, sly_Model_User $user = null) {
 		$articleID   = (int) $articleID;
@@ -670,15 +671,5 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 				'user'     => $user
 			));
 		}
-	}
-
-	/**
-	 *
-	 * @param  int      $id
-	 * @return boolean  Whether the article exists or not. Deleted equals not existing.
-	 */
-	public function exists($id) {
-		$count = $this->getPersistence()->fetch($this->getTableName(), 'COUNT(id) as c', array('id' => $id, 'deleted' => 0));
-		return ((int) $count['c'] > 0);
 	}
 }
