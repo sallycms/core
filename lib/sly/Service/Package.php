@@ -408,8 +408,10 @@ class sly_Service_Package {
 			}
 		}
 
+		$packages = array_unique($packages);
 		natcasesort($packages);
-		return $packages;
+
+		return array_values($packages);
 	}
 
 	private function readDir($dir) {
