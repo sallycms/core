@@ -71,7 +71,7 @@ class sly_DB_PDO_Driver_MYSQL extends sly_DB_PDO_Driver {
 	public function getVersionConstraints() {
 		return array(
 			sly_Util_Requirements::OK      => '5.1',
-			sly_Util_Requirements::WARNING => '5.1'
+			sly_Util_Requirements::WARNING => '5.0'
 		);
 	}
 }
