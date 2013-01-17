@@ -267,6 +267,7 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 		$user      = $this->getActor($user, __METHOD__);
 		$oldType   = $article->getType();
 		$articleID = $article->getId();
+		$curClang  = $article->getClang();
 		$langs     = $this->lngService->findAll(true);
 		$sql       = $this->getPersistence();
 		$ownTrx    = !$sql->isTransRunning();
@@ -299,6 +300,7 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 		}
 
 		// notify system
+		$article = $this->findById($articleID, $curClang);
 		$this->dispatcher->notify('SLY_ART_TYPE', $article, array('old_type' => $oldType, 'user' => $user));
 
 		return true;
