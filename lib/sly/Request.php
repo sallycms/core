@@ -378,7 +378,7 @@ class sly_Request {
 	 * @return string
 	 */
 	public function getScriptName() {
-		return $this->server->get('SCRIPT_NAME', $this->server->get('ORIG_SCRIPT_NAME', 'string', ''));
+		return $this->server->get('SCRIPT_NAME', 'string', $this->server->get('ORIG_SCRIPT_NAME', 'string', ''));
 	}
 
 	/**
