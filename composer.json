@@ -15,6 +15,7 @@
             "homepage": "http://www.webvariants.de/"
         }
     ],
+    "version": "0.9.x-dev",
     "homepage": "http://www.sallycms.de/",
     "license": "MIT",
     "repositories": [
@@ -66,7 +67,7 @@
     },
     "extra": {
         "branch-alias": {
-            "dev-default": "0.8.x-dev"
+            "dev-default": "0.9.x-dev"
         }
     },
     "scripts": {
