@@ -1,0 +1,40 @@
+<?php
+/*
+ * Copyright (c) 2013, webvariants GbR, http://www.webvariants.de
+ *
+ * This file is released under the terms of the MIT license. You can find the
+ * complete text in the attached LICENSE file or online at:
+ *
+ * http://www.opensource.org/licenses/mit-license.php
+ */
+$lang     = !empty($this->language) ? ' lang="'.$this->language.'"' : '';
+$manifest = !empty($this->manifest) ? ' manifest="'.$this->manifest.'"' : '';
+?>
+<!DOCTYPE html>
+<html<?php echo $lang.$manifest ?>>
+<head><?php
+	if (!empty($this->base)) {
+		print "\n\t<base href=\"".$this->base."\" />";
+	}
+
+	print "\n\t<title>".sly_html(trim($this->title))."</title>\n";
+
+	if (!empty($this->charset)) {
+		print "\t<meta charset=\"".$this->charset."\" />\n";
+	}
+
+	sly_Core::dispatcher()->notify('PAGE_HEADER', $this);
+
+	if ($this->favIcon !== null) {
+		$this->addLink('shortcut icon', $this->favIcon, 'image/x-icon');
+	}
+
+	$this->printHttpMetas();
+	$this->printMetas();
+	$this->printLinks();
+	$this->printCSSFiles();
+	if (!$this->scriptsAtBottom) $this->printJavaScriptFiles();
+	$this->printCSS();
+	if (!$this->scriptsAtBottom) $this->printJavaScript();
+?></head>
+<body<?php echo $this->printBodyAttrs() ?>>
