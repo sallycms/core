@@ -38,6 +38,22 @@ class sly_Util_Article {
 	}
 
 	/**
+	 * translate the article constants into the currently set article ID
+	 *
+	 * @param  int $id
+	 * @return int      the actual ID (int) or null if an invalid value was given
+	 */
+	public static function resolveConstant($id) {
+		switch ($id) {
+			case self::CURRENT_ARTICLE:  return sly_Core::getCurrentArticleId();
+			case self::START_ARTICLE:    return sly_Core::getSiteStartArticleId();
+			case self::NOTFOUND_ARTICLE: return sly_Core::getNotFoundArticleId();
+		}
+
+		return null;
+	}
+
+	/**
 	 * @throws sly_Exception
 	 * @param  int   $articleID
 	 * @param  int   $clang
@@ -51,14 +67,9 @@ class sly_Util_Article {
 
 		if ($article) return $article;
 
-		switch ($default) {
-			case self::CURRENT_ARTICLE:  $id = sly_Core::getCurrentArticleId();   break;
-			case self::START_ARTICLE:    $id = sly_Core::getSiteStartArticleId(); break;
-			case self::NOTFOUND_ARTICLE: $id = sly_Core::getNotFoundArticleId();  break;
-			// no default case by design
-		}
+		$id = self::resolveConstant($default);
 
-		if (isset($id)) {
+		if ($id !== null) {
 			$article = $service->findById($id, $clang);
 			if ($article) return $article;
 			throw new sly_Exception('Could not find a matching article, giving up.');
@@ -163,7 +174,7 @@ class sly_Util_Article {
 	 * get an article's URL
 	 *
 	 * @throws UnexpectedValueException
-	 * @param  int     $articleID
+	 * @param  int     $articleID  an existing article's ID or one of the class constants
 	 * @param  int     $clang
 	 * @param  array   $params
 	 * @param  string  $divider
@@ -174,7 +185,8 @@ class sly_Util_Article {
 	public static function getUrl($articleID, $clang = null, $params = array(), $divider = '&amp;', $absolute = false, $secure = null) {
 		$article = self::findById($articleID, $clang, $articleID);
 
-		if (!$article) {
+		// if no article was found, the default value, an integer (articleID), will be returned
+		if (!($article instanceof sly_Model_Article)) {
 			$clang     = $clang === null ? sly_Core::getCurrentClang() : (int) $clang;
 			$articleID = (int) $articleID;
 
