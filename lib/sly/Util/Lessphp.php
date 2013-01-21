@@ -12,6 +12,8 @@
  * @ingroup util
  */
 class sly_Util_Lessphp {
+	private static $currentFile = null;
+
 	/**
 	 * parse a LESS file with lessphp
 	 *
@@ -24,7 +26,12 @@ class sly_Util_Lessphp {
 	public static function process($lessFile) {
 		// Do not use ->compileFile() to have the $cssFile's dirname as the *first*
 		// importdir instead of the last, so users can use their own 'mixin.less'.
-		return self::getCompiler($lessFile)->compile(file_get_contents($lessFile));
+
+		self::$currentFile = $lessFile;
+		$result = self::getCompiler($lessFile)->compile(file_get_contents($lessFile));
+		self::$currentFile = null;
+
+		return $result;
 	}
 
 	/**
@@ -48,6 +55,7 @@ class sly_Util_Lessphp {
 
 		$less = new lessc($filename);
 		$less->setFormatter('compressed');
+		$less->registerFunction('asset', array(__CLASS__, 'asset'));
 
 		// add custom mixin package to default import dir
 		$dir = (array) $less->importDir;
@@ -61,5 +69,38 @@ class sly_Util_Lessphp {
 		$less->setImportDir(array_filter($dir));
 
 		return $less;
+	}
+
+	/**
+	 *
+	 * @param  string $arg     (relative) url to asset
+	 * @param  string $options t=add timestamp
+	 * @return string
+	 */
+	public static function asset($arg, $options = 't') {
+		if (!is_string($options)) {
+			$options = 't';
+		}
+
+		if ($arg[0] == 'list') {
+			$url     = $arg[2][0][2][0];
+			$options = $arg[2][1][2][0];
+		}
+		else {
+			$url = $arg[2][0];
+		}
+
+		/*
+		 *  if 't' option set add timestamp to url
+		 */
+		if (strpos($options, 't') !== false &&
+				self::$currentFile && substr($url, 0, 1) != '/' && strpos($url, ':') === false) {
+			$file = dirname(self::$currentFile) . '/' . $url;
+			if (file_exists($file)) {
+				$url = $url.(strpos($url, '?') === false ? '?' : '&').'t='.base_convert(filemtime($file), 10, 35);
+			}
+		}
+
+		return sprintf('url("%s")', $url);
 	}
 }
