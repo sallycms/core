@@ -118,4 +118,11 @@ class sly_Model_Medium extends sly_Model_Base_Id {
 	public function getFullPath() {
 		return SLY_MEDIAFOLDER.'/'.$this->filename;
 	}
+
+	/**
+	 * @return string
+	 */
+	public function getUrl($absolutePath = false) {
+		return ($absolutePath ? sly_Util_HTTP::getBaseUrl(true).'/' : '').'data/mediapool/'.$this->filename;
+	}
 }
