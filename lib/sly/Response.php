@@ -100,16 +100,16 @@ class sly_Response {
 	/**
 	 * Constructor
 	 *
-	 * @param string  $content The response content
-	 * @param integer $status  The response status code
-	 * @param array   $headers An array of response headers
+	 * @param string  $content  The response content
+	 * @param integer $status   The response status code
+	 * @param array   $headers  An array of response headers
 	 */
 	public function __construct($content = '', $status = 200, array $headers = array()) {
-		$this->headers      = new sly_Util_ArrayObject($headers, sly_Util_ArrayObject::NORMALIZE_HTTP_HEADER);
+		$this->headers      = new sly_Util_ArrayObject(array(), sly_Util_ArrayObject::NORMALIZE_HTTP_HEADER);
 		$this->cacheControl = array();
 
-		if ($this->hasHeader('Cache-Control')) {
-			$this->setHeader('Cache-Control', $this->getHeader('Cache-Control'));
+		foreach ($headers as $name => $values) {
+			$this->setHeader($name, $values);
 		}
 
 		$this->setContent($content);
