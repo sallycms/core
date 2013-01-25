@@ -15,7 +15,7 @@ class sly_Util_Session {
 	/**
 	 * Start a session if it is not already started
 	 */
-	public static function start() {
+	public static function start($onlyIfCookieSet = false) {
 		/*
 		Do NOT use session_id() here, because it could give you the wrong info.
 		Normally, in an ideal world, session_id() would be fine and we're all happy.
@@ -27,12 +27,14 @@ class sly_Util_Session {
 		explicitely unset() by FullPageCache.
 		*/
 
-		if (!isset($_SESSION) || !session_id()) {
-			// force httponly flag but leave other stuff unchanged
-			$params = session_get_cookie_params();
-			session_set_cookie_params($params['lifetime'], $params['path'], $params['domain'], $params['secure'], true);
+		if (!$onlyIfCookieSet || self::isCookieSet()) {
+			if (!isset($_SESSION) || !session_id()) {
+				// force httponly flag but leave other stuff unchanged
+				$params = session_get_cookie_params();
+				session_set_cookie_params($params['lifetime'], $params['path'], $params['domain'], $params['secure'], true);
 
-			session_start();
+				session_start();
+			}
 		}
 	}
 
@@ -83,5 +85,16 @@ class sly_Util_Session {
 	 */
 	public static function regenerate_id() {
 		return sly_Core::getSession()->regenerateID();
+	}
+
+	public static function isCookieSet() {
+		return !empty($_COOKIE[session_name()]);
+	}
+
+	public static function destroy() {
+		$params = session_get_cookie_params();
+		setcookie(session_name(), '', 0, $params['path'], $params['domain'], $params['secure'], isset($params['httponly']));
+		session_destroy();
+		session_write_close();
 	}
 }
