@@ -15,6 +15,7 @@
             "homepage": "http://www.webvariants.de/"
         }
     ],
+    "version": "0.9.x-dev",
     "homepage": "http://www.sallycms.de/",
     "license": "MIT",
     "repositories": [
@@ -57,16 +58,17 @@
         "fabpot/yaml": "1.0.6",
         "leafo/lessphp": "0.3.*@stable",
         "webvariants/babelcache": "1.2.*",
-        "sallycms/composer-installer": "*"
+        "sallycms/composer-installer": "*",
+        "xrstf/composer-php52": "~1.0"
     },
     "require-dev": {
         "pear-phpunit/phpunit": ">=3.6.10,<3.8",
         "pear-phpunit/dbunit": ">=1.1,<1.2",
-        "xrstf/composer-php52": "~1.0"
+        "doctrine/dbal": "~2.3.2"
     },
     "extra": {
         "branch-alias": {
-            "dev-default": "0.8.x-dev"
+            "dev-default": "0.9.x-dev"
         }
     },
     "scripts": {
