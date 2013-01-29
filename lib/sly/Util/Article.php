@@ -47,6 +47,11 @@ class sly_Util_Article {
 	public static function findById($articleID, $clang = null, $default = null) {
 		$service   = sly_Core::getContainer()->getArticleService();
 		$articleID = (int) $articleID;
+
+		if ($clang === false || $clang === null) {
+			$clang = sly_Core::getCurrentClang();
+		}
+
 		$article   = $service->findById($articleID, $clang);
 
 		if ($article) return $article;
@@ -56,10 +61,6 @@ class sly_Util_Article {
 			case self::START_ARTICLE:    $id = sly_Core::getSiteStartArticleId(); break;
 			case self::NOTFOUND_ARTICLE: $id = sly_Core::getNotFoundArticleId();  break;
 			// no default case by design
-		}
-
-		if ($clang === false || $clang === null) {
-			$clang = sly_Core::getCurrentClang();
 		}
 
 		if (isset($id)) {

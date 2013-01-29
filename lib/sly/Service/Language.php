@@ -93,7 +93,7 @@ class sly_Service_Language extends sly_Service_Model_Base_Id {
 	 * @return sly_Model_Language
 	 */
 	public function create($params) {
-		$langs = sly_Util_Language::findAll(); // TODO: avoid wrapper around ourselves
+		$langs = $this->findAll();
 
 		// if there are no languages yet, don't attempt to copy anything
 
@@ -119,7 +119,7 @@ class sly_Service_Language extends sly_Service_Model_Base_Id {
 					$sourceID = reset($ids);
 				}
 
-				$sql->query(str_replace('~', sly_Core::getTablePrefix(),
+				$sql->query(str_replace('~', $sql->getPrefix(),
 					'INSERT INTO ~article (id,re_id,name,catname,catpos,attributes,'.
 					'startpage,pos,path,status,createdate,updatedate,type,clang,createuser,'.
 					'updateuser,revision) '.
@@ -170,7 +170,7 @@ class sly_Service_Language extends sly_Service_Model_Base_Id {
 
 		// find all languages first
 		$toDelete = $this->find($where);
-		$allLangs = sly_Util_Language::findAll(); // TODO: avoid wrapper around ourselves
+		$allLangs = $this->findAll();
 
 		// delete
 		$res = parent::delete($where);

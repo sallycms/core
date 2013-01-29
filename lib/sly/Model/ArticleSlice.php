@@ -148,7 +148,7 @@ class sly_Model_ArticleSlice extends sly_Model_Base_Id implements sly_Model_ISli
 		$service   = $container->getArticleSliceService();
 		$db        = $container->getPersistence();
 
-		return $service->findOne(sprintf('slot = %s AND pos < %d AND article_id = %d AND clang = %d ORDER BY pos DESC', $db->quote($this->getSlot()), $this->getPosition(), $this->getArticleId(), $this->getClang()));
+		return $service->findOne(sprintf('slot = %s AND pos < %d AND article_id = %d AND clang = %d AND revision = %d ORDER BY pos DESC', $db->quote($this->getSlot()), $this->getPosition(), $this->getArticleId(), $this->getClang(), $this->getRevision()));
 	}
 
 	public function getNext() {
@@ -156,7 +156,7 @@ class sly_Model_ArticleSlice extends sly_Model_Base_Id implements sly_Model_ISli
 		$service   = $container->getArticleSliceService();
 		$db        = $container->getPersistence();
 
-		return $service->findOne(sprintf('slot = %s AND pos > %d AND article_id = %d AND clang = %d ORDER BY pos ASC', $db->quote($this->getSlot()), $this->getPosition(), $this->getArticleId(), $this->getClang()));
+		return $service->findOne(sprintf('slot = %s AND pos > %d AND article_id = %d AND clang = %d AND revision = %d ORDER BY pos ASC', $db->quote($this->getSlot()), $this->getPosition(), $this->getArticleId(), $this->getClang(), $this->getRevision()));
 	}
 
 	public function getModule() {

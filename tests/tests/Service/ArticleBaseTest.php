@@ -9,6 +9,8 @@
  */
 
 class sly_Service_ArticleBaseTest extends sly_Service_ArticleTestBase {
+	private static $clang = 5;
+
 	public static function setUpBeforeClass() {
 		sly_Core::setCurrentClang(1);
 	}
@@ -18,8 +20,8 @@ class sly_Service_ArticleBaseTest extends sly_Service_ArticleTestBase {
 	}
 
 	public function testGetNonExisting() {
-		$this->assertNull($this->getService()->findById(1));
-		$this->assertNull($this->getService()->findById(1), 2);
+		$this->assertNull($this->getService()->findById(1, self::$clang));
+		$this->assertNull($this->getService()->findById(1, 2));
 	}
 
 	public function testAdd() {
@@ -28,7 +30,7 @@ class sly_Service_ArticleBaseTest extends sly_Service_ArticleTestBase {
 
 		$this->assertInternalType('int', $newID);
 
-		$art = $service->findById($newID);
+		$art = $service->findById($newID, self::$clang);
 		$this->assertInstanceOf('sly_Model_Article', $art);
 
 		$this->assertEquals('my "article"', $art->getName());
@@ -43,9 +45,9 @@ class sly_Service_ArticleBaseTest extends sly_Service_ArticleTestBase {
 		$service = $this->getService();
 		$id      = $service->add(0, 'my article', 1, -1);
 
-		$service->edit($id, 1, 'new title', 0);
+		$service->edit($id, self::$clang, 'new title', 0);
 
-		$art = $service->findById($id);
+		$art = $service->findById($id, self::$clang);
 		$this->assertEquals('new title', $art->getName());
 		$this->assertEquals('', $art->getCatName());
 	}
@@ -56,17 +58,17 @@ class sly_Service_ArticleBaseTest extends sly_Service_ArticleTestBase {
 
 		$service->deleteById($id);
 
-		$this->assertNull($service->findById($id));
+		$this->assertNull($service->exists($id));
 	}
 
 	public function testChangeStatus() {
 		$service = $this->getService();
 		$id      = $service->add(0, 'tmp', 1, -1);
 
-		$this->assertTrue($service->findById($id, 1)->isOnline());
-		$service->changeStatus($id, 1, 0);
-		$this->assertFalse($service->findById($id, 1)->isOnline());
-		$service->changeStatus($id, 1, 1);
-		$this->assertTrue($service->findById($id, 1)->isOnline());
+		$this->assertTrue($service->findById($id, self::$clang)->isOnline());
+		$service->changeStatus($id, self::$clang, 0);
+		$this->assertFalse($service->findById($id, self::$clang)->isOnline());
+		$service->changeStatus($id, self::$clang, 1);
+		$this->assertTrue($service->findById($id, self::$clang)->isOnline());
 	}
 }

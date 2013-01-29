@@ -703,7 +703,8 @@ class sly_Container implements ArrayAccess, Countable {
 	 */
 	protected function buildDeletedArticleService(sly_Container $container) {
 		$persistence = $container['sly-persistence'];
-		$service     = new sly_Service_DeletedArticle($persistence);
+		$cache       = $container['sly-cache'];
+		$service     = new sly_Service_DeletedArticle($persistence, $cache);
 
 		return $this->values['sly-service-deletedarticle'] = $service;
 	}
@@ -718,7 +719,12 @@ class sly_Container implements ArrayAccess, Countable {
 		$slices      = $container['sly-service-slice'];
 		$templates   = $container['sly-service-template'];
 
-		return $this->values['sly-service-articleslice'] = new sly_Service_ArticleSlice($persistence, $dispatcher, $slices, $templates);
+		$service = new sly_Service_ArticleSlice($persistence, $dispatcher, $slices, $templates);
+
+		$this->values['sly-service-articleslice'] = $service;
+		$service->setArticleService($container['sly-service-article']);
+
+		return $service;
 	}
 
 	/**

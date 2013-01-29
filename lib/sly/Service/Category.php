@@ -29,7 +29,7 @@ class sly_Service_Category extends sly_Service_ArticleBase {
 	 * @return mixed                the condition either as an array or as a string
 	 */
 	protected function getSiblingQuery($categoryID, $clang = null, $asArray = false) {
-		$where = array('re_id' => (int) $categoryID, 'startpage' => 1);
+		$where = array('re_id' => (int) $categoryID, 'startpage' => 1, 'deleted' => 0);
 
 		if ($clang !== null) {
 			$where['clang'] = (int) $clang;
@@ -168,7 +168,7 @@ class sly_Service_Category extends sly_Service_ArticleBase {
 
 		// does this category exist?
 
-		$cat = $this->findById($categoryID);
+		$cat = $this->findById($categoryID, $this->getDefaultLanguageId());
 
 		if ($cat === null) {
 			throw new sly_Exception(t('category_not_found', $categoryID));
@@ -341,7 +341,7 @@ class sly_Service_Category extends sly_Service_ArticleBase {
 			$to     = $newPath.$categoryID.'|';
 			$where  = 'path LIKE "'.$from.'%"';
 			$update = 'path = REPLACE(path, "'.$from.'", "'.$to.'")';
-			$prefix = sly_Core::getTablePrefix();
+			$prefix = $sql->getPrefix();
 
 			$sql->query('UPDATE '.$prefix.'article SET '.$update.' WHERE '.$where);
 			$this->clearCacheByQuery($where);
@@ -367,15 +367,5 @@ class sly_Service_Category extends sly_Service_ArticleBase {
 				'user'   => $user
 			));
 		}
-	}
-
-	/**
-	 *
-	 * @param  int      $id   The Category id
-	 * @return boolean        Whether the article exists or not. Deleted equals not existing.
-	 */
-	public function exists($id) {
-		$count = $this->getPersistence()->fetch($this->getTableName(), 'COUNT(id) as c', array('id' => $id, 'startpage' => 1, 'deleted' => 0));
-		return ((int) $count['c'] > 0);
 	}
 }

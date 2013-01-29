@@ -60,7 +60,6 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base {
 	abstract protected function buildModel(array $params);
 
 	abstract public function getMaxPosition($id);
-	abstract public function exists($id);
 
 	public function findOne($where = null, $having = null) {
 		$res = $this->find($where, null, 'revision DESC', null, 1, $having);
@@ -77,11 +76,14 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base {
 	 * @return array
 	 */
 	public function find($where = null, $group = null, $order = null, $offset = null, $limit = null, $having = null) {
-		if (is_array($where)) {
+		if (is_string($where) && !empty($where)) {
+			$where = "($where) AND deleted = 0";
+		}
+		else if (is_array($where)) {
 			$where['deleted'] = 0;
 		}
 		else {
-			$where = "($where) AND deleted = 0";
+			$where = array('deleted' => 0);
 		}
 
 		return parent::find($where, $group, $order, $offset, $limit, $having);
@@ -163,7 +165,6 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base {
 		$id      = (int) $id;
 		$clangID = (int) $clangID;
 		$all     = $this->find(array('id' => $id, 'clang' => $clangID), null, 'revision');
-		$obj     = $all[0];
 		$type    = $this->getModelType();
 		$user    = $this->getActor($user, __METHOD__);
 
@@ -171,6 +172,7 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base {
 			throw new sly_Exception(t($type.'_not_found'));
 		}
 
+		$obj     = $all[0];
 		// if no explicit status is given, just take the next one
 
 		if ($newStatus === null) {
@@ -230,6 +232,15 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base {
 
 	public function deleteListCache() {
 		$this->cache->flush('sly.article.list');
+	}
+
+	/**
+	 *
+	 * @param  int      $id
+	 * @return boolean  Whether the article/category exists or not. Deleted equals not existing.
+	 */
+	public function exists($id) {
+		return $this->findById($id, $this->getDefaultLanguageId());
 	}
 
 	/**
@@ -465,7 +476,7 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base {
 
 	protected function moveObjects($op, $where) {
 		$db     = $this->getPersistence();
-		$prefix = sly_Core::getTablePrefix();
+		$prefix = $db->getPrefix();
 		$field  = $this->getModelType() === 'article' ? 'pos' : 'catpos';
 
 		$this->clearCacheByQuery($where);

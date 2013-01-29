@@ -1,8 +1,11 @@
 <?php
-
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+ * Copyright (c) 2013, webvariants GbR, http://www.webvariants.de
+ *
+ * This file is released under the terms of the MIT license. You can find the
+ * complete text in the attached LICENSE file or online at:
+ *
+ * http://www.opensource.org/licenses/mit-license.php
  */
 
 class SliceTest extends sly_BaseTest {
@@ -17,7 +20,7 @@ class SliceTest extends sly_BaseTest {
 
 	public function testCreate() {
 		$service = $this->getService();
-		$slice   = $service->create(array('module' => 'test', 'serialized_values' => array('test' => 'not empty')));
+		$slice   = $service->create(array('module' => 'test1', 'serialized_values' => array('test' => 'not empty')));
 
 		$this->assertInstanceOf('sly_Model_Slice', $slice);
 		$this->assertGreaterThan(0, $slice->getId());
