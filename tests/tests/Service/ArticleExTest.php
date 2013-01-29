@@ -292,7 +292,7 @@ class sly_Service_ArticleExTest extends sly_Service_ArticleTestBase {
 
 			$this->assertEquals($oldSlice->getClang(), $newSlice->getClang());
 			$this->assertNotEquals($oldSlice->getArticleId(), $newSlice->getArticleId());
-			$this->assertNotEquals($oldSlice->getId(), $newSlice->getId());
+			$this->assertNotEquals($oldSlice->getSliceId(), $newSlice->getSliceId());
 		}
 	}
 
@@ -345,17 +345,7 @@ class sly_Service_ArticleExTest extends sly_Service_ArticleTestBase {
 
 
 		$service->deleteById($new);
-
-		$dservice = $this->getDeletedArticleService();
-		$deleted = $dservice->find(array('id' => $new));
-
-		$this->assertCount(3, $deleted);
-
-		foreach($deleted as $x) {
-			$this->assertTrue($x->isDeleted());
-		}
-
-		$deleted = $dservice->findLatest(array('id' => $new));
-		$this->assertCount(1, $deleted);
+		$article = $service->findById($new, self::$clangA);
+		$this->assertNull($article);
 	}
 }

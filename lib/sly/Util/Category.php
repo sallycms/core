@@ -123,7 +123,7 @@ class sly_Util_Category {
 				}
 
 				$query  = sly_DB_Persistence::getInstance();
-				$prefix = sly_Core::getTablePrefix();
+				$prefix = $query->getPrefix();
 				$query->query('SELECT DISTINCT id FROM '.$prefix.'article WHERE path LIKE ?', array($path));
 
 				foreach ($query as $row) {

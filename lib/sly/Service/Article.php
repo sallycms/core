@@ -102,6 +102,14 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 		return new sly_Model_Article($params);
 	}
 
+	protected function getMaxRevision(sly_Model_Article $article) {
+		return $this->getPersistence()->magicFetch(
+				$this->getTableName(),
+				'MAX(revision)',
+				array('id' => $article->getId(), 'clang' => $article->getClang())
+		);
+	}
+
 	/**
 	 * @param  int $articleID
 	 * @param  int $clang
@@ -309,11 +317,16 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 	 * @param sly_Model_Article $article
 	 * @param sly_Model_User    $user
 	 */
-	public function touch(sly_Model_Article $article, sly_Model_User $user) {
-		$article->setRevision($article->getRevision()+1);
-		$article->setUpdateColumns($user);
+	public function touch(sly_Model_Article $article, sly_Model_User $user = null) {
+		$user    = $this->getActor($user, __METHOD__);
+		$touched = clone $article;
+		$touched->setRevision($this->getMaxRevision($article) + 1);
+		$touched->setUpdateColumns($user);
 		$this->deleteCache($article->getId(), $article->getClang());
-		return $this->insert($article);
+		$touched = $this->insert($touched);
+		$this->copyContent($article, $touched, $user);
+
+		return $touched;
 	}
 
 	/**
@@ -528,7 +541,7 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 		// switch key params of old and new start articles in every language
 
 		$oldCat  = $article->getCategoryId();
-		$params  = array('path', 'catname', 'startpage', 'catpos', 're_id');
+		$params  = array('path', 'catname', 'catpos', 're_id', 'startpage');
 
 		$sql    = $this->getPersistence();
 		$ownTrx = !$sql->isTransRunning();
@@ -548,21 +561,16 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 					$oldStarter[$param] = $t;
 				}
 
-				$oldStarter['clang'] = $clang;
-				$newStarter['clang'] = $clang;
-				$oldStarter['id']    = $oldCat;
-				$newStarter['id']    = $articleID;
-
-				$this->update(new sly_Model_Article($oldStarter));
-				$this->update(new sly_Model_Article($newStarter));
+				$sql->update($this->tablename, $newStarter, array('id' => $articleID, 'clang' => $clang));
+				$sql->update($this->tablename, $oldStarter, array('id' => $oldCat, 'clang' => $clang));
+				//$this->update(new sly_Model_Article($newStarter));
 			}
 
 			// switch parent id and adjust paths
 
-			$prefix = sly_Core::getTablePrefix();
-
-			$sql->update('article', array('re_id' => $articleID), array('re_id' => $oldCat));
-			$sql->query('UPDATE '.$prefix.'article SET path = REPLACE(path, "|'.$oldCat.'|", "|'.$articleID.'|") WHERE path LIKE "%|'.$oldCat.'|%"');
+			$prefix = $sql->getPrefix();
+			$sql->update($this->tablename, array('re_id' => $articleID), array('re_id' => $oldCat));
+			$sql->query('UPDATE '.$prefix.$this->tablename.' SET path = REPLACE(path, "|'.$oldCat.'|", "|'.$articleID.'|") WHERE path LIKE "%|'.$oldCat.'|%"');
 
 			// clear cache
 
@@ -599,11 +607,13 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 	public function copyContent(sly_Model_Article $source, sly_Model_Article $dest, sly_Model_User $user = null) {
 		$user = $this->getActor($user, __METHOD__);
 
-		if (!array_diff($source->getPKHash(), $dest->getPKHash())) {
+		if (!array_diff_assoc($source->getPKHash(), $dest->getPKHash())) {
 			throw new sly_Exception(t('source_and_target_are_equal'));
 		}
 
-		$dest = $this->touch($dest, $user);
+		if (!$source->hasTemplate() || !$dest->hasTemplate()) {
+			return false;
+		}
 
 		// copy the slices by their slots
 		$asServ   = $this->artSliceService;
@@ -633,7 +643,7 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 				$slice = $articleSlice->getSlice();
 				$slice = $this->sliceService->copy($slice);
 
-				$asServ->create(array(
+				$aSlice = new Sly_Model_ArticleSlice(array(
 					'clang'      => $dest->getClang(),
 					'slot'       => $srcSlot,
 					'pos'        => $position,
@@ -645,6 +655,8 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 					'updatedate' => time(),
 					'updateuser' => $login
 				));
+
+				$asServ->insert($aSlice);
 
 				$changes = true;
 			}

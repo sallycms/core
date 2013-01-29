@@ -10,13 +10,13 @@
 
 class sly_LoaderTest extends PHPUnit_Framework_TestCase {
 	public function testLoadExisting() {
-		$classToTest = 'sly_Util_Pager';
+		$classToTest = 'sly_Session';
 		sly_Loader::loadClass($classToTest);
 		return $this->assertTrue(class_exists($classToTest, false));
 	}
 
 	public function testLoadNotExisting() {
-		$classToTest = 'sly_Util_Pager'.uniqid();
+		$classToTest = 'sly_Session'.uniqid();
 		sly_Loader::loadClass($classToTest);
 		return $this->assertFalse(class_exists($classToTest, false));
 	}
