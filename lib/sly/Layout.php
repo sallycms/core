@@ -225,7 +225,8 @@ abstract class sly_Layout extends sly_Viewable {
 	 * @return mixed         either an array or a string
 	 */
 	public function getBodyAttr($name = null) {
-		return ($name && isset($this->bodyAttrs[$name])) ? $this->bodyAttrs[$name] : $this->bodyAttrs;
+		if ($name === null) return $this->bodyAttrs;
+		return isset($this->bodyAttrs[$name]) ? $this->bodyAttrs[$name] : null;
 	}
 
 	/**
