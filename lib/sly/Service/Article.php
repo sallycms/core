@@ -111,12 +111,22 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 	}
 
 	/**
-	 * @param  int $articleID
+	 * @param  int $id
 	 * @param  int $clang
 	 * @return sly_Model_Article
 	 */
-	public function findById($articleID, $clangID) {
-		return parent::findById($articleID, $clangID);
+	public function findById($id, $clang, $revision = null) {
+		return parent::findById($id, $clang, $revision);
+	}
+
+	/**
+	 *
+	 * @param  int   $id
+	 * @param  int   $clang
+	 * @return array
+	 */
+	public function findAllRevisions($id, $clang) {
+		return $this->find(compact('id', 'clang'), null, 'revision DESC');
 	}
 
 	/**

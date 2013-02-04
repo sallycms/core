@@ -124,28 +124,36 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base {
 	}
 
 	/**
-	 * finds latest revision of article
+	 * finds article by id clang and revision
 	 *
 	 * @param  int $id
 	 * @param  int $clang
+	 * @param  int $revision          if null the latest revision will be fetched
 	 * @return sly_Model_Base_Article
 	 */
-	protected function findById($id, $clangID) {
+	protected function findById($id, $clang, $revision = null) {
 		$id = (int) $id;
 
 		if ($id <= 0) {
 			return null;
 		}
 
+		$where     = compact('id', 'clang');
+		$useCache  = $revision === null;
 		$type      = $this->getModelType();
 		$namespace = 'sly.article';
-		$key       = substr($type, 0, 3).'_'.$id.'_'.$clangID;
-		$obj       = $this->cache->get($namespace, $key, null);
+		$key       = substr($type, 0, 3).'_'.$id.'_'.$clang;
+		$obj       = $useCache ? $this->cache->get($namespace, $key, null) : null;
 
 		if ($obj === null) {
-			$obj = $this->findOne(array('id' => $id, 'clang' => $clangID));
 
-			if ($obj !== null) {
+			if ($revision !== null) {
+				$where['revision'] = $revision;
+			}
+
+			$obj = $this->findOne($where);
+
+			if ($useCache && $obj !== null) {
 				$this->cache->set($namespace, $key, $obj);
 			}
 		}
@@ -156,15 +164,15 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base {
 	/**
 	 *
 	 * @param  int            $id
-	 * @param  int            $clangID
+	 * @param  int            $clang
 	 * @param  int            $newStatus
 	 * @param  sly_Model_User $user       updateuser or null for the current user
 	 * @return boolean
 	 */
-	public function changeStatus($id, $clangID, $newStatus = null, sly_Model_User $user = null) {
+	public function changeStatus($id, $clang, $newStatus = null, sly_Model_User $user = null) {
 		$id      = (int) $id;
-		$clangID = (int) $clangID;
-		$all     = $this->find(array('id' => $id, 'clang' => $clangID), null, 'revision');
+		$clang   = (int) $clang;
+		$all     = $this->find(array('id' => $id, 'clang' => $clang), null, 'revision');
 		$type    = $this->getModelType();
 		$user    = $this->getActor($user, __METHOD__);
 
@@ -240,7 +248,7 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base {
 	 * @return boolean  Whether the article/category exists or not. Deleted equals not existing.
 	 */
 	public function exists($id) {
-		return $this->findById($id, $this->getDefaultLanguageId());
+		return $this->findById($id, $this->getDefaultLanguageId()) !== null;
 	}
 
 	/**

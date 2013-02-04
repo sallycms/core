@@ -96,10 +96,11 @@ class sly_Service_Category extends sly_Service_ArticleBase {
 	/**
 	 * @param  int $id
 	 * @param  int $clang
+	 * @param  int $revision
 	 * @return sly_Model_Category
 	 */
-	public function findById($id, $clang) {
-		return parent::findById($id, $clang);
+	public function findById($id, $clang, $revision = null) {
+		return parent::findById($id, $clang, $revision);
 	}
 
 	/**
