@@ -58,7 +58,7 @@ class sly_Service_ArticleBaseTest extends sly_Service_ArticleTestBase {
 
 		$service->deleteById($id);
 
-		$this->assertNull($service->exists($id));
+		$this->assertFalse($service->exists($id));
 	}
 
 	public function testChangeStatus() {
