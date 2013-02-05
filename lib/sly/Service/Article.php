@@ -331,7 +331,7 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 		$user    = $this->getActor($user, __METHOD__);
 		$touched = clone $article;
 		$touched->setRevision($this->getMaxRevision($article) + 1);
-		$touched->setUpdateColumns($user);
+		$touched->setCreateColumns($user);
 		$this->deleteCache($article->getId(), $article->getClang());
 		$touched = $this->insert($touched);
 		$this->copyContent($article, $touched, $user);
