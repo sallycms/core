@@ -127,7 +127,7 @@ class sly_Model_ArticleSlice extends sly_Model_Base_Id implements sly_Model_ISli
 	 */
 	public function getArticle() {
 		if (empty($this->article)) {
-			$this->article =  sly_Util_Article::findById($this->getArticleId(), $this->getClang());
+			$this->article =  sly_Util_Article::findById($this->getArticleId(), $this->getClang(), $this->getRevision());
 		}
 		return $this->article;
 	}
