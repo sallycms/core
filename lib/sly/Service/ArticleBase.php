@@ -163,42 +163,35 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base {
 
 	/**
 	 *
-	 * @param  int            $id
-	 * @param  int            $clang
-	 * @param  int            $newStatus
-	 * @param  sly_Model_User $user       updateuser or null for the current user
+	 * @param  sly_Model_Base_Article $item
+	 * @param  int                    $newStatus
+	 * @param  sly_Model_User         $user       updateuser or null for the current user
 	 * @return boolean
 	 */
-	public function changeStatus($id, $clang, $newStatus = null, sly_Model_User $user = null) {
-		$id      = (int) $id;
-		$clang   = (int) $clang;
-		$all     = $this->find(array('id' => $id, 'clang' => $clang), null, 'revision');
+	public function changeStatus(sly_Model_Base_Article $item, $newStatus = null, sly_Model_User $user = null) {
 		$type    = $this->getModelType();
 		$user    = $this->getActor($user, __METHOD__);
 
-		if (empty($all)) {
+		if (!$item) {
 			throw new sly_Exception(t($type.'_not_found'));
 		}
 
-		$obj     = $all[0];
 		// if no explicit status is given, just take the next one
 
 		if ($newStatus === null) {
 			$states    = $this->getStates();
-			$oldStatus = $obj->getStatus();
+			$oldStatus = $item->getStatus();
 			$newStatus = ($oldStatus + 1) % count($states);
 		}
 
 		// update the article/category
-		foreach ($all as $obj) {
-			$obj->setStatus($newStatus);
-			$obj->setUpdateColumns($user);
-			$this->update($obj);
-		}
+
+		$item->setStatus($newStatus);
+		$item->setUpdateColumns($user);
+		$this->update($item);
 
 		// notify the system
-
-		$this->dispatcher->notify($this->getEvent('STATUS'), $obj, array('user' => $user));
+		$this->dispatcher->notify($this->getEvent('STATUS'), $item, array('user' => $user));
 
 		return true;
 	}
