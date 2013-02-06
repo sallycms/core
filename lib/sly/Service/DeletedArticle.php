@@ -77,7 +77,7 @@ class sly_Service_DeletedArticle extends sly_Service_Model_Base {
 			$query->order('revision');
 		}
 
-		$outerQuery = 'SELECT * FROM ('.$query->to_s().') latest_'.$this->getTableName().'_tmp GROUP BY id';
+		$outerQuery = 'SELECT * FROM ('.$query->to_s().') latest_'.$this->getTableName().'_tmp GROUP BY clang, id';
 
 		$db->query($outerQuery, $query->bind_values());
 
