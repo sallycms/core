@@ -43,15 +43,7 @@ class sly_Service_DeletedArticle extends sly_Service_Model_Base {
 	 * @return array
 	 */
 	public function find($where = null, $group = null, $order = null, $offset = null, $limit = null, $having = null) {
-		if (is_string($where) && !empty($where)) {
-			$where = "($where) AND deleted = 1";
-		}
-		else if (is_array($where)) {
-			$where['deleted'] = 1;
-		}
-		else {
-			$where = array('deleted' => 1);
-		}
+		$where = $this->fixWhereClause($where);
 
 		return parent::find($where, $group, $order, $offset, $limit, $having);
 	}
@@ -69,10 +61,11 @@ class sly_Service_DeletedArticle extends sly_Service_Model_Base {
 	 */
 	public function findLatest($where = null, $group = null, $order = null, $offset = null, $limit = null, $having = null) {
 		$return = array();
+		$where  = $this->fixWhereClause($where);
 		$db     = $this->getPersistence();
 		$query  = $db->getSQLbuilder($db->getPrefix().$this->getTableName())->select('*');
 
-		if ($where)  $query->where($where);
+		$query->where($where);
 		if ($group)  $query->group($group);
 		if ($having) $query->having($having);
 		if ($offset) $query->offset($offset);
@@ -136,11 +129,25 @@ class sly_Service_DeletedArticle extends sly_Service_Model_Base {
 		return ((int) $count['c'] > 0);
 	}
 
+	public function deleteListCache() {
+		$this->cache->flush('sly.article.list');
+	}
+
 	protected function getDefaultLanguageId() {
 		return (int) sly_Core::getDefaultClangId();
 	}
 
-	public function deleteListCache() {
-		$this->cache->flush('sly.article.list');
+	protected function fixWhereClause($where) {
+		if (is_string($where) && !empty($where)) {
+			$where = "($where) AND deleted = 1";
+		}
+		else if (is_array($where)) {
+			$where['deleted'] = 1;
+		}
+		else {
+			$where = array('deleted' => 1);
+		}
+
+		return $where;
 	}
 }
