@@ -175,17 +175,14 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 		$this->checkForSpecialArticle($articleID);
 
 		// check if article exists
-
-		$article = $this->findById($articleID, $defaultLang);
-
-		if ($article === null) {
+		if (!$this->exists($articleID)) {
 			throw new sly_Exception(t('article_not_found', $articleID));
 		}
 
 		// allow external code to stop the delete operation
+		$article = $this->findById($articleID, $defaultLang);
 		$this->dispatcher->notify('SLY_PRE_ART_DELETE', $article);
 
-		// re-position all following articles
 		$sql    = $this->getPersistence();
 		$ownTrx = !$sql->isTransRunning();
 
@@ -197,14 +194,16 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 			$parent = $article->getCategoryId();
 
 			foreach ($this->lngService->findAll(true) as $clangID) {
-				$pos       = $this->findById($articleID, $clangID)->getPosition();
+				$pos = $this->findById($articleID, $clangID)->getPosition();
+
+				// delete article and its content
+				$sql->update($this->getTableName(), array('deleted' => 1, 'pos' => 0), array('id' => $articleID, 'clang' => $clangID));
+
+				// re-position all following articles
 				$followers = $this->getFollowerQuery($parent, $clangID, $pos);
 
 				$this->moveObjects('-', $followers);
 			}
-
-			// delete article and its content
-			$sql->update($this->getTableName(), array('deleted' => 1, 'pos' => 0), array('id' => $articleID));
 
 			$this->deleteCache($articleID);
 
