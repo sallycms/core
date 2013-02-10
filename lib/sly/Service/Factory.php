@@ -39,6 +39,10 @@ abstract class sly_Service_Factory {
 
 	/**
 	 * @return sly_Service_Template  The template service instance
+	 *
+	 * @deprecated use sly_Container->getTemplateService() instead
+	 *
+	 * @return sly_Service_Template  The template service instance
 	 */
 	public static function getTemplateService() {
 		return sly_Core::getContainer()->getTemplateService();
