@@ -18,6 +18,7 @@ if ($cacheExists) {
 
 // init the Composer autoloader
 $loader = require SLY_VENDORFOLDER.'/autoload_52.php';
+$loader->setAllowUnderscore(true);
 
 // still load the old one, to give addOns time to update their code base
 // We should remove this once we can properly handle file includes and reach
