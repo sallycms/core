@@ -103,10 +103,10 @@ abstract class sly_Model_Base {
 
 			if ($value !== null) {
 				if ($type === 'date') {
-					$value = $value ? date('Y-m-d', $value) : '0000-00-00';
+					$value = $value ? gmdate('Y-m-d', $value) : '0000-00-00';
 				}
 				elseif ($type === 'datetime') {
-					$value = $value ? date('Y-m-d H:i:s', $value) : '0000-00-00 00:00:00';
+					$value = $value ? gmdate('Y-m-d H:i:s', $value) : '0000-00-00 00:00:00';
 				}
 				elseif ($type === 'array') {
 					$value = json_encode($value);
@@ -127,12 +127,12 @@ abstract class sly_Model_Base {
 					$type = 'int';
 
 					if (!sly_Util_String::isInteger($hash[$name])) {
-						$hash[$name] = strtotime($hash[$name]);
+						$hash[$name] = strtotime($hash[$name].' UTC');
 					}
 				}
 				elseif ($type === 'array') {
 					$value = $hash[$name];
-					
+
 					if (is_string($value)) {
 						$value = json_decode($value, true);
 					}
