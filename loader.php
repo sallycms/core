@@ -17,8 +17,19 @@ if ($cacheExists) {
 }
 
 // init the Composer autoloader
-$loader = require SLY_VENDORFOLDER.'/autoload_52.php';
-$loader->setAllowUnderscore(true);
+// In case we're running through PHPUnit, the Composer autoloader has already
+// been loaded. Since we have a "files" declaration, we cannot include the
+// functions.php twice without errors. So we have to skip loading our own
+// compatibility loader and simply use the original one. This means that in
+// test mode, classes with leading underscores are not possible without
+// classmaps.
+if (!class_exists('Composer\Autoload\ClassLoader', false)) {
+	$loader = require SLY_VENDORFOLDER.'/autoload_52.php';
+	$loader->setAllowUnderscore(true);
+}
+else {
+	$loader = require SLY_VENDORFOLDER.'/autoload.php';
+}
 
 // still load the old one, to give addOns time to update their code base
 // We should remove this once we can properly handle file includes and reach
