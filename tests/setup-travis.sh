@@ -6,6 +6,11 @@ if [ $TRAVIS_PHP_VERSION = '5.2' ]
 then
   phpenv global 5.3
   resetVersion=1
+
+  # Make sure to load a composer configuration *without* phpunit, or else we
+  # accidentally overwrite the system-wide classes with our own one (our
+  # autoloader would have preceedence before the system include_path).
+  mv tests/config/travis/composer.json composer.json
 fi
 
 composer self-update
