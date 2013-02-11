@@ -440,10 +440,10 @@ class sly_Container implements ArrayAccess, Countable {
 	}
 
 	/**
-	 * @param  sly_ErrorHandler_Interface $handler  the new error handler
-	 * @return sly_Container                        reference to self
+	 * @param  sly_ErrorHandler $handler  the new error handler
+	 * @return sly_Container              reference to self
 	 */
-	public function setErrorHandler(sly_ErrorHandler_Interface $handler) {
+	public function setErrorHandler(sly_ErrorHandler $handler) {
 		return $this->set('sly-error-handler', $handler);
 	}
 
