@@ -8,7 +8,7 @@ then
   resetVersion=1
 fi
 
-composer self-udpate
+composer self-update
 composer update --dev
 
 mysql -e "CREATE DATABASE sally_test CHARACTER SET utf8 COLLATE utf8_general_ci"
