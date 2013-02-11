@@ -23,4 +23,8 @@ mysql --database=sally_test -e "INSERT INTO sly_user (id,name,description,login,
 if [ $resetVersion -eq 1 ]
 then
   phpenv global 5.2
+
+  # Manually install DBUnit
+  pear install phpunit/DBUnit
+  phpenv rehash
 fi
