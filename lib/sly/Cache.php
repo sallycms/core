@@ -95,8 +95,7 @@ class sly_Cache extends BabelCache_Factory {
 	 * @return PDO
 	 */
 	protected function getSQLiteConnection() {
-		$file = SLY_IS_TESTING ? 'test.sqlite' : 'cache.sqlite';
-		$db   = sly_Util_Directory::join(SLY_DYNFOLDER, 'internal', 'sally', $file);
+		$db = sly_Util_Directory::join(SLY_DYNFOLDER, 'internal', 'sally', 'cache.sqlite');
 
 		if (!file_exists($db)) {
 			touch($db);

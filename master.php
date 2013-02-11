@@ -10,10 +10,6 @@
 
 define('SLY_START_TIME', microtime(true));
 
-if (!defined('SLY_IS_TESTING')) {
-	define('SLY_IS_TESTING', false);
-}
-
 // remove magic quotes (function is deprecated as of PHP 5.4, so we either
 // have to check the PHP version or suppress the E_DEPRECATED warning)
 if (@get_magic_quotes_gpc()) {
