@@ -34,14 +34,6 @@
                     "url": "https://github.com/fabpot/yaml/zipball/8a266aadce"
                 }
             }
-        },
-        {
-            "type": "pear",
-            "url": "http://pear.phpunit.de/"
-        },
-        {
-            "type": "pear",
-            "url": "http://pear.symfony-project.com/"
         }
     ],
     "autoload": {
@@ -62,8 +54,8 @@
         "xrstf/composer-php52": ">=1.0.3,<2.0"
     },
     "require-dev": {
-        "pear-phpunit/phpunit": ">=3.6.10,<3.8",
-        "pear-phpunit/dbunit": ">=1.1,<1.2",
+        "phpunit/phpunit": "3.7.*",
+        "phpunit/dbunit": "1.2.*",
         "doctrine/dbal": "~2.3.2"
     },
     "extra": {

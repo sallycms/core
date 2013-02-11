@@ -9,11 +9,32 @@
  */
 
 class sly_App_Tests implements sly_App_Interface {
+	protected $userID;
+	protected $container;
+
+	public function __construct(sly_Container $container, $userID) {
+		$this->container = $container;
+		$this->userID    = $userID;
+	}
 
 	public function initialize() {
 		$container = $this->getContainer();
+
+		// login the dummy user
+		$service = $container->getUserService();
+		$user    = $service->findById($this->userID);
+		$service->setCurrentUser($user);
+
+		// refresh develop ressources
 		$container->getTemplateService()->refresh();
 		$container->getModuleService()->refresh();
+
+		// add a dummy i18n
+		$i18n = new sly_I18N('de', dirname(__FILE__));
+		$container->setI18N($i18n);
+
+		// clear current cache
+		sly_Core::cache()->flush('sly');
 	}
 
 	public function run() {
@@ -29,7 +50,7 @@ class sly_App_Tests implements sly_App_Interface {
 	}
 
 	public function getContainer() {
-		return sly_Core::getContainer();
+		return $this->container;
 	}
 
 	public function isBackend() {
