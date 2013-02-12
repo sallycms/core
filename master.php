@@ -114,4 +114,7 @@ if ($knownVersion !== $coreVersion) {
 }
 
 // cleanup
-unset($container, $config, $errorHandler, $coreVersion, $knownVersion);
+unset($loader, $config, $errorHandler, $coreVersion, $knownVersion);
+
+// return the generated Container instance
+return $container;
