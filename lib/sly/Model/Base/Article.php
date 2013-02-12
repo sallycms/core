@@ -322,10 +322,14 @@ class sly_Model_Base_Article extends sly_Model_Base {
 			'disableCache' => $disableCache
 		));
 
-		// the listener must return an article_id (int) or URL (string) to modify the returned URL
+		// the listener must return an article (sly_Model_Article or int (ID)) or URL (string) to modify the returned URL
 		if ($redirect && $redirect !== $this) {
 			if (is_integer($redirect)) {
 				$id = $redirect;
+			}
+			elseif ($redirect instanceof sly_Model_Article) {
+				$id    = $redirect->getId();
+				$clang = $redirect->getClang();
 			}
 			else {
 				return $redirect;
