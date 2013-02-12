@@ -588,12 +588,13 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 	 * article. Slots not present in the target are simply skipped. Existing
 	 * content remains the same.
 	 *
-	 * @param int            $srcID     source article ID
-	 * @param int            $dstID     target article ID
-	 * @param int            $srcClang  source clang
-	 * @param int            $dstClang  target clang
-	 * @param int            $revision  revision (unused)
-	 * @param sly_Model_User $user      author or null for the current user
+	 * @param  int            $srcID     source article ID
+	 * @param  int            $dstID     target article ID
+	 * @param  int            $srcClang  source clang
+	 * @param  int            $dstClang  target clang
+	 * @param  int            $revision  revision (unused)
+	 * @param  sly_Model_User $user      author or null for the current user
+	 * @return boolean                   true if content was actually copied, false if nothing happened
 	 */
 	public function copyContent($srcID, $dstID, $srcClang = 0, $dstClang = 0, $revision = 0, sly_Model_User $user = null) {
 		$srcClang = (int) $srcClang;
@@ -609,6 +610,12 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 
 		$source = $this->findById($srcID, $srcClang);
 		$dest   = $this->findById($dstID, $dstClang);
+
+		// don't try to copy anthing if there is no template
+
+		if (!$source->hasTemplate() || !$dest->hasTemplate()) {
+			return false;
+		}
 
 		// copy the slices by their slots
 
@@ -687,5 +694,7 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 				'user'        => $user
 			));
 		}
+
+		return $changes;
 	}
 }
