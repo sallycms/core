@@ -23,8 +23,8 @@ abstract class sly_Service_ArticleTestBase extends sly_StructureTest {
 		$this->assertEquals($pos, $art->getPosition(), $msg);
 	}
 
-	protected function move($id, $to, $clang = 1) {
+	protected function move($id, $to, $clang) {
 		$cat = $this->getService()->findById($id, $clang);
-		$this->getService()->edit($id, $clang, $cat->getName(), $to);
+		$this->getService()->edit($cat, $cat->getName(), $to);
 	}
 }

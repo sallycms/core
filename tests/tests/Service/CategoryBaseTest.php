@@ -43,8 +43,9 @@ class sly_Service_CategoryBaseTest extends sly_Service_CategoryTestBase {
 	public function testEdit() {
 		$service = $this->getService();
 		$id      = $service->add(0, 'my category', 1, -1);
+		$cat     = $service->findById($id, self::$clang);
 
-		$service->edit($id, self::$clang, 'new title', 0);
+		$service->edit($cat, 'new title', 0);
 
 		$cat = $service->findById($id, self::$clang);
 		$this->assertEquals('new title', $cat->getName());
@@ -61,6 +62,7 @@ class sly_Service_CategoryBaseTest extends sly_Service_CategoryTestBase {
 	}
 
 	/**
+	 * @depends testDelete
 	 * @expectedException  sly_Exception
 	 */
 	public function testDeleteNonExisting() {
@@ -71,11 +73,15 @@ class sly_Service_CategoryBaseTest extends sly_Service_CategoryTestBase {
 	public function testChangeStatus() {
 		$service = $this->getService();
 		$id      = $service->add(0, 'tmp', 1, -1);
+		$cat     = $service->findById($id, self::$clang);
 
-		$this->assertTrue($service->findById($id, self::$clang)->isOnline());
-		$service->changeStatus($id, self::$clang, 0);
-		$this->assertFalse($service->findById($id, self::$clang)->isOnline());
-		$service->changeStatus($id, self::$clang, 1);
+		$this->assertTrue($cat->isOnline());
+		$service->changeStatus($cat, 0);
+
+		$cat     = $service->findById($id, self::$clang);
+		$this->assertFalse($cat->isOnline());
+		$service->changeStatus($cat, 1);
+
 		$this->assertTrue($service->findById($id, self::$clang)->isOnline());
 	}
 }

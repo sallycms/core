@@ -77,7 +77,12 @@ class sly_Container implements ArrayAccess, Countable {
 	 * @return sly_Container  reference to self
 	 */
 	public function set($id, $value) {
+		if (is_object($value) && $value instanceof sly_ContainerAwareInterface) {
+			$value->setContainer($this);
+		}
+
 		$this->values[$id] = $value;
+
 		return $this;
 	}
 
@@ -680,19 +685,13 @@ class sly_Container implements ArrayAccess, Countable {
 	 */
 	protected function buildArticleService(sly_Container $container) {
 		$persistence = $container['sly-persistence'];
-		$cache       = $container['sly-cache'];
-		$dispatcher  = $container['sly-dispatcher'];
-		$languages   = $container['sly-service-language'];
 		$slices      = $container['sly-service-slice'];
 		$articles    = $container['sly-service-articleslice'];
 		$templates   = $container['sly-service-template'];
-		$service     = new sly_Service_Article($persistence, $cache, $dispatcher, $languages, $slices, $articles, $templates);
+		$service     = new sly_Service_Article($persistence, $slices, $articles, $templates);
 
 		// make sure the circular dependency does not make the app die with an endless loop
-		$this->values['sly-service-article'] = $service;
-
-		$service->setArticleService($service);
-		$service->setCategoryService($container['sly-service-category']);
+		$this['sly-service-article'] = $service;
 
 		return $service;
 	}
@@ -703,10 +702,11 @@ class sly_Container implements ArrayAccess, Countable {
 	 */
 	protected function buildDeletedArticleService(sly_Container $container) {
 		$persistence = $container['sly-persistence'];
-		$cache       = $container['sly-cache'];
-		$service     = new sly_Service_DeletedArticle($persistence, $cache);
+		$service     = new sly_Service_DeletedArticle($persistence);
 
-		return $this->values['sly-service-deletedarticle'] = $service;
+		$this['sly-service-deletedarticle'] = $service;
+
+		return $service;
 	}
 
 	/**
@@ -753,16 +753,9 @@ class sly_Container implements ArrayAccess, Countable {
 	 */
 	protected function buildCategoryService(sly_Container $container) {
 		$persistence = $container['sly-persistence'];
-		$cache       = $container['sly-cache'];
-		$dispatcher  = $container['sly-dispatcher'];
-		$languages   = $container['sly-service-language'];
-		$service     = new sly_Service_Category($persistence, $cache, $dispatcher, $languages);
+		$service     = new sly_Service_Category($persistence);
 
-		// make sure the circular dependency does not make the app die with an endless loop
-		$this->values['sly-service-category'] = $service;
-
-		$service->setArticleService($container['sly-service-article']);
-		$service->setCategoryService($service);
+		$this['sly-service-category'] = $service;
 
 		return $service;
 	}
