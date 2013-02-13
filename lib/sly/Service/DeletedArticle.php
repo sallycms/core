@@ -12,12 +12,14 @@
  * @author  zozi@webvariants.de
  * @ingroup service
  */
-class sly_Service_DeletedArticle extends sly_Service_Model_Base {
+class sly_Service_DeletedArticle extends sly_Service_ArticleBase {
 	protected $tablename = 'article'; ///< string
 
-	public function __construct(sly_DB_Persistence $persistence, BabelCache_Interface $cache) {
-		parent::__construct($persistence);
-		$this->cache = $cache;
+	/**
+	 * @return string
+	 */
+	protected function getModelType() {
+		return 'article';
 	}
 
 	/**
@@ -26,66 +28,6 @@ class sly_Service_DeletedArticle extends sly_Service_Model_Base {
 	 */
 	protected function makeInstance(array $params) {
 		return new sly_Model_Article($params);
-	}
-
-	public function findOne($where = null, $having = null) {
-		$res = $this->find($where, null, 'revision DESC', null, 1, $having);
-		return count($res) === 1 ? $res[0] : null;
-	}
-
-	/**
-	 * @param  mixed  $where
-	 * @param  string $group
-	 * @param  string $order
-	 * @param  int    $offset
-	 * @param  int    $limit
-	 * @param  string $having
-	 * @return array
-	 */
-	public function find($where = null, $group = null, $order = null, $offset = null, $limit = null, $having = null) {
-		$where = $this->fixWhereClause($where);
-
-		return parent::find($where, $group, $order, $offset, $limit, $having);
-	}
-
-	/**
-	 * find latest revisions of deleted articles
-	 *
-	 * @param  mixed  $where
-	 * @param  string $group
-	 * @param  string $order
-	 * @param  int    $offset
-	 * @param  int    $limit
-	 * @param  string $having
-	 * @return array
-	 */
-	public function findLatest($where = null, $group = null, $order = null, $offset = null, $limit = null, $having = null) {
-		$return = array();
-		$where  = $this->fixWhereClause($where);
-		$db     = $this->getPersistence();
-		$query  = $db->getSQLbuilder($db->getPrefix().$this->getTableName())->select('*');
-
-		$query->where($where);
-		if ($group)  $query->group($group);
-		if ($having) $query->having($having);
-		if ($offset) $query->offset($offset);
-		if ($limit)  $query->limit($limit);
-		if ($order) {
-			$query->order('revision,'.$order);
-		}
-		else {
-			$query->order('revision');
-		}
-
-		$outerQuery = 'SELECT * FROM ('.$query->to_s().') latest_'.$this->getTableName().'_tmp GROUP BY clang, id';
-
-		$db->query($outerQuery, $query->bind_values());
-
-		foreach ($db as $row) {
-			$return[] = $this->makeInstance($row);
-		}
-
-		return $return;
 	}
 
 	/**
@@ -108,15 +50,22 @@ class sly_Service_DeletedArticle extends sly_Service_Model_Base {
 			throw new sly_Exception(t('category_not_found', $categoryId));
 		}
 
+
+
+		$service = $article->isStartArticle() ? $this->getCategoryService() : $this->getArticleService();
+
 		$newValues = array(
 			'status'  => 0,
-			'deleted' => 0
+			'deleted' => 0,
+			$service->getPositionField() => ($service->getMaxPosition($article->getParentId()) + 1)
  		);
-
 
 		$db = $this->getPersistence();
 		$db->update($this->getTableName(), $newValues, array('id' => $id));
+
 		$this->deleteListCache();
+
+		$this->getDispatcher()->notify($this->getEvent('RESTORED'), null, array('id' => $id));
 	}
 
 	/**
@@ -127,14 +76,6 @@ class sly_Service_DeletedArticle extends sly_Service_Model_Base {
 	public function exists($id) {
 		$count = $this->getPersistence()->fetch($this->getTableName(), 'COUNT(id) as c', array('id' => $id, 'deleted' => 1));
 		return ((int) $count['c'] > 0);
-	}
-
-	public function deleteListCache() {
-		$this->cache->flush('sly.article.list');
-	}
-
-	protected function getDefaultLanguageId() {
-		return (int) sly_Core::getDefaultClangId();
 	}
 
 	protected function fixWhereClause($where) {

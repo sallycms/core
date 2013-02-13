@@ -9,36 +9,10 @@
  */
 
 /**
- * @author  christoph@webvariants.de
+ * @author  christoph@webvariants.de, zozi@webvariants.de
  * @ingroup service
  */
-class sly_Service_Article extends sly_Service_ArticleBase {
-	protected $sliceService;    ///< sly_Service_Slice
-	protected $artSliceService; ///< sly_Service_ArticleSlice
-	protected $tplService;      ///< sly_Service_Template
-
-	/**
-	 * Constructor
-	 *
-	 * @param sly_DB_Persistence       $persistence
-	 * @param BabelCache_Interface     $cache
-	 * @param sly_Event_IDispatcher    $dispatcher
-	 * @param sly_Service_Language     $lngService
-	 * @param sly_Service_Slice        $sliceService
-	 * @param sly_Service_ArticleSlice $artSliceService
-	 * @param sly_Service_Template     $tplService
-	 */
-	public function __construct(
-		sly_DB_Persistence $persistence, BabelCache_Interface $cache, sly_Event_IDispatcher $dispatcher,
-		sly_Service_Language $lngService, sly_Service_Slice $sliceService, sly_Service_ArticleSlice $artSliceService,
-		sly_Service_Template $tplService
-	) {
-		parent::__construct($persistence, $cache, $dispatcher, $lngService);
-
-		$this->sliceService    = $sliceService;
-		$this->artSliceService = $artSliceService;
-		$this->tplService      = $tplService;
-	}
+class sly_Service_Article extends sly_Service_ArticleManager {
 
 	/**
 	 * @return string
@@ -47,6 +21,14 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 		return 'article';
 	}
 
+	/**
+	 * get WHERE statement for all category siblings
+	 *
+	 * @param  int     $categoryID
+	 * @param  int     $clang       clang or null for none (*not* the current one)
+	 * @param  boolean $asArray
+	 * @return mixed                the condition either as an array or as a string
+	 */
 	protected function getSiblingQuery($categoryID, $clang = null) {
 		$categoryID = (int) $categoryID;
 		$where      = '((re_id = '.$categoryID.' AND startpage = 0) OR id = '.$categoryID.') AND deleted = 0';
@@ -59,17 +41,9 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 		return $where;
 	}
 
-	public function getMaxPosition($categoryID) {
-		$db     = $this->getPersistence();
-		$where  = $this->getSiblingQuery($categoryID);
-		$maxPos = $db->magicFetch($this->getTableName(), 'MAX(pos)', $where);
-
-		return $maxPos;
-	}
-
 	protected function buildModel(array $params) {
-		if ($params['parent']) {
-			$cat     = $this->findById($params['parent'], $params['clang']);
+		if ($params['parent'] && $this->getCategoryService()->exists($params['parent'])) {
+			$cat     = $this->getCategoryService()->findById($params['parent'], $params['clang']);
 			$catname = $cat->getName();
 		}
 		else {
@@ -110,6 +84,10 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 		);
 	}
 
+	public function getPositionField() {
+		return 'pos';
+	}
+
 	/**
 	 * @param  int $id
 	 * @param  int $clang
@@ -138,21 +116,21 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 	 * @param  sly_Model_User $user        creator or null for the current user
 	 * @return int
 	 */
-	public function add($categoryID, $name, $status, $position = -1, sly_Model_User $user = null) {
+	public function add($categoryID, $name, $status = 0, $position = -1, sly_Model_User $user = null) {
 		return $this->addHelper($categoryID, $name, $status, $position, $user);
 	}
 
 	/**
 	 * @throws sly_Exception
-	 * @param  int            $articleID
-	 * @param  int            $clangID
-	 * @param  string         $name
-	 * @param  int            $position
-	 * @param  sly_Model_User $user       updateuser or null for the current user
+	 * @param  sly_Model_Article_Base $obj
+	 * @param  string                 $name
+	 * @param  mixed                  $position
+	 * @param  sly_Model_User         $user        updateuser or null for the current user
 	 * @return boolean
 	 */
-	public function edit($articleID, $clangID, $name, $position = false, sly_Model_User $user = null) {
-		return $this->editHelper($articleID, $clangID, $name, $position, $user);
+	public function edit(sly_Model_Base_Article $obj, $name, $position = false, sly_Model_User $user = null) {
+		$obj = $this->touch($obj);
+		return $this->editHelper($obj, $name, $position, $user);
 	}
 
 	/**
@@ -181,7 +159,7 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 
 		// allow external code to stop the delete operation
 		$article = $this->findById($articleID, $defaultLang);
-		$this->dispatcher->notify('SLY_PRE_ART_DELETE', $article);
+		$this->getDispatcher()->notify('SLY_PRE_ART_DELETE', $article);
 
 		$sql    = $this->getPersistence();
 		$ownTrx = !$sql->isTransRunning();
@@ -193,7 +171,7 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 		try {
 			$parent = $article->getCategoryId();
 
-			foreach ($this->lngService->findAll(true) as $clangID) {
+			foreach ($this->getLanguages() as $clangID) {
 				$pos = $this->findById($articleID, $clangID)->getPosition();
 
 				// delete article and its content
@@ -220,7 +198,7 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 		}
 
 		// notify system about the deleted article
-		$this->dispatcher->notify('SLY_ART_DELETED', $article);
+		$this->getDispatcher()->notify($this->getEvent('DELETED'), $article);
 
 		return true;
 	}
@@ -250,7 +228,7 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 		$clangId   = (int) $clangId;
 		$namespace = 'sly.article.list';
 		$key       = 'artsbytype_'.$type.'_'.$clangId.'_'.($ignoreOfflines ? '1' : '0');
-		$alist     = $this->cache->get($namespace, $key, null);
+		$alist     = $this->getCache()->get($namespace, $key, null);
 
 		if ($alist === null) {
 			$alist = array();
@@ -262,7 +240,7 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 			$sql->select($this->tablename, 'id', $where, null, 'pos,name');
 			foreach ($sql as $row) $alist[] = (int) $row['id'];
 
-			$this->cache->set($namespace, $key, $alist);
+			$this->getCache()->set($namespace, $key, $alist);
 		}
 
 		$artlist = array();
@@ -284,8 +262,6 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 	public function setType(sly_Model_Article $article, $type, sly_Model_User $user = null) {
 		$user      = $this->getActor($user, __METHOD__);
 		$oldType   = $article->getType();
-		$articleID = $article->getId();
-		$langs     = $this->lngService->findAll(true);
 		$sql       = $this->getPersistence();
 		$ownTrx    = !$sql->isTransRunning();
 
@@ -294,15 +270,12 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 		}
 
 		try {
-			foreach ($langs as $clangID) {
-				$article = $this->findById($articleID, $clangID);
-				//create new revision
-				$article = $this->touch($article, $user);
+			//create new revision
+			$article = $this->touch($article, $user);
 
-				// update the article
-				$article->setType($type);
-				$this->update($article);
-			}
+			// update the article
+			$article->setType($type);
+			$this->update($article);
 
 			if ($ownTrx) {
 				$sql->commit();
@@ -317,7 +290,7 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 		}
 
 		// notify system
-		$this->dispatcher->notify('SLY_ART_TYPE', $article, array('old_type' => $oldType, 'user' => $user));
+		$this->getDispatcher()->notify('SLY_ART_TYPE', $article, array('old_type' => $oldType, 'user' => $user));
 
 		return true;
 	}
@@ -336,96 +309,6 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 		$this->copyContent($article, $touched, $user);
 
 		return $touched;
-	}
-
-	/**
-	 * Copy an article
-	 *
-	 * The article will be placed at the end of the target category.
-	 *
-	 * @param  int            $id      article ID
-	 * @param  int            $target  target category ID
-	 * @param  sly_Model_User $user    creator for copies or null for the current user
-	 * @return int                     the new article's ID
-	 */
-	public function copy($id, $target, sly_Model_User $user = null) {
-		$id          = (int) $id;
-		$target      = (int) $target;
-		$user        = $this->getActor($user, __METHOD__);
-
-		// check article
-
-		if (!$this->exists($id)) {
-			throw new sly_Exception(t('article_not_found', $id));
-		}
-
-		// check category
-
-		if ($target !== 0 && !$this->catService->exists($target)) {
-			throw new sly_Exception(t('category_not_found', $target));
-		}
-
-		// prepare infos
-
-		$sql   = $this->getPersistence();
-		$pos   = $this->getMaxPosition($target) + 1;
-		$newID = $sql->magicFetch('article', 'MAX(id)') + 1;
-
-		// copy by language
-		$ownTrx = !$sql->isTransRunning();
-
-		if ($ownTrx) {
-			$sql->beginTransaction();
-		}
-
-		try {
-			foreach ($this->lngService->findAll(true) as $clang) {
-				$source    = $this->findById($id, $clang);
-				$cat       = $target === 0 ? null : $this->catService->findById($target, $clang);
-				$duplicate = clone $source;
-
-				$duplicate->setId($newID);
-				$duplicate->setParentId($target);
-				$duplicate->setCatName($cat ? $cat->getName() : '');
-				$duplicate->setPosition($pos);
-				$duplicate->setStatus(0);
-				$duplicate->setPath($cat ? ($cat->getPath().$target.'|') : '|');
-				$duplicate->setUpdateColumns($user);
-				$duplicate->setCreateColumns($user);
-				$duplicate->setRevision(0);
-
-				// make sure that when copying start articles
-				// we actually create an article and not a category
-				$duplicate->setStartpage(0);
-				$duplicate->setCatPosition(0);
-
-				// store it
-				$this->insert($duplicate);
-
-				$this->deleteListCache();
-
-				// copy slices
-				if ($source->hasType()) {
-					$this->copyContent($source, $duplicate, $user);
-				}
-
-				// notify system
-				$this->dispatcher->notify('SLY_ART_COPIED', $duplicate, compact('source', 'user'));
-			}
-
-			if ($ownTrx) {
-				$sql->commit();
-			}
-		}
-		catch (Exception $e) {
-			if ($ownTrx) {
-				$sql->rollBack();
-			}
-
-			throw $e;
-		}
-
-		return $newID;
 	}
 
 	/**
@@ -456,7 +339,7 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 
 		// check category
 
-		if ($target !== 0 && !$this->catService->exists($target)) {
+		if ($target !== 0 && !$this->getCategoryService()->exists($target)) {
 			throw new sly_Exception(t('category_not_found', $target));
 		}
 
@@ -477,9 +360,9 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 		}
 
 		try {
-			foreach ($this->lngService->findAll(true) as $clang) {
+			foreach ($this->getLanguages() as $clang) {
 				$article = $this->findById($id, $clang);
-				$cat     = $target === 0 ? null : $this->catService->findById($target, $clang);
+				$cat     = $target === 0 ? null : $this->getCategoryService()->findById($target, $clang);
 				$moved   = clone $article;
 
 				$moved->setParentId($target);
@@ -497,7 +380,7 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 				$this->moveObjects('-', $followers);
 
 				// notify system
-				$this->dispatcher->notify('SLY_ART_MOVED', $id, array(
+				$this->getDispatcher()->notify('SLY_ART_MOVED', $id, array(
 					'clang'  => $clang,
 					'target' => $target,
 					'user'   => $user
@@ -515,6 +398,96 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 
 			throw $e;
 		}
+	}
+
+	/**
+	 * Copy an article
+	 *
+	 * The article will be placed at the end of the target category.
+	 *
+	 * @param  int            $id      article ID
+	 * @param  int            $target  target category ID
+	 * @param  sly_Model_User $user    creator for copies or null for the current user
+	 * @return int                     the new article's ID
+	 */
+	public function copy($id, $target, sly_Model_User $user = null) {
+		$id          = (int) $id;
+		$target      = (int) $target;
+		$user        = $this->getActor($user, __METHOD__);
+
+		// check article
+
+		if (!$this->exists($id)) {
+			throw new sly_Exception(t('article_not_found', $id));
+		}
+
+		// check category
+
+		if ($target !== 0 && !$this->getCategoryService()->exists($target)) {
+			throw new sly_Exception(t('category_not_found', $target));
+		}
+
+		// prepare infos
+
+		$sql   = $this->getPersistence();
+		$pos   = $this->getMaxPosition($target) + 1;
+		$newID = $sql->magicFetch('article', 'MAX(id)') + 1;
+
+		// copy by language
+		$ownTrx = !$sql->isTransRunning();
+
+		if ($ownTrx) {
+			$sql->beginTransaction();
+		}
+
+		try {
+			foreach ($this->getLanguages() as $clang) {
+				$source    = $this->findById($id, $clang);
+				$cat       = $target === 0 ? null : $this->getCategoryService()->findById($target, $clang);
+				$duplicate = clone $source;
+
+				$duplicate->setId($newID);
+				$duplicate->setParentId($target);
+				$duplicate->setCatName($cat ? $cat->getName() : '');
+				$duplicate->setPosition($pos);
+				$duplicate->setStatus(0);
+				$duplicate->setPath($cat ? ($cat->getPath().$target.'|') : '|');
+				$duplicate->setUpdateColumns($user);
+				$duplicate->setCreateColumns($user);
+				$duplicate->setRevision(0);
+
+				// make sure that when copying start articles
+				// we actually create an article and not a category
+				$duplicate->setStartpage(0);
+				$duplicate->setCatPosition(0);
+
+				// store it
+				$this->insert($duplicate);
+
+				$this->deleteListCache();
+
+				// copy slices
+				if ($source->hasType()) {
+					$this->copyContent($source, $duplicate, $user);
+				}
+
+				// notify system
+				$this->getDispatcher()->notify('SLY_ART_COPIED', $duplicate, compact('source', 'user'));
+			}
+
+			if ($ownTrx) {
+				$sql->commit();
+			}
+		}
+		catch (Exception $e) {
+			if ($ownTrx) {
+				$sql->rollBack();
+			}
+
+			throw $e;
+		}
+
+		return $newID;
 	}
 
 	/**
@@ -560,7 +533,7 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 		}
 
 		try {
-			foreach ($this->lngService->findAll(true) as $clang) {
+			foreach ($this->getLanguages() as $clang) {
 				$newStarter = $this->findById($articleID, $clang)->toHash();
 				$oldStarter = $this->findById($oldCat, $clang)->toHash();
 
@@ -572,7 +545,6 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 
 				$sql->update($this->tablename, $newStarter, array('id' => $articleID, 'clang' => $clang));
 				$sql->update($this->tablename, $oldStarter, array('id' => $oldCat, 'clang' => $clang));
-				//$this->update(new sly_Model_Article($newStarter));
 			}
 
 			// switch parent id and adjust paths
@@ -599,7 +571,7 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 		}
 
 		// notify system
-		$this->dispatcher->notify('SLY_ART_TO_STARTPAGE', $articleID, array('old_cat' => $oldCat, 'user' => $user));
+		$this->getDispatcher()->notify('SLY_ART_TO_STARTPAGE', $articleID, array('old_cat' => $oldCat, 'user' => $user));
 	}
 
 	/**
@@ -625,10 +597,11 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 		}
 
 		// copy the slices by their slots
-		$asServ   = $this->artSliceService;
+		$asServ   = $this->container->getArticleSliceService();
+		$sServ    = $this->container->getSliceService();
 		$sql      = $this->getPersistence();
 		$login    = $user->getLogin();
-		$dstSlots = $this->tplService->getSlots($dest->getTemplateName());
+		$dstSlots = $this->container->getTemplateService()->getSlots($dest->getTemplateName());
 		$changes  = false;
 
 		$ownTrx = !$sql->isTransRunning();
@@ -650,7 +623,7 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 
 				// find slices to copy
 				$slice = $articleSlice->getSlice();
-				$slice = $this->sliceService->copy($slice);
+				$slice = $sServ->copy($slice);
 
 				$aSlice = new Sly_Model_ArticleSlice(array(
 					'clang'      => $dest->getClang(),
@@ -686,7 +659,7 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 			$this->deleteCache($dest->getId(), $dest->getClang());
 
 			// notify system
-			$this->dispatcher->notify('SLY_ART_CONTENT_COPIED', null, array(
+			$this->getDispatcher()->notify('SLY_ART_CONTENT_COPIED', null, array(
 				'from'     => $source,
 				'to'       => $dest,
 				'user'     => $user

@@ -25,6 +25,6 @@ abstract class sly_Service_CategoryTestBase extends sly_StructureTest {
 
 	protected function move($id, $to, $clang = 5) {
 		$cat = $this->getService()->findById($id, $clang);
-		$this->getService()->edit($id, $clang, $cat->getCatName(), $to);
+		$this->getService()->edit($cat, $cat->getCatName(), $to);
 	}
 }

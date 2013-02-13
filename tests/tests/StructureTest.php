@@ -90,7 +90,7 @@ abstract class sly_StructureTest extends sly_BaseTest {
 		}
 	}
 
-	abstract protected function move($id, $to, $clang = 1);
+	abstract protected function move($id, $to, $clang);
 	abstract protected function assertPosition($id, $pos, $clang = 1);
 	abstract protected function getService();
 }

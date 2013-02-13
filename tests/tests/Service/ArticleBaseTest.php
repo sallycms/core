@@ -12,7 +12,7 @@ class sly_Service_ArticleBaseTest extends sly_Service_ArticleTestBase {
 	private static $clang = 5;
 
 	public static function setUpBeforeClass() {
-		sly_Core::setCurrentClang(1);
+		sly_Core::setCurrentClang(self::$clang);
 	}
 
 	protected function getDataSetName() {
@@ -44,31 +44,45 @@ class sly_Service_ArticleBaseTest extends sly_Service_ArticleTestBase {
 	public function testEdit() {
 		$service = $this->getService();
 		$id      = $service->add(0, 'my article', 1, -1);
+		$art     = $service->findById($id, self::$clang);
 
-		$service->edit($id, self::$clang, 'new title', 0);
+		$service->edit($art, 'new title', 0);
 
 		$art = $service->findById($id, self::$clang);
+
 		$this->assertEquals('new title', $art->getName());
 		$this->assertEquals('', $art->getCatName());
 	}
 
 	public function testDelete() {
 		$service = $this->getService();
-		$id      = $service->add(0, 'tmp', 1, -1);
+		$user    = sly_Service_Factory::getUserService()->findById(1);
+		$new     = $service->add(0, 'Test', 1, -1, $user);
 
-		$service->deleteById($id);
+		// add a nw revision
+		$article = $service->findById($new, self::$clang);
+		$service->touch($article, $user);
 
-		$this->assertFalse($service->exists($id));
+		$service->deleteById($new);
+		$this->assertFalse($service->exists($new));
+
+		$article = $service->findById($new, self::$clang);
+		$this->assertNull($article);
 	}
 
 	public function testChangeStatus() {
 		$service = $this->getService();
 		$id      = $service->add(0, 'tmp', 1, -1);
 
-		$this->assertTrue($service->findById($id, self::$clang)->isOnline());
-		$service->changeStatus($id, self::$clang, 0);
-		$this->assertFalse($service->findById($id, self::$clang)->isOnline());
-		$service->changeStatus($id, self::$clang, 1);
-		$this->assertTrue($service->findById($id, self::$clang)->isOnline());
+		$article = $service->findById($id, self::$clang);
+		$this->assertTrue($article->isOnline());
+		$service->changeStatus($article, 0);
+
+		$article = $service->findById($id, self::$clang);
+		$this->assertFalse($article->isOnline());
+
+		$service->changeStatus($article, 1);
+		$article = $service->findById($id, self::$clang);
+		$this->assertTrue($article->isOnline());
 	}
 }

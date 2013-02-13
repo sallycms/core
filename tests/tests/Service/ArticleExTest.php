@@ -135,12 +135,15 @@ class sly_Service_ArticleExTest extends sly_Service_ArticleTestBase {
 
 		$article = $service->findById(1, self::$clangA);
 
-		$this->assertGreaterThanOrEqual($before, $article->getUpdateDate());
-		$this->assertLessThanOrEqual($after, $article->getUpdateDate());
+		$this->assertGreaterThanOrEqual($before, $article->getCreateDate());
+		$this->assertLessThanOrEqual($after, $article->getCreateDate());
 		$this->assertEquals($user->getLogin(), $article->getUpdateUser());
 		$this->assertEquals(1, $article->getRevision(), 'Touch should increase revision');
 	}
 
+	/**
+	 * @depends testTouch
+	 */
 	public function testSetType() {
 		$service = $this->getService();
 		$article = $service->findById(6, self::$clangA);
@@ -148,10 +151,8 @@ class sly_Service_ArticleExTest extends sly_Service_ArticleTestBase {
 		$service->setType($article, 'special');
 
 		// type must be the same in all languages
-		foreach (array(self::$clangA, self::$clangB) as $clang) {
-			$article = $service->findById(6, $clang);
-			$this->assertEquals('special', $article->getType());
-		}
+		$article = $service->findById(6, self::$clangA);
+		$this->assertEquals('special', $article->getType());
 	}
 
 	public function testFindByType() {
@@ -176,7 +177,7 @@ class sly_Service_ArticleExTest extends sly_Service_ArticleTestBase {
 
 		// set A offline
 
-		$service->changeStatus($artA, self::$clangA, 0);
+		$service->changeStatus($service->findById($artA, self::$clangA), 0);
 		$result = $service->findArticlesByType('special');
 
 		$this->assertCount(2, $result);
@@ -208,7 +209,7 @@ class sly_Service_ArticleExTest extends sly_Service_ArticleTestBase {
 
 		// since the new article is offline, expect the original article list
 
-		$arts = $service->findArticlesByCategory($root, true);
+		$arts = $service->findArticlesByCategory($root, true, self::$clangA);
 		$this->assertCount(3, $arts);
 
 		foreach ($arts as $idx => $art) {
@@ -217,7 +218,7 @@ class sly_Service_ArticleExTest extends sly_Service_ArticleTestBase {
 
 		// and now let's include the offline article
 
-		$arts = $service->findArticlesByCategory($root, false);
+		$arts = $service->findArticlesByCategory($root, false, self::$clangA);
 		$this->assertCount(4, $arts);
 		$last = array_pop($arts);
 
@@ -333,19 +334,5 @@ class sly_Service_ArticleExTest extends sly_Service_ArticleTestBase {
 		$this->assertCount(3, $service->findArticlesByCategory(0, false));
 		$this->assertCount(2, $service->findArticlesByCategory(0, true));
 		$this->assertCount(1, $service->findArticlesByCategory(1, false));
-	}
-
-	public function testDelete() {
-		$service = $this->getService();
-		$new     = $service->add(1, 'Test', 1);
-		$user    = sly_Service_Factory::getUserService()->findById(1);
-
-		$article = $service->findById($new, self::$clangA);
-		$service->touch($article, $user);
-
-
-		$service->deleteById($new);
-		$article = $service->findById($new, self::$clangA);
-		$this->assertNull($article);
 	}
 }
