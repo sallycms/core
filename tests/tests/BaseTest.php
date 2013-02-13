@@ -32,7 +32,7 @@ abstract class sly_BaseTest extends PHPUnit_Extensions_Database_TestCase {
 
 		if (!$this->setup) {
 			foreach ($this->getRequiredAddOns() as $addon) {
-				$this->loadAddOns($addon);
+				$this->loadAddOn($addon);
 			}
 
 			$this->setup = true;
@@ -74,7 +74,7 @@ abstract class sly_BaseTest extends PHPUnit_Extensions_Database_TestCase {
 
 	protected function loadAddOn($addon) {
 		$service = sly_Service_Factory::getAddOnManagerService();
-		$service->load($addon, true);
+		$service->load($addon, true, sly_Core::getContainer());
 	}
 
 	/**

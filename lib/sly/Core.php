@@ -345,7 +345,7 @@ class sly_Core {
 	public static function loadAddOns() {
 		$container = self::getContainer();
 
-		$container->getAddOnManagerService()->loadAddOns();
+		$container->getAddOnManagerService()->loadAddOns($container);
 		$container->getDispatcher()->notify('SLY_ADDONS_LOADED');
 	}
 
