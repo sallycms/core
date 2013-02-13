@@ -22,6 +22,6 @@ abstract class sly_StatelessTest extends PHPUnit_Framework_TestCase {
 
 	protected function loadAddOn($addon) {
 		$service = sly_Service_Factory::getAddOnManagerService();
-		$service->load($addon, true);
+		$service->load($addon, true, sly_Core::getContainer());
 	}
 }
