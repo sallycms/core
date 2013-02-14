@@ -106,6 +106,16 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base implements
 	}
 
 	/**
+	 * @param  array  $where
+	 * @param  string $having
+	 * @return sly_Model_Base
+	 */
+	public function findOne($where = null, $having = null) {
+		$res = $this->find($where, null, 'id, clang, revision DESC', null, 1, $having);
+		return count($res) === 1 ? $res[0] : null;
+	}
+
+	/**
 	 * @param  mixed  $where
 	 * @param  string $group
 	 * @param  string $order
@@ -121,41 +131,6 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base implements
 	}
 
 	/**
-	 * @param  array  $where
-	 * @param  string $having
-	 * @return sly_Model_Base
-	 */
-	public function findOne($where = null, $having = null) {
-		$res = $this->find($where, null, 'revision DESC', null, 1, $having);
-		return count($res) === 1 ? $res[0] : null;
-	}
-
-	/**
-	 * @param  sly_Model_Base_Article $article
-	 * @return sly_Model_Base_Article
-	 */
-	protected function update(sly_Model_Base_Article $obj) {
-		$persistence = $this->getPersistence();
-		$persistence->update($this->getTableName(), $obj->toHash(), $obj->getPKHash());
-
-		$this->deleteListCache();
-		$this->deleteCache($obj->getId(), $obj->getClang());
-
-		return $obj;
-	}
-
-	/**
-	 *
-	 * @param sly_Model_Base_Article $obj
-	 * @return sly_Model_Base_Article
-	 */
-	protected function insert(sly_Model_Base_Article $obj) {
-		$persistence = $this->getPersistence();
-		$persistence->insert($this->getTableName(), array_merge($obj->toHash(), $obj->getPKHash()));
-		return $obj;
-	}
-
-	/**
 	 * finds article by id clang and revision
 	 *
 	 * @param  int $id
@@ -163,32 +138,21 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base implements
 	 * @param  int $revision          if null the latest revision will be fetched
 	 * @return sly_Model_Base_Article
 	 */
-	protected function findById($id, $clang, $revision = null) {
-		$id = (int) $id;
+	protected function findByPK($id, $clang, $revision) {
+		$id       = (int) $id;
+		$clang    = (int) $clang;
 
-		if ($id <= 0) {
+		if ($id <= 0 || $clang <= 0) {
 			return null;
 		}
 
-		$where     = compact('id', 'clang');
-		$useCache  = $revision === null;
-		$type      = $this->getModelType();
-		$namespace = 'sly.article';
-		$key       = substr($type, 0, 3).'_'.$id.'_'.$clang;
-		$obj       = $useCache ? $this->getCache()->get($namespace, $key, null) : null;
+		$where    = compact('id', 'clang');
 
-		if ($obj === null) {
-
-			if ($revision !== null) {
-				$where['revision'] = $revision;
-			}
-
-			$obj = $this->findOne($where);
-
-			if ($useCache && $obj !== null) {
-				$this->getCache()->set($namespace, $key, $obj);
-			}
+		if ($revision !== null) {
+			$where['revision'] = (int) $revision;
 		}
+
+		$obj = $this->findOne($where);
 
 		return $obj;
 	}
@@ -211,10 +175,37 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base implements
 	/**
 	 *
 	 * @param  int      $id
-	 * @return boolean  Whether the article/category exists or not. Deleted equals not existing.
+	 * @return boolean  Whether the article exists or not. Deleted equals existing and vise versa.
 	 */
 	public function exists($id) {
-		return $this->findById($id, $this->getDefaultLanguageId()) !== null;
+		$where = $this->fixWhereClause(compact('id'));
+		$count = $this->getPersistence()->fetch($this->getTableName(), 'COUNT(id) as c', $where);
+		return ((int) $count['c'] > 0);
+	}
+
+	/**
+	 * @param  sly_Model_Base_Article $article
+	 * @return sly_Model_Base_Article
+	 */
+	protected function update(sly_Model_Base_Article $obj) {
+		$persistence = $this->getPersistence();
+		$persistence->update($this->getTableName(), $obj->toHash(), $obj->getPKHash());
+
+		$this->deleteListCache();
+		$this->deleteCache($obj->getId(), $obj->getClang());
+
+		return $obj;
+	}
+
+	/**
+	 *
+	 * @param  sly_Model_Base_Article $obj
+	 * @return sly_Model_Base_Article
+	 */
+	protected function insert(sly_Model_Base_Article $obj) {
+		$persistence = $this->getPersistence();
+		$persistence->insert($this->getTableName(), array_merge($obj->toHash(), $obj->getPKHash()));
+		return $obj;
 	}
 
 	protected function moveObjects($op, $where) {
@@ -284,7 +275,7 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base implements
 		$objlist = array();
 
 		foreach ($list as $id) {
-			$obj = $this->findById($id, $clang);
+			$obj = $this->findByPK($id, $clang);
 			if ($obj) $objlist[] = $obj;
 		}
 

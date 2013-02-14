@@ -43,7 +43,7 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 
 	protected function buildModel(array $params) {
 		if ($params['parent'] && $this->getCategoryService()->exists($params['parent'])) {
-			$cat     = $this->getCategoryService()->findById($params['parent'], $params['clang']);
+			$cat     = $this->getCategoryService()->findByPK($params['parent'], $params['clang']);
 			$catname = $cat->getName();
 		}
 		else {
@@ -93,8 +93,8 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 	 * @param  int $clang
 	 * @return sly_Model_Article
 	 */
-	public function findById($id, $clang, $revision = null) {
-		return parent::findById($id, $clang, $revision);
+	public function findByPK($id, $clang, $revision = null) {
+		return parent::findByPK($id, $clang, $revision);
 	}
 
 	/**
@@ -158,7 +158,7 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 		}
 
 		// allow external code to stop the delete operation
-		$article = $this->findById($articleID, $defaultLang);
+		$article = $this->findByPK($articleID, $defaultLang);
 		$this->getDispatcher()->notify('SLY_PRE_ART_DELETE', $article);
 
 		$sql    = $this->getPersistence();
@@ -171,14 +171,14 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 		try {
 			$parent = $article->getCategoryId();
 
-			foreach ($this->getLanguages() as $clangID) {
-				$pos = $this->findById($articleID, $clangID)->getPosition();
+			foreach ($this->getLanguages() as $clang) {
+				$pos = $this->findByPK($articleID, $clang)->getPosition();
 
 				// delete article and its content
-				$sql->update($this->getTableName(), array('deleted' => 1, 'pos' => 0), array('id' => $articleID, 'clang' => $clangID));
+				$sql->update($this->getTableName(), array('deleted' => 1, 'pos' => 0), array('id' => $articleID, 'clang' => $clang));
 
 				// re-position all following articles
-				$followers = $this->getFollowerQuery($parent, $clangID, $pos);
+				$followers = $this->getFollowerQuery($parent, $clang, $pos);
 
 				$this->moveObjects('-', $followers);
 			}
@@ -246,7 +246,7 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 		$artlist = array();
 
 		foreach ($alist as $id) {
-			$art = $this->findById($id, $clangId);
+			$art = $this->findByPK($id, $clangId);
 			if ($art) $artlist[] = $art;
 		}
 
@@ -325,7 +325,7 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 		$target      = (int) $target;
 		$defaultLang = $this->getDefaultLanguageId();
 		$user        = $this->getActor($user, __METHOD__);
-		$article     = $this->findById($id, $defaultLang);
+		$article     = $this->findByPK($id, $defaultLang);
 
 		// check article
 
@@ -361,8 +361,8 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 
 		try {
 			foreach ($this->getLanguages() as $clang) {
-				$article = $this->findById($id, $clang);
-				$cat     = $target === 0 ? null : $this->getCategoryService()->findById($target, $clang);
+				$article = $this->findByPK($id, $clang);
+				$cat     = $target === 0 ? null : $this->getCategoryService()->findByPK($target, $clang);
 				$moved   = clone $article;
 
 				$moved->setParentId($target);
@@ -442,8 +442,8 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 
 		try {
 			foreach ($this->getLanguages() as $clang) {
-				$source    = $this->findById($id, $clang);
-				$cat       = $target === 0 ? null : $this->getCategoryService()->findById($target, $clang);
+				$source    = $this->findByPK($id, $clang);
+				$cat       = $target === 0 ? null : $this->getCategoryService()->findByPK($target, $clang);
 				$duplicate = clone $source;
 
 				$duplicate->setId($newID);
@@ -504,7 +504,7 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 		$articleID   = (int) $articleID;
 		$defaultLang = $this->getDefaultLanguageId();
 		$user        = $this->getActor($user, __METHOD__);
-		$article     = $this->findById($articleID, $defaultLang);
+		$article     = $this->findByPK($articleID, $defaultLang);
 
 		// check article
 
@@ -534,8 +534,8 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 
 		try {
 			foreach ($this->getLanguages() as $clang) {
-				$newStarter = $this->findById($articleID, $clang)->toHash();
-				$oldStarter = $this->findById($oldCat, $clang)->toHash();
+				$newStarter = $this->findByPK($articleID, $clang)->toHash();
+				$oldStarter = $this->findByPK($oldCat, $clang)->toHash();
 
 				foreach ($params as $param) {
 					$t = $newStarter[$param];

@@ -86,8 +86,8 @@ class sly_Service_Category extends sly_Service_ArticleManager {
 	 * @param  int $revision
 	 * @return sly_Model_Category
 	 */
-	public function findById($id, $clang, $revision = null) {
-		return parent::findById($id, $clang, $revision);
+	public function findByPK($id, $clang, $revision = null) {
+		return parent::findByPK($id, $clang, $revision);
 	}
 
 	public function getPositionField() {
@@ -139,7 +139,7 @@ class sly_Service_Category extends sly_Service_ArticleManager {
 
 		// does this category exist?
 
-		$cat = $this->findById($categoryID, $this->getDefaultLanguageId());
+		$cat = $this->findByPK($categoryID, $this->getDefaultLanguageId());
 
 		if ($cat === null) {
 			throw new sly_Exception(t('category_not_found', $categoryID));
@@ -174,7 +174,7 @@ class sly_Service_Category extends sly_Service_ArticleManager {
 			$parent = $cat->getParentId();
 
 			foreach ($this->getLanguages() as $clangID) {
-				$catpos    = $this->findById($categoryID, $clangID)->getCatPosition();
+				$catpos    = $this->findByPK($categoryID, $clangID)->getCatPosition();
 				$followers = $this->getFollowerQuery($parent, $clangID, $catpos);
 
 				$this->moveObjects('-', $followers);
@@ -245,8 +245,8 @@ class sly_Service_Category extends sly_Service_ArticleManager {
 		$targetID    = (int) $targetID;
 		$defaultLang = $this->getDefaultLanguageId();
 		$user        = $this->getActor($user, __METHOD__);
-		$category    = $this->findById($id, $defaultLang);
-		$target      = $this->findById($targetID, $defaultLang);
+		$category    = $this->findByPK($id, $defaultLang);
+		$target      = $this->findByPK($targetID, $defaultLang);
 
 		// check categories
 
@@ -286,7 +286,7 @@ class sly_Service_Category extends sly_Service_ArticleManager {
 			// move the $category in each language by itself
 
 			foreach ($languages as $clang) {
-				$cat = $this->findById($id, $clang);
+				$cat = $this->findByPK($id, $clang);
 				$pos = $cat->getCatPosition();
 
 				$cat->setParentId($targetID);

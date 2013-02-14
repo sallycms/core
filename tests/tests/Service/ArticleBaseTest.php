@@ -20,8 +20,8 @@ class sly_Service_ArticleBaseTest extends sly_Service_ArticleTestBase {
 	}
 
 	public function testGetNonExisting() {
-		$this->assertNull($this->getService()->findById(1, self::$clang));
-		$this->assertNull($this->getService()->findById(1, 2));
+		$this->assertNull($this->getService()->findByPK(1, self::$clang));
+		$this->assertNull($this->getService()->findByPK(1, 2));
 	}
 
 	public function testAdd() {
@@ -30,7 +30,7 @@ class sly_Service_ArticleBaseTest extends sly_Service_ArticleTestBase {
 
 		$this->assertInternalType('int', $newID);
 
-		$art = $service->findById($newID, self::$clang);
+		$art = $service->findByPK($newID, self::$clang);
 		$this->assertInstanceOf('sly_Model_Article', $art);
 
 		$this->assertEquals('my "article"', $art->getName());
@@ -44,11 +44,11 @@ class sly_Service_ArticleBaseTest extends sly_Service_ArticleTestBase {
 	public function testEdit() {
 		$service = $this->getService();
 		$id      = $service->add(0, 'my article', 1, -1);
-		$art     = $service->findById($id, self::$clang);
+		$art     = $service->findByPK($id, self::$clang);
 
 		$service->edit($art, 'new title', 0);
 
-		$art = $service->findById($id, self::$clang);
+		$art     = $service->findByPK($id, self::$clang);
 
 		$this->assertEquals('new title', $art->getName());
 		$this->assertEquals('', $art->getCatName());
@@ -60,13 +60,13 @@ class sly_Service_ArticleBaseTest extends sly_Service_ArticleTestBase {
 		$new     = $service->add(0, 'Test', 1, -1, $user);
 
 		// add a nw revision
-		$article = $service->findById($new, self::$clang);
+		$article = $service->findByPK($new, self::$clang);
 		$service->touch($article, $user);
 
 		$service->deleteById($new);
 		$this->assertFalse($service->exists($new));
 
-		$article = $service->findById($new, self::$clang);
+		$article = $service->findByPK($new, self::$clang);
 		$this->assertNull($article);
 	}
 
@@ -74,15 +74,15 @@ class sly_Service_ArticleBaseTest extends sly_Service_ArticleTestBase {
 		$service = $this->getService();
 		$id      = $service->add(0, 'tmp', 1, -1);
 
-		$article = $service->findById($id, self::$clang);
+		$article = $service->findByPK($id, self::$clang);
 		$this->assertTrue($article->isOnline());
 		$service->changeStatus($article, 0);
 
-		$article = $service->findById($id, self::$clang);
+		$article = $service->findByPK($id, self::$clang);
 		$this->assertFalse($article->isOnline());
 
 		$service->changeStatus($article, 1);
-		$article = $service->findById($id, self::$clang);
+		$article = $service->findByPK($id, self::$clang);
 		$this->assertTrue($article->isOnline());
 	}
 }

@@ -84,7 +84,7 @@ class sly_Service_ArticleExTest extends sly_Service_ArticleTestBase {
 		$this->move($c, 2, $lang); $this->assertPositions(array($a, $c, $b), $lang);
 
 		//check if revision increased 7 times
-		$t = $service->findById($a, $lang);
+		$t = $service->findByPK($a, $lang);
 		$this->assertEquals($t->getRevision(), 7);
 	}
 
@@ -126,14 +126,14 @@ class sly_Service_ArticleExTest extends sly_Service_ArticleTestBase {
 
 	public function testTouch() {
 		$service = $this->getService();
-		$article = $service->findById(1, self::$clangA);
+		$article = $service->findByPK(1, self::$clangA);
 		$user    = sly_Service_Factory::getUserService()->findById(1);
 
 		$before = time();
 		$service->touch($article, $user);
 		$after = time();
 
-		$article = $service->findById(1, self::$clangA);
+		$article = $service->findByPK(1, self::$clangA);
 
 		$this->assertGreaterThanOrEqual($before, $article->getCreateDate());
 		$this->assertLessThanOrEqual($after, $article->getCreateDate());
@@ -146,12 +146,12 @@ class sly_Service_ArticleExTest extends sly_Service_ArticleTestBase {
 	 */
 	public function testSetType() {
 		$service = $this->getService();
-		$article = $service->findById(6, self::$clangA);
+		$article = $service->findByPK(6, self::$clangA);
 
 		$service->setType($article, 'special');
 
 		// type must be the same in all languages
-		$article = $service->findById(6, self::$clangA);
+		$article = $service->findByPK(6, self::$clangA);
 		$this->assertEquals('special', $article->getType());
 	}
 
@@ -164,26 +164,26 @@ class sly_Service_ArticleExTest extends sly_Service_ArticleTestBase {
 
 		// make A & B special articles
 
-		$service->setType($service->findById($artA, self::$clangA), 'special');
-		$service->setType($service->findById($artB, self::$clangA), 'special');
+		$service->setType($service->findByPK($artA, self::$clangA), 'special');
+		$service->setType($service->findByPK($artB, self::$clangA), 'special');
 		$result = $service->findArticlesByType('special');
 
 		$this->assertCount(2, $result);
 
 		foreach (array($artA, $artB) as $idx => $artId) {
-			$article = $service->findById($artId, self::$clangA);
+			$article = $service->findByPK($artId, self::$clangA);
 			$this->assertEquals($article, $result[$idx]);
 		}
 
 		// set A offline
 
-		$service->changeStatus($service->findById($artA, self::$clangA), 0);
+		$service->changeStatus($service->findByPK($artA, self::$clangA), 0);
 		$result = $service->findArticlesByType('special');
 
 		$this->assertCount(2, $result);
 
 		foreach (array($artA, $artB) as $idx => $artId) {
-			$article = $service->findById($artId, self::$clangA);
+			$article = $service->findByPK($artId, self::$clangA);
 			$this->assertEquals($article, $result[$idx]);
 		}
 
@@ -192,7 +192,7 @@ class sly_Service_ArticleExTest extends sly_Service_ArticleTestBase {
 		$result = $service->findArticlesByType('special', true);
 
 		$this->assertCount(1, $result);
-		$this->assertEquals($service->findById($artB, self::$clangA), $result[0]);
+		$this->assertEquals($service->findByPK($artB, self::$clangA), $result[0]);
 	}
 
 	public function testCopy() {
@@ -267,7 +267,7 @@ class sly_Service_ArticleExTest extends sly_Service_ArticleTestBase {
 
 		$this->assertInternalType('int', $newID);
 
-		$art = $service->findById($newID, self::$clangA);
+		$art = $service->findByPK($newID, self::$clangA);
 		$this->assertEquals(0, $art->getStartpage());
 		$this->assertEquals(0, $art->getCatPosition());
 	}
@@ -316,8 +316,8 @@ class sly_Service_ArticleExTest extends sly_Service_ArticleTestBase {
 		$this->assertPositions(array(6,8), self::$clangA);
 		$this->assertPositions(array(1,7), self::$clangA);
 
-		$art = $service->findById(7, self::$clangA);
-		$this->assertEquals($service->findById(1, self::$clangA)->getCatName(), $art->getCatName());
+		$art = $service->findByPK(7, self::$clangA);
+		$this->assertEquals($service->findByPK(1, self::$clangA)->getCatName(), $art->getCatName());
 		$this->assertEquals(2, $art->getPosition());
 
 		$this->assertCount(2, $service->findArticlesByCategory(0, false));
