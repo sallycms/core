@@ -87,7 +87,7 @@ abstract class sly_Service_ArticleManager extends sly_Service_ArticleBase {
 		$user        = $this->getActor($user, 'add');
 
 		// get the parent
-		$parentArticle = $this->getArticleService()->findById($parentID, $defaultLang);
+		$parentArticle = $this->getArticleService()->findByPK($parentID, $defaultLang);
 
 		///////////////////////////////////////////////////////////////
 		// check if parent exists

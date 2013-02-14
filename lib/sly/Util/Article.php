@@ -52,7 +52,7 @@ class sly_Util_Article {
 			$clang = sly_Core::getCurrentClang();
 		}
 
-		$article   = $service->findById($articleID, $clang, $revision);
+		$article   = $service->findByPK($articleID, $clang, $revision);
 
 		if ($article) return $article;
 
@@ -64,7 +64,7 @@ class sly_Util_Article {
 		}
 
 		if (isset($id)) {
-			$article = $service->findById($id, $clang);
+			$article = $service->findByPK($id, $clang);
 			if ($article) return $article;
 			throw new sly_Exception('Could not find a matching article, giving up.');
 		}
@@ -131,37 +131,6 @@ class sly_Util_Article {
 	 */
 	public static function isNotFoundArticle(sly_Model_Article $article) {
 		return $article->getId() === sly_Core::getNotFoundArticleId();
-	}
-
-	/**
-	 * @param  sly_Model_User $user
-	 * @param  int            $articleID
-	 * @return boolean
-	 */
-	public static function canReadArticle(sly_Model_User $user, $articleID) {
-		return sly_Util_Category::canReadCategory($user, $articleID);
-	}
-
-	/**
-	 * @param  sly_Model_User $user
-	 * @param  int            $articleID
-	 * @return boolean
-	 */
-	public static function canEditArticle(sly_Model_User $user, $articleID) {
-		if ($user->isAdmin()) return true;
-		if ($user->hasRight('article', 'edit', 0)) return true;
-		return $user->hasRight('article', 'edit', $articleID);
-	}
-
-	/**
-	 * @param  sly_Model_User $user
-	 * @param  int            $articleID
-	 * @return boolean
-	 */
-	public static function canEditContent(sly_Model_User $user, $articleID) {
-		if ($user->isAdmin()) return true;
-		if ($user->hasRight('article', 'editcontent', 0)) return true;
-		return $user->hasRight('article', 'editcontent', $articleID);
 	}
 
 	/**

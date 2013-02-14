@@ -46,11 +46,9 @@ class sly_Service_DeletedArticle extends sly_Service_ArticleBase {
 
 		$categoryId = $article->getCategoryId();
 
-		if ($categoryId !== 0 && !sly_Util_Category::exists($categoryId)) {
+		if ($categoryId !== 0 && !$this->getCategoryService()->exists($categoryId)) {
 			throw new sly_Exception(t('category_not_found', $categoryId));
 		}
-
-
 
 		$service = $article->isStartArticle() ? $this->getCategoryService() : $this->getArticleService();
 
@@ -66,16 +64,6 @@ class sly_Service_DeletedArticle extends sly_Service_ArticleBase {
 		$this->deleteListCache();
 
 		$this->getDispatcher()->notify($this->getEvent('RESTORED'), null, array('id' => $id));
-	}
-
-	/**
-	 *
-	 * @param  int      $id
-	 * @return boolean  Whether the article exists or not. Deleted equals existing and vise versa.
-	 */
-	public function exists($id) {
-		$count = $this->getPersistence()->fetch($this->getTableName(), 'COUNT(id) as c', array('id' => $id, 'deleted' => 1));
-		return ((int) $count['c'] > 0);
 	}
 
 	protected function fixWhereClause($where) {

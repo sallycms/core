@@ -22,6 +22,12 @@ class DeletedArticleTest extends sly_BaseTest {
 		return $service;
 	}
 
+	protected function getCategoryService() {
+		static $cservice = null;
+		if (!$cservice) $cservice = sly_Service_Factory::getCategoryService();
+		return $cservice;
+	}
+
 	protected function getDeletedArticleService() {
 		static $dservice = null;
 		if (!$dservice) $dservice = sly_Core::getContainer()->getDeletedArticleService();
@@ -31,7 +37,6 @@ class DeletedArticleTest extends sly_BaseTest {
 	public function testRestore() {
 		$service  = $this->getArticleService();
 		$dservice = $this->getDeletedArticleService();
-		$user     = sly_Service_Factory::getUserService()->findById(1);
 
 		$service->deleteById(8);
 		$deleted = $dservice->findLatest(array('id' => 8));
@@ -39,8 +44,8 @@ class DeletedArticleTest extends sly_BaseTest {
 			$this->assertTrue($x->isDeleted());
 		}
 
-		$dservice->restore(8, $user);
-		$this->assertInstanceOf('sly_Model_Article', $service->findById(8, self::$clang));
+		$dservice->restore(8, $this->getUser());
+		$this->assertInstanceOf('sly_Model_Article', $service->findByPK(8, self::$clang));
 	}
 
 	/**
@@ -48,9 +53,7 @@ class DeletedArticleTest extends sly_BaseTest {
 	 */
 	public function testRestoreMissing() {
 		$dservice = $this->getDeletedArticleService();
-		$user     = sly_Service_Factory::getUserService()->findById(1);
-
-		$dservice->restore(1, $user);
+		$dservice->restore(1, $this->getUser());
 	}
 
 	/**
@@ -58,13 +61,25 @@ class DeletedArticleTest extends sly_BaseTest {
 	 */
 	public function testRestoreCategoryMissing() {
 		$service  = $this->getArticleService();
+		$cservice = $this->getCategoryService();
 		$dservice = $this->getDeletedArticleService();
-		$user     = sly_Service_Factory::getUserService()->findById(1);
-		$newId    = $service->add(1, 'Test', 1, 1, $user);
+		$newId    = $service->add(2, 'Test', 1, 1, $this->getUser());
+
+		$service->deleteById($newId);
+		$cservice->deleteById(2);
 
 		// delte new article
-		$service->deleteById($newId);
-		$dservice->restore($newId, $user);
+		$dservice->restore($newId, $this->getUser());
+	}
+
+	protected function getUser() {
+		static $user;
+
+		if(!$user) {
+			$user = sly_Service_Factory::getUserService()->findById(1);
+		}
+
+		return $user;
 	}
 
 }

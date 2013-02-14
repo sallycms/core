@@ -11,7 +11,17 @@
 class ArticleSliceTest extends sly_BaseTest {
 
 	protected function getDataSetName() {
-		return 'sally-demopage';
+		return 'pristine-sally';
+	}
+
+	protected function dummyArticle() {
+		$aservice = $this->getArticleService();
+		$aid      = $aservice->add(0, 'Test');
+
+		$article  = $aservice->findByPK($aid, 5);
+		$aservice->setType($article, 'default');
+
+		return $aservice->findByPK($aid, 5);
 	}
 
 	protected function getService() {
@@ -27,43 +37,65 @@ class ArticleSliceTest extends sly_BaseTest {
 	}
 
 	public function testAdd() {
-		$service = $this->getService();
-		$article = $this->getArticleService()->findById(1, 5);
+		$service  = $this->getService();
+		$aservice = $this->getArticleService();
+		$article  = $this->dummyArticle();
+		$aid      = $article->getId();
 
-		$slice = $service->add($article, 'test', 'test1', array('test' => 'not empty'), 0, $this->getUser());
+		$slice = $service->add($article, 'test', 'test1', array('test' => '1'), 0, $this->getUser());
 		$this->assertEquals('test1', $slice->getModule());
+		$this->assertEquals(array('test' => '1'), $slice->getValues());
 
-		$articleNewRevision = $this->getArticleService()->findById(1, 5);
+		$article  = $aservice->findByPK($aid, 5);
+		$service->add($article, 'test', 'test1', array('test' => '0'), -1, $this->getUser());
+		$article  = $aservice->findByPK($aid, 5);
+		$service->add($article, 'test', 'test1', array('test' => '2'), 4, $this->getUser());
+
+		$articleNewRevision = $aservice->findByPK($aid, 5);
+		$slices = $articleNewRevision->getSlices();
+		$pos = 0;
+		foreach ($slices as $slice) {
+			$this->assertEquals($pos, $slice->getPosition());
+			$pos++;
+		}
 		$this->assertGreaterThan($article->getRevision(), $articleNewRevision->getRevision());
+		$this->assertNotEmpty($articleNewRevision->getSlices());
 	}
 
 	/**
 	 * @depends testAdd
 	 */
 	public function testEdit() {
-		$service = $this->getService();
-		$article = $this->getArticleService()->findById(1, 5);
+		$service  = $this->getService();
+		$aservice = $this->getArticleService();
+		$article  = $this->dummyArticle();
+		$aid      = $article->getId();
 
 		$slice   = $service->add($article, 'test', 'test1', array('test' => 'not empty'), 0, $this->getUser());
-		$article = $this->getArticleService()->findById(1, 5);
+		$article = $aservice->findByPK($aid, 5);
 		$slice   = $service->edit($article, 'test', 0, array('test' => 'not empty test'), $this->getUser());
 		$this->assertEquals('not empty test', $slice->getValue('test'));
 
-		$articleNewRevision = $this->getArticleService()->findById(1, 5);
+		$articleNewRevision = $aservice->findByPK(1, 5);
 		$this->assertGreaterThan($article->getRevision(), $articleNewRevision->getRevision());
 	}
 
+	/**
+	 * @depends testAdd
+	 */
 	public function testMove() {
-		$service = $this->getService();
-		$article = $this->getArticleService()->findById(1, 5);
+		$service  = $this->getService();
+		$aservice = $this->getArticleService();
+		$article  = $this->dummyArticle();
+		$aid      = $article->getId();
 
 		$slice   = $service->add($article, 'test', 'test1', array('test' => 'not empty'), -1, $this->getUser());
-		$article = $this->getArticleService()->findById(1, 5);
+		$article = $aservice->findByPK($aid, 5);
 		$slice   = $service->add($article, 'test', 'test1', array('test' => 'not empty test'), 2, $this->getUser());
-		$article = $this->getArticleService()->findById(1, 5);
+		$article = $aservice->findByPK($aid, 5);
 		$service->moveTo($article, 'test', 1, 0, $this->getUser());
 
-		$articleNewRevision = $this->getArticleService()->findById(1, 5);
+		$articleNewRevision = $aservice->findByPK($aid, 5);
 		$slices             = $articleNewRevision->getSlices('test');
 
 		$this->assertEquals('not empty test', $slices[0]->getValue('test'));
@@ -71,28 +103,33 @@ class ArticleSliceTest extends sly_BaseTest {
 		$this->assertGreaterThan($article->getRevision(), $articleNewRevision->getRevision());
 	}
 
+	/**
+	 * @depends testAdd
+	 */
 	public function testDelete() {
-		$service = $this->getService();
-		$article = $this->getArticleService()->findById(1, 5);
+		$service  = $this->getService();
+		$aservice = $this->getArticleService();
+		$article  = $this->dummyArticle();
+		$aid      = $article->getId();
 
-		$slice   = $service->add($article, 'test', 'test1', array('test' => 'not empty'), -1, $this->getUser());
+		$slice   = $service->add($article, 'test', 'test1', array('test' => 'not empty'), 0, $this->getUser());
 		$service->deleteByArticleSlice($slice);
-		$articleNewRevision = $this->getArticleService()->findById(1, 5);
+		$articleNewRevision = $aservice->findByPK($aid, 5);
 
 		$this->assertGreaterThan($article->getRevision(), $articleNewRevision->getRevision());
 		$this->assertEmpty($articleNewRevision->getSlices('test'));
 
 
-		$slice   = $service->add($article, 'test', 'test1', array('test' => 'not empty test'), 2, $this->getUser());
-		$article = $this->getArticleService()->findById(1, 5);
+		$slice   = $service->add($article, 'main', 'test1', array('test' => 'not empty test'), 0, $this->getUser());
+		$article = $aservice->findByPK($aid, 5);
 		$service->delete($article, 'test');
-		$article = $this->getArticleService()->findById(1, 5);
+		$article = $aservice->findByPK($aid, 5);
 
 		$this->assertEmpty($article->getSlices('test'));
 		$this->assertNotEmpty($article->getSlices());
 
 		$service->delete($article);
-		$articleNewRevision = $this->getArticleService()->findById(1, 5);
+		$articleNewRevision = $aservice->findByPK($aid, 5);
 
 		$this->assertEmpty($articleNewRevision->getSlices());
 		$this->assertGreaterThan($article->getRevision(), $articleNewRevision->getRevision());
