@@ -41,6 +41,11 @@ if (ini_get('register_globals')) {
 	unset($superglobals, $key, $keys);
 }
 
+if (!function_exists('mb_internal_encoding')) {
+	print 'SallyCMS requires the mbstring extension to work.';
+	exit(1);
+}
+
 // we're using UTF-8 everywhere
 mb_internal_encoding('UTF-8');
 
