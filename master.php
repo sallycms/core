@@ -107,12 +107,6 @@ catch (Exception $e) {
 $errorHandler = $container->getErrorHandler();
 $errorHandler->init();
 
-// Sync?
-if (!sly_Core::isSetup()) {
-	// Cache-Util initialisieren
-	sly_Util_Cache::registerListener();
-}
-
 // Check for system updates
 $coreVersion  = sly_Core::getVersion('X.Y.Z');
 $knownVersion = sly_Util_Versions::get('sally');
