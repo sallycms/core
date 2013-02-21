@@ -83,6 +83,7 @@ class sly_Core {
 		// init container
 		$container->setConfigDir(SLY_CONFIGFOLDER);
 		$container->set('sly-classloader', $classLoader);
+		$container->set('sly-start-time', $startTime);
 		$container->setApplicationInfo($appName, $appBaseUrl);
 
 		self::setContainer($container);
