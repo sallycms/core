@@ -27,6 +27,7 @@ class sly_Container implements ArrayAccess, Countable {
 			// needed variables
 			'sly-config-dir'  => array($this, 'missingValue'),
 			'sly-classloader' => array($this, 'missingValue'),
+			'sly-environment' => array($this, 'missingValue'),
 
 			// core objects
 			'sly-config'              => array($this, 'buildConfig'),
@@ -134,6 +135,13 @@ class sly_Container implements ArrayAccess, Countable {
 	 */
 	public function getCurrentLanguageID() {
 		return $this->get('sly-current-lang-id');
+	}
+
+	/**
+	 * @return string
+	 */
+	public function getEnvironment() {
+		return $this->get('sly-environment');
 	}
 
 	/**
@@ -424,6 +432,14 @@ class sly_Container implements ArrayAccess, Countable {
 	/*          setters for objects that are commonly set          */
 
 	/**
+	 * @param  string $env    the new environment, e.g. 'dev' or 'prod'
+	 * @return sly_Container  reference to self
+	 */
+	public function setEnvironment($env) {
+		return $this->set('sly-environment', $env);
+	}
+
+	/**
 	 * @param  int $articleID  the new current article
 	 * @return sly_Container   reference to self
 	 */
@@ -563,8 +579,7 @@ class sly_Container implements ArrayAccess, Countable {
 	 * @return sly_ErrorHandler_Interface
 	 */
 	protected function buildErrorHandler(sly_Container $container) {
-		$config  = $container['sly-config'];
-		$devMode = $config->get('DEVELOPER_MODE', false);
+		$devMode = $container['sly-environment'] !== 'prod';
 
 		return $this['sly-error-handler'] = $devMode ? new sly_ErrorHandler_Development() : new sly_ErrorHandler_Production();
 	}
