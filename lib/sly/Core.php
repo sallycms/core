@@ -27,6 +27,105 @@ class sly_Core {
 	}
 
 	/**
+	 * Boot-up the Sally core system
+	 *
+	 * This will set the global Sally constants (like SLY_COREFOLDER) and init
+	 * the system configuration. Be sure to not call this method twice with the
+	 * same configuration. And if you call it more than once, make sure you know
+	 * what you're doing.
+	 *
+	 * @param  mixed         $classLoader  ClassLoader instance from Composer
+	 * @param  string        $environment  system environment, use null to use the locally configured value
+	 * @param  string        $appName      application name, e.g. 'frontend'
+	 * @param  string        $appBaseUrl   application base URL, e.g. 'backend' or '' for the frontend
+	 * @param  sly_Container $container    DI container to use (if none given, an empty one is created)
+	 * @return sly_Container               the used container
+	 */
+	public static function boot($classLoader, $environment, $appName, $appBaseUrl, sly_Container $container = null) {
+		$startTime = microtime(true);
+
+		if (!$container) {
+			$container = new sly_Container();
+		}
+
+		// There are some places left in 0.8 where this is used. It's gone in 0.9.
+		if (!defined('SLY_IS_TESTING')) {
+			define('SLY_IS_TESTING', false);
+		}
+
+		// we're using UTF-8 everywhere
+		if (!function_exists('mb_internal_encoding')) {
+			print 'SallyCMS requires the mbstring extension to work.';
+			exit(1);
+		}
+
+		mb_internal_encoding('UTF-8');
+
+		// define that the path to the core is here
+		if (!defined('SLY_COREFOLDER'))    define('SLY_COREFOLDER',    dirname(dirname(dirname(__FILE__))));
+
+		// define constants for system wide important paths if they are not set already
+		if (!defined('SLY_BASE'))          define('SLY_BASE',          realpath(SLY_COREFOLDER.'/../../'));
+		if (!defined('SLY_SALLYFOLDER'))   define('SLY_SALLYFOLDER',   SLY_BASE.DIRECTORY_SEPARATOR.'sally');
+		if (!defined('SLY_DEVELOPFOLDER')) define('SLY_DEVELOPFOLDER', SLY_BASE.DIRECTORY_SEPARATOR.'develop');
+		if (!defined('SLY_VENDORFOLDER'))  define('SLY_VENDORFOLDER',  SLY_SALLYFOLDER.DIRECTORY_SEPARATOR.'vendor');
+		if (!defined('SLY_DATAFOLDER'))    define('SLY_DATAFOLDER',    SLY_BASE.DIRECTORY_SEPARATOR.'data');
+		if (!defined('SLY_DYNFOLDER'))     define('SLY_DYNFOLDER',     SLY_DATAFOLDER.DIRECTORY_SEPARATOR.'dyn');
+		if (!defined('SLY_MEDIAFOLDER'))   define('SLY_MEDIAFOLDER',   SLY_DATAFOLDER.DIRECTORY_SEPARATOR.'mediapool');
+		if (!defined('SLY_CONFIGFOLDER'))  define('SLY_CONFIGFOLDER',  SLY_DATAFOLDER.DIRECTORY_SEPARATOR.'config');
+		if (!defined('SLY_ADDONFOLDER'))   define('SLY_ADDONFOLDER',   SLY_SALLYFOLDER.DIRECTORY_SEPARATOR.'addons');
+
+		// define these PHP 5.3 constants here so that they can be used in YAML files
+		// (if someone really decides to put PHP code in their config files).
+		if (!defined('E_DEPRECATED'))      define('E_DEPRECATED',      8192);
+		if (!defined('E_USER_DEPRECATED')) define('E_USER_DEPRECATED', 16384);
+
+		// init container
+		$container->setConfigDir(SLY_CONFIGFOLDER);
+		$container->set('sly-classloader', $classLoader);
+		$container->setApplicationInfo($appName, $appBaseUrl);
+
+		self::setContainer($container);
+
+		// load core config (be extra careful because this is the first attempt to write
+		// to the filesystem on new installations)
+		try {
+			$config = $container->getConfig();
+			$config->loadStatic(SLY_COREFOLDER.'/config/sallyStatic.yml');
+			$config->loadLocalConfig();
+			$config->loadProjectConfig();
+			$config->loadDevelopConfig();
+		}
+		catch (sly_Util_DirectoryException $e) {
+			$dir = sly_html($e->getDirectory());
+
+			header('Content-Type: text/html; charset=UTF-8');
+			die(
+				'Could not create data directory in <strong>'.$dir.'</strong>.<br />'.
+				'Please check your filesystem permissions and ensure that PHP is allowed<br />'.
+				'to write in <strong>'.SLY_DATAFOLDER.'</strong>. In most cases this can<br />'.
+				'be fixed by creating the directory via FTP and chmodding it to <strong>0777</strong>.'
+			);
+		}
+		catch (Exception $e) {
+			header('Content-Type: text/plain; charset=UTF-8');
+			die('Could not load core configuration: '.$e->getMessage());
+		}
+
+		// get and inject the current system environment
+		if ($environment === null) {
+			$environment = $config->get('environment', 'dev');
+		}
+
+		$container->set('sly-environment', $environment);
+
+		// now that we now about the environment, we can toggle the config caching
+		$config->setCachingEnabled($environment === 'prod');
+
+		return $container;
+	}
+
+	/**
 	 * Get the single core instance
 	 *
 	 * @return sly_Core  the singleton
@@ -206,7 +305,7 @@ class sly_Core {
 	 * @return boolean  true if developer mode, else false
 	 */
 	public static function isDeveloperMode() {
-		return (boolean) self::config()->get('DEVELOPER_MODE');
+		return self::getContainer()->getEnvironment() !== 'prod';
 	}
 
 	/**
