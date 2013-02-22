@@ -66,7 +66,7 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base implements
 	abstract protected function fixWhereClause($where);
 
 	/**
-	 * find latest revisions of deleted articles
+	 * find latest revisions of articles
 	 *
 	 * @param  mixed  $where
 	 * @param  string $group
@@ -236,50 +236,6 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base implements
 		$position = $this->buildPositionQuery($min, $max);
 
 		return $siblings.' AND '.$position;
-	}
-
-	/**
-	 * @param  int     $categoryID
-	 * @param  boolean $ignoreOffline
-	 * @param  int     $clang
-	 * @return array
-	 */
-	protected function findElementsInCategory($categoryID, $ignoreOffline = false, $clang = null) {
-		if ($clang === false || $clang === null) {
-			$clang = sly_Core::getCurrentClang();
-		}
-
-		$categoryID = (int) $categoryID;
-		$clang      = (int) $clang;
-		$namespace  = 'sly.article.list';
-		$prefix     = substr($this->getModelType(), 0, 3);
-		$key        = $prefix.'sbycat_'.$categoryID.'_'.$clang.'_'.($ignoreOffline ? '1' : '0');
-		$list       = $this->getCache()->get($namespace, $key, null);
-
-		if ($list === null) {
-			$list  = array();
-			$sql   = $this->getPersistence();
-			$where = $this->getSiblingQuery($categoryID, $clang);
-			$pos   = $prefix === 'art' ? 'pos' : 'catpos';
-
-			if ($ignoreOffline) {
-				$where .= ' AND status = 1';
-			}
-
-			$sql->select($this->tablename, 'id', $where, 'id', $pos.',name');
-			foreach ($sql as $row) $list[] = (int) $row['id'];
-
-			$this->getCache()->set($namespace, $key, $list);
-		}
-
-		$objlist = array();
-
-		foreach ($list as $id) {
-			$obj = $this->findByPK($id, $clang);
-			if ($obj) $objlist[] = $obj;
-		}
-
-		return $objlist;
 	}
 
 	protected function getDefaultLanguageId() {

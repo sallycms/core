@@ -205,52 +205,33 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 
 	/**
 	 * @param  int     $categoryId
-	 * @param  boolean $ignoreOfflines
-	 * @param  int     $clangId
+	 * @param  int     $clang
+	 * @param  boolean $findOnline
 	 * @return array
 	 */
-	public function findArticlesByCategory($categoryId, $ignoreOfflines = false, $clangId = null) {
-		return $this->findElementsInCategory($categoryId, $ignoreOfflines, $clangId);
+	public function findArticlesByCategory($categoryId, $clang, $ignoreOfflines = false ) {
+		return $this->findElementsInCategory($categoryId, $clang, $ignoreOfflines);
 	}
 
 	/**
 	 * @param  string  $type
-	 * @param  boolean $ignoreOfflines
-	 * @param  int     $clangId
+	 * @param  int     $clang
+	 * @param  boolean $findOnline
 	 * @return array
 	 */
-	public function findArticlesByType($type, $ignoreOfflines = false, $clangId = null) {
-		if ($clangId === false || $clangId === null) {
-			$clangId = sly_Core::getCurrentClang();
+	public function findArticlesByType($type, $clang, $findOnline = false) {
+		$type  = trim($type);
+		$clang = (int) $clang;
+		$where = compact('type', 'clang');
+
+		if ($findOnline === true) {
+			$articles = $this->findOnline($where);
+		}
+		else {
+			$articles = $this->findLatest($where);
 		}
 
-		$type      = trim($type);
-		$clangId   = (int) $clangId;
-		$namespace = 'sly.article.list';
-		$key       = 'artsbytype_'.$type.'_'.$clangId.'_'.($ignoreOfflines ? '1' : '0');
-		$alist     = $this->getCache()->get($namespace, $key, null);
-
-		if ($alist === null) {
-			$alist = array();
-			$sql   = $this->getPersistence();
-			$where = array('type' => $type, 'clang' => $clangId);
-
-			if ($ignoreOfflines) $where['status'] = 1;
-
-			$sql->select($this->tablename, 'id', $where, null, 'pos,name');
-			foreach ($sql as $row) $alist[] = (int) $row['id'];
-
-			$this->getCache()->set($namespace, $key, $alist);
-		}
-
-		$artlist = array();
-
-		foreach ($alist as $id) {
-			$art = $this->findByPK($id, $clangId);
-			if ($art) $artlist[] = $art;
-		}
-
-		return $artlist;
+		return $articles;
 	}
 
 	/**

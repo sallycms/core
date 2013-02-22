@@ -103,9 +103,9 @@ class sly_Service_ArticleExTest extends sly_Service_ArticleTestBase {
 	/**
 	 * @dataProvider findArticlesByCategoryProvider
 	 */
-	public function testFindArticlesByCategory($parent, $ignoreOffline, $clang, array $expected) {
+	public function testFindArticlesByCategory($parent, $clang, array $expected) {
 		$service = $this->getService();
-		$arts    = $service->findArticlesByCategory($parent, $ignoreOffline, $clang);
+		$arts    = $service->findArticlesByCategory($parent, $clang);
 
 		foreach ($arts as &$art) {
 			$art = $art->getId();
@@ -116,57 +116,40 @@ class sly_Service_ArticleExTest extends sly_Service_ArticleTestBase {
 
 	public function findArticlesByCategoryProvider() {
 		return array(
-			array(0, false, self::$clangA, array(6,7,8)), array(0, true, self::$clangA, array(6,7,8)),
-			array(0, false, self::$clangB, array(6,7,8)), array(0, true, self::$clangB, array()),
-			array(1, false, self::$clangA, array(1)),
-			array(1, true,  self::$clangA, array(1)),
-			array(1, true,  self::$clangB, array())
+			array(0, self::$clangA, array(6,7,8)),
+			array(0, self::$clangB, array(6,7,8)),
+			array(1, self::$clangA, array(1)),
+			array(1, self::$clangB, array(1)),
 		);
 	}
 
-	public function testTouch() {
-		$service = $this->getService();
-		$article = $service->findByPK(1, self::$clangA);
-		$user    = sly_Service_Factory::getUserService()->findById(1);
-
-		$before = time();
-		$service->touch($article, $user);
-		$after = time();
-
-		$article = $service->findByPK(1, self::$clangA);
-
-		$this->assertGreaterThanOrEqual($before, $article->getCreateDate());
-		$this->assertLessThanOrEqual($after, $article->getCreateDate());
-		$this->assertEquals($user->getLogin(), $article->getUpdateUser());
-		$this->assertEquals(1, $article->getRevision(), 'Touch should increase revision');
-	}
-
-	/**
-	 * @depends testTouch
-	 */
 	public function testSetType() {
 		$service = $this->getService();
 		$article = $service->findByPK(6, self::$clangA);
 
 		$service->setType($article, 'special');
 
-		// type must be the same in all languages
-		$article = $service->findByPK(6, self::$clangA);
-		$this->assertEquals('special', $article->getType());
+
+		$articleNewRevision = $service->findByPK(6, self::$clangA);
+		$this->assertEquals('special', $articleNewRevision ->getType());
+		$this->assertGreaterThan($article->getRevision(), $articleNewRevision->getRevision());
 	}
 
+	/**
+	 * @depends testSetType
+	 */
 	public function testFindByType() {
 		$artA    = 6;
 		$artB    = 7;
 		$service = $this->getService();
 
-		$this->assertEmpty($service->findArticlesByType('special'));
+		$this->assertEmpty($service->findArticlesByType('special', self::$clangA));
 
 		// make A & B special articles
 
 		$service->setType($service->findByPK($artA, self::$clangA), 'special');
 		$service->setType($service->findByPK($artB, self::$clangA), 'special');
-		$result = $service->findArticlesByType('special');
+		$result = $service->findArticlesByType('special', self::$clangA);
 
 		$this->assertCount(2, $result);
 
@@ -174,25 +157,6 @@ class sly_Service_ArticleExTest extends sly_Service_ArticleTestBase {
 			$article = $service->findByPK($artId, self::$clangA);
 			$this->assertEquals($article, $result[$idx]);
 		}
-
-		// set A offline
-
-		$service->changeStatus($service->findByPK($artA, self::$clangA), 0);
-		$result = $service->findArticlesByType('special');
-
-		$this->assertCount(2, $result);
-
-		foreach (array($artA, $artB) as $idx => $artId) {
-			$article = $service->findByPK($artId, self::$clangA);
-			$this->assertEquals($article, $result[$idx]);
-		}
-
-		// when ignoring offline articles, don't expect A
-
-		$result = $service->findArticlesByType('special', true);
-
-		$this->assertCount(1, $result);
-		$this->assertEquals($service->findByPK($artB, self::$clangA), $result[0]);
 	}
 
 	public function testCopy() {
@@ -204,27 +168,18 @@ class sly_Service_ArticleExTest extends sly_Service_ArticleTestBase {
 		// copy the article in it's own category (root)
 
 		$newID = $service->copy(6, $root);
+		$articles[] = $newID;
 
 		$this->assertInternalType('int', $newID);
 
-		// since the new article is offline, expect the original article list
-
-		$arts = $service->findArticlesByCategory($root, true, self::$clangA);
-		$this->assertCount(3, $arts);
-
-		foreach ($arts as $idx => $art) {
-			$this->assertEquals($articles[$idx], $art->getId());
-		}
-
-		// and now let's include the offline article
-
-		$arts = $service->findArticlesByCategory($root, false, self::$clangA);
+		$arts = $service->findArticlesByCategory($root, self::$clangA);
 		$this->assertCount(4, $arts);
-		$last = array_pop($arts);
 
 		foreach ($arts as $idx => $art) {
 			$this->assertEquals($articles[$idx], $art->getId());
 		}
+
+		$last = array_pop($arts);
 
 		$this->assertEquals($newID, $last->getId());
 		$this->assertEquals(4, $last->getPosition());
@@ -232,7 +187,7 @@ class sly_Service_ArticleExTest extends sly_Service_ArticleTestBase {
 
 		// the same should apply to the B language
 
-		$arts = $service->findArticlesByCategory($root, false, self::$clangB);
+		$arts = $service->findArticlesByCategory($root, self::$clangB);
 		$this->assertCount(4, $arts);
 
 		$service->deleteById($newID);
@@ -245,16 +200,15 @@ class sly_Service_ArticleExTest extends sly_Service_ArticleTestBase {
 
 		$this->assertInternalType('int', $newID);
 
-		$arts = $service->findArticlesByCategory($cat, true);
-		$this->assertCount(1, $arts);
-
-		$arts = $service->findArticlesByCategory($cat, false);
+		$arts = $service->findArticlesByCategory($cat, self::$clangA);
 		$this->assertCount(2, $arts);
 		$this->assertEquals($newID, end($arts)->getId());
 		$this->assertEquals(reset($arts)->getName(), end($arts)->getCatName());
 	}
 
 	/**
+	 * @depends testCopy
+	 *
 	 * Check if the article service can copy a start article
 	 *
 	 * This makes sure that the article service correctly sets startpage = 0
@@ -300,7 +254,7 @@ class sly_Service_ArticleExTest extends sly_Service_ArticleTestBase {
 	private function compareSlices(sly_Model_ArticleSlice $oldSlice, sly_Model_ArticleSlice $newSlice) {
 		$this->assertEquals($oldSlice->getSlot(), $newSlice->getSlot());
 		$this->assertEquals($oldSlice->getPosition(), $newSlice->getPosition());
-//		$this->assertEquals($oldSlice->getCreatedate(), $newSlice->getCreatedate()); // get reset on copy to time()
+		$this->assertGreaterThan($oldSlice->getCreatedate(), $newSlice->getCreatedate());
 //		$this->assertEquals($oldSlice->getUpdatedate(), $newSlice->getUpdatedate()); // get reset on copy to time()
 		$this->assertEquals($oldSlice->getCreateuser(), $newSlice->getCreateuser());
 		$this->assertEquals($oldSlice->getUpdateuser(), $newSlice->getUpdateuser());
@@ -320,9 +274,9 @@ class sly_Service_ArticleExTest extends sly_Service_ArticleTestBase {
 		$this->assertEquals($service->findByPK(1, self::$clangA)->getCatName(), $art->getCatName());
 		$this->assertEquals(2, $art->getPosition());
 
-		$this->assertCount(2, $service->findArticlesByCategory(0, false));
-		$this->assertCount(2, $service->findArticlesByCategory(1, false));
-		$this->assertCount(1, $service->findArticlesByCategory(1, true));
+		$this->assertCount(2, $service->findArticlesByCategory(0, self::$clangA, false));
+		$this->assertCount(2, $service->findArticlesByCategory(1, self::$clangA, false));
+		$this->assertCount(2, $service->findArticlesByCategory(1, self::$clangA, true));
 
 		////////////////////////////////////////////////////////////
 		// move it back
@@ -331,8 +285,7 @@ class sly_Service_ArticleExTest extends sly_Service_ArticleTestBase {
 		$this->assertPositions(array(6,8,7), self::$clangA);
 		$this->assertPositions(array(1), self::$clangA);
 
-		$this->assertCount(3, $service->findArticlesByCategory(0, false));
-		$this->assertCount(2, $service->findArticlesByCategory(0, true));
-		$this->assertCount(1, $service->findArticlesByCategory(1, false));
+		$this->assertCount(3, $service->findArticlesByCategory(0, self::$clangA));
+		$this->assertCount(1, $service->findArticlesByCategory(1, self::$clangA));
 	}
 }

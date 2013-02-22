@@ -20,6 +20,21 @@ abstract class sly_Service_ArticleManager extends sly_Service_ArticleBase {
 	abstract public function getPositionField();
 
 	/**
+	 * find online articles/categories
+	 *
+	 * @param  mixed  $where
+	 * @param  string $group
+	 * @param  string $order
+	 * @param  int    $offset
+	 * @param  int    $limit
+	 * @param  string $having
+	 * @return array
+	 */
+	public function findOnline($where = null, $group = null, $order = null, $offset = null, $limit = null, $having = null) {
+		return $this->findLatest($where, $group, $order, $offset, $limit, $having);
+	}
+
+	/**
 	 * get maximum position eigther catpos or pos whether it is a article or
 	 * category service
 	 *
@@ -33,41 +48,6 @@ abstract class sly_Service_ArticleManager extends sly_Service_ArticleBase {
 		$maxPos = $db->magicFetch($this->getTableName(), 'MAX('.$field.')', $where);
 
 		return $maxPos;
-	}
-
-	/**
-	 *
-	 * @param  sly_Model_Base_Article $obj
-	 * @param  int                    $newStatus
-	 * @param  sly_Model_User         $user       updateuser or null for the current user
-	 * @return boolean
-	 */
-	public function changeStatus(sly_Model_Base_Article $obj, $newStatus = null, sly_Model_User $user = null) {
-		$type    = $this->getModelType();
-		$user    = $this->getActor($user, __METHOD__);
-
-		if (!$obj) {
-			throw new sly_Exception(t($type.'_not_found'));
-		}
-
-		// if no explicit status is given, just take the next one
-
-		if ($newStatus === null) {
-			$states    = $this->getStates();
-			$oldStatus = $obj->getStatus();
-			$newStatus = ($oldStatus + 1) % count($states);
-		}
-
-		// update the article/category
-
-		$obj->setStatus($newStatus);
-		$obj->setUpdateColumns($user);
-		$this->update($obj);
-
-		// notify the system
-		$this->getDispatcher()->notify($this->getEvent('STATUS'), $obj, array('user' => $user));
-
-		return true;
 	}
 
 	/**
@@ -317,22 +297,23 @@ abstract class sly_Service_ArticleManager extends sly_Service_ArticleBase {
 	}
 
 	/**
+	 * @param  int     $categoryID
+	 * @param  int     $clang
+	 * @param  boolean $findOnline
 	 * @return array
 	 */
-	public function getStates() {
-		$type = $this->getModelType();
+	protected function findElementsInCategory($categoryID, $clang, $findOnline = false) {
+		$categoryID = (int) $categoryID;
+		$clang      = (int) $clang;
+		$where      = $this->getSiblingQuery($categoryID, $clang);//array('re_id' => $categoryID, 'clang' => $clang);
 
-		if (!isset($this->states[$type])) {
-			$s = array(
-				// display name, CSS class
-				array(t('status_offline'), 'sly-offline'),
-				array(t('status_online'),  'sly-online')
-			);
-
-			$s = $this->getDispatcher()->filter($this->getEvent('STATUS_TYPES'), $s);
-			$this->states[$type] = $s;
+		if ($findOnline === true) {
+			$articles = $this->findOnline($where);
 		}
-
-		return $this->states[$type];
+		else {
+			$articles = $this->findLatest($where);
+		}
+		
+		return $articles;
 	}
 }

@@ -41,6 +41,9 @@ class sly_Service_ArticleBaseTest extends sly_Service_ArticleTestBase {
 		$this->assertTrue($art->isOnline());
 	}
 
+	/**
+	 * @depends testAdd
+	 */
 	public function testEdit() {
 		$service = $this->getService();
 		$id      = $service->add(0, 'my article', 1, -1);
@@ -54,6 +57,9 @@ class sly_Service_ArticleBaseTest extends sly_Service_ArticleTestBase {
 		$this->assertEquals('', $art->getCatName());
 	}
 
+	/**
+	 * @depends testAdd
+	 */
 	public function testDelete() {
 		$service = $this->getService();
 		$user    = sly_Service_Factory::getUserService()->findById(1);
@@ -70,19 +76,19 @@ class sly_Service_ArticleBaseTest extends sly_Service_ArticleTestBase {
 		$this->assertNull($article);
 	}
 
-	public function testChangeStatus() {
+	/**
+	 * @depends testAdd
+	 */
+	public function testTouch() {
 		$service = $this->getService();
-		$id      = $service->add(0, 'tmp', 1, -1);
-
+		$id      = $service->add(0, 'my article', 1, -1);
 		$article = $service->findByPK($id, self::$clang);
-		$this->assertTrue($article->isOnline());
-		$service->changeStatus($article, 0);
+		$user    = sly_Service_Factory::getUserService()->findById(1);
 
-		$article = $service->findByPK($id, self::$clang);
-		$this->assertFalse($article->isOnline());
+		$articleNewRevision = $service->touch($article, $user);
 
-		$service->changeStatus($article, 1);
-		$article = $service->findByPK($id, self::$clang);
-		$this->assertTrue($article->isOnline());
+		$this->assertGreaterThanOrEqual($article->getCreateDate(), $articleNewRevision->getCreateDate());
+		$this->assertEquals($user->getLogin(), $articleNewRevision->getUpdateUser());
+		$this->assertEquals(1, $articleNewRevision->getRevision(), 'Touch should increase revision');
 	}
 }
