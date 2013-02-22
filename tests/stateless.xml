@@ -21,19 +21,19 @@
 
 	<testsuites>
 		<testsuite name="tests">
-			<directory>tests/Event</directory>
-			<directory>tests/Util</directory>
+			<directory>tests/sly/Event</directory>
+			<directory>tests/sly/Util</directory>
 
-			<file>tests/DB/DumpTest.php</file>
-			<file>tests/Service/ArticleTypeTest.php</file>
-			<file>tests/Service/FactoryTest.php</file>
-			<file>tests/Service/ModuleTest.php</file>
-			<file>tests/Service/TemplateTest.php</file>
-			<file>tests/CoreTest.php</file>
-			<file>tests/FunctionsTest.php</file>
-			<file>tests/LoaderTest.php</file>
-			<file>tests/RegistryTest.php</file>
-			<file>tests/ConfigurationTest.php</file>
+			<file>tests/sly/DB/DumpTest.php</file>
+			<file>tests/sly/Service/ArticleTypeTest.php</file>
+			<file>tests/sly/Service/FactoryTest.php</file>
+			<file>tests/sly/Service/ModuleTest.php</file>
+			<file>tests/sly/Service/TemplateTest.php</file>
+			<file>tests/sly/CoreTest.php</file>
+			<file>tests/sly/FunctionsTest.php</file>
+			<file>tests/sly/LoaderTest.php</file>
+			<file>tests/sly/RegistryTest.php</file>
+			<file>tests/sly/ConfigurationTest.php</file>
 		</testsuite>
 	</testsuites>
 

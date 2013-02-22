@@ -5,4 +5,28 @@ DEFAULT_ARTICLE_TYPE: ''
 PROJECTNAME: 'Sally Trunk'
 TIMEZONE: Europe/Berlin
 DEFAULT_LOCALE: de_de
-addons: []
+addons: {  }
+templates:
+  data:
+    standard:
+      default:
+        standard.php: { filename: standard.php, title: standard, slots: { main: Hauptbereich, test: Testbereich }, mtime: 1361085386, params: {  } }
+  last_refresh: 1361499254
+modules:
+  data:
+    test1:
+      input:
+        test1.input.php: { filename: test1.input.php, title: test1, mtime: 1361085386, params: {  } }
+      output:
+        test1.output.php: { filename: test1.output.php, title: test1, mtime: 1361085386, params: {  } }
+    test2:
+      input:
+        test2.input.php: { filename: test2.input.php, title: test2, mtime: 1361085386, params: {  } }
+      output:
+        test2.output.php: { filename: test2.output.php, title: test2, mtime: 1361085386, params: {  } }
+    test3:
+      input:
+        'test~foo*test3.input.php': { filename: test~foo/test3.input.php, title: test3, mtime: 1361085386, params: {  } }
+      output:
+        'test~foo*test3.output.php': { filename: test~foo/test3.output.php, title: test3, mtime: 1361085386, params: {  } }
+  last_refresh: 1361499254
