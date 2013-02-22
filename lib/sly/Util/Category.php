@@ -78,7 +78,10 @@ class sly_Util_Category {
 	 * @return array
 	 */
 	public static function findByParentId($parentID, $ignoreOfflines = false, $clang = null) {
-		return sly_Core::getContainer()->getCategoryService()->findByParentId($parentID, $ignoreOfflines, $clang);
+		if ($clang === false || $clang === null) {
+			$clang = sly_Core::getCurrentClang();
+		}
+		return sly_Core::getContainer()->getCategoryService()->findByParentId($parentID, $clang, $ignoreOfflines);
 	}
 
 	/**
@@ -87,6 +90,9 @@ class sly_Util_Category {
 	 * @return array
 	 */
 	public static function getRootCategories($ignoreOfflines = false, $clang = null) {
-		return self::findByParentId(0, $ignoreOfflines, $clang);
+		if ($clang === false || $clang === null) {
+			$clang = sly_Core::getCurrentClang();
+		}
+		return self::findByParentId(0, $clang, $ignoreOfflines);
 	}
 }

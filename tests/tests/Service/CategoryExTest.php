@@ -136,7 +136,7 @@ class sly_Service_CategoryExTest extends sly_Service_CategoryTestBase {
 	 */
 	public function testFindByParentId($parent, $ignoreOffline, $clang, array $expected) {
 		$service = $this->getService();
-		$cats    = $service->findByParentId($parent, $ignoreOffline, $clang);
+		$cats    = $service->findByParentId($parent, $clang, $ignoreOffline);
 
 		foreach ($cats as &$cat) {
 			$cat = $cat->getId();
@@ -147,10 +147,9 @@ class sly_Service_CategoryExTest extends sly_Service_CategoryTestBase {
 
 	public function findByParentIdProvider() {
 		return array(
-			array(0, false, self::$clangA, array(1,2,3,4,5)), array(0, true, self::$clangA, array(1,2,3,5)),
-			array(0, false, self::$clangB, array(1,2,3,4,5)), array(0, true, self::$clangB, array()),
+			array(0, false, self::$clangA, array(1,2,3,4,5)),
+			array(0, false, self::$clangB, array(1,2,3,4,5)),
 			array(1, false, self::$clangA, array()),
-			array(1, true,  self::$clangA, array())
 		);
 	}
 

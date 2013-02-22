@@ -150,13 +150,13 @@ class sly_Service_Category extends sly_Service_ArticleManager {
 
 		// check if this category still has children (both articles and categories)
 
-		$children = $this->findByParentId($categoryID, false);
+		$children = $this->findByParentId($categoryID, $this->getDefaultLanguageId(), false);
 
 		if (!empty($children)) {
 			throw new sly_Exception(t('category_is_not_empty'));
 		}
 
-		$children = $this->getArticleService()->findArticlesByCategory($categoryID, false);
+		$children = $this->getArticleService()->findArticlesByCategory($categoryID, $this->getDefaultLanguageId(), false);
 
 		if (count($children) > 1 /* one child is expected, it's the category's start article */) {
 			throw new sly_Exception(t('category_is_not_empty'));
@@ -205,24 +205,24 @@ class sly_Service_Category extends sly_Service_ArticleManager {
 	 * return all categories of a parent
 	 *
 	 * @param  int     $parentId
-	 * @param  boolean $ignoreOfflines
 	 * @param  int     $clang
+	 * @param  boolean $findOnline
 	 * @return array
 	 */
-	public function findByParentId($parentId, $ignoreOfflines = false, $clang = null) {
-		return $this->findElementsInCategory($parentId, $ignoreOfflines, $clang);
+	public function findByParentId($parentId, $clang, $findOnline = false) {
+		return $this->findElementsInCategory($parentId, $clang, $findOnline);
 	}
 
 	/**
 	 * Selects a category and all children recursively
 	 *
 	 * @param  int $parentID   the sub-tree's root category or 0 for the whole tree
-	 * @param  int $clang      the language or null for the current one
+	 * @param  int $clang      the language
 	 * @return array           sorted list of category IDs
 	 */
-	public function findTree($parentID, $clang = null) {
+	public function findTree($parentID, $clang) {
 		$parentID = (int) $parentID;
-		$clang    = $clang === null ? sly_Core::getCurrentClang() : (int) $clang;
+		$clang    = (int) $clang;
 
 		if ($parentID === 0) {
 			return $this->find(array('clang' => $clang), null, 'id');

@@ -69,19 +69,4 @@ class sly_Service_CategoryBaseTest extends sly_Service_CategoryTestBase {
 		$service = $this->getService();
 		$service->deleteById(2);
 	}
-
-	public function testChangeStatus() {
-		$service = $this->getService();
-		$id      = $service->add(0, 'tmp', 1, -1);
-		$cat     = $service->findByPK($id, self::$clang);
-
-		$this->assertTrue($cat->isOnline());
-		$service->changeStatus($cat, 0);
-
-		$cat     = $service->findByPK($id, self::$clang);
-		$this->assertFalse($cat->isOnline());
-		$service->changeStatus($cat, 1);
-
-		$this->assertTrue($service->findByPK($id, self::$clang)->isOnline());
-	}
 }

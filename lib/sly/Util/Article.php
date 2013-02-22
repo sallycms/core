@@ -95,7 +95,10 @@ class sly_Util_Article {
 	 * @return array
 	 */
 	public static function findByCategory($categoryID, $ignoreOfflines = false, $clang = null) {
-		return sly_Core::getContainer()->getArticleService()->findArticlesByCategory($categoryID, $ignoreOfflines, $clang);
+		if ($clang === false || $clang === null) {
+			$clang = sly_Core::getCurrentClang();
+		}
+		return sly_Core::getContainer()->getArticleService()->findArticlesByCategory($categoryID, $clang, $ignoreOfflines);
 	}
 
 	/**
@@ -105,7 +108,10 @@ class sly_Util_Article {
 	 * @return array
 	 */
 	public static function findByType($type, $ignoreOfflines = false, $clang = null) {
-		return sly_Core::getContainer()->getArticleService()->findArticlesByType($type, $ignoreOfflines, $clang);
+		if ($clang === false || $clang === null) {
+			$clang = sly_Core::getCurrentClang();
+		}
+		return sly_Core::getContainer()->getArticleService()->findArticlesByType($type, $clang, $ignoreOfflines);
 	}
 
 	/**
@@ -114,7 +120,10 @@ class sly_Util_Article {
 	 * @return array
 	 */
 	public static function getRootArticles($ignoreOfflines = false, $clang = null) {
-		return self::findByCategory(0, $ignoreOfflines, $clang);
+		if ($clang === false || $clang === null) {
+			$clang = sly_Core::getCurrentClang();
+		}
+		return self::findByCategory(0, $clang, $ignoreOfflines);
 	}
 
 	/**
