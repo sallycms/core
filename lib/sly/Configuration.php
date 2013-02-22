@@ -31,6 +31,7 @@ class sly_Configuration {
 	private $flush;                 ///< boolean
 	private $localConfigModified;   ///< boolean
 	private $projectConfigModified; ///< boolean
+	private $enableCaching;         ///< boolean
 
 	/**
 	 * Create a new instance. Having more than one instance with
@@ -45,6 +46,7 @@ class sly_Configuration {
 		$this->flush                 = true;
 		$this->localConfigModified   = false;
 		$this->projectConfigModified = false;
+		$this->enableCaching         = false;
 
 		if (!$this->loadFromCacheFile()) {
 			$this->mode              = array();
@@ -58,11 +60,12 @@ class sly_Configuration {
 	public function __destruct() {
 		if ($this->flush) {
 			$this->flush();
-			if ($this->get('DEVELOPER_MODE') === true) {
-				$this->dropCacheFile();
+
+			if ($this->enableCaching) {
+				$this->createCacheFile();
 			}
 			else {
-				$this->createCacheFile();
+				$this->dropCacheFile();
 			}
 		}
 	}
@@ -74,6 +77,15 @@ class sly_Configuration {
 	 */
 	public function setFlushOnDestruct($enabled) {
 		$this->flush = (boolean) $enabled;
+	}
+
+	/**
+	 * activate/deactivate writing the configuration cache file
+	 *
+	 * @param boolean $enabled
+	 */
+	public function setCachingEnabled($enabled) {
+		$this->enableCaching = (boolean) $enabled;
 	}
 
 	/**

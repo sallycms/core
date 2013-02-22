@@ -135,9 +135,11 @@ class sly_Service_AddOn_Manager {
 	 * This prevents the included file from messing with the variables of the
 	 * surrounding code.
 	 *
-	 * @param string $filename
+	 * @param string        $filename
+	 * @param sly_Container $container  the DI container to use for the script
 	 */
-	protected function req($filename) {
+	protected function req($filename, sly_Container $container = null) {
+		if (!$container) unset($container);
 		require $filename;
 	}
 
@@ -184,8 +186,9 @@ class sly_Service_AddOn_Manager {
 	 * @param  string             $addon        addOn name
 	 * @param  boolean            $installDump
 	 * @param  sly_DB_Persistence $persistence  database to use when installing the dump (may only be null if $installDump is false)
+	 * @param  sly_Container      $container    DI container for the install.php
 	 */
-	public function install($addon, $installDump = true, sly_DB_Persistence $persistence = null) {
+	public function install($addon, $installDump = true, sly_DB_Persistence $persistence = null, sly_Container $container = null) {
 		$aservice = $this->addOnService;
 		$pservice = $this->pkgService;
 		$baseDir  = $pservice->baseDirectory($addon);
@@ -223,7 +226,7 @@ class sly_Service_AddOn_Manager {
 
 		if (is_readable($installFile)) {
 			try {
-				$this->req($installFile);
+				$this->req($installFile, $container);
 			}
 			catch (Exception $e) {
 				throw new sly_Exception(t('addon_install_failed', $addon, $e->getMessage()));
@@ -269,8 +272,9 @@ class sly_Service_AddOn_Manager {
 	 * @throws sly_Exception                    in case anything goes wrong
 	 * @param  string             $addon        addOn name
 	 * @param  sly_DB_Persistence $persistence  database to use when executing the uninstall.sql
+	 * @param  sly_Container      $container    DI container for the uninstall.php
 	 */
-	public function uninstall($addon, sly_DB_Persistence $persistence) {
+	public function uninstall($addon, sly_DB_Persistence $persistence, sly_Container $container = null) {
 		$aservice = $this->addOnService;
 		$pservice = $this->pkgService;
 
@@ -295,7 +299,7 @@ class sly_Service_AddOn_Manager {
 
 		if (is_readable($uninstall)) {
 			try {
-				$this->req($uninstall);
+				$this->req($uninstall, $container);
 			}
 			catch (Exception $e) {
 				throw new sly_Exception(t('addon_uninstall_failed', $addon, $e->getMessage()));
@@ -332,10 +336,11 @@ class sly_Service_AddOn_Manager {
 	/**
 	 * Activate an addOn
 	 *
-	 * @throws sly_Exception  in case anything goes wrong
-	 * @param  string $addon  addOn name
+	 * @throws sly_Exception             in case anything goes wrong
+	 * @param  string        $addon      addOn name
+	 * @param  sly_Container $container  DI container for the update.php (if needed)
 	 */
-	public function activate($addon) {
+	public function activate($addon, sly_Container $container) {
 		$aservice = $this->addOnService;
 		$pservice = $this->pkgService;
 
@@ -354,7 +359,7 @@ class sly_Service_AddOn_Manager {
 		// ask other addons about their plans
 		$this->fireEvent('PRE', 'ACTIVATE', $addon);
 
-		$this->checkUpdate($addon);
+		$this->checkUpdate($addon, $container);
 		$aservice->setProperty($addon, 'status', true);
 		$this->clearCache();
 
@@ -424,9 +429,10 @@ class sly_Service_AddOn_Manager {
 	 * This method detects changing versions and tries to include the
 	 * update.php if available.
 	 *
-	 * @param string $addon  addOn name
+	 * @param string        $addon      addOn name
+	 * @param sly_Container $container  DI container for the update.php
 	 */
-	public function checkUpdate($addon) {
+	public function checkUpdate($addon, sly_Container $container = null) {
 		$aservice = $this->addOnService;
 		$pservice = $this->pkgService;
 		$version  = $pservice->getVersion($addon);
@@ -442,7 +448,7 @@ class sly_Service_AddOn_Manager {
 			}
 
 			if (file_exists($updateFile)) {
-				$this->req($updateFile);
+				$this->req($updateFile, $container);
 			}
 		}
 
@@ -493,7 +499,12 @@ class sly_Service_AddOn_Manager {
 		$this->addOnService->clearCache();
 	}
 
-	public function loadAddOns() {
+	/**
+	 * load all enabled addOns
+	 *
+	 * @param sly_Container $container  DI container for the boot.php files
+	 */
+	public function loadAddOns(sly_Container $container = null) {
 		// Make sure we don't accidentally load addons that have become
 		// incompatible due to Sally and/or addon updates.
 		if (sly_Core::isDeveloperMode()) {
@@ -511,7 +522,7 @@ class sly_Service_AddOn_Manager {
 			$this->loadInfo = array();
 
 			foreach ($aservice->getRegisteredAddOns() as $pkg) {
-				$this->load($pkg);
+				$this->load($pkg, false, $container);
 			}
 
 			// and now we have a nice list that we can cache
@@ -529,7 +540,7 @@ class sly_Service_AddOn_Manager {
 				// init the addon
 				if ($activated) {
 					$bootFile = $pservice->baseDirectory($addon).'boot.php';
-					$this->req($bootFile);
+					$this->req($bootFile, $container);
 
 					$this->loaded[$addon] = 1;
 				}
@@ -538,10 +549,11 @@ class sly_Service_AddOn_Manager {
 	}
 
 	/**
-	 * @param string  $addon  addon name
-	 * @param boolean $force  load the addon even if it's not active
+	 * @param string        $addon      addon name
+	 * @param boolean       $force      load the addon even if it's not active
+	 * @param sly_Container $container  DI container for the boot.php
 	 */
-	public function load($addon, $force = false) {
+	public function load($addon, $force = false, sly_Container $container = null) {
 		if (isset($this->loaded[$addon])) {
 			return true;
 		}
@@ -567,13 +579,13 @@ class sly_Service_AddOn_Manager {
 			$requires = $aservice->getRequirements($addon, false);
 
 			foreach ($requires as $required) {
-				$this->load($required, $force);
+				$this->load($required, $force, $container);
 			}
 
-			$this->checkUpdate($addon);
+			$this->checkUpdate($addon, $container);
 
 			$bootFile = $pservice->baseDirectory($addon).'boot.php';
-			$this->req($bootFile);
+			$this->req($bootFile, $container);
 
 			$this->loaded[$addon] = 1;
 		}

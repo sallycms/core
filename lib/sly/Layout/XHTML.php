@@ -93,9 +93,9 @@ class sly_Layout_XHTML extends sly_Layout {
 				$files[$idx] = sly_html($file);
 			}
 
-			if ($isConditional) print '<!--[if '.strtoupper(substr($group, 3)).']>'."\n";
+			if ($isConditional) print"\t<!--[if ".strtoupper(substr($group, 3)).']>'."\n";
 			print "\t".'<script type="text/javascript" src="'.join('"></script>'."\n\t".'<script type="text/javascript" src="' , $files).'"></script>'."\n";
-			if ($isConditional) print '<![endif]-->'."\n";
+			if ($isConditional) print"\t<![endif]-->\n";
 		}
 	}
 
