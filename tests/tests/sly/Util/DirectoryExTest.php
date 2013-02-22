@@ -18,7 +18,7 @@ class sly_Util_DirectoryExTest extends PHPUnit_Framework_TestCase {
 	static $here = '';
 
 	public static function setUpBeforeClass() {
-		$here = realpath(dirname(__FILE__));
+		$here = dirname(__FILE__);
 		self::$here = $here;
 
 		mkdir($here.'/tmp/foo/bar', 0777, true);
@@ -55,7 +55,7 @@ class sly_Util_DirectoryExTest extends PHPUnit_Framework_TestCase {
 
 	public function testGetRelative() {
 		$result   = sly_Util_Directory::getRelative(__FILE__, SLY_COREFOLDER);
-		$expected = str_replace('/', self::S, 'tests/tests/Util/DirectoryExTest.php');
+		$expected = str_replace('/', self::S, 'tests/tests/sly/Util/DirectoryExTest.php');
 
 		$this->assertEquals($expected, $result);
 	}

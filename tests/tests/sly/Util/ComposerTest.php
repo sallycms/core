@@ -10,7 +10,7 @@
 
 class sly_Util_ComposerTest extends PHPUnit_Framework_TestCase {
 	private function getFile() {
-		return realpath(dirname(__FILE__).'/../../../composer.json');
+		return realpath(dirname(__FILE__).'/../../../../composer.json');
 	}
 
 	public function testSimpleStuff() {

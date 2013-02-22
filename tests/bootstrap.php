@@ -37,16 +37,10 @@ else {
 }
 
 // load core system
-$slyAppName = 'tests';
-$slyAppBase = 'tests';
-require $here.'/../master.php';
-$container = sly_Core::getContainer();
+$loader    = require $here.'/../autoload.php';
+$container = sly_Core::boot($loader, 'test', 'tests', 'tests');
 
-// do not overwrite config or write the cachefile
-$container->getConfig()->setFlushOnDestruct(false);
-
-// configure autoloader
-$loader = $container->getClassLoader();
+// add dummy lib and tests
 $loader->add('sly_', $here.DIRECTORY_SEPARATOR.'lib');
 $loader->add('sly_', $here.DIRECTORY_SEPARATOR.'tests');
 

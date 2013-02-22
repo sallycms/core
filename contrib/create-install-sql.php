@@ -123,7 +123,7 @@ $table = createTable($schema, 'sly_user');
 serialCol($table,   'id');
 customCol($table,   'name', 'VARCHAR(255) NULL');
 customCol($table,   'description', 'VARCHAR(255) NULL');
-stringCol($table,   'login', 50);
+stringCol($table,   'login', 128);
 charCol($table,     'password', 128);
 boolCol($table,     'status');
 textCol($table,     'attributes', true);

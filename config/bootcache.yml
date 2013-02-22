@@ -44,7 +44,6 @@
 - sly_Session
 - sly_Util_Array
 - sly_Util_Article
-- sly_Util_Cache
 - sly_Util_Directory
 - sly_Util_Session
 - sly_Util_String

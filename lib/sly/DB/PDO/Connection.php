@@ -40,21 +40,16 @@ class sly_DB_PDO_Connection {
 
 	/**
 	 * @throws sly_DB_PDO_Exception
-	 * @param  string $driver
+	 * @param  string $driverName
 	 * @param  string $host
 	 * @param  string $login
 	 * @param  string $password
 	 * @param  string $database
 	 * @return sly_DB_PDO_Connection instance
 	 */
-	public static function getInstance($driver, $host, $login, $password, $database) {
-		if (!class_exists('sly_DB_PDO_Driver_'.strtoupper($driver))) {
-			throw new sly_DB_PDO_Exception('Unknown Database Driver: '.$driver);
-		}
-
-		$driverClass = 'sly_DB_PDO_Driver_'.strtoupper($driver);
-		$driverObj   = new $driverClass($host, $login, $password, $database);
-		$dsn         = $driverObj->getDSN();
+	public static function getInstance($driverName, $host, $login, $password, $database) {
+		$driverObj = self::getDriverInstance($driverName, $host, $login, $password, $database);
+		$dsn       = $driverObj->getDSN();
 
 		if (empty(self::$instances[$dsn])) {
 			try {
@@ -74,10 +69,36 @@ class sly_DB_PDO_Connection {
 	}
 
 	/**
+	 * @throws sly_DB_PDO_Exception
+	 * @param  string $driver
+	 * @param  string $host
+	 * @param  string $login
+	 * @param  string $password
+	 * @param  string $database
+	 * @return sly_DB_PDO_Connection instance
+	 */
+	public static function getDriverInstance($driver, $host, $login, $password, $database) {
+		if (!class_exists('sly_DB_PDO_Driver_'.strtoupper($driver))) {
+			throw new sly_DB_PDO_Exception('Unknown Database Driver: '.$driver);
+		}
+
+		$driverClass = 'sly_DB_PDO_Driver_'.strtoupper($driver);
+
+		return new $driverClass($host, $login, $password, $database);
+	}
+
+	/**
 	 * @return PDO instance
 	 */
 	public function getPDO() {
 		return $this->pdo;
+	}
+
+	/**
+	 * @return sly_DB_PDO_Driver
+	 */
+	public function getDriver() {
+		return $this->driver;
 	}
 
 	/**
