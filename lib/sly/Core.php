@@ -48,11 +48,6 @@ class sly_Core {
 			$container = new sly_Container();
 		}
 
-		// There are some places left in 0.8 where this is used. It's gone in 0.9.
-		if (!defined('SLY_IS_TESTING')) {
-			define('SLY_IS_TESTING', false);
-		}
-
 		// we're using UTF-8 everywhere
 		if (!function_exists('mb_internal_encoding')) {
 			print 'SallyCMS requires the mbstring extension to work.';
