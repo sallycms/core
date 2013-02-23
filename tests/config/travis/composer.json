@@ -1,6 +1,13 @@
 {
     "name": "sallycms/core",
     "type": "sallycms-app",
+    "keywords": [
+        "cms",
+        "php",
+        "mysql",
+        "framework",
+        "sallycms"
+    ],
     "version": "0.9.x-dev",
     "license": "MIT",
     "repositories": [
