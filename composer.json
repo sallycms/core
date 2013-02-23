@@ -69,6 +69,9 @@
         ],
         "post-update-cmd": [
             "xrstf\\Composer52\\Generator::onPostInstallCmd"
+        ],
+        "post-autoload-dump": [
+            "xrstf\\Composer52\\Generator::onPostInstallCmd"
         ]
     }
 }
