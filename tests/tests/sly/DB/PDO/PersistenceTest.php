@@ -13,7 +13,7 @@ class sly_DB_PDO_PersistenceTest extends sly_BaseTest {
 
 	public static function setUpBeforeClass() {
 		parent::setUpBeforeClass();
-		self::$pers = sly_DB_PDO_Persistence::getInstance();
+		self::$pers = sly_Core::getContainer()->getPersistence();
 	}
 
 	protected function getDataSetName() {

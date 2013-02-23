@@ -47,7 +47,7 @@ abstract class sly_BaseTest extends PHPUnit_Extensions_Database_TestCase {
 		$comp = new PHPUnit_Extensions_Database_DataSet_CompositeDataSet(array());
 
 		if ($name !== null) {
-			$core = new PHPUnit_Extensions_Database_DataSet_YamlDataSet(dirname(__FILE__).'/../datasets/'.$name.'.yml');
+			$core = new PHPUnit_Extensions_Database_DataSet_YamlDataSet(dirname(__FILE__).'/../../datasets/'.$name.'.yml');
 			$comp->addDataSet($core);
 		}
 
