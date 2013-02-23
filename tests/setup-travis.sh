@@ -6,9 +6,15 @@ if [ $TRAVIS_PHP_VERSION = '5.2' ]
 then
   phpenv global 5.3
   resetVersion=1
+
+  # Make sure to load a composer configuration *without* phpunit, or else we
+  # accidentally overwrite the system-wide classes with our own one (our
+  # autoloader would have preceedence before the system include_path).
+  mv tests/config/travis/composer.json composer.json
 fi
 
-composer install --dev
+composer self-update
+composer update --dev
 
 mysql -e "CREATE DATABASE sally_test CHARACTER SET utf8 COLLATE utf8_general_ci"
 mysql --database=sally_test < install/mysql.sql
@@ -17,4 +23,8 @@ mysql --database=sally_test -e "INSERT INTO sly_user (id,name,description,login,
 if [ $resetVersion -eq 1 ]
 then
   phpenv global 5.2
+
+  # Manually install DBUnit
+  pear install phpunit/DBUnit
+  phpenv rehash
 fi
