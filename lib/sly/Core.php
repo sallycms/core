@@ -577,9 +577,6 @@ class sly_Core {
 		// clear config cache
 		$container->getConfig()->clearCache();
 
-		// create bootcache
-		sly_Util_BootCache::recreate();
-
 		self::dispatcher()->notify('SLY_CACHE_CLEARED');
 	}
 
