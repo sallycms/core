@@ -170,12 +170,18 @@ class sly_Configuration {
 	 */
 	public function loadLocalConfig() {
 		$filename = $this->getLocalConfigFile();
+		$retval   = false;
 
-		//do not hickup if the file does not exist
+		// do not hickup if the file does not exist
 		if (file_exists($filename)) {
-			return $this->loadInternal($filename, self::STORE_LOCAL);
+			$modified = $this->localConfigModified;
+			$retval   = $this->loadInternal($filename, self::STORE_LOCAL);
+
+			// restore original state
+			$this->localConfigModified = $modified;
 		}
-		return false;
+
+		return $retval;
 	}
 
 	/**
@@ -185,12 +191,18 @@ class sly_Configuration {
 	 */
 	public function loadProjectConfig() {
 		$filename = $this->getProjectConfigFile();
+		$retval   = false;
 
-		//do not hickup if the file does not exist
+		// do not hickup if the file does not exist
 		if (file_exists($filename)) {
-			return $this->loadInternal($filename, self::STORE_PROJECT);
+			$modified = $this->projectConfigModified;
+			$retval   = $this->loadInternal($filename, self::STORE_PROJECT);
+
+			// restore original state
+			$this->projectConfigModified = $modified;
 		}
-		return false;
+
+		return $retval;
 	}
 
 	/**
