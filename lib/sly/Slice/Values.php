@@ -194,7 +194,12 @@ class sly_Slice_Values {
 	 * @return string
 	 */
 	public function getUrl($id, $params = array(), $divider = '&amp;', $absolute = false, $secure = null) {
-		return sly_Util_Article::getUrl($this->get($id, sly_Util_Article::CURRENT_ARTICLE), null, $params, $divider, $absolute, $secure);
+		try {
+			return sly_Util_Article::getUrl($this->get($id, sly_Util_Article::CURRENT_ARTICLE), null, $params, $divider, $absolute, $secure);
+		}
+		catch (Exception $e) {
+			return '#';
+		}
 	}
 
 	/**
