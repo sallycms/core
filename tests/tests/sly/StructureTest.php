@@ -75,7 +75,7 @@ abstract class sly_StructureTest extends sly_BaseTest {
 		// $tree = array(1 => array(2 => array(3)))
 		foreach ($tree as $elemID => $children) {
 			if ($elemID > 0) {
-				$elem = $service->findById($elemID, $clang);
+				$elem = $service->findByPK($elemID, $clang);
 				$msg  = 'Parent of element '.$elemID.' should be '.$parent.'.';
 
 				$this->assertEquals($parent, $elem->getParentId(), $msg);
@@ -90,7 +90,7 @@ abstract class sly_StructureTest extends sly_BaseTest {
 		}
 	}
 
-	abstract protected function move($id, $to, $clang = 1);
+	abstract protected function move($id, $to, $clang);
 	abstract protected function assertPosition($id, $pos, $clang = 1);
 	abstract protected function getService();
 }

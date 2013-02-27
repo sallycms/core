@@ -46,6 +46,7 @@ class sly_Container implements ArrayAccess, Countable {
 			'sly-service-addon'          => array($this, 'buildAddOnService'),
 			'sly-service-addon-manager'  => array($this, 'buildAddOnManagerService'),
 			'sly-service-article'        => array($this, 'buildArticleService'),
+			'sly-service-deletedarticle' => array($this, 'buildDeletedArticleService'),
 			'sly-service-articleslice'   => array($this, 'buildArticleSliceService'),
 			'sly-service-articletype'    => array($this, 'buildArticleTypeService'),
 			'sly-service-asset'          => array($this, 'buildAssetService'),
@@ -77,7 +78,12 @@ class sly_Container implements ArrayAccess, Countable {
 	 * @return sly_Container  reference to self
 	 */
 	public function set($id, $value) {
+		if (is_object($value) && $value instanceof sly_ContainerAwareInterface) {
+			$value->setContainer($this);
+		}
+
 		$this->values[$id] = $value;
+
 		return $this;
 	}
 
@@ -274,6 +280,15 @@ class sly_Container implements ArrayAccess, Countable {
 	 */
 	public function getArticleService() {
 		return $this->get('sly-service-article');
+	}
+
+	/**
+	 * get article service for deleted articles
+	 *
+	 * @return sly_Service_DeletedArticle
+	 */
+	public function getDeletedArticleService() {
+		return $this->get('sly-service-deletedarticle');
 	}
 
 	/**
@@ -685,19 +700,26 @@ class sly_Container implements ArrayAccess, Countable {
 	 */
 	protected function buildArticleService(sly_Container $container) {
 		$persistence = $container['sly-persistence'];
-		$cache       = $container['sly-cache'];
-		$dispatcher  = $container['sly-dispatcher'];
-		$languages   = $container['sly-service-language'];
 		$slices      = $container['sly-service-slice'];
 		$articles    = $container['sly-service-articleslice'];
 		$templates   = $container['sly-service-template'];
-		$service     = new sly_Service_Article($persistence, $cache, $dispatcher, $languages, $slices, $articles, $templates);
+		$service     = new sly_Service_Article($persistence, $slices, $articles, $templates);
 
 		// make sure the circular dependency does not make the app die with an endless loop
-		$this->values['sly-service-article'] = $service;
+		$this['sly-service-article'] = $service;
 
-		$service->setArticleService($service);
-		$service->setCategoryService($container['sly-service-category']);
+		return $service;
+	}
+
+	/**
+	 * @param  sly_Container $container
+	 * @return sly_Service_Article
+	 */
+	protected function buildDeletedArticleService(sly_Container $container) {
+		$persistence = $container['sly-persistence'];
+		$service     = new sly_Service_DeletedArticle($persistence);
+
+		$this['sly-service-deletedarticle'] = $service;
 
 		return $service;
 	}
@@ -712,7 +734,12 @@ class sly_Container implements ArrayAccess, Countable {
 		$slices      = $container['sly-service-slice'];
 		$templates   = $container['sly-service-template'];
 
-		return $this->values['sly-service-articleslice'] = new sly_Service_ArticleSlice($persistence, $dispatcher, $slices, $templates);
+		$service = new sly_Service_ArticleSlice($persistence, $dispatcher, $slices, $templates);
+
+		$this->values['sly-service-articleslice'] = $service;
+		$service->setArticleService($container['sly-service-article']);
+
+		return $service;
 	}
 
 	/**
@@ -741,16 +768,9 @@ class sly_Container implements ArrayAccess, Countable {
 	 */
 	protected function buildCategoryService(sly_Container $container) {
 		$persistence = $container['sly-persistence'];
-		$cache       = $container['sly-cache'];
-		$dispatcher  = $container['sly-dispatcher'];
-		$languages   = $container['sly-service-language'];
-		$service     = new sly_Service_Category($persistence, $cache, $dispatcher, $languages);
+		$service     = new sly_Service_Category($persistence);
 
-		// make sure the circular dependency does not make the app die with an endless loop
-		$this->values['sly-service-category'] = $service;
-
-		$service->setArticleService($container['sly-service-article']);
-		$service->setCategoryService($service);
+		$this['sly-service-category'] = $service;
 
 		return $service;
 	}

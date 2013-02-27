@@ -39,6 +39,19 @@ class sly_Service_User extends sly_Service_Model_Base_Id {
 	}
 
 	/**
+	 * @param  array  $where
+	 * @param  string $group
+	 * @param  string $order
+	 * @param  int    $offset
+	 * @param  int    $limit
+	 * @param  string $having
+	 * @return array
+	 */
+	public function find($where = null, $group = null, $order = null, $offset = null, $limit = null, $having = null) {
+		return parent::find($where, $group, $order, $offset, $limit, $having);
+	}
+
+	/**
 	 * @param  array $params
 	 * @return sly_Model_User
 	 */
@@ -81,9 +94,9 @@ class sly_Service_User extends sly_Service_Model_Base_Id {
 	 */
 	public function add($login, $password, $active, $attributes, sly_Model_User $creator = null) {
 		return $this->create(array(
-			'login'  => $login,
-			'psw'    => $password,
-			'status' => (boolean) $active,
+			'login'      => $login,
+			'psw'        => $password,
+			'status'     => (boolean) $active,
 			'attributes' => $attributes
 		), $creator);
 	}

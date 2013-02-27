@@ -60,10 +60,15 @@ class sly_Util_Article {
 	 * @param  mixed $default
 	 * @return sly_Model_Article
 	 */
-	public static function findById($articleID, $clang = null, $default = null) {
+	public static function findById($articleID, $clang = null, $revision = null, $default = null) {
 		$service   = sly_Core::getContainer()->getArticleService();
 		$articleID = (int) $articleID;
-		$article   = $service->findById($articleID, $clang);
+
+		if ($clang === false || $clang === null) {
+			$clang = sly_Core::getCurrentClang();
+		}
+
+		$article   = $service->findByPK($articleID, $clang, $revision);
 
 		if ($article) return $article;
 
@@ -101,7 +106,10 @@ class sly_Util_Article {
 	 * @return array
 	 */
 	public static function findByCategory($categoryID, $ignoreOfflines = false, $clang = null) {
-		return sly_Core::getContainer()->getArticleService()->findArticlesByCategory($categoryID, $ignoreOfflines, $clang);
+		if ($clang === false || $clang === null) {
+			$clang = sly_Core::getCurrentClang();
+		}
+		return sly_Core::getContainer()->getArticleService()->findArticlesByCategory($categoryID, $clang, $ignoreOfflines);
 	}
 
 	/**
@@ -111,7 +119,10 @@ class sly_Util_Article {
 	 * @return array
 	 */
 	public static function findByType($type, $ignoreOfflines = false, $clang = null) {
-		return sly_Core::getContainer()->getArticleService()->findArticlesByType($type, $ignoreOfflines, $clang);
+		if ($clang === false || $clang === null) {
+			$clang = sly_Core::getCurrentClang();
+		}
+		return sly_Core::getContainer()->getArticleService()->findArticlesByType($type, $clang, $ignoreOfflines);
 	}
 
 	/**
@@ -120,7 +131,10 @@ class sly_Util_Article {
 	 * @return array
 	 */
 	public static function getRootArticles($ignoreOfflines = false, $clang = null) {
-		return self::findByCategory(0, $ignoreOfflines, $clang);
+		if ($clang === false || $clang === null) {
+			$clang = sly_Core::getCurrentClang();
+		}
+		return self::findByCategory(0, $clang, $ignoreOfflines);
 	}
 
 	/**
@@ -137,37 +151,6 @@ class sly_Util_Article {
 	 */
 	public static function isNotFoundArticle(sly_Model_Article $article) {
 		return $article->getId() === sly_Core::getNotFoundArticleId();
-	}
-
-	/**
-	 * @param  sly_Model_User $user
-	 * @param  int            $articleID
-	 * @return boolean
-	 */
-	public static function canReadArticle(sly_Model_User $user, $articleID) {
-		return sly_Util_Category::canReadCategory($user, $articleID);
-	}
-
-	/**
-	 * @param  sly_Model_User $user
-	 * @param  int            $articleID
-	 * @return boolean
-	 */
-	public static function canEditArticle(sly_Model_User $user, $articleID) {
-		if ($user->isAdmin()) return true;
-		if ($user->hasRight('article', 'edit', 0)) return true;
-		return $user->hasRight('article', 'edit', $articleID);
-	}
-
-	/**
-	 * @param  sly_Model_User $user
-	 * @param  int            $articleID
-	 * @return boolean
-	 */
-	public static function canEditContent(sly_Model_User $user, $articleID) {
-		if ($user->isAdmin()) return true;
-		if ($user->hasRight('article', 'editcontent', 0)) return true;
-		return $user->hasRight('article', 'editcontent', $articleID);
 	}
 
 	/**
