@@ -35,6 +35,11 @@ abstract class sly_BaseTest extends PHPUnit_Extensions_Database_TestCase {
 				$this->loadAddOns($addon);
 			}
 
+			// login the dummy user
+			$service = sly_Service_Factory::getUserService();
+			$user    = $service->findById(SLY_TESTING_USER_ID);
+			$service->setCurrentUser($user);
+
 			$this->setup = true;
 		}
 	}

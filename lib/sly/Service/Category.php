@@ -30,7 +30,7 @@ class sly_Service_Category extends sly_Service_ArticleManager {
 	 * @return mixed                the condition either as an array or as a string
 	 */
 	protected function getSiblingQuery($categoryID, $clang = null, $asArray = false) {
-		$where = array('re_id' => (int) $categoryID, 'startpage' => 1, 'deleted' => 0);
+		$where = array('re_id' => (int) $categoryID, 'startpage' => 1);
 
 		if ($clang !== null) {
 			$where['clang'] = (int) $clang;
@@ -64,7 +64,6 @@ class sly_Service_Category extends sly_Service_ArticleManager {
 			 'startpage' => 1,
 			       'pos' => 1,
 			      'path' => $params['path'],
-			    'status' => $params['status'],
 			      'type' => $params['type'],
 			     'clang' => $params['clang'],
 			   'deleted' => 0,
@@ -86,7 +85,7 @@ class sly_Service_Category extends sly_Service_ArticleManager {
 	 * @param  int $revision
 	 * @return sly_Model_Category
 	 */
-	public function findByPK($id, $clang, $revision = null) {
+	public function findByPK($id, $clang, $revision = self::FIND_REVISION_ONLINE) {
 		return parent::findByPK($id, $clang, $revision);
 	}
 
@@ -103,8 +102,8 @@ class sly_Service_Category extends sly_Service_ArticleManager {
 	 * @param  sly_Model_User $user      creator or null for the current user
 	 * @return int
 	 */
-	public function add($categoryID, $name, $status = 0, $position = -1, sly_Model_User $user = null) {
-		return $this->addHelper($categoryID, $name, $status, $position, $user);
+	public function add($categoryID, $name, $position = -1, sly_Model_User $user = null) {
+		return $this->addHelper($categoryID, $name, $position, $user);
 	}
 
 	/**
@@ -220,15 +219,18 @@ class sly_Service_Category extends sly_Service_ArticleManager {
 	 * @param  int $clang      the language
 	 * @return array           sorted list of category IDs
 	 */
-	public function findTree($parentID, $clang) {
+	public function findTree($parentID, $clang, $findOnline = false) {
 		$parentID = (int) $parentID;
 		$clang    = (int) $clang;
 
 		if ($parentID === 0) {
-			return $this->find(array('clang' => $clang), null, 'id');
+			$where = array('clang' => $clang);
+		}
+		else {
+			$where = 'clang = '.$clang.' AND (id = '.$parentID.' OR path LIKE "%|'.$parentID.'|%")';
 		}
 
-		return $this->find('clang = '.$clang.' AND (id = '.$parentID.' OR path LIKE "%|'.$parentID.'|%")', null, 'id');
+		return $this->find($where, null, 'id', null, null, null, $findOnline);
 	}
 
 	/**
@@ -311,7 +313,6 @@ class sly_Service_Category extends sly_Service_ArticleManager {
 			$prefix = $sql->getPrefix();
 
 			$sql->query('UPDATE '.$prefix.'article SET '.$update.' WHERE '.$where);
-			$this->clearCacheByQuery($where);
 
 			if ($ownTrx) {
 				$sql->commit();

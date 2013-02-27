@@ -63,8 +63,8 @@ class sly_Service_ArticleExTest extends sly_Service_ArticleTestBase {
 		$lang    = self::$clangA;
 
 		$a = 1;
-		$b = $service->add(1, 'A', 1, -1);
-		$c = $service->add(1, 'B', 1, -1);
+		$b = $service->add(1, 'A', -1);
+		$c = $service->add(1, 'B', -1);
 
 		// make sure everything is fine up to here
 		$this->assertPositions(array($a, $b, $c), $lang);
@@ -121,42 +121,6 @@ class sly_Service_ArticleExTest extends sly_Service_ArticleTestBase {
 			array(1, self::$clangA, array(1)),
 			array(1, self::$clangB, array(1)),
 		);
-	}
-
-	public function testSetType() {
-		$service = $this->getService();
-		$article = $service->findByPK(6, self::$clangA);
-
-		$service->setType($article, 'special');
-
-
-		$articleNewRevision = $service->findByPK(6, self::$clangA);
-		$this->assertEquals('special', $articleNewRevision ->getType());
-		$this->assertGreaterThan($article->getRevision(), $articleNewRevision->getRevision());
-	}
-
-	/**
-	 * @depends testSetType
-	 */
-	public function testFindByType() {
-		$artA    = 6;
-		$artB    = 7;
-		$service = $this->getService();
-
-		$this->assertEmpty($service->findArticlesByType('special', self::$clangA));
-
-		// make A & B special articles
-
-		$service->setType($service->findByPK($artA, self::$clangA), 'special');
-		$service->setType($service->findByPK($artB, self::$clangA), 'special');
-		$result = $service->findArticlesByType('special', self::$clangA);
-
-		$this->assertCount(2, $result);
-
-		foreach (array($artA, $artB) as $idx => $artId) {
-			$article = $service->findByPK($artId, self::$clangA);
-			$this->assertEquals($article, $result[$idx]);
-		}
 	}
 
 	public function testCopy() {
@@ -224,14 +188,8 @@ class sly_Service_ArticleExTest extends sly_Service_ArticleTestBase {
 		$art = $service->findByPK($newID, self::$clangA);
 		$this->assertEquals(0, $art->getStartpage());
 		$this->assertEquals(0, $art->getCatPosition());
-	}
 
-	/**
-	 * @depends testCopy
-	 */
-	public function testIfCopyAlsoCopiesContent() {
-		$service = $this->getService();
-		$newID   = $service->copy(1, 1);
+		// check of copy copies content
 		$sliceS  = sly_Service_Factory::getArticleSliceService();
 
 		$oldSlices = $sliceS->find(array('article_id' => 1,      'clang' => self::$clangA), null, 'slot ASC, pos ASC');

@@ -15,24 +15,9 @@ abstract class sly_Service_ArticleManager extends sly_Service_ArticleBase {
 	abstract protected function getSiblingQuery($id, $clang = null);
 
 	abstract public function move($id, $target, sly_Model_User $user = null);
-	abstract public function add($categoryID, $name, $status = 0, $position = -1, sly_Model_User $user = null);
+	abstract public function add($categoryID, $name, $position = -1, sly_Model_User $user = null);
 	abstract public function edit(sly_Model_Base_Article $obj, $name, $position = false, sly_Model_User $user = null);
 	abstract public function getPositionField();
-
-	/**
-	 * find online articles/categories
-	 *
-	 * @param  mixed  $where
-	 * @param  string $group
-	 * @param  string $order
-	 * @param  int    $offset
-	 * @param  int    $limit
-	 * @param  string $having
-	 * @return array
-	 */
-	public function findOnline($where = null, $group = null, $order = null, $offset = null, $limit = null, $having = null) {
-		return $this->findLatest($where, $group, $order, $offset, $limit, $having);
-	}
 
 	/**
 	 * get maximum position eigther catpos or pos whether it is a article or
@@ -59,10 +44,10 @@ abstract class sly_Service_ArticleManager extends sly_Service_ArticleBase {
 	 * @param  sly_Model_User $user      creator or null for the current user
 	 * @return int
 	 */
-	protected function addHelper($parentID, $name, $status, $position = -1, sly_Model_User $user = null) {
-		$parentID    = (int) $parentID;
-		$position    = (int) $position;
-		$status      = (int) $status;
+	protected function addHelper($parentID, $name, $position = -1, sly_Model_User $user = null) {
+		$parentID    = (int)    $parentID;
+		$name        = (string) $name;
+		$position    = (int)    $position;
 		$defaultLang = $this->getDefaultLanguageId();
 		$user        = $this->getActor($user, 'add');
 
@@ -103,7 +88,7 @@ abstract class sly_Service_ArticleManager extends sly_Service_ArticleBase {
 		}
 
 		///////////////////////////////////////////////////////////////
-		// move all following articles/categories down and remove them from cache
+		// move all following articles/categories down
 
 		if ($position < $maxPos) {
 			$followers = $this->getFollowerQuery($parentID, null, $position);
@@ -129,7 +114,6 @@ abstract class sly_Service_ArticleManager extends sly_Service_ArticleBase {
 					    'name' => $name,
 					'position' => $position,
 					    'path' => $path,
-					  'status' => $status ? 1 : 0,
 					    'type' => $type,
 					   'clang' => $clangID,
 					'revision' => 0
@@ -139,8 +123,6 @@ abstract class sly_Service_ArticleManager extends sly_Service_ArticleBase {
 				$obj->setCreateColumns($user);
 				$db->insert($this->tablename, array_merge($obj->getPKHash(), $obj->toHash()));
 
-				$this->deleteListCache();
-
 				// notify system
 
 				$this->getDispatcher()->notify($this->getEvent('ADDED'), $newID, array(
@@ -149,7 +131,6 @@ abstract class sly_Service_ArticleManager extends sly_Service_ArticleBase {
 					'name'     => $name,
 					'position' => $position,
 					'path'     => $path,
-					'status'   => $status,
 					'type'     => $type,
 					'user'     => $user,
 					'revision' => 0
@@ -216,9 +197,6 @@ abstract class sly_Service_ArticleManager extends sly_Service_ArticleBase {
 			if (!$isArticle) {
 				$where = array('re_id' => $id, 'startpage' => 0, 'clang' => $clangID);
 				$db->update('article', array('catname' => $name), $where);
-
-				// and remove them from the cache
-				$this->clearCacheByQuery($where);
 			}
 
 			///////////////////////////////////////////////////////////////
@@ -249,9 +227,6 @@ abstract class sly_Service_ArticleManager extends sly_Service_ArticleBase {
 					$this->getPersistence()->update($this->getTableName(), array($field => $newPos), $where);
 				}
 			}
-
-			// be safe and clear all lists
-			$this->deleteListCache();
 
 			if ($ownTrx) {
 				$db->commit();
@@ -305,15 +280,9 @@ abstract class sly_Service_ArticleManager extends sly_Service_ArticleBase {
 	protected function findElementsInCategory($categoryID, $clang, $findOnline = false) {
 		$categoryID = (int) $categoryID;
 		$clang      = (int) $clang;
-		$where      = $this->getSiblingQuery($categoryID, $clang);//array('re_id' => $categoryID, 'clang' => $clang);
+		$where      = $this->getSiblingQuery($categoryID, $clang);
+		$order      = $this->getPositionField();
 
-		if ($findOnline === true) {
-			$articles = $this->findOnline($where);
-		}
-		else {
-			$articles = $this->findLatest($where);
-		}
-		
-		return $articles;
+		return $this->find($where, null, $order, null, null, null, $findOnline);
 	}
 }
