@@ -36,6 +36,7 @@ class sly_Util_HTML {
 	}
 
 	/**
+	 * @deprecated moved to sallycms-backend sly_Helper_Sprite
 	 * @param  string $target
 	 * @param  string $text
 	 * @param  string $class

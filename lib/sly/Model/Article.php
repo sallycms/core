@@ -101,7 +101,11 @@ class sly_Model_Article extends sly_Model_Base_Article {
 	}
 
 	public function getSlices($slot = null) {
-		return sly_Util_ArticleSlice::findByArticle($this->getId(), $this->getClang(), $slot);
+		return sly_Util_ArticleSlice::findByArticle($this, $slot);
+	}
+
+	public function countSlices($slot = null) {
+		return count($this->getSlices($slot));
 	}
 
 	/**

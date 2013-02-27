@@ -15,16 +15,16 @@ abstract class sly_Service_CategoryTestBase extends sly_StructureTest {
 		return $service;
 	}
 
-	protected function assertPosition($id, $pos, $clang = 1) {
+	protected function assertPosition($id, $pos, $clang = 5) {
 		$service = $this->getService();
-		$cat     = $service->findById($id, $clang);
+		$cat     = $service->findByPK($id, $clang);
 		$msg     = 'Position of category '.$id.' should be '.$pos.'.';
 
 		$this->assertEquals($pos, $cat->getCatPosition(), $msg);
 	}
 
-	protected function move($id, $to, $clang = 1) {
-		$cat = $this->getService()->findById($id, $clang);
-		$this->getService()->edit($id, $clang, $cat->getCatName(), $to);
+	protected function move($id, $to, $clang = 5) {
+		$cat = $this->getService()->findByPK($id, $clang);
+		$this->getService()->edit($cat, $cat->getCatName(), $to);
 	}
 }
