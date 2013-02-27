@@ -16,7 +16,7 @@
 class sly_Model_Base_Article extends sly_Model_Base {
 	protected $id;          ///< int
 	protected $updateuser;  ///< string
-	protected $status;      ///< int
+	protected $online;      ///< boolean
 	protected $name;        ///< string
 	protected $catpos;      ///< int
 	protected $createdate;  ///< int
@@ -35,7 +35,7 @@ class sly_Model_Base_Article extends sly_Model_Base {
 
 	protected $_pk = array('id' => 'int', 'clang' => 'int', 'revision' => 'int'); ///< array
 	protected $_attributes = array(
-		'updateuser' => 'string', 'status' => 'int', 'name' => 'string',
+		'updateuser' => 'string', 'name' => 'string',
 		'catpos' => 'int', 'createdate' => 'datetime', 're_id' => 'int', 'pos' => 'int',
 		'catname' => 'string', 'startpage' => 'int', 'updatedate' => 'datetime',
 		'createuser' => 'string', 'attributes' => 'string', 'path' => 'string',
@@ -54,13 +54,6 @@ class sly_Model_Base_Article extends sly_Model_Base {
 	 */
 	public function getUpdateUser() {
 		return $this->updateuser;
-	}
-
-	/**
-	 * @return int
-	 */
-	public function getStatus() {
-		return $this->status;
 	}
 
 	/**
@@ -176,13 +169,6 @@ class sly_Model_Base_Article extends sly_Model_Base {
 	}
 
 	/**
-	 * @param int $status
-	 */
-	public function setStatus($status) {
-		$this->status = (int) $status;
-	}
-
-	/**
 	 * @param string $name
 	 */
 	public function setName($name) {
@@ -270,7 +256,7 @@ class sly_Model_Base_Article extends sly_Model_Base {
 	 * @param string $type
 	 */
 	public function setType($type) {
-		$this->type = $type;
+		$this->type = (string) $type;
 	}
 
 	/**
@@ -281,10 +267,18 @@ class sly_Model_Base_Article extends sly_Model_Base {
 	}
 
 	/**
+	 *
+	 * @param boolean $online
+	 */
+	public function setOnline($online) {
+		$this->online = (boolean) $online;
+	}
+
+	/**
 	 * @return boolean
 	 */
 	public function isOnline() {
-		return $this->getStatus() == 1 && !$this->isDeleted();
+		return $this->online;
 	}
 
 	/**

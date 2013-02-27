@@ -26,7 +26,7 @@ class sly_Service_ArticleBaseTest extends sly_Service_ArticleTestBase {
 
 	public function testAdd() {
 		$service = $this->getService();
-		$newID   = $service->add(0, 'my "article"', 1, -1);
+		$newID   = $service->add(0, 'my "article"', -1);
 
 		$this->assertInternalType('int', $newID);
 
@@ -46,7 +46,7 @@ class sly_Service_ArticleBaseTest extends sly_Service_ArticleTestBase {
 	 */
 	public function testEdit() {
 		$service = $this->getService();
-		$id      = $service->add(0, 'my article', 1, -1);
+		$id      = $service->add(0, 'my article', -1);
 		$art     = $service->findByPK($id, self::$clang);
 
 		$service->edit($art, 'new title', 0);
@@ -62,12 +62,11 @@ class sly_Service_ArticleBaseTest extends sly_Service_ArticleTestBase {
 	 */
 	public function testDelete() {
 		$service = $this->getService();
-		$user    = sly_Service_Factory::getUserService()->findById(1);
-		$new     = $service->add(0, 'Test', 1, -1, $user);
+		$new     = $service->add(0, 'Test', -1);
 
 		// add a nw revision
 		$article = $service->findByPK($new, self::$clang);
-		$service->touch($article, $user);
+		$service->touch($article);
 
 		$service->deleteById($new);
 		$this->assertFalse($service->exists($new));
@@ -81,14 +80,45 @@ class sly_Service_ArticleBaseTest extends sly_Service_ArticleTestBase {
 	 */
 	public function testTouch() {
 		$service = $this->getService();
-		$id      = $service->add(0, 'my article', 1, -1);
+		$id      = $service->add(0, 'my article', -1);
 		$article = $service->findByPK($id, self::$clang);
-		$user    = sly_Service_Factory::getUserService()->findById(1);
+		$user    = sly_Service_Factory::getUserService()->findById(SLY_TESTING_USER_ID);
 
-		$articleNewRevision = $service->touch($article, $user);
+		$articleNewRevision = $service->touch($article);
 
 		$this->assertGreaterThanOrEqual($article->getCreateDate(), $articleNewRevision->getCreateDate());
 		$this->assertEquals($user->getLogin(), $articleNewRevision->getUpdateUser());
 		$this->assertEquals(1, $articleNewRevision->getRevision(), 'Touch should increase revision');
+	}
+
+	public function testTypes() {
+		$service = $this->getService();
+		$artA    = $service->add(0, 'Test1', -1);;
+		$artB    = $service->add(0, 'Test2', -1);;
+
+		$this->assertEmpty($service->findArticlesByType('special', self::$clang));
+
+		// we need this later
+		$article = $service->findByPK($artA, self::$clang);
+
+		// make A & B special articles
+		$service->setType($service->findByPK($artA, self::$clang), 'special');
+		$service->setType($service->findByPK($artB, self::$clang), 'special');
+
+		// check if its a new revision and
+		$articleNewRevision = $service->findByPK($artA, self::$clang);
+		$this->assertEquals('special', $articleNewRevision->getType());
+		$this->assertGreaterThan($article->getRevision(), $articleNewRevision->getRevision());
+		// find the articles with the new type
+		$result = $service->findArticlesByType('special', self::$clang);
+
+		// check if they are two
+		$this->assertCount(2, $result);
+
+		// check if this are the two articles we changes
+		foreach (array($artA, $artB) as $idx => $artId) {
+			$article = $service->findByPK($artId, self::$clang);
+			$this->assertEquals($article, $result[$idx]);
+		}
 	}
 }

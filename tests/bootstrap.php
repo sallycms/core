@@ -60,11 +60,6 @@ if ($travis) {
 	foreach ($dirs as $dir) sly_Loader::addLoadPath($dir);
 }
 
-// login the dummy user
-$service = sly_Service_Factory::getUserService();
-$user    = $service->findById(SLY_TESTING_USER_ID);
-$service->setCurrentUser($user);
-
 // init the app
 $app = new sly_App_Tests();
 sly_Core::setCurrentApp($app);

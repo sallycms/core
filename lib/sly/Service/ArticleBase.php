@@ -9,6 +9,9 @@
  */
 
 abstract class sly_Service_ArticleBase extends sly_Service_Model_Base implements sly_ContainerAwareInterface {
+	const     FIND_REVISION_LATEST = -2;
+	const     FIND_REVISION_ONLINE = -1;
+
 	protected $tablename = 'article'; ///< string
 	protected $container;             ///< sly_Container
 	protected $languages = null;
@@ -68,15 +71,16 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base implements
 	/**
 	 * find latest revisions of articles
 	 *
-	 * @param  mixed  $where
-	 * @param  string $group
-	 * @param  string $order
-	 * @param  int    $offset
-	 * @param  int    $limit
-	 * @param  string $having
+	 * @param  mixed    $where
+	 * @param  string   $group
+	 * @param  string   $order
+	 * @param  int      $offset
+	 * @param  int      $limit
+	 * @param  string   $having
+	 * @param  boolean  $findOnline
 	 * @return array
 	 */
-	public function findLatest($where = null, $group = null, $order = null, $offset = null, $limit = null, $having = null) {
+	public function find($where = null, $group = null, $order = null, $offset = null, $limit = null, $having = null, $findOnline = false) {
 		$return = array();
 		$where  = $this->fixWhereClause($where);
 		$db     = $this->getPersistence();
@@ -88,10 +92,10 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base implements
 		if ($offset) $query->offset($offset);
 		if ($limit)  $query->limit($limit);
 		if ($order) {
-			$query->order('revision,'.$order);
+			$query->order($order.', revision DESC');
 		}
 		else {
-			$query->order('revision');
+			$query->order('revision DESC');
 		}
 
 		$outerQuery = 'SELECT * FROM ('.$query->to_s().') latest_'.$this->getTableName().'_tmp GROUP BY clang, id';
@@ -99,35 +103,25 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base implements
 		$db->query($outerQuery, $query->bind_values());
 
 		foreach ($db as $row) {
-			$return[] = $this->makeInstance($row);
+			$item = $this->makeInstance($row);
+			if ($findOnline) {
+				$item->setOnline(true);
+			} else {
+				$item->setOnline($this->getOnlineStatus($item));
+			}
+			$return[] = $item;
 		}
-
 		return $return;
 	}
 
 	/**
-	 * @param  array  $where
-	 * @param  string $having
-	 * @return sly_Model_Base
+	 *
+	 * @param mixed   $where
+	 * @param boolean $findOnline
 	 */
-	public function findOne($where = null, $having = null) {
-		$res = $this->find($where, null, 'id, clang, revision DESC', null, 1, $having);
-		return count($res) === 1 ? $res[0] : null;
-	}
-
-	/**
-	 * @param  mixed  $where
-	 * @param  string $group
-	 * @param  string $order
-	 * @param  int    $offset
-	 * @param  int    $limit
-	 * @param  string $having
-	 * @return array
-	 */
-	public function find($where = null, $group = null, $order = null, $offset = null, $limit = null, $having = null) {
-		$where = $this->fixWhereClause($where);
-
-		return parent::find($where, $group, $order, $offset, $limit, $having);
+	public function findOne($where = null, $findOnline = false) {
+		$items = $this->find($where, null, null, null, 1, null, $findOnline);
+		return !empty($items) ? $items[0] : null;
 	}
 
 	/**
@@ -148,28 +142,11 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base implements
 
 		$where    = compact('id', 'clang');
 
-		if ($revision !== null) {
+		if ($revision >= 0) {
 			$where['revision'] = (int) $revision;
 		}
 
-		$obj = $this->findOne($where);
-
-		return $obj;
-	}
-
-	/**
-	 * @param int $id     article/category ID
-	 * @param int $clang  language ID (give null to delete in all languages)
-	 */
-	protected function deleteCache($id, $clang = null) {
-		foreach ($this->getLanguages() as $_clang) {
-			if ($clang !== null && $clang != $_clang) {
-				continue;
-			}
-
-			$this->getCache()->delete('sly.article', 'art_'.$id.'_'.$_clang);
-			$this->getCache()->delete('sly.article', 'cat_'.$id.'_'.$_clang);
-		}
+		return $this->findOne($where, $revision === self::FIND_REVISION_ONLINE);
 	}
 
 	/**
@@ -191,9 +168,6 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base implements
 		$persistence = $this->getPersistence();
 		$persistence->update($this->getTableName(), $obj->toHash(), $obj->getPKHash());
 
-		$this->deleteListCache();
-		$this->deleteCache($obj->getId(), $obj->getClang());
-
 		return $obj;
 	}
 
@@ -212,8 +186,6 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base implements
 		$db     = $this->getPersistence();
 		$prefix = $db->getPrefix();
 		$field  = $this->getModelType() === 'article' ? 'pos' : 'catpos';
-
-		$this->clearCacheByQuery($where);
 
 		$db->query(sprintf(
 			'UPDATE %sarticle SET %s = %s %s 1 WHERE %s',
@@ -247,16 +219,13 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base implements
 		return 'SLY_'.strtoupper(substr($type, 0, 3)).'_'.$name;
 	}
 
-	protected function clearCacheByQuery($where) {
-		$db = $this->getPersistence();
-		$db->select('article', 'id,clang', $where, 'id,clang');
-
-		foreach ($db as $row) {
-			$this->deleteCache($row['id'], $row['clang']);
-		}
-	}
-
-	protected function deleteListCache() {
-		$this->getCache()->flush('sly.article.list');
+	/**
+	 * gets online status of article
+	 * @param  array $items   an array of sly_Model_Base_Article
+	 * @return boolean
+	 */
+	protected function getOnlineStatus($item) {
+		$sql   = $this->container->getPersistence();
+		return $sql->magicFetch($this->getTableName(), 'MAX(revision)', array('id' => $item->getId(), 'clang' => $item->getClang())) == $item->getRevision();
 	}
 }

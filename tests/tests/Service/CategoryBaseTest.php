@@ -25,7 +25,7 @@ class sly_Service_CategoryBaseTest extends sly_Service_CategoryTestBase {
 
 	public function testAdd() {
 		$service = $this->getService();
-		$newID   = $service->add(0, 'my "category"', 1, -1);
+		$newID   = $service->add(0, 'my "category"', -1);
 
 		$this->assertInternalType('int', $newID);
 
@@ -42,7 +42,7 @@ class sly_Service_CategoryBaseTest extends sly_Service_CategoryTestBase {
 
 	public function testEdit() {
 		$service = $this->getService();
-		$id      = $service->add(0, 'my category', 1, -1);
+		$id      = $service->add(0, 'my category', -1);
 		$cat     = $service->findByPK($id, self::$clang);
 
 		$service->edit($cat, 'new title', 0);
@@ -52,21 +52,16 @@ class sly_Service_CategoryBaseTest extends sly_Service_CategoryTestBase {
 		$this->assertEquals('new title', $cat->getCatName());
 	}
 
+	/**
+	 * @expectedException  sly_Exception
+	 */
 	public function testDelete() {
 		$service = $this->getService();
-		$id      = $service->add(0, 'tmp', 1, -1);
+		$id      = $service->add(0, 'tmp', -1);
 
 		$service->deleteById($id);
 
 		$this->assertNull($service->findByPK($id, self::$clang));
-	}
-
-	/**
-	 * @depends testDelete
-	 * @expectedException  sly_Exception
-	 */
-	public function testDeleteNonExisting() {
-		$service = $this->getService();
 		$service->deleteById(2);
 	}
 }

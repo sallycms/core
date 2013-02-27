@@ -39,12 +39,12 @@ class DeletedArticleTest extends sly_BaseTest {
 		$dservice = $this->getDeletedArticleService();
 
 		$service->deleteById(8);
-		$deleted = $dservice->findLatest(array('id' => 8));
+		$deleted = $dservice->find(array('id' => 8));
 		foreach($deleted as $x) {
 			$this->assertTrue($x->isDeleted());
 		}
 
-		$dservice->restore(8, $this->getUser());
+		$dservice->restore(8);
 		$this->assertInstanceOf('sly_Model_Article', $service->findByPK(8, self::$clang));
 	}
 
@@ -53,7 +53,7 @@ class DeletedArticleTest extends sly_BaseTest {
 	 */
 	public function testRestoreMissing() {
 		$dservice = $this->getDeletedArticleService();
-		$dservice->restore(1, $this->getUser());
+		$dservice->restore(1);
 	}
 
 	/**
@@ -63,23 +63,13 @@ class DeletedArticleTest extends sly_BaseTest {
 		$service  = $this->getArticleService();
 		$cservice = $this->getCategoryService();
 		$dservice = $this->getDeletedArticleService();
-		$newId    = $service->add(2, 'Test', 1, 1, $this->getUser());
+		$newId    = $service->add(2, 'Test', 1);
 
 		$service->deleteById($newId);
 		$cservice->deleteById(2);
 
 		// delte new article
-		$dservice->restore($newId, $this->getUser());
-	}
-
-	protected function getUser() {
-		static $user;
-
-		if(!$user) {
-			$user = sly_Service_Factory::getUserService()->findById(1);
-		}
-
-		return $user;
+		$dservice->restore($newId);
 	}
 
 }

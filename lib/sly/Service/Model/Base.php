@@ -38,8 +38,8 @@ abstract class sly_Service_Model_Base {
 	 * @param  string $having
 	 * @return sly_Model_Base
 	 */
-	public function findOne($where = null, $having = null) {
-		$res = $this->find($where, null, null, null, 1, $having);
+	protected function findOne($where = null) {
+		$res = $this->find($where, null, null, null, 1);
 		return count($res) === 1 ? $res[0] : null;
 	}
 
@@ -52,7 +52,7 @@ abstract class sly_Service_Model_Base {
 	 * @param  string $having
 	 * @return array
 	 */
-	public function find($where = null, $group = null, $order = null, $offset = null, $limit = null, $having = null) {
+	protected function find($where = null, $group = null, $order = null, $offset = null, $limit = null, $having = null) {
 		$return  = array();
 		$db      = $this->getPersistence();
 
@@ -69,7 +69,7 @@ abstract class sly_Service_Model_Base {
 	 * @param  mixed $where
 	 * @return int
 	 */
-	public function delete($where) {
+	protected function delete($where) {
 		if ($this->hasCascade) {
 			$models    = $this->find($where);
 			$container = sly_Core::getContainer();

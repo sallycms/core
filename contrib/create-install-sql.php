@@ -41,7 +41,6 @@ textCol($table,   'attributes');
 boolCol($table,   'startpage');
 intCol($table,    'pos');
 stringCol($table, 'path');
-intCol($table,    'status', true, 1);
 stringCol($table, 'type', 64);
 intCol($table,    'clang');
 boolCol($table,   'deleted');

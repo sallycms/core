@@ -32,24 +32,20 @@ class ArticleSliceTest extends sly_BaseTest {
 		return sly_Core::getContainer()->getArticleService();
 	}
 
-	protected function getUser() {
-		return sly_Service_Factory::getUserService()->findById(1);
-	}
-
 	public function testAdd() {
 		$service  = $this->getService();
 		$aservice = $this->getArticleService();
 		$article  = $this->dummyArticle();
 		$aid      = $article->getId();
 
-		$slice = $service->add($article, 'test', 'test1', array('test' => '1'), 0, $this->getUser());
+		$slice = $service->add($article, 'test', 'test1', array('test' => '1'), 0);
 		$this->assertEquals('test1', $slice->getModule());
 		$this->assertEquals(array('test' => '1'), $slice->getValues());
 
 		$article  = $aservice->findByPK($aid, 5);
-		$service->add($article, 'test', 'test1', array('test' => '0'), -1, $this->getUser());
+		$service->add($article, 'test', 'test1', array('test' => '0'), -1);
 		$article  = $aservice->findByPK($aid, 5);
-		$service->add($article, 'test', 'test1', array('test' => '2'), 4, $this->getUser());
+		$service->add($article, 'test', 'test1', array('test' => '2'), 4);
 
 		$articleNewRevision = $aservice->findByPK($aid, 5);
 		$slices = $articleNewRevision->getSlices();
@@ -71,9 +67,9 @@ class ArticleSliceTest extends sly_BaseTest {
 		$article  = $this->dummyArticle();
 		$aid      = $article->getId();
 
-		$slice   = $service->add($article, 'test', 'test1', array('test' => 'not empty'), 0, $this->getUser());
+		$slice   = $service->add($article, 'test', 'test1', array('test' => 'not empty'), 0);
 		$article = $aservice->findByPK($aid, 5);
-		$slice   = $service->edit($article, 'test', 0, array('test' => 'not empty test'), $this->getUser());
+		$slice   = $service->edit($article, 'test', 0, array('test' => 'not empty test'));
 		$this->assertEquals('not empty test', $slice->getValue('test'));
 
 		$articleNewRevision = $aservice->findByPK(1, 5);
@@ -89,11 +85,11 @@ class ArticleSliceTest extends sly_BaseTest {
 		$article  = $this->dummyArticle();
 		$aid      = $article->getId();
 
-		$slice   = $service->add($article, 'test', 'test1', array('test' => 'not empty'), -1, $this->getUser());
+		$slice   = $service->add($article, 'test', 'test1', array('test' => 'not empty'), -1);
 		$article = $aservice->findByPK($aid, 5);
-		$slice   = $service->add($article, 'test', 'test1', array('test' => 'not empty test'), 2, $this->getUser());
+		$slice   = $service->add($article, 'test', 'test1', array('test' => 'not empty test'), 2);
 		$article = $aservice->findByPK($aid, 5);
-		$service->moveTo($article, 'test', 1, 0, $this->getUser());
+		$service->moveTo($article, 'test', 1, 0);
 
 		$articleNewRevision = $aservice->findByPK($aid, 5);
 		$slices             = $articleNewRevision->getSlices('test');
@@ -112,7 +108,7 @@ class ArticleSliceTest extends sly_BaseTest {
 		$article  = $this->dummyArticle();
 		$aid      = $article->getId();
 
-		$slice   = $service->add($article, 'test', 'test1', array('test' => 'not empty'), 0, $this->getUser());
+		$slice   = $service->add($article, 'test', 'test1', array('test' => 'not empty'), 0);
 		$service->deleteByArticleSlice($slice);
 		$articleNewRevision = $aservice->findByPK($aid, 5);
 
@@ -120,7 +116,7 @@ class ArticleSliceTest extends sly_BaseTest {
 		$this->assertEmpty($articleNewRevision->getSlices('test'));
 
 
-		$slice   = $service->add($article, 'main', 'test1', array('test' => 'not empty test'), 0, $this->getUser());
+		$slice   = $service->add($article, 'main', 'test1', array('test' => 'not empty test'), 0);
 		$article = $aservice->findByPK($aid, 5);
 		$service->delete($article, 'test');
 		$article = $aservice->findByPK($aid, 5);

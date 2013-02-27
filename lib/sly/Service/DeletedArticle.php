@@ -53,15 +53,12 @@ class sly_Service_DeletedArticle extends sly_Service_ArticleBase {
 		$service = $article->isStartArticle() ? $this->getCategoryService() : $this->getArticleService();
 
 		$newValues = array(
-			'status'  => 0,
 			'deleted' => 0,
 			$service->getPositionField() => ($service->getMaxPosition($article->getParentId()) + 1)
  		);
 
 		$db = $this->getPersistence();
 		$db->update($this->getTableName(), $newValues, array('id' => $id));
-
-		$this->deleteListCache();
 
 		$this->getDispatcher()->notify($this->getEvent('RESTORED'), null, array('id' => $id));
 	}

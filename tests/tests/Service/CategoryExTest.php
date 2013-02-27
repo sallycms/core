@@ -111,9 +111,9 @@ class sly_Service_CategoryExTest extends sly_Service_CategoryTestBase {
 		$service    = sly_Service_Factory::getArticleService();
 		$catService = sly_Service_Factory::getCategoryService();
 
-		$a = $service->add(1, 'test article 1', 1);
-		$b = $service->add(1, 'test article 2', 1); // our new startarticle
-		$c = $service->add(1, 'test article 3', 1);
+		$a = $service->add(1, 'test article 1', 2);
+		$b = $service->add(1, 'test article 2', 3); // our new startarticle
+		$c = $service->add(1, 'test article 3', 4);
 
 		// make sure some categories have to be relinked
 		$catService->move(2, 1);
@@ -153,22 +153,19 @@ class sly_Service_CategoryExTest extends sly_Service_CategoryTestBase {
 		);
 	}
 
-	/**
-	 * @dataProvider  statusProvider
-	 */
-	public function testDeleteCancelledIfChildrenExist($status) {
+	public function testDeleteCancelledIfChildrenExist() {
 		$service = $this->getService();
 		$parent  = 2;
 
 		// create some children
-		$service->add($parent, 'A', $status, -1);
-		$B = $service->add($parent, 'B', $status, -1);
-		$service->add($parent, 'C', $status, -1);
+		$service->add($parent, 'A', -1);
+		$B = $service->add($parent, 'B', -1);
+		$service->add($parent, 'C', -1);
 
 		// and some children inside B
-		$service->add($B, 'X', $status, -1);
-		$service->add($B, 'Y', $status, -1);
-		$service->add($B, 'Z', $status, -1);
+		$service->add($B, 'X', -1);
+		$service->add($B, 'Y', -1);
+		$service->add($B, 'Z', -1);
 
 		try {
 			// boom
@@ -190,26 +187,18 @@ class sly_Service_CategoryExTest extends sly_Service_CategoryTestBase {
 	}
 
 	/**
-	 * @dataProvider       statusProvider
 	 * @expectedException  sly_Exception
 	 */
-	public function testDeleteCancelledIfChildArticlesExist($status) {
+	public function testDeleteCancelledIfChildArticlesExist() {
 		$cservice = $this->getService();
 		$aservice = sly_Service_Factory::getArticleService();
 		$parent   = 2;
 
 		// create some children
-		$aservice->add($parent, 'A', $status, -1);
-		$aservice->add($parent, 'B', $status, -1);
+		$aservice->add($parent, 'A', -1);
+		$aservice->add($parent, 'B', -1);
 
 		// boom
 		$cservice->deleteById($parent);
-	}
-
-	public function statusProvider() {
-		return array(
-			array(0),
-			array(1)
-		);
 	}
 }

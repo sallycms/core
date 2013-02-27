@@ -31,7 +31,7 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 	 */
 	protected function getSiblingQuery($categoryID, $clang = null) {
 		$categoryID = (int) $categoryID;
-		$where      = '((re_id = '.$categoryID.' AND startpage = 0) OR id = '.$categoryID.') AND deleted = 0';
+		$where      = '((re_id = '.$categoryID.' AND startpage = 0) OR id = '.$categoryID.')';
 
 		if ($clang !== null) {
 			$clang = (int) $clang;
@@ -60,7 +60,6 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 			 'startpage' => 0,
 			       'pos' => $params['position'],
 			      'path' => $params['path'],
-			    'status' => $params['status'],
 			      'type' => $params['type'],
 			     'clang' => $params['clang'],
 			   'deleted' => 0,
@@ -91,9 +90,10 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 	/**
 	 * @param  int $id
 	 * @param  int $clang
+	 * @param  int $revision
 	 * @return sly_Model_Article
 	 */
-	public function findByPK($id, $clang, $revision = null) {
+	public function findByPK($id, $clang, $revision = self::FIND_REVISION_ONLINE) {
 		return parent::findByPK($id, $clang, $revision);
 	}
 
@@ -116,8 +116,8 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 	 * @param  sly_Model_User $user        creator or null for the current user
 	 * @return int
 	 */
-	public function add($categoryID, $name, $status = 0, $position = -1, sly_Model_User $user = null) {
-		return $this->addHelper($categoryID, $name, $status, $position, $user);
+	public function add($categoryID, $name, $position = -1, sly_Model_User $user = null) {
+		return $this->addHelper($categoryID, $name, $position, $user);
 	}
 
 	/**
@@ -183,8 +183,6 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 				$this->moveObjects('-', $followers);
 			}
 
-			$this->deleteCache($articleID);
-
 			if ($ownTrx) {
 				$sql->commit();
 			}
@@ -224,14 +222,7 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 		$clang = (int) $clang;
 		$where = compact('type', 'clang');
 
-		if ($findOnline === true) {
-			$articles = $this->findOnline($where);
-		}
-		else {
-			$articles = $this->findLatest($where);
-		}
-
-		return $articles;
+		return $this->find($where, null, null, null, null, null, $findOnline);
 	}
 
 	/**
@@ -285,7 +276,6 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 		$touched = clone $article;
 		$touched->setRevision($this->getMaxRevision($article) + 1);
 		$touched->setCreateColumns($user);
-		$this->deleteCache($article->getId(), $article->getClang());
 		$touched = $this->insert($touched);
 		$this->copyContent($article, $touched, $user);
 
@@ -349,7 +339,6 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 				$moved->setParentId($target);
 				$moved->setPath($cat ? $cat->getPath().$target.'|' : '|');
 				$moved->setCatName($cat ? $cat->getName() : '');
-				$moved->setStatus(0);
 				$moved->setPosition($pos);
 				$moved->setUpdateColumns($user);
 
@@ -431,7 +420,6 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 				$duplicate->setParentId($target);
 				$duplicate->setCatName($cat ? $cat->getName() : '');
 				$duplicate->setPosition($pos);
-				$duplicate->setStatus(0);
 				$duplicate->setPath($cat ? ($cat->getPath().$target.'|') : '|');
 				$duplicate->setUpdateColumns($user);
 				$duplicate->setCreateColumns($user);
@@ -444,8 +432,6 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 
 				// store it
 				$this->insert($duplicate);
-
-				$this->deleteListCache();
 
 				// copy slices
 				if ($source->hasType()) {
@@ -533,11 +519,6 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 			$prefix = $sql->getPrefix();
 			$sql->update($this->tablename, array('re_id' => $articleID), array('re_id' => $oldCat));
 			$sql->query('UPDATE '.$prefix.$this->tablename.' SET path = REPLACE(path, "|'.$oldCat.'|", "|'.$articleID.'|") WHERE path LIKE "%|'.$oldCat.'|%"');
-
-			// clear cache
-
-			$this->clearCacheByQuery(array('re_id' => $articleID));
-			$this->deleteListCache();
 
 			if ($ownTrx) {
 				$sql->commit();
@@ -637,8 +618,6 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 		}
 
 		if ($changes) {
-			$this->deleteCache($dest->getId(), $dest->getClang());
-
 			// notify system
 			$this->getDispatcher()->notify('SLY_ART_CONTENT_COPIED', null, array(
 				'from'     => $source,

@@ -121,9 +121,9 @@ class sly_Service_Language extends sly_Service_Model_Base_Id {
 
 				$sql->query(str_replace('~', $sql->getPrefix(),
 					'INSERT INTO ~article (id,re_id,name,catname,catpos,attributes,'.
-					'startpage,pos,path,status,createdate,updatedate,type,clang,createuser,'.
+					'startpage,pos,path,createdate,updatedate,type,clang,createuser,'.
 					'updateuser,revision) '.
-					'SELECT id,re_id,name,catname,catpos,attributes,startpage,pos,path,0,createdate,'.
+					'SELECT id,re_id,name,catname,catpos,attributes,startpage,pos,path,createdate,'.
 					'updatedate,type,?,createuser,updateuser,revision '.
 					'FROM ~article WHERE clang = ?'),
 					array($newLanguage->getId(), $sourceID)
