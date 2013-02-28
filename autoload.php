@@ -10,7 +10,7 @@
 
 // check if we're installed as a dependency, residing in sally/core/
 $vendor = dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR.'vendor';
-/*
+
 if (!file_exists($vendor.'/autoload_52.php')) {
 	// check if we're a standalone installation
 	$vendor = dirname(__FILE__).DIRECTORY_SEPARATOR.'vendor';
@@ -21,7 +21,7 @@ if (!file_exists($vendor.'/autoload_52.php')) {
 			'php composer.phar install'.PHP_EOL;
 		exit(1);
 	}
-}*/
+}
 
 // init the Composer autoloader
 $loader = require $vendor.'/autoload_52.php';
