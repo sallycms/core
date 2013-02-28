@@ -87,10 +87,22 @@ class sly_Core {
 		// to the filesystem on new installations)
 		try {
 			$config = $container->getConfig();
-			$config->loadStatic(SLY_COREFOLDER.'/config/sallyStatic.yml');
-			$config->loadLocalConfig();
-			$config->loadProjectConfig();
-			$config->loadDevelopConfig();
+			// load sally defaults
+			$config->setStatic('/', sly_Util_YAML::load(SLY_COREFOLDER.DIRECTORY_SEPARATOR.'config'.DIRECTORY_SEPARATOR.'sallyStatic.yml'));
+			// load develop config
+			$dir = new sly_Util_Directory(SLY_DEVELOPFOLDER.DIRECTORY_SEPARATOR.'config');
+			if ($dir->exists()) {
+				foreach ($dir->listPlain() as $file) {
+					if (fnmatch('*.yml', $file) || fnmatch('*.yaml', $file)) {
+						$config->setStatic('/', sly_Util_YAML::load($dir.DIRECTORY_SEPARATOR.$file));
+					}
+				}
+			}
+
+			$configReader = $container['sly-config-reader'];
+
+			$config->setStatic($configReader->readLocal());
+			$config->set($configReader->readProject());
 		}
 		catch (sly_Util_DirectoryException $e) {
 			$dir = sly_html($e->getDirectory());
@@ -573,9 +585,6 @@ class sly_Core {
 
 		// refresh addOns
 		$container->getAddOnManagerService()->refresh();
-
-		// clear config cache
-		$container->getConfig()->clearCache();
 
 		// create bootcache
 		sly_Util_BootCache::recreate();

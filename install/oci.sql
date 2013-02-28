@@ -191,6 +191,7 @@ BEGIN
    END IF;
 END;
 CREATE TABLE sly_registry (name VARCHAR2(255) NOT NULL, value BLOB NOT NULL, PRIMARY KEY(name));
+CREATE TABLE sly_config (id VARCHAR2(255) NOT NULL, value BLOB NOT NULL, PRIMARY KEY(id));
 
 -- populate database with some initial data
 INSERT INTO sly_clang (name, locale) VALUES ('deutsch', 'de_DE');

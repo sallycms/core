@@ -13,12 +13,13 @@ use Doctrine\DBAL\Types\Type as Type;
 use Doctrine\DBAL\Schema\Schema as Schema;
 use Doctrine\DBAL\Platforms;
 
-require '../vendor/autoload.php';
+$baseDir = dirname(__DIR__);
+require $baseDir.'/vendor/autoload.php';
 
 ////////////////////////////////////////////////////////////////////////////////
 // detect Sally version
 
-$json    = json_decode(file_get_contents('../composer.json'));
+$json    = json_decode(file_get_contents($baseDir.'/composer.json'));
 $version = explode('.', $json->version);
 $version = sprintf('%d.%d.*', $version[0], $version[1]);
 
@@ -155,6 +156,12 @@ $valueColumn = blobCol($table, 'value'); // we need this later on
 
 $table->setPrimaryKey(array('name'));
 
+$table = createTable($schema, 'sly_config');
+stringCol($table, 'id');
+$valueColumn = blobCol($table, 'value'); // we need this later on
+
+$table->setPrimaryKey(array('id'));
+
 ////////////////////////////////////////////////////////////////////////////////
 // create the actual SQL files
 
@@ -187,7 +194,7 @@ foreach ($platforms as $name => $platform) {
 	$queries = array_map('trimSemicolon', $queries);
 	$queries = implode(";\n", $queries);
 
-	file_put_contents("../install/$name.sql", "$header\n\n$queries;\n\n$footer\n");
+	file_put_contents("$baseDir/install/$name.sql", "$header\n\n$queries;\n\n$footer\n");
 }
 
 ////////////////////////////////////////////////////////////////////////////////

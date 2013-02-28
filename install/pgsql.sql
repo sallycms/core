@@ -10,7 +10,8 @@ CREATE INDEX filename ON sly_file (filename);
 CREATE TABLE sly_file_category (id SERIAL NOT NULL, name VARCHAR(255) NOT NULL, re_id INT NOT NULL, path VARCHAR(255) NOT NULL, attributes TEXT NULL, createdate TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL, updatedate TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL, createuser VARCHAR(255) NOT NULL, updateuser VARCHAR(255) NOT NULL, revision INT DEFAULT 0 NOT NULL, PRIMARY KEY(id));
 CREATE TABLE sly_user (id SERIAL NOT NULL, name VARCHAR(255) NULL, description VARCHAR(255) NULL, login VARCHAR(128) NOT NULL, password CHAR(128), status BOOLEAN NOT NULL, attributes TEXT NULL, lasttrydate DATETIME NULL, timezone VARCHAR(64) NULL, createdate TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL, updatedate TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL, createuser VARCHAR(255) NOT NULL, updateuser VARCHAR(255) NOT NULL, revision INT DEFAULT 0 NOT NULL, PRIMARY KEY(id));
 CREATE TABLE sly_slice (id SERIAL NOT NULL, module VARCHAR(64) NOT NULL, serialized_values LONGTEXT NOT NULL, PRIMARY KEY(id));
-CREATE TABLE sly_registry (name VARCHAR(255) NOT NULL, value BYTEA NOT NULL, PRIMARY KEY(name));
+CREATE TABLE sly_registry (name VARCHAR(255) NOT NULL, value BLOB NOT NULL, PRIMARY KEY(name));
+CREATE TABLE sly_config (id VARCHAR(255) NOT NULL, value BYTEA NOT NULL, PRIMARY KEY(id));
 
 -- populate database with some initial data
 INSERT INTO sly_clang (name, locale) VALUES ('deutsch', 'de_DE');

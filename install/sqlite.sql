@@ -11,6 +11,7 @@ CREATE TABLE sly_file_category (id INTEGER NOT NULL, name VARCHAR(255) NOT NULL,
 CREATE TABLE sly_user (id INTEGER NOT NULL, name VARCHAR(255) NULL, description VARCHAR(255) NULL, login VARCHAR(128) NOT NULL, password CHAR(128), status BOOLEAN NOT NULL, attributes TEXT NULL, lasttrydate DATETIME NULL, timezone VARCHAR(64) NULL, createdate DATETIME NOT NULL, updatedate DATETIME NOT NULL, createuser VARCHAR(255) NOT NULL, updateuser VARCHAR(255) NOT NULL, revision INTEGER DEFAULT 0 NOT NULL, PRIMARY KEY(id));
 CREATE TABLE sly_slice (id INTEGER NOT NULL, module VARCHAR(64) NOT NULL, serialized_values LONGTEXT NOT NULL, PRIMARY KEY(id));
 CREATE TABLE sly_registry (name VARCHAR(255) NOT NULL, value BLOB NOT NULL, PRIMARY KEY(name));
+CREATE TABLE sly_config (id VARCHAR(255) NOT NULL, value BLOB NOT NULL, PRIMARY KEY(id));
 
 -- populate database with some initial data
 INSERT INTO sly_clang (name, locale) VALUES ('deutsch', 'de_DE');

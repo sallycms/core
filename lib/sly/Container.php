@@ -25,12 +25,13 @@ class sly_Container implements ArrayAccess, Countable {
 			'sly-current-lang-id'    => null,
 
 			// needed variables
-			'sly-config-dir'  => array($this, 'missingValue'),
 			'sly-classloader' => array($this, 'missingValue'),
 			'sly-environment' => array($this, 'missingValue'),
 
 			// core objects
-			'sly-config'              => array($this, 'buildConfig'),
+			'sly-config'              => array($this, 'missingValue'),
+			'sly-config-reader'       => array($this, 'buildConfigHandler'),
+			'sly-config-writer'       => $this['sly-config-reader'],
 			'sly-dispatcher'          => array($this, 'buildDispatcher'),
 			'sly-error-handler'       => array($this, 'buildErrorHandler'),
 			'sly-registry-temp'       => array($this, 'buildTempRegistry'),
@@ -562,10 +563,10 @@ class sly_Container implements ArrayAccess, Countable {
 	/*          factory methods          */
 
 	/**
-	 * @return sly_Configuration
+	 * @return sly_Configuration_Reader_DatabaseImpl
 	 */
-	protected function buildConfig(sly_Container $container) {
-		return $this['sly-config'] = new sly_Configuration($this->getService('File_YAML'), $container['sly-config-dir']);
+	protected function buildConfigHandler() {
+		return $this['sly-config-reader'] = new sly_Configuration_Reader_DatabaseImpl();
 	}
 
 	/**
