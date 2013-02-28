@@ -16,6 +16,9 @@ $travis = getenv('TRAVIS') !== false;
 $here   = dirname(__FILE__);
 $root   = dirname($here);
 
+// define Testuser
+define('SLY_TESTING_USER_ID', 1);
+
 // define vital paths
 define('SLY_BASE',          $root);
 define('SLY_DEVELOPFOLDER', $here.DIRECTORY_SEPARATOR.'develop');
