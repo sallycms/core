@@ -25,15 +25,21 @@ class sly_Configuration_DatabaseImpl implements sly_Configuration_Reader, sly_Co
 	}
 
 	public function writeLocal(array $data) {
-
+		sly_Util_YAML::dump(SLY_CONFIGFOLDER.'sly_local.yml', $data);
 	}
 
 	public function writeProject(array $data) {
+		$result = array();
+		$db     = $this->container->getPersistence();
 
+		foreach ($data as $id => $value) {
+			$value = json_encode($value);
+			$db->insert('config', compact('id', 'value'));
+		}
 	}
 
 	public function readLocal() {
-
+		return sly_Util_YAML::load(SLY_CONFIGFOLDER.'sly_local.yml');
 	}
 
 	public function readProject() {
