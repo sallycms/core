@@ -29,9 +29,9 @@ class sly_Container implements ArrayAccess, Countable {
 			'sly-environment' => array($this, 'missingValue'),
 
 			// core objects
-			'sly-config'              => array($this, 'missingValue'),
+			'sly-config'              => array($this, 'buildConfig'),
 			'sly-config-reader'       => array($this, 'buildConfigHandler'),
-			'sly-config-writer'       => $this['sly-config-reader'],
+			'sly-config-writer'       => array($this, 'get', array('sly-config-reader')),
 			'sly-dispatcher'          => array($this, 'buildDispatcher'),
 			'sly-error-handler'       => array($this, 'buildErrorHandler'),
 			'sly-registry-temp'       => array($this, 'buildTempRegistry'),
@@ -565,8 +565,15 @@ class sly_Container implements ArrayAccess, Countable {
 	/**
 	 * @return sly_Configuration_Reader_DatabaseImpl
 	 */
+	protected function buildConfig() {
+		return $this['sly-config'] = new sly_Configuration();
+	}
+
+	/**
+	 * @return sly_Configuration_Reader_DatabaseImpl
+	 */
 	protected function buildConfigHandler() {
-		return $this['sly-config-reader'] = new sly_Configuration_Reader_DatabaseImpl();
+		return $this['sly-config-reader'] = new sly_Configuration_DatabaseImpl();
 	}
 
 	/**
