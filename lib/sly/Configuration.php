@@ -91,6 +91,9 @@ class sly_Configuration implements sly_ContainerAwareInterface{
 	 * @return sly_Configuration
 	 */
 	public function setStatic($key, $value) {
+		if ($key !== '/' && $this->dynamicStore->has($key)) {
+			throw new sly_Exception('Keys that are in the dynamicStore can not be overwritten here!');
+		}
 		$this->setInternal($key, $value, $this->staticStore);
 		return $this;
 	}
@@ -119,8 +122,6 @@ class sly_Configuration implements sly_ContainerAwareInterface{
 			throw new sly_Exception('Empty key is not allowed!');
 		}
 
-		$this->cache = null;
-
 		if (!empty($value) && sly_Util_Array::isAssoc($value)) {
 			$key = trim($key, '/');
 
@@ -133,6 +134,7 @@ class sly_Configuration implements sly_ContainerAwareInterface{
 		}
 
 		$store->set($key, $value);
+		$this->cache = null;
 
 		return $this;
 	}

@@ -101,8 +101,8 @@ class sly_Core {
 
 			$configReader = $container['sly-config-reader'];
 
-			$config->setStatic($configReader->readLocal());
-			$config->set($configReader->readProject());
+			$config->setStatic('/', $configReader->readLocal());
+			$config->set('/', $configReader->readProject());
 		}
 		catch (sly_Util_DirectoryException $e) {
 			$dir = sly_html($e->getDirectory());
@@ -128,7 +128,7 @@ class sly_Core {
 		$container->set('sly-environment', $environment);
 
 		// now that we now about the environment, we can toggle the config caching
-		$config->setCachingEnabled($environment === 'prod');
+		//$config->setCachingEnabled($environment === 'prod');
 
 		return $container;
 	}

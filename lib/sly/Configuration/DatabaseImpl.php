@@ -16,8 +16,8 @@
 class sly_Configuration_DatabaseImpl implements sly_Configuration_Reader, sly_Configuration_Writer, sly_ContainerAwareInterface {
 	protected $container; ///< sly_Container
 
-	public function __construct(sly_DB_Persistence $persistence) {
-		$this->persistence = $persistence;
+	public function __construct() {
+
 	}
 
 	public function setContainer(sly_Container $container = null) {
@@ -25,21 +25,37 @@ class sly_Configuration_DatabaseImpl implements sly_Configuration_Reader, sly_Co
 	}
 
 	public function writeLocal(array $data) {
-		sly_Util_YAML::dump(SLY_CONFIGFOLDER.'sly_local.yml', $data);
+		sly_Util_YAML::dump(SLY_CONFIGFOLDER.DIRECTORY_SEPARATOR.'sly_local.yml', $data);
 	}
 
 	public function writeProject(array $data) {
-		$result = array();
-		$db     = $this->container->getPersistence();
+		$db      = $this->container->getPersistence();
+		$ownTrx  = !$db->isTransRunning();
 
-		foreach ($data as $id => $value) {
-			$value = json_encode($value);
-			$db->insert('config', compact('id', 'value'));
+		if ($ownTrx) {
+			$db->beginTransaction();
+		}
+		try {
+			$db->delete('config');
+			foreach ($data as $id => $value) {
+				$value = json_encode($value);
+				$db->insert('config', compact('id', 'value'));
+			}
+			if ($ownTrx) {
+					$db->commit();
+				}
+			}
+		catch (Exception $e) {
+			if ($ownTrx) {
+				$db->rollBack();
+			}
+
+			throw $e;
 		}
 	}
 
 	public function readLocal() {
-		return sly_Util_YAML::load(SLY_CONFIGFOLDER.'sly_local.yml');
+		return sly_Util_YAML::load(SLY_CONFIGFOLDER.DIRECTORY_SEPARATOR.'sly_local.yml');
 	}
 
 	public function readProject() {
@@ -49,7 +65,7 @@ class sly_Configuration_DatabaseImpl implements sly_Configuration_Reader, sly_Co
 		$db->select('config');
 
 		foreach ($db as $row) {
-			$result[$row['id']] = json_decode($row['value']);
+			$result[$row['id']] = json_decode($row['value'], true);
 		}
 
 		return $result;
