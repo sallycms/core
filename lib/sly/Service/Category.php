@@ -9,10 +9,11 @@
  */
 
 /**
- * @author  christoph@webvariants.de
+ * @author  christoph@webvariants.de, zozi@webvariants.de
  * @ingroup service
  */
-class sly_Service_Category extends sly_Service_ArticleBase {
+class sly_Service_Category extends sly_Service_ArticleManager {
+
 	/**
 	 * @return string
 	 */
@@ -47,20 +48,6 @@ class sly_Service_Category extends sly_Service_ArticleBase {
 	}
 
 	/**
-	 * get max category position
-	 *
-	 * @param  int $parentID
-	 * @return int
-	 */
-	public function getMaxPosition($parentID) {
-		$db     = $this->getPersistence();
-		$where  = $this->getSiblingQuery($parentID);
-		$maxPos = $db->magicFetch('article', 'MAX(catpos)', $where);
-
-		return $maxPos;
-	}
-
-	/**
 	 * build a new model from parameters
 	 *
 	 * @param  array  $params
@@ -77,9 +64,9 @@ class sly_Service_Category extends sly_Service_ArticleBase {
 			 'startpage' => 1,
 			       'pos' => 1,
 			      'path' => $params['path'],
-			    'status' => $params['status'],
 			      'type' => $params['type'],
 			     'clang' => $params['clang'],
+			   'deleted' => 0,
 			  'revision' => 0
 		));
 	}
@@ -95,56 +82,40 @@ class sly_Service_Category extends sly_Service_ArticleBase {
 	/**
 	 * @param  int $id
 	 * @param  int $clang
+	 * @param  int $revision
 	 * @return sly_Model_Category
 	 */
-	public function findById($id, $clang = null) {
-		return parent::findById($id, $clang);
+	public function findByPK($id, $clang, $revision = self::FIND_REVISION_ONLINE) {
+		return parent::findByPK($id, $clang, $revision);
 	}
 
-	/**
-	 * @param  mixed  $where
-	 * @param  string $group
-	 * @param  string $order
-	 * @param  int    $offset
-	 * @param  int    $limit
-	 * @param  string $having
-	 * @return array
-	 */
-	public function find($where = null, $group = null, $order = null, $offset = null, $limit = null, $having = null) {
-		if (is_array($where)) {
-			$where['startpage'] = 1;
-		}
-		else {
-			$where = "($where) AND startpage = 1";
-		}
-
-		return parent::find($where, $group, $order, $offset, $limit, $having);
+	public function getPositionField() {
+		return 'catpos';
 	}
 
 	/**
 	 * @throws sly_Exception
-	 * @param  int            $parentID
+	 * @param  int            $categoryID
 	 * @param  string         $name
 	 * @param  int            $status
 	 * @param  int            $position
 	 * @param  sly_Model_User $user      creator or null for the current user
 	 * @return int
 	 */
-	public function add($parentID, $name, $status = 0, $position = -1, sly_Model_User $user = null) {
-		return $this->addHelper($parentID, $name, $status, $position, $user);
+	public function add($categoryID, $name, $position = -1, sly_Model_User $user = null) {
+		return $this->addHelper($categoryID, $name, $position, $user);
 	}
 
 	/**
 	 * @throws sly_Exception
-	 * @param  int            $categoryID
-	 * @param  int            $clangID
-	 * @param  string         $name
-	 * @param  mixed          $position
-	 * @param  sly_Model_User $user        updateuser or null for the current user
+	 * @param  sly_Model_Article_Base $obj
+	 * @param  string                 $name
+	 * @param  mixed                  $position
+	 * @param  sly_Model_User         $user        updateuser or null for the current user
 	 * @return boolean
 	 */
-	public function edit($categoryID, $clangID, $name, $position = false, sly_Model_User $user = null) {
-		return $this->editHelper($categoryID, $clangID, $name, $position, $user);
+	public function edit(sly_Model_Base_Article $obj, $name, $position = false, sly_Model_User $user = null) {
+		return $this->editHelper($obj, $name, $position, $user);
 	}
 
 	/**
@@ -167,28 +138,24 @@ class sly_Service_Category extends sly_Service_ArticleBase {
 
 		// does this category exist?
 
-		$cat = $this->findById($categoryID);
+		$cat = $this->findByPK($categoryID, $this->getDefaultLanguageId());
 
 		if ($cat === null) {
 			throw new sly_Exception(t('category_not_found', $categoryID));
 		}
 
 		// allow external code to stop the delete operation
-		$this->dispatcher->notify('SLY_PRE_CAT_DELETE', $cat);
+		$this->getDispatcher()->notify('SLY_PRE_CAT_DELETE', $cat);
 
 		// check if this category still has children (both articles and categories)
 
-		$children = $this->findByParentId($categoryID, false);
+		$children = $this->findByParentId($categoryID, $this->getDefaultLanguageId(), false);
 
 		if (!empty($children)) {
 			throw new sly_Exception(t('category_is_not_empty'));
 		}
 
-		if (!($this->artService instanceof sly_Service_Article)) {
-			throw new LogicException('You must set the article service with ->setArticleService() before you can delete categories.');
-		}
-
-		$children = $this->artService->findArticlesByCategory($categoryID, false);
+		$children = $this->getArticleService()->findArticlesByCategory($categoryID, $this->getDefaultLanguageId(), false);
 
 		if (count($children) > 1 /* one child is expected, it's the category's start article */) {
 			throw new sly_Exception(t('category_is_not_empty'));
@@ -205,15 +172,15 @@ class sly_Service_Category extends sly_Service_ArticleBase {
 		try {
 			$parent = $cat->getParentId();
 
-			foreach ($this->lngService->findAll(true) as $clangID) {
-				$catpos    = $this->findById($categoryID, $clangID)->getCatPosition();
+			foreach ($this->getLanguages() as $clangID) {
+				$catpos    = $this->findByPK($categoryID, $clangID)->getCatPosition();
 				$followers = $this->getFollowerQuery($parent, $clangID, $catpos);
 
 				$this->moveObjects('-', $followers);
 			}
 
 			// remove the start article of this category (and this also kills the category itself)
-			$this->artService->deleteById($categoryID);
+			$this->getArticleService()->deleteById($categoryID);
 
 			if ($ownTrx) {
 				$sql->commit();
@@ -228,7 +195,7 @@ class sly_Service_Category extends sly_Service_ArticleBase {
 		}
 
 		// fire event
-		$this->dispatcher->notify('SLY_CAT_DELETED', $cat);
+		$this->getDispatcher()->notify('SLY_CAT_DELETED', $cat);
 
 		return true;
 	}
@@ -237,30 +204,33 @@ class sly_Service_Category extends sly_Service_ArticleBase {
 	 * return all categories of a parent
 	 *
 	 * @param  int     $parentId
-	 * @param  boolean $ignore_offlines
 	 * @param  int     $clang
+	 * @param  boolean $findOnline
 	 * @return array
 	 */
-	public function findByParentId($parentId, $ignore_offlines = false, $clang = null) {
-		return $this->findElementsInCategory($parentId, $ignore_offlines, $clang);
+	public function findByParentId($parentId, $clang, $findOnline = false) {
+		return $this->findElementsInCategory($parentId, $clang, $findOnline);
 	}
 
 	/**
 	 * Selects a category and all children recursively
 	 *
 	 * @param  int $parentID   the sub-tree's root category or 0 for the whole tree
-	 * @param  int $clang      the language or null for the current one
+	 * @param  int $clang      the language
 	 * @return array           sorted list of category IDs
 	 */
-	public function findTree($parentID, $clang = null) {
+	public function findTree($parentID, $clang, $findOnline = false) {
 		$parentID = (int) $parentID;
-		$clang    = $clang === null ? sly_Core::getCurrentClang() : (int) $clang;
+		$clang    = (int) $clang;
 
 		if ($parentID === 0) {
-			return $this->find(array('clang' => $clang), null, 'id');
+			$where = array('clang' => $clang);
+		}
+		else {
+			$where = 'clang = '.$clang.' AND (id = '.$parentID.' OR path LIKE "%|'.$parentID.'|%")';
 		}
 
-		return $this->find('clang = '.$clang.' AND (id = '.$parentID.' OR path LIKE "%|'.$parentID.'|%")', null, 'id');
+		return $this->find($where, null, 'id', null, null, null, $findOnline);
 	}
 
 	/**
@@ -268,28 +238,29 @@ class sly_Service_Category extends sly_Service_ArticleBase {
 	 *
 	 * The sub-tree will be placed at the end of the target category.
 	 *
-	 * @param int            $categoryID  ID of the category that should be moved
+	 * @param int            $id          ID of the category that should be moved
 	 * @param int            $targetID    target category ID
 	 * @param sly_Model_User $user         updateuser or null for the current user
 	 */
-	public function move($categoryID, $targetID, sly_Model_User $user = null) {
-		$categoryID = (int) $categoryID;
-		$targetID   = (int) $targetID;
-		$user       = $this->getActor($user, __METHOD__);
-		$category   = $this->findById($categoryID);
-		$target     = $this->findById($targetID);
+	public function move($id, $targetID, sly_Model_User $user = null) {
+		$id  = (int) $id;
+		$targetID    = (int) $targetID;
+		$defaultLang = $this->getDefaultLanguageId();
+		$user        = $this->getActor($user, __METHOD__);
+		$category    = $this->findByPK($id, $defaultLang);
+		$target      = $this->findByPK($targetID, $defaultLang);
 
 		// check categories
 
 		if ($category === null) {
-			throw new sly_Exception(t('category_not_found', $categoryID));
+			throw new sly_Exception(t('category_not_found', $id));
 		}
 
 		if ($targetID !== 0 && $target === null) {
 			throw new sly_Exception(t('target_category_not_found'));
 		}
 
-		if ($targetID !== 0 && $targetID === $categoryID) {
+		if ($targetID !== 0 && $targetID === $id) {
 			throw new sly_Exception(t('source_and_target_are_equal'));
 		}
 
@@ -309,7 +280,7 @@ class sly_Service_Category extends sly_Service_ArticleBase {
 
 		try {
 			$oldParent = $category->getParentId();
-			$languages = $this->lngService->findAll(true);
+			$languages = $this->getLanguages();
 			$newPos    = $this->getMaxPosition($targetID) + 1;
 			$oldPath   = $category->getPath();
 			$newPath   = $target ? ($target->getPath().$targetID.'|') : '|';
@@ -317,7 +288,7 @@ class sly_Service_Category extends sly_Service_ArticleBase {
 			// move the $category in each language by itself
 
 			foreach ($languages as $clang) {
-				$cat = $this->findById($categoryID, $clang);
+				$cat = $this->findByPK($id, $clang);
 				$pos = $cat->getCatPosition();
 
 				$cat->setParentId($targetID);
@@ -335,14 +306,13 @@ class sly_Service_Category extends sly_Service_ArticleBase {
 
 			// update paths for all elements in the affected sub-tree
 
-			$from   = $oldPath.$categoryID.'|';
-			$to     = $newPath.$categoryID.'|';
+			$from   = $oldPath.$id.'|';
+			$to     = $newPath.$id.'|';
 			$where  = 'path LIKE "'.$from.'%"';
 			$update = 'path = REPLACE(path, "'.$from.'", "'.$to.'")';
-			$prefix = sly_Core::getTablePrefix();
+			$prefix = $sql->getPrefix();
 
 			$sql->query('UPDATE '.$prefix.'article SET '.$update.' WHERE '.$where);
-			$this->clearCacheByQuery($where);
 
 			if ($ownTrx) {
 				$sql->commit();
@@ -359,11 +329,24 @@ class sly_Service_Category extends sly_Service_ArticleBase {
 		// notify system
 
 		foreach ($languages as $clang) {
-			$this->dispatcher->notify('SLY_CAT_MOVED', $categoryID, array(
+			$this->getDispatcher()->notify('SLY_CAT_MOVED', $id, array(
 				'clang'  => $clang,
 				'target' => $targetID,
 				'user'   => $user
 			));
 		}
+	}
+
+	protected function fixWhereClause($where) {
+		$where = parent::fixWhereClause($where);
+
+		if (is_array($where)) {
+			$where['startpage'] = 1;
+		}
+		else {
+			$where = "($where) AND startpage = 1";
+		}
+
+		return $where;
 	}
 }

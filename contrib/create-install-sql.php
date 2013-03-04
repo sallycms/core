@@ -41,13 +41,13 @@ textCol($table,   'attributes');
 boolCol($table,   'startpage');
 intCol($table,    'pos');
 stringCol($table, 'path');
-intCol($table,    'status', true, 1);
 stringCol($table, 'type', 64);
 intCol($table,    'clang');
+boolCol($table,   'deleted');
 userCols($table);
 revisionCol($table);
 
-$table->setPrimaryKey(array('id', 'clang'));
+$table->setPrimaryKey(array('id', 'clang', 'revision'));
 
 ////////////////////////////////////////////////////////////////////////////////
 // sly_article_slice
@@ -64,7 +64,7 @@ userCols($table);
 revisionCol($table);
 
 $table->setPrimaryKey(array('id'));
-$table->addIndex(array('article_id', 'clang'), 'find_article');
+$table->addIndex(array('article_id', 'clang', 'revision'), 'find_article');
 
 ////////////////////////////////////////////////////////////////////////////////
 // sly_clang
