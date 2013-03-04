@@ -191,7 +191,16 @@ BEGIN
    END IF;
 END;
 CREATE TABLE sly_registry (name VARCHAR2(255) NOT NULL, value BLOB NOT NULL, PRIMARY KEY(name));
-CREATE TABLE sly_config (id VARCHAR2(255) NOT NULL, value BLOB NOT NULL, PRIMARY KEY(id));
+CREATE TABLE sly_config (id VARCHAR2(255) NOT NULL, value LONGTEXT NOT NULL, PRIMARY KEY(id));
 
 -- populate database with some initial data
 INSERT INTO sly_clang (name, locale) VALUES ('deutsch', 'de_DE');
+INSERT INTO sly_config (id, value) VALUES ('START_ARTICLE_ID', '1');
+INSERT INTO sly_config (id, value) VALUES ('NOTFOUND_ARTICLE_ID', '1');
+INSERT INTO sly_config (id, value) VALUES ('DEFAULT_CLANG_ID', '1');
+INSERT INTO sly_config (id, value) VALUES ('DEFAULT_ARTICLE_TYPE', '""');
+INSERT INTO sly_config (id, value) VALUES ('PROJECTNAME', '"SallyCMS-Projekt"');
+INSERT INTO sly_config (id, value) VALUES ('TIMEZONE', '"Europe/Berlin"');
+INSERT INTO sly_config (id, value) VALUES ('DEFAULT_LOCALE', '"de_de"');
+INSERT INTO sly_config (id, value) VALUES ('addons', '[]');
+INSERT INTO sly_config (id, value) VALUES ('bootcache', 'true');

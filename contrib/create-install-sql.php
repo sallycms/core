@@ -158,7 +158,7 @@ $table->setPrimaryKey(array('name'));
 
 $table = createTable($schema, 'sly_config');
 stringCol($table, 'id');
-$valueColumn = blobCol($table, 'value'); // we need this later on
+longtextCol($table, 'value'); // we need this later on
 
 $table->setPrimaryKey(array('id'));
 
@@ -180,6 +180,15 @@ HEADER;
 $footer = <<<INSERT
 -- populate database with some initial data
 INSERT INTO sly_clang (name, locale) VALUES ('deutsch', 'de_DE');
+INSERT INTO sly_config (id, value) VALUES ('START_ARTICLE_ID', '1');
+INSERT INTO sly_config (id, value) VALUES ('NOTFOUND_ARTICLE_ID', '1');
+INSERT INTO sly_config (id, value) VALUES ('DEFAULT_CLANG_ID', '1');
+INSERT INTO sly_config (id, value) VALUES ('DEFAULT_ARTICLE_TYPE', '""');
+INSERT INTO sly_config (id, value) VALUES ('PROJECTNAME', '"SallyCMS-Projekt"');
+INSERT INTO sly_config (id, value) VALUES ('TIMEZONE', '"Europe/Berlin"');
+INSERT INTO sly_config (id, value) VALUES ('DEFAULT_LOCALE', '"de_de"');
+INSERT INTO sly_config (id, value) VALUES ('addons', '[]');
+INSERT INTO sly_config (id, value) VALUES ('bootcache', 'true');
 INSERT;
 
 foreach ($platforms as $name => $platform) {

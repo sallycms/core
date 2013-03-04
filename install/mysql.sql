@@ -9,7 +9,16 @@ CREATE TABLE sly_file_category (id INT UNSIGNED AUTO_INCREMENT NOT NULL, name VA
 CREATE TABLE sly_user (id INT UNSIGNED AUTO_INCREMENT NOT NULL, name VARCHAR(255) NULL, description VARCHAR(255) NULL, login VARCHAR(128) NOT NULL, password CHAR(128), status TINYINT(1) NOT NULL, attributes TEXT NULL, lasttrydate DATETIME NULL, timezone VARCHAR(64) NULL, createdate DATETIME NOT NULL, updatedate DATETIME NOT NULL, createuser VARCHAR(255) NOT NULL, updateuser VARCHAR(255) NOT NULL, revision INT UNSIGNED DEFAULT 0 NOT NULL, PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci ENGINE = InnoDB;
 CREATE TABLE sly_slice (id INT UNSIGNED AUTO_INCREMENT NOT NULL, module VARCHAR(64) NOT NULL, serialized_values LONGTEXT NOT NULL, PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci ENGINE = InnoDB;
 CREATE TABLE sly_registry (name VARCHAR(255) NOT NULL, value BLOB NOT NULL, PRIMARY KEY(name)) DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci ENGINE = InnoDB;
-CREATE TABLE sly_config (id VARCHAR(255) NOT NULL, value BLOB NOT NULL, PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci ENGINE = InnoDB;
+CREATE TABLE sly_config (id VARCHAR(255) NOT NULL, value LONGTEXT NOT NULL, PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci ENGINE = InnoDB;
 
 -- populate database with some initial data
 INSERT INTO sly_clang (name, locale) VALUES ('deutsch', 'de_DE');
+INSERT INTO sly_config (id, value) VALUES ('START_ARTICLE_ID', '1');
+INSERT INTO sly_config (id, value) VALUES ('NOTFOUND_ARTICLE_ID', '1');
+INSERT INTO sly_config (id, value) VALUES ('DEFAULT_CLANG_ID', '1');
+INSERT INTO sly_config (id, value) VALUES ('DEFAULT_ARTICLE_TYPE', '""');
+INSERT INTO sly_config (id, value) VALUES ('PROJECTNAME', '"SallyCMS-Projekt"');
+INSERT INTO sly_config (id, value) VALUES ('TIMEZONE', '"Europe/Berlin"');
+INSERT INTO sly_config (id, value) VALUES ('DEFAULT_LOCALE', '"de_de"');
+INSERT INTO sly_config (id, value) VALUES ('addons', '[]');
+INSERT INTO sly_config (id, value) VALUES ('bootcache', 'true');
