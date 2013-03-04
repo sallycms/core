@@ -9,8 +9,9 @@
  */
 
 class sly_Service_CategoryBaseTest extends sly_Service_CategoryTestBase {
+	protected static $clang = 5;
 	public static function setUpBeforeClass() {
-		sly_Core::setCurrentClang(1);
+		sly_Core::setCurrentClang(self::$clang);
 	}
 
 	protected function getDataSetName() {
@@ -18,17 +19,17 @@ class sly_Service_CategoryBaseTest extends sly_Service_CategoryTestBase {
 	}
 
 	public function testGetNonExisting() {
-		$this->assertNull($this->getService()->findById(1));
-		$this->assertNull($this->getService()->findById(1), 2);
+		$this->assertNull($this->getService()->findByPK(1, self::$clang));
+		$this->assertNull($this->getService()->findByPK(1, 2));
 	}
 
 	public function testAdd() {
 		$service = $this->getService();
-		$newID   = $service->add(0, 'my "category"', 1, -1);
+		$newID   = $service->add(0, 'my "category"', -1);
 
 		$this->assertInternalType('int', $newID);
 
-		$cat = $service->findById($newID);
+		$cat = $service->findByPK($newID, self::$clang);
 		$this->assertInstanceOf('sly_Model_Category', $cat);
 
 		$this->assertEquals('my "category"', $cat->getName());
@@ -41,40 +42,26 @@ class sly_Service_CategoryBaseTest extends sly_Service_CategoryTestBase {
 
 	public function testEdit() {
 		$service = $this->getService();
-		$id      = $service->add(0, 'my category', 1, -1);
+		$id      = $service->add(0, 'my category', -1);
+		$cat     = $service->findByPK($id, self::$clang);
 
-		$service->edit($id, 1, 'new title', 0);
+		$service->edit($cat, 'new title', 0);
 
-		$cat = $service->findById($id);
+		$cat = $service->findByPK($id, self::$clang);
 		$this->assertEquals('new title', $cat->getName());
 		$this->assertEquals('new title', $cat->getCatName());
-	}
-
-	public function testDelete() {
-		$service = $this->getService();
-		$id      = $service->add(0, 'tmp', 1, -1);
-
-		$service->deleteById($id);
-
-		$this->assertNull($service->findById($id));
 	}
 
 	/**
 	 * @expectedException  sly_Exception
 	 */
-	public function testDeleteNonExisting() {
+	public function testDelete() {
 		$service = $this->getService();
+		$id      = $service->add(0, 'tmp', -1);
+
+		$service->deleteById($id);
+
+		$this->assertNull($service->findByPK($id, self::$clang));
 		$service->deleteById(2);
-	}
-
-	public function testChangeStatus() {
-		$service = $this->getService();
-		$id      = $service->add(0, 'tmp', 1, -1);
-
-		$this->assertTrue($service->findById($id)->isOnline());
-		$service->changeStatus($id, 1, 0);
-		$this->assertFalse($service->findById($id)->isOnline());
-		$service->changeStatus($id, 1, 1);
-		$this->assertTrue($service->findById($id)->isOnline());
 	}
 }

@@ -35,9 +35,9 @@ class sly_ContainerTest extends PHPUnit_Framework_TestCase {
 	}
 
 	public function testCount() {
-		// Basic container has 30 items
+		// Basic container has 33 items
 		$container = new sly_Container();
-		$this->assertEquals($container->count(), 32);
+		$this->assertEquals($container->count(), 33);
 	}
 
 	public function testRemove() {

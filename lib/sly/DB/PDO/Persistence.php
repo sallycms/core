@@ -213,7 +213,7 @@ class sly_DB_PDO_Persistence extends sly_DB_Persistence {
 	/**
 	 * @return string
 	 */
-	protected function getPrefix() {
+	public function getPrefix() {
 		return $this->prefix;
 	}
 
@@ -392,7 +392,7 @@ class sly_DB_PDO_Persistence extends sly_DB_Persistence {
 	 * @param  string $table
 	 * @return sly_DB_PDO_SQLBuilder
 	 */
-	protected function getSQLbuilder($table) {
+	public function getSQLbuilder($table) {
 		$classname = 'sly_DB_PDO_SQLBuilder_'.strtoupper($this->driver);
 		return new $classname($this->connection->getPDO(), $table);
 	}
