@@ -60,7 +60,10 @@ class sly_Container implements ArrayAccess, Countable {
 			'sly-service-package-vendor' => array($this, 'buildVendorPackageService'),
 			'sly-service-slice'          => array($this, 'buildSliceService'),
 			'sly-service-template'       => array($this, 'buildTemplateService'),
-			'sly-service-user'           => array($this, 'buildUserService')
+			'sly-service-user'           => array($this, 'buildUserService'),
+
+			// helpers
+			'sly-slice-renderer'         => array($this, 'buildSliceRenderer')
 		), $values);
 	}
 
@@ -876,6 +879,15 @@ class sly_Container implements ArrayAccess, Countable {
 		$persistence = $container['sly-persistence'];
 
 		return $this->values['sly-service-user'] = new sly_Service_User($persistence, $cache, $dispatcher, $config);
+	}
+
+	/**
+	 *
+	 * @param sly_Container $container
+	 * @return sly_Slice_Renderer
+	 */
+	protected function buildSliceRenderer(sly_Container $container) {
+		return $this->values['sly-slice-renderer'] = new sly_Slice_RendererImpl($container['sly-service-module']);
 	}
 
 	protected function missingValue(sly_Container $container, $id) {
