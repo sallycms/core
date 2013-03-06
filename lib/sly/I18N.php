@@ -36,7 +36,7 @@ class sly_I18N implements sly_I18N_Base {
 	 * locale.
 	 *
 	 * @param string  $locale     locale name (like 'de_de')
-	 * @param string  $path       path to .yml files
+	 * @param string  $path       path to .yml files (can be null to not load any language files yet)
 	 * @param boolean $setlocale  when true the locale will be set via setlocale()
 	 */
 	public function __construct($locale, $path, $setlocale = true) {
@@ -44,7 +44,9 @@ class sly_I18N implements sly_I18N_Base {
 		$this->paths  = array();
 		$this->locale = $locale;
 
-		$this->appendFile($path);
+		if ($path !== null) {
+			$this->appendFile($path);
+		}
 
 		if ($setlocale) {
 			$this->setPHPLocale();
