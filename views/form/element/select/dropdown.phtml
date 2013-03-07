@@ -15,8 +15,6 @@ if ($this->getAttribute('multiple') == 'multiple') {
 	$this->setAttribute('name', $name.'[]');
 }
 
-$this->addClass('sly-form-select');
-
 print '<select '.$this->getAttributeString('value').'>';
 
 foreach ($this->values as $key => $value) {
