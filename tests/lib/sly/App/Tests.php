@@ -33,6 +33,8 @@ class sly_App_Tests implements sly_App_Interface {
 		$i18n = new sly_I18N('de', dirname(__FILE__));
 		$container->setI18N($i18n);
 
+		$container->getConfig()->setFlushOnDestruct(false);
+
 		// clear current cache
 		sly_Core::cache()->flush('sly');
 	}

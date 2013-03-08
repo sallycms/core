@@ -77,6 +77,6 @@ class sly_Service_LanguageTest extends sly_BaseTest {
 		$id       = $lang->getId();
 
 		$this->assertCount(3*$articles, $aService->find());
-		$this->assertInstanceOf('sly_Model_Article', $aService->findById(6, $id));
+		$this->assertInstanceOf('sly_Model_Article', $aService->findByPK(6, $id));
 	}
 }
