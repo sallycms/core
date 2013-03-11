@@ -23,7 +23,7 @@ abstract class sly_Service_CategoryTestBase extends sly_StructureTest {
 		$this->assertEquals($pos, $cat->getCatPosition(), $msg);
 	}
 
-	protected function move($id, $to, $clang = 5) {
+	protected function move($id, $to, $clang) {
 		$cat = $this->getService()->findByPK($id, $clang);
 		$this->getService()->edit($cat, $cat->getCatName(), $to);
 	}

@@ -553,7 +553,6 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 		if (!array_diff_assoc($source->getPKHash(), $dest->getPKHash())) {
 			throw new sly_Exception(t('source_and_target_are_equal'));
 		}
-
 		if (!$source->hasTemplate() || !$dest->hasTemplate()) {
 			return false;
 		}
@@ -625,5 +624,7 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 				'user'     => $user
 			));
 		}
+
+		return $changes;
 	}
 }
