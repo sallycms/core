@@ -33,6 +33,8 @@ class sly_App_Tests implements sly_App_Interface {
 		$i18n = new sly_I18N('de', dirname(__FILE__));
 		$container->setI18N($i18n);
 
+		$container->setEnvironment('dev');
+
 		$config = $container->getConfig();
 		$config->set('/', sly_Util_YAML::load(SLY_CONFIGFOLDER.DIRECTORY_SEPARATOR.'sly_project.yml'));
 
