@@ -62,7 +62,7 @@ class sly_Table_Column extends sly_Viewable {
 	 */
 	public static function icon($uri, $link = null, $title = null, $classes = '', $sortkey = '') {
 		$attributes = array('class' => 'sly-icon');
-		$icon       = sprintf('<img src="" alt="" title="%s" />', $uri, sly_html($title));
+		$icon       = sprintf('<img src="%s" alt="" title="%s" />', $uri, sly_html($title));
 
 		if ($link) {
 			$icon = sprintf('<a href="%s">%s</a>', sly_html($link), $icon);
