@@ -590,6 +590,6 @@ class sly_Core {
 	}
 
 	public static function isSetup() {
-		return self::config()->get('SETUP', true) === true;
+		return self::config()->get('setup', true) === true;
 	}
 }

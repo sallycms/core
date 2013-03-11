@@ -23,7 +23,7 @@ abstract class sly_BaseTest extends PHPUnit_Extensions_Database_TestCase {
 			$this->pdo = $conn->getPDO();
 		}
 
-		return $this->createDefaultDBConnection($this->pdo, $data['NAME']);
+		return $this->createDefaultDBConnection($this->pdo, $data['name']);
 	}
 
 	public function setUp() {

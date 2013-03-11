@@ -45,7 +45,6 @@ database:
   login: sally
   password: ''
   name: sally_base
-  persistent: false
   table_prefix: sly_
 babelcache:
   memcached: [localhost, 11211]
