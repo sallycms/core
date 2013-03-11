@@ -80,7 +80,7 @@ class sly_Cache extends BabelCache_Factory {
 	 * @return string  the cache prefix (to avoid collisions between projects using the same cache)
 	 */
 	protected function getPrefix() {
-		return sly_Core::config()->get('INSTNAME');
+		return sly_Core::config()->get('instname');
 	}
 
 	/**

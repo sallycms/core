@@ -23,7 +23,7 @@ class sly_Util_BootCache {
 		$cacheClass = get_class(sly_Core::cache());
 
 		// add current database driver
-		$driver = sly_Core::config()->get('DATABASE/DRIVER');
+		$driver = sly_Core::config()->get('database/driver');
 		$driver = strtoupper($driver);
 
 		self::addClass('sly_DB_PDO_Driver_'.$driver);

@@ -13,12 +13,11 @@ CREATE TABLE sly_config (id VARCHAR(255) NOT NULL, value LONGTEXT NOT NULL, PRIM
 
 -- populate database with some initial data
 INSERT INTO sly_clang (name, locale) VALUES ('deutsch', 'de_DE');
-INSERT INTO sly_config (id, value) VALUES ('START_ARTICLE_ID', '1');
-INSERT INTO sly_config (id, value) VALUES ('NOTFOUND_ARTICLE_ID', '1');
-INSERT INTO sly_config (id, value) VALUES ('DEFAULT_CLANG_ID', '1');
-INSERT INTO sly_config (id, value) VALUES ('DEFAULT_ARTICLE_TYPE', '""');
-INSERT INTO sly_config (id, value) VALUES ('PROJECTNAME', '"SallyCMS-Projekt"');
-INSERT INTO sly_config (id, value) VALUES ('TIMEZONE', '"Europe/Berlin"');
-INSERT INTO sly_config (id, value) VALUES ('DEFAULT_LOCALE', '"de_de"');
+INSERT INTO sly_config (id, value) VALUES ('start_article_id', '1');
+INSERT INTO sly_config (id, value) VALUES ('notfound_article_id', '1');
+INSERT INTO sly_config (id, value) VALUES ('default_clang_id', '1');
+INSERT INTO sly_config (id, value) VALUES ('default_article_type', '""');
+INSERT INTO sly_config (id, value) VALUES ('projectname', '"SallyCMS-Projekt"');
+INSERT INTO sly_config (id, value) VALUES ('timezone', '"Europe/Berlin"');
+INSERT INTO sly_config (id, value) VALUES ('default_locale', '"de_de"');
 INSERT INTO sly_config (id, value) VALUES ('addons', '[]');
-INSERT INTO sly_config (id, value) VALUES ('bootcache', 'true');
