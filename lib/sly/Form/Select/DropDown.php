@@ -21,6 +21,20 @@
  */
 class sly_Form_Select_DropDown extends sly_Form_Select_Base implements sly_Form_IElement {
 	/**
+	 * Constructor
+	 *
+	 * @param string $name    element name
+	 * @param string $label   the label
+	 * @param array  $value   the currently selected elements
+	 * @param array  $values  list of available values
+	 * @param string $id      optional ID (if not given, the name is used)
+	 */
+	public function __construct($name, $label, $value, array $values, $id = null) {
+		parent::__construct($name, $label, $value, $values, $id);
+		$this->addClass('sly-form-select');
+	}
+
+	/**
 	 * Sets the size of the dropdown box
 	 *
 	 * The size attribute is mainly useful when using a multi select dropdown
