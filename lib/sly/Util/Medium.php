@@ -118,7 +118,7 @@ class sly_Util_Medium {
 			throw new sly_Exception(t('error_moving_uploaded_file', basename($fileData['tmp_name'])), self::ERR_UPLOAD_FAILED);
 		}
 
-		@chmod($dstFile, sly_Core::config()->get('FILEPERM'));
+		@chmod($dstFile, sly_Core::config()->get('fileperm'));
 
 		// create and save our file
 
@@ -176,7 +176,7 @@ class sly_Util_Medium {
 
 			// check for disallowed extensions (broken by design...)
 
-			$blocked = sly_Core::config()->get('BLOCKED_EXTENSIONS');
+			$blocked = sly_Core::config()->get('blocked_extensions');
 
 			if (in_array($extension, $blocked)) {
 				$filename .= $extension;

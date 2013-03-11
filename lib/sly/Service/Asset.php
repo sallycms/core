@@ -119,7 +119,7 @@ class sly_Service_Asset {
 
 	public function process($file, $encoding) {
 		// check if the file can be streamed
-		$blocked = $this->config->get('BLOCKED_EXTENSIONS');
+		$blocked = $this->config->get('blocked_extensions');
 		$ok      = true;
 
 		foreach ($blocked as $ext) {
@@ -134,7 +134,7 @@ class sly_Service_Asset {
 			$ok         = strpos($normalized, '/') === false; // allow files in root directory (favicon)
 
 			if (!$ok) {
-				$allowed = $this->config->get('ASSETS_DIRECTORIES');
+				$allowed = $this->config->get('assets_directories');
 
 				foreach ($allowed as $path) {
 					if (sly_Util_String::startsWith($file, $path)) {

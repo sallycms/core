@@ -320,77 +320,77 @@ class sly_Core {
 	 * @return string  the project name
 	 */
 	public static function getProjectName() {
-		return self::config()->get('PROJECTNAME');
+		return self::config()->get('projectname');
 	}
 
 	/**
 	 * @return int  the project homepage ID (start article)
 	 */
 	public static function getSiteStartArticleId() {
-		return (int) self::config()->get('START_ARTICLE_ID');
+		return (int) self::config()->get('start_article_id');
 	}
 
 	/**
 	 * @return int  the not-found article's ID
 	 */
 	public static function getNotFoundArticleId() {
-		return (int) self::config()->get('NOTFOUND_ARTICLE_ID');
+		return (int) self::config()->get('notfound_article_id');
 	}
 
 	/**
 	 * @return int  the default clang ID
 	 */
 	public static function getDefaultClangId() {
-		return (int) self::config()->get('DEFAULT_CLANG_ID');
+		return (int) self::config()->get('default_clang_id');
 	}
 
 	/**
 	 * @return string  the default (backend) locale
 	 */
 	public static function getDefaultLocale() {
-		return self::config()->get('DEFAULT_LOCALE');
+		return self::config()->get('default_locale');
 	}
 
 	/**
 	 * @return string  the default article type
 	 */
 	public static function getDefaultArticleType() {
-		return self::config()->get('DEFAULT_ARTICLE_TYPE');
+		return self::config()->get('default_article_type');
 	}
 
 	/**
 	 * @return string  the class name of the global caching strategy
 	 */
 	public static function getCachingStrategy() {
-		return self::config()->get('CACHING_STRATEGY');
+		return self::config()->get('caching_strategy');
 	}
 
 	/**
 	 * @return string  the timezone's name
 	 */
 	public static function getTimezone() {
-		return self::config()->get('TIMEZONE');
+		return self::config()->get('timezone');
 	}
 
 	/**
 	 * @return int  permissions for files
 	 */
 	public static function getFilePerm($default = self::DEFAULT_FILEPERM) {
-		return (int) self::config()->get('FILEPERM', $default);
+		return (int) self::config()->get('fileperm', $default);
 	}
 
 	/**
 	 * @return int  permissions for directory
 	 */
 	public static function getDirPerm($default = self::DEFAULT_DIRPERM) {
-		return (int) self::config()->get('DIRPERM', $default);
+		return (int) self::config()->get('dirperm', $default);
 	}
 
 	/**
 	 * @return sring  the database table prefix
 	 */
 	public static function getTablePrefix() {
-		return self::config()->get('DATABASE/TABLE_PREFIX');
+		return self::config()->get('database/table_prefix');
 	}
 
 	/**
@@ -434,14 +434,14 @@ class sly_Core {
 
 		if ($version === null) {
 			$config  = self::config();
-			$version = $config->get('VERSION');
+			$version = $config->get('version');
 		}
 
 		$pattern = str_replace('s', 'sly', $pattern);
 		$pattern = str_replace('S', 'sally', $pattern);
-		$pattern = str_replace('X', $version['MAJOR'], $pattern);
-		$pattern = str_replace('Y', $version['MINOR'], $pattern);
-		$pattern = str_replace('Z', $version['BUGFIX'], $pattern);
+		$pattern = str_replace('X', $version['major'], $pattern);
+		$pattern = str_replace('Y', $version['minor'], $pattern);
+		$pattern = str_replace('Z', $version['bugfix'], $pattern);
 
 		return $pattern;
 	}

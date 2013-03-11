@@ -632,7 +632,7 @@ class sly_Container implements ArrayAccess, Countable {
 	 * @return sly_Session
 	 */
 	protected function buildSession(sly_Container $container) {
-		return $this['sly-session'] = new sly_Session($container->get('sly-config')->get('INSTNAME'));
+		return $this['sly-session'] = new sly_Session($container->get('sly-config')->get('instname'));
 	}
 
 	/**
@@ -640,12 +640,12 @@ class sly_Container implements ArrayAccess, Countable {
 	 * @return sly_DB_PDO_Persistence
 	 */
 	protected function buildPersistence(sly_Container $container) {
-		$config = $container['sly-config']->get('DATABASE');
+		$config = $container['sly-config']->get('database');
 
 		// TODO: to support the iterator inside the persistence, we need to create
 		// a fresh instance for every access. We should refactor the database access
 		// to allow for a single persistence instance.
-		return new sly_DB_PDO_Persistence($config['DRIVER'], $config['HOST'], $config['LOGIN'], $config['PASSWORD'], $config['NAME'], $config['TABLE_PREFIX']);
+		return new sly_DB_PDO_Persistence($config['driver'], $config['host'], $config['login'], $config['password'], $config['name'], $config['table_prefix']);
 	}
 
 	/**
@@ -654,8 +654,8 @@ class sly_Container implements ArrayAccess, Countable {
 	 */
 	protected function buildCache(sly_Container $container) {
 		$config   = $container['sly-config'];
-		$strategy = $config->get('CACHING_STRATEGY');
-		$fallback = $config->get('FALLBACK_CACHING_STRATEGY', 'sly_Cache_Blackhole');
+		$strategy = $config->get('caching_strategy');
+		$fallback = $config->get('fallback_caching_strategy', 'sly_Cache_Blackhole');
 
 		return $this['sly-cache'] = sly_Cache::factory($strategy, $fallback);
 	}

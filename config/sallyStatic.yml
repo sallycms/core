@@ -1,12 +1,12 @@
-VERSION:
-  MAJOR: 0
-  MINOR: 9
-  BUGFIX: 0
-FILEPERM: 436
-DIRPERM: 511
-USE_ETAG: never
-USE_LAST_MODIFIED: never
-BLOCKED_EXTENSIONS:
+version:
+  major: 0
+  minor: 9
+  bugfix: 0
+filepern: 436
+dirperm: 511
+use_etag: never
+use_last_modified: never
+blocked_extensions:
   - .php
   - .php3
   - .php4
@@ -19,9 +19,9 @@ BLOCKED_EXTENSIONS:
   - .cfm
   - .jsp
   - .htaccess
-FALLBACK_CACHING_STRATEGY: BabelCache_Filesystem_Plain
-ASSETS_CACHE_CONTROL: max-age=29030401
-ASSETS_DIRECTORIES:
+fallback_caching_strategy: BabelCache_Filesystem_Plain
+assets_cache_control: max-age=29030401
+assets_directories:
   - assets/
   - data/mediapool/
   - data/dyn/public/
@@ -35,4 +35,17 @@ authorisation:
   apps:
     title: 'translate:applications'
     token: {  }
-LESS_IMPORT_DIRS: ['sally/vendor/sallycms/less-mixins/']
+less_import_dirs: ['sally/vendor/sallycms/less-mixins/']
+instname: sly20100511212501
+caching_strategy: BabelCache_Blackhole
+environment: dev
+database:
+  driver: mysql
+  host: localhost
+  login: sally
+  password: ''
+  name: sally_base
+  persistent: false
+  table_prefix: sly_
+babelcache:
+  memcached: [localhost, 11211]
