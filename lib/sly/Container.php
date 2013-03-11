@@ -562,6 +562,7 @@ class sly_Container implements ArrayAccess, Countable {
 	/*          factory methods          */
 
 	/**
+	 * @param  sly_Container $container
 	 * @return sly_Configuration
 	 */
 	protected function buildConfig(sly_Container $container) {
@@ -569,10 +570,11 @@ class sly_Container implements ArrayAccess, Countable {
 	}
 
 	/**
+	 * @param  sly_Container $container
 	 * @return sly_Event_IDispatcher
 	 */
-	protected function buildDispatcher() {
-		return $this['sly-dispatcher'] = new sly_Event_Dispatcher();
+	protected function buildDispatcher(sly_Container $container) {
+		return $this['sly-dispatcher'] = new sly_Event_Dispatcher($container);
 	}
 
 	/**

@@ -23,12 +23,16 @@
  * @ingroup event
  */
 class sly_Event_Dispatcher implements sly_Event_IDispatcher {
-	private $listeners; ///< array  list of listeners
+	private $listeners; ///< array          list of listeners
+	private $container; ///< sly_Container  container for resolving service placeholders
 
 	/**
 	 * Constructor
+	 *
+	 * @param sly_Container $container
 	 */
-	public function __construct() {
+	public function __construct(sly_Container $container = null) {
+		$this->container = $container;
 		$this->listeners = array();
 	}
 
@@ -208,8 +212,11 @@ class sly_Event_Dispatcher implements sly_Event_IDispatcher {
 			$callee = $listener['listener'];
 			$legacy = $listener['legacy'];
 
+			// find service identifiers and determine current service from container
+			$callee = $this->replaceIdentifiers($callee, $listener['params']);
+
 			// skip bad listeners (or else they could break the subject for following listeners)
-			if (!is_callable($callee)) {
+			if ($callee === null || !is_callable($callee)) {
 				trigger_error('Listener #'.$idx.' for event '.$event.' is not callable, skipping.', E_USER_WARNING);
 				continue;
 			}
@@ -269,5 +276,94 @@ class sly_Event_Dispatcher implements sly_Event_IDispatcher {
 		else {
 			$this->listeners[$event][] = $item;
 		}
+	}
+
+	protected function getContainer() {
+		return $this->container;
+	}
+
+	protected function replaceIdentifiers($callback, array $params) {
+		$container = $this->getContainer();
+		if (!$container) return $callback;
+
+		if (is_string($callback)) {
+			$matches = array();
+			$length  = strlen($callback);
+
+			if (preg_match_all('/%([a-z0-9._#+-]+?)%/i', $callback, $matches, PREG_SET_ORDER)) {
+				foreach ($matches as $match) {
+					$identifier = $match[1];
+
+					if (!$container->has($identifier)) {
+						trigger_error('Could not find service "'.$identifier.'" in container.', E_USER_WARNING);
+						return null;
+					}
+
+					$service         = $container[$identifier];
+					$isWholeCallback = strlen($identifier) === ($length - 2); // - 2 for the '%' chars
+
+					// do not attempt to do string replacements inside the callback
+					// when it's just the name of a service
+					if ($isWholeCallback) {
+						return $service;
+					}
+
+					// If this identifier is just part of the callback,
+					// we could have a callback like 'execute_%environment%_stuff'.
+					// In this case we need to carefully check the service type.
+
+					switch (strtolower(gettype($service))) {
+						case 'string':
+						case 'int':
+						case 'null':
+							$service = (string) $service;
+							break;
+
+						case 'boolean':
+							$service = $service ? '1' : '0';
+							break;
+
+						default:
+							trigger_error('Service "'.$identifier.'" could not be resolved to a string inside the callback "'.$callback.'", got '.gettype($service).' value.', E_USER_WARNING);
+							return null;
+					}
+
+					$callback = str_replace($match[0], $service, $callback);
+				}
+
+				// perform recursive replacements
+				return $this->replaceIdentifiers($callback, $params);
+			}
+
+			// no matches, no fun
+			return $callback;
+		}
+		elseif (is_array($callback)) {
+			if (isset($callback['service'])) {
+				$service = $this->replaceIdentifiers($callback['service'], $params);
+			}
+			elseif (isset($callback[0])) {
+				$service = $this->replaceIdentifiers($callback[0], $params);
+			}
+			else {
+				trigger_error('Callback has neither "service" nor 0 element given.', E_USER_WARNING);
+				return null;
+			}
+
+			if (isset($callback['method'])) {
+				$method = $this->replaceIdentifiers($callback['method'], $params);
+			}
+			elseif (isset($callback[1])) {
+				$method = $this->replaceIdentifiers($callback[1], $params);
+			}
+			else {
+				trigger_error('Callback has neither "method" nor 1 element given.', E_USER_WARNING);
+				return null;
+			}
+
+			return array($service, $method);
+		}
+
+		return $callback;
 	}
 }
