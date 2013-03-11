@@ -221,15 +221,14 @@ class sly_Event_Dispatcher implements sly_Event_IDispatcher {
 			// in legacy mode, call $callback($params) with subject in $params
 			if ($legacy) {
 				$args['subject'] = $subject;
+				$retval = call_user_func($callee, $args);
 			}
 
 			// in modern mode, call $callback($subject, $params)
 			else {
-				$args = array($subject, $args);
+				$retval = call_user_func_array($callee, array($subject, $args));
 			}
 
-			// execute the listener
-			$retval = call_user_func($callee, $args);
 			++$called;
 
 			switch ($foldStrategy) {
