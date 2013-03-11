@@ -55,7 +55,14 @@ class sly_Configuration_DatabaseImpl implements sly_Configuration_Reader, sly_Co
 	}
 
 	public function readLocal() {
-		return sly_Util_YAML::load(SLY_CONFIGFOLDER.DIRECTORY_SEPARATOR.'sly_local.yml');
+		try {
+			$data = sly_Util_YAML::load(SLY_CONFIGFOLDER.DIRECTORY_SEPARATOR.'sly_local.yml');
+		}
+		catch (sly_Exception $e) {
+			return array();
+		}
+
+		return $data;
 	}
 
 	public function readProject() {

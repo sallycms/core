@@ -14,6 +14,14 @@
  * @ingroup core
  */
 interface sly_Configuration_Reader {
+
+	/**
+	 * @return array  Data from project config facility
+	 */
 	public function readProject();
+
+	/**
+	 * @return array  Data from local config facility
+	 */
 	public function readLocal();
 }
