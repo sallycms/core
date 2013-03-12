@@ -1,0 +1,33 @@
+<?php
+$texts = array(
+	array('Weeh! Seems like Murphy was right once again...', 'Murphy Strikes Again!'),
+	array('Castle of Aaauuuggghhh...', 'Castle of Aaauuuggghhh...'),
+	array('No 9000 computer has ever made a misstake.', 'HAL says...'),
+	array('I pity the fool who has to see this.', 'Mr. T says...')
+);
+$text = $texts[rand(0, count($texts) - 1)];
+?><!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title><?php echo sly_html($text[1]) ?></title>
+	<meta name="robots" content="none,noarchive">
+	<style>
+	h1, p { font-family:Calibri; }
+	#horizon { background-color:transparent; position:absolute; top:50%; left:0px; width:100%; margin-top:-100px; text-align:center; min-width:700px; }
+	#wrapper { margin:0px auto; background-color:#fff; position:relative; text-align:left; width:700px; height:100px; }
+	.beast { position:fixed; right: 3px; bottom: 3px; }
+	</style>
+</head>
+<body>
+<div id="horizon">
+	<div id="wrapper">
+		<h1><?php echo sly_html($text[0]) ?></h1>
+		<p>Es trat ein interner Fehler beim Verarbeiten Ihrer Anfrage auf. Bitte versuchen Sie es später noch einmal.</p>
+	</div>
+</div>
+<!-- Illustration provided by The Oatmeal -->
+<?php $beast = base64_encode(file_get_contents(dirname(__FILE__).'/beast.png')); ?>
+<img src="data:image/png;base64,<?php echo $beast ?>" alt="" class="beast" />
+</body>
+</html>
