@@ -74,10 +74,10 @@ class sly_Util_Medium {
 	 * @param  int              $categoryID
 	 * @param  string           $title
 	 * @param  sly_Model_Medium $mediumToReplace
-	 * @param  boolean          $useRename        if true, rename() will be used to move the file into the mediapool (rather than move_uploaded_file())
+	 * @param  boolean          $allowFakeUploads      if true, there will be no check if the file is a real upload
 	 * @return sly_Model_Medium
 	 */
-	public static function upload(array $fileData, $categoryID, $title, sly_Model_Medium $mediumToReplace = null, sly_Model_User $user = null, $useRename = false) {
+	public static function upload(array $fileData, $categoryID, $title, sly_Model_Medium $mediumToReplace = null, sly_Model_User $user = null, $allowFakeUpload = false) {
 		// check file data
 
 		if (!isset($fileData['tmp_name'])) {
@@ -106,16 +106,18 @@ class sly_Util_Medium {
 
 		// create filenames
 
-		$filename    = $fileData['name'];
-		$newFilename = $mediumToReplace ? $mediumToReplace->getFilename() : self::createFilename($filename);
-		$dstFile     = SLY_MEDIAFOLDER.'/'.$newFilename;
-		$file        = null;
+		$filename = $fileData['name'];
+		$dstFile  = $mediumToReplace ? $mediumToReplace->getFilename() : self::createFilename($filename);
+		$file     = null;
 
 		// move uploaded file
-		$move = $useRename ? 'rename' : 'move_uploaded_file';
-
-		if (!$move($fileData['tmp_name'], $dstFile)) {
-			throw new sly_Exception(t('error_moving_uploaded_file', basename($fileData['tmp_name'])), self::ERR_UPLOAD_FAILED);
+		try {
+			if (!$allowFakeUpload && !is_uploaded_file($fileData['tmp_name'])) {
+				throw new sly_Exception('This is not an uploaded file.', self::ERR_INVALID_FILEDATA);
+			}
+			sly_Core::getContainer()->getMediaFilesystem()->move($fileData['tmp_name'], $dstFile);
+		} catch (sly_Filesystem_Exception $e) {
+			throw new sly_Exception(t('error_moving_uploaded_file', basename($fileData['tmp_name'])).' '.$e->getMessage(), self::ERR_UPLOAD_FAILED);
 		}
 
 		@chmod($dstFile, sly_Core::config()->get('fileperm'));

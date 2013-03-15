@@ -159,9 +159,8 @@ abstract class sly_Filesystem_Local implements sly_Filesystem {
 	 * @throws sly_Filesystem_Exception  if the source file was not found, or the destination could not be written
 	 */
 	public function move($fromFileName, $destinationFileName) {
-		$fileName = $this->getFullPath($fileName);
-		
 		$this->exceptIfNotExists($fromFileName);
+		$destinationFileName = $this->getFullPath($destinationFileName);
 		$this->createDirectoryForFilePath($destinationFileName);
 
 		$success = rename($fromFileName, $destinationFileName);
