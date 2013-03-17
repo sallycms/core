@@ -16,41 +16,46 @@ abstract class sly_Filesystem_Local implements sly_Filesystem {
 	protected $base;
 
 	/**
+	 * Constructor
 	 *
-	 * @param  string $base
 	 * @throws sly_Filesystem_Exception
+	 * @param  string $base              absolute path to the storage directory
 	 */
 	public function __construct($base) {
-		$base = sly_Util_Directory::normalize($base);
-		if ($base === false) {
-			throw new sly_Filesystem_Exception('Base directory is not valid!');
+		$realpath = realpath($base);
+
+		if ($realpath === false) {
+			throw new sly_Filesystem_Exception('Base directory "'.$base.'" is not valid!');
 		}
-		$this->base = $base.DIRECTORY_SEPARATOR;
+
+		$this->base = rtrim($realpath, DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR;
 	}
 
 	/**
-	 * get size of file if byte
+	 * get size of file in byte
 	 *
-	 * @param  string                    $fileName
-	 * @return int                       filesize in byte
 	 * @throws sly_Filesystem_Exception  if the file does not exist
+	 * @param  string $fileName          filename
+	 * @return int                       filesize in byte
 	 */
 	public function getSize($fileName) {
 		$fileName = $this->getFullPath($fileName);
 		$this->exceptIfNotExists($fileName);
+
 		return filesize($fileName);
 	}
 
 	/**
 	 * get modification time of file as unix timestamp
 	 *
-	 * @param  string                    $fileName
-	 * @return int                       unix timestamp of file modification time
 	 * @throws sly_Filesystem_Exception  if the file does not exist
+	 * @param  string $fileName          filename
+	 * @return int                       unix timestamp of file modification time
 	 */
 	public function getMtime($fileName) {
 		$fileName = $this->getFullPath($fileName);
 		$this->exceptIfNotExists($fileName);
+
 		return filemtime($fileName);
 	}
 
@@ -59,83 +64,81 @@ abstract class sly_Filesystem_Local implements sly_Filesystem {
 	/**
 	 * checks if a file exists
 	 *
-	 * @param  type     $fileName
-	 * @return boolean  true if file exists in this filesystem
+	 * @param  string $fileName  filename
+	 * @return boolean           true if file exists in this filesystem
 	 */
 	public function exists($fileName) {
 		$fileName = $this->getFullPath($fileName);
+
 		return file_exists($fileName);
 	}
 
 	/**
 	 * get content of the file
 	 *
-	 * @param  string                    $fileName
-	 * @return string                    content of the file
 	 * @throws sly_Filesystem_Exception  if the file does not exist
+	 * @param  string $fileName          filename
+	 * @return string                    content of the file
 	 */
 	public function read($fileName) {
 		$fileName = $this->getFullPath($fileName);
 		$this->exceptIfNotExists($fileName);
+
 		return file_get_contents($fileName);
 	}
 
 	/**
 	 * create file with content or overwrite file content
 	 *
-	 * @param  string $fileName
-	 * @param  string $content
 	 * @throws sly_Filesystem_Exception  if the file could not be written
+	 * @param  string $fileName          filename
+	 * @param  string $content           raw file contents
 	 */
 	public function write($fileName, $content) {
 		$fileName = $this->getFullPath($fileName);
 		$this->createDirectoryForFilePath($fileName);
-		$success = file_put_contents($fileName, $content);
 
-		if (!$success) {
-			throw new sly_Filesystem_Exception('File '.$fileName.' could not be written!');
+		if (@file_put_contents($fileName, $content) === false) {
+			$this->throwException('File '.$fileName.' could not be written');
 		}
 	}
 
 	/**
 	 * set modification time of file to current time
 	 *
-	 * @param  string $fileName
 	 * @throws sly_Filesystem_Exception  if the file does not exist or could not be modified
+	 * @param  string $fileName          filename
 	 */
 	public function touch($fileName) {
 		$fileName = $this->getFullPath($fileName);
 		$this->exceptIfNotExists($fileName);
-		$success = touch($fileName);
 
-		if (!$success) {
-			throw new sly_Filesystem_Exception('File '.$fileName.' could not be touched!');
+		if (@touch($fileName) === false) {
+			$this->throwException('File '.$fileName.' could not be touched');
 		}
 	}
 
 	/**
 	 * remove file
 	 *
-	 * @param  string $fileName
 	 * @throws sly_Filesystem_Exception  if the file could not be removed
+	 * @param  string $fileName          filename
 	 */
 	public function remove($fileName) {
 		$fileName = $this->getFullPath($fileName);
 		$this->exceptIfNotExists($fileName);
 
-		$success = unlink($fileName);
-
-		if (!$success) {
-			throw new sly_Filesystem_Exception('File '.$fileName.' could not be removed!');
+		if (@unlink($fileName) === false) {
+			$this->throwException('File '.$fileName.' could not be removed');
 		}
 	}
 
 	/**
 	 * copies a file
 	 *
-	 * @param string $fromFileName
-	 * @param string $destinationFileName
-	 * @throws sly_Filesystem_Exception  if the source file was not found, or the destination could not be written
+	 * @throws sly_Filesystem_Exception     if the source file was not found, or the destination could not be written
+	 * @param  string $fileName
+	 * @param  string $destinationFileName
 	 */
 	public function copy($fromFileName, $destinationFileName) {
 		$fromFileName        = $this->getFullPath($fromFileName);
@@ -144,36 +147,33 @@ abstract class sly_Filesystem_Local implements sly_Filesystem {
 		$this->exceptIfNotExists($fromFileName);
 		$this->createDirectoryForFilePath($destinationFileName);
 
-		$success = copy($fromFileName, $destinationFileName);
-
-		if (!$success) {
-			throw new sly_Filesystem_Exception('File '.$destinationFileName.' could not be written!');
+		if (@copy($fromFileName, $destinationFileName) === false) {
+			$this->throwException('File '.$fromFileName.' could not be copied to '.$destinationFileName);
 		}
 	}
 
 	/**
 	 * moves a file
 	 *
-	 * @param string $fromFileName
-	 * @param string $destinationFileName
-	 * @throws sly_Filesystem_Exception  if the source file was not found, or the destination could not be written
+	 * @throws sly_Filesystem_Exception     if the source file was not found, or the destination could not be written
+	 * @param  string $fromFileName
+	 * @param  string $destinationFileName
 	 */
 	public function move($fromFileName, $destinationFileName) {
 		$this->exceptIfNotExists($fromFileName);
 		$destinationFileName = $this->getFullPath($destinationFileName);
 		$this->createDirectoryForFilePath($destinationFileName);
 
-		$success = rename($fromFileName, $destinationFileName);
-
-		if (!$success) {
-			throw new sly_Filesystem_Exception('File '.$destinationFileName.' could not be written!');
+		if (@rename($fromFileName, $destinationFileName) === false) {
+			$this->throwException('File '.$fromFileName.' could not be moved to '.$destinationFileName);
 		}
 	}
 
 	/**
 	 * get a list of files, filename starts with prefix
 	 *
-	 * @param string $prefix
+	 * @param  string $prefix
+	 * @return array
 	 */
 	public function listFiles($prefix = '') {
 		return glob($this->base.$prefix.'*');
@@ -182,8 +182,8 @@ abstract class sly_Filesystem_Local implements sly_Filesystem {
 	/**
 	 * throw a exception if a file does not exist
 	 *
-	 * @param type $fileName
 	 * @throws sly_Filesystem_Exception
+	 * @param  string $fileName
 	 */
 	protected function exceptIfNotExists($fileName) {
 		if (!$this->exists($fileName)) {
@@ -197,5 +197,12 @@ abstract class sly_Filesystem_Local implements sly_Filesystem {
 
 	protected function createDirectoryForFilePath($fileName) {
 		sly_Util_Directory::create(dirname($fileName));
+	}
+
+	protected function throwException($message) {
+		$error = error_get_last();
+		$error = isset($error['message']) ? $error['message'] : 'Unknown error';
+
+		throw new sly_Filesystem_Exception($message.': '.$error);
 	}
 }
