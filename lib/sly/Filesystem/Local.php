@@ -70,7 +70,7 @@ abstract class sly_Filesystem_Local implements sly_Filesystem {
 	public function exists($fileName) {
 		$fileName = $this->getFullPath($fileName);
 
-		return file_exists($fileName);
+		return is_file($fileName);
 	}
 
 	/**
