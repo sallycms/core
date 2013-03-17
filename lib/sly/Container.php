@@ -62,7 +62,7 @@ class sly_Container implements ArrayAccess, Countable {
 			'sly-service-template'       => array($this, 'buildTemplateService'),
 			'sly-service-user'           => array($this, 'buildUserService'),
 
-			//filesystems
+			// filesystems
 			'sly-filesystem-media'       => array($this, 'buildMediaFilesystem'),
 
 			// helpers
@@ -901,7 +901,7 @@ class sly_Container implements ArrayAccess, Countable {
 	}
 
 	protected function buildMediaFilesystem() {
-		return $this['sly-filesystem-media'] = new sly_Filesystem_LocalMedia();
+		return $this['sly-filesystem-media'] = new sly_Filesystem_LocalMedia(SLY_MEDIAFOLDER);
 	}
 
 	protected function missingValue(sly_Container $container, $id) {
