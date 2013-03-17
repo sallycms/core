@@ -12,4 +12,6 @@
  * @ingroup core
  * @since 0.9
  */
-class sly_Filesystem_Exception extends sly_Exception {}
+class sly_Filesystem_Exception extends sly_Exception {
+
+}
