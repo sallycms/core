@@ -1,7 +1,7 @@
--- Sally Database Dump Version 0.8.*
+-- Sally Database Dump Version 0.9.*
 -- Prefix sly_
 
-CREATE TABLE sly_article (id NUMBER(10) NOT NULL, clang NUMBER(10) NOT NULL, re_id NUMBER(10) NOT NULL, name VARCHAR2(255) NOT NULL, catname VARCHAR2(255) NOT NULL, catpos NUMBER(10) NOT NULL, attributes TEXT NOT NULL, startpage NUMBER(1) NOT NULL, pos NUMBER(10) NOT NULL, path VARCHAR2(255) NOT NULL, status NUMBER(10) NOT NULL, type VARCHAR2(64) NOT NULL, createdate TIMESTAMP(0) NOT NULL, updatedate TIMESTAMP(0) NOT NULL, createuser VARCHAR2(255) NOT NULL, updateuser VARCHAR2(255) NOT NULL, revision NUMBER(10) DEFAULT 0 NOT NULL, PRIMARY KEY(id, clang));
+CREATE TABLE sly_article (id NUMBER(10) NOT NULL, clang NUMBER(10) NOT NULL, revision NUMBER(10) DEFAULT 0 NOT NULL, re_id NUMBER(10) NOT NULL, name VARCHAR2(255) NOT NULL, catname VARCHAR2(255) NOT NULL, catpos NUMBER(10) NOT NULL, attributes TEXT NOT NULL, startpage NUMBER(1) NOT NULL, pos NUMBER(10) NOT NULL, path VARCHAR2(255) NOT NULL, type VARCHAR2(64) NOT NULL, deleted NUMBER(1) NOT NULL, createdate TIMESTAMP(0) NOT NULL, updatedate TIMESTAMP(0) NOT NULL, createuser VARCHAR2(255) NOT NULL, updateuser VARCHAR2(255) NOT NULL, PRIMARY KEY(id, clang, revision));
 CREATE TABLE sly_article_slice (id NUMBER(10) NOT NULL, clang NUMBER(10) NOT NULL, slot VARCHAR2(64) NOT NULL, pos NUMBER(10) NOT NULL, slice_id NUMBER(10) DEFAULT 0 NOT NULL, article_id NUMBER(10) NOT NULL, createdate TIMESTAMP(0) NOT NULL, updatedate TIMESTAMP(0) NOT NULL, createuser VARCHAR2(255) NOT NULL, updateuser VARCHAR2(255) NOT NULL, revision NUMBER(10) DEFAULT 0 NOT NULL, PRIMARY KEY(id));
 DECLARE
   constraints_Count NUMBER;
@@ -33,7 +33,7 @@ BEGIN
       END LOOP;
    END IF;
 END;
-CREATE INDEX find_article ON sly_article_slice (article_id, clang);
+CREATE INDEX find_article ON sly_article_slice (article_id, clang, revision);
 CREATE TABLE sly_clang (id NUMBER(10) NOT NULL, name VARCHAR2(255) NOT NULL, locale VARCHAR2(5) NOT NULL, revision NUMBER(10) DEFAULT 0 NOT NULL, PRIMARY KEY(id));
 DECLARE
   constraints_Count NUMBER;
@@ -191,6 +191,15 @@ BEGIN
    END IF;
 END;
 CREATE TABLE sly_registry (name VARCHAR2(255) NOT NULL, value BLOB NOT NULL, PRIMARY KEY(name));
+CREATE TABLE sly_config (id VARCHAR2(255) NOT NULL, value LONGTEXT NOT NULL, PRIMARY KEY(id));
 
 -- populate database with some initial data
 INSERT INTO sly_clang (name, locale) VALUES ('deutsch', 'de_DE');
+INSERT INTO sly_config (id, value) VALUES ('start_article_id', '1');
+INSERT INTO sly_config (id, value) VALUES ('notfound_article_id', '1');
+INSERT INTO sly_config (id, value) VALUES ('default_clang_id', '1');
+INSERT INTO sly_config (id, value) VALUES ('default_article_type', '""');
+INSERT INTO sly_config (id, value) VALUES ('projectname', '"SallyCMS-Projekt"');
+INSERT INTO sly_config (id, value) VALUES ('timezone', '"Europe/Berlin"');
+INSERT INTO sly_config (id, value) VALUES ('default_locale', '"de_de"');
+INSERT INTO sly_config (id, value) VALUES ('addons', '[]');

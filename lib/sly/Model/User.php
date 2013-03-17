@@ -51,7 +51,7 @@ class sly_Model_User extends sly_Model_Base_Id {
 	protected function evalRights() {
 		$config      = sly_Core::config();
 
-		$this->startpage     = $config->get('START_PAGE');
+		$this->startpage     = $config->get('start_page');
 		$this->backendLocale = sly_Core::getDefaultLocale();
 		$this->isAdmin       = false;
 

@@ -93,7 +93,7 @@ class sly_Service_Language extends sly_Service_Model_Base_Id {
 	 * @return sly_Model_Language
 	 */
 	public function create($params) {
-		$langs = sly_Util_Language::findAll(); // TODO: avoid wrapper around ourselves
+		$langs = $this->findAll();
 
 		// if there are no languages yet, don't attempt to copy anything
 
@@ -119,11 +119,11 @@ class sly_Service_Language extends sly_Service_Model_Base_Id {
 					$sourceID = reset($ids);
 				}
 
-				$sql->query(str_replace('~', sly_Core::getTablePrefix(),
+				$sql->query(str_replace('~', $sql->getPrefix(),
 					'INSERT INTO ~article (id,re_id,name,catname,catpos,attributes,'.
-					'startpage,pos,path,status,createdate,updatedate,type,clang,createuser,'.
+					'startpage,pos,path,createdate,updatedate,type,clang,createuser,'.
 					'updateuser,revision) '.
-					'SELECT id,re_id,name,catname,catpos,attributes,startpage,pos,path,0,createdate,'.
+					'SELECT id,re_id,name,catname,catpos,attributes,startpage,pos,path,createdate,'.
 					'updatedate,type,?,createuser,updateuser,revision '.
 					'FROM ~article WHERE clang = ?'),
 					array($newLanguage->getId(), $sourceID)
@@ -166,35 +166,30 @@ class sly_Service_Language extends sly_Service_Model_Base_Id {
 	 * @return int
 	 */
 	public function delete($where) {
-		$db = $this->getPersistence();
-
 		// find all languages first
 		$toDelete = $this->find($where);
-		$allLangs = sly_Util_Language::findAll(); // TODO: avoid wrapper around ourselves
-
-		// delete
-		$res = parent::delete($where);
-
-		// update cache (so that addOns can access fresh clang data when listening to CLANG_DELETED)
-		foreach ($toDelete as $language) {
-			unset($allLangs[$language->getId()]);
-		}
-
-		$this->cache->set('sly.language', 'all', $allLangs);
 
 		// remove
+		$res    = false;
 		$db     = $this->getPersistence();
 		$ownTrx = !$db->isTransRunning();
+		$pre    = $db->getPrefix();
 
 		if ($ownTrx) {
 			$db->beginTransaction();
 		}
 
 		try {
+
+			// delete
+			$res = parent::delete($where);
+
 			foreach ($toDelete as $language) {
 				$params = array('clang' => $language->getId());
-				$db->delete('article', $params);
+
+				$db->query('DELETE FROM '.$pre.'slice WHERE id IN ( SELECT slice_id FROM '.$pre.'article_slice WHERE clang = :clang )', $params);
 				$db->delete('article_slice', $params);
+				$db->delete('article', $params);
 
 				$this->dispatcher->notify('CLANG_DELETED', $language, array(
 					'id'   => $language->getId(),

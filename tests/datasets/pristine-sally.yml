@@ -2,7 +2,7 @@ sly_article: []
 sly_article_slice: []
 sly_clang:
    -
-      id: 1
+      id: 5
       name: deutsch
       locale: de_DE
       revision: 0

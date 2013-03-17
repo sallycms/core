@@ -17,13 +17,13 @@ abstract class sly_BaseTest extends PHPUnit_Extensions_Database_TestCase {
 	 */
 	public function getConnection() {
 		if (!$this->pdo) {
-			$data = sly_Core::config()->get('DATABASE');
-			$conn = sly_DB_PDO_Connection::getInstance($data['DRIVER'], $data['HOST'], $data['LOGIN'], $data['PASSWORD'], $data['NAME']);
+			$data = sly_Core::config()->get('database');
+			$conn = sly_DB_PDO_Connection::getInstance($data['driver'], $data['host'], $data['login'], $data['password'], $data['name']);
 
 			$this->pdo = $conn->getPDO();
 		}
 
-		return $this->createDefaultDBConnection($this->pdo, $data['NAME']);
+		return $this->createDefaultDBConnection($this->pdo, $data['name']);
 	}
 
 	public function setUp() {
@@ -34,6 +34,11 @@ abstract class sly_BaseTest extends PHPUnit_Extensions_Database_TestCase {
 			foreach ($this->getRequiredAddOns() as $addon) {
 				$this->loadAddOn($addon);
 			}
+
+			// login the dummy user
+			$service = sly_Service_Factory::getUserService();
+			$user    = $service->findById(SLY_TESTING_USER_ID);
+			$service->setCurrentUser($user);
 
 			$this->setup = true;
 		}
