@@ -104,7 +104,7 @@ abstract class sly_Service_File_Base {
 		}
 
 		if (!is_file($filename)) {
-			throw new sly_Exception(t('file_not_found', $filename));
+			throw new sly_Exception('File '.$filename.' not found');
 		}
 
 		$cachefile = $this->getCacheFile($filename);
