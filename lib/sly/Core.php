@@ -117,7 +117,6 @@ class sly_Core {
 		}
 		catch (Exception $e) {
 			header('Content-Type: text/plain; charset=UTF-8');
-			print $e->getTraceAsString();
 			die('Could not load core configuration: '.$e->getMessage());
 		}
 
