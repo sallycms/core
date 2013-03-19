@@ -92,7 +92,7 @@ abstract class sly_Service_File_Base {
 	 */
 	public function load($filename, $forceCached = false, $disableRuntimeCache = false) {
 		if (mb_strlen($filename) === 0 || !is_string($filename)) {
-			throw new sly_Exception('No file given!');
+			throw new InvalidArgumentException('No file given!');
 		}
 
 		if (!$disableRuntimeCache) {
