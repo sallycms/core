@@ -101,19 +101,15 @@ class sly_Core {
 
 			$configReader = $container['sly-config-reader'];
 
-			$config->setStatic('/', $configReader->readLocal());
-			$config->set('/', $configReader->readProject());
-		}
-		catch (sly_Util_DirectoryException $e) {
-			$dir = sly_html($e->getDirectory());
+			$localConfig = $configReader->readLocal();
+			if (!empty($localConfig)) {
+				$config->setStatic('/', $localConfig);
+			}
 
-			header('Content-Type: text/html; charset=UTF-8');
-			die(
-				'Could not create data directory in <strong>'.$dir.'</strong>.<br />'.
-				'Please check your filesystem permissions and ensure that PHP is allowed<br />'.
-				'to write in <strong>'.SLY_DATAFOLDER.'</strong>. In most cases this can<br />'.
-				'be fixed by creating the directory via FTP and chmodding it to <strong>0777</strong>.'
-			);
+			$projectConfig = $configReader->readProject();
+			if (!empty($projectConfig)) {
+				$config->set('/', $projectConfig);
+			}
 		}
 		catch (Exception $e) {
 			header('Content-Type: text/plain; charset=UTF-8');
