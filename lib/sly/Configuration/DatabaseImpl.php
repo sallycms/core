@@ -55,24 +55,30 @@ class sly_Configuration_DatabaseImpl implements sly_Configuration_Reader, sly_Co
 	}
 
 	public function readLocal() {
+		$result = array();
+
 		try {
-			$data = sly_Util_YAML::load(SLY_CONFIGFOLDER.DIRECTORY_SEPARATOR.'sly_local.yml');
+			$result = sly_Util_YAML::load(SLY_CONFIGFOLDER.DIRECTORY_SEPARATOR.'sly_local.yml');
 		}
 		catch (sly_Exception $e) {
-			return array();
+			// pass
 		}
 
-		return $data;
+		return $result;
 	}
 
 	public function readProject() {
 		$result = array();
-		$db     = $this->container->getPersistence();
 
-		$db->select('config');
+		try {
+			$db = $this->container->getPersistence();
+			$db->select('config');
 
-		foreach ($db as $row) {
-			$result[$row['id']] = json_decode($row['value'], true);
+			foreach ($db as $row) {
+				$result[$row['id']] = json_decode($row['value'], true);
+			}
+		} catch (sly_DB_Exception $e) {
+			// pass
 		}
 
 		return $result;
