@@ -97,7 +97,6 @@ class sly_Service_Category extends sly_Service_ArticleManager {
 	 * @throws sly_Exception
 	 * @param  int            $categoryID
 	 * @param  string         $name
-	 * @param  int            $status
 	 * @param  int            $position
 	 * @param  sly_Model_User $user      creator or null for the current user
 	 * @return int
