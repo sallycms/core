@@ -50,7 +50,7 @@ class sly_Configuration implements sly_ContainerAwareInterface{
 			$writer = $this->container['sly-config-reader'];
 		}
 
-		$writer->write($this->dynamicStore);
+		$writer->writeProject($this->dynamicStore->get('/'));
 
 		return $this;
 	}
