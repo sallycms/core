@@ -31,7 +31,7 @@ class sly_Container implements ArrayAccess, Countable {
 			// core objects
 			'sly-config'              => array($this, 'buildConfig'),
 			'sly-config-reader'       => array($this, 'buildConfigHandler'),
-			'sly-config-writer'       => array($this, 'get', array('sly-config-reader')),
+			'sly-config-writer'       => array($this, 'buildConfigWriter'),
 			'sly-dispatcher'          => array($this, 'buildDispatcher'),
 			'sly-error-handler'       => array($this, 'buildErrorHandler'),
 			'sly-registry-temp'       => array($this, 'buildTempRegistry'),
@@ -568,71 +568,78 @@ class sly_Container implements ArrayAccess, Countable {
 	/**
 	 * @return sly_Configuration_Reader_DatabaseImpl
 	 */
-	protected function buildConfig() {
-		return $this['sly-config'] = new sly_Configuration();
+	protected function buildConfig(sly_Container $container, $id) {
+		return $this[$id] = new sly_Configuration();
 	}
 
 	/**
 	 * @return sly_Configuration_Reader_DatabaseImpl
 	 */
-	protected function buildConfigHandler() {
-		return $this['sly-config-reader'] = new sly_Configuration_DatabaseImpl();
+	protected function buildConfigHandler(sly_Container $container, $id) {
+		return $this[$id] = new sly_Configuration_DatabaseImpl();
+	}
+
+	/**
+	 * @return sly_Configuration_Reader_DatabaseImpl
+	 */
+	protected function buildConfigWriter(sly_Container $container, $id) {
+		return $this[$id] = $container['sly-config-reader'];
 	}
 
 	/**
 	 * @return sly_Event_IDispatcher
 	 */
-	protected function buildDispatcher() {
-		return $this['sly-dispatcher'] = new sly_Event_Dispatcher();
+	protected function buildDispatcher(sly_Container $container, $id) {
+		return $this[$id] = new sly_Event_Dispatcher();
 	}
 
 	/**
 	 * @return sly_Registry_Temp
 	 */
-	protected function buildTempRegistry() {
-		return $this['sly-registry-temp'] = sly_Registry_Temp::getInstance();
+	protected function buildTempRegistry(sly_Container $container, $id) {
+		return $this[$id] = sly_Registry_Temp::getInstance();
 	}
 
 	/**
 	 * @return sly_Registry_Persistent
 	 */
-	protected function buildPersistentRegistry() {
-		return $this['sly-registry-persistent'] = sly_Registry_Persistent::getInstance();
+	protected function buildPersistentRegistry(sly_Container $container, $id) {
+		return $this[$id] = sly_Registry_Persistent::getInstance();
 	}
 
 	/**
 	 * @param  sly_Container $container
 	 * @return sly_ErrorHandler_Interface
 	 */
-	protected function buildErrorHandler(sly_Container $container) {
+	protected function buildErrorHandler(sly_Container $container, $id) {
 		$devMode = $container['sly-environment'] !== 'prod';
 
-		return $this['sly-error-handler'] = $devMode ? new sly_ErrorHandler_Development() : new sly_ErrorHandler_Production();
+		return $this[$id] = $devMode ? new sly_ErrorHandler_Development() : new sly_ErrorHandler_Production();
 	}
 
 	/**
 	 * @return sly_Request
 	 */
-	protected function buildRequest() {
-		return $this->values['sly-request'] = sly_Request::createFromGlobals();
+	protected function buildRequest(sly_Container $container, $id) {
+		return $this[$id] = sly_Request::createFromGlobals();
 	}
 
 	/**
 	 * @return sly_Response
 	 */
-	protected function buildResponse() {
+	protected function buildResponse(sly_Container $container, $id) {
 		$response = new sly_Response('', 200);
 		$response->setContentType('text/html', 'UTF-8');
 
-		return $this->values['sly-response'] = $response;
+		return $this[$id] = $response;
 	}
 
 	/**
 	 * @param  sly_Container $container
 	 * @return sly_Session
 	 */
-	protected function buildSession(sly_Container $container) {
-		return $this['sly-session'] = new sly_Session($container->get('sly-config')->get('instname'));
+	protected function buildSession(sly_Container $container, $id) {
+		return $this[$id] = new sly_Session($container->get('sly-config')->get('instname'));
 	}
 
 	/**
@@ -652,19 +659,19 @@ class sly_Container implements ArrayAccess, Countable {
 	 * @param  sly_Container $container
 	 * @return BabelCache_Interface
 	 */
-	protected function buildCache(sly_Container $container) {
+	protected function buildCache(sly_Container $container, $id) {
 		$config   = $container['sly-config'];
 		$strategy = $config->get('caching_strategy');
 		$fallback = $config->get('fallback_caching_strategy', 'sly_Cache_Blackhole');
 
-		return $this['sly-cache'] = sly_Cache::factory($strategy, $fallback);
+		return $this[$id] = sly_Cache::factory($strategy, $fallback);
 	}
 
 	/**
 	 * @param  sly_Container $container
 	 * @return sly_Util_FlashMessage
 	 */
-	protected function buildFlashMessage(sly_Container $container) {
+	protected function buildFlashMessage(sly_Container $container, $id) {
 		sly_Util_Session::start();
 
 		$session = $container->get('sly-session');
@@ -673,14 +680,14 @@ class sly_Container implements ArrayAccess, Countable {
 		$msg->removeFromSession($session);
 		$msg->setAutoStore(true);
 
-		return $this->values['sly-flash-message'] = $msg;
+		return $this[$id] = $msg;
 	}
 
 	/**
 	 * @param  sly_Container $container
 	 * @return sly_Service_AddOn
 	 */
-	protected function buildAddOnService(sly_Container $container) {
+	protected function buildAddOnService(sly_Container $container, $id) {
 		$cache      = $container['sly-cache'];
 		$config     = $container['sly-config'];
 		$adnService = $container['sly-service-package-addon'];
@@ -689,27 +696,27 @@ class sly_Container implements ArrayAccess, Countable {
 
 		$service->setVendorPackageService($vndService);
 
-		return $this->values['sly-service-addon'] = $service;
+		return $this[$id] = $service;
 	}
 
 	/**
 	 * @param  sly_Container $container
 	 * @return sly_Service_AddOn_Manager
 	 */
-	protected function buildAddOnManagerService(sly_Container $container) {
+	protected function buildAddOnManagerService(sly_Container $container, $id) {
 		$config     = $container['sly-config'];
 		$dispatcher = $container['sly-dispatcher'];
 		$cache      = $container['sly-cache'];
 		$service    = $container['sly-service-addon'];
 
-		return $this->values['sly-service-addon-manager'] = new sly_Service_AddOn_Manager($config, $dispatcher, $cache, $service);
+		return $this[$id] = new sly_Service_AddOn_Manager($config, $dispatcher, $cache, $service);
 	}
 
 	/**
 	 * @param  sly_Container $container
 	 * @return sly_Service_Article
 	 */
-	protected function buildArticleService(sly_Container $container) {
+	protected function buildArticleService(sly_Container $container, $id) {
 		$persistence = $container['sly-persistence'];
 		$slices      = $container['sly-service-slice'];
 		$articles    = $container['sly-service-articleslice'];
@@ -717,7 +724,7 @@ class sly_Container implements ArrayAccess, Countable {
 		$service     = new sly_Service_Article($persistence, $slices, $articles, $templates);
 
 		// make sure the circular dependency does not make the app die with an endless loop
-		$this['sly-service-article'] = $service;
+		$this[$id] = $service;
 
 		return $service;
 	}
@@ -726,11 +733,11 @@ class sly_Container implements ArrayAccess, Countable {
 	 * @param  sly_Container $container
 	 * @return sly_Service_Article
 	 */
-	protected function buildDeletedArticleService(sly_Container $container) {
+	protected function buildDeletedArticleService(sly_Container $container, $id) {
 		$persistence = $container['sly-persistence'];
 		$service     = new sly_Service_DeletedArticle($persistence);
 
-		$this['sly-service-deletedarticle'] = $service;
+		$this[$id] = $service;
 
 		return $service;
 	}
@@ -739,7 +746,7 @@ class sly_Container implements ArrayAccess, Countable {
 	 * @param  sly_Container $container
 	 * @return sly_Service_ArticleSlice
 	 */
-	protected function buildArticleSliceService(sly_Container $container) {
+	protected function buildArticleSliceService(sly_Container $container, $id) {
 		$persistence = $container['sly-persistence'];
 		$dispatcher  = $container['sly-dispatcher'];
 		$slices      = $container['sly-service-slice'];
@@ -747,7 +754,7 @@ class sly_Container implements ArrayAccess, Countable {
 
 		$service = new sly_Service_ArticleSlice($persistence, $dispatcher, $slices, $templates);
 
-		$this->values['sly-service-articleslice'] = $service;
+		$this[$id] = $service;
 		$service->setArticleService($container['sly-service-article']);
 
 		return $service;
@@ -757,31 +764,31 @@ class sly_Container implements ArrayAccess, Countable {
 	 * @param  sly_Container $container
 	 * @return sly_Service_ArticleType
 	 */
-	protected function buildArticleTypeService(sly_Container $container) {
+	protected function buildArticleTypeService(sly_Container $container, $id) {
 		$config    = $container['sly-config'];
 		$modules   = $container['sly-service-module'];
 		$templates = $container['sly-service-template'];
 
-		return $this->values['sly-service-articletype'] = new sly_Service_ArticleType($config, $modules, $templates);
+		return $this[$id] = new sly_Service_ArticleType($config, $modules, $templates);
 	}
 
 	/**
 	 * @param  sly_Container $container
 	 * @return sly_Service_Asset
 	 */
-	protected function buildAssetService(sly_Container $container) {
-		return $this->values['sly-service-asset'] = new sly_Service_Asset($container['sly-config'], $container['sly-dispatcher']);
+	protected function buildAssetService(sly_Container $container, $id) {
+		return $this[$id] = new sly_Service_Asset($container['sly-config'], $container['sly-dispatcher']);
 	}
 
 	/**
 	 * @param  sly_Container $container
 	 * @return sly_Service_Category
 	 */
-	protected function buildCategoryService(sly_Container $container) {
+	protected function buildCategoryService(sly_Container $container, $id) {
 		$persistence = $container['sly-persistence'];
 		$service     = new sly_Service_Category($persistence);
 
-		$this['sly-service-category'] = $service;
+		$this[$id] = $service;
 
 		return $service;
 	}
@@ -790,26 +797,26 @@ class sly_Container implements ArrayAccess, Countable {
 	 * @param  sly_Container $container
 	 * @return sly_Service_Language
 	 */
-	protected function buildLanguageService(sly_Container $container) {
+	protected function buildLanguageService(sly_Container $container, $id) {
 		$persistence = $container['sly-persistence'];
 		$cache       = $container['sly-cache'];
 		$dispatcher  = $container['sly-dispatcher'];
 
-		return $this->values['sly-service-language'] = new sly_Service_Language($persistence, $cache, $dispatcher);
+		return $this[$id] = new sly_Service_Language($persistence, $cache, $dispatcher);
 	}
 
 	/**
 	 * @param  sly_Container $container
 	 * @return sly_Service_MediaCategory
 	 */
-	protected function buildMediaCategoryService(sly_Container $container) {
+	protected function buildMediaCategoryService(sly_Container $container, $id) {
 		$persistence = $container['sly-persistence'];
 		$cache       = $container['sly-cache'];
 		$dispatcher  = $container['sly-dispatcher'];
 		$service     = new sly_Service_MediaCategory($persistence, $cache, $dispatcher);
 
 		// make sure the circular dependency does not make the app die with an endless loop
-		$this->values['sly-service-mediacategory'] = $service;
+		$this[$id] = $service;
 		$service->setMediumService($container['sly-service-medium']);
 
 		return $service;
@@ -819,66 +826,66 @@ class sly_Container implements ArrayAccess, Countable {
 	 * @param  sly_Container $container
 	 * @return sly_Service_Medium
 	 */
-	protected function buildMediumService(sly_Container $container) {
+	protected function buildMediumService(sly_Container $container, $id) {
 		$persistence = $container['sly-persistence'];
 		$cache       = $container['sly-cache'];
 		$dispatcher  = $container['sly-dispatcher'];
 		$categories  = $container['sly-service-mediacategory'];
 
-		return $this->values['sly-service-medium'] = new sly_Service_Medium($persistence, $cache, $dispatcher, $categories);
+		return $this[$id] = new sly_Service_Medium($persistence, $cache, $dispatcher, $categories);
 	}
 
 	/**
 	 * @param  sly_Container $container
 	 * @return sly_Service_Module
 	 */
-	protected function buildModuleService(sly_Container $container) {
-		return $this->values['sly-service-module'] = new sly_Service_Module($container['sly-config'], $container['sly-dispatcher']);
+	protected function buildModuleService(sly_Container $container, $id) {
+		return $this[$id] = new sly_Service_Module($container['sly-config'], $container['sly-dispatcher']);
 	}
 
 	/**
 	 * @param  sly_Container $container
 	 * @return sly_Service_Package_AddOn
 	 */
-	protected function buildAddOnPackageService(sly_Container $container) {
-		return $this->values['sly-service-package-addon'] = new sly_Service_Package(SLY_ADDONFOLDER, $container['sly-cache']);
+	protected function buildAddOnPackageService(sly_Container $container, $id) {
+		return $this[$id] = new sly_Service_Package(SLY_ADDONFOLDER, $container['sly-cache']);
 	}
 
 	/**
 	 * @param  sly_Container $container
 	 * @return sly_Service_Package_Vendor
 	 */
-	protected function buildVendorPackageService(sly_Container $container) {
-		return $this->values['sly-service-package-vendor'] = new sly_Service_Package(SLY_VENDORFOLDER, $container['sly-cache']);
+	protected function buildVendorPackageService(sly_Container $container, $id) {
+		return $this[$id] = new sly_Service_Package(SLY_VENDORFOLDER, $container['sly-cache']);
 	}
 
 	/**
 	 * @param  sly_Container $container
 	 * @return sly_Service_Slice
 	 */
-	protected function buildSliceService(sly_Container $container) {
-		return $this->values['sly-service-slice'] = new sly_Service_Slice($container['sly-persistence']);
+	protected function buildSliceService(sly_Container $container, $id) {
+		return $this[$id] = new sly_Service_Slice($container['sly-persistence']);
 	}
 
 	/**
 	 * @param  sly_Container $container
 	 * @return sly_Service_Template
 	 */
-	protected function buildTemplateService(sly_Container $container) {
-		return $this->values['sly-service-template'] = new sly_Service_Template($container['sly-config'], $container['sly-dispatcher']);
+	protected function buildTemplateService(sly_Container $container, $id) {
+		return $this[$id] = new sly_Service_Template($container['sly-config'], $container['sly-dispatcher']);
 	}
 
 	/**
 	 * @param  sly_Container $container
 	 * @return sly_Service_User
 	 */
-	protected function buildUserService(sly_Container $container) {
+	protected function buildUserService(sly_Container $container, $id) {
 		$cache       = $container['sly-cache'];
 		$config      = $container['sly-config'];
 		$dispatcher  = $container['sly-dispatcher'];
 		$persistence = $container['sly-persistence'];
 
-		return $this->values['sly-service-user'] = new sly_Service_User($persistence, $cache, $dispatcher, $config);
+		return $this[$id] = new sly_Service_User($persistence, $cache, $dispatcher, $config);
 	}
 
 	/**
@@ -886,8 +893,8 @@ class sly_Container implements ArrayAccess, Countable {
 	 * @param sly_Container $container
 	 * @return sly_Slice_Renderer
 	 */
-	protected function buildSliceRenderer(sly_Container $container) {
-		return $this->values['sly-slice-renderer'] = new sly_Slice_RendererImpl($container['sly-service-module']);
+	protected function buildSliceRenderer(sly_Container $container, $id) {
+		return $this[$id] = new sly_Slice_RendererImpl($container['sly-service-module']);
 	}
 
 	protected function missingValue(sly_Container $container, $id) {
