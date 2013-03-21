@@ -34,7 +34,7 @@ class sly_Model_Article extends sly_Model_Base_Article {
 	 * @return sly_Model_Category
 	 */
 	public function getCategory() {
-		return sly_Core::getContainer()->getCategoryService()->findById($this->getCategoryId(), $this->getClang());
+		return sly_Core::getContainer()->getCategoryService()->findByPK($this->getCategoryId(), $this->getClang());
 	}
 
 	/**
