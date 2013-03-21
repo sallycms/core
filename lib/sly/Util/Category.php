@@ -47,7 +47,7 @@ class sly_Util_Category {
 	public static function findById($categoryID, $clang = null, $default = null) {
 		$service    = sly_Core::getContainer()->getCategoryService();
 		$categoryID = (int) $categoryID;
-		$cat        = $service->findById($categoryID, $clang);
+		$cat        = $service->findByPK($categoryID, $clang);
 
 		if ($cat) return $cat;
 
