@@ -237,6 +237,10 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 		$sql       = $this->getPersistence();
 		$ownTrx    = !$sql->isTransRunning();
 
+		if ($article->getType() === $type) {
+			return true;
+		}
+
 		if ($ownTrx) {
 			$sql->beginTransaction();
 		}
