@@ -60,7 +60,7 @@ class sly_Util_Article {
 	 * @param  mixed $default
 	 * @return sly_Model_Article
 	 */
-	public static function findById($articleID, $clang = null, $revision = null, $default = null) {
+	public static function findById($articleID, $clang = null, $revision = sly_Service_Article::FIND_REVISION_ONLINE, $default = null) {
 		$service   = sly_Core::getContainer()->getArticleService();
 		$articleID = (int) $articleID;
 
