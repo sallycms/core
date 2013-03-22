@@ -57,6 +57,7 @@ class sly_Util_Article {
 	 * @throws sly_Exception
 	 * @param  int   $articleID
 	 * @param  int   $clang
+	 * @param  int   $revision
 	 * @param  mixed $default
 	 * @return sly_Model_Article
 	 */
