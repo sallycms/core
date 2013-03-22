@@ -104,7 +104,18 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 	 * @return array
 	 */
 	public function findAllRevisions($id, $clang) {
-		return $this->find(compact('id', 'clang'), null, 'revision DESC');
+		$where  = compact('id', 'clang');
+		$order  = 'revision DESC';
+		$return = array();
+		$db     = $this->getPersistence();
+
+		$db->select($this->getTableName(), '*', $where, null, $order);
+
+		foreach ($db as $row) {
+			$return[] = $this->makeInstance($row);
+		}
+
+		return $return;
 	}
 
 	/**
