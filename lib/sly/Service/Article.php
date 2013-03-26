@@ -112,7 +112,9 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 		$db->select($this->getTableName(), '*', $where, null, $order);
 
 		foreach ($db as $row) {
-			$return[] = $this->makeInstance($row);
+			$item = $this->makeInstance($row);
+			$item->setOnline($this->getOnlineStatus($item));
+			$return[] = $item;
 		}
 
 		return $return;
