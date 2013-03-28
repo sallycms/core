@@ -64,6 +64,7 @@ class sly_Container implements ArrayAccess, Countable {
 
 			// filesystems
 			'sly-filesystem-media'       => array($this, 'buildMediaFilesystem'),
+			'sly-filesystem-dyn-public'  => array($this, 'buildDynPublicFilesystem'),
 
 			// helpers
 			'sly-slice-renderer'         => array($this, 'buildSliceRenderer')
@@ -452,10 +453,17 @@ class sly_Container implements ArrayAccess, Countable {
 	}
 
 	/**
-	 * @return sly_Filesystem
+	 * @return sly\Filesystem\Filesystem
 	 */
 	public function getMediaFilesystem() {
 		return $this->get('sly-filesystem-media');
+	}
+
+	/**
+	 * @return sly\Filesystem\Filesystem
+	 */
+	public function getDynPublicFilesystem() {
+		return $this->get('sly-filesystem-dyn-public');
 	}
 
 	/*          setters for objects that are commonly set          */
@@ -901,10 +909,26 @@ class sly_Container implements ArrayAccess, Countable {
 	}
 
 	protected function buildMediaFilesystem() {
-		return $this['sly-filesystem-media'] = new sly_Filesystem_LocalMedia(SLY_MEDIAFOLDER);
+		return $this['sly-filesystem-media'] = $this->getLocalHttpFilesystem(SLY_MEDIAFOLDER, 'data/mediapool/');
+	}
+
+	protected function buildDynPublicFilesystem() {
+		$dir     = SLY_DYNFOLDER.DIRECTORY_SEPARATOR.'public';
+		$baseUri = 'data/dyn/public/';
+
+		return $this['sly-filesystem-dyn-public'] = $this->getLocalHttpFilesystem($dir, $baseUri);
 	}
 
 	protected function missingValue(sly_Container $container, $id) {
 		throw new sly_Exception('You have to set the value for "'.$id.'" first!');
+	}
+
+	protected function getLocalHttpFilesystem($baseDir, $baseUri) {
+		$baseUri  = $this->getRequest()->getBaseUrl(true).'/'.$baseUri;
+		$config   = $this->getConfig();
+		$filePerm = $config->get('fileperm', sly_Core::DEFAULT_FILEPERM);
+		$dirPerm  = $config->get('dirperm', sly_Core::DEFAULT_DIRPERM);
+
+		return new sly\Filesystem\Adapter\LocalHttp($baseDir, $baseUri, $filePerm, $dirPerm);
 	}
 }
