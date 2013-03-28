@@ -63,8 +63,9 @@ class sly_Container implements ArrayAccess, Countable {
 			'sly-service-user'           => array($this, 'buildUserService'),
 
 			// filesystems
-			'sly-filesystem-media'       => array($this, 'buildMediaFilesystem'),
-			'sly-filesystem-dyn-public'  => array($this, 'buildDynPublicFilesystem'),
+			'sly-filesystem-media'        => array($this, 'buildMediaFilesystem'),
+			'sly-filesystem-dyn-public'   => array($this, 'buildDynPublicFilesystem'),
+			'sly-filesystem-dyn-internal' => array($this, 'buildDynInternalFilesystem'),
 
 			// helpers
 			'sly-slice-renderer'         => array($this, 'buildSliceRenderer')
@@ -464,6 +465,13 @@ class sly_Container implements ArrayAccess, Countable {
 	 */
 	public function getDynPublicFilesystem() {
 		return $this->get('sly-filesystem-dyn-public');
+	}
+
+	/**
+	 * @return sly\Filesystem\Filesystem
+	 */
+	public function getDynInternalFilesystem() {
+		return $this->get('sly-filesystem-dyn-internal');
 	}
 
 	/*          setters for objects that are commonly set          */
@@ -919,8 +927,20 @@ class sly_Container implements ArrayAccess, Countable {
 		return $this['sly-filesystem-dyn-public'] = $this->getLocalHttpFilesystem($dir, $baseUri);
 	}
 
+	protected function buildDynInternalFilesystem() {
+		return $this['sly-filesystem-dyn-internal'] = $this->getLocalFilesystem(SLY_DYNFOLDER.DIRECTORY_SEPARATOR.'internal');
+	}
+
 	protected function missingValue(sly_Container $container, $id) {
 		throw new sly_Exception('You have to set the value for "'.$id.'" first!');
+	}
+
+	protected function getLocalFilesystem($baseDir) {
+		$config   = $this->getConfig();
+		$filePerm = $config->get('fileperm', sly_Core::DEFAULT_FILEPERM);
+		$dirPerm  = $config->get('dirperm', sly_Core::DEFAULT_DIRPERM);
+
+		return new sly\Filesystem\Adapter\Local($baseDir, $filePerm, $dirPerm);
 	}
 
 	protected function getLocalHttpFilesystem($baseDir, $baseUri) {
