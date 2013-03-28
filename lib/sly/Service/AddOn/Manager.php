@@ -8,6 +8,8 @@
  * http://www.opensource.org/licenses/mit-license.php
  */
 
+use sly\Filesystem\Filesystem;
+
 /**
  * @author  christoph@webvariants.de
  * @ingroup service
@@ -18,6 +20,8 @@ class sly_Service_AddOn_Manager {
 	protected $cache;        ///< BabelCache_Interface
 	protected $addOnService; ///< sly_Service_AddOn
 	protected $pkgService;   ///< sly_Service_Package
+	protected $publicFs;     ///< Filesystem
+	protected $internalFs;   ///< Filesystem
 	protected $loadInfo;     ///< array
 	protected $loaded;       ///< array
 
@@ -26,12 +30,17 @@ class sly_Service_AddOn_Manager {
 	 * @param sly_Event_IDispatcher $dispatcher
 	 * @param BabelCache_Interface  $cache
 	 * @param sly_Service_AddOn     $service
+	 * @param Filesystem            $publicFs
+	 * @param Filesystem            $internalFs
 	 */
-	public function __construct(sly_Configuration $config, sly_Event_IDispatcher $dispatcher, BabelCache_Interface $cache, sly_Service_AddOn $service) {
+	public function __construct(sly_Configuration $config, sly_Event_IDispatcher $dispatcher,
+		BabelCache_Interface $cache, sly_Service_AddOn $service, Filesystem $publicFs, Filesystem $internalFs) {
 		$this->config       = $config;
 		$this->dispatcher   = $dispatcher;
 		$this->cache        = $cache;
 		$this->addOnService = $service;
+		$this->publicFs     = $publicFs;
+		$this->internalFs   = $internalFs;
 		$this->pkgService   = $service->getPackageService();
 		$this->loadInfo     = array();
 		$this->loaded       = array();

@@ -727,8 +727,10 @@ class sly_Container implements ArrayAccess, Countable {
 		$dispatcher = $container['sly-dispatcher'];
 		$cache      = $container['sly-cache'];
 		$service    = $container['sly-service-addon'];
+		$publicFs   = $container['sly-filesystem-dyn-public'];
+		$internalFs = $container['sly-filesystem-dyn-internal'];
 
-		return $this->values['sly-service-addon-manager'] = new sly_Service_AddOn_Manager($config, $dispatcher, $cache, $service);
+		return $this->values['sly-service-addon-manager'] = new sly_Service_AddOn_Manager($config, $dispatcher, $cache, $service, $publicFs, $internalFs);
 	}
 
 	/**
