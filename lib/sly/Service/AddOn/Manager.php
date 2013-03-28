@@ -8,7 +8,9 @@
  * http://www.opensource.org/licenses/mit-license.php
  */
 
+use sly\Filesystem\Adapter;
 use sly\Filesystem\Filesystem;
+use sly\Filesystem\Service;
 
 /**
  * @author  christoph@webvariants.de
@@ -58,16 +60,20 @@ class sly_Service_AddOn_Manager {
 	 */
 	public function copyAssets($addon) {
 		$baseDir   = $this->pkgService->baseDirectory($addon);
-		$target    = $this->addOnService->publicDirectory($addon);
+		$target    = $addon;
 		$assetsDir = $baseDir.'assets';
 
 		if (!is_dir($assetsDir)) {
 			return true;
 		}
 
-		$dir = new sly_Util_Directory($assetsDir);
+		$source  = new Adapter\Local($assetsDir, 0777, 0777);
+		$service = new Service($source);
 
-		if (!$dir->copyTo($target)) {
+		try {
+			$service->mirrorTo('', $this->publicFs, $target);
+		}
+		catch (Exception $e) {
 			throw new sly_Exception(t('addon_assets_failed', $assetsDir));
 		}
 
@@ -106,7 +112,7 @@ class sly_Service_AddOn_Manager {
 	 * @param string $addon  addon name
 	 */
 	public function deletePublicFiles($addon) {
-		$this->deleteFiles('public', $addon);
+		$this->deleteFiles('public', $this->publicFs, $addon);
 	}
 
 	/**
@@ -115,24 +121,26 @@ class sly_Service_AddOn_Manager {
 	 * @param string $addon  addon name
 	 */
 	public function deleteInternalFiles($addon) {
-		$this->deleteFiles('internal', $addon);
+		$this->deleteFiles('internal', $this->internalFs, $addon);
 	}
 
 	/**
 	 * Removes all files in a directory
 	 *
-	 * @throws sly_Exception  in case the assets could not be copied
-	 * @param  string $type   'public' or 'internal'
-	 * @param  string $addon  addon name
+	 * @throws sly_Exception      in case the assets could not be copied
+	 * @param  string     $type
+	 * @param  Filesystem $fs
+	 * @param  string     $addon  addon name
 	 */
-	protected function deleteFiles($type, $addon) {
+	protected function deleteFiles($type, Filesystem $fs, $addon) {
 		$this->fireEvent('PRE', 'DELETE_'.strtoupper($type), $addon);
 
-		$dir = $this->addOnService->dynDirectory($type, $addon);
-		$obj = new sly_Util_Directory($dir);
-
-		if (!$obj->delete(true)) {
-			throw new sly_Exception(t('addon_cleanup_failed', $dir));
+		try {
+			$service = new Service($fs);
+			$service->removeFiles($addon, true);
+		}
+		catch (Exception $e) {
+			throw new sly_Exception(t('addon_cleanup_failed', $type));
 		}
 
 		$this->fireEvent('POST', 'DELETE_'.strtoupper($type), $addon);
