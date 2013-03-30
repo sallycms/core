@@ -8,6 +8,9 @@
  * http://www.opensource.org/licenses/mit-license.php
  */
 
+use sly\Filesystem\Decorator\Prefixed;
+use sly\Filesystem\Filesystem;
+
 /**
  * @author  christoph@webvariants.de
  * @ingroup service
@@ -17,7 +20,8 @@ class sly_Service_AddOn {
 	protected $cache;      ///< BabelCache_Interface
 	protected $pkgService; ///< sly_Service_Package
 	protected $vndService; ///< sly_Service_Package  vendor package service (optional)
-	protected $dynDir;     ///< string
+	protected $publicFs;   ///< Filesystem
+	protected $internalFs; ///< Filesystem
 
 	const SALLY_PKGKEY     = 'sallycms/sallycms';
 	const INSTALLER_PKGKEY = 'sallycms/composer-installer';
@@ -26,13 +30,15 @@ class sly_Service_AddOn {
 	 * @param sly_Configuration    $config
 	 * @param BabelCache_Interface $cache
 	 * @param sly_Service_Package  $pkgService
-	 * @param string               $dynDir
+	 * @param Filesystem           $publicFs
+	 * @param Filesystem           $internalFs
 	 */
-	public function __construct(sly_Configuration $config, BabelCache_Interface $cache, sly_Service_Package $pkgService, $dynDir) {
+	public function __construct(sly_Configuration $config, BabelCache_Interface $cache, sly_Service_Package $pkgService, Filesystem $publicFs, Filesystem $internalFs) {
 		$this->config     = $config;
-		$this->cache     = $cache;
+		$this->cache      = $cache;
 		$this->pkgService = $pkgService;
-		$this->dynDir     = sly_Util_Directory::normalize($dynDir).DIRECTORY_SEPARATOR;
+		$this->publicFs   = $publicFs;
+		$this->internalFs = $internalFs;
 	}
 
 	/**
@@ -75,16 +81,6 @@ class sly_Service_AddOn {
 	 */
 	public function getProperty($addon, $property, $default = null) {
 		return $this->config->get($this->getConfPath($addon).'/'.$property, $default);
-	}
-
-	/**
-	 * @param  string $type   'internal' or 'public'
-	 * @param  string $addon  addon name
-	 * @return string
-	 */
-	public function dynDirectory($type, $addon) {
-		$dir = $this->dynDir.$type.DIRECTORY_SEPARATOR.str_replace('/', DIRECTORY_SEPARATOR, $addon);
-		return sly_Util_Directory::create($dir);
 	}
 
 	/**
@@ -241,23 +237,23 @@ class sly_Service_AddOn {
 	}
 
 	/**
-	 * Get the full path to the public directory
+	 * Get the filesystem containing an addOn's public files
 	 *
 	 * @param  string $addon  addon name
-	 * @return string         full path
+	 * @return Filesystem
 	 */
-	public function publicDirectory($addon) {
-		return $this->dynDirectory('public', $addon);
+	public function publicFilesystem($addon) {
+		return new Prefixed($this->publicFs, $addon);
 	}
 
 	/**
-	 * Get the full path to the internal directory
+	 * Get the filesystem containing an addOn's internal files
 	 *
 	 * @param  string $addon  addon name
-	 * @return string         full path
+	 * @return Filesystem
 	 */
-	public function internalDirectory($addon) {
-		return $this->dynDirectory('internal', $addon);
+	public function internalFilesystem($addon) {
+		return new Prefixed($this->internalFs, $addon);
 	}
 
 	/**

@@ -711,7 +711,9 @@ class sly_Container implements ArrayAccess, Countable {
 		$config     = $container['sly-config'];
 		$adnService = $container['sly-service-package-addon'];
 		$vndService = $container['sly-service-package-vendor'];
-		$service    = new sly_Service_AddOn($config, $cache, $adnService, SLY_DYNFOLDER);
+		$publicFs   = $container['sly-filesystem-dyn-public'];
+		$internalFs = $container['sly-filesystem-dyn-internal'];
+		$service    = new sly_Service_AddOn($config, $cache, $adnService, $publicFs, $internalFs);
 
 		$service->setVendorPackageService($vndService);
 
@@ -727,10 +729,8 @@ class sly_Container implements ArrayAccess, Countable {
 		$dispatcher = $container['sly-dispatcher'];
 		$cache      = $container['sly-cache'];
 		$service    = $container['sly-service-addon'];
-		$publicFs   = $container['sly-filesystem-dyn-public'];
-		$internalFs = $container['sly-filesystem-dyn-internal'];
 
-		return $this->values['sly-service-addon-manager'] = new sly_Service_AddOn_Manager($config, $dispatcher, $cache, $service, $publicFs, $internalFs);
+		return $this->values['sly-service-addon-manager'] = new sly_Service_AddOn_Manager($config, $dispatcher, $cache, $service);
 	}
 
 	/**
