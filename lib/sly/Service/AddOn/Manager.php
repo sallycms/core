@@ -22,8 +22,6 @@ class sly_Service_AddOn_Manager {
 	protected $cache;        ///< BabelCache_Interface
 	protected $addOnService; ///< sly_Service_AddOn
 	protected $pkgService;   ///< sly_Service_Package
-	protected $publicFs;     ///< Filesystem
-	protected $internalFs;   ///< Filesystem
 	protected $loadInfo;     ///< array
 	protected $loaded;       ///< array
 
@@ -36,13 +34,11 @@ class sly_Service_AddOn_Manager {
 	 * @param Filesystem            $internalFs
 	 */
 	public function __construct(sly_Configuration $config, sly_Event_IDispatcher $dispatcher,
-		BabelCache_Interface $cache, sly_Service_AddOn $service, Filesystem $publicFs, Filesystem $internalFs) {
+		BabelCache_Interface $cache, sly_Service_AddOn $service) {
 		$this->config       = $config;
 		$this->dispatcher   = $dispatcher;
 		$this->cache        = $cache;
 		$this->addOnService = $service;
-		$this->publicFs     = $publicFs;
-		$this->internalFs   = $internalFs;
 		$this->pkgService   = $service->getPackageService();
 		$this->loadInfo     = array();
 		$this->loaded       = array();
@@ -59,9 +55,7 @@ class sly_Service_AddOn_Manager {
 	 * @return boolean        always true
 	 */
 	public function copyAssets($addon) {
-		$baseDir   = $this->pkgService->baseDirectory($addon);
-		$target    = $addon;
-		$assetsDir = $baseDir.'assets';
+		$assetsDir = $this->pkgService->baseDirectory($addon).'assets';
 
 		if (!is_dir($assetsDir)) {
 			return true;
@@ -69,9 +63,10 @@ class sly_Service_AddOn_Manager {
 
 		$source  = new Adapter\Local($assetsDir, 0777, 0777);
 		$service = new Service($source);
+		$target  = $this->addOnService->publicFilesystem($addon);
 
 		try {
-			$service->mirrorTo('', $this->publicFs, $target);
+			$service->mirrorTo('', $target, '');
 		}
 		catch (Exception $e) {
 			throw new sly_Exception(t('addon_assets_failed', $assetsDir));
@@ -112,7 +107,7 @@ class sly_Service_AddOn_Manager {
 	 * @param string $addon  addon name
 	 */
 	public function deletePublicFiles($addon) {
-		$this->deleteFiles('public', $this->publicFs, $addon);
+		$this->deleteFiles('public', $this->addOnService->publicFilesystem($addon), $addon);
 	}
 
 	/**
@@ -121,7 +116,7 @@ class sly_Service_AddOn_Manager {
 	 * @param string $addon  addon name
 	 */
 	public function deleteInternalFiles($addon) {
-		$this->deleteFiles('internal', $this->internalFs, $addon);
+		$this->deleteFiles('internal', $this->addOnService->internalFilesystem($addon), $addon);
 	}
 
 	/**
@@ -133,17 +128,17 @@ class sly_Service_AddOn_Manager {
 	 * @param  string     $addon  addon name
 	 */
 	protected function deleteFiles($type, Filesystem $fs, $addon) {
-		$this->fireEvent('PRE', 'DELETE_'.strtoupper($type), $addon);
+		$this->fireEvent('PRE', 'DELETE_'.strtoupper($type), $addon, array('filesystem' => $fs));
 
 		try {
 			$service = new Service($fs);
-			$service->removeFiles($addon, true);
+			$service->removeAllFiles();
 		}
 		catch (Exception $e) {
 			throw new sly_Exception(t('addon_cleanup_failed', $type));
 		}
 
-		$this->fireEvent('POST', 'DELETE_'.strtoupper($type), $addon);
+		$this->fireEvent('POST', 'DELETE_'.strtoupper($type), $addon, array('filesystem' => $fs));
 	}
 
 	/**
@@ -678,11 +673,12 @@ class sly_Service_AddOn_Manager {
 	/**
 	 * Fire a notify event regarding addOn state changes
 	 *
-	 * @param string $time   'PRE' or 'POST'
-	 * @param string $type   'INSTALL', 'UNINSTALL', ...
-	 * @param string $addon  the addOn that we operate on
+	 * @param string $time    'PRE' or 'POST'
+	 * @param string $type    'INSTALL', 'UNINSTALL', ...
+	 * @param string $addon   the addOn that we operate on
+	 * @param array  $params  additional event parameters
 	 */
-	protected function fireEvent($time, $type, $addon) {
-		$this->dispatcher->notify('SLY_ADDON_'.$time.'_'.$type, $addon);
+	protected function fireEvent($time, $type, $addon, array $params = array()) {
+		$this->dispatcher->notify('SLY_ADDON_'.$time.'_'.$type, $addon, $params);
 	}
 }
