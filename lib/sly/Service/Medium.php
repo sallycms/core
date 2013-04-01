@@ -8,6 +8,8 @@
  * http://www.opensource.org/licenses/mit-license.php
  */
 
+use sly\Filesystem\Filesystem;
+
 /**
  * DB Model Klasse für Medien
  *
@@ -19,6 +21,7 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id {
 	protected $cache;              ///< BabelCache_Interface
 	protected $dispatcher;         ///< sly_Event_IDispatcher
 	protected $catService;         ///< sly_Service_MediaCategory
+	protected $mediaFs;            ///< Filesystem
 
 	/**
 	 * Constructor
@@ -27,13 +30,16 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id {
 	 * @param BabelCache_Interface      $cache
 	 * @param sly_Event_IDispatcher     $dispatcher
 	 * @param sly_Service_MediaCategory $catService
+	 * @param sly_Service_MediaCategory $mediaFs
 	 */
-	public function __construct(sly_DB_Persistence $persistence, BabelCache_Interface $cache, sly_Event_IDispatcher $dispatcher, sly_Service_MediaCategory $catService) {
+	public function __construct(sly_DB_Persistence $persistence, BabelCache_Interface $cache, sly_Event_IDispatcher $dispatcher,
+		sly_Service_MediaCategory $catService, Filesystem $mediaFs) {
 		parent::__construct($persistence);
 
 		$this->cache      = $cache;
 		$this->dispatcher = $dispatcher;
 		$this->catService = $catService;
+		$this->mediaFs    = $mediaFs;
 	}
 
 	/**
@@ -162,10 +168,11 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id {
 
 		// check file itself
 
+		$fs       = $this->mediaFs;
 		$filename = basename($filename);
 		$fullname = SLY_MEDIAFOLDER.'/'.$filename;
 
-		if (!file_exists($fullname)) {
+		if (!$fs->exists($filename)) {
 			throw new sly_Exception(t('file_not_found', $filename));
 		}
 
@@ -254,8 +261,10 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id {
 			$sql = $this->getPersistence();
 			$sql->delete('file', array('id' => $medium->getId()));
 
-			if ($medium->exists()) {
-				unlink(SLY_MEDIAFOLDER.'/'.$medium->getFilename());
+			$filename = $medium->getFilename();
+
+			if ($this->mediaFs->exists($filename)) {
+				$this->mediaFs->remove($filename);
 			}
 		}
 		catch (Exception $e) {

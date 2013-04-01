@@ -852,8 +852,9 @@ class sly_Container implements ArrayAccess, Countable {
 		$cache       = $container['sly-cache'];
 		$dispatcher  = $container['sly-dispatcher'];
 		$categories  = $container['sly-service-mediacategory'];
+		$mediaFs     = $container['sly-filesystem-media'];
 
-		return $this->values['sly-service-medium'] = new sly_Service_Medium($persistence, $cache, $dispatcher, $categories);
+		return $this->values['sly-service-medium'] = new sly_Service_Medium($persistence, $cache, $dispatcher, $categories, $mediaFs);
 	}
 
 	/**
