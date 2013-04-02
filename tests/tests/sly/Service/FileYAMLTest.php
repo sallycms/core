@@ -18,7 +18,7 @@ class sly_Service_FileYAMLTest extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * @expectedException InvalidArgumentException
+	 * @expectedException  Symfony\Component\Yaml\Exception\ParseException
 	 */
 	public function testLoadBroken() {
 		$this->service->load(SLY_COREFOLDER.'/tests/files/fuckedUpYaml.yml');
