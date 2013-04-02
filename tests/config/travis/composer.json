@@ -15,8 +15,7 @@
             "sly_": "lib/"
         },
         "files": [
-            "lib/functions.php",
-            "lib/compatibility.php"
+            "lib/functions.php"
         ]
     },
     "require": {
