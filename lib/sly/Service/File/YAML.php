@@ -43,7 +43,7 @@ class sly_Service_File_YAML extends sly_Service_File_Base {
 	}
 
 	protected function checkForSfYaml() {
-		if (!class_exists('sfYaml')) {
+		if (!class_exists('Symfony\Component\Yaml\Yaml')) {
 			throw new sly_Exception('Symfony\Yaml was not found. Did you forget `composer install`?');
 		}
 	}
