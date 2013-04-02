@@ -106,7 +106,7 @@ class sly_Util_ParamParser {
 			try {
 				$value = Inline::parse($value);
 			}
-			catch (InvalidArgumentException $e) {
+			catch (Exception $e) {
 				trigger_error(t('invalid_develop_param', $value), E_USER_WARNING);
 			}
 
