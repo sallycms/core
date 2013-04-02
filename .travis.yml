@@ -15,7 +15,7 @@ install:
    - ./tests/setup-travis.sh
 
 script:
-   - phpunit -c tests/full.xml
+   - vendor/bin/phpunit -c tests/full.xml
 
 notifications:
    email:
