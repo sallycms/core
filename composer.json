@@ -51,7 +51,7 @@
         "leafo/lessphp": "0.3.*@stable",
         "webvariants/babelcache": "1.2.*",
         "sallycms/composer-installer": "~1.1",
-        "xrstf/composer-php52": ">=1.0.3,<2.0"
+        "pimple/pimple": "~1.0"
     },
     "require-dev": {
         "phpunit/phpunit": "3.7.*",
