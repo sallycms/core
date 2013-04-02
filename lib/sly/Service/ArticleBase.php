@@ -9,13 +9,12 @@
  */
 
 abstract class sly_Service_ArticleBase extends sly_Service_Model_Base implements sly_ContainerAwareInterface {
-	const     FIND_REVISION_LATEST = -2;
-	const     FIND_REVISION_ONLINE = -1;
+	const FIND_REVISION_LATEST = -2;
+	const FIND_REVISION_ONLINE = -1;
 
 	protected $tablename = 'article'; ///< string
 	protected $container;             ///< sly_Container
 	protected $languages = null;
-
 
 	public function setContainer(sly_Container $container = null) {
 		$this->container = $container;

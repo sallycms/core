@@ -106,6 +106,11 @@ class sly_Core {
 				$config->setStatic('/', $localConfig);
 			}
 
+			// Now that we know the local, i.e. database config, we can build the
+			// persistence and power up the config reader.
+			$persistence = $container['sly-persistence'];
+			$configReader->setPersistence($persistence);
+
 			$projectConfig = $configReader->readProject();
 			if (!empty($projectConfig)) {
 				$config->set('/', $projectConfig);

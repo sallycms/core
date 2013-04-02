@@ -40,12 +40,21 @@ class sly_Container extends Pimple implements Countable {
 		});
 
 		$this['sly-config-reader'] = $this->share(function($container) {
-			return new sly_Configuration_DatabaseImpl();
+			$yamlService = $container->getService('File_YAML');
+
+			// check if the persistence may be already available
+			$persistence = $container->raw('sly-persistence');
+
+			if (!($persistence instanceof sly_DB_Persistence)) {
+				$persistence = null;
+			}
+
+			return new sly_Configuration_DatabaseImpl(SLY_CONFIGFOLDER, $yamlService, $persistence);
 		});
 
-		$this['sly-config-writer'] = $this->share(function($container) {
+		$this['sly-config-writer'] = function($container) {
 			return $container['sly-config-reader'];
-		});
+		};
 
 		$this['sly-dispatcher'] = $this->share(function($container) {
 			return new sly_Event_Dispatcher();
@@ -80,14 +89,14 @@ class sly_Container extends Pimple implements Countable {
 			return new sly_Session($container['sly-config']->get('instname'));
 		});
 
-		$this['sly-persistence'] = function($container) {
+		$this['sly-persistence'] = $this->inject(function($container) {
 			$config = $container['sly-config']->get('database');
 
 			// TODO: to support the iterator inside the persistence, we need to create
 			// a fresh instance for every access. We should refactor the database access
 			// to allow for a single persistence instance.
 			return new sly_DB_PDO_Persistence($config['driver'], $config['host'], $config['login'], $config['password'], $config['name'], $config['table_prefix']);
-		};
+		});
 
 		$this['sly-cache'] = $this->share(function($container) {
 			$config   = $container['sly-config'];
@@ -130,7 +139,7 @@ class sly_Container extends Pimple implements Countable {
 			$cache      = $container['sly-cache'];
 			$service    = $container['sly-service-addon'];
 
-			return $this[$id] = new sly_Service_AddOn_Manager($config, $dispatcher, $cache, $service);
+			return new sly_Service_AddOn_Manager($config, $dispatcher, $cache, $service);
 		});
 
 		$this['sly-service-article'] = $this->share(function($container) {
@@ -138,21 +147,14 @@ class sly_Container extends Pimple implements Countable {
 			$slices      = $container['sly-service-slice'];
 			$articles    = $container['sly-service-articleslice'];
 			$templates   = $container['sly-service-template'];
-			$service     = new sly_Service_Article($persistence, $slices, $articles, $templates);
 
-			// make sure the circular dependency does not make the app die with an endless loop
-			$this['sly-service-article'] = $service;
-
-			return $service;
+			return new sly_Service_Article($persistence, $slices, $articles, $templates);
 		});
 
 		$this['sly-service-deletedarticle'] = $this->share(function($container) {
 			$persistence = $container['sly-persistence'];
-			$service     = new sly_Service_DeletedArticle($persistence);
 
-			$this['sly-service-deletedarticle'] = $service;
-
-			return $service;
+			return new sly_Service_DeletedArticle($persistence);
 		});
 
 		$this['sly-service-articleslice'] = $this->share(function($container) {
@@ -161,12 +163,7 @@ class sly_Container extends Pimple implements Countable {
 			$slices      = $container['sly-service-slice'];
 			$templates   = $container['sly-service-template'];
 
-			$service = new sly_Service_ArticleSlice($persistence, $dispatcher, $slices, $templates);
-
-			$this['sly-service-articleslice'] = $service;
-			$service->setArticleService($container['sly-service-article']);
-
-			return $service;
+			return new sly_Service_ArticleSlice($persistence, $dispatcher, $slices, $templates);
 		});
 
 		$this['sly-service-articletype'] = $this->share(function($container) {
@@ -183,11 +180,8 @@ class sly_Container extends Pimple implements Countable {
 
 		$this['sly-service-category'] = $this->share(function($container) {
 			$persistence = $container['sly-persistence'];
-			$service     = new sly_Service_Category($persistence);
 
-			$this['sly-service-category'] = $service;
-
-			return $service;
+			return new sly_Service_Category($persistence);
 		});
 
 		$this['sly-service-language'] = $this->share(function($container) {
@@ -202,13 +196,8 @@ class sly_Container extends Pimple implements Countable {
 			$persistence = $container['sly-persistence'];
 			$cache       = $container['sly-cache'];
 			$dispatcher  = $container['sly-dispatcher'];
-			$service     = new sly_Service_MediaCategory($persistence, $cache, $dispatcher);
 
-			// make sure the circular dependency does not make the app die with an endless loop
-			$this['sly-service-mediacategory'] = $service;
-			$service->setMediumService($container['sly-service-medium']);
-
-			return $service;
+			return new sly_Service_MediaCategory($persistence, $cache, $dispatcher);
 		});
 
 		$this['sly-service-medium'] = $this->share(function($container) {
@@ -266,6 +255,52 @@ class sly_Container extends Pimple implements Countable {
 	}
 
 	/**
+	 * Returns a closure that tests for *Aware interfaces and injects common
+	 * dependencies via setter methods.
+	 *
+	 * See here why this method is static but in most cases not called
+	 * statically: https://github.com/fabpot/Pimple/pull/63
+	 *
+	 * @param  Closure $callable  a closure to wrap
+	 * @return Closure            the wrapped closure
+	 */
+	public static function inject(Closure $callable) {
+		return function ($c) use ($callable) {
+			$object = $callable($c);
+
+			if ($object instanceof sly_ContainerAwareInterface) {
+				$object->setContainer($c);
+			}
+
+			return $object;
+		};
+	}
+
+	/**
+	 * Returns a closure that stores the result of the given closure for
+	 * uniqueness in the scope of this instance of Pimple.
+	 *
+	 * @param  Closure $callable            a closure to wrap for uniqueness
+	 * @param  bool    $injectOptionalDeps  whether to automatically wrap in inject() as well
+	 * @return Closure                      the wrapped closure
+	 */
+	public static function share(Closure $callable, $injectOptionalDeps = true) {
+		if ($injectOptionalDeps) {
+			$callable = self::inject($callable);
+		}
+
+		return function ($c) use ($callable) {
+			static $object;
+
+			if (null === $object) {
+				$object = $callable($c);
+			}
+
+			return $object;
+		};
+	}
+
+	/**
 	 * Returns the number of elements
 	 *
 	 * @return int
@@ -281,16 +316,6 @@ class sly_Container extends Pimple implements Countable {
 	 */
 	public function set($id, $value) {
 		$this->offsetSet($id, $value);
-
-		return $this;
-	}
-
-	public function offsetSet($id, $value) {
-		if (is_object($value) && $value instanceof sly_ContainerAwareInterface) {
-			$value->setContainer($this);
-		}
-
-		parent::offsetSet($id, $value);
 
 		return $this;
 	}
@@ -609,7 +634,7 @@ class sly_Container extends Pimple implements Countable {
 	}
 
 	/**
-	 * @return xrstf_Composer52_ClassLoader
+	 * @return Composer\Autoload\ClassLoader
 	 */
 	public function getClassLoader() {
 		return $this['sly-classloader'];
@@ -710,8 +735,8 @@ class sly_Container extends Pimple implements Countable {
 	}
 
 	/**
-	 * @param  string $dir       the sally config dir
-	 * @return sly_Container     reference to self
+	 * @param  string $dir    the sally config dir
+	 * @return sly_Container  reference to self
 	 */
 	public function setConfigDir($dir) {
 		return $this->set('sly-config-dir', $dir);

@@ -13,74 +13,72 @@
  *
  * @ingroup core
  */
-class sly_Configuration_DatabaseImpl implements sly_Configuration_Reader, sly_Configuration_Writer, sly_ContainerAwareInterface {
-	protected $container; ///< sly_Container
+class sly_Configuration_DatabaseImpl implements sly_Configuration_Reader, sly_Configuration_Writer {
+	protected $configDir;   ///< string
+	protected $persistence; ///< sly_DB_PDO_Persistence
+	protected $fileService; ///< sly_Service_File_Base
 
-	public function __construct() {
-
+	public function __construct($configDirectory, sly_Service_File_Base $fileService, sly_DB_PDO_Persistence $persistence = null) {
+		$this->configDir   = rtrim($configDirectory, '/\\');
+		$this->fileService = $fileService;
+		$this->persistence = $persistence;
 	}
 
-	public function setContainer(sly_Container $container = null) {
-		$this->container = $container;
+	public function setPersistence(sly_DB_PDO_Persistence $persistence) {
+		$this->persistence = $persistence;
 	}
 
 	public function writeLocal(array $data) {
-		sly_Util_YAML::dump(SLY_CONFIGFOLDER.DIRECTORY_SEPARATOR.'sly_local.yml', $data);
+		$this->fileService->dump($this->configDir.DIRECTORY_SEPARATOR.'sly_local.yml', $data);
 	}
 
 	public function writeProject(array $data) {
-		$db      = $this->container->getPersistence();
-		$ownTrx  = !$db->isTransRunning();
+		$this->checkPersistence();
 
-		if ($ownTrx) {
-			$db->beginTransaction();
-		}
-		try {
+		$db = $this->persistence;
+
+		$db->transactional(function() use ($db, $data) {
 			$db->delete('config');
+
 			foreach ($data as $id => $value) {
 				$value = json_encode($value);
 				$db->insert('config', compact('id', 'value'));
 			}
-			if ($ownTrx) {
-					$db->commit();
-				}
-			}
-		catch (Exception $e) {
-			if ($ownTrx) {
-				$db->rollBack();
-			}
-
-			throw $e;
-		}
+		});
 	}
 
 	public function readLocal() {
-		$result = array();
-
 		try {
-			$result = sly_Util_YAML::load(SLY_CONFIGFOLDER.DIRECTORY_SEPARATOR.'sly_local.yml');
+			return $this->fileService->load($this->configDir.DIRECTORY_SEPARATOR.'sly_local.yml');
 		}
 		catch (sly_Exception $e) {
-			// pass
+			return array();
 		}
-
-		return $result;
 	}
 
 	public function readProject() {
+		$this->checkPersistence();
+
+		$db     = $this->persistence;
 		$result = array();
 
 		try {
-			$db = $this->container->getPersistence();
 			$db->select('config');
 
 			foreach ($db as $row) {
 				$result[$row['id']] = json_decode($row['value'], true);
 			}
-		} catch (sly_DB_Exception $e) {
+		}
+		catch (sly_DB_Exception $e) {
 			// pass
 		}
 
 		return $result;
+	}
+
+	protected function checkPersistence() {
+		if (!$this->persistence) {
+			throw new LogicException('Persistence must be set before project configuration can be handled.');
+		}
 	}
 }
