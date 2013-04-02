@@ -57,7 +57,7 @@ class sly_Core {
 		mb_internal_encoding('UTF-8');
 
 		// define that the path to the core is here
-		if (!defined('SLY_COREFOLDER'))    define('SLY_COREFOLDER',    dirname(dirname(dirname(__FILE__))));
+		if (!defined('SLY_COREFOLDER'))    define('SLY_COREFOLDER',    dirname(dirname(__DIR__)));
 
 		// define constants for system wide important paths if they are not set already
 		if (!defined('SLY_BASE'))          define('SLY_BASE',          realpath(SLY_COREFOLDER.'/../../'));

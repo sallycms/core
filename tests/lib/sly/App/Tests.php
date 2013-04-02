@@ -30,7 +30,7 @@ class sly_App_Tests implements sly_App_Interface {
 		$container->getModuleService()->refresh();
 
 		// add a dummy i18n
-		$i18n = new sly_I18N('de', dirname(__FILE__));
+		$i18n = new sly_I18N('de', __DIR__);
 		$container->setI18N($i18n);
 
 		$container->setEnvironment('dev');
