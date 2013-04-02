@@ -271,7 +271,7 @@ function sly_translate($text, $html = false) {
 function sly_ini_get($key) {
 	$res = ini_get($key);
 
-	// key not found (only possible in PHP 5.3+, PHP 5.2 returns an empty string for missing keys)
+	// key not found
 	if ($res === false) {
 		return $res;
 	}
