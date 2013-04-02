@@ -8,12 +8,12 @@
  * http://www.opensource.org/licenses/mit-license.php
  */
 
-// check if we're installed as a dependency, residing in sally/core/
-$vendor = dirname(__DIR__).DIRECTORY_SEPARATOR.'vendor';
+// check if we're a standalone installation
+$vendor = __DIR__.DIRECTORY_SEPARATOR.'vendor';
 
 if (!file_exists($vendor.'/autoload.php')) {
-	// check if we're a standalone installation
-	$vendor = __DIR__.DIRECTORY_SEPARATOR.'vendor';
+	// check if we're installed as a dependency, residing in sally/core/
+	$vendor = dirname(__DIR__).DIRECTORY_SEPARATOR.'vendor';
 
 	if (!file_exists($vendor.'/autoload.php')) {
 		print
