@@ -8,6 +8,8 @@
  * http://www.opensource.org/licenses/mit-license.php
  */
 
+use Symfony\Component\Yaml\Inline;
+
 /**
  * @ingroup util
  */
@@ -102,7 +104,7 @@ class sly_Util_ParamParser {
 			$value = str_replace("\n", ' ', $value);
 
 			try {
-				$value = sfYamlInline::load($value);
+				$value = Inline::parse($value);
 			}
 			catch (InvalidArgumentException $e) {
 				trigger_error(t('invalid_develop_param', $value), E_USER_WARNING);

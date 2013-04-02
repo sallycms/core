@@ -18,24 +18,6 @@
     "version": "0.9.x-dev",
     "homepage": "http://www.sallycms.de/",
     "license": "MIT",
-    "repositories": [
-        {
-            "type": "package",
-            "package": {
-                "name": "fabpot/yaml",
-                "version": "1.0.6",
-                "autoload": {
-                    "psr-0": {
-                        "sfYaml": "lib/"
-                    }
-                },
-                "dist": {
-                    "type": "zip",
-                    "url": "https://github.com/fabpot/yaml/zipball/8a266aadce"
-                }
-            }
-        }
-    ],
     "autoload": {
         "psr-0": {
             "sly_": "lib/"
@@ -46,8 +28,8 @@
         ]
     },
     "require": {
-        "php": ">=5.2.1",
-        "fabpot/yaml": "1.0.6",
+        "php": ">=5.3.3",
+        "symfony/yaml": "~2.2",
         "leafo/lessphp": "0.3.*@stable",
         "webvariants/babelcache": "1.2.*",
         "sallycms/composer-installer": "~1.1",
