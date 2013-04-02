@@ -2,9 +2,9 @@ setup: false
 instname: sly59f008fea53fb4447830
 caching_strategy: BabelCache_Blackhole
 database:
-  driver: mysql
-  host: localhost
-  login: develop
-  password: develop
-  name: sally_test
-  table_prefix: sly_
+    driver: mysql
+    host: localhost
+    login: develop
+    password: develop
+    name: sally_test
+    table_prefix: sly_

@@ -11,8 +11,10 @@
 class sly_ConfigurationHandlerTest extends PHPUnit_Framework_TestCase {
 
 	public function testHandler() {
-		$handler = new sly_Configuration_DatabaseImpl();
-		$handler->setContainer(sly_Core::getContainer());
+		$container = sly_Core::getContainer();
+		$handler   = new sly_Configuration_DatabaseImpl(SLY_CONFIGFOLDER, $container->getService('File_YAML'));
+
+		$handler->setPersistence($container->getPersistence());
 
 		$local = $handler->readLocal();
 		$this->assertNotEmpty($local);
@@ -24,7 +26,7 @@ class sly_ConfigurationHandlerTest extends PHPUnit_Framework_TestCase {
 
 		$project = array('unit' => 'test', 'array' => array('unit' => 'test'));
 		$handler->writeProject($project);
-		
+
 		$project2 = $handler->readProject();
 		$this->assertEquals($project2, $project);
 	}

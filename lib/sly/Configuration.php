@@ -13,7 +13,7 @@
  *
  * @ingroup core
  */
-class sly_Configuration implements sly_ContainerAwareInterface{
+class sly_Configuration implements sly_ContainerAwareInterface {
 	protected $container;    ///< sly_Container
 	protected $staticStore;  ///< sly_Util_Array
 	protected $dynamicStore; ///< sly_Util_Array
