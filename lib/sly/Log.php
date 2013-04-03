@@ -65,7 +65,7 @@ class sly_Log {
 	public static function getLogDirectory() {
 		// fallback in case the class is loaded via bootcache
 		if (self::$targetDir === null) {
-			self::setLogDirectory(SLY_DYNFOLDER.'/internal/sally/logs');
+			self::setLogDirectory(SLY_TEMPFOLDER.'/sally/logs');
 		}
 
 		return self::$targetDir;

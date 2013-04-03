@@ -19,7 +19,7 @@ class sly_Service_File_YAML extends sly_Service_File_Base {
 	 * @return string
 	 */
 	protected function getCacheDir() {
-		$dir = SLY_DYNFOLDER.'/internal/sally/yaml-cache';
+		$dir = SLY_TEMPFOLDER.'/sally/yaml-cache';
 		return sly_Util_Directory::create($dir, null, true);
 	}
 

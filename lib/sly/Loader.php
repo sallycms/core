@@ -99,17 +99,6 @@ class sly_Loader {
 
 		if ($found) {
 			include_once $fullPath;
-
-			// init classes
-
-			switch ($className) {
-				case 'sly_Log':
-					$dir = SLY_DYNFOLDER.'/internal/sally/logs';
-					sly_Util_Directory::create($dir);
-					sly_Log::setLogDirectory($dir);
-					break;
-			}
-
 			return true;
 		}
 
@@ -177,7 +166,7 @@ class sly_Loader {
 		static $dir = null;
 
 		if ($dir === null) {
-			$dir  = SLY_DYNFOLDER.'/internal/sally/loader';
+			$dir  = SLY_TEMPFOLDER.'/sally/loader';
 			$perm = 0777; // hard-coded since sly_Core may not have been loaded yet
 
 			if (is_dir(dirname($dir)) && !is_dir($dir)) {
