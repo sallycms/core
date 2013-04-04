@@ -570,9 +570,6 @@ class sly_Core {
 	public static function clearCache() {
 		clearstatcache();
 
-		// clear loader cache
-		sly_Loader::clearCache();
-
 		$container = self::getContainer();
 
 		// clear our own data caches
