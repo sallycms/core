@@ -29,12 +29,6 @@ $loader = require $vendor.'/autoload.php';
 // make sure to use develop/lib as the first load path
 $loader->add('', dirname(dirname(__DIR__)).'/develop/lib', true);
 
-// still load the old one, to give addOns time to update their code base
-// We should remove this once we can properly handle file includes and reach
-// maybe version 0.10 or 0.11.
-sly_Loader::enablePathCache();
-sly_Loader::register();
-
 // cleanup
 unset($vendor);
 
