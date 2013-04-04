@@ -56,12 +56,7 @@ class sly_DB_PDO_Connection {
 				self::$instances[$dsn] = new self($driverObj, $dsn, $login, $password);
 			}
 			catch (PDOException $e) {
-				if (version_compare(PHP_VERSION, '5.3.0', '>=')) {
-					throw new sly_DB_PDO_Exception($e->getMessage(), $e->getCode(), $e->getPrevious());
-				}
-				else {
-					throw new sly_DB_PDO_Exception($e->getMessage(), $e->getCode());
-				}
+				throw new sly_DB_PDO_Exception($e->getMessage(), $e->getCode(), $e->getPrevious());
 			}
 		}
 
