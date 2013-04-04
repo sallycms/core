@@ -9,7 +9,7 @@
  */
 
 /**
- * PDO Persintence Klasse für eine PDO-Verbindung
+ * PDO Persistence Klasse für eine PDO-Verbindung
  *
  * @author  zozi@webvariants.de
  * @ingroup database
