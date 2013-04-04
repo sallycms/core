@@ -22,11 +22,10 @@ class sly_Util_Article {
 	 * checks whether an article exists or not
 	 *
 	 * @param  int $articleID
-	 * @param  int $clang
 	 * @return boolean
 	 */
-	public static function exists($articleID, $clang = null) {
-		return self::isValid(self::findById($articleID, $clang));
+	public static function exists($articleID) {
+		return sly_Core::getContainer()->getArticleService()->exists($articleID);
 	}
 
 	/**
