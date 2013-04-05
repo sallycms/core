@@ -219,11 +219,11 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base implements
 	}
 
 	/**
-	 * gets online status of article
-	 * @param  array $items   an array of sly_Model_Base_Article
+	 * gets online status of article/category
+	 * @param  array $items  sly_Model_Base_Article
 	 * @return boolean
 	 */
-	protected function getOnlineStatus($item) {
+	protected function getOnlineStatus(sly_Model_Base_Article $item) {
 		$sql   = $this->container->getPersistence();
 		return $sql->magicFetch($this->getTableName(), 'MAX(revision)', array('id' => $item->getId(), 'clang' => $item->getClang())) == $item->getRevision();
 	}
