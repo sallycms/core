@@ -42,10 +42,10 @@ class sly_Configuration implements sly_ContainerAwareInterface {
 	/**
 	 * Store the dynamic art of the configuration
 	 *
-	 * @param  sly_configuration_Writer $writer
+	 * @param  sly_Configuration_Writer $writer
 	 * @return sly_Configuration
 	 */
-	public function store(sly_configuration_Writer $writer = null) {
+	public function store(sly_Configuration_Writer $writer = null) {
 		if ($writer === null) {
 			$writer = $this->container['sly-config-reader'];
 		}
