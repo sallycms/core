@@ -13,14 +13,6 @@
  */
 abstract class sly_DB_Persistence implements Iterator {
 	/**
-	 * @deprecated use sly_Container to get the persistence
-	 * @return     sly_DB_PDO_Persistence
-	 */
-	public static function getInstance() {
-		return sly_Core::getContainer()->getPersistence();
-	}
-
-	/**
 	 * Führt einen query auf der Datenbank aus, der Query kann
 	 * in PDO Prepared statement syntax sein, muss aber nicht.
 	 *

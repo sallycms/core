@@ -89,13 +89,41 @@ class sly_Container extends Pimple implements Countable {
 			return new sly_Session($container['sly-config']->get('instname'));
 		});
 
-		$this['sly-persistence'] = $this->inject(function($container) {
+		$this['sly-pdo-driver'] = $this->inject(function($container) {
 			$config = $container['sly-config']->get('database');
+			$driver = $config['driver'];
+
+			if (!class_exists('sly_DB_PDO_Driver_'.strtoupper($driver))) {
+				throw new sly_DB_PDO_Exception('Unknown Database Driver: '.$driver);
+			}
+
+			$driverClass = 'sly_DB_PDO_Driver_'.strtoupper($driver);
+
+			return new $driverClass($config['host'], $config['login'], $config['password'], $config['name']);
+		});
+
+		$this['sly-pdo-connection'] = $this->share(function($container) {
+			$config = $container['sly-config']->get('database');
+			$driver = $container['sly-pdo-driver'];
+			$pdo    = new PDO($driver->getDSN(), $config['login'], $config['password'], $driver->getPDOOptions());
+
+			$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+			foreach ($driver->getPDOAttributes() as $key => $value) {
+				$pdo->setAttribute($key, $value);
+			}
+
+			return new sly_DB_PDO_Connection($driver, $pdo);
+		});
+
+		$this['sly-persistence'] = $this->inject(function($container) {
+			$config     = $container['sly-config']->get('database');
+			$connection = $container['sly-pdo-connection'];
 
 			// TODO: to support the iterator inside the persistence, we need to create
 			// a fresh instance for every access. We should refactor the database access
 			// to allow for a single persistence instance.
-			return new sly_DB_PDO_Persistence($config['driver'], $config['host'], $config['login'], $config['password'], $config['name'], $config['table_prefix']);
+			return new sly_DB_PDO_Persistence($config['driver'], $connection, $config['table_prefix']);
 		});
 
 		$this['sly-cache'] = $this->share(function($container) {
