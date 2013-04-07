@@ -12,7 +12,7 @@ class sly_DB_PDO_ConnectionTest extends PHPUnit_Framework_TestCase {
 	private static $connection;
 
 	public static function setUpBeforeClass() {
-		self::$connection = sly_DB_PDO_Persistence::getInstance()->getConnection();
+		self::$connection = sly_Core::getContainer()->get('sly-pdo-connection');
 	}
 
 	public function testGetPDO() {
