@@ -67,11 +67,11 @@ class sly_Container extends Pimple implements Countable {
 		});
 
 		$this['sly-registry-temp'] = $this->share(function($container) {
-			return sly_Registry_Temp::getInstance();
+			return new sly_Registry_Temp();
 		});
 
 		$this['sly-registry-persistent'] = $this->share(function($container) {
-			return sly_Registry_Persistent::getInstance();
+			return new sly_Registry_Persistent($container['sly-persistence']);
 		});
 
 		$this['sly-request'] = $this->share(function($container) {
