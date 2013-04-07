@@ -17,13 +17,11 @@ abstract class sly_BaseTest extends PHPUnit_Extensions_Database_TestCase {
 	 */
 	public function getConnection() {
 		if (!$this->pdo) {
-			$data = sly_Core::config()->get('database');
-			$conn = sly_DB_PDO_Connection::getInstance($data['driver'], $data['host'], $data['login'], $data['password'], $data['name']);
-
+			$conn      = sly_Core::getContainer()->get('sly-pdo-connection');
 			$this->pdo = $conn->getPDO();
 		}
 
-		return $this->createDefaultDBConnection($this->pdo, $data['name']);
+		return $this->createDefaultDBConnection($this->pdo);
 	}
 
 	public function setUp() {
