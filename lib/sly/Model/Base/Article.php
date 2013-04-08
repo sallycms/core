@@ -308,10 +308,12 @@ class sly_Model_Base_Article extends sly_Model_Base {
 	}
 
 	/**
+	 * @param  sly_Service_Category $catService
 	 * @return array
 	 */
-	public function getParentTree() {
-		$return = array();
+	public function getParentTree(sly_Service_Category $catService = null) {
+		$return     = array();
+		$catService = $catService ?: sly_Core::getContainer()->getCategoryService();
 
 		$explode = explode('|', $this->getPath());
 		$explode = array_filter($explode);
@@ -321,7 +323,7 @@ class sly_Model_Base_Article extends sly_Model_Base {
 		}
 
 		foreach ($explode as $var) {
-			$return[] = sly_Util_Category::findById($var, $this->getClang());
+			$return[] = $catService->findByPK($var, $this->getClang());
 		}
 
 		return $return;
@@ -329,10 +331,11 @@ class sly_Model_Base_Article extends sly_Model_Base {
 
 	/**
 	 * @param  sly_Model_Base_Article $anObj
+	 * @param  sly_Service_Category   $catService
 	 * @return boolean
 	 */
-	public function inParentTree(sly_Model_Base_Article $anObj) {
-		$tree = $this->getParentTree();
+	public function inParentTree(sly_Model_Base_Article $anObj, sly_Service_Category $catService = null) {
+		$tree = $this->getParentTree($catService);
 
 		foreach ($tree as $treeObj) {
 			if ($treeObj->getId() == $anObj->getId()) {

@@ -31,10 +31,13 @@ class sly_Model_Article extends sly_Model_Base_Article {
 	}
 
 	/**
+	 * @param  sly_Service_Category $catService
 	 * @return sly_Model_Category
 	 */
-	public function getCategory() {
-		return sly_Core::getContainer()->getCategoryService()->findByPK($this->getCategoryId(), $this->getClang());
+	public function getCategory(sly_Service_Category $catService = null) {
+		$catService = $catService ?: sly_Core::getContainer()->getCategoryService();
+
+		return $catService->findByPK($this->getCategoryId(), $this->getClang());
 	}
 
 	/**
@@ -47,14 +50,15 @@ class sly_Model_Article extends sly_Model_Base_Article {
 	}
 
 	/**
+	 * @param  sly_Service_Template $tplService
 	 * @return boolean
 	 */
-	public function hasTemplate() {
+	public function hasTemplate(sly_Service_Template $tplService = null) {
 		if ($this->hasType()) {
 			$templateName    = $this->getTemplateName();
-			$templateService = sly_Core::getContainer()->getTemplateService();
+			$tplService      = $tplService ?: sly_Core::getContainer()->getTemplateService();
 
-			return !empty($templateName) && $templateService->exists($templateName);
+			return !empty($templateName) && $tplService->exists($templateName);
 		}
 
 		return false;
@@ -63,21 +67,25 @@ class sly_Model_Article extends sly_Model_Base_Article {
 	/**
 	 * returns the template name of the template associated with the articletype of this article
 	 *
-	 * @return string  the template name
+	 * @param  sly_Service_ArticleType $atService
+	 * @return string                              the template name
 	 */
-	public function getTemplateName() {
-		return sly_Core::getContainer()->getArticleTypeService()->getTemplate($this->type);
+	public function getTemplateName(sly_Service_ArticleType $atService = null) {
+		$atService = $atService ?: sly_Core::getContainer()->getArticleTypeService();
+
+		return $atService->getTemplate($this->type);
 	}
 
 	/**
-	 * returns the articlecontent for a given slot, or if empty for all slots
+	 * returns the article content for a given slot, or if empty for all slots
 	 *
-	 * @param  string $slot
+	 * @param  string        $slot
+	 * @param  sly_Container $container
 	 * @return string
 	 */
-	public function getContent($slot = null) {
+	public function getContent($slot = null, sly_Container $container = null) {
 		$content       = '';
-		$container     = sly_Core::getContainer();
+		$container     = $container ?: sly_Core::getContainer();
 		$moduleService = $container->getModuleService();
 		$typeService   = $container->getArticleTypeService();
 
