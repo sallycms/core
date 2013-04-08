@@ -54,6 +54,15 @@ class sly_DB_Dump {
 	}
 
 	/**
+	 * Get the filename
+	 *
+	 * @return string
+	 */
+	public function getFilename() {
+		return $this->filename;
+	}
+
+	/**
 	 * Get the headers
 	 *
 	 * This method will read the headers from the dump file and return it.
