@@ -562,7 +562,7 @@ class sly_Service_Article extends sly_Service_ArticleBase {
 
 			// clear cache
 
-			$this->clearCacheByQuery(array('re_id' => $articleID));
+			$this->clearCacheByQuery('path LIKE "%|'.$articleID.'|%"');
 			$this->deleteListCache();
 
 			if ($ownTrx) {
