@@ -441,7 +441,8 @@ class sly_Service_ArticleSlice implements sly_ContainerAwareInterface {
 	/**
 	 * Move a slice up or down
 	 *
-	 * @deprecated since 0.9
+	 * @deprecated since 0.9  use moveTo() instead
+	 *
 	 * @throws sly_Exception
 	 * @param  int            $slice_id   article slice ID
 	 * @param  string         $direction  direction to move, either 'up' or 'down'
@@ -459,6 +460,43 @@ class sly_Service_ArticleSlice implements sly_ContainerAwareInterface {
 		$curPos = $articleSlice->getPosition();
 		$newPos = $direction === 'up' ? $curPos - 1 : $curPos + 1;
 		$this->moveTo($articleSlice->getArticle(), $articleSlice->getSlot(), $curPos, $newPos, $user);
+	}
+
+	/**
+	 * Get the previous slice in the same slot
+	 *
+	 * @param  sly_Model_ArticleSlice $slice
+	 * @param  sly_Model_ArticleSlice         the previous slice or null
+	 */
+	public function getPrevious(sly_Model_ArticleSlice $slice) {
+		return $this->getSibling($slice, 'slot = %s AND pos < %d AND article_id = %d AND clang = %d AND revision = %d ORDER BY pos DESC');
+	}
+
+	/**
+	 * Get the next slice in the same slot
+	 *
+	 * @param  sly_Model_ArticleSlice $slice
+	 * @param  sly_Model_ArticleSlice         the next slice or null
+	 */
+	public function getNext(sly_Model_ArticleSlice $slice) {
+		return $this->getSibling($slice, 'slot = %s AND pos > %d AND article_id = %d AND clang = %d AND revision = %d ORDER BY pos ASC');
+	}
+
+	/**
+	 * Get slice sibling
+	 *
+	 * @param  sly_Model_ArticleSlice $slice
+	 * @param  string                 $where  the WHERE statement with placeholders
+	 * @param  sly_Model_ArticleSlice
+	 */
+	protected function getSibling(sly_Model_ArticleSlice $slice, $where) {
+		$slot    = $this->getPersistence()->quote($slice->getSlot());
+		$pos     = $slice->getPosition();
+		$article = $slice->getArticleId();
+		$clang   = $slice->getClang();
+		$rev     = $slice->getRevision();
+
+		return $this->findOne(sprintf($where, $slot, $pos, $article, $clang, $rev));
 	}
 
 	/**
