@@ -175,10 +175,19 @@ class sly_Model_ArticleSlice extends sly_Model_Base_Id implements sly_Model_ISli
 		return $this->getSlice()->getModule();
 	}
 
-	public function setModule($module) {
-		$slice = $this->getSlice();
+	/**
+	 * set the module on the associated slice and save the change immediately
+	 *
+	 * @param string            $module
+	 * @param sly_Service_Slice $service
+	 */
+	public function setModule($module, sly_Service_Slice $service = null) {
+		$service = $service ?: sly_Core::getContainer()->getSliceService();
+		$slice   = $this->getSlice();
+
 		$slice->setModule($module);
-		$this->slice = sly_Core::getContainer()->getSliceService()->save($slice);
+
+		$this->slice = $service->save($slice);
 	}
 
 	/**
@@ -203,9 +212,9 @@ class sly_Model_ArticleSlice extends sly_Model_Base_Id implements sly_Model_ISli
 	 * @param sly_Model_Article $article
 	 */
 	public function setArticle(sly_Model_Article $article) {
-		$this->article = $article;
+		$this->article    = $article;
 		$this->article_id = $article->getId();
-		$this->clang = $article->getClang();
+		$this->clang      = $article->getClang();
 	}
 
 	/**
@@ -270,15 +279,15 @@ class sly_Model_ArticleSlice extends sly_Model_Base_Id implements sly_Model_ISli
 	}
 
 	/**
-	 * get the rendered output
+	 * render (execute) this slice's module
 	 *
+	 * @param  sly_Slice_Renderer $renderer
 	 * @return string
 	 */
-	public function getOutput() {
-		$values   = $this->getValues();
-		$renderer = new sly_Slice_Renderer($this->getModule(), $values);
-		$output   = $renderer->renderOutput($this);
-		return $output;
+	public function getOutput(sly_Slice_Renderer $renderer = null) {
+		$renderer = $renderer ?: sly_Core::getContainer()->get('sly-slice-renderer');
+
+		return $renderer->renderOutput($this);
 	}
 
 	public function setRevision($revision) {
