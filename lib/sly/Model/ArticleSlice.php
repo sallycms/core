@@ -123,40 +123,52 @@ class sly_Model_ArticleSlice extends sly_Model_Base_Id implements sly_Model_ISli
 
 	/**
 	 *
+	 * @param  sly_Service_Article $service
 	 * @return sly_Model_Article
 	 */
-	public function getArticle() {
+	public function getArticle(sly_Service_Article $service = null) {
 		if (empty($this->article)) {
-			$this->article =  sly_Util_Article::findById($this->getArticleId(), $this->getClang(), $this->getRevision());
+			$service       = $service ?: sly_Core::getContainer()->getArticleService();
+			$this->article = $service->findByPK($this->getArticleId(), $this->getClang(), $this->getRevision());
 		}
+
 		return $this->article;
 	}
 
 	/**
 	 *
+	 * @param  sly_Service_Slice $service
 	 * @return sly_Model_Slice
 	 */
-	public function getSlice() {
+	public function getSlice(sly_Service_Slice $service = null) {
 		if (empty($this->slice)) {
-			$this->slice = sly_Core::getContainer()->getSliceService()->findById($this->getSliceId());
+			$service     = $service ?: sly_Core::getContainer()->getSliceService();
+			$this->slice = $service->findById($this->getSliceId());
 		}
+
 		return $this->slice;
 	}
 
-	public function getPrevious() {
-		$container = sly_Core::getContainer();
-		$service   = $container->getArticleSliceService();
-		$db        = $container->getPersistence();
+	/**
+	 *
+	 * @param  sly_Service_ArticleSlice $service
+	 * @return sly_Model_ArticleSlice
+	 */
+	public function getPrevious(sly_Service_ArticleSlice $service = null) {
+		$service = $service ?: sly_Core::getContainer()->getArticleSliceService();
 
-		return $service->findOne(sprintf('slot = %s AND pos < %d AND article_id = %d AND clang = %d AND revision = %d ORDER BY pos DESC', $db->quote($this->getSlot()), $this->getPosition(), $this->getArticleId(), $this->getClang(), $this->getRevision()));
+		return $service->getPrevious($this);
 	}
 
-	public function getNext() {
-		$container = sly_Core::getContainer();
-		$service   = $container->getArticleSliceService();
-		$db        = $container->getPersistence();
+	/**
+	 *
+	 * @param  sly_Service_ArticleSlice $service
+	 * @return sly_Model_ArticleSlice
+	 */
+	public function getNext(sly_Service_ArticleSlice $service = null) {
+		$service = $service ?: sly_Core::getContainer()->getArticleSliceService();
 
-		return $service->findOne(sprintf('slot = %s AND pos > %d AND article_id = %d AND clang = %d AND revision = %d ORDER BY pos ASC', $db->quote($this->getSlot()), $this->getPosition(), $this->getArticleId(), $this->getClang(), $this->getRevision()));
+		return $service->getNext($this);
 	}
 
 	public function getModule() {
