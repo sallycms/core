@@ -26,57 +26,70 @@ class sly_Model_Category extends sly_Model_Base_Article {
 	/**
 	 * return the startarticle of this category
 	 *
+	 * @param  sly_Service_Article $service
 	 * @return sly_Model_Article
 	 */
-	public function getStartArticle() {
-		return sly_Util_Article::findById($this->getId(), $this->getClang());
+	public function getStartArticle(sly_Service_Article $service = null) {
+		$service = $service ?: sly_Core::getContainer()->getArticleService();
+
+		return $service->findByPK($this->getId(), $this->getClang(), sly_Service_Article::FIND_REVISION_ONLINE);
 	}
 
 	/**
 	 * return all articles of this category
 	 *
-	 * @param  boolean $ignore_offlines
+	 * @param  boolean             $ignoreOfflines
+	 * @param  sly_Service_Article $service
 	 * @return array
 	 */
-	public function getArticles($ignore_offlines = false) {
-		return sly_Util_Article::findByCategory($this->getId(), $ignore_offlines, $this->getClang());
+	public function getArticles($ignoreOfflines = false, sly_Service_Article $service = null) {
+		$service = $service ?: sly_Core::getContainer()->getArticleService();
+
+		return $service->findArticlesByCategory($this->getId(), $this->getClang(), $ignoreOfflines);
 	}
 
 	/**
 	 * get the parent category
 	 *
-	 * @param  int $clang
+	 * @param  int                  $clang
+	 * @param  sly_Service_Category $service
 	 * @return sly_Model_Category
 	 */
-	public function getParent($clang = null) {
-		return sly_Util_Category::findById($this->getParentId(), $clang);
+	public function getParent($clang = null, sly_Service_Category $service = null) {
+		$service = $service ?: sly_Core::getContainer()->getCategoryService();
+		$clang   = $clang === null ? $this->getClang() : $clang;
+
+		return $service->findByPK($this->getParentId(), $clang, sly_Service_Category::FIND_REVISION_ONLINE);
 	}
 
 	/**
 	 * return true if this is an ancestor of the given category
 	 *
-	 * @param  sly_Model_Category $other_cat
+	 * @param  sly_Model_Category $otherCat
 	 * @return boolean
 	 */
-	public function isAncestor(sly_Model_Category $other_cat) {
-		return in_array($this->getId(), explode('|', $other_cat->getPath()));
+	public function isAncestor(sly_Model_Category $otherCat) {
+		return in_array($this->getId(), explode('|', $otherCat->getPath()));
 	}
 
 	/**
-	 * @param  sly_Model_Category $other_cat
+	 * @param  sly_Model_Category $otherCat
 	 * @return boolean
 	 */
-	public function isParent(sly_Model_Category $other_cat) {
-		return $this->getId() == $other_cat->getParentId();
+	public function isParent(sly_Model_Category $otherCat) {
+		return $this->getId() == $otherCat->getParentId();
 	}
 
 	/**
-	 * @param  boolean $ignore_offlines
-	 * @param  int     $clang
+	 * @param  boolean              $ignoreOfflines
+	 * @param  int                  $clang
+	 * @param  sly_Service_Category $service
 	 * @return array
 	 */
-	public function getChildren($ignore_offlines = false, $clang = null) {
-		if ($clang === null) $clang = $this->getClang();
-		return sly_Util_Category::findByParentId($this->getId(), $ignore_offlines, $clang);
+	public function getChildren($ignoreOfflines = false, $clang = null, sly_Service_Category $service = null) {
+		$service = $service ?: sly_Core::getContainer()->getCategoryService();
+		$clang   = $clang === null ? $this->getClang() : $clang;
+
+		return $service->findByParentId($this->getId(), $ignoreOfflines, $clang);
 	}
 }

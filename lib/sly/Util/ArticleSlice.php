@@ -77,8 +77,8 @@ class sly_Util_ArticleSlice {
 	 * @return array              list of sly_Model_ArticleSlice objects
 	 */
 	public static function findByArticle(sly_Model_Article $article, $slot = null) {
-		$where     = array('article_id' => $article->getId(), 'clang' => $article->getClang(), 'revision' => $article->getRevision());
-		$order     = 'pos ASC';
+		$where = array('article_id' => $article->getId(), 'clang' => $article->getClang(), 'revision' => $article->getRevision());
+		$order = 'pos ASC';
 
 		if ($slot !== null) {
 			$where['slot'] = $slot;

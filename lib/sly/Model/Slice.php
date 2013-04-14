@@ -14,8 +14,8 @@
  * @author  zozi@webvariants.de
  * @ingroup model
  */
-class sly_Model_Slice extends sly_Model_Base_Id {
-	protected $module; ///< string
+class sly_Model_Slice extends sly_Model_Base_Id implements sly_Model_ISlice {
+	protected $module;            ///< string
 	protected $serialized_values; ///< array
 
 	protected $_attributes = array('module' => 'string', 'serialized_values' => 'array'); ///< array
@@ -55,6 +55,7 @@ class sly_Model_Slice extends sly_Model_Base_Id {
 		if (!sly_Util_Array::isAssoc($values)) {
 			throw new sly_Exception('Values must be assoc array!');
 		}
+
 		$this->serialized_values = sly_makeArray($values);
 	}
 
@@ -63,15 +64,14 @@ class sly_Model_Slice extends sly_Model_Base_Id {
 	}
 
 	/**
-	 * get the rendered output
+	 * render (execute) this slice's module
 	 *
+	 * @param  sly_Slice_Renderer $renderer
 	 * @return string
 	 */
-	public function getOutput() {
-		$values   = $this->getValues();
-		$renderer = new sly_Slice_Renderer($this->getModule(), $values);
-		$output   = $renderer->renderOutput($this);
-		return $output;
-	}
+	public function getOutput(sly_Slice_Renderer $renderer = null) {
+		$renderer = $renderer ?: sly_Core::getContainer()->get('sly-slice-renderer');
 
+		return $renderer->renderOutput($this);
+	}
 }

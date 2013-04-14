@@ -281,6 +281,10 @@ class sly_Model_ArticleSlice extends sly_Model_Base_Id implements sly_Model_ISli
 	/**
 	 * render (execute) this slice's module
 	 *
+	 * This is re-implemented here (instead of just proxying to
+	 * model_slice->getOutput()), so that the executed module can use the
+	 * additional API on this class.
+	 *
 	 * @param  sly_Slice_Renderer $renderer
 	 * @return string
 	 */
