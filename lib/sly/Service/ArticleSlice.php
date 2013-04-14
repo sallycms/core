@@ -463,6 +463,25 @@ class sly_Service_ArticleSlice implements sly_ContainerAwareInterface {
 	}
 
 	/**
+	 * find all slices within an article
+	 *
+	 * @param  sly_Model_Article  $article   an article
+	 * @param  string             $slot
+	 * @return array              list of sly_Model_ArticleSlice objects
+	 */
+	public function findByArticle(sly_Model_Article $article, $slot = null) {
+		$where = array('article_id' => $article->getId(), 'clang' => $article->getClang(), 'revision' => $article->getRevision());
+		$order = 'pos ASC';
+
+		if ($slot !== null) {
+			$where['slot'] = $slot;
+			$order         = 'slot ASC, pos ASC';
+		}
+
+		return $this->find($where, null, $order);
+	}
+
+	/**
 	 * Get the previous slice in the same slot
 	 *
 	 * @param  sly_Model_ArticleSlice $slice
