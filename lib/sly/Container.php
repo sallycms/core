@@ -233,10 +233,9 @@ class sly_Container extends Pimple implements Countable {
 			$persistence = $container['sly-persistence'];
 			$cache       = $container['sly-cache'];
 			$dispatcher  = $container['sly-dispatcher'];
-			$categories  = $container['sly-service-mediacategory'];
 			$filesystem  = $container['sly-filesystem-media'];
 
-			return new sly_Service_Medium($persistence, $cache, $dispatcher, $categories, $filesystem);
+			return new sly_Service_Medium($persistence, $cache, $dispatcher, $filesystem);
 		});
 
 		$this['sly-service-module'] = $this->share(function($container) {
@@ -279,7 +278,7 @@ class sly_Container extends Pimple implements Countable {
 
 			return new sly_Service_File_YAML($fileperm);
 		});
-		
+
 		//////////////////////////////////////////////////////////////////////////
 		// filesystems
 
@@ -736,15 +735,8 @@ class sly_Container extends Pimple implements Countable {
 	/**
 	 * @return sly\Filesystem\Filesystem
 	 */
-	public function getDynPublicFilesystem() {
-		return $this->get('sly-filesystem-dyn-public');
-	}
-
-	/**
-	 * @return sly\Filesystem\Filesystem
-	 */
-	public function getDynInternalFilesystem() {
-		return $this->get('sly-filesystem-dyn-internal');
+	public function getDynFilesystem() {
+		return $this->get('sly-filesystem-dyn');
 	}
 
 	/*          setters for objects that are commonly set          */
