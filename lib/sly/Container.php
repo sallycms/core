@@ -40,7 +40,7 @@ class sly_Container extends Pimple implements Countable {
 		});
 
 		$this['sly-config-reader'] = $this->share(function($container) {
-			$yamlService = $container->getService('File_YAML');
+			$yamlService = $container['sly-service-yaml'];
 
 			// check if the persistence may be already available
 			$persistence = $container->raw('sly-persistence');
@@ -264,6 +264,18 @@ class sly_Container extends Pimple implements Countable {
 			$persistence = $container['sly-persistence'];
 
 			return new sly_Service_User($persistence, $cache, $dispatcher, $config);
+		});
+
+		$this['sly-service-json'] = $this->share(function($container) {
+			$fileperm = $container['sly-config']->get('fileperm', sly_Core::DEFAULT_FILEPERM);
+
+			return new sly_Service_File_JSON($fileperm);
+		});
+
+		$this['sly-service-yaml'] = $this->share(function($container) {
+			$fileperm = $container['sly-config']->get('fileperm', sly_Core::DEFAULT_FILEPERM);
+
+			return new sly_Service_File_YAML($fileperm);
 		});
 
 		//////////////////////////////////////////////////////////////////////////
