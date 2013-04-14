@@ -11,7 +11,7 @@
 use sly\Filesystem\Filesystem;
 
 /**
- * DB Model Klasse für Medien
+ * Service implementation for medium models
  *
  * @author  christoph@webvariants.de
  * @ingroup service
