@@ -154,7 +154,8 @@ class sly_Container extends Pimple implements Countable {
 			$config     = $container['sly-config'];
 			$adnService = $container['sly-service-package-addon'];
 			$vndService = $container['sly-service-package-vendor'];
-			$service    = new sly_Service_AddOn($config, $cache, $adnService, SLY_DYNFOLDER);
+			$filesystem = $container['sly-filesystem-dyn'];
+			$service    = new sly_Service_AddOn($config, $cache, $adnService, $filesystem);
 
 			$service->setVendorPackageService($vndService);
 
@@ -233,8 +234,9 @@ class sly_Container extends Pimple implements Countable {
 			$cache       = $container['sly-cache'];
 			$dispatcher  = $container['sly-dispatcher'];
 			$categories  = $container['sly-service-mediacategory'];
+			$filesystem  = $container['sly-filesystem-media'];
 
-			return new sly_Service_Medium($persistence, $cache, $dispatcher, $categories);
+			return new sly_Service_Medium($persistence, $cache, $dispatcher, $categories, $filesystem);
 		});
 
 		$this['sly-service-module'] = $this->share(function($container) {
@@ -276,6 +278,29 @@ class sly_Container extends Pimple implements Countable {
 			$fileperm = $container['sly-config']->get('fileperm', sly_Core::DEFAULT_FILEPERM);
 
 			return new sly_Service_File_YAML($fileperm);
+		});
+		
+		//////////////////////////////////////////////////////////////////////////
+		// filesystems
+
+		$this['sly-filesystem-media'] = $this->share(function($container) {
+			$baseDir  = SLY_MEDIAFOLDER;
+			$baseUri  = $container['sly-request']->getBaseUrl(true).'/data/mediapool/';
+			$config   = $container['sly-config'];
+			$filePerm = $config->get('fileperm', sly_Core::DEFAULT_FILEPERM);
+			$dirPerm  = $config->get('dirperm', sly_Core::DEFAULT_DIRPERM);
+
+			return new sly\Filesystem\Adapter\LocalHttp($baseDir, $baseUri, $filePerm, $dirPerm);
+		});
+
+		$this['sly-filesystem-dyn'] = $this->share(function($container) {
+			$baseDir  = SLY_DYNFOLDER;
+			$baseUri  = $container['sly-request']->getBaseUrl(true).'/data/dyn/';
+			$config   = $container['sly-config'];
+			$filePerm = $config->get('fileperm', sly_Core::DEFAULT_FILEPERM);
+			$dirPerm  = $config->get('dirperm', sly_Core::DEFAULT_DIRPERM);
+
+			return new sly\Filesystem\Adapter\LocalHttp($baseDir, $baseUri, $filePerm, $dirPerm);
 		});
 
 		//////////////////////////////////////////////////////////////////////////
@@ -699,6 +724,27 @@ class sly_Container extends Pimple implements Countable {
 		}
 
 		return $this[$id];
+	}
+
+	/**
+	 * @return sly\Filesystem\Filesystem
+	 */
+	public function getMediaFilesystem() {
+		return $this->get('sly-filesystem-media');
+	}
+
+	/**
+	 * @return sly\Filesystem\Filesystem
+	 */
+	public function getDynPublicFilesystem() {
+		return $this->get('sly-filesystem-dyn-public');
+	}
+
+	/**
+	 * @return sly\Filesystem\Filesystem
+	 */
+	public function getDynInternalFilesystem() {
+		return $this->get('sly-filesystem-dyn-internal');
 	}
 
 	/*          setters for objects that are commonly set          */

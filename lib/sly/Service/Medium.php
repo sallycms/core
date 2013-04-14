@@ -8,6 +8,8 @@
  * http://www.opensource.org/licenses/mit-license.php
  */
 
+use sly\Filesystem\Filesystem;
+
 /**
  * DB Model Klasse für Medien
  *
@@ -19,20 +21,22 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id implements sly_Contai
 	protected $cache;              ///< BabelCache_Interface
 	protected $dispatcher;         ///< sly_Event_IDispatcher
 	protected $container;          ///< sly_Container
+	protected $mediaFs;            ///< Filesystem
 
 	/**
 	 * Constructor
 	 *
-	 * @param sly_DB_Persistence        $persistence
-	 * @param BabelCache_Interface      $cache
-	 * @param sly_Event_IDispatcher     $dispatcher
-	 * @param sly_Service_MediaCategory $catService
+	 * @param sly_DB_Persistence    $persistence
+	 * @param BabelCache_Interface  $cache
+	 * @param sly_Event_IDispatcher $dispatcher
+	 * @param Filesystem            $mediaFs
 	 */
-	public function __construct(sly_DB_Persistence $persistence, BabelCache_Interface $cache, sly_Event_IDispatcher $dispatcher) {
+	public function __construct(sly_DB_Persistence $persistence, BabelCache_Interface $cache, sly_Event_IDispatcher $dispatcher, Filesystem $mediaFs) {
 		parent::__construct($persistence);
 
 		$this->cache      = $cache;
 		$this->dispatcher = $dispatcher;
+		$this->mediaFs    = $mediaFs;
 	}
 
 	public function setContainer(sly_Container $container = null) {
@@ -176,10 +180,11 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id implements sly_Contai
 
 		// check file itself
 
+		$fs       = $this->mediaFs;
 		$filename = basename($filename);
 		$fullname = SLY_MEDIAFOLDER.'/'.$filename;
 
-		if (!file_exists($fullname)) {
+		if (!$fs->exists($filename)) {
 			throw new sly_Exception(t('file_not_found', $filename));
 		}
 
@@ -269,8 +274,10 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id implements sly_Contai
 			$sql = $this->getPersistence();
 			$sql->delete('file', array('id' => $medium->getId()));
 
-			if ($medium->exists()) {
-				unlink(SLY_MEDIAFOLDER.'/'.$medium->getFilename());
+			$filename = $medium->getFilename();
+
+			if ($this->mediaFs->exists($filename)) {
+				$this->mediaFs->remove($filename);
 			}
 		}
 		catch (Exception $e) {
