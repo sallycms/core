@@ -9,7 +9,6 @@
  */
 
 class sly_ContainerTest extends PHPUnit_Framework_TestCase {
-
 	public function testBasicSetGet() {
 		$container = new sly_Container();
 		$container->set('test', 'value');
@@ -37,7 +36,7 @@ class sly_ContainerTest extends PHPUnit_Framework_TestCase {
 	public function testCount() {
 		// Basic container has 35 items
 		$container = new sly_Container();
-		$this->assertEquals($container->count(), 35);
+		$this->assertEquals($container->count(), 37);
 	}
 
 	public function testRemove() {
@@ -48,5 +47,4 @@ class sly_ContainerTest extends PHPUnit_Framework_TestCase {
 		unset($container['not.existing']);
 		$this->assertFalse($container->has('not.existing'));
 	}
-
 }

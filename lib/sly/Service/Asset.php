@@ -13,7 +13,7 @@
  */
 class sly_Service_Asset {
 	const CACHE_DIR = 'public/sally/static-cache';  ///< string
-	const TEMP_DIR  = 'internal/sally/temp';        ///< string
+	const TEMP_DIR  = 'sally/assets';               ///< string
 
 	const EVENT_PROCESS_ASSET        = 'SLY_CACHE_PROCESS_ASSET';        ///< string
 	const EVENT_REVALIDATE_ASSETS    = 'SLY_CACHE_REVALIDATE_ASSETS';    ///< string
@@ -282,7 +282,7 @@ class sly_Service_Asset {
 
 		if (sly_Util_String::endsWith($file, '.less') && file_exists(SLY_BASE.'/'.$file)) {
 			$css     = sly_Util_Lessphp::process($file);
-			$dir     = SLY_DYNFOLDER.'/'.self::TEMP_DIR;
+			$dir     = SLY_TEMPFOLDER.'/'.self::TEMP_DIR;
 			$tmpFile = $dir.'/'.md5($file).'.less';
 
 			sly_Util_Directory::create($dir, $this->getDirPerm());
@@ -378,7 +378,7 @@ class sly_Service_Asset {
 		$obj->delete(true);
 
 		// clear the temp dir
-		$tmpDir = sly_Util_Directory::join(SLY_DYNFOLDER, self::TEMP_DIR);
+		$tmpDir = sly_Util_Directory::join(SLY_TEMPFOLDER, self::TEMP_DIR);
 		$obj    = new sly_Util_Directory($tmpDir);
 
 		$obj->deleteFiles(true);

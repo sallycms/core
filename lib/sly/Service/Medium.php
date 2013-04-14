@@ -16,30 +16,42 @@ use sly\Filesystem\Filesystem;
  * @author  christoph@webvariants.de
  * @ingroup service
  */
-class sly_Service_Medium extends sly_Service_Model_Base_Id {
+class sly_Service_Medium extends sly_Service_Model_Base_Id implements sly_ContainerAwareInterface {
 	protected $tablename = 'file'; ///< string
 	protected $cache;              ///< BabelCache_Interface
 	protected $dispatcher;         ///< sly_Event_IDispatcher
-	protected $catService;         ///< sly_Service_MediaCategory
+	protected $container;          ///< sly_Container
 	protected $mediaFs;            ///< Filesystem
 
 	/**
 	 * Constructor
 	 *
-	 * @param sly_DB_Persistence        $persistence
-	 * @param BabelCache_Interface      $cache
-	 * @param sly_Event_IDispatcher     $dispatcher
-	 * @param sly_Service_MediaCategory $catService
-	 * @param sly_Service_MediaCategory $mediaFs
+	 * @param sly_DB_Persistence    $persistence
+	 * @param BabelCache_Interface  $cache
+	 * @param sly_Event_IDispatcher $dispatcher
+	 * @param Filesystem            $mediaFs
 	 */
-	public function __construct(sly_DB_Persistence $persistence, BabelCache_Interface $cache, sly_Event_IDispatcher $dispatcher,
-		sly_Service_MediaCategory $catService, Filesystem $mediaFs) {
+	public function __construct(sly_DB_Persistence $persistence, BabelCache_Interface $cache, sly_Event_IDispatcher $dispatcher, Filesystem $mediaFs) {
 		parent::__construct($persistence);
 
 		$this->cache      = $cache;
 		$this->dispatcher = $dispatcher;
-		$this->catService = $catService;
 		$this->mediaFs    = $mediaFs;
+	}
+
+	public function setContainer(sly_Container $container = null) {
+		$this->container = $container;
+	}
+
+	/**
+	 * @return sly_Service_MediaCategory
+	 */
+	protected function getMediaCategoryService() {
+		if (!$this->container) {
+			throw new LogicException('Container must be set before media categories can be handled.');
+		}
+
+		return $this->container->getMediaCategoryService();
 	}
 
 	/**
@@ -179,8 +191,9 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id {
 		// check category
 
 		$categoryID = (int) $categoryID;
+		$catService = $this->getMediaCategoryService();
 
-		if ($this->catService->findById($categoryID) === null) {
+		if ($catService->findById($categoryID) === null) {
 			$categoryID = 0;
 		}
 

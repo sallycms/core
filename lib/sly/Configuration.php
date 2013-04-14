@@ -13,7 +13,7 @@
  *
  * @ingroup core
  */
-class sly_Configuration implements sly_ContainerAwareInterface{
+class sly_Configuration implements sly_ContainerAwareInterface {
 	protected $container;    ///< sly_Container
 	protected $staticStore;  ///< sly_Util_Array
 	protected $dynamicStore; ///< sly_Util_Array
@@ -42,15 +42,15 @@ class sly_Configuration implements sly_ContainerAwareInterface{
 	/**
 	 * Store the dynamic art of the configuration
 	 *
-	 * @param  sly_configuration_Writer $writer
+	 * @param  sly_Configuration_Writer $writer
 	 * @return sly_Configuration
 	 */
-	public function store(sly_configuration_Writer $writer = null) {
+	public function store(sly_Configuration_Writer $writer = null) {
 		if ($writer === null) {
 			$writer = $this->container['sly-config-reader'];
 		}
 
-		$writer->write($this->dynamicStore);
+		$writer->writeProject($this->dynamicStore->get('/'));
 
 		return $this;
 	}

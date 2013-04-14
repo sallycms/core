@@ -57,7 +57,7 @@ class sly_Core {
 		mb_internal_encoding('UTF-8');
 
 		// define that the path to the core is here
-		if (!defined('SLY_COREFOLDER'))    define('SLY_COREFOLDER',    dirname(dirname(dirname(__FILE__))));
+		if (!defined('SLY_COREFOLDER'))    define('SLY_COREFOLDER',    dirname(dirname(__DIR__)));
 
 		// define constants for system wide important paths if they are not set already
 		if (!defined('SLY_BASE'))          define('SLY_BASE',          realpath(SLY_COREFOLDER.'/../../'));
@@ -68,6 +68,7 @@ class sly_Core {
 		if (!defined('SLY_DYNFOLDER'))     define('SLY_DYNFOLDER',     SLY_DATAFOLDER.DIRECTORY_SEPARATOR.'dyn');
 		if (!defined('SLY_MEDIAFOLDER'))   define('SLY_MEDIAFOLDER',   SLY_DATAFOLDER.DIRECTORY_SEPARATOR.'mediapool');
 		if (!defined('SLY_CONFIGFOLDER'))  define('SLY_CONFIGFOLDER',  SLY_DATAFOLDER.DIRECTORY_SEPARATOR.'config');
+		if (!defined('SLY_TEMPFOLDER'))    define('SLY_TEMPFOLDER',    SLY_DATAFOLDER.DIRECTORY_SEPARATOR.'temp');
 		if (!defined('SLY_ADDONFOLDER'))   define('SLY_ADDONFOLDER',   SLY_SALLYFOLDER.DIRECTORY_SEPARATOR.'addons');
 
 		// define these PHP 5.3 constants here so that they can be used in YAML files
@@ -101,19 +102,20 @@ class sly_Core {
 
 			$configReader = $container['sly-config-reader'];
 
-			$config->setStatic('/', $configReader->readLocal());
-			$config->set('/', $configReader->readProject());
-		}
-		catch (sly_Util_DirectoryException $e) {
-			$dir = sly_html($e->getDirectory());
+			$localConfig = $configReader->readLocal();
+			if (!empty($localConfig)) {
+				$config->setStatic('/', $localConfig);
+			}
 
-			header('Content-Type: text/html; charset=UTF-8');
-			die(
-				'Could not create data directory in <strong>'.$dir.'</strong>.<br />'.
-				'Please check your filesystem permissions and ensure that PHP is allowed<br />'.
-				'to write in <strong>'.SLY_DATAFOLDER.'</strong>. In most cases this can<br />'.
-				'be fixed by creating the directory via FTP and chmodding it to <strong>0777</strong>.'
-			);
+			// Now that we know the local, i.e. database config, we can build the
+			// persistence and power up the config reader.
+			$persistence = $container['sly-persistence'];
+			$configReader->setPersistence($persistence);
+
+			$projectConfig = $configReader->readProject();
+			if (!empty($projectConfig)) {
+				$config->set('/', $projectConfig);
+			}
 		}
 		catch (Exception $e) {
 			header('Content-Type: text/plain; charset=UTF-8');
@@ -567,9 +569,6 @@ class sly_Core {
 	 */
 	public static function clearCache() {
 		clearstatcache();
-
-		// clear loader cache
-		sly_Loader::clearCache();
 
 		$container = self::getContainer();
 

@@ -14,10 +14,10 @@
 abstract class sly_Service_Model_Base {
 	protected $tablename;          ///< string
 	protected $hasCascade = false; ///< boolean
-	protected $persistence;        ///< sly_DB_Persistence
+	protected $persistence;        ///< sly_DB_PDO_Persistence
 
-	public function __construct(sly_DB_Persistence $persistence = null) {
-		$this->persistence = $persistence ? $persistence : sly_DB_Persistence::getInstance();
+	public function __construct(sly_DB_PDO_Persistence $persistence = null) {
+		$this->persistence = $persistence ?: sly_Core::getContainer()->getPersistence();
 	}
 
 	/**
@@ -53,12 +53,12 @@ abstract class sly_Service_Model_Base {
 	 * @return array
 	 */
 	protected function find($where = null, $group = null, $order = null, $offset = null, $limit = null, $having = null) {
-		$return  = array();
-		$db      = $this->getPersistence();
+		$return = array();
+		$db     = $this->getPersistence();
 
 		$db->select($this->getTableName(), '*', $where, $group, $order, $offset, $limit, $having);
 
-		foreach ($db as $row) {
+		foreach ($db->all() as $row) {
 			$return[] = $this->makeInstance($row);
 		}
 
@@ -87,24 +87,22 @@ abstract class sly_Service_Model_Base {
 	/**
 	 * @param  array  $where
 	 * @param  string $group
-	 * @return array
+	 * @return int
 	 */
 	public function count($where = null, $group = null) {
-		$count = array();
-		$db    = $this->getPersistence();
+		$db = $this->getPersistence();
 
 		$db->select($this->getTableName(), 'COUNT(*)', $where, $group);
 
-		foreach ($db as $row) {
-			$count = (int) reset($row);
-		}
+		$rows = $db->all();
+		$rows = reset($rows); // [{COUNT(*) => X}]   =>   {COUNT(*) => X}
 
-		return $count;
+		return (int) reset($rows);
 	}
 
 	protected function getActor(sly_Model_User $user = null, $methodName = null) {
 		if ($user === null) {
-			$user = sly_Util_User::getCurrentUser();
+			$user = sly_Core::getContainer()->getUserService()->getCurrentUser();
 
 			if ($user === null) {
 				throw new sly_Exception($methodName ? t('operation_requires_user_context', $methodName) : t('an_operation_requires_user_context'));

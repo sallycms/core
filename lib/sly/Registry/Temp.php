@@ -12,20 +12,10 @@
  * @ingroup registry
  */
 class sly_Registry_Temp implements sly_Registry_Registry {
-	private static $instance; ///< sly_Registry_Temp
-
 	private $store; ///< sly_Util_Array
 
-	private function __construct() {
+	public function __construct() {
 		$this->store = new sly_Util_Array();
-	}
-
-	/**
-	 * @return sly_Registry_Temp
-	 */
-	public static function getInstance() {
-		if (empty(self::$instance)) self::$instance = new self();
-		return self::$instance;
 	}
 
 	/**

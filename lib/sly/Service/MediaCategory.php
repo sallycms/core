@@ -14,20 +14,17 @@
  * @author  christoph@webvariants.de
  * @ingroup service
  */
-class sly_Service_MediaCategory extends sly_Service_Model_Base_Id {
+class sly_Service_MediaCategory extends sly_Service_Model_Base_Id implements sly_ContainerAwareInterface {
 	protected $tablename = 'file_category'; ///< string
 	protected $cache;                       ///< BabelCache_Interface
 	protected $dispatcher;                  ///< sly_Event_IDispatcher
-	protected $mediumService;               ///< sly_Service_Medium
+	protected $container;                   ///< sly_Container
 
 	const ERR_CAT_HAS_MEDIA   = 1; ///< int
 	const ERR_CAT_HAS_SUBCATS = 2; ///< int
 
 	/**
 	 * Constructor
-	 *
-	 * Note that you have to call setMediumService() afterwards to have a
-	 * fully-functional service.
 	 *
 	 * @param sly_DB_Persistence    $persistence
 	 * @param BabelCache_Interface  $cache
@@ -40,13 +37,19 @@ class sly_Service_MediaCategory extends sly_Service_Model_Base_Id {
 		$this->dispatcher = $dispatcher;
 	}
 
+	public function setContainer(sly_Container $container = null) {
+		$this->container = $container;
+	}
+
 	/**
-	 * Set medium service
-	 *
-	 * @param sly_Service_Medium $service
+	 * @return sly_Service_Medium
 	 */
-	public function setMediumService(sly_Service_Medium $service) {
-		$this->mediumService = $service;
+	protected function getMediumService() {
+		if (!$this->container) {
+			throw new LogicException('Container must be set before media can be handled.');
+		}
+
+		return $this->container->getMediumService();
 	}
 
 	/**
@@ -247,14 +250,9 @@ class sly_Service_MediaCategory extends sly_Service_Model_Base_Id {
 			throw new sly_Exception(t('category_is_not_empty'), self::ERR_CAT_HAS_MEDIA);
 		}
 
-		$service = $this->mediumService;
-
-		if (!($service instanceof sly_Service_Medium)) {
-			throw new LogicException('You must set the medium service with ->setMediumService() before you can delete categories.');
-		}
-
-		$db     = $this->getPersistence();
-		$ownTrx = !$db->isTransRunning();
+		$service = $this->getMediumService();
+		$db      = $this->getPersistence();
+		$ownTrx  = !$db->isTransRunning();
 
 		if ($ownTrx) {
 			$db->beginTransaction();

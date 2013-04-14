@@ -13,7 +13,7 @@ if (PHP_SAPI !== 'cli') {
 }
 
 $travis = getenv('TRAVIS') !== false;
-$here   = dirname(__FILE__);
+$here   = __DIR__;
 $root   = dirname($here);
 
 // define Testuser

@@ -13,6 +13,7 @@
  * @ingroup service
  */
 class sly_Service_Article extends sly_Service_ArticleManager {
+	private $urlCache = array();
 
 	/**
 	 * @return string
@@ -104,7 +105,20 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 	 * @return array
 	 */
 	public function findAllRevisions($id, $clang) {
-		return $this->find(compact('id', 'clang'), null, 'revision DESC');
+		$where  = compact('id', 'clang');
+		$order  = 'revision DESC';
+		$return = array();
+		$db     = $this->getPersistence();
+
+		$db->select($this->getTableName(), '*', $where, null, $order);
+
+		foreach ($db as $row) {
+			$item = $this->makeInstance($row);
+			$item->setOnline($this->getOnlineStatus($item));
+			$return[] = $item;
+		}
+
+		return $return;
 	}
 
 	/**
@@ -236,6 +250,10 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 		$oldType   = $article->getType();
 		$sql       = $this->getPersistence();
 		$ownTrx    = !$sql->isTransRunning();
+
+		if ($article->getType() === $type) {
+			return true;
+		}
 
 		if ($ownTrx) {
 			$sql->beginTransaction();
@@ -626,5 +644,83 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 		}
 
 		return $changes;
+	}
+
+	/**
+	 * return the url
+	 *
+	 * @param  sly_Model_Article $article
+	 * @param  mixed             $params
+	 * @param  string            $divider
+	 * @param  boolean           $disableCache
+	 * @return string
+	 */
+	public function getUrl(sly_Model_Article $article, $params = '', $divider = '&amp;', $disableCache = false) {
+		$id    = $article->getId();
+		$clang = $article->getClang();
+
+		// cache the URLs for this request (unlikely to change)
+
+		$cacheKey = substr(md5($id.'_'.$clang.'_'.json_encode($params).'_'.$divider), 0, 10);
+
+		if (!$disableCache && isset($this->urlCache[$cacheKey])) {
+			return $this->urlCache[$cacheKey];
+		}
+
+		$dispatcher = $this->getDispatcher();
+		$redirect   = $dispatcher->filter('SLY_URL_REDIRECT', $article, array(
+			'params'       => $params,
+			'divider'      => $divider,
+			'disableCache' => $disableCache
+		));
+
+		// the listener must return an article (sly_Model_Article or int (ID)) or URL (string) to modify the returned URL
+
+		if ($redirect && $redirect !== $article) {
+			if (is_integer($redirect)) {
+				$id = $redirect;
+			}
+			elseif ($redirect instanceof sly_Model_Article) {
+				$id    = $redirect->getId();
+				$clang = $redirect->getClang();
+			}
+			else {
+				$this->urlCache[$cacheKey] = $redirect;
+				return $redirect;
+			}
+		}
+
+		// check for any fancy URL addOns
+
+		$paramString = sly_Util_HTTP::queryString($params, $divider);
+		$url         = $dispatcher->filter('URL_REWRITE', '', array(
+			'id'            => $id,
+			'clang'         => $clang,
+			'params'        => $paramString,
+			'divider'       => $divider,
+			'disable_cache' => $disableCache
+		));
+
+		// if no listener is available, generate plain index.php?article_id URLs
+
+		if (empty($url)) {
+			$clangString = '';
+			$languages   = $this->getLanguages(true);
+			$defClang    = $this->container->getConfig()->get('default_clang_id') ?: reset($languages);
+
+			if (count($languages) > 1 && $clang != $defClang) {
+				$clangString = $divider.'clang='.$clang;
+			}
+
+			$url = 'index.php?article_id='.$id.$clangString.$paramString;
+		}
+
+		$this->urlCache[$cacheKey] = $url;
+
+		return $url;
+	}
+
+	public function clearUrlCache() {
+		$this->urlCache = array();
 	}
 }

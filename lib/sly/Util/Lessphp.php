@@ -51,8 +51,6 @@ class sly_Util_Lessphp {
 	 * @return lessc             the LESS compiler
 	 */
 	public static function getCompiler($filename = null) {
-		require_once SLY_VENDORFOLDER.'/leafo/lessphp/lessc.inc.php';
-
 		$less = new lessc($filename);
 		$less->setFormatter('compressed');
 		$less->registerFunction('asset', array(__CLASS__, 'asset'));

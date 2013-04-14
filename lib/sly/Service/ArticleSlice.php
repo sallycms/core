@@ -14,12 +14,12 @@
  * @author  zozi@webvariants.de
  * @ingroup service
  */
-class sly_Service_ArticleSlice  {
+class sly_Service_ArticleSlice implements sly_ContainerAwareInterface {
 	protected $tablename = 'article_slice'; ///< string
 	protected $persistence;
 	protected $sliceService;                ///< sly_Service_Slice
 	protected $templateService;             ///< sly_Service_Template
-	protected $articleService;              ///< sly_Service_Article
+	protected $container;                   ///< sly_Container
 	protected $dispatcher;                  ///< sly_Event_IDispatcher
 
 	/**
@@ -29,7 +29,7 @@ class sly_Service_ArticleSlice  {
 	 * @param sly_Event_IDispatcher $dispatcher
 	 * @param sly_Service_Slice     $sliceService
 	 * @param sly_Service_Template  $templateService
-	 * @param sly_Service_Article   $articleService
+	 * @param sly_Service_Article   $container
 	 */
 	public function __construct(sly_DB_Persistence $persistence, sly_Event_IDispatcher $dispatcher, sly_Service_Slice $sliceService, sly_Service_Template $templateService) {
 		$this->persistence     = $persistence;
@@ -38,8 +38,19 @@ class sly_Service_ArticleSlice  {
 		$this->dispatcher      = $dispatcher;
 	}
 
-	public function setArticleService($articleService) {
-		$this->articleService  = $articleService;
+	public function setContainer(sly_Container $container = null) {
+		$this->container = $container;
+	}
+
+	/**
+	 * @return sly_Service_Article
+	 */
+	protected function getArticleService() {
+		if (!$this->container) {
+			throw new LogicException('Container must be set before article slices can be handled.');
+		}
+
+		return $this->container->getArticleService();
 	}
 
 	/**
@@ -138,7 +149,8 @@ class sly_Service_ArticleSlice  {
 	 * @throws sly_Exception
 	 */
 	public function delete(sly_Model_Article $article, $slot = null, $pos = null) {
-		$article = $this->articleService->touch($article);
+		$articleService = $this->getArticleService();
+		$article        = $articleService->touch($article);
 
 		$where = array(
 			'article_id' => $article->getId(),
@@ -222,7 +234,8 @@ class sly_Service_ArticleSlice  {
 		// here we go
 
 		try {
-			$article      = $this->articleService->touch($article);
+			$artService   = $this->getArticleService();
+			$article      = $artService->touch($article);
 			$articleSlice = $this->findOne(
 				array(
 					'article_id' => $article->getId(),
@@ -273,7 +286,8 @@ class sly_Service_ArticleSlice  {
 			throw new sly_Exception(t('article_has_no_template'));
 		}
 
-		$article = $this->articleService->touch($article, $user);
+		$artService = $this->getArticleService();
+		$article    = $artService->touch($article, $user);
 
 		$tpl = $article->getTemplateName();
 
@@ -358,13 +372,14 @@ class sly_Service_ArticleSlice  {
 		}
 
 		try {
-			$user      = $this->getActor($user, __METHOD__);
-			$article   = $this->articleService->touch($article, $user);
-			$maxPos    = $this->getMaxPosition($article, $slot);
-			$newPos    = max(array(0, min(array($newPos, $maxPos)))); // normalize
-			$articleId = $article->getId();
-			$clang     = $article->getClang();
-			$revision  = $article->getRevision();
+			$artService = $this->getArticleService();
+			$user       = $this->getActor($user, __METHOD__);
+			$article    = $artService->touch($article, $user);
+			$maxPos     = $this->getMaxPosition($article, $slot);
+			$newPos     = max(array(0, min(array($newPos, $maxPos)))); // normalize
+			$articleId  = $article->getId();
+			$clang      = $article->getClang();
+			$revision   = $article->getRevision();
 
 			// if it equals $curPos is eighter $maxPos, or 0 and should be moved
 			// out of range
@@ -426,7 +441,8 @@ class sly_Service_ArticleSlice  {
 	/**
 	 * Move a slice up or down
 	 *
-	 * @deprecated since 0.9
+	 * @deprecated since 0.9  use moveTo() instead
+	 *
 	 * @throws sly_Exception
 	 * @param  int            $slice_id   article slice ID
 	 * @param  string         $direction  direction to move, either 'up' or 'down'
@@ -444,6 +460,62 @@ class sly_Service_ArticleSlice  {
 		$curPos = $articleSlice->getPosition();
 		$newPos = $direction === 'up' ? $curPos - 1 : $curPos + 1;
 		$this->moveTo($articleSlice->getArticle(), $articleSlice->getSlot(), $curPos, $newPos, $user);
+	}
+
+	/**
+	 * find all slices within an article
+	 *
+	 * @param  sly_Model_Article  $article   an article
+	 * @param  string             $slot
+	 * @return array              list of sly_Model_ArticleSlice objects
+	 */
+	public function findByArticle(sly_Model_Article $article, $slot = null) {
+		$where = array('article_id' => $article->getId(), 'clang' => $article->getClang(), 'revision' => $article->getRevision());
+		$order = 'pos ASC';
+
+		if ($slot !== null) {
+			$where['slot'] = $slot;
+			$order         = 'slot ASC, pos ASC';
+		}
+
+		return $this->find($where, null, $order);
+	}
+
+	/**
+	 * Get the previous slice in the same slot
+	 *
+	 * @param  sly_Model_ArticleSlice $slice
+	 * @param  sly_Model_ArticleSlice         the previous slice or null
+	 */
+	public function getPrevious(sly_Model_ArticleSlice $slice) {
+		return $this->getSibling($slice, 'slot = %s AND pos < %d AND article_id = %d AND clang = %d AND revision = %d ORDER BY pos DESC');
+	}
+
+	/**
+	 * Get the next slice in the same slot
+	 *
+	 * @param  sly_Model_ArticleSlice $slice
+	 * @param  sly_Model_ArticleSlice         the next slice or null
+	 */
+	public function getNext(sly_Model_ArticleSlice $slice) {
+		return $this->getSibling($slice, 'slot = %s AND pos > %d AND article_id = %d AND clang = %d AND revision = %d ORDER BY pos ASC');
+	}
+
+	/**
+	 * Get slice sibling
+	 *
+	 * @param  sly_Model_ArticleSlice $slice
+	 * @param  string                 $where  the WHERE statement with placeholders
+	 * @param  sly_Model_ArticleSlice
+	 */
+	protected function getSibling(sly_Model_ArticleSlice $slice, $where) {
+		$slot    = $this->getPersistence()->quote($slice->getSlot());
+		$pos     = $slice->getPosition();
+		$article = $slice->getArticleId();
+		$clang   = $slice->getClang();
+		$rev     = $slice->getRevision();
+
+		return $this->findOne(sprintf($where, $slot, $pos, $article, $clang, $rev));
 	}
 
 	/**

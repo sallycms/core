@@ -8,5 +8,8 @@
  * http://www.opensource.org/licenses/mit-license.php
  */
 
-$type = 'radio';
-include __DIR__.'/group.phtml';
+class sly_Registry_TempTest extends sly_Registry_BaseTest {
+	protected function getRegistry() {
+		return new sly_Registry_Temp();
+	}
+}

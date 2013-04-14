@@ -295,79 +295,25 @@ class sly_Model_Base_Article extends sly_Model_Base {
 	/**
 	 * return the url
 	 *
-	 * @param  mixed   $params
-	 * @param  string  $divider
-	 * @param  boolean $disableCache
+	 * @param  mixed               $params
+	 * @param  string              $divider
+	 * @param  boolean             $disableCache
+	 * @param  sly_Service_Article $service
 	 * @return string
 	 */
-	public function getUrl($params = '', $divider = '&amp;', $disableCache = false) {
-		static $urlCache = array();
+	public function getUrl($params = '', $divider = '&amp;', $disableCache = false, sly_Service_Article $service = null) {
+		$service = $service ?: sly_Core::getContainer()->getArticleService();
 
-		$id    = $this->getId();
-		$clang = $this->getClang();
-
-		// cache the URLs for this request (unlikely to change)
-
-		$cacheKey = substr(md5($id.'_'.$clang.'_'.json_encode($params).'_'.$divider), 0, 10);
-
-		if (!$disableCache && isset($urlCache[$cacheKey])) {
-			return $urlCache[$cacheKey];
-		}
-
-		$dispatcher = sly_Core::dispatcher();
-		$redirect   = $dispatcher->filter('SLY_URL_REDIRECT', $this, array(
-			'params'       => $params,
-			'divider'      => $divider,
-			'disableCache' => $disableCache
-		));
-
-		// the listener must return an article (sly_Model_Article or int (ID)) or URL (string) to modify the returned URL
-		if ($redirect && $redirect !== $this) {
-			if (is_integer($redirect)) {
-				$id = $redirect;
-			}
-			elseif ($redirect instanceof sly_Model_Article) {
-				$id    = $redirect->getId();
-				$clang = $redirect->getClang();
-			}
-			else {
-				return $redirect;
-			}
-		}
-
-		// check for any fancy URL addOns
-
-		$paramString = sly_Util_HTTP::queryString($params, $divider);
-		$url         = $dispatcher->filter('URL_REWRITE', '', array(
-			'id'            => $id,
-			'clang'         => $clang,
-			'params'        => $paramString,
-			'divider'       => $divider,
-			'disable_cache' => $disableCache
-		));
-
-		// if no listener is available, generate plain index.php?article_id URLs
-
-		if (empty($url)) {
-			$clangString  = '';
-			$multilingual = sly_Util_Language::isMultilingual();
-
-			if ($multilingual && $clang != sly_Core::getDefaultClangId()) {
-				$clangString = $divider.'clang='.$clang;
-			}
-
-			$url = 'index.php?article_id='.$id.$clangString.$paramString;
-		}
-
-		$urlCache[$cacheKey] = $url;
-		return $url;
+		return $service->getUrl($this, $params, $divider, $disableCache);
 	}
 
 	/**
+	 * @param  sly_Service_Category $catService
 	 * @return array
 	 */
-	public function getParentTree() {
-		$return = array();
+	public function getParentTree(sly_Service_Category $catService = null) {
+		$return     = array();
+		$catService = $catService ?: sly_Core::getContainer()->getCategoryService();
 
 		$explode = explode('|', $this->getPath());
 		$explode = array_filter($explode);
@@ -377,7 +323,7 @@ class sly_Model_Base_Article extends sly_Model_Base {
 		}
 
 		foreach ($explode as $var) {
-			$return[] = sly_Util_Category::findById($var, $this->getClang());
+			$return[] = $catService->findByPK($var, $this->getClang());
 		}
 
 		return $return;
@@ -385,10 +331,11 @@ class sly_Model_Base_Article extends sly_Model_Base {
 
 	/**
 	 * @param  sly_Model_Base_Article $anObj
+	 * @param  sly_Service_Category   $catService
 	 * @return boolean
 	 */
-	public function inParentTree(sly_Model_Base_Article $anObj) {
-		$tree = $this->getParentTree();
+	public function inParentTree(sly_Model_Base_Article $anObj, sly_Service_Category $catService = null) {
+		$tree = $this->getParentTree($catService);
 
 		foreach ($tree as $treeObj) {
 			if ($treeObj->getId() == $anObj->getId()) {

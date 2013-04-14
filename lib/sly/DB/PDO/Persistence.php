@@ -9,28 +9,29 @@
  */
 
 /**
- * PDO Persintence Klasse für eine PDO-Verbindung
+ * PDO Persistence Klasse für eine PDO-Verbindung
  *
  * @author  zozi@webvariants.de
  * @ingroup database
  */
 class sly_DB_PDO_Persistence extends sly_DB_Persistence {
 	protected $driver;           ///< string
+
 	private $connection = null;  ///< sly_DB_PDO_Connection
 	private $statement  = null;  ///< PDOStatement
 	private $currentRow = null;  ///< int
 
 	/**
-	 * @param string $driver
+	 * @param string $driverName
 	 * @param string $host
 	 * @param string $login
 	 * @param string $password
 	 * @param string $database
 	 */
-	public function __construct($driver, $host, $login, $password, $database = null, $prefix = '') {
-		$this->driver     = $driver;
+	public function __construct($driverName, sly_DB_PDO_Connection $connection, $prefix = '') {
+		$this->driver     = $driverName;
 		$this->prefix     = $prefix;
-		$this->connection = sly_DB_PDO_Connection::getInstance($driver, $host, $login, $password, $database);
+		$this->connection = $connection;
 	}
 
 	/**

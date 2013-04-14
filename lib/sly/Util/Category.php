@@ -22,11 +22,10 @@ class sly_Util_Category {
 	 * checks whether a category exists or not
 	 *
 	 * @param  int $categoryID
-	 * @param  int $clang
 	 * @return boolean
 	 */
-	public static function exists($categoryID, $clang = null) {
-		return self::isValid(self::findById($categoryID, $clang));
+	public static function exists($categoryID) {
+		return sly_Core::getContainer()->getCategoryService()->exists($categoryID);
 	}
 
 	/**
@@ -47,7 +46,7 @@ class sly_Util_Category {
 	public static function findById($categoryID, $clang = null, $default = null) {
 		$service    = sly_Core::getContainer()->getCategoryService();
 		$categoryID = (int) $categoryID;
-		$cat        = $service->findById($categoryID, $clang);
+		$cat        = $service->findByPK($categoryID, $clang);
 
 		if ($cat) return $cat;
 
