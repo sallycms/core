@@ -81,8 +81,8 @@ class sly_Service_ArticleSlice implements sly_ContainerAwareInterface {
 	 * @return array
 	 */
 	public function find($where = null, $group = null, $order = null, $offset = null, $limit = null, $having = null) {
-		$return  = array();
-		$db      = $this->getPersistence();
+		$return = array();
+		$db     = $this->getPersistence();
 
 		$db->select($this->tablename, '*', $where, $group, $order, $offset, $limit, $having);
 
@@ -102,33 +102,32 @@ class sly_Service_ArticleSlice implements sly_ContainerAwareInterface {
 	}
 
 	public function insert(sly_Model_ArticleSlice $slice) {
-		$sql = $this->getPersistence();
+		$sql  = $this->getPersistence();
+		$self = $sql;
 
-		return $sql->transactional(array($this, 'insertTrx'), array($slice));
+		return $sql->transactional(function() use ($sql, $slice, $self) {
+			$pre   = $sql->getPrefix();
+			$table = $self->getTableName();
+
+			$sql->query(
+				'UPDATE '.$pre.$table.' SET pos = pos + 1 WHERE article_id = ? AND clang = ? AND slot = ? AND revision = ? AND pos >= ?',
+				array(
+					$slice->getArticleId(),
+					$slice->getClang(),
+					$slice->getSlot(),
+					$slice->getRevision(),
+					$slice->getPosition()
+				)
+			);
+
+			$sql->insert($table, $slice->toHash());
+		});
 	}
 
 	protected function update(sly_Model_ArticleSlice $slice) {
 		$sql = $this->getPersistence();
 
 		$sql->update($this->tablename, $slice->toHash(), $slice->getPKHash());
-	}
-
-	public function insertTrx(sly_Model_ArticleSlice $slice) {
-		$sql = $this->getPersistence();
-		$pre = $sql->getPrefix();
-
-		$sql->query(
-			'UPDATE '.$pre.$this->tablename.' SET pos = pos + 1 ' .
-			'WHERE article_id = ? AND clang = ? AND slot = ? ' .
-			'AND revision = ? AND pos >= ?', array(
-				$slice->getArticleId(),
-				$slice->getClang(),
-				$slice->getSlot(),
-				$slice->getRevision(),
-				$slice->getPosition()
-			)
-		);
-		$sql->insert($this->tablename, $slice->toHash());
 	}
 
 	/**
@@ -170,50 +169,41 @@ class sly_Service_ArticleSlice implements sly_ContainerAwareInterface {
 			$where['pos'] = $pos;
 		}
 
-		$sql = $this->getPersistence();
+		$self         = $this;
+		$dispatcher   = $this->dispatcher;
+		$sql          = $this->getPersistence();
+		$prefix       = $sql->getPrefix();
+		$sliceService = $this->sliceService;
 
-		$ownTrx = !$sql->isTransRunning();
+		$sql->transactional(function() use ($self, $sql, $dispatcher, $where, $pos, $slot, $prefix, $sliceService) {
+			$articleSlices = $self->find($where);
+			$tableName     = $self->getTableName();
 
-		if ($ownTrx) {
-			$sql->beginTransaction();
-		}
-
-		try {
-			$articleSlices = $this->find($where);
-
-			// fix order if its only one articleSlice
+			// fix order if it's only one article slice
 			if ($slot !== null && $pos !== null) {
-				$sql->query('UPDATE '.$sql->getPrefix().'article_slice SET pos = pos -1 WHERE
-					article_id = :article_id AND clang = :clang AND slot = :slot AND revision = :revision AND pos > :pos',
+				$sql->query(
+					'UPDATE '.$prefix.'article_slice SET pos = pos - 1 '.
+					'WHERE article_id = :article_id AND clang = :clang AND slot = :slot AND revision = :revision AND pos > :pos',
 					$where
 				);
 			}
 
 			foreach ($articleSlices as $articleSlice) {
 				// delete slice
-				$this->sliceService->deleteById($articleSlice->getSliceId());
+				$sliceService->deleteById($articleSlice->getSliceId());
 
 				// delete articleslice
-				$sql->delete($this->tablename, array(
-						'article_id' => $articleSlice->getArticleId(),
-						'clang'      => $articleSlice->getClang(),
-						'revision'   => $articleSlice->getRevision(),
-						'slot'       => $articleSlice->getSlot(),
-						'pos'        => $articleSlice->getPosition()
-					)
-				);
+				$sql->delete($tableName, array(
+					'article_id' => $articleSlice->getArticleId(),
+					'clang'      => $articleSlice->getClang(),
+					'revision'   => $articleSlice->getRevision(),
+					'slot'       => $articleSlice->getSlot(),
+					'pos'        => $articleSlice->getPosition()
+				));
 			}
 
-		}
-		catch (Exception $e) {
-			if ($ownTrx) {
-				$sql->rollBack();
-			}
-
-			throw $e;
-		}
-
-		$this->dispatcher->notify('SLY_SLICE_DELETED', null, $where);
+			$dispatcher->notify('SLY_SLICE_DELETED', null, $where);
+		});
 	}
 
 	/**
@@ -224,27 +214,21 @@ class sly_Service_ArticleSlice implements sly_ContainerAwareInterface {
 	 * @return sly_Model_ArticleSlice
 	 */
 	public function edit(sly_Model_Article $article, $slot, $pos, array $values, sly_Model_User $user = null) {
-		$sql    = $this->getPersistence();
-		$ownTrx = !$sql->isTransRunning();
+		$sql          = $this->getPersistence();
+		$self         = $this;
+		$dispatcher   = $this->getDispatcher();
+		$artService   = $self->getArticleService();
+		$sliceService = $this->sliceService;
 
-		if ($ownTrx) {
-			$sql->beginTransaction();
-		}
-
-		// here we go
-
-		try {
-			$artService   = $this->getArticleService();
+		return $sql->transactional(function() use ($sql, $self, $article, $slot, $pos, $values, $user, $artService, $dispatcher) {
 			$article      = $artService->touch($article);
-			$articleSlice = $this->findOne(
-				array(
-					'article_id' => $article->getId(),
-					'clang'      => $article->getClang(),
-					'revision'   => $article->getRevision(),
-					'slot'       => $slot,
-					'pos'        => $pos
-				)
-			);
+			$articleSlice = $self->findOne(array(
+				'article_id' => $article->getId(),
+				'clang'      => $article->getClang(),
+				'revision'   => $article->getRevision(),
+				'slot'       => $slot,
+				'pos'        => $pos
+			));
 
 			if (!$articleSlice) {
 				throw new sly_Exception_ArticleSliceNotFound(t('slice_not_found'));
@@ -252,18 +236,12 @@ class sly_Service_ArticleSlice implements sly_ContainerAwareInterface {
 
 			$slice = $articleSlice->getSlice();
 			$slice->setValues($values);
-			$this->sliceService->save($slice);
-		}
-		catch (Exception $e) {
-			if ($ownTrx) {
-				$sql->rollBack();
-			}
+			$sliceService->save($slice);
 
-			throw $e;
-		}
-		$this->dispatcher->notify('SLY_SLICE_EDITED', $articleSlice);
+			$dispatcher->notify('SLY_SLICE_EDITED', $articleSlice);
 
-		return $articleSlice;
+			return $articleSlice;
+		});
 	}
 
 	/**
@@ -288,10 +266,9 @@ class sly_Service_ArticleSlice implements sly_ContainerAwareInterface {
 
 		$artService = $this->getArticleService();
 		$article    = $artService->touch($article, $user);
+		$template   = $article->getTemplateName();
 
-		$tpl = $article->getTemplateName();
-
-		if (!$this->templateService->hasSlot($tpl, $slot)) {
+		if (!$this->templateService->hasSlot($template, $slot)) {
 			throw new sly_Exception(t('article_has_no_such_slot', $slot));
 		}
 
@@ -302,17 +279,13 @@ class sly_Service_ArticleSlice implements sly_ContainerAwareInterface {
 
 		// prepare database transaction
 
-		$sql    = $this->getPersistence();
-		$ownTrx = !$sql->isTransRunning();
+		$sql          = $this->getPersistence();
+		$self         = $this;
+		$dispatcher   = $this->dispatcher;
+		$sliceService = $this->sliceService;
 
-		if ($ownTrx) {
-			$sql->beginTransaction();
-		}
-
-		// here we go
-
-		try {
-			$maxPos = $this->getMaxPosition($article, $slot);
+		return $sql->transactional(function() use($self, $article, $slot, $pos, $values, $module, $sliceService, $user, $revision, $dispatcher) {
+			$maxPos = $self->getMaxPosition($article, $slot);
 			$target = $maxPos + 1;
 
 			if ($pos !== null) {
@@ -329,7 +302,7 @@ class sly_Service_ArticleSlice implements sly_ContainerAwareInterface {
 			$slice = new sly_Model_Slice();
 			$slice->setModule($module);
 			$slice->setValues($values);
-			$slice = $this->sliceService->save($slice);
+			$slice = $sliceService->save($slice);
 
 			$articleSlice = new sly_Model_ArticleSlice();
 			$articleSlice->setPosition($target);
@@ -339,43 +312,26 @@ class sly_Service_ArticleSlice implements sly_ContainerAwareInterface {
 			$articleSlice->setArticle($article);
 			$articleSlice->setRevision($revision);
 
-			$this->insert($articleSlice);
+			$self->insert($articleSlice);
 
-			// commit changes
+			$dispatcher->notify('SLY_SLICE_ADDED', $articleSlice);
 
-			if ($ownTrx) {
-				$sql->commit();
-			}
-		}
-		catch (Exception $e) {
-			if ($ownTrx) {
-				$sql->rollBack();
-			}
-
-			throw $e;
-		}
-
-		// notify system
-		$this->dispatcher->notify('SLY_SLICE_ADDED', $articleSlice);
-		return $articleSlice;
+			return $articleSlice;
+		});
 	}
 
 	public function moveTo(sly_Model_Article $article, $slot, $curPos, $newPos, sly_Model_User $user = null) {
-		$curPos = (int) $curPos;
-		$newPos = (int) $newPos;
-		$sql    = $this->getPersistence();
-		$ownTrx = !$sql->isTransRunning();
+		$curPos     = (int) $curPos;
+		$newPos     = (int) $newPos;
+		$self       = $this;
+		$sql        = $this->getPersistence();
+		$artService = $this->getArticleService();
+		$user       = $this->getActor($user, __METHOD__);
+		$dispatcher = $this->getDispatcher();
 
-		// make sure a transaction is startet
-		if ($ownTrx) {
-			$sql->beginTransaction();
-		}
-
-		try {
-			$artService = $this->getArticleService();
-			$user       = $this->getActor($user, __METHOD__);
+		$sql->transactional(function() use ($article, $user, $slot, $curPos, $newPos, $sql, $artService, $self, $dispatcher) {
 			$article    = $artService->touch($article, $user);
-			$maxPos     = $this->getMaxPosition($article, $slot);
+			$maxPos     = $self->getMaxPosition($article, $slot);
 			$newPos     = max(array(0, min(array($newPos, $maxPos)))); // normalize
 			$articleId  = $article->getId();
 			$clang      = $article->getClang();
@@ -387,18 +343,19 @@ class sly_Service_ArticleSlice implements sly_ContainerAwareInterface {
 				throw new sly_Exception_ArticleSlicePositionOutOfBounds();
 			}
 
-			$articleSlice = $this->findOne(array('article_id' => $articleId, 'clang' => $clang, 'slot' => $slot, 'pos' => $curPos, 'revision' => $revision));
+			$articleSlice = $self->findOne(array('article_id' => $articleId, 'clang' => $clang, 'slot' => $slot, 'pos' => $curPos, 'revision' => $revision));
 
 			if (!$articleSlice) {
 				throw new sly_Exception_ArticleSliceNotFound(t('slice_not_found'));
 			}
 
-			$op  = ($newPos < $curPos) ? '+' : '-';
-			$rel = ($newPos < $curPos) ? '<=' : '>=';
+			$op    = ($newPos < $curPos) ? '+' : '-';
+			$rel   = ($newPos < $curPos) ? '<=' : '>=';
+			$table = $self->getTableName();
 
 			//move other slices
 			$sql->query(sprintf(
-				'UPDATE %s'.$this->tablename.' SET pos = pos %s 1 ' .
+				'UPDATE %s'.$table.' SET pos = pos %s 1 ' .
 				'WHERE article_id = ? AND clang = ? AND slot = ? ' .
 				'AND revision = ? AND pos %s ?', $sql->getPrefix(), $op, $rel), array(
 					$articleId,
@@ -411,31 +368,17 @@ class sly_Service_ArticleSlice implements sly_ContainerAwareInterface {
 
 			$articleSlice->setPosition($newPos);
 			$articleSlice->setUpdateColumns($user);
-			$this->update($articleSlice);
+			$self->update($articleSlice);
 
-			if ($ownTrx) {
-				$sql->commit();
-			}
-		}
-		catch (Exception $e) {
-			if ($ownTrx) {
-				$sql->rollBack();
-			}
-
-			throw $e;
-		}
-
-		// @deprecated revove direction from the event in the future
-		$direction = $op === '+' ? 'up' : 'down';
-
-		// notify system
-		$this->dispatcher->notify('SLY_SLICE_MOVED', $articleSlice, array(
-			'clang'     => $clang,
-			'direction' => $direction,
-			'old_pos'   => $curPos,
-			'new_pos'   => $newPos,
-			'user'      => $user
-		));
+			// notify system
+			$dispatcher->notify('SLY_SLICE_MOVED', $articleSlice, array(
+				'clang'     => $clang,
+				'direction' => $op === '+' ? 'up' : 'down', // @deprecated remove direction from the event in the future
+				'old_pos'   => $curPos,
+				'new_pos'   => $newPos,
+				'user'      => $user
+			));
+		});
 	}
 
 	/**
@@ -459,6 +402,7 @@ class sly_Service_ArticleSlice implements sly_ContainerAwareInterface {
 
 		$curPos = $articleSlice->getPosition();
 		$newPos = $direction === 'up' ? $curPos - 1 : $curPos + 1;
+
 		$this->moveTo($articleSlice->getArticle(), $articleSlice->getSlot(), $curPos, $newPos, $user);
 	}
 
@@ -527,6 +471,7 @@ class sly_Service_ArticleSlice implements sly_ContainerAwareInterface {
 	 */
 	protected function getMaxPosition(sly_Model_Article $article, $slot) {
 		$sql = $this->getPersistence();
+
 		return (int) $sql->magicFetch('article_slice', 'MAX(pos)', array('article_id' => $article->getId(), 'clang' => $article->getClang(), 'slot' => $slot, 'revision' => $article->getRevision()));
 	}
 

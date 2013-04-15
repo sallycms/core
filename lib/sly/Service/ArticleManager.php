@@ -9,7 +9,7 @@
  */
 
 abstract class sly_Service_ArticleManager extends sly_Service_ArticleBase {
-	protected $states    = array();   ///< array
+	protected $states = array();   ///< array
 
 	abstract protected function buildModel(array $params);
 	abstract protected function getSiblingQuery($id, $clang = null);
@@ -45,9 +45,9 @@ abstract class sly_Service_ArticleManager extends sly_Service_ArticleBase {
 	 * @return int
 	 */
 	protected function addHelper($parentID, $name, $position = -1, sly_Model_User $user = null) {
-		$parentID    = (int)    $parentID;
+		$parentID    = (int) $parentID;
+		$position    = (int) $position;
 		$name        = (string) $name;
-		$position    = (int)    $position;
 		$defaultLang = $this->getDefaultLanguageId();
 		$user        = $this->getActor($user, 'add');
 
@@ -98,17 +98,17 @@ abstract class sly_Service_ArticleManager extends sly_Service_ArticleBase {
 		///////////////////////////////////////////////////////////////
 		// create article/category rows for all languages
 
-		$ownTrx = !$db->isTransRunning();
+		$dispatcher = $this->getDispatcher();
+		$languages  = $this->getLanguages();
+		$self       = $this;
 
-		if ($ownTrx) {
-			$db->beginTransaction();
-		}
-
-		try {
+		return $db->transactional(function() use ($db, $languages, $parentID, $name, $position, $path, $type, $self, $dispatcher, $user) {
 			$newID = $db->magicFetch('article', 'MAX(id)') + 1;
+			$table = $self->getTableName();
+			$event = $self->getEvent('ADDED');
 
-			foreach ($this->getLanguages() as $clangID) {
-				$obj = $this->buildModel(array(
+			foreach ($languages as $clangID) {
+				$obj = $self->buildModel(array(
 					      'id' => $newID,
 					  'parent' => $parentID,
 					    'name' => $name,
@@ -121,11 +121,11 @@ abstract class sly_Service_ArticleManager extends sly_Service_ArticleBase {
 
 				$obj->setUpdateColumns($user);
 				$obj->setCreateColumns($user);
-				$db->insert($this->tablename, array_merge($obj->getPKHash(), $obj->toHash()));
+				$db->insert($table, array_merge($obj->getPKHash(), $obj->toHash()));
 
 				// notify system
 
-				$this->getDispatcher()->notify($this->getEvent('ADDED'), $newID, array(
+				$dispatcher->notify($event, $newID, array(
 					're_id'    => $parentID,
 					'clang'    => $clangID,
 					'name'     => $name,
@@ -137,19 +137,8 @@ abstract class sly_Service_ArticleManager extends sly_Service_ArticleBase {
 				));
 			}
 
-			if ($ownTrx) {
-				$db->commit();
-			}
-		}
-		catch (Exception $e) {
-			if ($ownTrx) {
-				$db->rollBack();
-			}
-
-			throw $e;
-		}
-
-		return $newID;
+			return $newID;
+		});
 	}
 
 	/**
@@ -172,26 +161,20 @@ abstract class sly_Service_ArticleManager extends sly_Service_ArticleBase {
 			throw new sly_Exception(t($modelType.'_not_found', $ids));
 		}
 
-		$id      = $obj->getId();
-		$clangID = $obj->getClang();
-		$db      = $this->getPersistence();
-		$ownTrx  = !$db->isTransRunning();
+		$id         = $obj->getId();
+		$clangID    = $obj->getClang();
+		$db         = $this->getPersistence();
+		$dispatcher = $this->getDispatcher();
 
-		if ($ownTrx) {
-			$db->beginTransaction();
-		}
-
-		try {
-			///////////////////////////////////////////////////////////////
+		$db->transactional(function() use ($self, $db, $id, $clangID, $obj, $isArticle, $name, $user, $position, $dispatcher) {
 			// update the object itself
 
 			$isArticle ? $obj->setName($name) : $obj->setCatName($name);
 
 			$obj->setUpdateColumns($user);
 
-			$obj = $this->update($obj);
+			$obj = $self->update($obj);
 
-			///////////////////////////////////////////////////////////////
 			// change catname of all children
 
 			if (!$isArticle) {
@@ -199,7 +182,6 @@ abstract class sly_Service_ArticleManager extends sly_Service_ArticleBase {
 				$db->update('article', array('catname' => $name), $where);
 			}
 
-			///////////////////////////////////////////////////////////////
 			// move object if required
 
 			$curPos = $isArticle ? $obj->getPosition() : $obj->getCatPosition();
@@ -207,7 +189,7 @@ abstract class sly_Service_ArticleManager extends sly_Service_ArticleBase {
 			if ($position !== false && $position != $curPos) {
 				$position = (int) $position;
 				$parentID = $isArticle ? $obj->getCategoryId() : $obj->getParentId();
-				$maxPos   = $this->getMaxPosition($parentID);
+				$maxPos   = $self->getMaxPosition($parentID);
 				$newPos   = ($position <= 0 || $position > $maxPos) ? $maxPos : $position;
 
 				// only do something if the position really changed
@@ -218,29 +200,20 @@ abstract class sly_Service_ArticleManager extends sly_Service_ArticleBase {
 
 					// move all other objects
 
-					$followers = $this->getFollowerQuery($parentID, $clangID, $a, $b);
-					$this->moveObjects($relation, $followers);
+					$followers = $self->getFollowerQuery($parentID, $clangID, $a, $b);
+					$self->moveObjects($relation, $followers);
 
 					// save own, new position for all revisions
+
 					$field = $isArticle ? 'pos' : 'catpos';
 					$where = array('id' => $obj->getId(), 'clang' => $obj->getClang());
-					$this->getPersistence()->update($this->getTableName(), array($field => $newPos), $where);
+
+					$db->update($self->getTableName(), array($field => $newPos), $where);
 				}
 			}
 
-			if ($ownTrx) {
-				$db->commit();
-			}
-		}
-		catch (Exception $e) {
-			if ($ownTrx) {
-				$db->rollBack();
-			}
-
-			throw $e;
-		}
-
-		$this->getDispatcher()->notify($this->getEvent('UPDATED'), $obj, array('user' => $user));
+			$dispatcher->notify($self->getEvent('UPDATED'), $obj, array('user' => $user));
+		});
 
 		return true;
 	}

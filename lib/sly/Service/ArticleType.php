@@ -39,9 +39,11 @@ class sly_Service_ArticleType {
 	 */
 	public function getArticleTypes() {
 		$types = array();
+
 		foreach (array_keys($this->data) as $name) {
 			$types[$name] = $this->getTitle($name);
 		}
+
 		return $types;
 	}
 
@@ -53,6 +55,7 @@ class sly_Service_ArticleType {
 	 */
 	public function get($articleType, $property, $default = '') {
 		$this->exists($articleType, true);
+
 		return isset($this->data[$articleType][$property]) ? $this->data[$articleType][$property] : $default;
 	}
 
@@ -62,6 +65,7 @@ class sly_Service_ArticleType {
 	 */
 	public function getTitle($articleType) {
 		$title = $this->get($articleType, 'title');
+
 		return empty($title) ? $articleType : $title;
 	}
 
@@ -175,6 +179,7 @@ class sly_Service_ArticleType {
 		if (!$this->exists($type)) return false;
 
 		$modules = $this->getModules($type, $slot);
+
 		return array_key_exists($module, $modules);
 	}
 }
