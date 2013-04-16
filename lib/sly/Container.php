@@ -283,23 +283,17 @@ class sly_Container extends Pimple implements Countable {
 		// filesystems
 
 		$this['sly-filesystem-media'] = $this->share(function($container) {
-			$baseDir  = SLY_MEDIAFOLDER;
-			$baseUri  = $container['sly-request']->getBaseUrl(true).'/data/mediapool/';
-			$config   = $container['sly-config'];
-			$filePerm = $config->get('fileperm', sly_Core::DEFAULT_FILEPERM);
-			$dirPerm  = $config->get('dirperm', sly_Core::DEFAULT_DIRPERM);
+			$adapter = new Gaufrette\Adapter\Local(SLY_MEDIAFOLDER);
+			$fs      = new Gaufrette\Filesystem($adapter);
 
-			return new sly\Filesystem\Adapter\LocalHttp($baseDir, $baseUri, $filePerm, $dirPerm);
+			return $fs;
 		});
 
 		$this['sly-filesystem-dyn'] = $this->share(function($container) {
-			$baseDir  = SLY_DYNFOLDER;
-			$baseUri  = $container['sly-request']->getBaseUrl(true).'/data/dyn/';
-			$config   = $container['sly-config'];
-			$filePerm = $config->get('fileperm', sly_Core::DEFAULT_FILEPERM);
-			$dirPerm  = $config->get('dirperm', sly_Core::DEFAULT_DIRPERM);
+			$adapter = new Gaufrette\Adapter\Local(SLY_DYNFOLDER);
+			$fs      = new Gaufrette\Filesystem($adapter);
 
-			return new sly\Filesystem\Adapter\LocalHttp($baseDir, $baseUri, $filePerm, $dirPerm);
+			return $fs;
 		});
 
 		//////////////////////////////////////////////////////////////////////////
@@ -726,14 +720,14 @@ class sly_Container extends Pimple implements Countable {
 	}
 
 	/**
-	 * @return sly\Filesystem\Filesystem
+	 * @return Gaufrette\Filesystem
 	 */
 	public function getMediaFilesystem() {
 		return $this->get('sly-filesystem-media');
 	}
 
 	/**
-	 * @return sly\Filesystem\Filesystem
+	 * @return Gaufrette\Filesystem
 	 */
 	public function getDynFilesystem() {
 		return $this->get('sly-filesystem-dyn');
