@@ -8,7 +8,7 @@
  * http://www.opensource.org/licenses/mit-license.php
  */
 
-use sly\Filesystem\Filesystem;
+use Gaufrette\Filesystem;
 
 /**
  * Business Model Klasse für Medien
@@ -116,16 +116,13 @@ class sly_Model_Medium extends sly_Model_Base_Id {
 	public function exists(Filesystem $fs = null) {
 		$fs = $fs ?: sly_Core::getContainer()->getMediaFilesystem();
 
-		return strlen($this->filename) > 0 && $fs->exists($this->filename);
+		return strlen($this->filename) > 0 && $fs->has($this->filename);
 	}
 
 	/**
-	 * @param  Filesystem $fs
 	 * @return string
 	 */
-	public function getUrl(Filesystem $fs = null) {
-		$fs = $fs ?: sly_Core::getContainer()->getMediaFilesystem();
-
-		return $fs->getUrl($this->filename);
+	public function getUrl($absolutePath = false) {
+		return ($absolutePath ? sly_Util_HTTP::getBaseUrl(true).'/' : '').'data/mediapool/'.$this->filename;
 	}
 }
