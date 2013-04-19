@@ -629,7 +629,7 @@ class sly_Container implements ArrayAccess, Countable {
 	protected function buildCache(sly_Container $container) {
 		$config   = $container['sly-config'];
 		$strategy = $config->get('CACHING_STRATEGY');
-		$fallback = $config->get('FALLBACK_CACHING_STRATEGY', 'sly_Cache_Blackhole');
+		$fallback = $config->get('FALLBACK_CACHING_STRATEGY', 'BabelCache_Blackhole');
 
 		return $this['sly-cache'] = sly_Cache::factory($strategy, $fallback);
 	}
