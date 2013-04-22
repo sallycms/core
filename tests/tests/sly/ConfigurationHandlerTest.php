@@ -12,7 +12,7 @@ class sly_ConfigurationHandlerTest extends PHPUnit_Framework_TestCase {
 
 	public function testHandler() {
 		$container = sly_Core::getContainer();
-		$handler   = new sly_Configuration_DatabaseImpl(SLY_CONFIGFOLDER, $container->getService('File_YAML'));
+		$handler   = new sly_Configuration_DatabaseImpl(SLY_CONFIGFOLDER, $container->get('sly-service-yaml'));
 
 		$handler->setPersistence($container->getPersistence());
 
