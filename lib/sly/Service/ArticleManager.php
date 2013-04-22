@@ -100,15 +100,16 @@ abstract class sly_Service_ArticleManager extends sly_Service_ArticleBase {
 
 		$dispatcher = $this->getDispatcher();
 		$languages  = $this->getLanguages();
-		$self       = $this;
 
-		return $db->transactional(function() use ($db, $languages, $parentID, $name, $position, $path, $type, $self, $dispatcher, $user) {
+		$trx = $db->beginTrx();
+
+		try {
 			$newID = $db->magicFetch('article', 'MAX(id)') + 1;
-			$table = $self->getTableName();
-			$event = $self->getEvent('ADDED');
+			$table = $this->getTableName();
+			$event = $this->getEvent('ADDED');
 
 			foreach ($languages as $clangID) {
-				$obj = $self->buildModel(array(
+				$obj = $this->buildModel(array(
 					      'id' => $newID,
 					  'parent' => $parentID,
 					    'name' => $name,
@@ -137,8 +138,13 @@ abstract class sly_Service_ArticleManager extends sly_Service_ArticleBase {
 				));
 			}
 
-			return $newID;
-		});
+			$db->commitTrx($trx);
+		}
+		catch (Exception $e) {
+			$db->rollBackTrx($trx, $e);
+		}
+
+		return $newID;
 	}
 
 	/**
@@ -166,14 +172,16 @@ abstract class sly_Service_ArticleManager extends sly_Service_ArticleBase {
 		$db         = $this->getPersistence();
 		$dispatcher = $this->getDispatcher();
 
-		$db->transactional(function() use ($self, $db, $id, $clangID, $obj, $isArticle, $name, $user, $position, $dispatcher) {
+		$trx = $db->beginTrx();
+
+		try {
 			// update the object itself
 
 			$isArticle ? $obj->setName($name) : $obj->setCatName($name);
 
 			$obj->setUpdateColumns($user);
 
-			$obj = $self->update($obj);
+			$obj = $this->update($obj);
 
 			// change catname of all children
 
@@ -189,7 +197,7 @@ abstract class sly_Service_ArticleManager extends sly_Service_ArticleBase {
 			if ($position !== false && $position != $curPos) {
 				$position = (int) $position;
 				$parentID = $isArticle ? $obj->getCategoryId() : $obj->getParentId();
-				$maxPos   = $self->getMaxPosition($parentID);
+				$maxPos   = $this->getMaxPosition($parentID);
 				$newPos   = ($position <= 0 || $position > $maxPos) ? $maxPos : $position;
 
 				// only do something if the position really changed
@@ -200,20 +208,25 @@ abstract class sly_Service_ArticleManager extends sly_Service_ArticleBase {
 
 					// move all other objects
 
-					$followers = $self->getFollowerQuery($parentID, $clangID, $a, $b);
-					$self->moveObjects($relation, $followers);
+					$followers = $this->getFollowerQuery($parentID, $clangID, $a, $b);
+					$this->moveObjects($relation, $followers);
 
 					// save own, new position for all revisions
 
 					$field = $isArticle ? 'pos' : 'catpos';
 					$where = array('id' => $obj->getId(), 'clang' => $obj->getClang());
 
-					$db->update($self->getTableName(), array($field => $newPos), $where);
+					$db->update($this->getTableName(), array($field => $newPos), $where);
 				}
 			}
 
-			$dispatcher->notify($self->getEvent('UPDATED'), $obj, array('user' => $user));
-		});
+			$dispatcher->notify($this->getEvent('UPDATED'), $obj, array('user' => $user));
+
+			$db->commitTrx($trx);
+		}
+		catch (Exception $e) {
+			$db->rollBackTrx($trx, $e);
+		}
 
 		return true;
 	}

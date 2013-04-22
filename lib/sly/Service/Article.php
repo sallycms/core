@@ -174,29 +174,35 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 		$article    = $this->findByPK($articleID, $defaultLang);
 		$dispatcher = $this->getDispatcher();
 		$sql        = $this->getPersistence();
-		$self       = $this;
+		$tableName  = $this->getTableName();
+		$parent     = $article->getCategoryId();
 
-		$sql->transactional(function() use ($self, $article, $articleID, $sql) {
+		$trx = $sql->beginTrx();
+
+		try {
 			// allow external code to stop the delete operation
 			$dispatcher->notify('SLY_PRE_ART_DELETE', $article);
 
-			$parent = $article->getCategoryId();
-
-			foreach ($self->getLanguages() as $clang) {
-				$pos = $self->findByPK($articleID, $clang)->getPosition();
+			foreach ($this->getLanguages() as $clang) {
+				$pos = $this->findByPK($articleID, $clang)->getPosition();
 
 				// delete article and its content
-				$sql->update($self->getTableName(), array('deleted' => 1, 'pos' => 0), array('id' => $articleID, 'clang' => $clang));
+				$sql->update($tableName, array('deleted' => 1, 'pos' => 0), array('id' => $articleID, 'clang' => $clang));
 
 				// re-position all following articles
-				$followers = $self->getFollowerQuery($parent, $clang, $pos);
+				$followers = $this->getFollowerQuery($parent, $clang, $pos);
 
-				$self->moveObjects('-', $followers);
+				$this->moveObjects('-', $followers);
 			}
 
 			// notify system about the deleted article
 			$dispatcher->notify($this->getEvent('DELETED'), $article);
-		});
+
+			$sql->commitTrx($trx);
+		}
+		catch (Exception $e) {
+			$sql->rollBackTrx($trx, $e);
+		}
 
 		return true;
 	}
@@ -240,19 +246,24 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 
 		$user = $this->getActor($user, __METHOD__);
 		$sql  = $this->getPersistence();
-		$self = $this;
+		$trx  = $sql->beginTrx();
 
-		$sql->transactional(function() use ($user, $article, $self, $oldType) {
+		try {
 			// create new revision
-			$article = $self->touch($article, $user);
+			$article = $this->touch($article, $user);
 
 			// update the article
 			$article->setType($type);
-			$self->update($article);
+			$this->update($article);
 
 			// notify system
-			$dispatcher->notify('SLY_ART_TYPE', $article, array('old_type' => $oldType, 'user' => $user));
-		});
+			$this->getDispatcher()->notify('SLY_ART_TYPE', $article, array('old_type' => $oldType, 'user' => $user));
+
+			$sql->commitTrx($trx);
+		}
+		catch (Exception $e) {
+			$sql->rollBackTrx($trx, $e);
+		}
 
 		return true;
 	}
@@ -265,17 +276,22 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 		$user    = $this->getActor($user, __METHOD__);
 		$touched = clone $article;
 		$sql     = $this->getPersistence();
-		$self    = $this;
+		$trx     = $sql->beginTrx();
 
-		return $sql->transactional(function() use ($self, $article, $touched, $user) {
-			$touched->setRevision($self->getMaxRevision($article) + 1);
+		try {
+			$touched->setRevision($this->getMaxRevision($article) + 1);
 			$touched->setCreateColumns($user);
-			$touched = $self->insert($touched);
+			$touched = $this->insert($touched);
 
-			$self->copyContent($article, $touched, $user);
+			$this->copyContent($article, $touched, $user);
 
-			return $touched;
-		});
+			$sql->commitTrx($trx);
+		}
+		catch (Exception $e) {
+			$sql->rollBackTrx($trx, $e);
+		}
+
+		return $touched;
 	}
 
 	/**
@@ -318,16 +334,16 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 
 		// prepare infos
 
-		$pos        = $this->getMaxPosition($target) + 1;
-		$sql        = $this->getPersistence();
 		$dispatcher = $this->getDispatcher();
-		$languages  = $this->getLanguages();
-		$catService = $self->getCategoryService();
-		$self       = $this;
+		$catService = $this->getCategoryService();
 
-		$sql->transactional(function() use ($languages, $self, $id, $source, $target, $pos, $user, $catService, $dispatcher) {
-			foreach ($languages as $clang) {
-				$article = $self->findByPK($id, $clang);
+		$pos = $this->getMaxPosition($target) + 1;
+		$sql = $this->getPersistence();
+		$trx = $sql->beginTrx();
+
+		try {
+			foreach ($this->getLanguages() as $clang) {
+				$article = $this->findByPK($id, $clang);
 				$cat     = $target === 0 ? null : $catService->findByPK($target, $clang);
 				$moved   = clone $article;
 
@@ -338,11 +354,11 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 				$moved->setUpdateColumns($user);
 
 				// move article at the end of new category
-				$self->update($moved);
+				$this->update($moved);
 
 				// re-number old category
-				$followers = $self->getFollowerQuery($source, $clang, $article->getPosition());
-				$self->moveObjects('-', $followers);
+				$followers = $this->getFollowerQuery($source, $clang, $article->getPosition());
+				$this->moveObjects('-', $followers);
 
 				// notify system
 				$dispatcher->notify('SLY_ART_MOVED', $id, array(
@@ -351,7 +367,12 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 					'user'   => $user
 				));
 			}
-		});
+
+			$sql->commitTrx($trx);
+		}
+		catch (Exception $e) {
+			$sql->rollBackTrx($trx, $e);
+		}
 	}
 
 	/**
@@ -387,15 +408,15 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 		$pos        = $this->getMaxPosition($target) + 1;
 		$newID      = $sql->magicFetch('article', 'MAX(id)') + 1;
 		$dispatcher = $this->getDispatcher();
-		$languages  = $this->getLanguages();
-		$catService = $self->getCategoryService();
-		$self       = $this;
+		$catService = $this->getCategoryService();
 
 		// copy by language
 
-		$sql->transactional(function() use ($languages, $id, $source, $target, $newID, $self, $user, $pos, $catService, $dispatcher) {
-			foreach ($languages as $clang) {
-				$source    = $self->findByPK($id, $clang);
+		$trx = $sql->beginTrx();
+
+		try {
+			foreach ($this->getLanguages() as $clang) {
+				$source    = $this->findByPK($id, $clang);
 				$cat       = $target === 0 ? null : $catService->findByPK($target, $clang);
 				$duplicate = clone $source;
 
@@ -414,17 +435,22 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 				$duplicate->setCatPosition(0);
 
 				// store it
-				$self->insert($duplicate);
+				$this->insert($duplicate);
 
 				// copy slices
 				if ($source->hasType()) {
-					$self->copyContent($source, $duplicate, $user);
+					$this->copyContent($source, $duplicate, $user);
 				}
 
 				// notify system
 				$dispatcher->notify('SLY_ART_COPIED', $duplicate, compact('source', 'user'));
 			}
-		});
+
+			$sql->commitTrx($trx);
+		}
+		catch (Exception $e) {
+			$sql->rollBackTrx($trx, $e);
+		}
 
 		return $newID;
 	}
@@ -464,16 +490,16 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 		$oldCat     = $article->getCategoryId();
 		$params     = array('path', 'catname', 'catpos', 're_id', 'startpage');
 		$sql        = $this->getPersistence();
-		$languages  = $this->getLanguages();
 		$dispatcher = $this->getDispatcher();
-		$self       = $this;
 
-		$sql->transactional(function() use ($languages, $self, $articleID, $oldCat, $params, $sql, $dispatcher, $user) {
-			$table = $self->getTableName();
+		$trx = $sql->beginTrx();
 
-			foreach ($languages as $clang) {
-				$newStarter = $self->findByPK($articleID, $clang)->toHash();
-				$oldStarter = $self->findByPK($oldCat, $clang)->toHash();
+		try {
+			$table = $this->getTableName();
+
+			foreach ($this->getLanguages() as $clang) {
+				$newStarter = $this->findByPK($articleID, $clang)->toHash();
+				$oldStarter = $this->findByPK($oldCat, $clang)->toHash();
 
 				foreach ($params as $param) {
 					$t = $newStarter[$param];
@@ -492,7 +518,12 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 
 			// notify system
 			$dispatcher->notify('SLY_ART_TO_STARTPAGE', $articleID, array('old_cat' => $oldCat, 'user' => $user));
-		});
+
+			$sql->commitTrx($trx);
+		}
+		catch (Exception $e) {
+			$sql->rollBackTrx($trx, $e);
+		}
 	}
 
 	/**
@@ -518,14 +549,14 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 		}
 
 		// copy the slices by their slots
-		$asServ   = $this->container->getArticleSliceService();
-		$sServ    = $this->container->getSliceService();
-		$sql      = $this->getPersistence();
-		$login    = $user->getLogin();
-		$dstSlots = $this->container->getTemplateService()->getSlots($dest->getTemplateName());
-		$self     = $this;
+		$asServ     = $this->container->getArticleSliceService();
+		$sServ      = $this->container->getSliceService();
+		$sql        = $this->getPersistence();
+		$login      = $user->getLogin();
+		$dstSlots   = $this->container->getTemplateService()->getSlots($dest->getTemplateName());
+		$dispatcher = $this->getDispatcher();
 
-		return $sql->transactional(function() use ($sql, $self, $source, $dstSlots, $dest, $sServ, $asServ, $login, $dispatcher, $user) {
+		return $sql->transactional(function() use ($sql, $source, $dstSlots, $dest, $sServ, $asServ, $login, $dispatcher, $user) {
 			$slices  = $source->getSlices();
 			$changes = false;
 
