@@ -354,6 +354,38 @@ class sly_DB_PDO_Persistence extends sly_DB_Persistence {
 		}
 	}
 
+	/*
+	 The following three methods exist just to make using transactions less
+	 painful when you need to call protected stuff and hence cannot use an
+	 anonymous function in PHP <5.4.
+	 */
+
+	public function beginTrx() {
+		if ($this->isTransRunning()) {
+			return false;
+		}
+
+		$this->beginTransaction();
+
+		return true;
+	}
+
+	public function commitTrx($flag) {
+		if ($flag) {
+			$this->commit();
+		}
+	}
+
+	public function rollBackTrx($flag, Exception $e = null) {
+		if ($flag) {
+			$this->rollBack();
+		}
+
+		if ($e) {
+			throw $e;
+		}
+	}
+
 	// =========================================================================
 	// ERROR UND LOGGING
 	// =========================================================================
