@@ -290,7 +290,7 @@ class sly_Service_VersionParser {
 					}
 				}
 
-				return array(array($matches[1] ?: '=', $version));
+				return array(array($matches[1] ? $matches[1] : '=', $version));
 			}
 			catch (Exception $e) {
 				// ignore
