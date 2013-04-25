@@ -9,7 +9,7 @@
  */
 
 /**
- * DB Model Klasse für Medienkategorien
+ * Service class for managing media categories
  *
  * @author  christoph@webvariants.de
  * @ingroup service
@@ -185,7 +185,7 @@ class sly_Service_MediaCategory extends sly_Service_Model_Base_Id implements sly
 		$this->cache->flush('sly.mediacat.list');
 
 		// notify system
-		$this->dispatcher->notify('SLY_MEDIACAT_ADDED', $category, compact('user'));
+		$this->dispatcher->notify('SLY_MEDIACAT_ADDED', $category, compact('user', 'parent'));
 
 		return $category;
 	}
@@ -252,11 +252,7 @@ class sly_Service_MediaCategory extends sly_Service_Model_Base_Id implements sly
 
 		$service = $this->getMediumService();
 		$db      = $this->getPersistence();
-		$ownTrx  = !$db->isTransRunning();
-
-		if ($ownTrx) {
-			$db->beginTransaction();
-		}
+		$trx     = $db->beginTrx();
 
 		try {
 			// delete subcats
@@ -272,16 +268,10 @@ class sly_Service_MediaCategory extends sly_Service_Model_Base_Id implements sly
 			// delete cat itself
 			$db->delete('file_category', array('id' => $cat->getId()));
 
-			if ($ownTrx) {
-				$db->commit();
-			}
+			$db->commitTrx($trx);
 		}
 		catch (Exception $e) {
-			if ($ownTrx) {
-				$db->rollBack();
-			}
-
-			throw $e;
+			$db->rollBackTrx($trx, $e);
 		}
 
 		// update cache

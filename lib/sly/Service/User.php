@@ -9,7 +9,7 @@
  */
 
 /**
- * DB Model Klasse für Benutzer
+ * Service class for managing users
  *
  * @author  christoph@webvariants.de
  * @ingroup service
@@ -110,12 +110,13 @@ class sly_Service_User extends sly_Service_Model_Base_Id {
 	 */
 	public function save(sly_Model_Base $user, sly_Model_User $manager = null) {
 		$manager = $this->getActor($manager, __METHOD__);
+		$adding  = $user->getId() == sly_Model_Base_Id::NEW_ID;
 
 		if (mb_strlen($user->getLogin()) === 0) {
 			throw new sly_Exception(t('no_username_given'));
 		}
 
-		if ($user->getId() === sly_Model_Base_Id::NEW_ID) {
+		if ($adding) {
 			if ($this->count(array('login' => $user->getLogin())) > 0) {
 				throw new sly_Exception(t('user_login_already_exists'));
 			}
@@ -126,11 +127,11 @@ class sly_Service_User extends sly_Service_Model_Base_Id {
 		$user->setUpdateColumns($manager);
 
 		// notify addOns
-		$event = ($user->getId() == sly_Model_Base_Id::NEW_ID) ? 'SLY_PRE_USER_ADD' : 'SLY_PRE_USER_UPDATE';
+		$event = $adding ? 'SLY_PRE_USER_ADD' : 'SLY_PRE_USER_UPDATE';
 		$this->dispatcher->notify($event, $user, compact('manager'));
 
 		// save the changes
-		$event = ($user->getId() === sly_Model_Base_Id::NEW_ID) ? 'SLY_USER_ADDED' : 'SLY_USER_UPDATED';
+		$event = $adding ? 'SLY_USER_ADDED' : 'SLY_USER_UPDATED';
 		$user  = parent::save($user);
 
 		$this->cache->flush('sly.user');

@@ -86,10 +86,12 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base implements
 		$query  = $db->getSQLbuilder($db->getPrefix().$this->getTableName())->select('*');
 
 		$query->where($where);
+
 		if ($group)  $query->group($group);
 		if ($having) $query->having($having);
 		if ($offset) $query->offset($offset);
 		if ($limit)  $query->limit($limit);
+
 		if ($order) {
 			$query->order($order.', revision DESC');
 		}
@@ -103,13 +105,17 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base implements
 
 		foreach ($db as $row) {
 			$item = $this->makeInstance($row);
+
 			if ($findOnline) {
 				$item->setOnline(true);
-			} else {
+			}
+			else {
 				$item->setOnline($this->getOnlineStatus($item));
 			}
+
 			$return[] = $item;
 		}
+
 		return $return;
 	}
 
@@ -132,14 +138,14 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base implements
 	 * @return sly_Model_Base_Article
 	 */
 	protected function findByPK($id, $clang, $revision) {
-		$id       = (int) $id;
-		$clang    = (int) $clang;
+		$id    = (int) $id;
+		$clang = (int) $clang;
 
 		if ($id <= 0 || $clang <= 0) {
 			return null;
 		}
 
-		$where    = compact('id', 'clang');
+		$where = compact('id', 'clang');
 
 		if ($revision >= 0) {
 			$where['revision'] = (int) $revision;
@@ -156,6 +162,7 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base implements
 	public function exists($id) {
 		$where = $this->fixWhereClause(compact('id'));
 		$count = $this->getPersistence()->fetch($this->getTableName(), 'COUNT(id) as c', $where);
+
 		return ((int) $count['c'] > 0);
 	}
 
@@ -178,6 +185,7 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base implements
 	protected function insert(sly_Model_Base_Article $obj) {
 		$persistence = $this->getPersistence();
 		$persistence->insert($this->getTableName(), array_merge($obj->toHash(), $obj->getPKHash()));
+
 		return $obj;
 	}
 
@@ -224,7 +232,7 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base implements
 	 * @return boolean
 	 */
 	protected function getOnlineStatus(sly_Model_Base_Article $item) {
-		$sql   = $this->container->getPersistence();
+		$sql = $this->container->getPersistence();
 		return $sql->magicFetch($this->getTableName(), 'MAX(revision)', array('id' => $item->getId(), 'clang' => $item->getClang())) == $item->getRevision();
 	}
 }

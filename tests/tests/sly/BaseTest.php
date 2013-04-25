@@ -34,7 +34,7 @@ abstract class sly_BaseTest extends PHPUnit_Extensions_Database_TestCase {
 			}
 
 			// login the dummy user
-			$service = sly_Service_Factory::getUserService();
+			$service = sly_Core::getContainer()->getUserService();
 			$user    = $service->findById(SLY_TESTING_USER_ID);
 			$service->setCurrentUser($user);
 
@@ -76,7 +76,7 @@ abstract class sly_BaseTest extends PHPUnit_Extensions_Database_TestCase {
 	}
 
 	protected function loadAddOn($addon) {
-		$service = sly_Service_Factory::getAddOnManagerService();
+		$service = sly_Core::getContainer()->getAddOnManagerService();
 		$service->load($addon, true, sly_Core::getContainer());
 	}
 

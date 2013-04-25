@@ -15,7 +15,7 @@ class sly_Service_UserTest extends sly_BaseTest {
 
 	protected function getService() {
 		static $service = null;
-		if (!$service) $service = sly_Service_Factory::getUserService();
+		if (!$service) $service = sly_Core::getContainer()->getUserService();
 		return $service;
 	}
 

@@ -13,7 +13,7 @@ class sly_Service_FileYAMLTest extends PHPUnit_Framework_TestCase {
 	private $data;
 
 	public function setUp() {
-		$this->service = new sly_Service_File_YAML();
+		$this->service = new sly_Service_File_YAML(0777);
 		$this->data    = array('yaml' => array('dump' => 'test'));
 	}
 
