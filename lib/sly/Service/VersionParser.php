@@ -8,8 +8,8 @@
  * For the full copyright and license information, please go to
  * https://github.com/composer/composer/blob/master/LICENSE.
  *
- * This file was partially re-written to be PHP 5.2.x compatible and omit some
- * features not used in SallyCMS. Those changes are (c) 2012 webvariants GbR.
+ * This file was partially re-written to omit features not used in SallyCMS.
+ * Those changes are (c) 2013 webvariants GbR.
  */
 
 class sly_Service_VersionParser {

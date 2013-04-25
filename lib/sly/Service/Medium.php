@@ -9,7 +9,7 @@
  */
 
 /**
- * DB Model Klasse für Medien
+ * Service class for managing media (aka files)
  *
  * @author  christoph@webvariants.de
  * @ingroup service

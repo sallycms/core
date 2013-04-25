@@ -40,9 +40,9 @@ class sly_Slice_RendererImpl implements sly_Slice_Renderer {
 			throw new sly_Exception('Values must be assoc array!');
 		}
 
-		$filename = $this->moduleService->getFolder() . DIRECTORY_SEPARATOR . $this->moduleService->getInputFilename($moduleName);
-		$values = new sly_Slice_Values($values);
-		$form = new sly_Slice_Form();
+		$filename = $this->moduleService->getFolder().DIRECTORY_SEPARATOR.$this->moduleService->getInputFilename($moduleName);
+		$values   = new sly_Slice_Values($values);
+		$form     = new sly_Slice_Form();
 
 		ob_start();
 
@@ -58,7 +58,8 @@ class sly_Slice_RendererImpl implements sly_Slice_Renderer {
 			}
 
 			return ob_get_clean();
-		} catch (Exception $e) {
+		}
+		catch (Exception $e) {
 			ob_end_clean();
 			throw $e;
 		}
@@ -74,17 +75,18 @@ class sly_Slice_RendererImpl implements sly_Slice_Renderer {
 		// Allow addOns to modify/switch the slice before rendering it.
 		// If no slice instance is returned, then it's assumed that the slice
 		// shall not be rendered and an empty string is returned.
-		$container = sly_Core::getContainer();
+
+		$container  = sly_Core::getContainer();
 		$dispatcher = $container->getDispatcher();
-		$slice = $dispatcher->filter('SLY_SLICE_PRE_RENDER', $slice, array('module' => $slice->getModule()));
+		$slice      = $dispatcher->filter('SLY_SLICE_PRE_RENDER', $slice, array('module' => $slice->getModule()));
 
 		if (!($slice instanceof sly_Model_ISlice)) {
 			return '';
 		}
 
-		$service = $container->getModuleService();
-		$filename = $service->getFolder() . DIRECTORY_SEPARATOR . $service->getOutputFilename($slice->getModule());
-		$values = new sly_Slice_Values($slice->getValues());
+		$service  = $container->getModuleService();
+		$filename = $service->getFolder().DIRECTORY_SEPARATOR.$service->getOutputFilename($slice->getModule());
+		$values   = new sly_Slice_Values($slice->getValues());
 
 		unset($service, $dispatcher, $container);
 		ob_start();
@@ -94,18 +96,19 @@ class sly_Slice_RendererImpl implements sly_Slice_Renderer {
 
 			$output = ob_get_clean();
 			$output = sly_Util_HTML::replaceSallyLinks($content);
-		} catch (Exception $e) {
+		}
+		catch (Exception $e) {
 			ob_end_clean();
 			throw $e;
 		}
 
 		// Allow addOns to alter the output before it's returned.
-		$container = sly_Core::getContainer();
+		$container  = sly_Core::getContainer();
 		$dispatcher = $container->getDispatcher();
-		$output = $dispatcher->filter('SLY_SLICE_POST_RENDER', $output, array(
-			'slice' => func_get_arg(0),
+		$output     = $dispatcher->filter('SLY_SLICE_POST_RENDER', $output, array(
+			'slice'  => func_get_arg(0),
 			'module' => $slice->getModule()
-				));
+		));
 
 		return $output;
 	}
