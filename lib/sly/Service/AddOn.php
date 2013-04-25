@@ -8,8 +8,7 @@
  * http://www.opensource.org/licenses/mit-license.php
  */
 
-use sly\Filesystem\Decorator\Prefixed;
-use sly\Filesystem\Filesystem;
+use Gaufrette\Filesystem;
 
 /**
  * @author  christoph@webvariants.de
@@ -20,8 +19,7 @@ class sly_Service_AddOn {
 	protected $cache;      ///< BabelCache_Interface
 	protected $pkgService; ///< sly_Service_Package
 	protected $vndService; ///< sly_Service_Package  vendor package service (optional)
-	protected $publicFs;   ///< Filesystem
-	protected $internalFs; ///< Filesystem
+	protected $dynFs;      ///< Filesystem
 
 	const SALLY_PKGKEY     = 'sallycms/sallycms';
 	const INSTALLER_PKGKEY = 'sallycms/composer-installer';
@@ -33,12 +31,11 @@ class sly_Service_AddOn {
 	 * @param Filesystem           $publicFs
 	 * @param Filesystem           $internalFs
 	 */
-	public function __construct(sly_Configuration $config, BabelCache_Interface $cache, sly_Service_Package $pkgService, Filesystem $publicFs, Filesystem $internalFs) {
+	public function __construct(sly_Configuration $config, BabelCache_Interface $cache, sly_Service_Package $pkgService, Filesystem $dynFs) {
 		$this->config     = $config;
 		$this->cache      = $cache;
 		$this->pkgService = $pkgService;
-		$this->publicFs   = $publicFs;
-		$this->internalFs = $internalFs;
+		$this->dynFs      = $dynFs;
 	}
 
 	/**

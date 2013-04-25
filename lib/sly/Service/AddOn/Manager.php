@@ -8,9 +8,7 @@
  * http://www.opensource.org/licenses/mit-license.php
  */
 
-use sly\Filesystem\Adapter;
-use sly\Filesystem\Filesystem;
-use sly\Filesystem\Service;
+use Gaufrette\Filesystem;
 
 /**
  * @author  christoph@webvariants.de
@@ -30,8 +28,6 @@ class sly_Service_AddOn_Manager {
 	 * @param sly_Event_IDispatcher $dispatcher
 	 * @param BabelCache_Interface  $cache
 	 * @param sly_Service_AddOn     $service
-	 * @param Filesystem            $publicFs
-	 * @param Filesystem            $internalFs
 	 */
 	public function __construct(sly_Configuration $config, sly_Event_IDispatcher $dispatcher,
 		BabelCache_Interface $cache, sly_Service_AddOn $service) {
