@@ -47,7 +47,7 @@ class sly_Configuration implements sly_ContainerAwareInterface {
 	 */
 	public function store(sly_Configuration_Writer $writer = null) {
 		if ($writer === null) {
-			$writer = $this->container['sly-config-reader'];
+			$writer = $this->container['sly-config-writer'];
 		}
 
 		$writer->writeProject($this->dynamicStore->get('/'));
