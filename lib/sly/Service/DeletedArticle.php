@@ -50,11 +50,11 @@ class sly_Service_DeletedArticle extends sly_Service_ArticleBase {
 			throw new sly_Exception(t('category_not_found', $categoryId));
 		}
 
-		$service = $article->isStartArticle() ? $this->getCategoryService() : $this->getArticleService();
-
+		$service   = $article->isStartArticle() ? $this->getCategoryService() : $this->getArticleService();
+		$maxPos    = $service->getMaxPosition($article->getParentId());
 		$newValues = array(
 			'deleted' => 0,
-			$service->getPositionField() => ($service->getMaxPosition($article->getParentId()) + 1)
+			$service->getPositionField() => $maxPos + 1
  		);
 
 		$db = $this->getPersistence();

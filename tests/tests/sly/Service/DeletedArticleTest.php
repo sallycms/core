@@ -18,13 +18,13 @@ class DeletedArticleTest extends sly_BaseTest {
 
 	protected function getArticleService() {
 		static $service = null;
-		if (!$service) $service = sly_Service_Factory::getArticleService();
+		if (!$service) $service = sly_Core::getContainer()->getArticleService();
 		return $service;
 	}
 
 	protected function getCategoryService() {
 		static $cservice = null;
-		if (!$cservice) $cservice = sly_Service_Factory::getCategoryService();
+		if (!$cservice) $cservice = sly_Core::getContainer()->getCategoryService();
 		return $cservice;
 	}
 
