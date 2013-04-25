@@ -82,7 +82,7 @@ class sly_Service_ArticleBaseTest extends sly_Service_ArticleTestBase {
 		$service = $this->getService();
 		$id      = $service->add(0, 'my article', -1);
 		$article = $service->findByPK($id, self::$clang);
-		$user    = sly_Service_Factory::getUserService()->findById(SLY_TESTING_USER_ID);
+		$user    = sly_Core::getContainer()->getUserService()->findById(SLY_TESTING_USER_ID);
 
 		$articleNewRevision = $service->touch($article);
 

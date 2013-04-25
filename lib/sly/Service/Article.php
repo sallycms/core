@@ -171,25 +171,23 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 			throw new sly_Exception(t('article_not_found', $articleID));
 		}
 
-		// allow external code to stop the delete operation
-		$article = $this->findByPK($articleID, $defaultLang);
-		$this->getDispatcher()->notify('SLY_PRE_ART_DELETE', $article);
+		$article    = $this->findByPK($articleID, $defaultLang);
+		$dispatcher = $this->getDispatcher();
+		$sql        = $this->getPersistence();
+		$tableName  = $this->getTableName();
+		$parent     = $article->getCategoryId();
 
-		$sql    = $this->getPersistence();
-		$ownTrx = !$sql->isTransRunning();
-
-		if ($ownTrx) {
-			$sql->beginTransaction();
-		}
+		$trx = $sql->beginTrx();
 
 		try {
-			$parent = $article->getCategoryId();
+			// allow external code to stop the delete operation
+			$dispatcher->notify('SLY_PRE_ART_DELETE', $article);
 
 			foreach ($this->getLanguages() as $clang) {
 				$pos = $this->findByPK($articleID, $clang)->getPosition();
 
 				// delete article and its content
-				$sql->update($this->getTableName(), array('deleted' => 1, 'pos' => 0), array('id' => $articleID, 'clang' => $clang));
+				$sql->update($tableName, array('deleted' => 1, 'pos' => 0), array('id' => $articleID, 'clang' => $clang));
 
 				// re-position all following articles
 				$followers = $this->getFollowerQuery($parent, $clang, $pos);
@@ -197,20 +195,14 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 				$this->moveObjects('-', $followers);
 			}
 
-			if ($ownTrx) {
-				$sql->commit();
-			}
+			// notify system about the deleted article
+			$dispatcher->notify($this->getEvent('DELETED'), $article);
+
+			$sql->commitTrx($trx);
 		}
 		catch (Exception $e) {
-			if ($ownTrx) {
-				$sql->rollBack();
-			}
-
-			throw $e;
+			$sql->rollBackTrx($trx, $e);
 		}
-
-		// notify system about the deleted article
-		$this->getDispatcher()->notify($this->getEvent('DELETED'), $article);
 
 		return true;
 	}
@@ -246,41 +238,32 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 	 * @return boolean
 	 */
 	public function setType(sly_Model_Article $article, $type, sly_Model_User $user = null) {
-		$user      = $this->getActor($user, __METHOD__);
-		$oldType   = $article->getType();
-		$sql       = $this->getPersistence();
-		$ownTrx    = !$sql->isTransRunning();
+		$oldType = $article->getType();
 
-		if ($article->getType() === $type) {
+		if ($oldType === $type) {
 			return true;
 		}
 
-		if ($ownTrx) {
-			$sql->beginTransaction();
-		}
+		$user = $this->getActor($user, __METHOD__);
+		$sql  = $this->getPersistence();
+		$trx  = $sql->beginTrx();
 
 		try {
-			//create new revision
+			// create new revision
 			$article = $this->touch($article, $user);
 
 			// update the article
 			$article->setType($type);
 			$this->update($article);
 
-			if ($ownTrx) {
-				$sql->commit();
-			}
+			// notify system
+			$this->getDispatcher()->notify('SLY_ART_TYPE', $article, array('old_type' => $oldType, 'user' => $user));
+
+			$sql->commitTrx($trx);
 		}
 		catch (Exception $e) {
-			if ($ownTrx) {
-				$sql->rollBack();
-			}
-
-			throw $e;
+			$sql->rollBackTrx($trx, $e);
 		}
-
-		// notify system
-		$this->getDispatcher()->notify('SLY_ART_TYPE', $article, array('old_type' => $oldType, 'user' => $user));
 
 		return true;
 	}
@@ -292,10 +275,21 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 	public function touch(sly_Model_Article $article, sly_Model_User $user = null) {
 		$user    = $this->getActor($user, __METHOD__);
 		$touched = clone $article;
-		$touched->setRevision($this->getMaxRevision($article) + 1);
-		$touched->setCreateColumns($user);
-		$touched = $this->insert($touched);
-		$this->copyContent($article, $touched, $user);
+		$sql     = $this->getPersistence();
+		$trx     = $sql->beginTrx();
+
+		try {
+			$touched->setRevision($this->getMaxRevision($article) + 1);
+			$touched->setCreateColumns($user);
+			$touched = $this->insert($touched);
+
+			$this->copyContent($article, $touched, $user);
+
+			$sql->commitTrx($trx);
+		}
+		catch (Exception $e) {
+			$sql->rollBackTrx($trx, $e);
+		}
 
 		return $touched;
 	}
@@ -340,18 +334,17 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 
 		// prepare infos
 
-		$pos    = $this->getMaxPosition($target) + 1;
-		$sql    = $this->getPersistence();
-		$ownTrx = !$sql->isTransRunning();
+		$dispatcher = $this->getDispatcher();
+		$catService = $this->getCategoryService();
 
-		if ($ownTrx) {
-			$sql->beginTransaction();
-		}
+		$pos = $this->getMaxPosition($target) + 1;
+		$sql = $this->getPersistence();
+		$trx = $sql->beginTrx();
 
 		try {
 			foreach ($this->getLanguages() as $clang) {
 				$article = $this->findByPK($id, $clang);
-				$cat     = $target === 0 ? null : $this->getCategoryService()->findByPK($target, $clang);
+				$cat     = $target === 0 ? null : $catService->findByPK($target, $clang);
 				$moved   = clone $article;
 
 				$moved->setParentId($target);
@@ -368,23 +361,17 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 				$this->moveObjects('-', $followers);
 
 				// notify system
-				$this->getDispatcher()->notify('SLY_ART_MOVED', $id, array(
+				$dispatcher->notify('SLY_ART_MOVED', $id, array(
 					'clang'  => $clang,
 					'target' => $target,
 					'user'   => $user
 				));
 			}
 
-			if ($ownTrx) {
-				$sql->commit();
-			}
+			$sql->commitTrx($trx);
 		}
 		catch (Exception $e) {
-			if ($ownTrx) {
-				$sql->rollBack();
-			}
-
-			throw $e;
+			$sql->rollBackTrx($trx, $e);
 		}
 	}
 
@@ -399,9 +386,9 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 	 * @return int                     the new article's ID
 	 */
 	public function copy($id, $target, sly_Model_User $user = null) {
-		$id          = (int) $id;
-		$target      = (int) $target;
-		$user        = $this->getActor($user, __METHOD__);
+		$id     = (int) $id;
+		$target = (int) $target;
+		$user   = $this->getActor($user, __METHOD__);
 
 		// check article
 
@@ -417,21 +404,20 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 
 		// prepare infos
 
-		$sql   = $this->getPersistence();
-		$pos   = $this->getMaxPosition($target) + 1;
-		$newID = $sql->magicFetch('article', 'MAX(id)') + 1;
+		$sql        = $this->getPersistence();
+		$pos        = $this->getMaxPosition($target) + 1;
+		$newID      = $sql->magicFetch('article', 'MAX(id)') + 1;
+		$dispatcher = $this->getDispatcher();
+		$catService = $this->getCategoryService();
 
 		// copy by language
-		$ownTrx = !$sql->isTransRunning();
 
-		if ($ownTrx) {
-			$sql->beginTransaction();
-		}
+		$trx = $sql->beginTrx();
 
 		try {
 			foreach ($this->getLanguages() as $clang) {
 				$source    = $this->findByPK($id, $clang);
-				$cat       = $target === 0 ? null : $this->getCategoryService()->findByPK($target, $clang);
+				$cat       = $target === 0 ? null : $catService->findByPK($target, $clang);
 				$duplicate = clone $source;
 
 				$duplicate->setId($newID);
@@ -457,19 +443,13 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 				}
 
 				// notify system
-				$this->getDispatcher()->notify('SLY_ART_COPIED', $duplicate, compact('source', 'user'));
+				$dispatcher->notify('SLY_ART_COPIED', $duplicate, compact('source', 'user'));
 			}
 
-			if ($ownTrx) {
-				$sql->commit();
-			}
+			$sql->commitTrx($trx);
 		}
 		catch (Exception $e) {
-			if ($ownTrx) {
-				$sql->rollBack();
-			}
-
-			throw $e;
+			$sql->rollBackTrx($trx, $e);
 		}
 
 		return $newID;
@@ -507,17 +487,16 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 
 		// switch key params of old and new start articles in every language
 
-		$oldCat  = $article->getCategoryId();
-		$params  = array('path', 'catname', 'catpos', 're_id', 'startpage');
+		$oldCat     = $article->getCategoryId();
+		$params     = array('path', 'catname', 'catpos', 're_id', 'startpage');
+		$sql        = $this->getPersistence();
+		$dispatcher = $this->getDispatcher();
 
-		$sql    = $this->getPersistence();
-		$ownTrx = !$sql->isTransRunning();
-
-		if ($ownTrx) {
-			$sql->beginTransaction();
-		}
+		$trx = $sql->beginTrx();
 
 		try {
+			$table = $this->getTableName();
+
 			foreach ($this->getLanguages() as $clang) {
 				$newStarter = $this->findByPK($articleID, $clang)->toHash();
 				$oldStarter = $this->findByPK($oldCat, $clang)->toHash();
@@ -528,30 +507,23 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 					$oldStarter[$param] = $t;
 				}
 
-				$sql->update($this->tablename, $newStarter, array('id' => $articleID, 'clang' => $clang));
-				$sql->update($this->tablename, $oldStarter, array('id' => $oldCat, 'clang' => $clang));
+				$sql->update($table, $newStarter, array('id' => $articleID, 'clang' => $clang));
+				$sql->update($table, $oldStarter, array('id' => $oldCat, 'clang' => $clang));
 			}
 
 			// switch parent id and adjust paths
-
 			$prefix = $sql->getPrefix();
-			$sql->update($this->tablename, array('re_id' => $articleID), array('re_id' => $oldCat));
-			$sql->query('UPDATE '.$prefix.$this->tablename.' SET path = REPLACE(path, "|'.$oldCat.'|", "|'.$articleID.'|") WHERE path LIKE "%|'.$oldCat.'|%"');
+			$sql->update($table, array('re_id' => $articleID), array('re_id' => $oldCat));
+			$sql->query('UPDATE '.$prefix.$table.' SET path = REPLACE(path, "|'.$oldCat.'|", "|'.$articleID.'|") WHERE path LIKE "%|'.$oldCat.'|%"');
 
-			if ($ownTrx) {
-				$sql->commit();
-			}
+			// notify system
+			$dispatcher->notify('SLY_ART_TO_STARTPAGE', $articleID, array('old_cat' => $oldCat, 'user' => $user));
+
+			$sql->commitTrx($trx);
 		}
 		catch (Exception $e) {
-			if ($ownTrx) {
-				$sql->rollBack();
-			}
-
-			throw $e;
+			$sql->rollBackTrx($trx, $e);
 		}
-
-		// notify system
-		$this->getDispatcher()->notify('SLY_ART_TO_STARTPAGE', $articleID, array('old_cat' => $oldCat, 'user' => $user));
 	}
 
 	/**
@@ -561,9 +533,9 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 	 * article. Slots not present in the target are simply skipped. Existing
 	 * content remains the same.
 	 *
-	 * @param sly_Model_Article  $source    source article
-	 * @param sly_Model_Article  $dest      target article
-	 * @param sly_Model_User     $user      author or null for the current user
+	 * @param sly_Model_Article  $source  source article
+	 * @param sly_Model_Article  $dest    target article
+	 * @param sly_Model_User     $user    author or null for the current user
 	 */
 	public function copyContent(sly_Model_Article $source, sly_Model_Article $dest, sly_Model_User $user = null) {
 		$user = $this->getActor($user, __METHOD__);
@@ -571,26 +543,22 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 		if (!array_diff_assoc($source->getPKHash(), $dest->getPKHash())) {
 			throw new sly_Exception(t('source_and_target_are_equal'));
 		}
+
 		if (!$source->hasTemplate() || !$dest->hasTemplate()) {
 			return false;
 		}
 
 		// copy the slices by their slots
-		$asServ   = $this->container->getArticleSliceService();
-		$sServ    = $this->container->getSliceService();
-		$sql      = $this->getPersistence();
-		$login    = $user->getLogin();
-		$dstSlots = $this->container->getTemplateService()->getSlots($dest->getTemplateName());
-		$changes  = false;
+		$asServ     = $this->container->getArticleSliceService();
+		$sServ      = $this->container->getSliceService();
+		$sql        = $this->getPersistence();
+		$login      = $user->getLogin();
+		$dstSlots   = $this->container->getTemplateService()->getSlots($dest->getTemplateName());
+		$dispatcher = $this->getDispatcher();
 
-		$ownTrx = !$sql->isTransRunning();
-
-		if ($ownTrx) {
-			$sql->beginTransaction();
-		}
-
-		try {
-			$slices = $source->getSlices();
+		return $sql->transactional(function() use ($sql, $source, $dstSlots, $dest, $sServ, $asServ, $login, $dispatcher, $user) {
+			$slices  = $source->getSlices();
+			$changes = false;
 
 			foreach ($slices as $articleSlice) {
 				$srcSlot = $articleSlice->getSlot();
@@ -622,28 +590,17 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 				$changes = true;
 			}
 
-			if ($ownTrx) {
-				$sql->commit();
-			}
-		}
-		catch (Exception $e) {
-			if ($ownTrx) {
-				$sql->rollBack();
-			}
-
-			throw $e;
-		}
-
-		if ($changes) {
 			// notify system
-			$this->getDispatcher()->notify('SLY_ART_CONTENT_COPIED', null, array(
-				'from'     => $source,
-				'to'       => $dest,
-				'user'     => $user
-			));
-		}
+			if ($changes) {
+				$dispatcher->notify('SLY_ART_CONTENT_COPIED', null, array(
+					'from' => $source,
+					'to'   => $dest,
+					'user' => $user
+				));
+			}
 
-		return $changes;
+			return $changes;
+		});
 	}
 
 	/**

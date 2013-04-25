@@ -11,7 +11,7 @@
 use sly\Filesystem\Filesystem;
 
 /**
- * Service implementation for medium models
+ * Service class for managing media (aka files)
  *
  * @author  christoph@webvariants.de
  * @ingroup service

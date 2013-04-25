@@ -11,7 +11,7 @@
 abstract class sly_Service_ArticleTestBase extends sly_StructureTest {
 	protected function getService() {
 		static $service = null;
-		if (!$service) $service = sly_Service_Factory::getArticleService();
+		if (!$service) $service = sly_Core::getContainer()->getArticleService();
 		return $service;
 	}
 

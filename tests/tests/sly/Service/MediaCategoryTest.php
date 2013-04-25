@@ -15,7 +15,7 @@ class sly_Service_MediaCategoryTest extends sly_BaseTest {
 
 	protected function getService() {
 		static $service = null;
-		if (!$service) $service = sly_Service_Factory::getMediaCategoryService();
+		if (!$service) $service = sly_Core::getContainer()->getMediaCategoryService();
 		return $service;
 	}
 

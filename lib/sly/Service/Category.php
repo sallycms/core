@@ -13,7 +13,6 @@
  * @ingroup service
  */
 class sly_Service_Category extends sly_Service_ArticleManager {
-
 	/**
 	 * @return string
 	 */
@@ -154,19 +153,16 @@ class sly_Service_Category extends sly_Service_ArticleManager {
 			throw new sly_Exception(t('category_is_not_empty'));
 		}
 
-		$children = $this->getArticleService()->findArticlesByCategory($categoryID, $this->getDefaultLanguageId(), false);
+		$articleService = $this->getArticleService();
+		$children       = $articleService->findArticlesByCategory($categoryID, $this->getDefaultLanguageId(), false);
 
 		if (count($children) > 1 /* one child is expected, it's the category's start article */) {
 			throw new sly_Exception(t('category_is_not_empty'));
 		}
 
 		// re-position all following categories
-		$sql    = $this->getPersistence();
-		$ownTrx = !$sql->isTransRunning();
-
-		if ($ownTrx) {
-			$sql->beginTransaction();
-		}
+		$sql = $this->getPersistence();
+		$trx = $sql->beginTrx();
 
 		try {
 			$parent = $cat->getParentId();
@@ -179,22 +175,16 @@ class sly_Service_Category extends sly_Service_ArticleManager {
 			}
 
 			// remove the start article of this category (and this also kills the category itself)
-			$this->getArticleService()->deleteById($categoryID);
+			$articleService->deleteById($categoryID);
 
-			if ($ownTrx) {
-				$sql->commit();
-			}
+			// fire event
+			$this->getDispatcher()->notify('SLY_CAT_DELETED', $cat);
+
+			$sql->commitTrx($trx);
 		}
 		catch (Exception $e) {
-			if ($ownTrx) {
-				$sql->rollBack();
-			}
-
-			throw $e;
+			$sql->rollBackTrx($trx, $e);
 		}
-
-		// fire event
-		$this->getDispatcher()->notify('SLY_CAT_DELETED', $cat);
 
 		return true;
 	}
@@ -270,12 +260,8 @@ class sly_Service_Category extends sly_Service_ArticleManager {
 		}
 
 		// prepare movement
-		$sql    = $this->getPersistence();
-		$ownTrx = !$sql->isTransRunning();
-
-		if ($ownTrx) {
-			$sql->beginTransaction();
-		}
+		$sql = $this->getPersistence();
+		$trx = $sql->beginTrx();
 
 		try {
 			$oldParent = $category->getParentId();
@@ -313,22 +299,18 @@ class sly_Service_Category extends sly_Service_ArticleManager {
 
 			$sql->query('UPDATE '.$prefix.'article SET '.$update.' WHERE '.$where);
 
-			if ($ownTrx) {
-				$sql->commit();
-			}
+			$sql->commitTrx($trx);
 		}
 		catch (Exception $e) {
-			if ($ownTrx) {
-				$sql->rollBack();
-			}
-
-			throw $e;
+			$sql->rollBackTrx($trx, $e);
 		}
 
 		// notify system
 
+		$dispatcher = $this->getDispatcher();
+
 		foreach ($languages as $clang) {
-			$this->getDispatcher()->notify('SLY_CAT_MOVED', $id, array(
+			$dispatcher->notify('SLY_CAT_MOVED', $id, array(
 				'clang'  => $clang,
 				'target' => $targetID,
 				'user'   => $user

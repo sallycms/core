@@ -101,12 +101,8 @@ class sly_Service_Language extends sly_Service_Model_Base_Id {
 			$newLanguage = parent::create($params);
 		}
 		else {
-			$sql    = $this->getPersistence();
-			$ownTrx = !$sql->isTransRunning();
-
-			if ($ownTrx) {
-				$sql->beginTransaction();
-			}
+			$sql = $this->getPersistence();
+			$trx = $sql->beginTrx();
 
 			try {
 				$newLanguage = parent::create($params);
@@ -129,16 +125,10 @@ class sly_Service_Language extends sly_Service_Model_Base_Id {
 					array($newLanguage->getId(), $sourceID)
 				);
 
-				if ($ownTrx) {
-					$sql->commit();
-				}
+				$sql->commitTrx($trx);
 			}
 			catch (Exception $e) {
-				if ($ownTrx) {
-					$sql->rollBack();
-				}
-
-				throw $e;
+				$sql->rollBackTrx($trx, $e);
 			}
 		}
 
@@ -170,24 +160,19 @@ class sly_Service_Language extends sly_Service_Model_Base_Id {
 		$toDelete = $this->find($where);
 
 		// remove
-		$res    = false;
-		$db     = $this->getPersistence();
-		$ownTrx = !$db->isTransRunning();
-		$pre    = $db->getPrefix();
-
-		if ($ownTrx) {
-			$db->beginTransaction();
-		}
+		$res = false;
+		$db  = $this->getPersistence();
+		$pre = $db->getPrefix();
+		$trx = $db->beginTrx();
 
 		try {
-
 			// delete
 			$res = parent::delete($where);
 
 			foreach ($toDelete as $language) {
 				$params = array('clang' => $language->getId());
 
-				$db->query('DELETE FROM '.$pre.'slice WHERE id IN ( SELECT slice_id FROM '.$pre.'article_slice WHERE clang = :clang )', $params);
+				$db->query('DELETE FROM '.$pre.'slice WHERE id IN (SELECT slice_id FROM '.$pre.'article_slice WHERE clang = :clang)', $params);
 				$db->delete('article_slice', $params);
 				$db->delete('article', $params);
 
@@ -197,19 +182,14 @@ class sly_Service_Language extends sly_Service_Model_Base_Id {
 				));
 			}
 
-			if ($ownTrx) {
-				$db->commit();
-			}
+			$db->commitTrx($trx);
 		}
 		catch (Exception $e) {
-			if ($ownTrx) {
-				$db->rollBack();
-			}
-
-			throw $e;
+			$db->rollBackTrx($trx, $e);
 		}
 
 		sly_Core::clearCache();
+
 		return $res;
 	}
 }
