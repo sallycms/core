@@ -131,7 +131,10 @@ abstract class sly_App_Base implements sly_App_Interface {
 	}
 
 	protected function setDefaultTimezone() {
-		date_default_timezone_set(sly_Core::getTimezone());
+		$tz = sly_Core::getTimezone() ?: @date_default_timezone_get();
+		$tz = $tz ?: 'Europe/Berlin';
+
+		date_default_timezone_set($tz);
 	}
 
 	protected function performRouting(sly_Request $request) {
