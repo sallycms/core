@@ -9,6 +9,12 @@
  */
 
 /**
+ * Service class for managing packages
+ *
+ * This class only ever sees Composer packages and has no Sally addOn
+ * semantics built into it. Use the addOn service for accessing addOn stuff and
+ * the addOn manager to perform more complex operations like installating them.
+ *
  * @author  christoph@webvariants.de
  * @ingroup service
  */
