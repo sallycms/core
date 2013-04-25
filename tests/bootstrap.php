@@ -22,12 +22,10 @@ define('SLY_TESTING_USER_ID', 1);
 // define vital paths
 define('SLY_BASE',          $root);
 define('SLY_DEVELOPFOLDER', $here.DIRECTORY_SEPARATOR.'develop');
-define('SLY_MEDIAFOLDER',   $here.DIRECTORY_SEPARATOR.'mediapool');
 define('SLY_ADDONFOLDER',   $here.DIRECTORY_SEPARATOR.'addons');
 define('SLY_VENDORFOLDER',  $root.DIRECTORY_SEPARATOR.'vendor');
 define('SLY_DATAFOLDER',    $here.DIRECTORY_SEPARATOR.'data'.DIRECTORY_SEPARATOR.'run-'.uniqid());
 
-if (!is_dir(SLY_MEDIAFOLDER)) mkdir(SLY_MEDIAFOLDER);
 if (!is_dir(SLY_ADDONFOLDER)) mkdir(SLY_ADDONFOLDER);
 if (!is_dir(SLY_DATAFOLDER))  mkdir(SLY_DATAFOLDER, 0777, true);
 
