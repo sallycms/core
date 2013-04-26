@@ -41,7 +41,7 @@ class sly_Service_DeletedArticle extends sly_Service_ArticleBase {
 		$article = $this->findOne(array('id' => $id, 'clang' => $this->getDefaultLanguageId()));
 
 		if ($article === null) {
-			throw new sly_Exception(t('article_not_found'));
+			throw new sly_Exception(t('article_not_found', $id));
 		}
 
 		$categoryId = $article->getCategoryId();
