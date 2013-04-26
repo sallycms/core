@@ -52,6 +52,13 @@ abstract class sly_App_Base implements sly_App_Interface {
 		// boot addOns
 		sly_Core::loadAddOns();
 
+		// setup the stream wrappers
+		$container = $this->getContainer();
+		$fsMap     = $container['sly-filesystem-map'];
+		$fsService = $container['sly-service-filesystem'];
+
+		$fsService->registerStreamWrappers();
+
 		// register listeners
 		sly_Core::registerListeners();
 

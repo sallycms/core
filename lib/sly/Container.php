@@ -213,6 +213,10 @@ class sly_Container extends Pimple implements Countable {
 			return new sly_Service_Category($persistence);
 		});
 
+		$this['sly-service-filesystem'] = $this->share(function($container) {
+			return new sly_Service_Filesystem(SLY_TEMPFOLDER);
+		});
+
 		$this['sly-service-language'] = $this->share(function($container) {
 			$persistence = $container['sly-persistence'];
 			$cache       = $container['sly-cache'];
@@ -294,6 +298,15 @@ class sly_Container extends Pimple implements Countable {
 			$fs      = new Gaufrette\Filesystem($adapter);
 
 			return $fs;
+		});
+
+		$this['sly-filesystem-map'] = $this->share(function($container) {
+			$map = new Gaufrette\FilesystemMap();
+
+			$map->set('dyn', $container['sly-filesystem-dyn']);
+			$map->set('media', $container['sly-filesystem-media']);
+
+			return $map;
 		});
 
 		//////////////////////////////////////////////////////////////////////////
