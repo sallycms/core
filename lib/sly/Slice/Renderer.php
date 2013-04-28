@@ -68,13 +68,18 @@ class sly_Slice_Renderer {
 	public function renderOutput(sly_Model_ISlice $slice) {
 		// Allow addOns to modify/switch the slice before rendering it.
 		// If no slice instance is returned, then it's assumed that the slice
-		// shall not be rendered and an empty string is returned.
+		// shall not be rendered and the event returned the desired output.
+		// Use this to return cached content or "mute" a slice.
+
 		$container  = sly_Core::getContainer();
 		$dispatcher = $container->getDispatcher();
-		$slice      = $dispatcher->filter('SLY_SLICE_PRE_RENDER', $slice, array('module' => $this->moduleName));
+		$slice      = $dispatcher->filter('SLY_SLICE_PRE_RENDER', $slice, array(
+			'module' => $this->moduleName,
+			'values' => $this->values
+		));
 
 		if (!($slice instanceof sly_Model_ISlice)) {
-			return '';
+			return is_string($slice) ? $slice : '';
 		}
 
 		$service  = $container->getModuleService();
@@ -100,7 +105,8 @@ class sly_Slice_Renderer {
 		$dispatcher = $container->getDispatcher();
 		$output     = $dispatcher->filter('SLY_SLICE_POST_RENDER', $output, array(
 			'slice'  => func_get_arg(0),
-			'module' => $this->moduleName
+			'module' => $this->moduleName,
+			'values' => $this->values
 		));
 
 		return $output;
