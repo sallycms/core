@@ -42,22 +42,22 @@ class sly_Form_Input_Number extends sly_Form_Input_Base {
 	/**
 	 * Sets the minimum value
 	 *
-	 * @param  int $min               the new value
+	 * @param  int $min               the new value, null to reset
 	 * @return sly_Form_Input_Number  the object itself
 	 */
 	public function setMin($min) {
-		$this->min = (int) $min;
+		$this->min = $min === null ? null : (int) $min;
 		return $this;
 	}
 
 	/**
 	 * Sets the maximum value
 	 *
-	 * @param  int $max               the new value
+	 * @param  int $max               the new value, null to reset
 	 * @return sly_Form_Input_Number  the object itself
 	 */
 	public function setMax($max) {
-		$this->max = (int) $max;
+		$this->max = $max === null ? null : (int) $max;
 		return $this;
 	}
 
