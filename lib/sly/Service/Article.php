@@ -285,6 +285,10 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 
 			$this->copyContent($article, $touched, $user);
 
+			$this->getDispatcher()->notify('SLY_ART_TOUCHED', $touched, array(
+				'source'  => $article,
+			));
+
 			$sql->commitTrx($trx);
 		}
 		catch (Exception $e) {
