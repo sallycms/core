@@ -126,7 +126,7 @@ abstract class sly_Service_ArticleManager extends sly_Service_ArticleBase {
 
 				// notify system
 
-				$dispatcher->notify($event, $newID, array(
+				$dispatcher->notify($event, $obj, array(
 					're_id'    => $parentID,
 					'clang'    => $clangID,
 					'name'     => $name,
