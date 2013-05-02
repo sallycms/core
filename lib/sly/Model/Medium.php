@@ -109,11 +109,10 @@ class sly_Model_Medium extends sly_Model_Base_Id {
 	}
 
 	/**
-	 * @param  Filesystem $fs
 	 * @return boolean
 	 */
-	public function exists(Filesystem $fs = null) {
-		$fs = $fs ?: sly_Core::getContainer()->getMediaFilesystem();
+	public function exists() {
+		$fs = sly_Core::getContainer()->getMediaFilesystem();
 
 		return strlen($this->filename) > 0 && $fs->has($this->filename);
 	}
