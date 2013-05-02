@@ -154,7 +154,8 @@ class sly_Container extends Pimple implements Countable {
 			$config     = $container['sly-config'];
 			$adnService = $container['sly-service-package-addon'];
 			$vndService = $container['sly-service-package-vendor'];
-			$service    = new sly_Service_AddOn($config, $cache, $adnService, SLY_DYNFOLDER);
+			$filesystem = $container['sly-filesystem-dyn'];
+			$service    = new sly_Service_AddOn($config, $cache, $adnService, $filesystem);
 
 			$service->setVendorPackageService($vndService);
 
@@ -212,6 +213,10 @@ class sly_Container extends Pimple implements Countable {
 			return new sly_Service_Category($persistence);
 		});
 
+		$this['sly-service-filesystem'] = $this->share(function($container) {
+			return new sly_Service_Filesystem(SLY_TEMPFOLDER);
+		});
+
 		$this['sly-service-language'] = $this->share(function($container) {
 			$persistence = $container['sly-persistence'];
 			$cache       = $container['sly-cache'];
@@ -232,9 +237,9 @@ class sly_Container extends Pimple implements Countable {
 			$persistence = $container['sly-persistence'];
 			$cache       = $container['sly-cache'];
 			$dispatcher  = $container['sly-dispatcher'];
-			$categories  = $container['sly-service-mediacategory'];
+			$filesystem  = $container['sly-filesystem-media'];
 
-			return new sly_Service_Medium($persistence, $cache, $dispatcher, $categories);
+			return new sly_Service_Medium($persistence, $cache, $dispatcher, $filesystem);
 		});
 
 		$this['sly-service-module'] = $this->share(function($container) {
@@ -276,6 +281,32 @@ class sly_Container extends Pimple implements Countable {
 			$fileperm = $container['sly-config']->get('fileperm', sly_Core::DEFAULT_FILEPERM);
 
 			return new sly_Service_File_YAML($fileperm);
+		});
+
+		//////////////////////////////////////////////////////////////////////////
+		// filesystems
+
+		$this['sly-filesystem-media'] = $this->share(function($container) {
+			$adapter = new Gaufrette\Adapter\Local(SLY_DATAFOLDER.DIRECTORY_SEPARATOR.'mediapool');
+			$fs      = new Gaufrette\Filesystem($adapter);
+
+			return $fs;
+		});
+
+		$this['sly-filesystem-dyn'] = $this->share(function($container) {
+			$adapter = new Gaufrette\Adapter\Local(SLY_DATAFOLDER.DIRECTORY_SEPARATOR.'dyn');
+			$fs      = new Gaufrette\Filesystem($adapter);
+
+			return $fs;
+		});
+
+		$this['sly-filesystem-map'] = $this->share(function($container) {
+			$map = new Gaufrette\FilesystemMap();
+
+			$map->set('dyn', $container['sly-filesystem-dyn']);
+			$map->set('media', $container['sly-filesystem-media']);
+
+			return $map;
 		});
 
 		//////////////////////////////////////////////////////////////////////////
@@ -699,6 +730,20 @@ class sly_Container extends Pimple implements Countable {
 		}
 
 		return $this[$id];
+	}
+
+	/**
+	 * @return Gaufrette\Filesystem
+	 */
+	public function getMediaFilesystem() {
+		return $this->get('sly-filesystem-media');
+	}
+
+	/**
+	 * @return Gaufrette\Filesystem
+	 */
+	public function getDynFilesystem() {
+		return $this->get('sly-filesystem-dyn');
 	}
 
 	/*          setters for objects that are commonly set          */
