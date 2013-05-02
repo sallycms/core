@@ -24,10 +24,8 @@
  * @since   0.1
  */
 abstract class sly_Controller_Base {
-	protected $content_type = null; ///< string         the content type
-	protected $charset      = null; ///< string         the character set
-	protected $request      = null; ///< sly_Request    the current request
-	protected $container    = null; ///< sly_Container  the DI container
+	protected $request   = null; ///< sly_Request    the current request
+	protected $container = null; ///< sly_Container  the DI container
 
 	/**
 	 * Set DI container
@@ -67,50 +65,6 @@ abstract class sly_Controller_Base {
 	 */
 	public function getRequest() {
 		return $this->request;
-	}
-
-	/**
-	 * Set the content type
-	 *
-	 * @param string $type  the new content type
-	 */
-	protected function setContentType($type) {
-		$this->content_type = $type;
-
-		// as long as we have kind of a 'transparent' response object,
-		// let's assume that the response to-be-sent is known in sly_Core.
-		sly_Core::getResponse()->setContentType($type);
-	}
-
-	/**
-	 * Get the content type
-	 *
-	 * @return string  the content type (null if not set yet)
-	 */
-	protected function getContentType() {
-		return $this->content_type;
-	}
-
-	/**
-	 * Set the charset
-	 *
-	 * @param string $charset  the new charset
-	 */
-	protected function setCharset($charset) {
-		$this->charset = $charset;
-
-		// as long as we have kind of a 'transparent' response object,
-		// let's assume that the response to-be-sent is known in sly_Core.
-		sly_Core::getResponse()->setCharset($charset);
-	}
-
-	/**
-	 * Get the charset
-	 *
-	 * @return string  the charset (null if not set yet)
-	 */
-	protected function getCharset() {
-		return $this->charset;
 	}
 
 	/**
