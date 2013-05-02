@@ -18,7 +18,7 @@ class sly_Util_DirectoryExTest extends PHPUnit_Framework_TestCase {
 	static $here = '';
 
 	public static function setUpBeforeClass() {
-		$here = dirname(__FILE__);
+		$here = __DIR__;
 		self::$here = $here;
 
 		mkdir($here.'/tmp/foo/bar', 0777, true);

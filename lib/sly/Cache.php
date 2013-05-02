@@ -80,22 +80,21 @@ class sly_Cache extends BabelCache_Factory {
 	 * @return string  the cache prefix (to avoid collisions between projects using the same cache)
 	 */
 	protected function getPrefix() {
-		return sly_Core::config()->get('INSTNAME');
+		return sly_Core::config()->get('instname');
 	}
 
 	/**
 	 * @return string  the directory to store the filesystem cache
 	 */
 	protected function getCacheDirectory() {
-		$dir = sly_Util_Directory::join(SLY_DYNFOLDER, 'internal', 'sally', 'fscache');
-		return sly_Util_Directory::create($dir);
+		return sly_Util_Directory::create(SLY_TEMPFOLDER.'/sally/fscache');
 	}
 
 	/**
 	 * @return PDO
 	 */
 	protected function getSQLiteConnection() {
-		$db = sly_Util_Directory::join(SLY_DYNFOLDER, 'internal', 'sally', 'cache.sqlite');
+		$db = sly_Util_Directory::join(SLY_TEMPFOLDER, 'sally', 'cache.sqlite');
 
 		if (!file_exists($db)) {
 			touch($db);

@@ -267,7 +267,7 @@ class sly_Dispatcher {
 		$dispatcher = $container->getDispatcher();
 		$appName    = $container->getApplicationName();
 		$content    = $dispatcher->filter('OUTPUT_FILTER', $content, array('environment' => $appName));
-		$useEtag    = $config->get('USE_ETAG');
+		$useEtag    = $config->get('use_etag');
 		$response   = $container->getResponse();
 
 		if ($useEtag === true || $useEtag === $appName || (is_array($useEtag) && in_array($appName, $useEtag))) {

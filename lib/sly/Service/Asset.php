@@ -13,7 +13,7 @@
  */
 class sly_Service_Asset {
 	const CACHE_DIR = 'public/sally/static-cache';  ///< string
-	const TEMP_DIR  = 'internal/sally/temp';        ///< string
+	const TEMP_DIR  = 'sally/assets';               ///< string
 
 	const EVENT_PROCESS_ASSET        = 'SLY_CACHE_PROCESS_ASSET';        ///< string
 	const EVENT_REVALIDATE_ASSETS    = 'SLY_CACHE_REVALIDATE_ASSETS';    ///< string
@@ -119,7 +119,7 @@ class sly_Service_Asset {
 
 	public function process($file, $encoding) {
 		// check if the file can be streamed
-		$blocked = $this->config->get('BLOCKED_EXTENSIONS');
+		$blocked = $this->config->get('blocked_extensions');
 		$ok      = true;
 
 		foreach ($blocked as $ext) {
@@ -134,7 +134,7 @@ class sly_Service_Asset {
 			$ok         = strpos($normalized, '/') === false; // allow files in root directory (favicon)
 
 			if (!$ok) {
-				$allowed = $this->config->get('ASSETS_DIRECTORIES');
+				$allowed = $this->config->get('assets_directories');
 
 				foreach ($allowed as $path) {
 					if (sly_Util_String::startsWith($file, $path)) {
@@ -280,7 +280,7 @@ class sly_Service_Asset {
 	public function processLessCSS($filename) {
 		if (sly_Util_String::endsWith($filename, '.less') && file_exists(SLY_BASE.'/'.$filename)) {
 			$css     = sly_Util_Lessphp::process($filename);
-			$dir     = SLY_DYNFOLDER.'/'.self::TEMP_DIR;
+			$dir     = SLY_TEMPFOLDER.'/'.self::TEMP_DIR;
 			$tmpFile = $dir.'/'.md5($filename).'.less';
 
 			sly_Util_Directory::create($dir, $this->getDirPerm());
@@ -376,7 +376,7 @@ class sly_Service_Asset {
 		$obj->delete(true);
 
 		// clear the temp dir
-		$tmpDir = sly_Util_Directory::join(SLY_DYNFOLDER, self::TEMP_DIR);
+		$tmpDir = sly_Util_Directory::join(SLY_TEMPFOLDER, self::TEMP_DIR);
 		$obj    = new sly_Util_Directory($tmpDir);
 
 		$obj->deleteFiles(true);

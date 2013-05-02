@@ -64,7 +64,7 @@ class sly_Service_CategoryExTest extends sly_Service_CategoryTestBase {
 	 */
 	public function testTreeMoves($moves, $expected) {
 		$moves   = json_decode($moves, true);
-		$service = sly_Service_Factory::getCategoryService();
+		$service = sly_Core::getContainer()->getCategoryService();
 
 		foreach ($moves as $move) {
 			$service->move($move[0], $move[1]);
@@ -88,7 +88,7 @@ class sly_Service_CategoryExTest extends sly_Service_CategoryTestBase {
 	 * @expectedException sly_Exception
 	 */
 	public function testIllegalTreeMoves($from, $to) {
-		$service = sly_Service_Factory::getCategoryService();
+		$service = sly_Core::getContainer()->getCategoryService();
 		$service->move(2, 1);
 		$service->move(3, 2);
 
@@ -108,8 +108,8 @@ class sly_Service_CategoryExTest extends sly_Service_CategoryTestBase {
 	 */
 	public function testConvertToStartArticle() {
 		// create some articles
-		$service    = sly_Service_Factory::getArticleService();
-		$catService = sly_Service_Factory::getCategoryService();
+		$service    = sly_Core::getContainer()->getArticleService();
+		$catService = sly_Core::getContainer()->getCategoryService();
 
 		$a = $service->add(1, 'test article 1', 2);
 		$b = $service->add(1, 'test article 2', 3); // our new startarticle
@@ -191,7 +191,7 @@ class sly_Service_CategoryExTest extends sly_Service_CategoryTestBase {
 	 */
 	public function testDeleteCancelledIfChildArticlesExist() {
 		$cservice = $this->getService();
-		$aservice = sly_Service_Factory::getArticleService();
+		$aservice = sly_Core::getContainer()->getArticleService();
 		$parent   = 2;
 
 		// create some children

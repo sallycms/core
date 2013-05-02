@@ -191,6 +191,15 @@ BEGIN
    END IF;
 END;
 CREATE TABLE sly_registry (name VARCHAR2(255) NOT NULL, value BLOB NOT NULL, PRIMARY KEY(name));
+CREATE TABLE sly_config (id VARCHAR2(255) NOT NULL, value LONGTEXT NOT NULL, PRIMARY KEY(id));
 
 -- populate database with some initial data
 INSERT INTO sly_clang (name, locale) VALUES ('deutsch', 'de_DE');
+INSERT INTO sly_config (id, value) VALUES ('start_article_id', '1');
+INSERT INTO sly_config (id, value) VALUES ('notfound_article_id', '1');
+INSERT INTO sly_config (id, value) VALUES ('default_clang_id', '1');
+INSERT INTO sly_config (id, value) VALUES ('default_article_type', '""');
+INSERT INTO sly_config (id, value) VALUES ('projectname', '"SallyCMS-Projekt"');
+INSERT INTO sly_config (id, value) VALUES ('timezone', '"Europe/Berlin"');
+INSERT INTO sly_config (id, value) VALUES ('default_locale', '"de_de"');
+INSERT INTO sly_config (id, value) VALUES ('addons', '[]');

@@ -190,7 +190,7 @@ class sly_Service_ArticleExTest extends sly_Service_ArticleTestBase {
 		$this->assertEquals(0, $art->getCatPosition());
 
 		// check of copy copies content
-		$sliceS  = sly_Service_Factory::getArticleSliceService();
+		$sliceS  = sly_Core::getContainer()->getArticleSliceService();
 
 		$oldSlices = $sliceS->find(array('article_id' => 1,      'clang' => self::$clangA), null, 'slot ASC, pos ASC');
 		$newSlices = $sliceS->find(array('article_id' => $newID, 'clang' => self::$clangA), null, 'slot ASC, pos ASC');

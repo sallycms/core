@@ -38,7 +38,7 @@ Hallo Welt!
 print \$x + 5;
 TESTFILE;
 
-		$service = sly_Service_Factory::getTemplateService();
+		$service = sly_Core::getContainer()->getTemplateService();
 		$folder  = $service->getFolder();
 
 		// create test template file
@@ -61,7 +61,7 @@ TESTFILE;
 	}
 
 	public function testGetParams() {
-		$service = sly_Service_Factory::getTemplateService();
+		$service = sly_Core::getContainer()->getTemplateService();
 
 		$this->assertEquals(self::$uniqid, $service->get(self::$uniqid, 'name'));
 		$this->assertEquals('Mein super tolles Template!!!1elf', $service->getTitle(self::$uniqid));

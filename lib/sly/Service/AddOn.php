@@ -62,7 +62,7 @@ class sly_Service_AddOn {
 	 */
 	public function setProperty($addon, $property, $value) {
 		$this->clearCache();
-		return $this->config->set($this->getConfPath($addon).'/'.$property, $value);
+		return $this->config->set($this->getConfPath($addon).'/'.$property, $value)->store();
 	}
 
 	/**

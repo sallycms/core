@@ -11,7 +11,7 @@
 abstract class sly_Service_CategoryTestBase extends sly_StructureTest {
 	protected function getService() {
 		static $service = null;
-		if (!$service) $service = sly_Service_Factory::getCategoryService();
+		if (!$service) $service = sly_Core::getContainer()->getCategoryService();
 		return $service;
 	}
 

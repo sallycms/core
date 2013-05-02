@@ -15,18 +15,18 @@ abstract class sly_StructureTest extends sly_BaseTest {
 	public static function setUpBeforeClass() {
 		$conf = sly_Core::config();
 
-		self::$origStart    = $conf->get('START_ARTICLE_ID');
-		self::$origNotFound = $conf->get('NOTFOUND_ARTICLE_ID');
+		self::$origStart    = $conf->get('start_article_id');
+		self::$origNotFound = $conf->get('notfound_article_id');
 
-		$conf->set('START_ARTICLE_ID', 0);
-		$conf->set('NOTFOUND_ARTICLE_ID', 0);
+		$conf->set('start_article_id', 0);
+		$conf->set('notfound_article_id', 0);
 	}
 
 	public static function tearDownAfterClass() {
 		$conf = sly_Core::config();
 
-		$conf->set('START_ARTICLE_ID', self::$origStart);
-		$conf->set('NOTFOUND_ARTICLE_ID', self::$origNotFound);
+		$conf->set('start_article_id', self::$origStart);
+		$conf->set('notfound_article_id', self::$origNotFound);
 	}
 
 	protected function tearDown() {

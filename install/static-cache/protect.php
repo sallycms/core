@@ -69,7 +69,7 @@ if (file_exists($checkScript)) {
 $errors = ob_get_clean();
 
 // jump back (at 88 mph)
-chdir(dirname(__FILE__));
+chdir(__DIR__);
 
 // disable sending the file when any kind of errors occured
 if (!empty($errors)) {

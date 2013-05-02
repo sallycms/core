@@ -51,8 +51,6 @@ class sly_Util_Lessphp {
 	 * @return lessc             the LESS compiler
 	 */
 	public static function getCompiler($filename = null) {
-		require_once SLY_VENDORFOLDER.'/leafo/lessphp/lessc.inc.php';
-
 		$less = new lessc($filename);
 		$less->setFormatter('compressed');
 		$less->registerFunction('asset', array(__CLASS__, 'asset'));
@@ -60,7 +58,7 @@ class sly_Util_Lessphp {
 		// add custom mixin package to default import dir
 		$dir = (array) $less->importDir;
 
-		foreach (sly_Core::config()->get('LESS_IMPORT_DIRS') as $includeDir) {
+		foreach (sly_Core::config()->get('less_import_dirs') as $includeDir) {
 			$dir[] = SLY_BASE.DIRECTORY_SEPARATOR.trim($includeDir, DIRECTORY_SEPARATOR);
 		}
 		// always add the file's dir as the first import dir

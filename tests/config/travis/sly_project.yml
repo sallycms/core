@@ -1,8 +1,8 @@
-START_ARTICLE_ID: 0
-NOTFOUND_ARTICLE_ID: 0
-DEFAULT_CLANG_ID: 5
-DEFAULT_ARTICLE_TYPE: ''
-PROJECTNAME: 'Sally Trunk'
-TIMEZONE: Europe/Berlin
-DEFAULT_LOCALE: de_de
+start_article_id: 0
+notfound_article_id: 0
+default_clang_id: 5
+default_article_type: ''
+projectname: 'Sally Trunk'
+timezone: Europe/Berlin
+default_locale: de_de
 addons: []
