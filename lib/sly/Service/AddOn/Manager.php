@@ -85,7 +85,7 @@ class sly_Service_AddOn_Manager {
 		$pservice = $this->pkgService;
 		$path     = $this->addOnService->getConfPath($addon);
 
-		$this->config->remove($path);
+		$this->config->remove($path)->store();
 		sly_Util_Versions::remove($pservice->getVersionKey($addon));
 
 		$this->clearCache();
@@ -258,9 +258,7 @@ class sly_Service_AddOn_Manager {
 		}
 
 		$defaultsFile = $baseDir.'defaults.yml';
-		if (file_exists($defaultsFile)) {
-			$this->config->loadProjectDefaults($defaultsFile, true, $aservice->getConfPath($addon));
-		}
+		sly_Util_Configuration::loadYamlFile($this->config, $defaultsFile, false);
 
 		// notify listeners
 		$this->fireEvent('POST', 'INSTALL', $addon);
@@ -443,9 +441,7 @@ class sly_Service_AddOn_Manager {
 			$updateFile   = $baseDir.'update.php';
 			$defaultsFile = $baseDir.'defaults.yml';
 
-			if (file_exists($defaultsFile)) {
-				$this->config->loadProjectDefaults($defaultsFile, true, $aservice->getConfPath($addon));
-			}
+			sly_Util_Configuration::loadYamlFile($this->config, $defaultsFile, false);
 
 			if (file_exists($updateFile)) {
 				$this->req($updateFile, $container);
@@ -615,13 +611,11 @@ class sly_Service_AddOn_Manager {
 			$staticFile   = $baseFolder.'static.yml';
 
 			if ($activated) {
-				if (file_exists($staticFile)) {
-					$this->config->loadStatic($staticFile, $aservice->getConfPath($addon));
-				}
+				sly_Util_Configuration::loadYamlFile($this->config, $staticFile, true);
 			}
 
 			if (file_exists($globalsFile)) {
-				$this->config->loadStatic($globalsFile);
+				sly_Util_Configuration::loadYamlFile($this->config, $globalsFile, true);
 			}
 		}
 	}

@@ -12,24 +12,14 @@
  * @ingroup registry
  */
 class sly_Registry_Persistent implements sly_Registry_Registry {
-	private static $instance; ///< sly_Registry_Persistent
-
 	private $store;  ///< sly_Util_Array
 	private $pdo;    ///< sly_DB_PDO_Persistence
 	private $prefix; ///< string
 
-	private function __construct() {
+	public function __construct(sly_DB_PDO_Persistence $persistence) {
 		$this->store  = new sly_Util_Array();
-		$this->pdo    = sly_DB_Persistence::getInstance();
-		$this->prefix = $this->pdo->getPrefix();
-	}
-
-	/**
-	 * @return sly_Registry_Persistent
-	 */
-	public static function getInstance() {
-		if (empty(self::$instance)) self::$instance = new self();
-		return self::$instance;
+		$this->pdo    = $persistence;
+		$this->prefix = $persistence->getPrefix();
 	}
 
 	/**

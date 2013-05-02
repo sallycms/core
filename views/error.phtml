@@ -27,7 +27,7 @@ $text = $texts[rand(0, count($texts) - 1)];
 	</div>
 </div>
 <!-- Illustration provided by The Oatmeal -->
-<?php $beast = base64_encode(file_get_contents(dirname(__FILE__).'/beast.png')); ?>
+<?php $beast = base64_encode(file_get_contents(__DIR__.'/beast.png')); ?>
 <img src="data:image/png;base64,<?php echo $beast ?>" alt="" class="beast" />
 </body>
 </html>

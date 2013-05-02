@@ -64,17 +64,23 @@ class sly_Model_MediaCategory extends sly_Model_Base_Id {
 	public function getRevision()   { return $this->revision;   } ///< @return int
 
 	/**
+	 * @param  sly_Service_MediaCategory $service
 	 * @return sly_Model_MediaCategory
 	 */
-	public function getParent() {
-		return sly_Util_MediaCategory::findById($this->re_id);
+	public function getParent(sly_Service_MediaCategory $service = null) {
+		$service = $service ?: sly_Core::getContainer()->getMediaCategoryService();
+
+		return $service->findById($this->re_id);
 	}
 
 	/**
+	 * @param  sly_Service_MediaCategory $service
 	 * @return array
 	 */
-	public function getChildren() {
-		return sly_Util_MediaCategory::findByParentId($this->id);
+	public function getChildren(sly_Service_MediaCategory $service = null) {
+		$service = $service ?: sly_Core::getContainer()->getMediaCategoryService();
+
+		return $service->findByParentId($this->id);
 	}
 
 	/**
@@ -85,18 +91,21 @@ class sly_Model_MediaCategory extends sly_Model_Base_Id {
 	}
 
 	/**
-	 * @param  boolean $asInstances
+	 * @param  boolean                   $asInstances
+	 * @param  sly_Service_MediaCategory $service
 	 * @return array
 	 */
-	public function getParentTree($asInstances = true) {
+	public function getParentTree($asInstances = true, sly_Service_MediaCategory $service = null) {
 		$list = array();
 
 		if ($this->path) {
-			$list = array_filter(explode('|', $this->path));
+			$list = array_map('intval', array_filter(explode('|', $this->path)));
 
 			if ($asInstances) {
+				$service = $service ?: sly_Core::getContainer()->getMediaCategoryService();
+
 				foreach ($list as $idx => $catID) {
-					$list[$idx] = sly_Util_MediaCategory::findById($catID);
+					$list[$idx] = $service->findById($catID);
 				}
 			}
 		}
@@ -105,20 +114,24 @@ class sly_Model_MediaCategory extends sly_Model_Base_Id {
 	}
 
 	/**
-	 * @param  mixed $reference
+	 * @param  mixed                     $reference  either another category instance or a category ID
+	 * @param  sly_Service_MediaCategory $service
 	 * @return boolean
 	 */
-	public function inParentTree($reference) {
+	public function inParentTree($reference, sly_Service_MediaCategory $service = null) {
 		$ref  = $reference instanceof self ? $reference->getId() : (int) $reference;
-		$list = $this->getParentTree(false);
+		$list = $this->getParentTree(false, $service);
 
 		return in_array($ref, $list);
 	}
 
 	/**
+	 * @param  sly_Service_Medium $service
 	 * @return array
 	 */
-	public function getMedia() {
-		return sly_Util_Medium::findByCategory($this->id);
+	public function getMedia(sly_Service_Medium $service = null) {
+		$service = $service ?: sly_Core::getContainer()->getMediumService();
+
+		return $service->findMediaByCategory($this->id);
 	}
 }

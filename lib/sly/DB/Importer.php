@@ -12,11 +12,12 @@
  * @ingroup database
  */
 class sly_DB_Importer {
-	protected $filename; ///< string
-	protected $dump;     ///< sly_DB_Dump
+	protected $persistence; ///< sly_DB_PDO_Persistence
+	protected $dispatcher;  ///< sly_Event_IDispatcher
 
-	public function __construct() {
-		$this->reset();
+	public function __construct(sly_DB_PDO_Persistence $persistence, sly_Event_IDispatcher $dispatcher) {
+		$this->persistence = $persistence;
+		$this->dispatcher  = $dispatcher;
 	}
 
 	/**
@@ -24,51 +25,34 @@ class sly_DB_Importer {
 	 * @param  string $filename
 	 */
 	public function import($filename) {
-		$this->reset($filename);
+		return $this->importDump(new sly_DB_Dump($filename));
+	}
 
+	/**
+	 * @throws sly_Exception      if the dump is broken or missing
+	 * @param  sly_DB_Dump $dump
+	 */
+	public function importDump(sly_DB_Dump $dump) {
 		// check preconditions
-		$this->dump = new sly_DB_Dump($this->filename);
-
-		$this->checkVersion();
-		$this->checkPrefix();
+		$this->checkVersion($dump);
+		$this->checkPrefix($dump);
 
 		// fire event (could throw up)
-		sly_Core::dispatcher()->notify('SLY_DB_IMPORTER_BEFORE', $this->dump, array(
-			'filename' => $filename,
-			'filesize' => filesize($filename)
-		));
+		$this->dispatcher->notify('SLY_DB_IMPORTER_BEFORE', $dump);
 
 		// import dump
-		$this->executeQueries();
+		$this->executeQueries($dump);
 
-		$flash   = sly_Core::getFlashMessage();
-		$queries = count($this->dump->getQueries());
-		$msg     = t('importer_database_imported', $queries);
-
-		$flash->addInfo($msg);
-
-		// refresh cache
-		sly_Core::dispatcher()->notify('SLY_DB_IMPORTER_AFTER', $this->dump, array(
-			'filename' => $this->filename,
-			'filesize' => filesize($this->filename)
-		));
-
-		sly_Core::clearCache();
+		// notify system
+		$this->dispatcher->notify('SLY_DB_IMPORTER_AFTER', $dump);
 	}
 
 	/**
-	 * @param string $filename
+	 * @throws sly_Exception      when the versions don't match
+	 * @param  sly_DB_Dump $dump
 	 */
-	protected function reset($filename = '') {
-		$this->filename = $filename;
-		$this->dump     = null;
-	}
-
-	/**
-	 * @throws sly_Exception  when the versions don't match
-	 */
-	protected function checkVersion() {
-		$dumpVersion = $this->dump->getVersion();
+	protected function checkVersion(sly_DB_Dump $dump) {
+		$dumpVersion = $dump->getVersion();
 		$thisVersion = sly_Core::getVersion('X.Y.Y');
 
 		if ($dumpVersion === null || !sly_Util_Versions::isCompatible($dumpVersion)) {
@@ -77,26 +61,27 @@ class sly_DB_Importer {
 	}
 
 	/**
-	 * @throws sly_Exception  when no prefix was found
+	 * @throws sly_Exception      when no prefix was found
+	 * @param  sly_DB_Dump $dump
 	 */
-	protected function checkPrefix() {
-		$prefix = $this->dump->getPrefix();
+	protected function checkPrefix(sly_DB_Dump $dump) {
+		$prefix = $dump->getPrefix();
 
 		if ($prefix === null) {
 			throw new sly_Exception(t('importer_no_valid_import_file_prefix'));
 		}
 	}
 
-	protected function executeQueries() {
-		$sql = sly_DB_Persistence::getInstance();
-
+	/**
+	 * @throws sly_Exception      if a database error occurs
+	 * @param  sly_DB_Dump $dump
+	 */
+	protected function executeQueries(sly_DB_Dump $dump) {
 		try {
-			$this->dump->mapQueries(array($sql, 'query'));
+			$dump->mapQueries(array($this->persistence, 'query'));
 		}
 		catch (sly_DB_PDO_Exception $e) {
 			throw new sly_Exception($e->getMessage(), $e->getCode());
 		}
-
-		$sql = null;
 	}
 }

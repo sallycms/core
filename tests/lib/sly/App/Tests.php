@@ -30,10 +30,13 @@ class sly_App_Tests implements sly_App_Interface {
 		$container->getModuleService()->refresh();
 
 		// add a dummy i18n
-		$i18n = new sly_I18N('de', dirname(__FILE__));
+		$i18n = new sly_I18N('de', __DIR__);
 		$container->setI18N($i18n);
 
-		$container->getConfig()->setFlushOnDestruct(false);
+		$container->setEnvironment('dev');
+
+		$config = $container->getConfig();
+		$config->set('/', sly_Util_YAML::load(SLY_CONFIGFOLDER.DIRECTORY_SEPARATOR.'sly_project.yml'));
 
 		// clear current cache
 		sly_Core::cache()->flush('sly');

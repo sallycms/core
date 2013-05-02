@@ -57,7 +57,7 @@ class sly_Core {
 		mb_internal_encoding('UTF-8');
 
 		// define that the path to the core is here
-		if (!defined('SLY_COREFOLDER'))    define('SLY_COREFOLDER',    dirname(dirname(dirname(__FILE__))));
+		if (!defined('SLY_COREFOLDER'))    define('SLY_COREFOLDER',    dirname(dirname(__DIR__)));
 
 		// define constants for system wide important paths if they are not set already
 		if (!defined('SLY_BASE'))          define('SLY_BASE',          realpath(SLY_COREFOLDER.'/../../'));
@@ -68,6 +68,7 @@ class sly_Core {
 		if (!defined('SLY_DYNFOLDER'))     define('SLY_DYNFOLDER',     SLY_DATAFOLDER.DIRECTORY_SEPARATOR.'dyn');
 		if (!defined('SLY_MEDIAFOLDER'))   define('SLY_MEDIAFOLDER',   SLY_DATAFOLDER.DIRECTORY_SEPARATOR.'mediapool');
 		if (!defined('SLY_CONFIGFOLDER'))  define('SLY_CONFIGFOLDER',  SLY_DATAFOLDER.DIRECTORY_SEPARATOR.'config');
+		if (!defined('SLY_TEMPFOLDER'))    define('SLY_TEMPFOLDER',    SLY_DATAFOLDER.DIRECTORY_SEPARATOR.'temp');
 		if (!defined('SLY_ADDONFOLDER'))   define('SLY_ADDONFOLDER',   SLY_SALLYFOLDER.DIRECTORY_SEPARATOR.'addons');
 
 		// define these PHP 5.3 constants here so that they can be used in YAML files
@@ -87,21 +88,34 @@ class sly_Core {
 		// to the filesystem on new installations)
 		try {
 			$config = $container->getConfig();
-			$config->loadStatic(SLY_COREFOLDER.'/config/sallyStatic.yml');
-			$config->loadLocalConfig();
-			$config->loadProjectConfig();
-			$config->loadDevelopConfig();
-		}
-		catch (sly_Util_DirectoryException $e) {
-			$dir = sly_html($e->getDirectory());
+			// load sally defaults
+			$config->setStatic('/', sly_Util_YAML::load(SLY_COREFOLDER.DIRECTORY_SEPARATOR.'config'.DIRECTORY_SEPARATOR.'sallyStatic.yml'));
+			// load develop config
+			$dir = new sly_Util_Directory(SLY_DEVELOPFOLDER.DIRECTORY_SEPARATOR.'config');
+			if ($dir->exists()) {
+				foreach ($dir->listPlain() as $file) {
+					if (fnmatch('*.yml', $file) || fnmatch('*.yaml', $file)) {
+						$config->setStatic('/', sly_Util_YAML::load($dir.DIRECTORY_SEPARATOR.$file));
+					}
+				}
+			}
 
-			header('Content-Type: text/html; charset=UTF-8');
-			die(
-				'Could not create data directory in <strong>'.$dir.'</strong>.<br />'.
-				'Please check your filesystem permissions and ensure that PHP is allowed<br />'.
-				'to write in <strong>'.SLY_DATAFOLDER.'</strong>. In most cases this can<br />'.
-				'be fixed by creating the directory via FTP and chmodding it to <strong>0777</strong>.'
-			);
+			$configReader = $container['sly-config-reader'];
+
+			$localConfig = $configReader->readLocal();
+			if (!empty($localConfig)) {
+				$config->setStatic('/', $localConfig);
+			}
+
+			// Now that we know the local, i.e. database config, we can build the
+			// persistence and power up the config reader.
+			$persistence = $container['sly-persistence'];
+			$configReader->setPersistence($persistence);
+
+			$projectConfig = $configReader->readProject();
+			if (!empty($projectConfig)) {
+				$config->set('/', $projectConfig);
+			}
 		}
 		catch (Exception $e) {
 			header('Content-Type: text/plain; charset=UTF-8');
@@ -116,7 +130,7 @@ class sly_Core {
 		$container->set('sly-environment', $environment);
 
 		// now that we now about the environment, we can toggle the config caching
-		$config->setCachingEnabled($environment === 'prod');
+		//$config->setCachingEnabled($environment === 'prod');
 
 		return $container;
 	}
@@ -308,77 +322,77 @@ class sly_Core {
 	 * @return string  the project name
 	 */
 	public static function getProjectName() {
-		return self::config()->get('PROJECTNAME');
+		return self::config()->get('projectname');
 	}
 
 	/**
 	 * @return int  the project homepage ID (start article)
 	 */
 	public static function getSiteStartArticleId() {
-		return (int) self::config()->get('START_ARTICLE_ID');
+		return (int) self::config()->get('start_article_id');
 	}
 
 	/**
 	 * @return int  the not-found article's ID
 	 */
 	public static function getNotFoundArticleId() {
-		return (int) self::config()->get('NOTFOUND_ARTICLE_ID');
+		return (int) self::config()->get('notfound_article_id');
 	}
 
 	/**
 	 * @return int  the default clang ID
 	 */
 	public static function getDefaultClangId() {
-		return (int) self::config()->get('DEFAULT_CLANG_ID');
+		return (int) self::config()->get('default_clang_id');
 	}
 
 	/**
 	 * @return string  the default (backend) locale
 	 */
 	public static function getDefaultLocale() {
-		return self::config()->get('DEFAULT_LOCALE');
+		return self::config()->get('default_locale');
 	}
 
 	/**
 	 * @return string  the default article type
 	 */
 	public static function getDefaultArticleType() {
-		return self::config()->get('DEFAULT_ARTICLE_TYPE');
+		return self::config()->get('default_article_type');
 	}
 
 	/**
 	 * @return string  the class name of the global caching strategy
 	 */
 	public static function getCachingStrategy() {
-		return self::config()->get('CACHING_STRATEGY');
+		return self::config()->get('caching_strategy');
 	}
 
 	/**
 	 * @return string  the timezone's name
 	 */
 	public static function getTimezone() {
-		return self::config()->get('TIMEZONE');
+		return self::config()->get('timezone');
 	}
 
 	/**
 	 * @return int  permissions for files
 	 */
 	public static function getFilePerm($default = self::DEFAULT_FILEPERM) {
-		return (int) self::config()->get('FILEPERM', $default);
+		return (int) self::config()->get('fileperm', $default);
 	}
 
 	/**
 	 * @return int  permissions for directory
 	 */
 	public static function getDirPerm($default = self::DEFAULT_DIRPERM) {
-		return (int) self::config()->get('DIRPERM', $default);
+		return (int) self::config()->get('dirperm', $default);
 	}
 
 	/**
 	 * @return sring  the database table prefix
 	 */
 	public static function getTablePrefix() {
-		return self::config()->get('DATABASE/TABLE_PREFIX');
+		return self::config()->get('database/table_prefix');
 	}
 
 	/**
@@ -422,14 +436,14 @@ class sly_Core {
 
 		if ($version === null) {
 			$config  = self::config();
-			$version = $config->get('VERSION');
+			$version = $config->get('version');
 		}
 
 		$pattern = str_replace('s', 'sly', $pattern);
 		$pattern = str_replace('S', 'sally', $pattern);
-		$pattern = str_replace('X', $version['MAJOR'], $pattern);
-		$pattern = str_replace('Y', $version['MINOR'], $pattern);
-		$pattern = str_replace('Z', $version['BUGFIX'], $pattern);
+		$pattern = str_replace('X', $version['major'], $pattern);
+		$pattern = str_replace('Y', $version['minor'], $pattern);
+		$pattern = str_replace('Z', $version['bugfix'], $pattern);
 
 		return $pattern;
 	}
@@ -556,9 +570,6 @@ class sly_Core {
 	public static function clearCache() {
 		clearstatcache();
 
-		// clear loader cache
-		sly_Loader::clearCache();
-
 		$container = self::getContainer();
 
 		// clear our own data caches
@@ -574,13 +585,10 @@ class sly_Core {
 		// refresh addOns
 		$container->getAddOnManagerService()->refresh();
 
-		// clear config cache
-		$container->getConfig()->clearCache();
-
 		self::dispatcher()->notify('SLY_CACHE_CLEARED');
 	}
 
 	public static function isSetup() {
-		return self::config()->get('SETUP', true) === true;
+		return self::config()->get('setup', true) === true;
 	}
 }

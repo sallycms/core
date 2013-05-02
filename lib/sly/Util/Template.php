@@ -43,7 +43,7 @@ class sly_Util_Template {
 	 */
 	public static function wrap($name, array $params = array(), $contentName = 'content') {
 		try {
-			sly_Service_Factory::getTemplateService()->wrapFile($name, $params, $contentName);
+			sly_Core::getContainer()->getTemplateService()->wrapFile($name, $params, $contentName);
 		}
 		catch (sly_Service_Template_Exception $e) {
 			print $e->getMessage();

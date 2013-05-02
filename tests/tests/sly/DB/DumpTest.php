@@ -10,7 +10,7 @@
 
 class sly_DB_DumpTest extends PHPUnit_Framework_TestCase {
 	public static function setUpBeforeClass() {
-		$dir = dirname(__FILE__);
+		$dir = __DIR__;
 
 		file_put_contents("$dir/dumpA.sql", "-- Sally Database Dump Version 0.6\r\n-- Prefix foo_");
 		file_put_contents("$dir/dumpB.sql", "## Sally Database Dump Version 1\n");
@@ -18,13 +18,13 @@ class sly_DB_DumpTest extends PHPUnit_Framework_TestCase {
 		file_put_contents("$dir/dumpD.sql", "-- Sally Database Dump Version 0.6\n-- Prefix "); // empty prefix!
 
 		// login the dummy user
-		$service = sly_Service_Factory::getUserService();
+		$service = sly_Core::getContainer()->getUserService();
 		$user    = $service->findById(SLY_TESTING_USER_ID);
 		$service->setCurrentUser($user);
 	}
 
 	public static function tearDownAfterClass() {
-		$dir = dirname(__FILE__);
+		$dir = __DIR__;
 
 		unlink("$dir/dumpA.sql");
 		unlink("$dir/dumpB.sql");
@@ -44,7 +44,7 @@ class sly_DB_DumpTest extends PHPUnit_Framework_TestCase {
 	 * @dataProvider dumpProvider
 	 */
 	public function testGetProperties($dump, $version, $prefix, $count) {
-		$d = new sly_DB_Dump(dirname(__FILE__).'/'.$dump);
+		$d = new sly_DB_Dump(__DIR__.'/'.$dump);
 		$this->assertEquals($version, $d->getVersion());
 		$this->assertEquals($prefix, $d->getPrefix());
 		$this->assertCount($count, $d->getHeaders());
@@ -60,7 +60,7 @@ class sly_DB_DumpTest extends PHPUnit_Framework_TestCase {
 	}
 
 	public function testGetContent() {
-		$file    = dirname(__FILE__).'/content.sql';
+		$file    = __DIR__.'/content.sql';
 		$content = 'INSERT INTO foo (); SELECT foo FROM bar; INSERT INTO bar ();';
 
 		file_put_contents($file, $content);
@@ -74,7 +74,7 @@ class sly_DB_DumpTest extends PHPUnit_Framework_TestCase {
 	 * @depends  testGetContent
 	 */
 	public function testGetChunkedContent() {
-		$file  = dirname(__FILE__).'/content.sql';
+		$file  = __DIR__.'/content.sql';
 		$count = 20000;
 
 		@unlink($file);
@@ -97,7 +97,7 @@ class sly_DB_DumpTest extends PHPUnit_Framework_TestCase {
 	 * @dataProvider  replacePrefixProvider
 	 */
 	public function testReplacePrefix($query, $expected) {
-		$dump = new sly_DB_Dump(dirname(__FILE__).'/dumpA.sql');
+		$dump = new sly_DB_Dump(__DIR__.'/dumpA.sql');
 		$dump->getPrefix(); // parse the file header
 		$this->assertSame($expected, $dump->replacePrefix($query));
 	}

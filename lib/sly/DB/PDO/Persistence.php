@@ -9,28 +9,29 @@
  */
 
 /**
- * PDO Persintence Klasse für eine PDO-Verbindung
+ * PDO Persistence Klasse für eine PDO-Verbindung
  *
  * @author  zozi@webvariants.de
  * @ingroup database
  */
 class sly_DB_PDO_Persistence extends sly_DB_Persistence {
 	protected $driver;           ///< string
+
 	private $connection = null;  ///< sly_DB_PDO_Connection
 	private $statement  = null;  ///< PDOStatement
 	private $currentRow = null;  ///< int
 
 	/**
-	 * @param string $driver
+	 * @param string $driverName
 	 * @param string $host
 	 * @param string $login
 	 * @param string $password
 	 * @param string $database
 	 */
-	public function __construct($driver, $host, $login, $password, $database = null, $prefix = '') {
-		$this->driver     = $driver;
+	public function __construct($driverName, sly_DB_PDO_Connection $connection, $prefix = '') {
+		$this->driver     = $driverName;
 		$this->prefix     = $prefix;
-		$this->connection = sly_DB_PDO_Connection::getInstance($driver, $host, $login, $password, $database);
+		$this->connection = $connection;
 	}
 
 	/**
@@ -349,6 +350,38 @@ class sly_DB_PDO_Persistence extends sly_DB_Persistence {
 				$this->rollBack();
 			}
 
+			throw $e;
+		}
+	}
+
+	/*
+	 The following three methods exist just to make using transactions less
+	 painful when you need to call protected stuff and hence cannot use an
+	 anonymous function in PHP <5.4.
+	 */
+
+	public function beginTrx() {
+		if ($this->isTransRunning()) {
+			return false;
+		}
+
+		$this->beginTransaction();
+
+		return true;
+	}
+
+	public function commitTrx($flag) {
+		if ($flag) {
+			$this->commit();
+		}
+	}
+
+	public function rollBackTrx($flag, Exception $e = null) {
+		if ($flag) {
+			$this->rollBack();
+		}
+
+		if ($e) {
 			throw $e;
 		}
 	}
