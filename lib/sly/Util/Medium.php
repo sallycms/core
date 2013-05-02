@@ -202,6 +202,7 @@ class sly_Util_Medium {
 
 	/**
 	 * @param  string $filename
+	 * @param  string $realName  optional; in case $filename is encoded and has no proper extension
 	 * @return string
 	 */
 	public static function getMimetype($filename, $realName) {
@@ -214,7 +215,7 @@ class sly_Util_Medium {
 
 		// fallback to a generic type
 		else {
-			$mimetype = sly_Util_Mime::getType($realName);
+			$mimetype = sly_Util_Mime::getType($realName === null ? $filename : $realName);
 		}
 
 		return $mimetype;

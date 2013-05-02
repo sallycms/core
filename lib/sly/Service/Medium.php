@@ -166,8 +166,7 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id implements sly_Contai
 
 	/**
 	 * @throws sly_Exception
-	 * @param  string         $filename
-	 * @param  string         $title
+	 * @param  string         $filename      full path to the source file outside the mediapool
 	 * @param  string         $title
 	 * @param  int            $categoryID
 	 * @param  string         $mimetype
@@ -180,11 +179,7 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id implements sly_Contai
 
 		// check file itself
 
-		$fs       = $this->mediaFs;
-		$filename = basename($filename);
-		$fullname = SLY_MEDIAFOLDER.'/'.$filename;
-
-		if (!$fs->exists($filename)) {
+		if (!file_exists($filename)) { // $filename points to a plain ol' file somewhere in the filesystem
 			throw new sly_Exception(t('file_not_found', $filename));
 		}
 
@@ -197,35 +192,47 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id implements sly_Contai
 			$categoryID = 0;
 		}
 
-		$size     = @getimagesize($fullname);
+		$size     = @getimagesize($filename);
 		$mimetype = empty($mimetype) ? sly_Util_Medium::getMimetype($fullname, $filename) : $mimetype;
+		$db       = $this->getContainer()->getPersistence();
+		$trx      = $db->beginTrx();
 
-		// create file object
+		try {
+			// create file object
 
-		$file = new sly_Model_Medium();
-		$file->setFiletype($mimetype);
-		$file->setTitle($title);
-		$file->setOriginalName($originalName === null ? $filename : basename($originalName));
-		$file->setFilename($filename);
-		$file->setFilesize(filesize($fullname));
-		$file->setCategoryId($categoryID);
-		$file->setRevision(0); // totally useless...
-		$file->setReFileId(0); // even more useless
-		$file->setAttributes('');
-		$file->setCreateColumns($user);
+			$file = new sly_Model_Medium();
+			$file->setFiletype($mimetype);
+			$file->setTitle($title);
+			$file->setOriginalName($originalName === null ? $filename : basename($originalName));
+			$file->setFilename(basename($filename));
+			$file->setFilesize(filesize($fullname));
+			$file->setCategoryId($categoryID);
+			$file->setRevision(0);
+			$file->setReFileId(0);
+			$file->setAttributes('');
+			$file->setCreateColumns($user);
 
-		if ($size) {
-			$file->setWidth($size[0]);
-			$file->setHeight($size[1]);
+			if ($size) {
+				$file->setWidth($size[0]);
+				$file->setHeight($size[1]);
+			}
+			else {
+				$file->setWidth(0);
+				$file->setHeight(0);
+			}
+
+			// store the file in our database
+			$this->save($file);
+
+			// add file to media filesystem
+			$service = new sly_Filesystem_Service($this->mediaFs);
+			$service->importFile($filename, basename($filename));
+
+			$db->commitTrx($trx);
 		}
-		else {
-			$file->setWidth(0);
-			$file->setHeight(0);
+		catch (Exception $e) {
+			$db->rollBackTrx($trx, $e);
 		}
-
-		// store and return it
-
-		$this->save($file);
 
 		$this->cache->flush('sly.medium.list');
 		$this->dispatcher->notify('SLY_MEDIA_ADDED', $file, compact('user'));

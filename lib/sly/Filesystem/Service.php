@@ -84,6 +84,20 @@ class sly_Filesystem_Service {
 		return $this;
 	}
 
+	public function importFile($sourceFile, $targetFile) {
+		$in  = fopen($sourceFile, 'rb');
+		$out = $this->fs->createStream($targetFile);
+
+		$out->open(new Gaufrette\StreamMode('wb'));
+
+		while (!feof($in)) {
+			$out->write(fread($in, 16384));
+		}
+
+		fclose($in);
+		$out->close();
+	}
+
 	/**
 	 * Mirrors part of the filesystem into another filesystem
 	 *
