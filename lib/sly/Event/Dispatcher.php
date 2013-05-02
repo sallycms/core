@@ -29,7 +29,7 @@ class sly_Event_Dispatcher implements sly_Event_IDispatcher {
 	/**
 	 * Constructor
 	 *
-	 * @param sly_Container $container
+	 * @param sly_Container $container  the DI container to for resolving service placeholders
 	 */
 	public function __construct(sly_Container $container = null) {
 		$this->container = $container;
@@ -209,14 +209,14 @@ class sly_Event_Dispatcher implements sly_Event_IDispatcher {
 		$params['event'] = $event;
 
 		foreach ($listeners as $idx => $listener) {
-			$callee = $listener['listener'];
-			$legacy = $listener['legacy'];
+			$callable = $listener['listener'];
+			$legacy   = $listener['legacy'];
 
 			// find service identifiers and determine current service from container
-			$callee = $this->replaceIdentifiers($callee, $listener['params']);
+			$callable = $this->replaceIdentifiers($callable, $listener['params']);
 
 			// skip bad listeners (or else they could break the subject for following listeners)
-			if ($callee === null || !is_callable($callee)) {
+			if ($callable === null || !is_callable($callable)) {
 				trigger_error('Listener #'.$idx.' for event '.$event.' is not callable, skipping.', E_USER_WARNING);
 				continue;
 			}
@@ -228,12 +228,12 @@ class sly_Event_Dispatcher implements sly_Event_IDispatcher {
 			// in legacy mode, call $callback($params) with subject in $params
 			if ($legacy) {
 				$args['subject'] = $subject;
-				$retval = call_user_func($callee, $args);
+				$retval = call_user_func($callable, $args);
 			}
 
 			// in modern mode, call $callback($subject, $params)
 			else {
-				$retval = call_user_func_array($callee, array($subject, $args));
+				$retval = call_user_func_array($callable, array($subject, $args));
 			}
 
 			++$called;
@@ -278,6 +278,11 @@ class sly_Event_Dispatcher implements sly_Event_IDispatcher {
 		}
 	}
 
+	/**
+	 * get the DI container
+	 *
+	 * @return sly_Container
+	 */
 	protected function getContainer() {
 		return $this->container;
 	}
@@ -286,11 +291,14 @@ class sly_Event_Dispatcher implements sly_Event_IDispatcher {
 		$container = $this->getContainer();
 		if (!$container) return $callback;
 
+		// could be a plain service identifier
 		if (is_string($callback)) {
 			$matches = array();
 			$length  = strlen($callback);
 
+			// listeners like '%service%_%param%', most likely resolving to a global function name
 			if (preg_match_all('/%([a-z0-9._#+-]+?)%/i', $callback, $matches, PREG_SET_ORDER)) {
+				// replace each match on its own
 				foreach ($matches as $match) {
 					$identifier = $match[1];
 
@@ -303,7 +311,9 @@ class sly_Event_Dispatcher implements sly_Event_IDispatcher {
 					$isWholeCallback = strlen($identifier) === ($length - 2); // - 2 for the '%' chars
 
 					// do not attempt to do string replacements inside the callback
-					// when it's just the name of a service
+					// when it's just the name of a service (so '%foo%' can resolve
+					// to an object which needs to be invokable)
+
 					if ($isWholeCallback) {
 						return $service;
 					}
@@ -338,6 +348,8 @@ class sly_Event_Dispatcher implements sly_Event_IDispatcher {
 			// no matches, no fun
 			return $callback;
 		}
+
+		// a listener like ['%service%', 'method'] or {'service': '%myidentifier%', 'method': 'mymethod_%environment%'}
 		elseif (is_array($callback)) {
 			if (isset($callback['service'])) {
 				$service = $this->replaceIdentifiers($callback['service'], $params);
