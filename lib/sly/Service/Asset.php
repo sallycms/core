@@ -41,7 +41,7 @@ class sly_Service_Asset {
 		$this->dispatcher = $dispatcher;
 		$this->config     = $config;
 
-		$dispatcher->register(self::EVENT_PROCESS_ASSET, array($this, 'processLessCSS'));
+		$dispatcher->addListener(self::EVENT_PROCESS_ASSET, array($this, 'processLessCSS'));
 	}
 
 	/**
@@ -274,16 +274,14 @@ class sly_Service_Asset {
 	}
 
 	/**
-	 * @param  array $params
+	 * @param  string $filename
 	 * @return string
 	 */
-	public function processLessCSS(array $params) {
-		$file = $params['subject'];
-
-		if (sly_Util_String::endsWith($file, '.less') && file_exists(SLY_BASE.'/'.$file)) {
-			$css     = sly_Util_Lessphp::process($file);
+	public function processLessCSS($filename) {
+		if (sly_Util_String::endsWith($filename, '.less') && file_exists(SLY_BASE.'/'.$filename)) {
+			$css     = sly_Util_Lessphp::process($filename);
 			$dir     = SLY_TEMPFOLDER.'/'.self::TEMP_DIR;
-			$tmpFile = $dir.'/'.md5($file).'.less';
+			$tmpFile = $dir.'/'.md5($filename).'.less';
 
 			sly_Util_Directory::create($dir, $this->getDirPerm());
 
@@ -293,7 +291,7 @@ class sly_Service_Asset {
 			return $tmpFile;
 		}
 
-		return $file;
+		return $filename;
 	}
 
 	private function initCache() {

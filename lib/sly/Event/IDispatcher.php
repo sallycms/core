@@ -17,7 +17,7 @@
  */
 interface sly_Event_IDispatcher {
 	/**
-	 * Registers a listener
+	 * Add a listener
 	 *
 	 * Registers a callback for a given event, remembering it for later
 	 * execution. A listener can get a list of special parameters that will be
@@ -26,9 +26,21 @@ interface sly_Event_IDispatcher {
 	 * @param string  $event     the event name (case sensitive, use upper case by convention)
 	 * @param mixed   $listener  the callback (anything PHP regards as callable)
 	 * @param array   $array     additional params for the listener
-	 * @param boolean $first     if true, the listener will be put in front of existing listeners
+	 * @param boolean $prepend   if true, the listener will be put in front of existing listeners
 	 */
-	public function register($event, $listener, $params = array(), $first = false);
+	public function addListener($event, $listener, array $params = array(), $prepend = false);
+
+	/**
+	 * Registers a listener
+	 *
+	 * @deprecated  since 0.9, use addListener() and the new callback signature instead
+	 *
+	 * @param string  $event     the event name (case sensitive, use upper case by convention)
+	 * @param mixed   $listener  the callback (anything PHP regards as callable)
+	 * @param array   $array     additional params for the listener
+	 * @param boolean $prepend   if true, the listener will be put in front of existing listeners
+	 */
+	public function register($event, $listener, $params = array(), $prepend = false);
 
 	/**
 	 * Return all listeners for one event
@@ -76,7 +88,7 @@ interface sly_Event_IDispatcher {
 	 * @param  array  $params   additional parameters (if necessary)
 	 * @return int              the number of listeners that have been executed
 	 */
-	public function notify($event, $subject = null, $params = array());
+	public function notify($event, $subject = null, array $params = array());
 
 	/**
 	 * Notify all listeners until one stops
@@ -94,7 +106,7 @@ interface sly_Event_IDispatcher {
 	 * @return mixed            null if no listeners are set, false if no
 	 *                          listener stops the evaluation or else true
 	 */
-	public function notifyUntil($event, $subject = null, $params = array());
+	public function notifyUntil($event, $subject = null, array $params = array());
 
 	/**
 	 * Filter a value
@@ -106,10 +118,10 @@ interface sly_Event_IDispatcher {
 	 * Listeners cannot stop the evaluation (in contrast to notifyUntil()).
 	 *
 	 * @param  string $event    the event to be triggered
-	 * @param  mixed  $subject  an optional value for the listeners to work with
+	 * @param  mixed  $subject  a start value for the listeners to work with
 	 * @param  array  $params   additional parameters (if necessary)
 	 * @return mixed            the return value of the last listener or the
 	 *                          original subject if no listeners have been set
 	 */
-	public function filter($event, $subject = null, $params = array());
+	public function filter($event, $subject, array $params = array());
 }

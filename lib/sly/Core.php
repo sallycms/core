@@ -471,7 +471,7 @@ class sly_Core {
 
 		foreach ($listeners as $event => $callbacks) {
 			foreach ($callbacks as $callback) {
-				$dispatcher->register($event, $callback);
+				$dispatcher->addListener($event, $callback);
 			}
 		}
 

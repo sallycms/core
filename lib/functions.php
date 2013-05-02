@@ -69,7 +69,7 @@ function sly_setarraytype(array $haystack, $key, $type, $default = null) {
  * @return mixed             the casted value or default
  */
 function sly_get($name, $type, $default = null) {
-	return sly_Core::getRequest()->get($name, $type, $default);
+	return sly_Core::getContainer()->get('sly-request')->get($name, $type, $default);
 }
 
 /**
@@ -81,7 +81,7 @@ function sly_get($name, $type, $default = null) {
  * @return mixed             the casted value or default
  */
 function sly_post($name, $type, $default = null) {
-	return sly_Core::getRequest()->post($name, $type, $default);
+	return sly_Core::getContainer()->get('sly-request')->post($name, $type, $default);
 }
 
 /**
@@ -93,7 +93,7 @@ function sly_post($name, $type, $default = null) {
  * @return mixed             the casted value or default
  */
 function sly_request($name, $type, $default = null) {
-	return sly_Core::getRequest()->request($name, $type, $default);
+	return sly_Core::getContainer()->get('sly-request')->request($name, $type, $default);
 }
 
 /**
@@ -105,7 +105,7 @@ function sly_request($name, $type, $default = null) {
  * @return mixed             the casted value or default
  */
 function sly_cookie($name, $type, $default = null) {
-	return sly_Core::getRequest()->cookie($name, $type, $default);
+	return sly_Core::getContainer()->get('sly-request')->cookie($name, $type, $default);
 }
 
 /**
@@ -117,7 +117,7 @@ function sly_cookie($name, $type, $default = null) {
  * @return mixed             the casted values or default
  */
 function sly_getArray($name, $types, $default = array()) {
-	return sly_Core::getRequest()->getArray($name, $types, $default);
+	return sly_Core::getContainer()->get('sly-request')->getArray($name, $types, $default);
 }
 
 /**
@@ -129,7 +129,7 @@ function sly_getArray($name, $types, $default = array()) {
  * @return mixed             the casted values or default
  */
 function sly_postArray($name, $types, $default = array()) {
-	return sly_Core::getRequest()->postArray($name, $types, $default);
+	return sly_Core::getContainer()->get('sly-request')->postArray($name, $types, $default);
 }
 
 /**
@@ -141,7 +141,7 @@ function sly_postArray($name, $types, $default = array()) {
  * @return mixed             the casted values or default
  */
 function sly_requestArray($name, $types, $default = array()) {
-	return sly_Core::getRequest()->requestArray($name, $types, $default);
+	return sly_Core::getContainer()->get('sly-request')->requestArray($name, $types, $default);
 }
 
 function sly_html($string) {
@@ -227,10 +227,10 @@ function sly_makeArray($element) {
  */
 function t($key) {
 	$args = func_get_args();
-	$i18n = sly_Core::getI18N();
+	$i18n = sly_Core::getContainer()->get('sly-i18n');
 
 	if (!($i18n instanceof sly_I18N)) {
-		throw new sly_Exception('No translation database set in sly_Core!');
+		throw new sly_Exception('No valid I18N object has been set in the DI container.');
 	}
 
 	$func = array($i18n, 'msg');
