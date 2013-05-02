@@ -1,0 +1,5 @@
+syntax:glob
+vendor/*
+tests/data/*
+tests/mediapool/*
+tests/config/.htaccess
