@@ -57,7 +57,7 @@ abstract class sly_App_Base implements sly_App_Interface {
 		$fsMap     = $container['sly-filesystem-map'];
 		$fsService = $container['sly-service-filesystem'];
 
-		$fsService->registerStreamWrappers();
+		$fsService->registerStreamWrappers($fsMap);
 
 		// register listeners
 		sly_Core::registerListeners();
