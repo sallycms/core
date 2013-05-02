@@ -287,7 +287,11 @@ class sly_Container extends Pimple implements Countable {
 		// filesystems
 
 		$this['sly-filesystem-media'] = $this->share(function($container) {
-			$adapter = new Gaufrette\Adapter\Local(SLY_DATAFOLDER.DIRECTORY_SEPARATOR.'mediapool');
+			// make sure the mediapool directory exists, as Gaufrette is not going to create it for us
+			$dir = SLY_DATAFOLDER.DIRECTORY_SEPARATOR.'mediapool';
+			$dir = sly_Util_Directory::create($dir);
+
+			$adapter = new Gaufrette\Adapter\Local($dir);
 			$fs      = new Gaufrette\Filesystem($adapter);
 
 			return $fs;
