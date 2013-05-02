@@ -308,12 +308,11 @@ class sly_Model_Base_Article extends sly_Model_Base {
 	}
 
 	/**
-	 * @param  sly_Service_Category $catService
 	 * @return array
 	 */
-	public function getParentTree(sly_Service_Category $catService = null) {
+	public function getParentTree() {
 		$return     = array();
-		$catService = $catService ?: sly_Core::getContainer()->getCategoryService();
+		$catService = sly_Core::getContainer()->getCategoryService();
 
 		$explode = explode('|', $this->getPath());
 		$explode = array_filter($explode);
@@ -331,11 +330,10 @@ class sly_Model_Base_Article extends sly_Model_Base {
 
 	/**
 	 * @param  sly_Model_Base_Article $anObj
-	 * @param  sly_Service_Category   $catService
 	 * @return boolean
 	 */
-	public function inParentTree(sly_Model_Base_Article $anObj, sly_Service_Category $catService = null) {
-		$tree = $this->getParentTree($catService);
+	public function inParentTree(sly_Model_Base_Article $anObj) {
+		$tree = $this->getParentTree();
 
 		foreach ($tree as $treeObj) {
 			if ($treeObj->getId() == $anObj->getId()) {

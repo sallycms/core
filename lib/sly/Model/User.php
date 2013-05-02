@@ -209,11 +209,10 @@ class sly_Model_User extends sly_Model_Base_Id {
 	public function isAdmin()          { return $this->isAdmin;       } ///< @return boolean
 
 	/**
-	 * @param  sly_Service_Language $service
 	 * @return array
 	 */
-	public function getAllowedCLangs(sly_Service_Language $service = null) {
-		$service = $service ?: sly_Core::getContainer()->getLanguageService();
+	public function getAllowedCLangs() {
+		$service = sly_Core::getContainer()->getLanguageService();
 		$allowed = array();
 
 		foreach ($service->findAll(true) as $language) {
@@ -246,11 +245,10 @@ class sly_Model_User extends sly_Model_Base_Id {
 	}
 
 	/**
-	 * @param  sly_Service_User $service
 	 * @return int
 	 */
-	public function delete(sly_Service_User $service = null) {
-		$service = $service ?: sly_Core::getContainer()->getUserService();
+	public function delete() {
+		$service = sly_Core::getContainer()->getUserService();
 
 		return $service->deleteById($this->id);
 	}
