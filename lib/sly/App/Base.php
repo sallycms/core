@@ -53,11 +53,7 @@ abstract class sly_App_Base implements sly_App_Interface {
 		sly_Core::loadAddOns();
 
 		// setup the stream wrappers
-		$container = $this->getContainer();
-		$fsMap     = $container['sly-filesystem-map'];
-		$fsService = $container['sly-service-filesystem'];
-
-		$fsService->registerStreamWrapper($fsMap);
+		$this->registerStreamWrapper();
 
 		// register listeners
 		sly_Core::registerListeners();
@@ -161,6 +157,14 @@ abstract class sly_App_Base implements sly_App_Interface {
 		$this->action     = $this->getActionFromRequest($request);
 
 		return $retval;
+	}
+
+	protected function registerStreamWrapper() {
+		$container = $this->getContainer();
+		$fsMap     = $container['sly-filesystem-map'];
+		$fsService = $container['sly-service-filesystem'];
+
+		$fsService->registerStreamWrapper($fsMap);
 	}
 
 	abstract protected function prepareRouter(sly_Container $container);
