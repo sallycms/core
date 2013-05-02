@@ -27,6 +27,6 @@ class sly_Service_Filesystem {
 
 	public function registerStreamWrapper(FilesystemMap $fsMap) {
 		StreamWrapper::setFilesystemMap($fsMap);
-		StreamWrapper::register();
+		StreamWrapper::register('sly');
 	}
 }
