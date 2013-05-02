@@ -57,7 +57,7 @@ class sly_Container extends Pimple implements Countable {
 		};
 
 		$this['sly-dispatcher'] = $this->share(function($container) {
-			return new sly_Event_Dispatcher();
+			return new sly_Event_Dispatcher($container);
 		});
 
 		$this['sly-error-handler'] = $this->share(function($container) {
