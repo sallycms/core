@@ -9,6 +9,7 @@
  */
 
 use Gaufrette\Filesystem;
+use Gaufrette\Adapter\Local;
 
 /**
  * @author  christoph@webvariants.de
@@ -51,21 +52,21 @@ class sly_Service_AddOn_Manager {
 	 * @return boolean        always true
 	 */
 	public function copyAssets($addon) {
-		$assetsDir = $this->pkgService->baseDirectory($addon).'assets';
+		$sourceDir = $this->pkgService->baseDirectory($addon).'assets';
 
-		if (!is_dir($assetsDir)) {
+		if (!is_dir($sourceDir)) {
 			return true;
 		}
 
-		$source  = new Adapter\Local($assetsDir, 0777, 0777);
-		$service = new Service($source);
+		$source  = new Filesystem(new Local($sourceDir));
+		$service = new sly_Filesystem_Service($source);
 		$target  = $this->addOnService->publicFilesystem($addon);
 
 		try {
 			$service->mirrorTo('', $target, '');
 		}
 		catch (Exception $e) {
-			throw new sly_Exception(t('addon_assets_failed', $assetsDir));
+			throw new sly_Exception(t('addon_assets_failed', $sourceDir));
 		}
 
 		return true;
