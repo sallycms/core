@@ -172,7 +172,7 @@ class sly_Util_String {
 	}
 
 	/**
-	 * shortens a filename to a max lenght and leaves an optional suffix
+	 * shortens a filename to a max length and leaves an optional suffix
 	 * prior to the extension
 	 *
 	 * @param  string $name          filename to be shorten
