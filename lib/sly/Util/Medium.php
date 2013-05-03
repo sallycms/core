@@ -8,8 +8,6 @@
  * http://www.opensource.org/licenses/mit-license.php
  */
 
-use Gaufrette\Filesystem;
-
 /**
  * @ingroup util
  *
@@ -157,132 +155,24 @@ class sly_Util_Medium {
 	}
 
 	/**
-	 * Remove unwanted characters from a filename
+	 * @deprecated  since 0.9, use sly_Util_File::createFilename() instead
 	 *
-	 * @param  string                $filename
-	 * @param  sly_Event_IDispatcher $dispatcher  if given, the SLY_MEDIUM_FILENAME will be fired
+	 * @param  string  $filename
+	 * @param  boolean $doSubindexing
 	 * @return string
 	 */
-	public static function cleanFilename($filename, sly_Event_IDispatcher $dispatcher = null) {
-		$origFilename = $filename;
-		$filename     = mb_strtolower($filename);
-		$filename     = str_replace(array('ä', 'ö', 'ü', 'ß'), array('ae', 'oe', 'ue', 'ss'), $filename);
-
-		if ($dispatcher) {
-			$filename = $dispatcher->filter('SLY_MEDIUM_FILENAME', $filename, array('orig' => $origFilename));
-		}
-
-		$filename = preg_replace('#[^a-z0-9.+-]#i', '_', $filename);
-		$filename = trim(preg_replace('#_+#i', '_', $filename), '_');
-
-		return $filename;
+	public static function createFilename($filename, $doSubindexing = true) {
+		return sly_Util_File::createFilename($filename, $doSubindexing, true, null);
 	}
 
 	/**
-	 * Append .txt to a file if its extension is blocked
+	 * @deprecated  since 0.9, use sly_Util_File::getMimetype() instead
 	 *
-	 * @param  string $filename
-	 * @param  array  $blacklist  ['.php', '.exe', ...]
-	 * @return string
-	 */
-	public static function sanitiseFileExtension($filename, array $blacklist) {
-		$extension = sly_Util_String::getFileExtension($filename);
-		if ($extension === '') return $filename;
-
-		$filename  = mb_substr($filename, 0, -(mb_strlen($extension)+1));
-		$extension = '.'.mb_strtolower($extension);
-		$blacklist = array_map('mb_strtolower', $blacklist);
-
-		if (in_array($extension, $blacklist)) {
-			return $filename.$extension.'.txt';
-		}
-
-		return $filename.$extension;
-	}
-
-	/**
-	 * Iterate a filename until a non-existing one was found
-	 *
-	 * This method will append '_1', '_2' etc. to a filename and hence test
-	 * 'file.ext', 'file_1.ext', 'file_2.ext' until a free filename was found.
-	 *
-	 * Use the $extension parameter if you have a custom extension (which is
-	 * not simply the part after the last dot). The $extension should include
-	 * the separating dot (e.g. '.foo.bar').
-	 *
-	 * @param  string     $filename
-	 * @param  Filesystem $fs         the filesystem to base the subindexing on, by default the media filesystem
-	 * @param  string     $extension  use null to determine it automatically
-	 * @return string
-	 */
-	public static function iterateFilename($filename, Filesystem $fs = null, $extension = null) {
-		$fs = $fs ?: $container->get('sly-filesystem-media');
-
-		if ($fs->has($filename)) {
-			$extension = $extension === null ? sly_Util_String::getFileExtension($filename) : $extension;
-			$basename  = substr($filename, 0, -(strlen($extension)+1));
-
-			// this loop is empty on purpose
-			for ($cnt = 1; $fs->has($basename.'_'.$cnt.$extension); ++$cnt);
-			$filename = $basename.'_'.$cnt.$extension;
-		}
-
-		return $filename;
-	}
-
-	/**
-	 * @param  string     $filename
-	 * @param  boolean    $doSubindexing
-	 * @param  boolean    $applyBlacklist
-	 * @param  Filesystem $fs              the filesystem to base the subindexing on, by default the media filesystem
-	 * @return string
-	 */
-	public static function createFilename($filename, $doSubindexing = true, $applyBlacklist = true, Filesystem $fs = null) {
-		$origFilename = $filename;
-		$container    = sly_Core::getContainer();
-		$filename     = self::cleanFilename($filename, $container->getDispatcher()); // möp.png -> moep.png
-
-		if (strlen($filename) === 0) {
-			$filename = 'unnamed';
-		}
-
-		$extension = sly_Util_String::getFileExtension($filename);
-
-		// check for disallowed extensions
-
-		if ($applyBlacklist) {
-			$blocked    = $container->getConfig()->get('blocked_extensions');
-			$filename   = self::sanitiseFileExtension($filename, $blocked); // foo.php -> foo.php.txt
-			$extension .= '.txt';
-		}
-
-		// increment filename suffix until an unique one was found
-
-		if ($doSubindexing || $origFilename !== $filename) {
-			$filename = self::iterateFilename($filename, $fs, $extension); // foo.png -> foo_4.png  /  foo.php.txt -> foo_4.php.txt
-		}
-
-		return $filename;
-	}
-
-	/**
 	 * @param  string $filename
 	 * @param  string $realName  optional; in case $filename is encoded and has no proper extension
 	 * @return string
 	 */
 	public static function getMimetype($filename, $realName = null) {
-		$size = @getimagesize($filename);
-
-		// if it's an image, we know the type
-		if (isset($size['mime'])) {
-			$mimetype = $size['mime'];
-		}
-
-		// fallback to a generic type
-		else {
-			$mimetype = sly_Util_Mime::getType($realName === null ? $filename : $realName);
-		}
-
-		return $mimetype;
+		return sly_Util_File::getMimetype($filename, $realName);
 	}
 }
