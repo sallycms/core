@@ -22,6 +22,8 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id implements sly_Contai
 	protected $dispatcher;         ///< sly_Event_IDispatcher
 	protected $container;          ///< sly_Container
 	protected $mediaFs;            ///< Filesystem
+	protected $extBlacklist;       ///< array
+	protected $fsBaseUri;          ///< string
 
 	/**
 	 * Constructor
@@ -30,13 +32,17 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id implements sly_Contai
 	 * @param BabelCache_Interface  $cache
 	 * @param sly_Event_IDispatcher $dispatcher
 	 * @param Filesystem            $mediaFs
+	 * @param array                 $extBlacklist
+	 * @param string                $fsBaseUri
 	 */
-	public function __construct(sly_DB_Persistence $persistence, BabelCache_Interface $cache, sly_Event_IDispatcher $dispatcher, Filesystem $mediaFs) {
+	public function __construct(sly_DB_Persistence $persistence, BabelCache_Interface $cache, sly_Event_IDispatcher $dispatcher, Filesystem $mediaFs, array $extBlacklist, $fsBaseUri) {
 		parent::__construct($persistence);
 
-		$this->cache      = $cache;
-		$this->dispatcher = $dispatcher;
-		$this->mediaFs    = $mediaFs;
+		$this->cache        = $cache;
+		$this->dispatcher   = $dispatcher;
+		$this->mediaFs      = $mediaFs;
+		$this->extBlacklist = $extBlacklist;
+		$this->fsBaseUri    = rtrim($fsBaseUri, '/').'/';
 	}
 
 	public function setContainer(sly_Container $container = null) {
@@ -165,8 +171,47 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id implements sly_Contai
 	}
 
 	/**
+	 * Import a file to the media filesystem
+	 *
+	 * This will import the given $source into the media filesystem. $source must
+	 * be the full path to a file, either a local file ('/path/to/file.jpg') or
+	 * an URI pointing to a valid stream wrapper ('sly://dyn/myfile.jpg').
+	 *
+	 * Only the basename of $targetName is relevant (all files in the media
+	 * filesystem are on one level). The the target filename already exists,
+	 * the filename will be incremented by appending '_1', '_2', ... to it. The
+	 * final full URI to the imported file is returned.
+	 *
+	 * @param  string  $source          full path/URI to the source file outside the media fs
+	 * @param  string  $targetName      desired target name
+	 * @param  boolean $applyBlacklist  whether or not to to add '.txt' to blacklisted extensions
+	 * @return string                   final URI of the imported file
+	 */
+	public function importFile($source, $targetName, $applyBlacklist) {
+		if (!file_exists($source)) {
+			throw new sly_Exception(t('file_not_found', $source));
+		}
+
+		$targetName = basename($targetName);
+
+		if (mb_strlen($targetName) === 0) {
+			throw new sly_Exception('No target name for importing "'.$source.'" given.');
+		}
+
+		$targetName = sly_Util_Medium::createFilename($targetName, true, $applyBlacklist, $this->mediaFs);
+
+		// add file to media filesystem
+		$service = new sly_Filesystem_Service($this->mediaFs);
+		$service->importFile($source, $targetName);
+
+		return $this->baseUri.$targetName;
+	}
+
+	/**
+	 * Add a file to the media database
+	 *
 	 * @throws sly_Exception
-	 * @param  string         $filename      full path to the source file outside the mediapool
+	 * @param  string         $filename
 	 * @param  string         $title
 	 * @param  int            $categoryID
 	 * @param  string         $mimetype
@@ -193,46 +238,33 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id implements sly_Contai
 		}
 
 		$size     = @getimagesize($filename);
-		$mimetype = empty($mimetype) ? sly_Util_Medium::getMimetype($fullname, $filename) : $mimetype;
+		$mimetype = empty($mimetype) ? sly_Util_Medium::getMimetype($filename) : $mimetype;
 		$db       = $this->getContainer()->getPersistence();
-		$trx      = $db->beginTrx();
 
-		try {
-			// create file object
+		// create file object
+		$file = new sly_Model_Medium();
+		$file->setFiletype($mimetype);
+		$file->setTitle($title);
+		$file->setOriginalName($originalName === null ? $filename : basename($originalName));
+		$file->setFilename(basename($filename));
+		$file->setFilesize(filesize($fullname));
+		$file->setCategoryId($categoryID);
+		$file->setRevision(0);
+		$file->setReFileId(0);
+		$file->setAttributes('');
+		$file->setCreateColumns($user);
 
-			$file = new sly_Model_Medium();
-			$file->setFiletype($mimetype);
-			$file->setTitle($title);
-			$file->setOriginalName($originalName === null ? $filename : basename($originalName));
-			$file->setFilename(basename($filename));
-			$file->setFilesize(filesize($fullname));
-			$file->setCategoryId($categoryID);
-			$file->setRevision(0);
-			$file->setReFileId(0);
-			$file->setAttributes('');
-			$file->setCreateColumns($user);
-
-			if ($size) {
-				$file->setWidth($size[0]);
-				$file->setHeight($size[1]);
-			}
-			else {
-				$file->setWidth(0);
-				$file->setHeight(0);
-			}
-
-			// store the file in our database
-			$this->save($file);
-
-			// add file to media filesystem
-			$service = new sly_Filesystem_Service($this->mediaFs);
-			$service->importFile($filename, basename($filename));
-
-			$db->commitTrx($trx);
+		if ($size) {
+			$file->setWidth($size[0]);
+			$file->setHeight($size[1]);
 		}
-		catch (Exception $e) {
-			$db->rollBackTrx($trx, $e);
+		else {
+			$file->setWidth(0);
+			$file->setHeight(0);
 		}
+
+		// store the file in our database
+		$this->save($file);
 
 		$this->cache->flush('sly.medium.list');
 		$this->dispatcher->notify('SLY_MEDIA_ADDED', $file, compact('user'));

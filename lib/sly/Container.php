@@ -238,8 +238,10 @@ class sly_Container extends Pimple implements Countable {
 			$cache       = $container['sly-cache'];
 			$dispatcher  = $container['sly-dispatcher'];
 			$filesystem  = $container['sly-filesystem-media'];
+			$blocked     = $container['sly-config']->get('blocked_extensions');
+			$fsBaseUri   = 'sly://media/';
 
-			return new sly_Service_Medium($persistence, $cache, $dispatcher, $filesystem);
+			return new sly_Service_Medium($persistence, $cache, $dispatcher, $filesystem, $blocked, $fsBaseUri);
 		});
 
 		$this['sly-service-module'] = $this->share(function($container) {
