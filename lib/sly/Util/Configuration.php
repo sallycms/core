@@ -23,8 +23,8 @@ class sly_Util_Configuration {
 		if (file_exists($filename)) {
 			$data = sly_Util_YAML::load($filename);
 
-			if (!empty($ddata)) {
-				if ($asStatic) {
+			if (!empty($data)) {
+				if ($static) {
 					$config->setStatic('/', $data);
 				}
 				else {
