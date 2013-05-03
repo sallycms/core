@@ -31,11 +31,10 @@ class sly_Model_Article extends sly_Model_Base_Article {
 	}
 
 	/**
-	 * @param  sly_Service_Category $catService
 	 * @return sly_Model_Category
 	 */
-	public function getCategory(sly_Service_Category $catService = null) {
-		$catService = $catService ?: sly_Core::getContainer()->getCategoryService();
+	public function getCategory() {
+		$catService = sly_Core::getContainer()->getCategoryService();
 
 		return $catService->findByPK($this->getCategoryId(), $this->getClang());
 	}
@@ -53,10 +52,10 @@ class sly_Model_Article extends sly_Model_Base_Article {
 	 * @param  sly_Service_Template $tplService
 	 * @return boolean
 	 */
-	public function hasTemplate(sly_Service_Template $tplService = null) {
+	public function hasTemplate() {
 		if ($this->hasType()) {
 			$templateName    = $this->getTemplateName();
-			$tplService      = $tplService ?: sly_Core::getContainer()->getTemplateService();
+			$tplService      = sly_Core::getContainer()->getTemplateService();
 
 			return !empty($templateName) && $tplService->exists($templateName);
 		}
@@ -67,11 +66,10 @@ class sly_Model_Article extends sly_Model_Base_Article {
 	/**
 	 * returns the template name of the template associated with the articletype of this article
 	 *
-	 * @param  sly_Service_ArticleType $atService
-	 * @return string                              the template name
+	 * @return string  the template name
 	 */
-	public function getTemplateName(sly_Service_ArticleType $atService = null) {
-		$atService = $atService ?: sly_Core::getContainer()->getArticleTypeService();
+	public function getTemplateName() {
+		$atService = sly_Core::getContainer()->getArticleTypeService();
 
 		return $atService->getTemplate($this->type);
 	}
@@ -108,14 +106,14 @@ class sly_Model_Article extends sly_Model_Base_Article {
 		return $content;
 	}
 
-	public function getSlices($slot = null, sly_Service_ArticleSlice $service = null) {
-		$service = $service ?: sly_Core::getContainer()->getArticleSliceService();
+	public function getSlices($slot = null) {
+		$service = sly_Core::getContainer()->getArticleSliceService();
 
 		return $service->findByArticle($this, $slot);
 	}
 
-	public function countSlices($slot = null, sly_Service_ArticleSlice $service = null) {
-		return count($this->getSlices($slot, $service));
+	public function countSlices($slot = null) {
+		return count($this->getSlices($slot));
 	}
 
 	/**

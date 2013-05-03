@@ -122,13 +122,11 @@ class sly_Model_ArticleSlice extends sly_Model_Base_Id implements sly_Model_ISli
 	}
 
 	/**
-	 *
-	 * @param  sly_Service_Article $service
 	 * @return sly_Model_Article
 	 */
-	public function getArticle(sly_Service_Article $service = null) {
+	public function getArticle() {
 		if (empty($this->article)) {
-			$service       = $service ?: sly_Core::getContainer()->getArticleService();
+			$service       = sly_Core::getContainer()->getArticleService();
 			$this->article = $service->findByPK($this->getArticleId(), $this->getClang(), $this->getRevision());
 		}
 
@@ -136,13 +134,11 @@ class sly_Model_ArticleSlice extends sly_Model_Base_Id implements sly_Model_ISli
 	}
 
 	/**
-	 *
-	 * @param  sly_Service_Slice $service
 	 * @return sly_Model_Slice
 	 */
-	public function getSlice(sly_Service_Slice $service = null) {
+	public function getSlice() {
 		if (empty($this->slice)) {
-			$service     = $service ?: sly_Core::getContainer()->getSliceService();
+			$service     = sly_Core::getContainer()->getSliceService();
 			$this->slice = $service->findById($this->getSliceId());
 		}
 
@@ -150,23 +146,19 @@ class sly_Model_ArticleSlice extends sly_Model_Base_Id implements sly_Model_ISli
 	}
 
 	/**
-	 *
-	 * @param  sly_Service_ArticleSlice $service
 	 * @return sly_Model_ArticleSlice
 	 */
-	public function getPrevious(sly_Service_ArticleSlice $service = null) {
-		$service = $service ?: sly_Core::getContainer()->getArticleSliceService();
+	public function getPrevious() {
+		$service = sly_Core::getContainer()->getArticleSliceService();
 
 		return $service->getPrevious($this);
 	}
 
 	/**
-	 *
-	 * @param  sly_Service_ArticleSlice $service
 	 * @return sly_Model_ArticleSlice
 	 */
-	public function getNext(sly_Service_ArticleSlice $service = null) {
-		$service = $service ?: sly_Core::getContainer()->getArticleSliceService();
+	public function getNext() {
+		$service = sly_Core::getContainer()->getArticleSliceService();
 
 		return $service->getNext($this);
 	}
@@ -178,11 +170,10 @@ class sly_Model_ArticleSlice extends sly_Model_Base_Id implements sly_Model_ISli
 	/**
 	 * set the module on the associated slice and save the change immediately
 	 *
-	 * @param string            $module
-	 * @param sly_Service_Slice $service
+	 * @param string $module
 	 */
-	public function setModule($module, sly_Service_Slice $service = null) {
-		$service = $service ?: sly_Core::getContainer()->getSliceService();
+	public function setModule($module) {
+		$service = sly_Core::getContainer()->getSliceService();
 		$slice   = $this->getSlice();
 
 		$slice->setModule($module);
@@ -288,8 +279,8 @@ class sly_Model_ArticleSlice extends sly_Model_Base_Id implements sly_Model_ISli
 	 * @param  sly_Slice_Renderer $renderer
 	 * @return string
 	 */
-	public function getOutput(sly_Slice_Renderer $renderer = null) {
-		$renderer = $renderer ?: sly_Core::getContainer()->get('sly-slice-renderer');
+	public function getOutput() {
+		$renderer = sly_Core::getContainer()->get('sly-slice-renderer');
 
 		return $renderer->renderOutput($this);
 	}

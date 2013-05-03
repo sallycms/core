@@ -66,11 +66,10 @@ class sly_Model_Slice extends sly_Model_Base_Id implements sly_Model_ISlice {
 	/**
 	 * render (execute) this slice's module
 	 *
-	 * @param  sly_Slice_Renderer $renderer
 	 * @return string
 	 */
-	public function getOutput(sly_Slice_Renderer $renderer = null) {
-		$renderer = $renderer ?: sly_Core::getContainer()->get('sly-slice-renderer');
+	public function getOutput() {
+		$renderer = sly_Core::getContainer()->get('sly-slice-renderer');
 
 		return $renderer->renderOutput($this);
 	}
