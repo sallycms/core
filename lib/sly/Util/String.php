@@ -337,12 +337,13 @@ class sly_Util_String {
 	}
 
 	/**
+	 * @deprecated  since 0.9, use sly_Util_File::getExtension() instead
+	 *
 	 * @param  string $filename
 	 * @return string
 	 */
 	public static function getFileExtension($filename) {
-		$lastDotPos = mb_strrpos($filename, '.');
-		return $lastDotPos === false ? '' : mb_substr($filename, $lastDotPos + 1);
+		return sly_Util_File::getExtension($filename);
 	}
 
 	/**

@@ -315,8 +315,8 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id implements sly_Contai
 
 			$filename = $medium->getFilename();
 
-			if ($this->mediaFs->exists($filename)) {
-				$this->mediaFs->remove($filename);
+			if ($this->mediaFs->has($filename)) {
+				$this->mediaFs->delete($filename);
 			}
 		}
 		catch (Exception $e) {
