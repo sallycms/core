@@ -17,9 +17,11 @@ class sly_Authorisation_ArticleListProvider implements sly_Authorisation_ListPro
 	private function initcache() {
 		if (!isset(self::$cache)) {
 			self::$cache = array(self::ALL => t('all'));
-			$query = sly_DB_Persistence::getInstance();
-			$query->select('article', 'id, name', array('clang' => sly_Core::config()->get('default_clang_id')));
-			foreach ($query as $row) {
+
+			$persistence = sly_Core::getContainer()->getPersistence();
+			$persistence->select('article', 'id, name', array('clang' => sly_Core::config()->get('default_clang_id')));
+
+			foreach ($persistence->all() as $row) {
 				self::$cache[$row['id']] = $row['name'];
 			}
 		}
