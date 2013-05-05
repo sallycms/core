@@ -289,21 +289,15 @@ class sly_Container extends Pimple implements Countable {
 		// filesystems
 
 		$this['sly-filesystem-media'] = $this->share(function($container) {
-			// make sure the mediapool directory exists, as Gaufrette is not going to create it for us
-			$dir = SLY_DATAFOLDER.DIRECTORY_SEPARATOR.'mediapool';
-			$dir = sly_Util_Directory::create($dir);
-
-			$adapter = new Gaufrette\Adapter\Local($dir);
-			$fs      = new Gaufrette\Filesystem($adapter);
-
-			return $fs;
+			return $this->getLocalFilesystem(SLY_DATAFOLDER.DIRECTORY_SEPARATOR.'mediapool', false);
 		});
 
 		$this['sly-filesystem-dyn'] = $this->share(function($container) {
-			$adapter = new Gaufrette\Adapter\Local(SLY_DATAFOLDER.DIRECTORY_SEPARATOR.'dyn');
-			$fs      = new Gaufrette\Filesystem($adapter);
+			return $this->getLocalFilesystem(SLY_DATAFOLDER.DIRECTORY_SEPARATOR.'dyn', true);
+		});
 
-			return $fs;
+		$this['sly-filesystem-assets'] = $this->share(function($container) {
+			return $this->getLocalFilesystem(SLY_DATAFOLDER.DIRECTORY_SEPARATOR.'assets', false);
 		});
 
 		$this['sly-filesystem-map'] = $this->share(function($container) {
@@ -311,6 +305,7 @@ class sly_Container extends Pimple implements Countable {
 
 			$map->set('dyn', $container['sly-filesystem-dyn']);
 			$map->set('media', $container['sly-filesystem-media']);
+			$map->set('assets', $container['sly-filesystem-assets']);
 
 			return $map;
 		});
@@ -831,5 +826,20 @@ class sly_Container extends Pimple implements Countable {
 	 */
 	public function setConfigDir($dir) {
 		return $this->set('sly-config-dir', $dir);
+	}
+
+	protected function getLocalFilesystem($dir, $isPrivate) {
+		// make sure the mediapool directory exists, as Gaufrette is not going to create it for us
+		if ($isPrivate) {
+			$dir = sly_Util_Directory::createHttpProtected($dir, true);
+		}
+		else {
+			$dir = sly_Util_Directory::create($dir, null, true);
+		}
+
+		$adapter = new Gaufrette\Adapter\Local($dir);
+		$fs      = new Gaufrette\Filesystem($adapter);
+
+		return $fs;
 	}
 }
