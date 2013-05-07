@@ -456,7 +456,7 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 			$sql->rollBackTrx($trx, $e);
 		}
 
-		return $newID;
+		return $duplicate;
 	}
 
 	/**
