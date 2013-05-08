@@ -88,7 +88,7 @@ class sly_Util_Medium {
 		// file matches the old one.
 
 		if ($mediumToReplace) {
-			$newType = self::getMimetype($fileData['tmp_name'], $fileData['name']);
+			$newType = sly_Util_File::getMimetype($fileData['tmp_name'], $fileData['name']);
 			$oldType = $mediumToReplace->getFiletype();
 
 			if ($newType !== $oldType) {
@@ -107,16 +107,19 @@ class sly_Util_Medium {
 		// create filenames
 
 		$filename = $fileData['name'];
-		$dstFile  = $mediumToReplace ? $mediumToReplace->getFilename() : self::createFilename($filename);
+		$dstFile  = $mediumToReplace ? $mediumToReplace->getFilename() : sly_Util_File::createFilename($filename);
 		$file     = null;
 
 		// move uploaded file
+
 		try {
 			if (!$allowFakeUpload && !is_uploaded_file($fileData['tmp_name'])) {
 				throw new sly_Exception('This is not an uploaded file.', self::ERR_INVALID_FILEDATA);
 			}
+
 			sly_Core::getContainer()->getMediaFilesystem()->move($fileData['tmp_name'], $dstFile);
-		} catch (sly_Filesystem_Exception $e) {
+		}
+		catch (sly_Filesystem_Exception $e) {
 			throw new sly_Exception(t('error_moving_uploaded_file', basename($fileData['tmp_name'])).' '.$e->getMessage(), self::ERR_UPLOAD_FAILED);
 		}
 
