@@ -8,7 +8,8 @@
  * http://www.opensource.org/licenses/mit-license.php
  */
 
-use sly\Filesystem\Filesystem;
+use Gaufrette\Filesystem;
+use Gaufrette\Util\Path;
 
 /**
  * Service class for managing media (aka files)
@@ -198,7 +199,7 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id implements sly_Contai
 			throw new sly_Exception('No target name for importing "'.$source.'" given.');
 		}
 
-		$targetName = sly_Util_Medium::createFilename($targetName, true, $applyBlacklist, $this->mediaFs);
+		$targetName = sly_Util_File::createFilename($targetName, true, $applyBlacklist, $this->mediaFs);
 
 		// add file to media filesystem
 		$service = new sly_Filesystem_Service($this->mediaFs);
@@ -211,7 +212,7 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id implements sly_Contai
 	 * Add a file to the media database
 	 *
 	 * @throws sly_Exception
-	 * @param  string         $filename
+	 * @param  string         $filename      relative filename inside the media filesystem
 	 * @param  string         $title
 	 * @param  int            $categoryID
 	 * @param  string         $mimetype
@@ -224,7 +225,7 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id implements sly_Contai
 
 		// check file itself
 
-		if (!file_exists($filename)) { // $filename points to a plain ol' file somewhere in the filesystem
+		if (!$this->mediaFs->has($filename)) {
 			throw new sly_Exception(t('file_not_found', $filename));
 		}
 
@@ -237,17 +238,19 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id implements sly_Contai
 			$categoryID = 0;
 		}
 
-		$size     = @getimagesize($filename);
-		$mimetype = empty($mimetype) ? sly_Util_Medium::getMimetype($filename) : $mimetype;
+		$basename = basename($filename);
+		$fileURI  = $this->fsBaseUri.Path::normalize($filename);
+		$size     = @getimagesize($fileURI);
+		$mimetype = empty($mimetype) ? sly_Util_File::getMimetype($filename) : $mimetype;
 		$db       = $this->getContainer()->getPersistence();
 
 		// create file object
 		$file = new sly_Model_Medium();
 		$file->setFiletype($mimetype);
 		$file->setTitle($title);
-		$file->setOriginalName($originalName === null ? $filename : basename($originalName));
-		$file->setFilename(basename($filename));
-		$file->setFilesize(filesize($fullname));
+		$file->setOriginalName($originalName === null ? $basename : basename($originalName));
+		$file->setFilename($basename);
+		$file->setFilesize(filesize($fileURI));
 		$file->setCategoryId($categoryID);
 		$file->setRevision(0);
 		$file->setReFileId(0);

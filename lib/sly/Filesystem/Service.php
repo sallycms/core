@@ -98,6 +98,38 @@ class sly_Filesystem_Service {
 		$out->close();
 	}
 
+	public function uploadFile(array $fileData, $targetFile, $doSubindexing = true) {
+		if (!isset($fileData['tmp_name'])) {
+			throw new sly_Exception('The given array does not contain file upload information.');
+		}
+
+		switch ($fileData['error']) {
+			// use the same exception code, since most userland code will not care why the file was too large
+			case UPLOAD_ERR_FORM_SIZE:
+			case UPLOAD_ERR_INI_SIZE:   throw new sly_Exception('The uploaded file was too large.', UPLOAD_ERR_INI_SIZE);
+			case UPLOAD_ERR_PARTIAL:    throw new sly_Exception('The file was only partially uploaded.', UPLOAD_ERR_PARTIAL);
+			case UPLOAD_ERR_NO_FILE:    throw new sly_Exception('No file has been uploaded.', UPLOAD_ERR_NO_FILE);
+			case UPLOAD_ERR_NO_TMP_DIR: throw new sly_Exception('The uploaded file could not be temporarily stored.', UPLOAD_ERR_NO_TMP_DIR);
+			case UPLOAD_ERR_CANT_WRITE: throw new sly_Exception('The uploaded file could not be written.', UPLOAD_ERR_CANT_WRITE);
+			case UPLOAD_ERR_EXTENSION:  throw new sly_Exception('An unknown server-side error occured during the upload.', UPLOAD_ERR_EXTENSION);
+		}
+
+		if (!is_uploaded_file($fileData['tmp_name'])) {
+			throw new sly_Exception('This is not an uploaded file.', UPLOAD_ERR_NO_FILE);
+		}
+
+		$targetFile = sly_Util_File::createFilename($targetFile, $doSubindexing, false, $this->fs);
+
+		try {
+			$this->importFile($fileData['tmp_name'], $targetFile);
+		}
+		catch (sly_Filesystem_Exception $e) {
+			throw new sly_Exception(t('error_uploaded_file', basename($fileData['tmp_name'])).' '.$e->getMessage(), UPLOAD_ERR_EXTENSION);
+		}
+
+		return $targetFile;
+	}
+
 	/**
 	 * Mirrors part of the filesystem into another filesystem
 	 *
