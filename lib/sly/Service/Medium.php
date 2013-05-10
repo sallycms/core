@@ -172,6 +172,16 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id implements sly_Contai
 	}
 
 	/**
+	 * Check if a file exists in the media filesystem
+	 *
+	 * @param  string $filename  e.g. 'foo.jpg'
+	 * @return boolean
+	 */
+	public function fileExists($filename) {
+		return $this->mediaFs->has(basename($filename));
+	}
+
+	/**
 	 * Import a file to the media filesystem
 	 *
 	 * This will import the given $source into the media filesystem. $source must
@@ -225,7 +235,7 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id implements sly_Contai
 
 		// check file itself
 
-		if (!$this->mediaFs->has($filename)) {
+		if (!$this->fileExists($filename)) {
 			throw new sly_Exception(t('file_not_found', $filename));
 		}
 
@@ -240,9 +250,7 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id implements sly_Contai
 
 		$basename = basename($filename);
 		$fileURI  = $this->fsBaseUri.Path::normalize($filename);
-		$size     = @getimagesize($fileURI);
 		$mimetype = empty($mimetype) ? sly_Util_File::getMimetype($filename) : $mimetype;
-		$db       = $this->getContainer()->getPersistence();
 
 		// create file object
 		$file = new sly_Model_Medium();
@@ -257,14 +265,7 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id implements sly_Contai
 		$file->setAttributes('');
 		$file->setCreateColumns($user);
 
-		if ($size) {
-			$file->setWidth($size[0]);
-			$file->setHeight($size[1]);
-		}
-		else {
-			$file->setWidth(0);
-			$file->setHeight(0);
-		}
+		$this->setImageSize($file, $fileURI, $mimetype);
 
 		// store the file in our database
 		$this->save($file);
@@ -273,6 +274,34 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id implements sly_Contai
 		$this->dispatcher->notify('SLY_MEDIA_ADDED', $file, compact('user'));
 
 		return $file;
+	}
+
+	public function replace(sly_Model_Medium $medium, $newFile, sly_Model_User $user = null) {
+		// check file itself
+
+		if (!file_exists($newFile)) {
+			throw new sly_Exception(t('file_not_found', $newFile));
+		}
+
+		// check if the type of the new file matches the old one
+
+		$mimetype = sly_Util_File::getMimetype($newFile);
+
+		if ($mimetype !== $medium->getFiletype()) {
+			throw new sly_Exception(t('types_of_old_and_new_do_not_match'));
+		}
+
+		// replace the existing file
+
+		$service = new sly_Filesystem_Service($this->mediaFs);
+		$service->importFile($newFile, $medium->getFilename());
+
+		// update the medium
+
+		$medium->setFilesize(filesize($newFile));
+		$this->setImageSize($medium, $newFile, $mimetype);
+
+		$this->update($medium, $user);
 	}
 
 	/**
@@ -333,5 +362,20 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id implements sly_Contai
 		$this->dispatcher->notify('SLY_MEDIA_DELETED', $medium);
 
 		return true;
+	}
+
+	protected function setImageSize(sly_Model_Medium $medium, $filename, $mimetype) {
+		if (substr($mimetype, 0, 6) === 'image/') {
+			$size = @getimagesize($filename);
+
+			if ($size) {
+				$medium->setWidth($size[0]);
+				$medium->setHeight($size[1]);
+			}
+			else {
+				$medium->setWidth(0);
+				$medium->setHeight(0);
+			}
+		}
 	}
 }
