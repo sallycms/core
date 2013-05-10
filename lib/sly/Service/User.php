@@ -150,20 +150,16 @@ class sly_Service_User extends sly_Service_Model_Base_Id {
 	}
 
 	public function delete($where) {
-		$id   = (int) $where['id'];
-		$user = $this->findById($id);
+		$users = $this->find($where);
 
-		if (!$user) {
-			throw new sly_Exception(t('user_not_found', $id));
+		foreach($users as $user) {
+			// allow external code to stop the delete operation
+			$this->dispatcher->notify('SLY_PRE_USER_DELETE', $user);
+			$retval = parent::delete(array('id' => $user->getId()));
+			$this->dispatcher->notify('SLY_USER_DELETED', $user);
 		}
 
-		// allow external code to stop the delete operation
-		$this->dispatcher->notify('SLY_PRE_USER_DELETE', $user);
-
-		$retval = parent::delete($where);
-
 		$this->cache->flush('sly.user');
-		$this->dispatcher->notify('SLY_USER_DELETED', $id);
 
 		return $retval;
 	}
