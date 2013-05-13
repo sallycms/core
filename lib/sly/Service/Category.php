@@ -53,7 +53,7 @@ class sly_Service_Category extends sly_Service_ArticleManager {
 	 * @return sly_Model_Article
 	 */
 	protected function buildModel(array $params) {
-		return new sly_Model_Article(array(
+		return new sly_Model_Category(array(
 			        'id' => $params['id'],
 			     're_id' => $params['parent'],
 			      'name' => $params['name'],
