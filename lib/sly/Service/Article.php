@@ -94,7 +94,7 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 	 * @param  int $revision
 	 * @return sly_Model_Article
 	 */
-	public function findByPK($id, $clang, $revision = self::FIND_REVISION_ONLINE) {
+	public function findByPK($id, $clang, $revision = self::FIND_REVISION_LATEST) {
 		return parent::findByPK($id, $clang, $revision);
 	}
 
