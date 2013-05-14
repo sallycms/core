@@ -8,6 +8,7 @@
  * http://www.opensource.org/licenses/mit-license.php
  */
 
+$user         = sly_Util_User::getCurrentUser();
 $type         = sly_Util_Language::isMultilingual() ? 'multilingual' : 'monolingual';
 $formRowClass = array('sly-form-row', 'sly-num'.$rowNum, 'sly-form-'.$type);
 $element      = reset($elements); // in multilingual rows, there can only be one...
@@ -27,6 +28,10 @@ else {
 $equalValue = $origElement->getDisplayValue();
 
 foreach (sly_Util_Language::findAll(true) as $clangID) {
+	if (!sly_Util_Language::hasPermissionOnLanguage($user, $clangID)) {
+		continue;
+	}
+
 	if (!isset($values[$clangID])) {
 		$values[$clangID] = $equalValue;
 	}
