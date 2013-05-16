@@ -205,7 +205,44 @@ class sly_Container extends Pimple implements Countable {
 		});
 
 		$this['sly-service-asset'] = $this->share(function($container) {
-			return new sly_Service_Asset($container['sly-config'], $container['sly-dispatcher']);
+			$service      = new sly_Asset_Service($container['sly-dispatcher']);
+			$lessCompiler = $container['sly-service-asset-lessphp'];
+			$filePerm     = $container['sly-config']->get('fileperm');
+			$dirPerm      = $container['sly-config']->get('dirperm');
+
+			$service->addProcessListener(function($lessFile) use ($lessCompiler, $filePerm, $dirPerm) {
+				if (!sly_Util_String::endsWith($lessFile, '.less') || !file_exists(SLY_BASE.'/'.$lessFile)) {
+					return $lessFile;
+				}
+
+				$css     = $lessCompiler->process($lessFile);
+				$dir     = SLY_TEMPFOLDER.'/sally/less-cache';
+				$tmpFile = $dir.'/'.md5($lessFile).'.css';
+
+				sly_Util_Directory::create($dir, $dirPerm, true);
+
+				file_put_contents($tmpFile, $css);
+				chmod($tmpFile, $filePerm);
+
+				return $tmpFile;
+			});
+
+			return $service;
+		});
+
+		$this['sly-service-asset-lessphp'] = $this->share(function($container) {
+			$lessc    = new lessc();
+			$compiler = new sly_Asset_Compiler_Lessphp($lessc);
+			$config   = $container['sly-config'];
+
+			$lessc->setFormatter('compressed');
+			$lessc->registerFunction('asset', array($compiler, 'lessAssetFunction'));
+
+			foreach ($config->get('less_import_dirs') as $includeDir) {
+				$compiler->addImportDir(SLY_BASE.DIRECTORY_SEPARATOR.trim($includeDir, DIRECTORY_SEPARATOR));
+			}
+
+			return $compiler;
 		});
 
 		$this['sly-service-category'] = $this->share(function($container) {
