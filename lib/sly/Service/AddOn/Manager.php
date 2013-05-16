@@ -42,37 +42,6 @@ class sly_Service_AddOn_Manager {
 	}
 
 	/**
-	 * Copy assets from addon to it's public folder
-	 *
-	 * This method copies all files in 'assets' to the public directory of the
-	 * given addon.
-	 *
-	 * @throws sly_Exception  in case the assets could not be copied
-	 * @param  string $addon  addon name
-	 * @return boolean        always true
-	 */
-	public function copyAssets($addon) {
-		$sourceDir = $this->pkgService->baseDirectory($addon).'assets';
-
-		if (!is_dir($sourceDir)) {
-			return true;
-		}
-
-		$source  = new Filesystem(new Local($sourceDir));
-		$service = new sly_Filesystem_Service($source);
-		$target  = $this->addOnService->publicFilesystem($addon);
-
-		try {
-			$service->mirrorTo('', $target, '');
-		}
-		catch (Exception $e) {
-			throw new sly_Exception(t('addon_assets_failed', $sourceDir));
-		}
-
-		return true;
-	}
-
-	/**
 	 * Adds a new addon to the global config
 	 *
 	 * @param string $addon  addon name
@@ -249,9 +218,6 @@ class sly_Service_AddOn_Manager {
 			$mysiam = $pservice->getKey($addon, 'allow_non_innodb', false);
 			$this->installDump($persistence, $installSQL, $mysiam, 'install');
 		}
-
-		// copy assets to data/dyn/public
-		$this->copyAssets($addon);
 
 		// load globals.yml
 		$this->loadConfig($addon, false, true);
