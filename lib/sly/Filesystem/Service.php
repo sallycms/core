@@ -84,7 +84,7 @@ class sly_Filesystem_Service {
 		return $this;
 	}
 
-	public function importFile($sourceFile, $targetFile) {
+	public function importFile($sourceFile, $targetFile, $removeSource) {
 		$in  = fopen($sourceFile, 'rb');
 		$out = $this->fs->createStream($targetFile);
 
@@ -96,6 +96,10 @@ class sly_Filesystem_Service {
 
 		fclose($in);
 		$out->close();
+
+		if ($removeSource) {
+			unlink($sourceFile);
+		}
 	}
 
 	public function uploadFile(array $fileData, $targetFile, $doSubindexing = true) {
