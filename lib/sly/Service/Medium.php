@@ -276,7 +276,7 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id implements sly_Contai
 		return $file;
 	}
 
-	public function replace(sly_Model_Medium $medium, $newFile, sly_Model_User $user = null) {
+	public function replace(sly_Model_Medium $medium, $newFile, $deleteSource, sly_Model_User $user = null) {
 		// check file itself
 
 		if (!file_exists($newFile)) {
@@ -294,7 +294,7 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id implements sly_Contai
 		// replace the existing file
 
 		$service = new sly_Filesystem_Service($this->mediaFs);
-		$service->importFile($newFile, $medium->getFilename());
+		$service->importFile($newFile, $medium->getFilename(), $deleteSource);
 
 		// update the medium
 
