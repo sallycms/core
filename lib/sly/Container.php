@@ -296,16 +296,11 @@ class sly_Container extends Pimple implements Countable {
 			return $this->getLocalFilesystem(SLY_DATAFOLDER.DIRECTORY_SEPARATOR.'dyn', true);
 		});
 
-		$this['sly-filesystem-assets'] = $this->share(function($container) {
-			return $this->getLocalFilesystem(SLY_DATAFOLDER.DIRECTORY_SEPARATOR.'assets', false);
-		});
-
 		$this['sly-filesystem-map'] = $this->share(function($container) {
 			$map = new Gaufrette\FilesystemMap();
 
 			$map->set('dyn', $container['sly-filesystem-dyn']);
 			$map->set('media', $container['sly-filesystem-media']);
-			$map->set('assets', $container['sly-filesystem-assets']);
 
 			return $map;
 		});
