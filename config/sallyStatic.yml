@@ -20,14 +20,6 @@ blocked_extensions:
   - .jsp
   - .htaccess
 fallback_caching_strategy: BabelCache_Filesystem_Plain
-assets_cache_control: max-age=29030401
-assets_directories:
-  - assets/
-  - data/mediapool/
-  - data/dyn/public/
-  - sally/backend/assets/
-  - sally/setup/assets/
-  - sally/noir/assets/
 authorisation:
   article:
     title: 'translate:article'
