@@ -28,8 +28,7 @@ class sly_Service_AddOn {
 	 * @param sly_Configuration    $config
 	 * @param BabelCache_Interface $cache
 	 * @param sly_Service_Package  $pkgService
-	 * @param Filesystem           $publicFs
-	 * @param Filesystem           $internalFs
+	 * @param Filesystem           $dynFs
 	 */
 	public function __construct(sly_Configuration $config, BabelCache_Interface $cache, sly_Service_Package $pkgService, Filesystem $dynFs) {
 		$this->config     = $config;
@@ -234,23 +233,13 @@ class sly_Service_AddOn {
 	}
 
 	/**
-	 * Get the filesystem containing an addOn's public files
+	 * Get the filesystem for dynamic files of an addOn
 	 *
 	 * @param  string $addon  addon name
 	 * @return Filesystem
 	 */
-	public function publicFilesystem($addon) {
-		return new Prefixed($this->publicFs, $addon);
-	}
-
-	/**
-	 * Get the filesystem containing an addOn's internal files
-	 *
-	 * @param  string $addon  addon name
-	 * @return Filesystem
-	 */
-	public function internalFilesystem($addon) {
-		return new Prefixed($this->internalFs, $addon);
+	public function getDynFilesystem($addon) {
+		return new Prefixed($this->dynFs, $addon);
 	}
 
 	/**
