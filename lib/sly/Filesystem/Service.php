@@ -102,7 +102,7 @@ class sly_Filesystem_Service {
 		}
 	}
 
-	public function uploadFile(array $fileData, $targetFile, $doSubindexing = true) {
+	public function uploadFile(array $fileData, $targetFile = null, $doSubindexing = true, $applyBlacklist = false) {
 		if (!isset($fileData['tmp_name'])) {
 			throw new sly_Exception('The given array does not contain file upload information.');
 		}
@@ -122,10 +122,14 @@ class sly_Filesystem_Service {
 			throw new sly_Exception('This is not an uploaded file.', UPLOAD_ERR_NO_FILE);
 		}
 
-		$targetFile = sly_Util_File::createFilename($targetFile, $doSubindexing, false, $this->fs);
+		if ($targetFile === null) {
+			$targetFile = basename($fileData['name']);
+		}
+
+		$targetFile = sly_Util_File::createFilename($targetFile, $doSubindexing, $applyBlacklist, $this->fs);
 
 		try {
-			$this->importFile($fileData['tmp_name'], $targetFile);
+			$this->importFile($fileData['tmp_name'], $targetFile, false);
 		}
 		catch (sly_Filesystem_Exception $e) {
 			throw new sly_Exception(t('error_uploaded_file', basename($fileData['tmp_name'])).' '.$e->getMessage(), UPLOAD_ERR_EXTENSION);
