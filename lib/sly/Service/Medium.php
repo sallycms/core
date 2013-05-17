@@ -215,7 +215,25 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id implements sly_Contai
 		$service = new sly_Filesystem_Service($this->mediaFs);
 		$service->importFile($source, $targetName);
 
-		return $this->baseUri.$targetName;
+		return $this->fsBaseUri.$targetName;
+	}
+
+	/**
+	 * Upload a file to the media filesystem
+	 *
+	 * This is similar to importing, but takes the file information from PHP's
+	 * $_FILES array and is suitable for file uploads.
+	 *
+	 * @param  array   $fileData        everything from $_FILES['yourfile']
+	 * @param  boolean $doSubindexing
+	 * @param  boolean $applyBlacklist  whether or not to to add '.txt' to blacklisted extensions
+	 * @return string                   final URI of the imported file
+	 */
+	public function uploadFile(array $fileData, $doSubindexing, $applyBlacklist) {
+		$service  = new sly_Filesystem_Service($this->mediaFs);
+		$filename = $service->uploadFile($fileData, null, $doSubindexing, $applyBlacklist);
+
+		return $this->fsBaseUri.$filename;
 	}
 
 	/**
@@ -365,16 +383,15 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id implements sly_Contai
 	}
 
 	protected function setImageSize(sly_Model_Medium $medium, $filename, $mimetype) {
+		$medium->setWidth(0);
+		$medium->setHeight(0);
+
 		if (substr($mimetype, 0, 6) === 'image/') {
 			$size = @getimagesize($filename);
 
 			if ($size) {
 				$medium->setWidth($size[0]);
 				$medium->setHeight($size[1]);
-			}
-			else {
-				$medium->setWidth(0);
-				$medium->setHeight(0);
 			}
 		}
 	}
