@@ -16,7 +16,9 @@ $reqUri = preg_replace('/[?&].*$/', '', $reqUri);
 $parts  = explode('/', trim($reqUri, '/'));
 
 switch (reset($parts)) {
-	case 'backend': return array('backend',  'backend');
-	case 'setup':   return array('setup',    'setup');
-	default:        return array('frontend', '/');
+	case 'backend':   return array('backend',  'backend');
+	case 'setup':     return array('setup',    'setup');
+	case 'assets':    // fallthrough
+	case 'mediapool': return array('assets',   '/');
+	default:          return array('frontend', '/');
 }
