@@ -44,7 +44,7 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 
 	protected function buildModel(array $params) {
 		if ($params['parent'] && $this->getCategoryService()->exists($params['parent'])) {
-			$cat     = $this->getCategoryService()->findByPK($params['parent'], $params['clang']);
+			$cat     = $this->getCategoryService()->findByPK($params['parent'], $params['clang'], self::FIND_REVISION_LATEST);
 			$catname = $cat->getName();
 		}
 		else {
@@ -94,7 +94,7 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 	 * @param  int $revision
 	 * @return sly_Model_Article
 	 */
-	public function findByPK($id, $clang, $revision = self::FIND_REVISION_ONLINE) {
+	public function findByPK($id, $clang, $revision = self::FIND_REVISION_LATEST) {
 		return parent::findByPK($id, $clang, $revision);
 	}
 
@@ -171,7 +171,7 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 			throw new sly_Exception(t('article_not_found', $articleID));
 		}
 
-		$article    = $this->findByPK($articleID, $defaultLang);
+		$article    = $this->findByPK($articleID, $defaultLang, self::FIND_REVISION_LATEST);
 		$dispatcher = $this->getDispatcher();
 		$sql        = $this->getPersistence();
 		$tableName  = $this->getTableName();
@@ -184,7 +184,7 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 			$dispatcher->notify('SLY_PRE_ART_DELETE', $article);
 
 			foreach ($this->getLanguages() as $clang) {
-				$pos = $this->findByPK($articleID, $clang)->getPosition();
+				$pos = $this->findByPK($articleID, $clang, self::FIND_REVISION_LATEST)->getPosition();
 
 				// delete article and its content
 				$sql->update($tableName, array('deleted' => 1, 'pos' => 0), array('id' => $articleID, 'clang' => $clang));
@@ -285,6 +285,10 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 
 			$this->copyContent($article, $touched, $user);
 
+			$this->getDispatcher()->notify('SLY_ART_TOUCHED', $touched, array(
+				'source'  => $article,
+			));
+
 			$sql->commitTrx($trx);
 		}
 		catch (Exception $e) {
@@ -308,7 +312,7 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 		$target      = (int) $target;
 		$defaultLang = $this->getDefaultLanguageId();
 		$user        = $this->getActor($user, __METHOD__);
-		$article     = $this->findByPK($id, $defaultLang);
+		$article     = $this->findByPK($id, $defaultLang, self::FIND_REVISION_LATEST);
 
 		// check article
 
@@ -343,8 +347,8 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 
 		try {
 			foreach ($this->getLanguages() as $clang) {
-				$article = $this->findByPK($id, $clang);
-				$cat     = $target === 0 ? null : $catService->findByPK($target, $clang);
+				$article = $this->findByPK($id, $clang, self::FIND_REVISION_LATEST);
+				$cat     = $target === 0 ? null : $catService->findByPK($target, $clang, self::FIND_REVISION_LATEST);
 				$moved   = clone $article;
 
 				$moved->setParentId($target);
@@ -416,8 +420,8 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 
 		try {
 			foreach ($this->getLanguages() as $clang) {
-				$source    = $this->findByPK($id, $clang);
-				$cat       = $target === 0 ? null : $catService->findByPK($target, $clang);
+				$source    = $this->findByPK($id, $clang, self::FIND_REVISION_LATEST);
+				$cat       = $target === 0 ? null : $catService->findByPK($target, $clang, self::FIND_REVISION_LATEST);
 				$duplicate = clone $source;
 
 				$duplicate->setId($newID);
@@ -452,7 +456,7 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 			$sql->rollBackTrx($trx, $e);
 		}
 
-		return $newID;
+		return $duplicate;
 	}
 
 	/**
@@ -469,7 +473,7 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 		$articleID   = (int) $articleID;
 		$defaultLang = $this->getDefaultLanguageId();
 		$user        = $this->getActor($user, __METHOD__);
-		$article     = $this->findByPK($articleID, $defaultLang);
+		$article     = $this->findByPK($articleID, $defaultLang, self::FIND_REVISION_LATEST);
 
 		// check article
 
@@ -498,8 +502,8 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 			$table = $this->getTableName();
 
 			foreach ($this->getLanguages() as $clang) {
-				$newStarter = $this->findByPK($articleID, $clang)->toHash();
-				$oldStarter = $this->findByPK($oldCat, $clang)->toHash();
+				$newStarter = $this->findByPK($articleID, $clang, self::FIND_REVISION_LATEST)->toHash();
+				$oldStarter = $this->findByPK($oldCat, $clang, self::FIND_REVISION_LATEST)->toHash();
 
 				foreach ($params as $param) {
 					$t = $newStarter[$param];

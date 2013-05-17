@@ -17,14 +17,14 @@ class sly_Util_Configuration {
 	 *
 	 * @param sly_Configuration $config    a configuration instance
 	 * @param string            $filename  filename to load
-	 * @param boolean           $asStatic  do not add the data to the dynamic store
+	 * @param boolean           $static  do not add the data to the dynamic store
 	 */
 	public static function loadYamlFile(sly_Configuration $config, $filename, $static) {
 		if (file_exists($filename)) {
 			$data = sly_Util_YAML::load($filename);
 
-			if (!empty($ddata)) {
-				if ($asStatic) {
+			if (!empty($data)) {
+				if ($static) {
 					$config->setStatic('/', $data);
 				}
 				else {

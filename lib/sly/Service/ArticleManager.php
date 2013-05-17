@@ -52,7 +52,7 @@ abstract class sly_Service_ArticleManager extends sly_Service_ArticleBase {
 		$user        = $this->getActor($user, 'add');
 
 		// get the parent
-		$parentArticle = $this->getArticleService()->findByPK($parentID, $defaultLang);
+		$parentArticle = $this->getArticleService()->findByPK($parentID, $defaultLang, self::FIND_REVISION_LATEST);
 
 		///////////////////////////////////////////////////////////////
 		// check if parent exists
@@ -126,7 +126,7 @@ abstract class sly_Service_ArticleManager extends sly_Service_ArticleBase {
 
 				// notify system
 
-				$dispatcher->notify($event, $newID, array(
+				$dispatcher->notify($event, $obj, array(
 					're_id'    => $parentID,
 					'clang'    => $clangID,
 					'name'     => $name,
