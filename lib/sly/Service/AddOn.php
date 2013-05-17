@@ -239,7 +239,7 @@ class sly_Service_AddOn {
 	 * @return Filesystem
 	 */
 	public function getDynFilesystem($addon) {
-		return new Prefixed($this->dynFs, $addon);
+		return new sly_Filesystem_Prefixed($this->dynFs, $addon);
 	}
 
 	/**
