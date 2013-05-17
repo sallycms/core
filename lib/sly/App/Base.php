@@ -79,7 +79,6 @@ abstract class sly_App_Base implements sly_App_Interface {
 		if (sly_Core::isDeveloperMode() || ($user && $user->isAdmin())) {
 			$container->getTemplateService()->refresh();
 			$container->getModuleService()->refresh();
-			$container->getAssetService()->validateCache();
 		}
 	}
 

@@ -155,8 +155,7 @@ class sly_Container extends Pimple implements Countable {
 			$adnService = $container['sly-service-package-addon'];
 			$vndService = $container['sly-service-package-vendor'];
 			$dynFs      = $container['sly-filesystem-dyn'];
-			$assetFs    = $container['sly-filesystem-assets'];
-			$service    = new sly_Service_AddOn($config, $cache, $adnService, $dynFs, $assetFs);
+			$service    = new sly_Service_AddOn($config, $cache, $adnService, $dynFs);
 
 			$service->setVendorPackageService($vndService);
 
