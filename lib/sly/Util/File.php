@@ -80,7 +80,9 @@ class sly_Util_File {
 
 		if ($fs->has($filename)) {
 			$extension = $extension === null ? self::getExtension($filename) : $extension;
-			$basename  = substr($filename, 0, -(strlen($extension)+1));
+			$extension = ltrim($extension, '.');
+			$extension = $extension === '' ? '' : '.'.$extension;
+			$basename  = $extension === '' ? $filename : substr($filename, 0, -(strlen($extension)+1));
 
 			// this loop is empty on purpose
 			for ($cnt = 1; $fs->has($basename.'_'.$cnt.$extension); ++$cnt);
@@ -111,9 +113,13 @@ class sly_Util_File {
 		// check for disallowed extensions
 
 		if ($applyBlacklist) {
-			$blocked    = $container->getConfig()->get('blocked_extensions');
-			$filename   = self::sanitiseFileExtension($filename, $blocked); // foo.php -> foo.php.txt
-			$extension .= '.txt';
+			$blocked     = $container->getConfig()->get('blocked_extensions');
+			$unsanitised = $filename;
+			$filename    = self::sanitiseFileExtension($filename, $blocked); // foo.php -> foo.php.txt
+
+			if ($unsanitised !== $filename) {
+				$extension = $extension === '' ? 'txt' : "$extension.txt";
+			}
 		}
 
 		// increment filename suffix until an unique one was found
