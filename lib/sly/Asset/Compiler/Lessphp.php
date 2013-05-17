@@ -46,7 +46,7 @@ class sly_Asset_Compiler_Lessphp {
 	 */
 	public function addImportDir($directory, $prepend = false) {
 		if (!is_dir($directory)) {
-			throw new sly_Exception('Import directory "'.directory.'" does not exist.');
+			throw new sly_Exception('Import directory "'.$directory.'" does not exist.');
 		}
 
 		$dirs = (array) $this->lessc->importDir;
@@ -85,10 +85,10 @@ class sly_Asset_Compiler_Lessphp {
 		$origImportDirs = (array) $lessc->importDir;
 
 		// always add the file's dir as the first import dir
-		$this->addImportDir(dirname($filename), true);
+		$this->addImportDir(dirname($lessFile), true);
 
 		// do the heavy work
-		$result = $compiler->compile(file_get_contents($lessFile));
+		$result = $lessc->compile(file_get_contents($lessFile));
 
 		// restore import dirs
 		$lessc->setImportDir($origImportDirs);
