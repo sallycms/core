@@ -188,12 +188,7 @@ class sly_Container extends Pimple implements Countable {
 		});
 
 		$this['sly-service-articleslice'] = $this->share(function($container) {
-			$persistence = $container['sly-persistence'];
-			$dispatcher  = $container['sly-dispatcher'];
-			$slices      = $container['sly-service-slice'];
-			$templates   = $container['sly-service-template'];
-
-			return new sly_Service_ArticleSlice($persistence, $dispatcher, $slices, $templates);
+			return new sly_Service_ArticleSlice();
 		});
 
 		$this['sly-service-articletype'] = $this->share(function($container) {

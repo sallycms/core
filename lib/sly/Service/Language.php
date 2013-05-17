@@ -137,7 +137,7 @@ class sly_Service_Language extends sly_Service_Model_Base_Id {
 		$this->cache->set('sly.language', 'all', $langs);
 
 		// notify listeners
-		$this->dispatcher->notify('CLANG_ADDED', $newLanguage, array('id' => $newLanguage->getId(), 'language' => $newLanguage));
+		$this->dispatcher->notify('SLY_CLANG_ADDED', $newLanguage, array('id' => $newLanguage->getId(), 'language' => $newLanguage));
 
 		return $newLanguage;
 	}
@@ -176,7 +176,7 @@ class sly_Service_Language extends sly_Service_Model_Base_Id {
 				$db->delete('article_slice', $params);
 				$db->delete('article', $params);
 
-				$this->dispatcher->notify('CLANG_DELETED', $language, array(
+				$this->dispatcher->notify('SLY_CLANG_DELETED', $language, array(
 					'id'   => $language->getId(),
 					'name' => $language->getName()
 				));

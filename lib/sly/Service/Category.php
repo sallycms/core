@@ -29,7 +29,7 @@ class sly_Service_Category extends sly_Service_ArticleManager {
 	 * @return mixed                the condition either as an array or as a string
 	 */
 	protected function getSiblingQuery($categoryID, $clang = null, $asArray = false) {
-		$where = array('re_id' => (int) $categoryID, 'startpage' => 1);
+		$where = array('re_id' => (int) $categoryID, 'startpage' => 1, 'revision' => 0);
 
 		if ($clang !== null) {
 			$where['clang'] = (int) $clang;
@@ -53,7 +53,7 @@ class sly_Service_Category extends sly_Service_ArticleManager {
 	 * @return sly_Model_Article
 	 */
 	protected function buildModel(array $params) {
-		return new sly_Model_Article(array(
+		return new sly_Model_Category(array(
 			        'id' => $params['id'],
 			     're_id' => $params['parent'],
 			      'name' => $params['name'],
@@ -84,7 +84,7 @@ class sly_Service_Category extends sly_Service_ArticleManager {
 	 * @param  int $revision
 	 * @return sly_Model_Category
 	 */
-	public function findByPK($id, $clang, $revision = self::FIND_REVISION_ONLINE) {
+	public function findByPK($id, $clang, $revision = 0) {
 		return parent::findByPK($id, $clang, $revision);
 	}
 

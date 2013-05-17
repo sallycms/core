@@ -16,27 +16,7 @@
  */
 class sly_Service_ArticleSlice implements sly_ContainerAwareInterface {
 	protected $tablename = 'article_slice'; ///< string
-	protected $persistence;
-	protected $sliceService;                ///< sly_Service_Slice
-	protected $templateService;             ///< sly_Service_Template
 	protected $container;                   ///< sly_Container
-	protected $dispatcher;                  ///< sly_Event_IDispatcher
-
-	/**
-	 * Constructor
-	 *
-	 * @param sly_DB_Persistence    $persistence
-	 * @param sly_Event_IDispatcher $dispatcher
-	 * @param sly_Service_Slice     $sliceService
-	 * @param sly_Service_Template  $templateService
-	 * @param sly_Service_Article   $container
-	 */
-	public function __construct(sly_DB_Persistence $persistence, sly_Event_IDispatcher $dispatcher, sly_Service_Slice $sliceService, sly_Service_Template $templateService) {
-		$this->persistence     = $persistence;
-		$this->sliceService    = $sliceService;
-		$this->templateService = $templateService;
-		$this->dispatcher      = $dispatcher;
-	}
 
 	public function setContainer(sly_Container $container = null) {
 		$this->container = $container;
@@ -46,11 +26,22 @@ class sly_Service_ArticleSlice implements sly_ContainerAwareInterface {
 	 * @return sly_Service_Article
 	 */
 	protected function getArticleService() {
-		if (!$this->container) {
-			throw new LogicException('Container must be set before article slices can be handled.');
-		}
-
 		return $this->container->getArticleService();
+	}
+
+	/**
+	 * @return sly_Service_Slice
+	 */
+	protected function getSliceService() {
+		return $this->container->getSliceService();
+	}
+
+	/**
+	 *
+	 * @return sly_Event_IDispatcher
+	 */
+	protected function getDispatcher() {
+		return $this->container->getDispatcher();
 	}
 
 	/**
@@ -58,7 +49,7 @@ class sly_Service_ArticleSlice implements sly_ContainerAwareInterface {
 	 * @return sly_DB_PDO_Persistence
 	 */
 	protected function getPersistence() {
-		return $this->persistence;
+		return $this->container->getPersistence();
 	}
 
 	/**
@@ -169,10 +160,10 @@ class sly_Service_ArticleSlice implements sly_ContainerAwareInterface {
 		}
 
 		$self         = $this;
-		$dispatcher   = $this->dispatcher;
+		$dispatcher   = $this->getDispatcher();
 		$sql          = $this->getPersistence();
 		$prefix       = $sql->getPrefix();
-		$sliceService = $this->sliceService;
+		$sliceService = $this->getSliceService();
 		$tableName    = $this->tablename;
 
 		$sql->transactional(function() use ($self, $sql, $dispatcher, $where, $pos, $slot, $prefix, $sliceService, $tableName) {
@@ -215,9 +206,9 @@ class sly_Service_ArticleSlice implements sly_ContainerAwareInterface {
 	public function edit(sly_Model_Article $article, $slot, $pos, array $values, sly_Model_User $user = null) {
 		$sql          = $this->getPersistence();
 		$self         = $this;
-		$dispatcher   = $this->dispatcher;
+		$dispatcher   = $this->getDispatcher();
 		$artService   = $this->getArticleService();
-		$sliceService = $this->sliceService;
+		$sliceService = $this->getSliceService();
 
 		return $sql->transactional(function() use ($sql, $self, $article, $slot, $pos, $values, $user, $artService, $dispatcher, $sliceService) {
 			$article      = $artService->touch($article);
@@ -263,11 +254,12 @@ class sly_Service_ArticleSlice implements sly_ContainerAwareInterface {
 			throw new sly_Exception(t('article_has_no_template'));
 		}
 
-		$artService = $this->getArticleService();
-		$article    = $artService->touch($article, $user);
-		$template   = $article->getTemplateName();
+		$artService  = $this->getArticleService();
+		$tmplService = $this->container->getTemplateService();
+		$article     = $artService->touch($article, $user);
+		$template    = $article->getTemplateName();
 
-		if (!$this->templateService->hasSlot($template, $slot)) {
+		if (!$tmplService->hasSlot($template, $slot)) {
 			throw new sly_Exception(t('article_has_no_such_slot', $slot));
 		}
 
@@ -279,8 +271,8 @@ class sly_Service_ArticleSlice implements sly_ContainerAwareInterface {
 		// prepare database transaction
 
 		$sql          = $this->getPersistence();
-		$dispatcher   = $this->dispatcher;
-		$sliceService = $this->sliceService;
+		$dispatcher   = $this->getDispatcher();
+		$sliceService = $this->getSliceService();
 
 		$trx = $sql->beginTrx();
 
@@ -331,7 +323,7 @@ class sly_Service_ArticleSlice implements sly_ContainerAwareInterface {
 		$sql        = $this->getPersistence();
 		$artService = $this->getArticleService();
 		$user       = $this->getActor($user, __METHOD__);
-		$dispatcher = $this->dispatcher;
+		$dispatcher = $this->getDispatcher();
 
 		$trx = $sql->beginTrx();
 
