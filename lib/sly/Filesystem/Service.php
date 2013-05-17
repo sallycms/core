@@ -63,7 +63,7 @@ class sly_Filesystem_Service {
 	 * @param  boolean $recursive
 	 * @return sly_Filesystem_Service
 	 */
-	public function removeFiles($prefix, $recursive) {
+	public function deleteFiles($prefix, $recursive) {
 		$filenames = $this->fs->listKeys($prefix);
 		$prefix    = $prefix === '' ? '' : Path::normalize($prefix);
 
