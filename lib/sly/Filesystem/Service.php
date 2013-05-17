@@ -102,7 +102,7 @@ class sly_Filesystem_Service {
 		}
 	}
 
-	public function uploadFile(array $fileData, $targetFile = null, $doSubindexing = true, $applyBlacklist = false) {
+	public function checkUpload(array $fileData) {
 		if (!isset($fileData['tmp_name'])) {
 			throw new sly_Exception('The given array does not contain file upload information.');
 		}
@@ -121,6 +121,10 @@ class sly_Filesystem_Service {
 		if (!is_uploaded_file($fileData['tmp_name'])) {
 			throw new sly_Exception('This is not an uploaded file.', UPLOAD_ERR_NO_FILE);
 		}
+	}
+
+	public function uploadFile(array $fileData, $targetFile = null, $doSubindexing = true, $applyBlacklist = false) {
+		$this->checkUpload($fileData);
 
 		if ($targetFile === null) {
 			$targetFile = basename($fileData['name']);

@@ -294,7 +294,7 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id implements sly_Contai
 		return $file;
 	}
 
-	public function replace(sly_Model_Medium $medium, $newFile, $deleteSource, sly_Model_User $user = null) {
+	public function replace(sly_Model_Medium $medium, $newFile, $deleteSource) {
 		// check file itself
 
 		if (!file_exists($newFile)) {
@@ -318,8 +318,31 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id implements sly_Contai
 
 		$medium->setFilesize(filesize($newFile));
 		$this->setImageSize($medium, $newFile, $mimetype);
+	}
 
-		$this->update($medium, $user);
+	public function replaceByUpload(sly_Model_Medium $medium, array $fileData) {
+		$service = new sly_Filesystem_Service($this->mediaFs);
+		$service->checkUpload($fileData);
+
+		// check if the type of the new file matches the old one
+
+		$mimetype = sly_Util_File::getMimetype($fileData['name']);
+
+		if ($mimetype !== $medium->getFiletype()) {
+			throw new sly_Exception(t('types_of_old_and_new_do_not_match'));
+		}
+
+		// replace the existing file
+
+		$filename = $medium->getFilename();
+		$fileURI  = $this->fsBaseUri.$filename;
+
+		$service->uploadFile($fileData, $filename, false, false);
+
+		// update the medium
+
+		$medium->setFilesize(filesize($fileURI));
+		$this->setImageSize($medium, $fileURI, $mimetype);
 	}
 
 	/**
