@@ -67,7 +67,7 @@ class sly_Filesystem_Service {
 		$filenames = $this->fs->listKeys($prefix);
 		$prefix    = $prefix === '' ? '' : Path::normalize($prefix);
 
-		foreach ($filenames as $filename) {
+		foreach ($filenames['keys'] as $filename) {
 			if ($recursive) {
 				$this->fs->delete($filename);
 			}

@@ -68,43 +68,24 @@ class sly_Service_AddOn_Manager {
 	}
 
 	/**
-	 * Removes all public files
+	 * Removes all dyn files
 	 *
 	 * @param string $addon  addon name
 	 */
-	public function deletePublicFiles($addon) {
-		$this->deleteFiles('public', $this->addOnService->publicFilesystem($addon), $addon);
-	}
+	public function deleteDynFiles($addon) {
+		$fs = $this->addOnService->getDynFilesystem($addon);
 
-	/**
-	 * Removes all internal files
-	 *
-	 * @param string $addon  addon name
-	 */
-	public function deleteInternalFiles($addon) {
-		$this->deleteFiles('internal', $this->addOnService->internalFilesystem($addon), $addon);
-	}
-
-	/**
-	 * Removes all files in a directory
-	 *
-	 * @throws sly_Exception      in case the assets could not be copied
-	 * @param  string     $type
-	 * @param  Filesystem $fs
-	 * @param  string     $addon  addon name
-	 */
-	protected function deleteFiles($type, Filesystem $fs, $addon) {
-		$this->fireEvent('PRE', 'DELETE_'.strtoupper($type), $addon, array('filesystem' => $fs));
+		$this->fireEvent('PRE', 'DELETE_DYN_FILES', $addon, array('filesystem' => $fs));
 
 		try {
-			$service = new Service($fs);
-			$service->removeAllFiles();
+			$service = new sly_Filesystem_Service($fs);
+			$service->deleteAllFiles();
 		}
 		catch (Exception $e) {
-			throw new sly_Exception(t('addon_cleanup_failed', $type));
+			throw new sly_Exception(t('addon_cleanup_failed'));
 		}
 
-		$this->fireEvent('POST', 'DELETE_'.strtoupper($type), $addon, array('filesystem' => $fs));
+		$this->fireEvent('POST', 'DELETE_DYN_FILES', $addon, array('filesystem' => $fs));
 	}
 
 	/**
@@ -290,8 +271,7 @@ class sly_Service_AddOn_Manager {
 		$aservice->setProperty($addon, 'install', false);
 
 		// delete files
-		$this->deletePublicFiles($addon);
-		$this->deleteInternalFiles($addon);
+		$this->deleteDynFiles($addon);
 
 		// remove version data
 		sly_Util_Versions::remove($pservice->getVersion($addon));
@@ -609,8 +589,7 @@ class sly_Service_AddOn_Manager {
 		foreach ($registered as $addon) {
 			if (!in_array($addon, $packages)) {
 				$this->remove($addon);
-				$this->deletePublicFiles($addon);
-				$this->deleteInternalFiles($addon);
+				$this->deleteDynFiles($addon);
 
 				$this->clearCache();
 			}
