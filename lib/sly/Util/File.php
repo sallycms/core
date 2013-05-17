@@ -141,6 +141,17 @@ class sly_Util_File {
 
 	/**
 	 * @param  string $filename
+	 * @return string
+	 */
+	public static function stripExtension($filename) {
+		$ext = self::getExtension($filename);
+		if ($ext === '') return $filename;
+
+		return substr($filename, 0, -(mb_strlen($ext)+1));
+	}
+
+	/**
+	 * @param  string $filename
 	 * @param  string $realName  optional; in case $filename is encoded and has no proper extension
 	 * @return string
 	 */
