@@ -201,11 +201,11 @@ class sly_Container extends Pimple implements Countable {
 		$this['sly-service-asset'] = $this->share(function($container) {
 			$service      = new sly_Asset_Service($container['sly-dispatcher']);
 			$lessCompiler = $container['sly-service-asset-lessphp'];
-			$filePerm     = $container['sly-config']->get('fileperm');
-			$dirPerm      = $container['sly-config']->get('dirperm');
+			$filePerm     = $container['sly-config']->get('fileperm') ?: 0644;
+			$dirPerm      = $container['sly-config']->get('dirperm') ?: 0777;
 
 			$service->addProcessListener(function($lessFile) use ($lessCompiler, $filePerm, $dirPerm) {
-				if (!sly_Util_String::endsWith($lessFile, '.less') || !file_exists(SLY_BASE.'/'.$lessFile)) {
+				if (!sly_Util_String::endsWith($lessFile, '.less') || !file_exists($lessFile)) {
 					return $lessFile;
 				}
 
