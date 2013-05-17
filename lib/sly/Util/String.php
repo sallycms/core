@@ -100,14 +100,20 @@ class sly_Util_String {
 		if ($timestamp === null) $timestamp = time();
 		elseif (!self::isInteger($timestamp)) $timestamp = strtotime($timestamp);
 
-		$str = strftime($format, $timestamp);
-
 		// Windows systems do not support UTF-8 locales, so we try to fix this
 		// by manually converting the string. This should only happen on dev
 		// machines, so don't worry about performance.
 
+		// in case $format contains UTF-8 symbols, we need to temporarily turn them into ISO chars
 		if (PHP_OS === 'WINNT' && function_exists('iconv')) {
-			$str = iconv('ISO-8859-1', 'UTF-8', $str);
+			$format = iconv('UTF-8', 'ISO-8859-1', $format);
+		}
+
+		$str = strftime($format, $timestamp);
+
+		// now we can transform all ISO chars into nice UTF-8 symbols
+		if (PHP_OS === 'WINNT' && function_exists('iconv')) {
+			$str = iconv('ISO-8859-1', 'UTF-8//IGNORE', $str);
 		}
 
 		return $str;
