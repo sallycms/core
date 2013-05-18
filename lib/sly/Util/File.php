@@ -82,7 +82,7 @@ class sly_Util_File {
 			$extension = $extension === null ? self::getExtension($filename) : $extension;
 			$extension = ltrim($extension, '.');
 			$extension = $extension === '' ? '' : '.'.$extension;
-			$basename  = $extension === '' ? $filename : substr($filename, 0, -(strlen($extension)+1));
+			$basename  = $extension === '' ? $filename : substr($filename, 0, -strlen($extension));
 
 			// this loop is empty on purpose
 			for ($cnt = 1; $fs->has($basename.'_'.$cnt.$extension); ++$cnt);
