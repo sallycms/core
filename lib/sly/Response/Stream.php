@@ -22,7 +22,7 @@ class sly_Response_Stream extends sly_Response {
 		parent::__construct(null, $status, $headers);
 
 		if (is_resource($file)) {
-			if (get_resource_type ($file) == 'stream') {
+			if (get_resource_type($file) === 'stream') {
 				$this->file = $file;
 			}
 			else {
@@ -30,13 +30,11 @@ class sly_Response_Stream extends sly_Response {
 			}
 		}
 		else {
-			$path = realpath($file);
-
-			if ($path === false || !is_file($path)) {
+			if (!is_file($file)) {
 				throw new sly_Exception('Could not find file "'.$file.'".');
 			}
 
-			$this->file = $path;
+			$this->file = $file;
 		}
 	}
 
