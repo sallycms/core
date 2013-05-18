@@ -29,7 +29,6 @@
     "require": {
         "php": ">=5.3.3",
         "symfony/yaml": "~2.2",
-        "leafo/lessphp": "~0.3.8",
         "webvariants/babelcache": "~1.2.17",
         "sallycms/composer-installer": "~1.1",
         "knplabs/gaufrette": "0.2.*@dev",
