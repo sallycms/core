@@ -8,6 +8,8 @@
  * http://www.opensource.org/licenses/mit-license.php
  */
 
+use Gaufrette\Filesystem;
+
 /**
  * Business Model Klasse für Medien
  *
@@ -110,14 +112,9 @@ class sly_Model_Medium extends sly_Model_Base_Id {
 	 * @return boolean
 	 */
 	public function exists() {
-		return strlen($this->filename) > 0 && file_exists(SLY_MEDIAFOLDER.'/'.$this->filename);
-	}
+		$fs = sly_Core::getContainer()->getMediaFilesystem();
 
-	/**
-	 * @return string
-	 */
-	public function getFullPath() {
-		return SLY_MEDIAFOLDER.'/'.$this->filename;
+		return strlen($this->filename) > 0 && $fs->has($this->filename);
 	}
 
 	/**

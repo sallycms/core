@@ -11,15 +11,17 @@
 class sly_Dispatcher {
 	protected $container;
 	protected $prefix;
+	protected $pearStyle;
 
 	/**
 	 * Constructor
 	 *
 	 * @param sly_Container $container
 	 */
-	public function __construct(sly_Container $container, $containerClassPrefix) {
+	public function __construct(sly_Container $container, $containerClassPrefix, $pearStyle = true) {
 		$this->container = $container;
 		$this->prefix    = $containerClassPrefix;
+		$this->pearStyle = !!$pearStyle;
 	}
 
 	/**
@@ -190,7 +192,9 @@ class sly_Dispatcher {
 	 * return classname for &page=whatever
 	 *
 	 * It will return sly_Controller_System for &page=system
-	 * and sly_Controller_System_Languages for &page=system_languages
+	 * and sly_Controller_System_Languages for &page=system_languages. If PEAR
+	 * style is disabled, then \ will be used as a separator, leading to class
+	 * names like sly\Controller\System\Languages.
 	 *
 	 * @throws sly_Controller_Exception  if the controller name is invalid
 	 * @param  string $controller        controller name like 'structure'
@@ -208,7 +212,7 @@ class sly_Dispatcher {
 		$parts     = explode('_', strtolower($controller));
 
 		foreach ($parts as $part) {
-			$className .= '_'.ucfirst($part);
+			$className .= ($this->pearStyle ? '_' : '\\').ucfirst($part);
 		}
 
 		return $className;
