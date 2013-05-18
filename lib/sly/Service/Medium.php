@@ -405,6 +405,41 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id implements sly_Contai
 		return true;
 	}
 
+	public function getUsages(sly_Model_Medium $medium) {
+		$sql      = $this->getPersistence();
+		$filename = $medium->getFilename();
+		$prefix   = $sql->getPrefix();
+		$query    =
+			'SELECT s.article_id, s.clang, s.revision '.
+			'FROM '.$prefix.'slice sv, '.$prefix.'article_slice s, '.$prefix.'article a '.
+			'WHERE sv.id = s.slice_id AND a.id = s.article_id AND a.clang = s.clang AND serialized_values REGEXP ? '.
+			'GROUP BY s.article_id, s.clang';
+
+		$usages  = array();
+		$b       = '[^[:alnum:]_+-]'; // more or less like a \b in PCRE
+		$quoted  = str_replace(array('.', '+'), array('\.', '\+'), $filename);
+		$data    = array("(^|$b)$quoted(\$|$b)");
+		$service = $this->container->getArticleService();
+
+		$sql->query($query, $data);
+
+		foreach ($sql->all() as $row) {
+			$article  = $service->findById($row['article_id'], $row['clang'], $row['revision']);
+			$usages[] = array(
+				'object' => $article,
+				'type'   => 'sly-article'
+			);
+		}
+
+		$usages = $this->dispatcher->filter('SLY_MEDIA_USAGES', $usages, array(
+			'filename' => $filename, // deprecated since 0.9
+			'media'    => $medium,   // deprecated since 0.9
+			'medium'   => $medium
+		));
+
+		return $usages;
+	}
+
 	protected function setImageSize(sly_Model_Medium $medium, $filename, $mimetype) {
 		$medium->setWidth(0);
 		$medium->setHeight(0);
