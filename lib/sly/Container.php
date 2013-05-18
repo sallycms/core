@@ -154,7 +154,8 @@ class sly_Container extends Pimple implements Countable {
 			$config     = $container['sly-config'];
 			$adnService = $container['sly-service-package-addon'];
 			$vndService = $container['sly-service-package-vendor'];
-			$service    = new sly_Service_AddOn($config, $cache, $adnService, SLY_DYNFOLDER);
+			$dynFs      = $container['sly-filesystem-dyn'];
+			$service    = new sly_Service_AddOn($config, $cache, $adnService, $dynFs);
 
 			$service->setVendorPackageService($vndService);
 
@@ -198,13 +199,54 @@ class sly_Container extends Pimple implements Countable {
 		});
 
 		$this['sly-service-asset'] = $this->share(function($container) {
-			return new sly_Service_Asset($container['sly-config'], $container['sly-dispatcher']);
+			$service      = new sly_Asset_Service($container['sly-dispatcher']);
+			$lessCompiler = $container['sly-service-asset-lessphp'];
+			$filePerm     = $container['sly-config']->get('fileperm') ?: 0644;
+			$dirPerm      = $container['sly-config']->get('dirperm') ?: 0777;
+
+			$service->addProcessListener(function($lessFile) use ($lessCompiler, $filePerm, $dirPerm) {
+				if (!sly_Util_String::endsWith($lessFile, '.less') || !file_exists($lessFile)) {
+					return $lessFile;
+				}
+
+				$css     = $lessCompiler->process($lessFile);
+				$dir     = SLY_TEMPFOLDER.'/sally/less-cache';
+				$tmpFile = $dir.'/'.md5($lessFile).'.css';
+
+				sly_Util_Directory::create($dir, $dirPerm, true);
+
+				file_put_contents($tmpFile, $css);
+				chmod($tmpFile, $filePerm);
+
+				return $tmpFile;
+			});
+
+			return $service;
+		});
+
+		$this['sly-service-asset-lessphp'] = $this->share(function($container) {
+			$lessc    = new lessc();
+			$compiler = new sly_Asset_Compiler_Lessphp($lessc);
+			$config   = $container['sly-config'];
+
+			$lessc->setFormatter('compressed');
+			$lessc->registerFunction('asset', array($compiler, 'lessAssetFunction'));
+
+			foreach ($config->get('less_import_dirs') as $includeDir) {
+				$compiler->addImportDir(SLY_BASE.DIRECTORY_SEPARATOR.trim($includeDir, DIRECTORY_SEPARATOR));
+			}
+
+			return $compiler;
 		});
 
 		$this['sly-service-category'] = $this->share(function($container) {
 			$persistence = $container['sly-persistence'];
 
 			return new sly_Service_Category($persistence);
+		});
+
+		$this['sly-service-filesystem'] = $this->share(function($container) {
+			return new sly_Service_Filesystem(SLY_TEMPFOLDER);
 		});
 
 		$this['sly-service-language'] = $this->share(function($container) {
@@ -227,9 +269,11 @@ class sly_Container extends Pimple implements Countable {
 			$persistence = $container['sly-persistence'];
 			$cache       = $container['sly-cache'];
 			$dispatcher  = $container['sly-dispatcher'];
-			$categories  = $container['sly-service-mediacategory'];
+			$filesystem  = $container['sly-filesystem-media'];
+			$blocked     = $container['sly-config']->get('blocked_extensions');
+			$fsBaseUri   = 'sly://media/';
 
-			return new sly_Service_Medium($persistence, $cache, $dispatcher, $categories);
+			return new sly_Service_Medium($persistence, $cache, $dispatcher, $filesystem, $blocked, $fsBaseUri);
 		});
 
 		$this['sly-service-module'] = $this->share(function($container) {
@@ -271,6 +315,26 @@ class sly_Container extends Pimple implements Countable {
 			$fileperm = $container['sly-config']->get('fileperm', sly_Core::DEFAULT_FILEPERM);
 
 			return new sly_Service_File_YAML($fileperm);
+		});
+
+		//////////////////////////////////////////////////////////////////////////
+		// filesystems
+
+		$this['sly-filesystem-media'] = $this->share(function($container) {
+			return $this->getLocalFilesystem(SLY_DATAFOLDER.DIRECTORY_SEPARATOR.'mediapool', false);
+		});
+
+		$this['sly-filesystem-dyn'] = $this->share(function($container) {
+			return $this->getLocalFilesystem(SLY_DATAFOLDER.DIRECTORY_SEPARATOR.'dyn', true);
+		});
+
+		$this['sly-filesystem-map'] = $this->share(function($container) {
+			$map = new Gaufrette\FilesystemMap();
+
+			$map->set('dyn', $container['sly-filesystem-dyn']);
+			$map->set('media', $container['sly-filesystem-media']);
+
+			return $map;
 		});
 
 		//////////////////////////////////////////////////////////////////////////
@@ -696,6 +760,20 @@ class sly_Container extends Pimple implements Countable {
 		return $this[$id];
 	}
 
+	/**
+	 * @return Gaufrette\Filesystem
+	 */
+	public function getMediaFilesystem() {
+		return $this->get('sly-filesystem-media');
+	}
+
+	/**
+	 * @return Gaufrette\Filesystem
+	 */
+	public function getDynFilesystem() {
+		return $this->get('sly-filesystem-dyn');
+	}
+
 	/*          setters for objects that are commonly set          */
 
 	/**
@@ -775,5 +853,20 @@ class sly_Container extends Pimple implements Countable {
 	 */
 	public function setConfigDir($dir) {
 		return $this->set('sly-config-dir', $dir);
+	}
+
+	protected function getLocalFilesystem($dir, $isPrivate) {
+		// make sure the mediapool directory exists, as Gaufrette is not going to create it for us
+		if ($isPrivate) {
+			$dir = sly_Util_Directory::createHttpProtected($dir, true);
+		}
+		else {
+			$dir = sly_Util_Directory::create($dir, null, true);
+		}
+
+		$adapter = new Gaufrette\Adapter\Local($dir);
+		$fs      = new Gaufrette\Filesystem($adapter);
+
+		return $fs;
 	}
 }

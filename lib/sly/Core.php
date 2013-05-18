@@ -66,7 +66,6 @@ class sly_Core {
 		if (!defined('SLY_VENDORFOLDER'))  define('SLY_VENDORFOLDER',  SLY_SALLYFOLDER.DIRECTORY_SEPARATOR.'vendor');
 		if (!defined('SLY_DATAFOLDER'))    define('SLY_DATAFOLDER',    SLY_BASE.DIRECTORY_SEPARATOR.'data');
 		if (!defined('SLY_DYNFOLDER'))     define('SLY_DYNFOLDER',     SLY_DATAFOLDER.DIRECTORY_SEPARATOR.'dyn');
-		if (!defined('SLY_MEDIAFOLDER'))   define('SLY_MEDIAFOLDER',   SLY_DATAFOLDER.DIRECTORY_SEPARATOR.'mediapool');
 		if (!defined('SLY_CONFIGFOLDER'))  define('SLY_CONFIGFOLDER',  SLY_DATAFOLDER.DIRECTORY_SEPARATOR.'config');
 		if (!defined('SLY_TEMPFOLDER'))    define('SLY_TEMPFOLDER',    SLY_DATAFOLDER.DIRECTORY_SEPARATOR.'temp');
 		if (!defined('SLY_ADDONFOLDER'))   define('SLY_ADDONFOLDER',   SLY_SALLYFOLDER.DIRECTORY_SEPARATOR.'addons');
@@ -88,33 +87,41 @@ class sly_Core {
 		// to the filesystem on new installations)
 		try {
 			$config = $container->getConfig();
+			$yaml   = $container['sly-service-yaml'];
+
 			// load sally defaults
-			$config->setStatic('/', sly_Util_YAML::load(SLY_COREFOLDER.DIRECTORY_SEPARATOR.'config'.DIRECTORY_SEPARATOR.'sallyStatic.yml'));
+			$config->setStatic('/', $yaml->load(SLY_COREFOLDER.DIRECTORY_SEPARATOR.'config'.DIRECTORY_SEPARATOR.'sallyStatic.yml'));
+
 			// load develop config
 			$dir = new sly_Util_Directory(SLY_DEVELOPFOLDER.DIRECTORY_SEPARATOR.'config');
+
 			if ($dir->exists()) {
 				foreach ($dir->listPlain() as $file) {
 					if (fnmatch('*.yml', $file) || fnmatch('*.yaml', $file)) {
-						$config->setStatic('/', sly_Util_YAML::load($dir.DIRECTORY_SEPARATOR.$file));
+						$config->setStatic('/', $yaml->load($dir.DIRECTORY_SEPARATOR.$file));
 					}
 				}
 			}
 
+			// load local configuration
 			$configReader = $container['sly-config-reader'];
+			$localConfig  = $configReader->readLocal();
 
-			$localConfig = $configReader->readLocal();
 			if (!empty($localConfig)) {
 				$config->setStatic('/', $localConfig);
 			}
 
 			// Now that we know the local, i.e. database config, we can build the
-			// persistence and power up the config reader.
-			$persistence = $container['sly-persistence'];
-			$configReader->setPersistence($persistence);
+			// persistence and power up the config reader. Of course this may not
+			// happen when still in setup mode.
+			if ($config->get('setup', true) !== true) {
+				$persistence = $container['sly-persistence'];
+				$configReader->setPersistence($persistence);
 
-			$projectConfig = $configReader->readProject();
-			if (!empty($projectConfig)) {
-				$config->set('/', $projectConfig);
+				$projectConfig = $configReader->readProject();
+				if (!empty($projectConfig)) {
+					$config->set('/', $projectConfig);
+				}
 			}
 		}
 		catch (Exception $e) {
