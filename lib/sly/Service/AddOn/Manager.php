@@ -95,7 +95,7 @@ class sly_Service_AddOn_Manager {
 	 */
 	public function deleteTempFiles($addon) {
 		$dir = $this->addOnService->getTempDirectory($addon);
-		$fs  = new Local($dir);
+		$fs  = new Filesystem(new Local($dir));
 
 		$this->fireEvent('PRE', 'DELETE_TEMP_FILES', $addon, array('filesystem' => $fs));
 
