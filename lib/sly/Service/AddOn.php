@@ -243,6 +243,16 @@ class sly_Service_AddOn {
 	}
 
 	/**
+	 * Get the path to the temp directory for an addOn
+	 *
+	 * @param  string $addon  addon name
+	 * @return string
+	 */
+	public function getTempDirectory($addon) {
+		return sly_Util_Directory::create(SLY_TEMPFOLDER.'/'.$addon, null, true);
+	}
+
+	/**
 	 * Checks if an addOn exists
 	 *
 	 * @param  string $addon  addon name

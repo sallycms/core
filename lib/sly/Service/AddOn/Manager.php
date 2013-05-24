@@ -89,6 +89,28 @@ class sly_Service_AddOn_Manager {
 	}
 
 	/**
+	 * Removes all temporary files
+	 *
+	 * @param string $addon  addon name
+	 */
+	public function deleteTempFiles($addon) {
+		$dir = $this->addOnService->getTempDirectory($addon);
+		$fs  = new Local($dir);
+
+		$this->fireEvent('PRE', 'DELETE_TEMP_FILES', $addon, array('filesystem' => $fs));
+
+		try {
+			$service = new sly_Filesystem_Service($fs);
+			$service->deleteAllFiles();
+		}
+		catch (Exception $e) {
+			throw new sly_Exception(t('addon_cleanup_failed'));
+		}
+
+		$this->fireEvent('POST', 'DELETE_TEMP_FILES', $addon, array('filesystem' => $fs));
+	}
+
+	/**
 	 * Include file
 	 *
 	 * This prevents the included file from messing with the variables of the
@@ -272,6 +294,7 @@ class sly_Service_AddOn_Manager {
 
 		// delete files
 		$this->deleteDynFiles($addon);
+		$this->deleteTempFiles($addon);
 
 		// remove version data
 		sly_Util_Versions::remove($pservice->getVersion($addon));
@@ -590,6 +613,7 @@ class sly_Service_AddOn_Manager {
 			if (!in_array($addon, $packages)) {
 				$this->remove($addon);
 				$this->deleteDynFiles($addon);
+				$this->deleteTempFiles($addon);
 
 				$this->clearCache();
 			}
