@@ -82,7 +82,7 @@ class sly_Service_Language extends sly_Service_Model_Base_Id {
 		$result = parent::save($model);
 
 		// notify listeners
-		$this->dispatcher->notify('CLANG_UPDATED', $model);
+		$this->dispatcher->notify('SLY_CLANG_UPDATED', $model);
 
 		return $result;
 	}
