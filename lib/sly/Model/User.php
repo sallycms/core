@@ -160,7 +160,7 @@ class sly_Model_User extends sly_Model_Base_Id {
 	 * @param string $key
 	 * @param mixed $value
 	 */
-	public function setAttrubute($key, $value) {
+	public function setAttribute($key, $value) {
 		$this->attributes[(string) $key] = $value;
 	}
 
