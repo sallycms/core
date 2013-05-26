@@ -37,7 +37,7 @@ class sly_Util_Versions {
 	 * @return boolean              true if it matches, else false
 	 */
 	public static function isCompatible($constraints, $version = null) {
-		$version = $version === null ? sly_Core::getVersion('X.Y.Z') : $version;
+		$version = $version === null ? sly_Core::getVersion('R') : $version;
 		$parser  = new sly_Service_VersionParser();
 		$checks  = $parser->parseConstraints($constraints);
 		$version = $parser->normalize($version);
