@@ -195,7 +195,7 @@ class sly_Service_AddOn_Manager {
 
 		if (!empty($sallyVersion)) {
 			if (!$aservice->isCompatible($addon)) {
-				throw new sly_Exception(t('addon_incompatible', $addon, sly_Core::getVersion('X.Y.Z')));
+				throw new sly_Exception(t('addon_incompatible', $addon, sly_Core::getVersion('R')));
 			}
 		}
 		else {
