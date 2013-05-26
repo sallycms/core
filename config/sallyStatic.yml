@@ -1,7 +1,3 @@
-version:
-  major: 0
-  minor: 9
-  bugfix: 0
 filepern: 436
 dirperm: 511
 use_etag: never
