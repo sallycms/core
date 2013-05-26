@@ -16,7 +16,7 @@
 class sly_Model_Base_Article extends sly_Model_Base {
 	protected $id;          ///< int
 	protected $updateuser;  ///< string
-	protected $status;      ///< int
+	protected $online;      ///< boolean
 	protected $name;        ///< string
 	protected $catpos;      ///< int
 	protected $createdate;  ///< int
@@ -31,14 +31,15 @@ class sly_Model_Base_Article extends sly_Model_Base {
 	protected $path;        ///< string
 	protected $type;        ///< string
 	protected $revision;    ///< int
+	protected $deleted;     ///< int
 
-	protected $_pk = array('id' => 'int', 'clang' => 'int'); ///< array
+	protected $_pk = array('id' => 'int', 'clang' => 'int', 'revision' => 'int'); ///< array
 	protected $_attributes = array(
-		'updateuser' => 'string', 'status' => 'int', 'name' => 'string',
+		'updateuser' => 'string', 'name' => 'string',
 		'catpos' => 'int', 'createdate' => 'datetime', 're_id' => 'int', 'pos' => 'int',
 		'catname' => 'string', 'startpage' => 'int', 'updatedate' => 'datetime',
 		'createuser' => 'string', 'attributes' => 'string', 'path' => 'string',
-		'type' => 'string', 'revision' => 'int'
+		'type' => 'string', 'deleted' => 'int'
 	); ///< array
 
 	/**
@@ -53,13 +54,6 @@ class sly_Model_Base_Article extends sly_Model_Base {
 	 */
 	public function getUpdateUser() {
 		return $this->updateuser;
-	}
-
-	/**
-	 * @return int
-	 */
-	public function getStatus() {
-		return $this->status;
 	}
 
 	/**
@@ -175,13 +169,6 @@ class sly_Model_Base_Article extends sly_Model_Base {
 	}
 
 	/**
-	 * @param int $status
-	 */
-	public function setStatus($status) {
-		$this->status = (int) $status;
-	}
-
-	/**
 	 * @param string $name
 	 */
 	public function setName($name) {
@@ -269,7 +256,7 @@ class sly_Model_Base_Article extends sly_Model_Base {
 	 * @param string $type
 	 */
 	public function setType($type) {
-		$this->type = $type;
+		$this->type = (string) $type;
 	}
 
 	/**
@@ -280,10 +267,18 @@ class sly_Model_Base_Article extends sly_Model_Base {
 	}
 
 	/**
+	 *
+	 * @param boolean $online
+	 */
+	public function setOnline($online) {
+		$this->online = (boolean) $online;
+	}
+
+	/**
 	 * @return boolean
 	 */
 	public function isOnline() {
-		return $this->getStatus() == 1;
+		return $this->online;
 	}
 
 	/**
@@ -293,82 +288,31 @@ class sly_Model_Base_Article extends sly_Model_Base {
 		return!$this->isOnline();
 	}
 
+	public function isDeleted() {
+		return $this->deleted == 1;
+	}
+
 	/**
 	 * return the url
 	 *
-	 * @param  mixed   $params
-	 * @param  string  $divider
-	 * @param  boolean $disableCache
+	 * @param  mixed               $params
+	 * @param  string              $divider
+	 * @param  boolean             $disableCache
+	 * @param  sly_Service_Article $service
 	 * @return string
 	 */
-	public function getUrl($params = '', $divider = '&amp;', $disableCache = false) {
-		static $urlCache = array();
+	public function getUrl($params = '', $divider = '&amp;', $disableCache = false, sly_Service_Article $service = null) {
+		$service = $service ?: sly_Core::getContainer()->getArticleService();
 
-		$id    = $this->getId();
-		$clang = $this->getClang();
-
-		// cache the URLs for this request (unlikely to change)
-
-		$cacheKey = substr(md5($id.'_'.$clang.'_'.json_encode($params).'_'.$divider), 0, 10);
-
-		if (!$disableCache && isset($urlCache[$cacheKey])) {
-			return $urlCache[$cacheKey];
-		}
-
-		$dispatcher = sly_Core::dispatcher();
-		$redirect   = $dispatcher->filter('SLY_URL_REDIRECT', $this, array(
-			'params'       => $params,
-			'divider'      => $divider,
-			'disableCache' => $disableCache
-		));
-
-		// the listener must return an article (sly_Model_Article or int (ID)) or URL (string) to modify the returned URL
-		if ($redirect && $redirect !== $this) {
-			if (is_integer($redirect)) {
-				$id = $redirect;
-			}
-			elseif ($redirect instanceof sly_Model_Article) {
-				$id    = $redirect->getId();
-				$clang = $redirect->getClang();
-			}
-			else {
-				return $redirect;
-			}
-		}
-
-		// check for any fancy URL addOns
-
-		$paramString = sly_Util_HTTP::queryString($params, $divider);
-		$url         = $dispatcher->filter('URL_REWRITE', '', array(
-			'id'            => $id,
-			'clang'         => $clang,
-			'params'        => $paramString,
-			'divider'       => $divider,
-			'disable_cache' => $disableCache
-		));
-
-		// if no listener is available, generate plain index.php?article_id URLs
-
-		if (empty($url)) {
-			$clangString  = '';
-			$multilingual = sly_Util_Language::isMultilingual();
-
-			if ($multilingual && $clang != sly_Core::getDefaultClangId()) {
-				$clangString = $divider.'clang='.$clang;
-			}
-
-			$url = 'index.php?article_id='.$id.$clangString.$paramString;
-		}
-
-		$urlCache[$cacheKey] = $url;
-		return $url;
+		return $service->getUrl($this, $params, $divider, $disableCache);
 	}
 
 	/**
 	 * @return array
 	 */
 	public function getParentTree() {
-		$return = array();
+		$return     = array();
+		$catService = sly_Core::getContainer()->getCategoryService();
 
 		$explode = explode('|', $this->getPath());
 		$explode = array_filter($explode);
@@ -378,7 +322,7 @@ class sly_Model_Base_Article extends sly_Model_Base {
 		}
 
 		foreach ($explode as $var) {
-			$return[] = sly_Util_Category::findById($var, $this->getClang());
+			$return[] = $catService->findByPK($var, $this->getClang());
 		}
 
 		return $return;

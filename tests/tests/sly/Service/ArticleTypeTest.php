@@ -11,7 +11,7 @@
 class sly_Service_ArticleTypeTest extends PHPUnit_Framework_TestCase {
 	private function getService() {
 		static $service = null;
-		if (!$service) $service = sly_Service_Factory::getArticleTypeService();
+		if (!$service) $service = sly_Core::getContainer()->getArticleTypeService();
 		return $service;
 	}
 

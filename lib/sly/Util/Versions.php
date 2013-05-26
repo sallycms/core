@@ -26,7 +26,7 @@ class sly_Util_Versions {
 	 * @return string
 	 */
 	public static function set($path, $version) {
-		return sly_Core::config()->set('versions/'.$path, $version);
+		return sly_Core::config()->set('versions/'.$path, $version)->store();
 	}
 
 	/**
@@ -60,6 +60,6 @@ class sly_Util_Versions {
 	 * @param  string $component
 	 */
 	public static function remove($component) {
-		sly_Core::config()->remove('versions/'.$component);
+		sly_Core::config()->remove('versions/'.$component)->store();
 	}
 }

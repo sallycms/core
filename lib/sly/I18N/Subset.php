@@ -39,20 +39,6 @@ class sly_I18N_Subset implements sly_I18N_Base {
 	}
 
 	/**
-	 * Convenience method to create the subset
-	 *
-	 * This method will just call the constructor with the i18n object from
-	 * sly_Core.
-	 *
-	 * @param  string $prefix   the prefix to prepend
-	 * @return sly_I18N_Subset  the created instance (no singleton)
-	 */
-	public static function create($prefix) {
-		$i18n = sly_Core::getI18N();
-		return new self($i18n, $prefix);
-	}
-
-	/**
 	 * Translate a key
 	 *
 	 * @param  string $key  the key to translate

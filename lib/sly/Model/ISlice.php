@@ -15,7 +15,6 @@
  * @ingroup model
  */
 interface sly_Model_ISlice {
-
 	/**
 	 * get modulename
 	 *
@@ -33,8 +32,8 @@ interface sly_Model_ISlice {
 	/**
 	 * add a SliceValue
 	 *
-	 * @param  string $finder
-	 * @param  string $value
+	 * @param string $finder
+	 * @param string $value
 	 */
 	public function setValue($finder, $value = null);
 
@@ -50,7 +49,7 @@ interface sly_Model_ISlice {
 	/**
 	 * clear all current SliceValues and sert the new values
 	 *
-	 * @param  array an assoc array($finder => $value, ...)
+	 * @param  array $values  an assoc array($finder => $value, ...)
 	 * @return boolean
 	 */
 	public function setValues($values = array());
@@ -58,7 +57,7 @@ interface sly_Model_ISlice {
 	/**
 	 * return all SliceValues
 	 *
-	 * @return array an assoc array($finder => $value, ...)
+	 * @return array  an assoc array($finder => $value, ...)
 	 */
 	public function getValues();
 
@@ -68,5 +67,4 @@ interface sly_Model_ISlice {
 	 * @return string
 	 */
 	public function getOutput();
-
 }

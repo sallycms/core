@@ -55,7 +55,7 @@ abstract class sly_Model_Base {
 	 */
 	public function setUpdateColumns($user = null) {
 		if (!is_string($user) && !($user instanceof sly_Model_User)) {
-			$user = sly_Util_User::getCurrentUser();
+			$user = sly_Core::getContainer()->getUserService()->getCurrentUser();
 
 			if (!$user) {
 				throw new sly_Exception(t('operation_requires_user_context', __METHOD__));
@@ -75,7 +75,7 @@ abstract class sly_Model_Base {
 	 */
 	public function setCreateColumns($user = null) {
 		if (!is_string($user) && !($user instanceof sly_Model_User)) {
-			$user = sly_Util_User::getCurrentUser();
+			$user = sly_Core::getContainer()->getUserService()->getCurrentUser();
 
 			if (!$user) {
 				throw new sly_Exception(t('operation_requires_user_context', __METHOD__));

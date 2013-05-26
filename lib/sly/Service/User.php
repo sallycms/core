@@ -9,7 +9,7 @@
  */
 
 /**
- * DB Model Klasse für Benutzer
+ * Service class for managing users
  *
  * @author  christoph@webvariants.de
  * @ingroup service
@@ -36,6 +36,19 @@ class sly_Service_User extends sly_Service_Model_Base_Id {
 		$this->cache      = $cache;
 		$this->dispatcher = $dispatcher;
 		$this->config     = $config;
+	}
+
+	/**
+	 * @param  array  $where
+	 * @param  string $group
+	 * @param  string $order
+	 * @param  int    $offset
+	 * @param  int    $limit
+	 * @param  string $having
+	 * @return array
+	 */
+	public function find($where = null, $group = null, $order = null, $offset = null, $limit = null, $having = null) {
+		return parent::find($where, $group, $order, $offset, $limit, $having);
 	}
 
 	/**
@@ -81,9 +94,9 @@ class sly_Service_User extends sly_Service_Model_Base_Id {
 	 */
 	public function add($login, $password, $active, $attributes, sly_Model_User $creator = null) {
 		return $this->create(array(
-			'login'  => $login,
-			'psw'    => $password,
-			'status' => (boolean) $active,
+			'login'      => $login,
+			'psw'        => $password,
+			'status'     => (boolean) $active,
 			'attributes' => $attributes
 		), $creator);
 	}
@@ -97,12 +110,13 @@ class sly_Service_User extends sly_Service_Model_Base_Id {
 	 */
 	public function save(sly_Model_Base $user, sly_Model_User $manager = null) {
 		$manager = $this->getActor($manager, __METHOD__);
+		$adding  = $user->getId() == sly_Model_Base_Id::NEW_ID;
 
 		if (mb_strlen($user->getLogin()) === 0) {
 			throw new sly_Exception(t('no_username_given'));
 		}
 
-		if ($user->getId() === sly_Model_Base_Id::NEW_ID) {
+		if ($adding) {
 			if ($this->count(array('login' => $user->getLogin())) > 0) {
 				throw new sly_Exception(t('user_login_already_exists'));
 			}
@@ -113,11 +127,11 @@ class sly_Service_User extends sly_Service_Model_Base_Id {
 		$user->setUpdateColumns($manager);
 
 		// notify addOns
-		$event = ($user->getId() == sly_Model_Base_Id::NEW_ID) ? 'SLY_PRE_USER_ADD' : 'SLY_PRE_USER_UPDATE';
+		$event = $adding ? 'SLY_PRE_USER_ADD' : 'SLY_PRE_USER_UPDATE';
 		$this->dispatcher->notify($event, $user, compact('manager'));
 
 		// save the changes
-		$event = ($user->getId() === sly_Model_Base_Id::NEW_ID) ? 'SLY_USER_ADDED' : 'SLY_USER_UPDATED';
+		$event = $adding ? 'SLY_USER_ADDED' : 'SLY_USER_UPDATED';
 		$user  = parent::save($user);
 
 		$this->cache->flush('sly.user');
@@ -136,20 +150,16 @@ class sly_Service_User extends sly_Service_Model_Base_Id {
 	}
 
 	public function delete($where) {
-		$id   = (int) $where['id'];
-		$user = $this->findById($id);
+		$users = $this->find($where);
 
-		if (!$user) {
-			throw new sly_Exception(t('user_not_found', $id));
+		foreach($users as $user) {
+			// allow external code to stop the delete operation
+			$this->dispatcher->notify('SLY_PRE_USER_DELETE', $user);
+			$retval = parent::delete(array('id' => $user->getId()));
+			$this->dispatcher->notify('SLY_USER_DELETED', $user);
 		}
 
-		// allow external code to stop the delete operation
-		$this->dispatcher->notify('SLY_PRE_USER_DELETE', $user);
-
-		$retval = parent::delete($where);
-
 		$this->cache->flush('sly.user');
-		$this->dispatcher->notify('SLY_USER_DELETED', $id);
 
 		return $retval;
 	}
@@ -226,7 +236,7 @@ class sly_Service_User extends sly_Service_Model_Base_Id {
 		$loginOK = false;
 
 		if ($user instanceof sly_Model_User) {
-			$loginOK = $user->getLastTryDate() < time()-$this->config->get('RELOGINDELAY')
+			$loginOK = $user->getLastTryDate() < time()-$this->config->get('relogindelay')
 					&& $user->getStatus() == 1
 					&& $this->checkPassword($user, $password);
 

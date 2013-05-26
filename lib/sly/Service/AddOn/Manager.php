@@ -8,6 +8,9 @@
  * http://www.opensource.org/licenses/mit-license.php
  */
 
+use Gaufrette\Filesystem;
+use Gaufrette\Adapter\Local;
+
 /**
  * @author  christoph@webvariants.de
  * @ingroup service
@@ -27,7 +30,8 @@ class sly_Service_AddOn_Manager {
 	 * @param BabelCache_Interface  $cache
 	 * @param sly_Service_AddOn     $service
 	 */
-	public function __construct(sly_Configuration $config, sly_Event_IDispatcher $dispatcher, BabelCache_Interface $cache, sly_Service_AddOn $service) {
+	public function __construct(sly_Configuration $config, sly_Event_IDispatcher $dispatcher,
+		BabelCache_Interface $cache, sly_Service_AddOn $service) {
 		$this->config       = $config;
 		$this->dispatcher   = $dispatcher;
 		$this->cache        = $cache;
@@ -35,34 +39,6 @@ class sly_Service_AddOn_Manager {
 		$this->pkgService   = $service->getPackageService();
 		$this->loadInfo     = array();
 		$this->loaded       = array();
-	}
-
-	/**
-	 * Copy assets from addon to it's public folder
-	 *
-	 * This method copies all files in 'assets' to the public directory of the
-	 * given addon.
-	 *
-	 * @throws sly_Exception  in case the assets could not be copied
-	 * @param  string $addon  addon name
-	 * @return boolean        always true
-	 */
-	public function copyAssets($addon) {
-		$baseDir   = $this->pkgService->baseDirectory($addon);
-		$target    = $this->addOnService->publicDirectory($addon);
-		$assetsDir = $baseDir.'assets';
-
-		if (!is_dir($assetsDir)) {
-			return true;
-		}
-
-		$dir = new sly_Util_Directory($assetsDir);
-
-		if (!$dir->copyTo($target)) {
-			throw new sly_Exception(t('addon_assets_failed', $assetsDir));
-		}
-
-		return true;
 	}
 
 	/**
@@ -85,48 +61,53 @@ class sly_Service_AddOn_Manager {
 		$pservice = $this->pkgService;
 		$path     = $this->addOnService->getConfPath($addon);
 
-		$this->config->remove($path);
+		$this->config->remove($path)->store();
 		sly_Util_Versions::remove($pservice->getVersionKey($addon));
 
 		$this->clearCache();
 	}
 
 	/**
-	 * Removes all public files
+	 * Removes all dyn files
 	 *
 	 * @param string $addon  addon name
 	 */
-	public function deletePublicFiles($addon) {
-		$this->deleteFiles('public', $addon);
-	}
+	public function deleteDynFiles($addon) {
+		$fs = $this->addOnService->getDynFilesystem($addon);
 
-	/**
-	 * Removes all internal files
-	 *
-	 * @param string $addon  addon name
-	 */
-	public function deleteInternalFiles($addon) {
-		$this->deleteFiles('internal', $addon);
-	}
+		$this->fireEvent('PRE', 'DELETE_DYN_FILES', $addon, array('filesystem' => $fs));
 
-	/**
-	 * Removes all files in a directory
-	 *
-	 * @throws sly_Exception  in case the assets could not be copied
-	 * @param  string $type   'public' or 'internal'
-	 * @param  string $addon  addon name
-	 */
-	protected function deleteFiles($type, $addon) {
-		$this->fireEvent('PRE', 'DELETE_'.strtoupper($type), $addon);
-
-		$dir = $this->addOnService->dynDirectory($type, $addon);
-		$obj = new sly_Util_Directory($dir);
-
-		if (!$obj->delete(true)) {
-			throw new sly_Exception(t('addon_cleanup_failed', $dir));
+		try {
+			$service = new sly_Filesystem_Service($fs);
+			$service->deleteAllFiles();
+		}
+		catch (Exception $e) {
+			throw new sly_Exception(t('addon_cleanup_failed'));
 		}
 
-		$this->fireEvent('POST', 'DELETE_'.strtoupper($type), $addon);
+		$this->fireEvent('POST', 'DELETE_DYN_FILES', $addon, array('filesystem' => $fs));
+	}
+
+	/**
+	 * Removes all temporary files
+	 *
+	 * @param string $addon  addon name
+	 */
+	public function deleteTempFiles($addon) {
+		$dir = $this->addOnService->getTempDirectory($addon);
+		$fs  = new Filesystem(new Local($dir));
+
+		$this->fireEvent('PRE', 'DELETE_TEMP_FILES', $addon, array('filesystem' => $fs));
+
+		try {
+			$service = new sly_Filesystem_Service($fs);
+			$service->deleteAllFiles();
+		}
+		catch (Exception $e) {
+			throw new sly_Exception(t('addon_cleanup_failed'));
+		}
+
+		$this->fireEvent('POST', 'DELETE_TEMP_FILES', $addon, array('filesystem' => $fs));
 	}
 
 	/**
@@ -241,9 +222,6 @@ class sly_Service_AddOn_Manager {
 			$this->installDump($persistence, $installSQL, $mysiam, 'install');
 		}
 
-		// copy assets to data/dyn/public
-		$this->copyAssets($addon);
-
 		// load globals.yml
 		$this->loadConfig($addon, false, true);
 
@@ -258,9 +236,7 @@ class sly_Service_AddOn_Manager {
 		}
 
 		$defaultsFile = $baseDir.'defaults.yml';
-		if (file_exists($defaultsFile)) {
-			$this->config->loadProjectDefaults($defaultsFile, true, $aservice->getConfPath($addon));
-		}
+		sly_Util_Configuration::loadYamlFile($this->config, $defaultsFile, false);
 
 		// notify listeners
 		$this->fireEvent('POST', 'INSTALL', $addon);
@@ -317,8 +293,8 @@ class sly_Service_AddOn_Manager {
 		$aservice->setProperty($addon, 'install', false);
 
 		// delete files
-		$this->deletePublicFiles($addon);
-		$this->deleteInternalFiles($addon);
+		$this->deleteDynFiles($addon);
+		$this->deleteTempFiles($addon);
 
 		// remove version data
 		sly_Util_Versions::remove($pservice->getVersion($addon));
@@ -443,9 +419,7 @@ class sly_Service_AddOn_Manager {
 			$updateFile   = $baseDir.'update.php';
 			$defaultsFile = $baseDir.'defaults.yml';
 
-			if (file_exists($defaultsFile)) {
-				$this->config->loadProjectDefaults($defaultsFile, true, $aservice->getConfPath($addon));
-			}
+			sly_Util_Configuration::loadYamlFile($this->config, $defaultsFile, false);
 
 			if (file_exists($updateFile)) {
 				$this->req($updateFile, $container);
@@ -615,13 +589,11 @@ class sly_Service_AddOn_Manager {
 			$staticFile   = $baseFolder.'static.yml';
 
 			if ($activated) {
-				if (file_exists($staticFile)) {
-					$this->config->loadStatic($staticFile, $aservice->getConfPath($addon));
-				}
+				sly_Util_Configuration::loadYamlFile($this->config, $staticFile, true);
 			}
 
 			if (file_exists($globalsFile)) {
-				$this->config->loadStatic($globalsFile);
+				sly_Util_Configuration::loadYamlFile($this->config, $globalsFile, true);
 			}
 		}
 	}
@@ -640,8 +612,8 @@ class sly_Service_AddOn_Manager {
 		foreach ($registered as $addon) {
 			if (!in_array($addon, $packages)) {
 				$this->remove($addon);
-				$this->deletePublicFiles($addon);
-				$this->deleteInternalFiles($addon);
+				$this->deleteDynFiles($addon);
+				$this->deleteTempFiles($addon);
 
 				$this->clearCache();
 			}
@@ -661,11 +633,12 @@ class sly_Service_AddOn_Manager {
 	/**
 	 * Fire a notify event regarding addOn state changes
 	 *
-	 * @param string $time   'PRE' or 'POST'
-	 * @param string $type   'INSTALL', 'UNINSTALL', ...
-	 * @param string $addon  the addOn that we operate on
+	 * @param string $time    'PRE' or 'POST'
+	 * @param string $type    'INSTALL', 'UNINSTALL', ...
+	 * @param string $addon   the addOn that we operate on
+	 * @param array  $params  additional event parameters
 	 */
-	protected function fireEvent($time, $type, $addon) {
-		$this->dispatcher->notify('SLY_ADDON_'.$time.'_'.$type, $addon);
+	protected function fireEvent($time, $type, $addon, array $params = array()) {
+		$this->dispatcher->notify('SLY_ADDON_'.$time.'_'.$type, $addon, $params);
 	}
 }
