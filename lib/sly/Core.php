@@ -435,22 +435,37 @@ class sly_Core {
 	}
 
 	/**
-	 * @param  string $pattern  the pattern (X = major version, Y = minor version, Z = minor version)
+	 * Get the Sally core version
+	 *
+	 * This will return the version according to a format string ($pattern). This
+	 * can be anything, but some characters have a special meaning:
+	 *
+	 *  - X: major version (e.g. 0)
+	 *  - Y: minor version (e.g. 9)
+	 *  - Z: minor version (e.g. 2 or 9999999 if using a dev version)
+	 *  - B: build number (e.g. 0 or 9999999 if using a dev version)
+	 *  - S: stability (e.g. 'stable' or 'dev')
+	 *  - F: full version (e.g. '0.9.9999999.9999999-dev')
+	 *  - R: raw version (e.g. '0.9.x-dev')
+	 *
+	 * @param  string $pattern  the pattern
 	 * @return string           the pattern with replaced version numbers
 	 */
 	public static function getVersion($pattern = 'X.Y.Z') {
 		static $version = null;
 
 		if ($version === null) {
-			$config  = self::config();
-			$version = $config->get('version');
+			$parser  = new sly_Service_VersionParser();
+			$version = $parser->getPackageVersionDetails(SLY_COREFOLDER);
 		}
 
-		$pattern = str_replace('s', 'sly', $pattern);
-		$pattern = str_replace('S', 'sally', $pattern);
 		$pattern = str_replace('X', $version['major'], $pattern);
 		$pattern = str_replace('Y', $version['minor'], $pattern);
 		$pattern = str_replace('Z', $version['bugfix'], $pattern);
+		$pattern = str_replace('B', $version['build'], $pattern);
+		$pattern = str_replace('S', $version['stability'], $pattern);
+		$pattern = str_replace('F', $version['full'], $pattern);
+		$pattern = str_replace('R', $version['raw'], $pattern);
 
 		return $pattern;
 	}

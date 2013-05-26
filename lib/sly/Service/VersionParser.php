@@ -67,6 +67,40 @@ class sly_Service_VersionParser {
 		return $stability === 'rc' ? 'RC' : $stability;
 	}
 
+	public function getPackageVersionDetails($packageDir) {
+		$json     = $packageDir.'/composer.json';
+		$composer = new sly_Util_Composer($json);
+		$version  = $composer->getKey('version');
+
+		return $this->getVersionDetails($version);
+	}
+
+	public function getVersionDetails($version) {
+		$raw      = $version;
+		$version  = $this->normalize($version);
+		$result   = array(
+			'major'     => null,
+			'minor'     => null,
+			'bugfix'    => null,
+			'build'     => null,
+			'stability' => self::parseStability($version),
+			'full'      => $version,
+			'raw'       => $raw
+		);
+
+		if ('dev-' !== strtolower(substr($version, 0, 4))) {
+			$parts = explode('-', $version, 2);
+			$nums  = explode('.', $parts[0]);
+
+			$result['major']  = (int) $nums[0];
+			$result['minor']  = (int) $nums[1];
+			$result['bugfix'] = (int) $nums[2];
+			$result['build']  = (int) $nums[3];
+		}
+
+		return $result;
+	}
+
 	/**
 	 * Normalizes a version string to be able to perform comparisons on it
 	 *
