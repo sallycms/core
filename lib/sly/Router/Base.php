@@ -19,8 +19,16 @@ class sly_Router_Base implements sly_Router_Interface {
 		$this->routes = $routes;
 	}
 
+	public function appendRoute($route, array $values) {
+		$this->routes[] = array($route, $values);
+	}
+
+	public function prependRoute($route, array $values) {
+		array_unshift($this->routes, array($route, $values));
+	}
+
 	public function addRoute($route, array $values) {
-		$this->routes[$route] = $values;
+		$this->appendRoute($route, $values);
 	}
 
 	public function clearRoutes() {
@@ -34,7 +42,9 @@ class sly_Router_Base implements sly_Router_Interface {
 	public function match(sly_Request $request) {
 		$requestUri = $this->getRequestUri($request);
 
-		foreach ($this->routes as $route => $values) {
+		foreach ($this->routes as $routeData) {
+			list($route, $values) = $routeData;
+
 			$regex = $this->buildRegex($route);
 			$match = null;
 

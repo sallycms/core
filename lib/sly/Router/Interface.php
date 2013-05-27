@@ -10,7 +10,13 @@
 
 interface sly_Router_Interface {
 	public function match(sly_Request $request);
-	public function addRoute($route, array $values);
+	public function appendRoute($route, array $values);
+	public function prependRoute($route, array $values);
 	public function getRoutes();
 	public function clearRoutes();
+
+	/**
+	 * @deprecated  use the more explicit appendRoute() and prependRoute() methods
+	 */
+	public function addRoute($route, array $values);
 }
