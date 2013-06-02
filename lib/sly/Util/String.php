@@ -358,13 +358,19 @@ class sly_Util_String {
 	 * @return string          a human readable representation of $value
 	 */
 	public static function stringify($value, array $options = array()) {
+		$quote   = !empty($options['quote']);
+		$compact = !empty($options['compact']);
+		$depth   = isset($options['__depth']) ? $options['__depth'] : 2;
+
+		$options['__depth'] = $depth - 1;
+
 		switch (gettype($value)) {
 			case 'integer':
 				$value = $value;
 				break;
 
 			case 'string':
-				$value = empty($options['quote']) ? $value : '"'.$value.'"';
+				$value = $quote ? '"'.$value.'"' : $value;
 				break;
 
 			case 'boolean':
@@ -372,12 +378,53 @@ class sly_Util_String {
 				break;
 
 			case 'double':
-				$value = str_replace('.', ',', round($value, 8));
+				$value = str_replace('.', ',', round($value, $compact ? 8 : 3));
 				break;
 
 			case 'array':
+				if (empty($options['compact'])) {
+					$value = print_r($value, true);
+				}
+				else {
+					$assoc = sly_Util_Array::isAssoc($value);
+					$nice  = array();
+
+					foreach ($value as $key => $val) {
+						switch (gettype($val)) {
+							case 'array':
+								if ($depth > 0) {
+									$val = self::stringify($val, $options);
+								}
+								else {
+									$val = 'array('.count($val).')';
+								}
+
+							default:
+								$val = self::stringify($val, $options);
+						}
+
+						if ($assoc) {
+							$nice[] = '"'.$key.'":'.$val;
+						}
+						else {
+							$nice[] = $val;
+						}
+					}
+
+					$nice  = implode($assoc ? ', ' : ',', $nice);
+					$value = ($assoc ? '{' : '[').$nice.($assoc ? '}' : ']');
+				}
+
+				break;
+
 			case 'object':
-				$value = print_r($value, true);
+				if (empty($options['compact'])) {
+					$value = print_r($value, true);
+				}
+				else {
+					$value = 'object('.get_class($value).')';
+				}
+
 				break;
 
 			case 'NULL':
