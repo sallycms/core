@@ -171,6 +171,10 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id implements sly_Contai
 		return $objlist;
 	}
 
+	public function getFullPath(sly_Model_Medium $medium) {
+		return $this->fsBaseUri.$medium->getFilename();
+	}
+
 	/**
 	 * Check if a file exists in the media filesystem
 	 *
@@ -334,8 +338,7 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id implements sly_Contai
 
 		// replace the existing file
 
-		$filename = $medium->getFilename();
-		$fileURI  = $this->fsBaseUri.$filename;
+		$fileURI = $this->getFullPath($medium);
 
 		$service->uploadFile($fileData, $filename, false, false);
 

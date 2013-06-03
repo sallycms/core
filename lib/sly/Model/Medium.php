@@ -97,6 +97,13 @@ class sly_Model_Medium extends sly_Model_Base_Id {
 	/**
 	 * @return string
 	 */
+	public function getFullPath() {
+		return sly_Core::getContainer()->getMediumService()->getFullPath($this);
+	}
+
+	/**
+	 * @return string
+	 */
 	public function getFormattedSize() {
 		return sly_Util_String::formatFilesize($this->filesize);
 	}
@@ -121,6 +128,6 @@ class sly_Model_Medium extends sly_Model_Base_Id {
 	 * @return string
 	 */
 	public function getUrl($absolutePath = false) {
-		return ($absolutePath ? sly_Util_HTTP::getBaseUrl(true).'/' : '').'data/mediapool/'.$this->filename;
+		return ($absolutePath ? sly_Util_HTTP::getBaseUrl(true).'/' : '').'mediapool/'.$this->filename;
 	}
 }
