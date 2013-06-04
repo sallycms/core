@@ -10,13 +10,18 @@
 
 // determine application based on the request URI
 
-$base   = dirname($_SERVER['SCRIPT_NAME']);
-$reqUri = substr(isset($_SERVER['REDIRECT_URL']) ? $_SERVER['REDIRECT_URL'] : $_SERVER['REQUEST_URI'], strlen($base));
-$reqUri = preg_replace('/[?&].*$/', '', $reqUri);
-$parts  = explode('/', trim($reqUri, '/'));
+$router = function($server) {
+	$base   = dirname($server['SCRIPT_NAME']);
+	$reqUri = substr($server['REQUEST_URI'], strlen($base));
+	$reqUri = preg_replace('/[?&].*$/', '', $reqUri);
+	$reqUri = trim($reqUri, '/');
 
-switch (reset($parts)) {
-	case 'backend': return array('backend',  'backend');
-	case 'setup':   return array('setup',    'setup');
-	default:        return array('frontend', '/');
-}
+	// route other app URIs (be careful not to confuse the assets)
+	if (preg_match('#^backend(?!/assets/)(/|$)#', $reqUri)) return array('backend', 'backend');
+	if (preg_match('#^setup(?!/assets/)(/|$)#', $reqUri))   return array('setup',   'setup');
+
+	// everything else goes through the frontend
+	return array('frontend', '/');
+};
+
+return $router($_SERVER);
