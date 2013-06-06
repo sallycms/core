@@ -151,6 +151,24 @@ class sly_Util_File {
 	}
 
 	/**
+	 * @param  string $file
+	 * @return string
+	 */
+	public static function getRelativeFilename($file) {
+		if (strpos($file, "eval()'d code")) {
+			return "eval()'d code";
+		}
+
+		$base = SLY_BASE;
+
+		if (strlen($file) >= strlen($base) && substr($file, 0, strlen($base)) === $base) {
+			return '/'.str_replace("\\", '/', substr($file, strlen($base) + 1)); // +1 cuts off the (back)slash
+		}
+
+		return $file;
+	}
+
+	/**
 	 * @param  string $filename
 	 * @param  string $realName  optional; in case $filename is encoded and has no proper extension
 	 * @return string
