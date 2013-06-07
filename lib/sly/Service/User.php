@@ -8,6 +8,8 @@
  * http://www.opensource.org/licenses/mit-license.php
  */
 
+use wv\BabelCache\CacheInterface;
+
 /**
  * Service class for managing users
  *
@@ -18,7 +20,7 @@ class sly_Service_User extends sly_Service_Model_Base_Id {
 	private static $currentUser = false; ///< mixed
 
 	protected $tablename = 'user'; ///< string
-	protected $cache;              ///< BabelCache_Interface
+	protected $cache;              ///< CacheInterface
 	protected $dispatcher;         ///< sly_Event_IDispatcher
 	protected $config;             ///< sly_Configuration
 
@@ -26,11 +28,11 @@ class sly_Service_User extends sly_Service_Model_Base_Id {
 	 * Constructor
 	 *
 	 * @param sly_DB_Persistence    $persistence
-	 * @param BabelCache_Interface  $cache
+	 * @param CacheInterface        $cache
 	 * @param sly_Event_IDispatcher $dispatcher
 	 * @param sly_Configuration     $config
 	 */
-	public function __construct(sly_DB_Persistence $persistence, BabelCache_Interface $cache, sly_Event_IDispatcher $dispatcher, sly_Configuration $config) {
+	public function __construct(sly_DB_Persistence $persistence, CacheInterface $cache, sly_Event_IDispatcher $dispatcher, sly_Configuration $config) {
 		parent::__construct($persistence);
 
 		$this->cache      = $cache;
@@ -134,7 +136,7 @@ class sly_Service_User extends sly_Service_Model_Base_Id {
 		$event = $adding ? 'SLY_USER_ADDED' : 'SLY_USER_UPDATED';
 		$user  = parent::save($user);
 
-		$this->cache->flush('sly.user');
+		$this->cache->clear('sly.user');
 		$this->dispatcher->notify($event, $user, array('user' => $manager));
 
 		return $user;
@@ -159,7 +161,7 @@ class sly_Service_User extends sly_Service_Model_Base_Id {
 			$this->dispatcher->notify('SLY_USER_DELETED', $user);
 		}
 
-		$this->cache->flush('sly.user');
+		$this->cache->clear('sly.user');
 
 		return $retval;
 	}

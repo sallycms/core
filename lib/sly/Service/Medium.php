@@ -10,6 +10,7 @@
 
 use Gaufrette\Filesystem;
 use Gaufrette\Util\Path;
+use wv\BabelCache\CacheInterface;
 
 /**
  * Service class for managing media (aka files)
@@ -19,7 +20,7 @@ use Gaufrette\Util\Path;
  */
 class sly_Service_Medium extends sly_Service_Model_Base_Id implements sly_ContainerAwareInterface {
 	protected $tablename = 'file'; ///< string
-	protected $cache;              ///< BabelCache_Interface
+	protected $cache;              ///< CacheInterface
 	protected $dispatcher;         ///< sly_Event_IDispatcher
 	protected $container;          ///< sly_Container
 	protected $mediaFs;            ///< Filesystem
@@ -30,13 +31,13 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id implements sly_Contai
 	 * Constructor
 	 *
 	 * @param sly_DB_Persistence    $persistence
-	 * @param BabelCache_Interface  $cache
+	 * @param CacheInterface        $cache
 	 * @param sly_Event_IDispatcher $dispatcher
 	 * @param Filesystem            $mediaFs
 	 * @param array                 $extBlacklist
 	 * @param string                $fsBaseUri
 	 */
-	public function __construct(sly_DB_Persistence $persistence, BabelCache_Interface $cache, sly_Event_IDispatcher $dispatcher, Filesystem $mediaFs, array $extBlacklist, $fsBaseUri) {
+	public function __construct(sly_DB_Persistence $persistence, CacheInterface $cache, sly_Event_IDispatcher $dispatcher, Filesystem $mediaFs, array $extBlacklist, $fsBaseUri) {
 		parent::__construct($persistence);
 
 		$this->cache        = $cache;
@@ -292,7 +293,7 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id implements sly_Contai
 		// store the file in our database
 		$this->save($file);
 
-		$this->cache->flush('sly.medium.list');
+		$this->cache->clear('sly.medium.list');
 		$this->dispatcher->notify('SLY_MEDIA_ADDED', $file, compact('user'));
 
 		return $file;
@@ -360,7 +361,7 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id implements sly_Contai
 		$this->save($medium);
 
 		// notify the listeners and clear our own cache
-		$this->cache->delete('sly.medium', $medium->getId());
+		$this->cache->remove('sly.medium', $medium->getId());
 		$this->dispatcher->notify('SLY_MEDIA_UPDATED', $medium, compact('user'));
 	}
 
@@ -400,8 +401,8 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id implements sly_Contai
 			throw new sly_Exception($e->getMessage());
 		}
 
-		$this->cache->flush('sly.medium.list');
-		$this->cache->delete('sly.medium', $medium->getId());
+		$this->cache->clear('sly.medium.list');
+		$this->cache->remove('sly.medium', $medium->getId());
 
 		$this->dispatcher->notify('SLY_MEDIA_DELETED', $medium);
 

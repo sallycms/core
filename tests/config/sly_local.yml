@@ -1,6 +1,6 @@
 setup: false
 instname: sly59f008fea53fb4447830
-caching_strategy: BabelCache_Blackhole
+caching_strategy: blackhole
 database:
     driver: mysql
     host: localhost

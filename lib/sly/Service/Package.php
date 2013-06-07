@@ -8,6 +8,8 @@
  * http://www.opensource.org/licenses/mit-license.php
  */
 
+use wv\BabelCache\CacheInterface;
+
 /**
  * Service class for managing packages
  *
@@ -20,16 +22,16 @@
  */
 class sly_Service_Package {
 	protected $sourceDir; ///< string
-	protected $cache;     ///< BabelCache_Interface
+	protected $cache;     ///< CacheInterface
 	protected $composers; ///< array
 	protected $refreshed; ///< boolean
 	protected $namespace; ///< string
 
 	/**
-	 * @param string               $sourceDir
-	 * @param BabelCache_Interface $cache
+	 * @param string         $sourceDir
+	 * @param CacheInterface $cache
 	 */
-	public function __construct($sourceDir, BabelCache_Interface $cache) {
+	public function __construct($sourceDir, CacheInterface $cache) {
 		$this->sourceDir = sly_Util_Directory::normalize($sourceDir).DIRECTORY_SEPARATOR;
 		$this->cache     = $cache;
 		$this->composers = array();
@@ -41,7 +43,7 @@ class sly_Service_Package {
 	 * Clears the addOn metadata cache
 	 */
 	public function clearCache() {
-		$this->cache->flush('sly.package', true);
+		$this->cache->clear('sly.package', true);
 		$this->composers = array();
 		$this->refreshed = false;
 	}

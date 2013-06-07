@@ -126,12 +126,29 @@ class sly_Container extends Pimple implements Countable {
 			return new sly_DB_PDO_Persistence($config['driver'], $connection, $config['table_prefix']);
 		});
 
+		$this['sly-cache-factory'] = $this->share(function($container) {
+			$config     = $container['sly-config'];
+			$babelcache = sly_makeArray($config->get('babelcache'));
+			$prefix     = $config->get('instname');
+
+			return new sly_Cache_Factory($babelcache, $prefix);
+		});
+
 		$this['sly-cache'] = $this->share(function($container) {
 			$config   = $container['sly-config'];
+			$factory  = $container['sly-cache-factory'];
 			$strategy = $config->get('caching_strategy');
-			$fallback = $config->get('fallback_caching_strategy', 'BabelCache_Blackhole');
+			$fallback = $config->get('fallback_caching_strategy', 'blackhole');
+			$cache    = null;
 
-			return sly_Cache::factory($strategy, $fallback);
+			try {
+				$cache = $factory->getCache($strategy);
+			}
+			catch (Exception $e) {
+				$cache = $factory->getCache($fallback);
+			}
+
+			return new wv\BabelCache\Cache\Compat($cache);
 		});
 
 		$this['sly-flash-message'] = $this->share(function($container) {
@@ -504,7 +521,7 @@ class sly_Container extends Pimple implements Countable {
 	}
 
 	/**
-	 * @return BabelCache_Interface
+	 * @return wv\BabelCache\CacheInterface
 	 */
 	public function getCache() {
 		return $this['sly-cache'];

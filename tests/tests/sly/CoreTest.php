@@ -11,7 +11,7 @@
 class sly_CoreTest extends PHPUnit_Framework_TestCase {
 	public function testGetCache() {
 		$cache = sly_Core::cache();
-		$this->assertInstanceOf('BabelCache_Interface', $cache);
+		$this->assertInstanceOf('wv\BabelCache\CacheInterface', $cache);
 	}
 
 	public function testGetSingleton() {
