@@ -15,7 +15,8 @@ blocked_extensions:
   - .cfm
   - .jsp
   - .htaccess
-fallback_caching_strategy: BabelCache_Filesystem_Plain
+caching_strategy: blackhole
+fallback_caching_strategy: filesystem
 authorisation:
   article:
     title: 'translate:article'
@@ -25,7 +26,6 @@ authorisation:
     token: {  }
 less_import_dirs: ['sally/vendor/sallycms/less-mixins/']
 instname: sly20100511212501
-caching_strategy: BabelCache_Blackhole
 environment: dev
 database:
   driver: mysql
@@ -34,5 +34,41 @@ database:
   password: ''
   name: sally_base
   table_prefix: sly_
+
+# BabelCache configuration. Only uncomment those settings you actually need,
+# otherwise non-available adapters might show up in the backend.
 babelcache:
-  memcached: [localhost, 11211]
+  _dummy: ~ # <- only here just so that 'babelcache' is always an object (otherwise overwriting it would yield an error)
+
+  # Memcached support
+  # each element in the list must be a tripel consisting of host, port and weight.
+  # try to use IPs instead of hostnames
+
+#  memcached:
+#    - ['127.0.0.1', 11211, 1]
+#    - ['42.42.42.42', 11211, 2]
+
+  # Memcached with Authentication (SASL) support
+  # if your Memcached daemon requires authentication, use this. Note that the
+  # SASL cache uses only the FIRST server.
+
+#  memcached_sasl: [username, password]
+
+  # Redis
+  # See https://github.com/nrk/predis#connecting-to-redis for more info on how
+  # this config structure can look like.
+
+#  redis:
+#    host: '127.0.0.1'
+#    port: 6379
+
+  # MySQL support
+  # Uncomment these if you want to be able to cache using a MySQL database.
+  # This can very well be another server than the regular Sally database.
+
+#  mysql:
+#    host: localhost
+#    user: username
+#    password: mysupersecretpassword
+#    database: mycachedb
+#    table: mycache

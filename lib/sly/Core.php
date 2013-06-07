@@ -179,7 +179,7 @@ class sly_Core {
 	/**
 	 * Get the global caching instance
 	 *
-	 * @return BabelCache_Interface  caching instance
+	 * @return wv\BabelCache\CacheInterface  caching instance
 	 */
 	public static function cache() {
 		return self::getContainer()->getCache();

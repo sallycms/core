@@ -41,7 +41,7 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base implements
 	/**
 	 * get cache instance
 	 *
-	 * @return BabelCache_Interface
+	 * @return wv\BabelCache\CacheInterface
 	 */
 	protected function getCache() {
 		return $this->container->getCache();

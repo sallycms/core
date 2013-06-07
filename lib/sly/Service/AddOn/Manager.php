@@ -10,6 +10,7 @@
 
 use Gaufrette\Filesystem;
 use Gaufrette\Adapter\Local;
+use wv\BabelCache\CacheInterface;
 
 /**
  * @author  christoph@webvariants.de
@@ -18,7 +19,7 @@ use Gaufrette\Adapter\Local;
 class sly_Service_AddOn_Manager {
 	protected $config;       ///< sly_Configuration
 	protected $dispatcher;   ///< sly_Event_IDispatcher
-	protected $cache;        ///< BabelCache_Interface
+	protected $cache;        ///< CacheInterface
 	protected $addOnService; ///< sly_Service_AddOn
 	protected $pkgService;   ///< sly_Service_Package
 	protected $loadInfo;     ///< array
@@ -27,11 +28,11 @@ class sly_Service_AddOn_Manager {
 	/**
 	 * @param sly_Configuration     $config
 	 * @param sly_Event_IDispatcher $dispatcher
-	 * @param BabelCache_Interface  $cache
+	 * @param CacheInterface        $cache
 	 * @param sly_Service_AddOn     $service
 	 */
 	public function __construct(sly_Configuration $config, sly_Event_IDispatcher $dispatcher,
-		BabelCache_Interface $cache, sly_Service_AddOn $service) {
+		CacheInterface $cache, sly_Service_AddOn $service) {
 		$this->config       = $config;
 		$this->dispatcher   = $dispatcher;
 		$this->cache        = $cache;

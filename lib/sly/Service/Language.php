@@ -8,23 +8,25 @@
  * http://www.opensource.org/licenses/mit-license.php
  */
 
+use wv\BabelCache\CacheInterface;
+
 /**
  * @author  christoph@webvariants.de
  * @ingroup service
  */
 class sly_Service_Language extends sly_Service_Model_Base_Id {
 	protected $tablename = 'clang'; ///< string
-	protected $cache;               ///< BabelCache_Interface
+	protected $cache;               ///< CacheInterface
 	protected $dispatcher;          ///< sly_Event_IDispatcher
 
 	/**
 	 * Constructor
 	 *
 	 * @param sly_DB_Persistence    $persistence
-	 * @param BabelCache_Interface  $cache
+	 * @param CacheInterface        $cache
 	 * @param sly_Event_IDispatcher $dispatcher
 	 */
-	public function __construct(sly_DB_Persistence $persistence, BabelCache_Interface $cache, sly_Event_IDispatcher $dispatcher) {
+	public function __construct(sly_DB_Persistence $persistence, CacheInterface $cache, sly_Event_IDispatcher $dispatcher) {
 		parent::__construct($persistence);
 
 		$this->cache      = $cache;
@@ -77,7 +79,7 @@ class sly_Service_Language extends sly_Service_Model_Base_Id {
 	 * @return sly_Model_Base
 	 */
 	public function save(sly_Model_Base $model) {
-		$this->cache->delete('sly.language', 'all');
+		$this->cache->remove('sly.language', 'all');
 
 		$result = parent::save($model);
 

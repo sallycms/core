@@ -8,6 +8,8 @@
  * http://www.opensource.org/licenses/mit-license.php
  */
 
+use wv\BabelCache\CacheInterface;
+
 /**
  * Service class for managing media categories
  *
@@ -16,7 +18,7 @@
  */
 class sly_Service_MediaCategory extends sly_Service_Model_Base_Id implements sly_ContainerAwareInterface {
 	protected $tablename = 'file_category'; ///< string
-	protected $cache;                       ///< BabelCache_Interface
+	protected $cache;                       ///< CacheInterface
 	protected $dispatcher;                  ///< sly_Event_IDispatcher
 	protected $container;                   ///< sly_Container
 
@@ -27,10 +29,10 @@ class sly_Service_MediaCategory extends sly_Service_Model_Base_Id implements sly
 	 * Constructor
 	 *
 	 * @param sly_DB_Persistence    $persistence
-	 * @param BabelCache_Interface  $cache
+	 * @param CacheInterface        $cache
 	 * @param sly_Event_IDispatcher $dispatcher
 	 */
-	public function __construct(sly_DB_Persistence $persistence, BabelCache_Interface $cache, sly_Event_IDispatcher $dispatcher) {
+	public function __construct(sly_DB_Persistence $persistence, CacheInterface $cache, sly_Event_IDispatcher $dispatcher) {
 		parent::__construct($persistence);
 
 		$this->cache      = $cache;
@@ -189,7 +191,7 @@ class sly_Service_MediaCategory extends sly_Service_Model_Base_Id implements sly
 		$this->save($category);
 
 		// update cache
-		$this->cache->flush('sly.mediacat.list');
+		$this->cache->clear('sly.mediacat.list');
 
 		// notify system
 		$this->dispatcher->notify('SLY_MEDIACAT_ADDED', $category, compact('user', 'parent'));
@@ -216,7 +218,7 @@ class sly_Service_MediaCategory extends sly_Service_Model_Base_Id implements sly
 		$this->save($cat);
 
 		// update cache
-		$this->cache->flush('sly.mediacat');
+		$this->cache->clear('sly.mediacat');
 
 		// notify system
 		$this->dispatcher->notify('SLY_MEDIACAT_UPDATED', $cat, compact('user'));
@@ -282,8 +284,8 @@ class sly_Service_MediaCategory extends sly_Service_Model_Base_Id implements sly
 		}
 
 		// update cache
-		$this->cache->flush('sly.mediacat');
-		$this->cache->flush('sly.mediacat.list');
+		$this->cache->clear('sly.mediacat');
+		$this->cache->clear('sly.mediacat.list');
 
 		// notify system
 		$this->dispatcher->notify('SLY_MEDIACAT_DELETED', $cat);

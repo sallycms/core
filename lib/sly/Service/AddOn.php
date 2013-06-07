@@ -9,6 +9,8 @@
  */
 
 use Gaufrette\Filesystem;
+use wv\BabelCache\CacheInterface;
+use wv\BabelCache\Util;
 
 /**
  * @author  christoph@webvariants.de
@@ -16,7 +18,7 @@ use Gaufrette\Filesystem;
  */
 class sly_Service_AddOn {
 	protected $config;     ///< sly_Configuration
-	protected $cache;      ///< BabelCache_Interface
+	protected $cache;      ///< CacheInterface
 	protected $pkgService; ///< sly_Service_Package
 	protected $vndService; ///< sly_Service_Package  vendor package service (optional)
 	protected $dynFs;      ///< Filesystem
@@ -25,12 +27,12 @@ class sly_Service_AddOn {
 	const INSTALLER_PKGKEY = 'sallycms/composer-installer';
 
 	/**
-	 * @param sly_Configuration    $config
-	 * @param BabelCache_Interface $cache
-	 * @param sly_Service_Package  $pkgService
-	 * @param Filesystem           $dynFs
+	 * @param sly_Configuration   $config
+	 * @param CacheInterface      $cache
+	 * @param sly_Service_Package $pkgService
+	 * @param Filesystem          $dynFs
 	 */
-	public function __construct(sly_Configuration $config, BabelCache_Interface $cache, sly_Service_Package $pkgService, Filesystem $dynFs) {
+	public function __construct(sly_Configuration $config, CacheInterface $cache, sly_Service_Package $pkgService, Filesystem $dynFs) {
 		$this->config     = $config;
 		$this->cache      = $cache;
 		$this->pkgService = $pkgService;
@@ -95,7 +97,7 @@ class sly_Service_AddOn {
 	 */
 	public function filterByProperty($property, $value = true, $isComposerKey = false) {
 		$cache  = $this->cache;
-		$key    = sly_Cache::generateKey('filter', $property, $value, $isComposerKey);
+		$key    = Util::generateKey('filter', $property, $value, $isComposerKey);
 		$result = $cache->get('sly.addon', $key);
 
 		if (!is_array($result)) {
@@ -318,7 +320,7 @@ class sly_Service_AddOn {
 	 * Clears the addOn metadata cache
 	 */
 	public function clearCache() {
-		$this->cache->flush('sly.addon', true);
+		$this->cache->clear('sly.addon', true);
 		$this->pkgService->clearCache();
 	}
 
