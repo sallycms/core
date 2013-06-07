@@ -1,3 +1,0 @@
-Header set Content-Encoding "gzip"
-Header append Vary Accept-Encoding
-SetEnv no-gzip dont-vary
