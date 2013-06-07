@@ -85,6 +85,13 @@ class sly_Service_MediaCategory extends sly_Service_Model_Base_Id implements sly
 	}
 
 	/**
+	 * @return array
+	 */
+	public function findAll() {
+		return $this->findBy('all', null, 'name');
+	}
+
+	/**
 	 * @param  string $name
 	 * @return array
 	 */
