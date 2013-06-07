@@ -601,9 +601,6 @@ class sly_Core {
 		$container->getTemplateService()->refresh();
 		$container->getModuleService()->refresh();
 
-		// clear asset cache
-		$container->getAssetService()->clearCache();
-
 		// refresh addOns
 		$container->getAddOnManagerService()->refresh();
 
