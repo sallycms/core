@@ -841,7 +841,7 @@ class sly_Container extends Pimple implements Countable {
 		}
 
 		$adapter = new Gaufrette\Adapter\Local($dir);
-		$fs      = new Gaufrette\Filesystem($adapter);
+		$fs      = new sly_Filesystem_Filesystem($adapter);
 
 		return $fs;
 	}
