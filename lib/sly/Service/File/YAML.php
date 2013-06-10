@@ -28,7 +28,6 @@ class sly_Service_File_YAML extends sly_Service_File_Base {
 	 * @return mixed
 	 */
 	protected function readFile($filename) {
-		$this->checkForSfYaml();
 		return Yaml::parse($filename);
 	}
 
@@ -38,13 +37,6 @@ class sly_Service_File_YAML extends sly_Service_File_Base {
 	 * @return int               number of written bytes
 	 */
 	protected function writeFile($filename, $data) {
-		$this->checkForSfYaml();
 		return file_put_contents($filename, Yaml::dump($data, 5), LOCK_EX);
-	}
-
-	protected function checkForSfYaml() {
-		if (!class_exists('Symfony\Component\Yaml\Yaml')) {
-			throw new sly_Exception('Symfony\Yaml was not found. Did you forget `composer install`?');
-		}
 	}
 }
