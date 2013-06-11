@@ -83,7 +83,7 @@ class sly_Service_AddOn_Manager {
 			$service->deleteAllFiles();
 		}
 		catch (Exception $e) {
-			throw new sly_Exception(t('addon_cleanup_failed'));
+			throw new sly_Exception(t('addon_cleanup_failed', $e->getMessage()));
 		}
 
 		$this->fireEvent('POST', 'DELETE_DYN_FILES', $addon, array('filesystem' => $fs));
