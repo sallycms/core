@@ -296,12 +296,27 @@ class sly_Container extends Pimple implements Countable {
 		//////////////////////////////////////////////////////////////////////////
 		// filesystems
 
-		$this['sly-filesystem-media'] = $this->share(function($container) {
-			return $this->getLocalFilesystem(SLY_DATAFOLDER.DIRECTORY_SEPARATOR.'mediapool', false);
+		$getLocalFilesystem = function($dir, $isPrivate) {
+			// make sure the mediapool directory exists, as Gaufrette is not going to create it for us
+			if ($isPrivate) {
+				$dir = sly_Util_Directory::createHttpProtected($dir, true);
+			}
+			else {
+				$dir = sly_Util_Directory::create($dir, null, true);
+			}
+
+			$adapter = new Gaufrette\Adapter\Local($dir);
+			$fs      = new sly_Filesystem_Filesystem($adapter);
+
+			return $fs;
+		};
+
+		$this['sly-filesystem-media'] = $this->share(function($container) use ($getLocalFilesystem) {
+			return $getLocalFilesystem(SLY_DATAFOLDER.DIRECTORY_SEPARATOR.'mediapool', false);
 		});
 
-		$this['sly-filesystem-dyn'] = $this->share(function($container) {
-			return $this->getLocalFilesystem(SLY_DATAFOLDER.DIRECTORY_SEPARATOR.'dyn', true);
+		$this['sly-filesystem-dyn'] = $this->share(function($container) use ($getLocalFilesystem) {
+			return $getLocalFilesystem(SLY_DATAFOLDER.DIRECTORY_SEPARATOR.'dyn', true);
 		});
 
 		$this['sly-filesystem-map'] = $this->share(function($container) {
@@ -829,20 +844,5 @@ class sly_Container extends Pimple implements Countable {
 	 */
 	public function setConfigDir($dir) {
 		return $this->set('sly-config-dir', $dir);
-	}
-
-	protected function getLocalFilesystem($dir, $isPrivate) {
-		// make sure the mediapool directory exists, as Gaufrette is not going to create it for us
-		if ($isPrivate) {
-			$dir = sly_Util_Directory::createHttpProtected($dir, true);
-		}
-		else {
-			$dir = sly_Util_Directory::create($dir, null, true);
-		}
-
-		$adapter = new Gaufrette\Adapter\Local($dir);
-		$fs      = new sly_Filesystem_Filesystem($adapter);
-
-		return $fs;
 	}
 }
