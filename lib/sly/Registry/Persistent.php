@@ -28,8 +28,8 @@ class sly_Registry_Persistent implements sly_Registry_Registry {
 	 * @return mixed
 	 */
 	public function set($key, $value) {
-		$this->remove($key);
-		$this->pdo->insert('registry', array('name' => $key, 'value' => serialize($value)));
+		$this->pdo->replace('registry', array('value' => serialize($value)), array('name' => $key));
+
 		return $this->store->set($key, $value);
 	}
 
