@@ -481,7 +481,7 @@ class sly_Core {
 	}
 
 	public static function registerListeners() {
-		$listeners  = self::config()->get('LISTENERS', array());
+		$listeners  = self::config()->get('listeners', array());
 		$dispatcher = self::dispatcher();
 
 		foreach ($listeners as $event => $callbacks) {
