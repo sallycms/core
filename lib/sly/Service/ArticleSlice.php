@@ -55,7 +55,7 @@ class sly_Service_ArticleSlice implements sly_ContainerAwareInterface {
 	/**
 	 * @param  array  $where
 	 * @param  string $having
-	 * @return sly_Model_Base
+	 * @return sly_Model_ArticleSlice
 	 */
 	public function findOne($where = null, $having = null) {
 		$res = $this->find($where, null, null, null, 1, $having);

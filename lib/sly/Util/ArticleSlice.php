@@ -39,7 +39,7 @@ class sly_Util_ArticleSlice {
 	 */
 	public static function findById($articleSliceID) {
 		$articleSliceID = (int) $articleSliceID;
-		return sly_Core::getContainer()->getArticleSliceService()->findById($articleSliceID);
+		return sly_Core::getContainer()->getArticleSliceService()->findOne(array('id' => $articleSliceID));
 	}
 
 	/**
