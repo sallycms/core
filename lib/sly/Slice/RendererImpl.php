@@ -80,8 +80,8 @@ class sly_Slice_RendererImpl implements sly_Slice_Renderer {
 		$container  = sly_Core::getContainer();
 		$dispatcher = $container->getDispatcher();
 		$slice      = $dispatcher->filter('SLY_SLICE_PRE_RENDER', $slice, array(
-			'module' => $this->moduleName,
-			'values' => $this->values
+			'module' => $slice->getModule(),
+			'values' => $slice->getValues(),
 		));
 
 		if (!($slice instanceof sly_Model_ISlice)) {
@@ -99,7 +99,7 @@ class sly_Slice_RendererImpl implements sly_Slice_Renderer {
 			include $filename;
 
 			$output = ob_get_clean();
-			$output = sly_Util_HTML::replaceSallyLinks($content);
+			$output = sly_Util_HTML::replaceSallyLinks($output);
 		}
 		catch (Exception $e) {
 			ob_end_clean();
@@ -111,8 +111,8 @@ class sly_Slice_RendererImpl implements sly_Slice_Renderer {
 		$dispatcher = $container->getDispatcher();
 		$output     = $dispatcher->filter('SLY_SLICE_POST_RENDER', $output, array(
 			'slice'  => func_get_arg(0),
-			'module' => $this->moduleName,
-			'values' => $this->values
+			'module' => $slice->getModule(),
+			'values' => $slice->getValues()
 		));
 
 		return $output;
