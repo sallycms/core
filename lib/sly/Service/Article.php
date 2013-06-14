@@ -272,7 +272,7 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 	 * @param sly_Model_Article $article
 	 * @param sly_Model_User    $user
 	 */
-	public function touch(sly_Model_Article $article, sly_Model_User $user = null) {
+	public function touch(sly_Model_Article $article, sly_Model_User $user = null, $skip_sliceIds = array()) {
 		$user    = $this->getActor($user, __METHOD__);
 		$touched = clone $article;
 		$sql     = $this->getPersistence();
@@ -283,7 +283,7 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 			$touched->setCreateColumns($user);
 			$touched = $this->insert($touched);
 
-			$this->copyContent($article, $touched, $user);
+			$this->copyContent($article, $touched, $user, $skip_sliceIds);
 
 			$this->getDispatcher()->notify('SLY_ART_TOUCHED', $touched, array(
 				'source'  => $article,
@@ -541,7 +541,7 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 	 * @param sly_Model_Article  $dest    target article
 	 * @param sly_Model_User     $user    author or null for the current user
 	 */
-	public function copyContent(sly_Model_Article $source, sly_Model_Article $dest, sly_Model_User $user = null) {
+	public function copyContent(sly_Model_Article $source, sly_Model_Article $dest, sly_Model_User $user = null, $skip_sliceIds = array()) {
 		$user = $this->getActor($user, __METHOD__);
 
 		if (!array_diff_assoc($source->getPKHash(), $dest->getPKHash())) {
@@ -560,7 +560,7 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 		$dstSlots   = $this->container->getTemplateService()->getSlots($dest->getTemplateName());
 		$dispatcher = $this->getDispatcher();
 
-		return $sql->transactional(function() use ($sql, $source, $dstSlots, $dest, $sServ, $asServ, $login, $dispatcher, $user) {
+		return $sql->transactional(function() use ($sql, $source, $dstSlots, $dest, $sServ, $asServ, $login, $dispatcher, $user, $skip_sliceIds) {
 			$slices  = $source->getSlices();
 			$changes = false;
 
@@ -574,6 +574,11 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 
 				// find slices to copy
 				$slice = $articleSlice->getSlice();
+
+				// "delete" slice
+				if (in_array($slice->getId(), $skip_sliceIds))
+					continue;
+
 				$slice = $sServ->copy($slice);
 
 				$aSlice = new Sly_Model_ArticleSlice(array(
