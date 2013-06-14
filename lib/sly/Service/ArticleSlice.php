@@ -378,9 +378,13 @@ class sly_Service_ArticleSlice implements sly_ContainerAwareInterface {
 			));
 
 			$sql->commitTrx($trx);
+
+			return true;
 		}
 		catch (Exception $e) {
 			$sql->rollBackTrx($trx, $e);
+
+			return false;
 		}
 	}
 
@@ -401,12 +405,12 @@ class sly_Service_ArticleSlice implements sly_ContainerAwareInterface {
 			throw new sly_Exception(t('unsupported_direction', $direction));
 		}
 
-		$articleSlice = $this->findById($slice_id);
+		$articleSlice = $this->findOne(array('id' => $slice_id));
 
 		$curPos = $articleSlice->getPosition();
 		$newPos = $direction === 'up' ? $curPos - 1 : $curPos + 1;
 
-		$this->moveTo($articleSlice->getArticle(), $articleSlice->getSlot(), $curPos, $newPos, $user);
+		return $this->moveTo($articleSlice->getArticle(), $articleSlice->getSlot(), $curPos, $newPos, $user);
 	}
 
 	/**
