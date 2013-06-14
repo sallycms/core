@@ -621,7 +621,7 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 	 * @param  boolean           $disableCache
 	 * @return string
 	 */
-	public function getUrl(sly_Model_Article $article, $params = '', $divider = '&amp;', $disableCache = false) {
+	public function getUrl(sly_Model_Base_Article $article, $params = '', $divider = '&amp;', $disableCache = false) {
 		$id    = $article->getId();
 		$clang = $article->getClang();
 
