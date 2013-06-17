@@ -46,6 +46,11 @@ class sly_Util_Category {
 	public static function findById($categoryID, $clang = null, $default = null) {
 		$service    = sly_Core::getContainer()->getCategoryService();
 		$categoryID = (int) $categoryID;
+
+		if ($clang === false || $clang === null) {
+			$clang = sly_Core::getCurrentClang();
+		}
+
 		$cat        = $service->findByPK($categoryID, $clang);
 
 		if ($cat) return $cat;
@@ -55,10 +60,6 @@ class sly_Util_Category {
 			case self::START_ARTICLE:    $id = sly_Core::getSiteStartArticleId(); break;
 			case self::NOTFOUND_ARTICLE: $id = sly_Core::getNotFoundArticleId();  break;
 			// no default case by design
-		}
-
-		if ($clang === false || $clang === null) {
-			$clang = sly_Core::getCurrentClang();
 		}
 
 		if (isset($id)) {
