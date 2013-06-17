@@ -49,6 +49,8 @@ userCols($table);
 revisionCol($table);
 
 $table->setPrimaryKey(array('id', 'clang', 'revision'));
+$table->addIndex(array('re_id'), 'parents');
+$table->addIndex(array('type'), 'types');
 
 ////////////////////////////////////////////////////////////////////////////////
 // sly_article_slice

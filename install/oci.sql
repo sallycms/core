@@ -2,6 +2,8 @@
 -- Prefix sly_
 
 CREATE TABLE sly_article (id NUMBER(10) NOT NULL, clang NUMBER(10) NOT NULL, revision NUMBER(10) DEFAULT 0 NOT NULL, re_id NUMBER(10) NOT NULL, name VARCHAR2(255) NOT NULL, catname VARCHAR2(255) NOT NULL, catpos NUMBER(10) NOT NULL, attributes TEXT NOT NULL, startpage NUMBER(1) NOT NULL, pos NUMBER(10) NOT NULL, path VARCHAR2(255) NOT NULL, type VARCHAR2(64) NOT NULL, deleted NUMBER(1) NOT NULL, createdate TIMESTAMP(0) NOT NULL, updatedate TIMESTAMP(0) NOT NULL, createuser VARCHAR2(255) NOT NULL, updateuser VARCHAR2(255) NOT NULL, PRIMARY KEY(id, clang, revision));
+CREATE INDEX parents ON sly_article (re_id);
+CREATE INDEX types ON sly_article (type);
 CREATE TABLE sly_article_slice (id NUMBER(10) NOT NULL, clang NUMBER(10) NOT NULL, slot VARCHAR2(64) NOT NULL, pos NUMBER(10) NOT NULL, slice_id NUMBER(10) DEFAULT 0 NOT NULL, article_id NUMBER(10) NOT NULL, createdate TIMESTAMP(0) NOT NULL, updatedate TIMESTAMP(0) NOT NULL, createuser VARCHAR2(255) NOT NULL, updateuser VARCHAR2(255) NOT NULL, revision NUMBER(10) DEFAULT 0 NOT NULL, PRIMARY KEY(id));
 DECLARE
   constraints_Count NUMBER;

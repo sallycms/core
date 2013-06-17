@@ -80,28 +80,42 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base implements
 	 * @return array
 	 */
 	public function find($where = null, $group = null, $order = null, $offset = null, $limit = null, $having = null, $findOnline = false) {
-		$return = array();
-		$where  = $this->fixWhereClause($where);
-		$db     = $this->getPersistence();
-		$query  = $db->getSQLbuilder($db->getPrefix().$this->getTableName())->select('*');
+		$db         = $this->getPersistence();
+		$where      = $this->fixWhereClause($where);
+		$tableName  = $db->getPrefix().$this->getTableName();
+		$innerQuery = $db->getSQLbuilder($tableName);
+		$outerQuery = $db->getSQLbuilder($tableName);
+		$return     = array();
 
-		$query->where($where);
+		// SELECT * FROM sly_article WHERE (id, clang, revision) IN (
+		//    SELECT id, clang, MAX(revision) FROM sly_article WHERE $where GROUP BY id, clang[, $group][ HAVING $having][ ORDER BY $order]
+		// )[ ORDER BY $order][ LIMIT [$offset,]$limit]
 
-		if ($group)  $query->group($group);
-		if ($having) $query->having($having);
-		if ($offset) $query->offset($offset);
-		if ($limit)  $query->limit($limit);
+		// Having MAX(r) in there does not cause issues when revision is also part
+		// of the WHERE clause, it just ensures the correct revision to be chosen.
+		// The ORDER BY clause must be present in both queries, as it can have an
+		// effect on the actual selection (inner). It must be present on the outer
+		// so the final result is sorted as the caller expected it.
+		// The LIMIT clause may NOT be part of the inner query, as it's not yet
+		// supported by neither MySQL nor MariaDB.
 
-		if ($order) {
-			$query->order($order.', revision DESC');
-		}
-		else {
-			$query->order('revision DESC');
-		}
+		$group = $group ? ('id, clang, '.$group) : 'id, clang';
 
-		$outerQuery = 'SELECT * FROM ('.$query->to_s().') latest_'.$this->getTableName().'_tmp GROUP BY clang, id';
+		$innerQuery->select('id, clang, MAX(revision)');
+		$innerQuery->where($where);
+		$innerQuery->group($group);
 
-		$db->query($outerQuery, $query->bind_values());
+		if ($having) $innerQuery->having($having);
+		if ($order)  $innerQuery->order($order);
+
+		$outerQuery->select('*');
+		$outerQuery->where('(id, clang, revision) IN ('.$innerQuery->to_s().')');
+
+		if ($order)  $outerQuery->order($order);
+		if ($offset) $outerQuery->offset($offset);
+		if ($limit)  $outerQuery->limit($limit);
+
+		$db->query($outerQuery, $innerQuery->bind_values());
 
 		foreach ($db as $row) {
 			$item = $this->makeInstance($row);
