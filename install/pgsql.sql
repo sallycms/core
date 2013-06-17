@@ -2,6 +2,8 @@
 -- Prefix sly_
 
 CREATE TABLE sly_article (id INT NOT NULL, clang INT NOT NULL, revision INT DEFAULT 0 NOT NULL, re_id INT NOT NULL, name VARCHAR(255) NOT NULL, catname VARCHAR(255) NOT NULL, catpos INT NOT NULL, attributes TEXT NOT NULL, startpage BOOLEAN NOT NULL, pos INT NOT NULL, path VARCHAR(255) NOT NULL, type VARCHAR(64) NOT NULL, deleted BOOLEAN NOT NULL, createdate TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL, updatedate TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL, createuser VARCHAR(255) NOT NULL, updateuser VARCHAR(255) NOT NULL, PRIMARY KEY(id, clang, revision));
+CREATE INDEX parents ON sly_article (re_id);
+CREATE INDEX types ON sly_article (type);
 CREATE TABLE sly_article_slice (id SERIAL NOT NULL, clang INT NOT NULL, slot VARCHAR(64) NOT NULL, pos INT NOT NULL, slice_id INT DEFAULT 0 NOT NULL, article_id INT NOT NULL, createdate TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL, updatedate TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL, createuser VARCHAR(255) NOT NULL, updateuser VARCHAR(255) NOT NULL, revision INT DEFAULT 0 NOT NULL, PRIMARY KEY(id));
 CREATE INDEX find_article ON sly_article_slice (article_id, clang, revision);
 CREATE TABLE sly_clang (id SERIAL NOT NULL, name VARCHAR(255) NOT NULL, locale VARCHAR(5) NOT NULL, revision INT DEFAULT 0 NOT NULL, PRIMARY KEY(id));
