@@ -86,6 +86,6 @@ class sly_Model_Category extends sly_Model_Base_Article {
 		$service = sly_Core::getContainer()->getCategoryService();
 		$clang   = $clang === null ? $this->getClang() : $clang;
 
-		return $service->findByParentId($this->getId(), $ignoreOfflines, $clang);
+		return $service->findByParentId($this->getId(), $clang, $ignoreOfflines);
 	}
 }
