@@ -341,24 +341,25 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 		$dispatcher = $this->getDispatcher();
 		$catService = $this->getCategoryService();
 
-		$pos = $this->getMaxPosition($target) + 1;
-		$sql = $this->getPersistence();
-		$trx = $sql->beginTrx();
+		$pos   = $this->getMaxPosition($target) + 1;
+		$sql   = $this->getPersistence();
+		$trx   = $sql->beginTrx();
+		$login = $user->getLogin();
+		$now   = gmdate('Y-m-d H:i:s');
 
 		try {
 			foreach ($this->getLanguages() as $clang) {
 				$article = $this->findByPK($id, $clang, self::FIND_REVISION_LATEST);
 				$cat     = $target === 0 ? null : $catService->findByPK($target, $clang, self::FIND_REVISION_LATEST);
-				$moved   = clone $article;
+				$path    = $cat ? $cat->getPath().$target.'|' : '|';
+				$catname = $cat ? $cat->getName()             : '';
 
-				$moved->setParentId($target);
-				$moved->setPath($cat ? $cat->getPath().$target.'|' : '|');
-				$moved->setCatName($cat ? $cat->getName() : '');
-				$moved->setPosition($pos);
-				$moved->setUpdateColumns($user);
-
-				// move article at the end of new category
-				$this->update($moved);
+				// move article in *all* revisions
+				$sql->update(
+					'article',
+					array('re_id' => $target, 'path' => $path, 'catname' => $catname, 'pos' => $pos, 'updateuser' => $login, 'updatedate' => $now),
+					array('id' => $id, 'clang' => $clang)
+				);
 
 				// re-number old category
 				$followers = $this->getFollowerQuery($source, $clang, $article->getPosition());
