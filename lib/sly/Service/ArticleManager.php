@@ -247,7 +247,7 @@ abstract class sly_Service_ArticleManager extends sly_Service_ArticleBase {
 		if (is_string($where) && !empty($where)) {
 			$where = "($where) AND deleted = 0";
 		}
-		else if (is_array($where)) {
+		elseif (is_array($where)) {
 			$where['deleted'] = 0;
 		}
 		else {
