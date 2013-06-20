@@ -190,7 +190,7 @@ class sly_Service_Language extends sly_Service_Model_Base_Id {
 			$db->rollBackTrx($trx, $e);
 		}
 
-		sly_Core::clearCache();
+		sly_Core::clearCache(array('reason' => 'SLY_CLANG_DELETED'));
 
 		return $res;
 	}

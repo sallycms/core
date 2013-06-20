@@ -587,9 +587,9 @@ class sly_Core {
 	/**
 	 * Clears the complete system cache
 	 *
-	 * @return string  the info messages (collected from all listeners)
+	 * @param array $eventParams  additional parameters for the SLY_CACHE_CLEARED event
 	 */
-	public static function clearCache() {
+	public static function clearCache(array $eventParams = array()) {
 		clearstatcache();
 
 		$container = self::getContainer();
@@ -604,7 +604,7 @@ class sly_Core {
 		// refresh addOns
 		$container->getAddOnManagerService()->refresh();
 
-		self::dispatcher()->notify('SLY_CACHE_CLEARED');
+		self::dispatcher()->notify('SLY_CACHE_CLEARED', null, $eventParams);
 	}
 
 	public static function isSetup() {
