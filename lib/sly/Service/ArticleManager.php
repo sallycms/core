@@ -183,9 +183,14 @@ abstract class sly_Service_ArticleManager extends sly_Service_ArticleBase {
 
 			$obj = $this->update($obj);
 
-			// change catname of all children
+			// change catname in all revisions
 
 			if (!$isArticle) {
+				$where = array('id' => $id, 'clang' => $clangID);
+				$db->update('article', array('catname' => $name), $where);
+
+				// change catname of all children in all revisions
+
 				$where = array('re_id' => $id, 'startpage' => 0, 'clang' => $clangID);
 				$db->update('article', array('catname' => $name), $where);
 			}
