@@ -96,7 +96,8 @@ class sly_Model_Article extends sly_Model_Base_Article {
 			}
 
 			if (!$typeService->hasModule($this->getType(), $module, $slice->getSlot())) {
-				trigger_error('Module '.$module.' is not allowed in type/slot '.$this->getType().'/'.$slice->getSlot(), E_USER_WARNING);
+				trigger_error('Module '.$module.' is not allowed in type/slot '.$this->getType().'/'.$slice->getSlot() .
+						' id/clang/rev: ' . $this->getId(), '/' . $this->getClang() . '/' . $this->getRevision(), E_USER_WARNING);
 				continue;
 			}
 
