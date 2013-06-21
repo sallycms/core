@@ -33,7 +33,7 @@ class sly_Session {
 	 */
 	public function get($key, $type, $default = null) {
 		$id = $this->installID;
-		return array_key_exists($id, $_SESSION) ? sly_setarraytype($_SESSION[$id], $key, $type, $default) : $default;
+		return isset($_SESSION) && array_key_exists($id, $_SESSION) ? sly_setarraytype($_SESSION[$id], $key, $type, $default) : $default;
 	}
 
 	/**
