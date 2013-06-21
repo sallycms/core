@@ -27,6 +27,7 @@ abstract class sly_Layout extends sly_Viewable {
 	protected $javaScriptFiles = array();  ///< array
 	protected $feedFiles       = array();  ///< array
 	protected $bodyAttrs       = array();  ///< array
+	protected $htmlAttrs       = array();  ///< array
 	protected $httpMetas       = array();  ///< array
 	protected $metas           = array();  ///< array
 	protected $links           = array();  ///< array
@@ -243,6 +244,30 @@ abstract class sly_Layout extends sly_Viewable {
 		}
 
 		$this->setBodyAttr('class', implode(' ', array_unique($classes)));
+	}
+
+	/**
+	 * Add an attribute to the html tag
+	 *
+	 * @param string $name   attribute name
+	 * @param string $value  attribute value
+	 */
+	public function setHtmlAttr($name, $value) {
+		$name  = trim($name);
+		$value = trim($value);
+
+		$this->htmlAttrs[$name] = $value;
+	}
+
+	/**
+	 * Get html attribute(s)
+	 *
+	 * @param  string $name  the attribute name or null for 'all'
+	 * @return mixed         either an array or a string
+	 */
+	public function getHtmlAttr($name = null) {
+		if ($name === null) return $this->htmlAttrs;
+		return isset($this->htmlAttrs[$name]) ? $this->htmlAttrs[$name] : null;
 	}
 
 	/**

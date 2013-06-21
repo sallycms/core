@@ -22,6 +22,10 @@ class sly_Layout_XHTML extends sly_Layout {
 	protected $language;                ///< string
 	protected $scriptsAtBottom = false; ///< boolean
 
+	public function __construct() {
+		$this->setHtmlAttr('xmlns', 'http://www.w3.org/1999/xhtml');
+	}
+
 	/**
 	 * Set the page to be transitional
 	 *
@@ -40,6 +44,9 @@ class sly_Layout_XHTML extends sly_Layout {
 	 */
 	public function setLanguage($language) {
 		$this->language = $language;
+
+		$this->setHtmlAttr('lang', $language);
+		$this->setHtmlAttr('xml:lang', $language);
 	}
 
 	/**
@@ -101,6 +108,10 @@ class sly_Layout_XHTML extends sly_Layout {
 
 	protected function printBodyAttrs() {
 		$this->printHeadElements(' %s="%s"', $this->bodyAttrs);
+	}
+
+	protected function printHtmlAttrs() {
+		$this->printHeadElements(' %s="%s"', $this->htmlAttrs);
 	}
 
 	protected function printMetas() {
