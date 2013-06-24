@@ -83,6 +83,7 @@ class sly_DB_PDO_Persistence extends sly_DB_Persistence {
 	 * @return int
 	 */
 	public function insert($table, $values) {
+		$this->triggerDBchanged();
 		$sql = $this->getSQLbuilder($this->getPrefix().$table);
 		$sql->insert($values);
 		$this->query($sql->to_s(), $sql->bind_values());
@@ -97,6 +98,7 @@ class sly_DB_PDO_Persistence extends sly_DB_Persistence {
 	 * @return int
 	 */
 	public function update($table, $newValues, $where = null) {
+		$this->triggerDBchanged();
 		$sql = $this->getSQLbuilder($this->getPrefix().$table);
 		$sql->update($newValues);
 		$sql->where($where);
@@ -113,6 +115,7 @@ class sly_DB_PDO_Persistence extends sly_DB_Persistence {
 	 * @return int
 	 */
 	public function replace($table, $newValues, $where, $transactional = false) {
+		$this->triggerDBchanged();
 		if ($transactional) {
 			return $this->transactional(array($this, 'replaceHelper'), array($table, $newValues, $where));
 		}
@@ -167,6 +170,7 @@ class sly_DB_PDO_Persistence extends sly_DB_Persistence {
 	 * @return int            affected rows
 	 */
 	public function delete($table, $where = null) {
+		$this->triggerDBchanged();
 		$sql = $this->getSQLbuilder($this->getPrefix().$table);
 		$sql->delete($where);
 		$this->query($sql->to_s(), $sql->bind_values());
@@ -443,6 +447,10 @@ class sly_DB_PDO_Persistence extends sly_DB_Persistence {
 		}
 
 		return $this->statement->fetchAll($fetchStyle, $fetchArgument);
+	}
+
+	protected function triggerDBchanged() {
+		sly_Core::getContainer()->getDispatcher()->notify('SLY_DB_PDO_PERSISTANCE_CHANGED');
 	}
 
 	// =========================================================================

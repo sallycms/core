@@ -15,6 +15,21 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base implements
 	protected $tablename = 'article'; ///< string
 	protected $container;             ///< sly_Container
 	protected $languages = null;
+	protected $cache = array();
+
+	public function __construct(\sly_DB_PDO_Persistence $persistence = null) {
+		parent::__construct($persistence);
+
+		$self = $this;
+		
+		sly_Core::getContainer()->getDispatcher()->addListener('SLY_DB_PDO_PERSISTANCE_CHANGED', function() use ($self) {
+			$self->__clearCache();
+		});
+	}
+
+	public function __clearCache() {
+		$this->cache = array();
+	}
 
 	public function setContainer(sly_Container $container = null) {
 		$this->container = $container;
@@ -165,7 +180,15 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base implements
 			$where['revision'] = (int) $revision;
 		}
 
-		return $this->findOne($where, $revision === self::FIND_REVISION_ONLINE);
+		if (!array_key_exists('findByPK', $this->cache))
+			$this->cache['findByPK'] = array();
+		$key = $id . '_' . $clang . '_' . $revision;
+		if (array_key_exists($key, $this->cache['findByPK']))
+			return $this->cache['findByPK'][$key];
+
+		$this->cache['findByPK'][$key] = $this->findOne($where, $revision === self::FIND_REVISION_ONLINE);
+
+		return $this->cache['findByPK'][$key];
 	}
 
 	/**
