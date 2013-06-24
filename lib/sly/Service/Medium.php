@@ -284,7 +284,6 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id implements sly_Contai
 		$file->setFilesize(filesize($fileURI));
 		$file->setCategoryId($categoryID);
 		$file->setRevision(0);
-		$file->setReFileId(0);
 		$file->setAttributes('');
 		$file->setCreateColumns($user);
 
