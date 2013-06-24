@@ -9,6 +9,7 @@
  */
 
 use Gaufrette\Filesystem;
+use Gaufrette\Adapter\Local;
 
 /**
  * @ingroup util
@@ -90,6 +91,20 @@ class sly_Util_File {
 		}
 
 		return $filename;
+	}
+
+	/**
+	 * Iterate a local filename until a non-existing one was found
+	 *
+	 * @param  string $filename
+	 * @param  string $extension  use null to determine it automatically
+	 * @return string
+	 */
+	public static function iterateLocalFilename($filename, $extension = null) {
+		$dir = dirname($filename);
+		$fs  = new Filesystem(new Local($dir));
+
+		return self::iterateFilename(basename($filename), $fs, $extension);
 	}
 
 	/**
