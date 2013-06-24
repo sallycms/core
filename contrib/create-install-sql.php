@@ -211,8 +211,8 @@ foreach ($platforms as $name => $platform) {
 function userCols(Table $table) {
 	$table->addColumn('createdate', 'datetime');
 	$table->addColumn('updatedate', 'datetime');
-	$table->addColumn('createuser', 'datetime')->setLength(128);
-	$table->addColumn('updateuser', 'datetime')->setLength(128);
+	$table->addColumn('createuser', 'string')->setLength(128);
+	$table->addColumn('updateuser', 'string')->setLength(128);
 }
 
 function createTable(Schema $schema, $name) {
