@@ -33,20 +33,21 @@ $schema = new Schema();
 
 $table = createTable($schema, 'sly_article');
 
-intCol($table,    'id');
-intCol($table,    're_id');
-stringCol($table, 'name');
-stringCol($table, 'catname');
-intCol($table,    'catpos');
-textCol($table,   'attributes');
-boolCol($table,   'startpage');
-intCol($table,    'pos');
-stringCol($table, 'path');
-stringCol($table, 'type', 64);
-intCol($table,    'clang');
-boolCol($table,   'deleted');
+$table->addColumn('id',         'integer')->setUnsigned(true);
+$table->addColumn('clang',      'integer')->setUnsigned(true);
+$table->addColumn('revision',   'integer')->setUnsigned(true)->setDefault(0);
+$table->addColumn('online',     'boolean')->setDefault('0');
+$table->addColumn('deleted',    'boolean')->setDefault('0');
+$table->addColumn('type',       'string')->setLength(64);
+$table->addColumn('re_id',      'integer')->setUnsigned(true);
+$table->addColumn('path',       'string')->setLength(255);
+$table->addColumn('pos',        'integer')->setUnsigned(true);
+$table->addColumn('name',       'string')->setLength(255);
+$table->addColumn('catpos',     'integer')->setUnsigned(true);
+$table->addColumn('catname',    'string')->setLength(255);
+$table->addColumn('startpage',  'boolean')->setDefault('0');
 userCols($table);
-revisionCol($table);
+$table->addColumn('attributes', 'text');
 
 $table->setPrimaryKey(array('id', 'clang', 'revision'));
 $table->addIndex(array('re_id'), 'parents');
@@ -57,14 +58,14 @@ $table->addIndex(array('type'), 'types');
 
 $table = createTable($schema, 'sly_article_slice');
 
-serialCol($table, 'id');
-intCol($table,    'clang');
-stringCol($table, 'slot', 64);
-intCol($table,    'pos', true, 5);
-intCol($table,    'slice_id', true, 20, 0);
-intCol($table,    'article_id');
+$table->addColumn('id',         'integer')->setUnsigned(true)->setAutoincrement(true);
+$table->addColumn('article_id', 'integer')->setUnsigned(true);
+$table->addColumn('clang',      'integer')->setUnsigned(true);
+$table->addColumn('revision',   'integer')->setUnsigned(true)->setDefault(0);
+$table->addColumn('pos',        'integer')->setUnsigned(true);
+$table->addColumn('slot',       'string')->setLength(64);
+$table->addColumn('slice_id',   'integer')->setUnsigned(true);
 userCols($table);
-revisionCol($table);
 
 $table->setPrimaryKey(array('id'));
 $table->addIndex(array('article_id', 'clang', 'revision'), 'find_article');
@@ -74,10 +75,20 @@ $table->addIndex(array('article_id', 'clang', 'revision'), 'find_article');
 
 $table = createTable($schema, 'sly_clang');
 
-serialCol($table, 'id');
-stringCol($table, 'name');
-stringCol($table, 'locale', 5);
-revisionCol($table);
+$table->addColumn('id',       'integer')->setUnsigned(true)->setAutoincrement(true);
+$table->addColumn('revision', 'integer')->setUnsigned(true)->setDefault(0);
+$table->addColumn('name',     'string')->setLength(255);
+$table->addColumn('locale',   'string')->setLength(5);
+
+$table->setPrimaryKey(array('id'));
+
+////////////////////////////////////////////////////////////////////////////////
+// sly_config
+
+$table = createTable($schema, 'sly_config');
+
+$table->addColumn('id',    'string')->setLength(255);
+$table->addColumn('value', 'text');
 
 $table->setPrimaryKey(array('id'));
 
@@ -86,19 +97,18 @@ $table->setPrimaryKey(array('id'));
 
 $table = createTable($schema, 'sly_file');
 
-serialCol($table, 'id');
-intCol($table,    're_file_id');
-intCol($table,    'category_id');
-textCol($table,   'attributes', true);
-stringCol($table, 'filetype');
-stringCol($table, 'filename');
-stringCol($table, 'originalname');
-intCol($table,    'filesize');
-intCol($table,    'width');
-intCol($table,    'height');
-stringCol($table, 'title');
+$table->addColumn('id',           'integer')->setUnsigned(true)->setAutoincrement(true);
+$table->addColumn('revision',     'integer')->setUnsigned(true)->setDefault(0);
+$table->addColumn('category_id',  'integer')->setUnsigned(true);
+$table->addColumn('title',        'string')->setLength(255);
+$table->addColumn('filename',     'string')->setLength(255);
+$table->addColumn('originalname', 'string')->setLength(255);
+$table->addColumn('filetype',     'string')->setLength(255);
+$table->addColumn('filesize',     'integer')->setUnsigned(true);
+$table->addColumn('width',        'integer')->setUnsigned(true);
+$table->addColumn('height',       'integer')->setUnsigned(true);
 userCols($table);
-revisionCol($table);
+$table->addColumn('attributes',   'text')->setNotnull(false);
 
 $table->setPrimaryKey(array('id'));
 $table->addIndex(array('filename'), 'filename');
@@ -108,43 +118,13 @@ $table->addIndex(array('filename'), 'filename');
 
 $table = createTable($schema, 'sly_file_category');
 
-serialCol($table, 'id');
-stringCol($table, 'name');
-intCol($table,    're_id');
-stringCol($table, 'path');
-textCol($table,   'attributes', true);
+$table->addColumn('id',         'integer')->setUnsigned(true)->setAutoincrement(true);
+$table->addColumn('revision',   'integer')->setUnsigned(true)->setDefault(0);
+$table->addColumn('name',       'string')->setLength(255);
+$table->addColumn('re_id',      'integer')->setUnsigned(true);
+$table->addColumn('path',       'string')->setLength(255);
 userCols($table);
-revisionCol($table);
-
-$table->setPrimaryKey(array('id'));
-
-////////////////////////////////////////////////////////////////////////////////
-// sly_user
-
-$table = createTable($schema, 'sly_user');
-
-serialCol($table,   'id');
-customCol($table,   'name', 'VARCHAR(255) NULL');
-customCol($table,   'description', 'VARCHAR(255) NULL');
-stringCol($table,   'login', 128);
-charCol($table,     'password', 128);
-boolCol($table,     'status');
-textCol($table,     'attributes', true);
-customCol($table,   'lasttrydate', 'DATETIME NULL');
-customCol($table,   'timezone', 'VARCHAR(64) NULL');
-userCols($table);
-revisionCol($table);
-
-$table->setPrimaryKey(array('id'));
-
-////////////////////////////////////////////////////////////////////////////////
-// sly_slice
-
-$table = createTable($schema, 'sly_slice');
-
-serialCol($table, 'id');
-stringCol($table, 'module', 64);
-longtextCol($table, 'serialized_values');
+$table->addColumn('attributes', 'text')->setNotnull(false);
 
 $table->setPrimaryKey(array('id'));
 
@@ -153,16 +133,41 @@ $table->setPrimaryKey(array('id'));
 
 $table = createTable($schema, 'sly_registry');
 
-stringCol($table, 'name');
-$valueColumn = blobCol($table, 'value'); // we need this later on
+$table->addColumn('name',  'string')->setLength(255);
+$table->addColumn('value', 'blob');
 
 $table->setPrimaryKey(array('name'));
 
-$table = createTable($schema, 'sly_config');
-stringCol($table, 'id');
-longtextCol($table, 'value'); // we need this later on
+////////////////////////////////////////////////////////////////////////////////
+// sly_slice
+
+$table = createTable($schema, 'sly_slice');
+
+$table->addColumn('id',                'integer')->setUnsigned(true)->setAutoincrement(true);
+$table->addColumn('module',            'string')->setLength(64);
+$table->addColumn('serialized_values', 'text');
 
 $table->setPrimaryKey(array('id'));
+
+////////////////////////////////////////////////////////////////////////////////
+// sly_user
+
+$table = createTable($schema, 'sly_user');
+
+$table->addColumn('id',          'integer')->setUnsigned(true)->setAutoincrement(true);
+$table->addColumn('revision',    'integer')->setUnsigned(true)->setDefault(0);
+$table->addColumn('login',       'string')->setLength(128);
+$table->addColumn('password',    'string')->setLength(128);
+$table->addColumn('status',      'boolean')->setDefault('0');
+$table->addColumn('name',        'string')->setLength(255)->setNotnull(false);
+$table->addColumn('description', 'string')->setLength(255)->setNotnull(false);
+$table->addColumn('timezone',    'string')->setLength(64)->setNotnull(false);
+$table->addColumn('lasttrydate', 'datetime')->setNotnull(false);
+userCols($table);
+$table->addColumn('attributes',  'text')->setNotnull(false);
+
+$table->setPrimaryKey(array('id'));
+$table->addIndex(array('login'), 'logins');
 
 ////////////////////////////////////////////////////////////////////////////////
 // create the actual SQL files
@@ -193,13 +198,6 @@ INSERT INTO sly_config (id, value) VALUES ('addons', '[]');
 INSERT;
 
 foreach ($platforms as $name => $platform) {
-	if ($name === 'pgsql') {
-		$valueColumn->setColumnDefinition('BYTEA NOT NULL');
-	}
-	else {
-		$valueColumn->setColumnDefinition('BLOB NOT NULL');
-	}
-
 	$queries = $schema->toSql($platform);
 	$queries = array_map('trimSemicolon', $queries);
 	$queries = implode(";\n", $queries);
@@ -210,55 +208,11 @@ foreach ($platforms as $name => $platform) {
 ////////////////////////////////////////////////////////////////////////////////
 // some helpers :)
 
-function serialCol(Table $table, $name) {
-	intCol($table, $name, true, 11, null, true);
-}
-
-function revisionCol(Table $table) {
-	intCol($table, 'revision', true, 11, 0);
-}
-
 function userCols(Table $table) {
-	datetimeCol($table, 'createdate');
-	datetimeCol($table, 'updatedate');
-	stringCol($table, 'createuser');
-	stringCol($table, 'updateuser');
-}
-
-function intCol(Table $table, $name, $unsigned = true, $precision = 11, $default = null, $autoincrement = false) {
-	$table->addColumn($name, 'integer', compact('unsigned', 'precision', 'default', 'autoincrement'));
-}
-
-function stringCol(Table $table, $name, $length = 255) {
-	$table->addColumn($name, 'string', compact('length'));
-}
-
-function charCol(Table $table, $name, $length) {
-	$table->addColumn($name, 'string', array('columndefinition' => "CHAR($length)"));
-}
-
-function boolCol(Table $table, $name) {
-	$table->addColumn($name, 'boolean');
-}
-
-function datetimeCol(Table $table, $name) {
-	$table->addColumn($name, 'datetime');
-}
-
-function blobCol(Table $table, $name) {
-	return customCol($table, $name, 'BLOB NOT NULL');
-}
-
-function textCol(Table $table, $name, $null = false) {
-	customCol($table, $name, 'TEXT '.($null ? 'NULL' : 'NOT NULL'));
-}
-
-function longtextCol(Table $table, $name, $null = false) {
-	customCol($table, $name, 'LONGTEXT '.($null ? 'NULL' : 'NOT NULL'));
-}
-
-function customCol(Table $table, $name, $def) {
-	return $table->addColumn($name, 'string', array('columndefinition' => $def));
+	$table->addColumn('createdate', 'datetime');
+	$table->addColumn('updatedate', 'datetime');
+	$table->addColumn('createuser', 'datetime')->setLength(128);
+	$table->addColumn('updateuser', 'datetime')->setLength(128);
 }
 
 function createTable(Schema $schema, $name) {
