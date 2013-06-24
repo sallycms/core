@@ -99,7 +99,7 @@ BEGIN
       END LOOP;
    END IF;
 END;
-CREATE INDEX filename ON sly_file (filename);
+CREATE UNIQUE INDEX filename ON sly_file (filename);
 CREATE TABLE sly_file_category (id NUMBER(10) NOT NULL, revision NUMBER(10) DEFAULT 0 NOT NULL, name VARCHAR2(255) NOT NULL, re_id NUMBER(10) NOT NULL, path VARCHAR2(255) NOT NULL, createdate TIMESTAMP(0) NOT NULL, updatedate TIMESTAMP(0) NOT NULL, createuser VARCHAR2(128) NOT NULL, updateuser VARCHAR2(128) NOT NULL, attributes CLOB DEFAULT NULL, PRIMARY KEY(id));
 DECLARE
   constraints_Count NUMBER;

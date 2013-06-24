@@ -111,7 +111,7 @@ userCols($table);
 $table->addColumn('attributes',   'text')->setNotnull(false);
 
 $table->setPrimaryKey(array('id'));
-$table->addIndex(array('filename'), 'filename');
+$table->addUniqueIndex(array('filename'), 'filenames');
 
 ////////////////////////////////////////////////////////////////////////////////
 // sly_file_category
