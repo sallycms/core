@@ -16,7 +16,7 @@
 class sly_Model_Base_Article extends sly_Model_Base {
 	protected $id;          ///< int
 	protected $updateuser;  ///< string
-	protected $online;      ///< boolean
+	protected $online;      ///< int
 	protected $name;        ///< string
 	protected $catpos;      ///< int
 	protected $createdate;  ///< int
@@ -39,7 +39,7 @@ class sly_Model_Base_Article extends sly_Model_Base {
 		'catpos' => 'int', 'createdate' => 'datetime', 're_id' => 'int', 'pos' => 'int',
 		'catname' => 'string', 'startpage' => 'int', 'updatedate' => 'datetime',
 		'createuser' => 'string', 'attributes' => 'string', 'path' => 'string',
-		'type' => 'string', 'deleted' => 'int'
+		'type' => 'string', 'deleted' => 'int', 'deleted' => 'int'
 	); ///< array
 
 	/**
@@ -271,14 +271,14 @@ class sly_Model_Base_Article extends sly_Model_Base {
 	 * @param boolean $online
 	 */
 	public function setOnline($online) {
-		$this->online = (boolean) $online;
+		$this->online = $online ? 1 : 0;
 	}
 
 	/**
 	 * @return boolean
 	 */
 	public function isOnline() {
-		return $this->online;
+		return $this->online ? true : false;
 	}
 
 	/**
@@ -289,7 +289,7 @@ class sly_Model_Base_Article extends sly_Model_Base {
 	}
 
 	public function isDeleted() {
-		return $this->deleted == 1;
+		return $this->deleted ? true : false;
 	}
 
 	/**
