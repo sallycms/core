@@ -105,8 +105,8 @@ $table->addColumn('filename',     'string')->setLength(255);
 $table->addColumn('originalname', 'string')->setLength(255);
 $table->addColumn('filetype',     'string')->setLength(255);
 $table->addColumn('filesize',     'integer')->setUnsigned(true);
-$table->addColumn('width',        'integer')->setUnsigned(true);
-$table->addColumn('height',       'integer')->setUnsigned(true);
+$table->addColumn('width',        'integer')->setUnsigned(true)->setNotnull(false);
+$table->addColumn('height',       'integer')->setUnsigned(true)->setNotnull(false);
 userCols($table);
 $table->addColumn('attributes',   'text')->setNotnull(false);
 
@@ -167,7 +167,7 @@ userCols($table);
 $table->addColumn('attributes',  'text')->setNotnull(false);
 
 $table->setPrimaryKey(array('id'));
-$table->addIndex(array('login'), 'logins');
+$table->addUniqueIndex(array('login'), 'logins');
 
 ////////////////////////////////////////////////////////////////////////////////
 // create the actual SQL files
