@@ -8,13 +8,13 @@ CREATE TABLE sly_article_slice (id INTEGER NOT NULL, article_id INTEGER NOT NULL
 CREATE INDEX find_article ON sly_article_slice (article_id, clang, revision);
 CREATE TABLE sly_clang (id INTEGER NOT NULL, revision INTEGER DEFAULT 0 NOT NULL, name VARCHAR(255) NOT NULL, locale VARCHAR(5) NOT NULL, PRIMARY KEY(id));
 CREATE TABLE sly_config (id VARCHAR(255) NOT NULL, value CLOB NOT NULL, PRIMARY KEY(id));
-CREATE TABLE sly_file (id INTEGER NOT NULL, revision INTEGER DEFAULT 0 NOT NULL, category_id INTEGER NOT NULL, title VARCHAR(255) NOT NULL, filename VARCHAR(255) NOT NULL, originalname VARCHAR(255) NOT NULL, filetype VARCHAR(255) NOT NULL, filesize INTEGER NOT NULL, width INTEGER NOT NULL, height INTEGER NOT NULL, createdate DATETIME NOT NULL, updatedate DATETIME NOT NULL, createuser VARCHAR(128) NOT NULL, updateuser VARCHAR(128) NOT NULL, attributes CLOB DEFAULT NULL, PRIMARY KEY(id));
+CREATE TABLE sly_file (id INTEGER NOT NULL, revision INTEGER DEFAULT 0 NOT NULL, category_id INTEGER NOT NULL, title VARCHAR(255) NOT NULL, filename VARCHAR(255) NOT NULL, originalname VARCHAR(255) NOT NULL, filetype VARCHAR(255) NOT NULL, filesize INTEGER NOT NULL, width INTEGER DEFAULT NULL, height INTEGER DEFAULT NULL, createdate DATETIME NOT NULL, updatedate DATETIME NOT NULL, createuser VARCHAR(128) NOT NULL, updateuser VARCHAR(128) NOT NULL, attributes CLOB DEFAULT NULL, PRIMARY KEY(id));
 CREATE INDEX filename ON sly_file (filename);
 CREATE TABLE sly_file_category (id INTEGER NOT NULL, revision INTEGER DEFAULT 0 NOT NULL, name VARCHAR(255) NOT NULL, re_id INTEGER NOT NULL, path VARCHAR(255) NOT NULL, createdate DATETIME NOT NULL, updatedate DATETIME NOT NULL, createuser VARCHAR(128) NOT NULL, updateuser VARCHAR(128) NOT NULL, attributes CLOB DEFAULT NULL, PRIMARY KEY(id));
 CREATE TABLE sly_registry (name VARCHAR(255) NOT NULL, value BLOB NOT NULL, PRIMARY KEY(name));
 CREATE TABLE sly_slice (id INTEGER NOT NULL, module VARCHAR(64) NOT NULL, serialized_values CLOB NOT NULL, PRIMARY KEY(id));
 CREATE TABLE sly_user (id INTEGER NOT NULL, revision INTEGER DEFAULT 0 NOT NULL, login VARCHAR(128) NOT NULL, password VARCHAR(128) NOT NULL, status BOOLEAN DEFAULT '0' NOT NULL, name VARCHAR(255) DEFAULT NULL, description VARCHAR(255) DEFAULT NULL, timezone VARCHAR(64) DEFAULT NULL, lasttrydate DATETIME DEFAULT NULL, createdate DATETIME NOT NULL, updatedate DATETIME NOT NULL, createuser VARCHAR(128) NOT NULL, updateuser VARCHAR(128) NOT NULL, attributes CLOB DEFAULT NULL, PRIMARY KEY(id));
-CREATE INDEX logins ON sly_user (login);
+CREATE UNIQUE INDEX logins ON sly_user (login);
 
 -- populate database with some initial data
 INSERT INTO sly_clang (name, locale) VALUES ('deutsch', 'de_DE');

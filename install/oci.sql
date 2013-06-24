@@ -68,7 +68,7 @@ BEGIN
    END IF;
 END;
 CREATE TABLE sly_config (id VARCHAR2(255) NOT NULL, value CLOB NOT NULL, PRIMARY KEY(id));
-CREATE TABLE sly_file (id NUMBER(10) NOT NULL, revision NUMBER(10) DEFAULT 0 NOT NULL, category_id NUMBER(10) NOT NULL, title VARCHAR2(255) NOT NULL, filename VARCHAR2(255) NOT NULL, originalname VARCHAR2(255) NOT NULL, filetype VARCHAR2(255) NOT NULL, filesize NUMBER(10) NOT NULL, width NUMBER(10) NOT NULL, height NUMBER(10) NOT NULL, createdate TIMESTAMP(0) NOT NULL, updatedate TIMESTAMP(0) NOT NULL, createuser VARCHAR2(128) NOT NULL, updateuser VARCHAR2(128) NOT NULL, attributes CLOB DEFAULT NULL, PRIMARY KEY(id));
+CREATE TABLE sly_file (id NUMBER(10) NOT NULL, revision NUMBER(10) DEFAULT 0 NOT NULL, category_id NUMBER(10) NOT NULL, title VARCHAR2(255) NOT NULL, filename VARCHAR2(255) NOT NULL, originalname VARCHAR2(255) NOT NULL, filetype VARCHAR2(255) NOT NULL, filesize NUMBER(10) NOT NULL, width NUMBER(10) DEFAULT NULL, height NUMBER(10) DEFAULT NULL, createdate TIMESTAMP(0) NOT NULL, updatedate TIMESTAMP(0) NOT NULL, createuser VARCHAR2(128) NOT NULL, updateuser VARCHAR2(128) NOT NULL, attributes CLOB DEFAULT NULL, PRIMARY KEY(id));
 DECLARE
   constraints_Count NUMBER;
 BEGIN
@@ -194,7 +194,7 @@ BEGIN
       END LOOP;
    END IF;
 END;
-CREATE INDEX logins ON sly_user (login);
+CREATE UNIQUE INDEX logins ON sly_user (login);
 
 -- populate database with some initial data
 INSERT INTO sly_clang (name, locale) VALUES ('deutsch', 'de_DE');
