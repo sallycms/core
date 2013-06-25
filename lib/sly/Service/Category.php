@@ -219,7 +219,7 @@ class sly_Service_Category extends sly_Service_ArticleManager {
 			$where = 'clang = '.$clang.' AND (id = '.$parentID.' OR path LIKE "%|'.$parentID.'|%")';
 		}
 
-		return $this->find($where, null, 'id', null, null, null, $findOnline);
+		return $this->find($where, null, 'id', null, null, null, $findOnline === true ? self::FIND_REVISION_ONLINE : self::FIND_REVISION_LATEST);
 	}
 
 	/**
