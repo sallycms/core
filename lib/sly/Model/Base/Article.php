@@ -15,31 +15,43 @@
  */
 class sly_Model_Base_Article extends sly_Model_Base {
 	protected $id;          ///< int
-	protected $updateuser;  ///< string
+	protected $clang;       ///< int
+	protected $revision;    ///< int
+	protected $latest;      ///< int
 	protected $online;      ///< int
+	protected $deleted;     ///< int
+	protected $type;        ///< string
+	protected $re_id;       ///< int
+	protected $path;        ///< string
+	protected $pos;         ///< int
 	protected $name;        ///< string
 	protected $catpos;      ///< int
-	protected $createdate;  ///< int
-	protected $clang;       ///< int
-	protected $re_id;       ///< int
-	protected $pos;         ///< int
 	protected $catname;     ///< string
 	protected $startpage;   ///< int
+	protected $createdate;  ///< int
 	protected $updatedate;  ///< int
 	protected $createuser;  ///< string
+	protected $updateuser;  ///< string
 	protected $attributes;  ///< string
-	protected $path;        ///< string
-	protected $type;        ///< string
-	protected $revision;    ///< int
-	protected $deleted;     ///< int
 
 	protected $_pk = array('id' => 'int', 'clang' => 'int', 'revision' => 'int'); ///< array
 	protected $_attributes = array(
-		'updateuser' => 'string', 'name' => 'string',
-		'catpos' => 'int', 'createdate' => 'datetime', 're_id' => 'int', 'pos' => 'int',
-		'catname' => 'string', 'startpage' => 'int', 'updatedate' => 'datetime',
-		'createuser' => 'string', 'attributes' => 'string', 'path' => 'string',
-		'type' => 'string', 'deleted' => 'int', 'deleted' => 'int'
+		'latest'     => 'int',
+		'online'     => 'int',
+		'deleted'    => 'int',
+		'type'       => 'string',
+		're_id'      => 'int',
+		'path'       => 'string',
+		'pos'        => 'int',
+		'name'       => 'string',
+		'catpos'     => 'int',
+		'catname'    => 'string',
+		'startpage'  => 'int',
+		'createdate' => 'datetime',
+		'updatedate' => 'datetime',
+		'createuser' => 'string',
+		'updateuser' => 'string',
+		'attributes' => 'string'
 	); ///< array
 
 	/**
@@ -50,10 +62,73 @@ class sly_Model_Base_Article extends sly_Model_Base {
 	}
 
 	/**
+	 * @return int
+	 */
+	public function getClang() {
+		return $this->clang;
+	}
+
+	/**
+	 * @return int
+	 */
+	public function getRevision() {
+		return $this->revision;
+	}
+
+	/**
+	 * @return boolean
+	 */
+	public function isLatest() {
+		return $this->latest ? true : false;
+	}
+
+	/**
+	 * @return boolean
+	 */
+	public function isOnline() {
+		return $this->online ? true : false;
+	}
+
+	/**
+	 * @return boolean
+	 */
+	public function isOffline() {
+		return!$this->isOnline();
+	}
+
+	/**
+	 * @return boolean
+	 */
+	public function isDeleted() {
+		return $this->deleted ? true : false;
+	}
+
+	/**
 	 * @return string
 	 */
-	public function getUpdateUser() {
-		return $this->updateuser;
+	public function getType() {
+		return $this->type;
+	}
+
+	/**
+	 * @return int
+	 */
+	public function getParentId() {
+		return $this->re_id;
+	}
+
+	/**
+	 * @return string
+	 */
+	public function getPath() {
+		return $this->path;
+	}
+
+	/**
+	 * @return int
+	 */
+	public function getPosition() {
+		return $this->pos;
 	}
 
 	/**
@@ -68,34 +143,6 @@ class sly_Model_Base_Article extends sly_Model_Base {
 	 */
 	public function getCatPosition() {
 		return $this->catpos;
-	}
-
-	/**
-	 * @return int
-	 */
-	public function getCreateDate() {
-		return $this->createdate;
-	}
-
-	/**
-	 * @return int
-	 */
-	public function getClang() {
-		return $this->clang;
-	}
-
-	/**
-	 * @return int
-	 */
-	public function getParentId() {
-		return $this->re_id;
-	}
-
-	/**
-	 * @return int
-	 */
-	public function getPosition() {
-		return $this->pos;
 	}
 
 	/**
@@ -115,6 +162,13 @@ class sly_Model_Base_Article extends sly_Model_Base {
 	/**
 	 * @return int
 	 */
+	public function getCreateDate() {
+		return $this->createdate;
+	}
+
+	/**
+	 * @return int
+	 */
 	public function getUpdateDate() {
 		return $this->updatedate;
 	}
@@ -129,29 +183,15 @@ class sly_Model_Base_Article extends sly_Model_Base {
 	/**
 	 * @return string
 	 */
+	public function getUpdateUser() {
+		return $this->updateuser;
+	}
+
+	/**
+	 * @return string
+	 */
 	public function getAttributes() {
 		return $this->attributes;
-	}
-
-	/**
-	 * @return string
-	 */
-	public function getPath() {
-		return $this->path;
-	}
-
-	/**
-	 * @return string
-	 */
-	public function getType() {
-		return $this->type;
-	}
-
-	/**
-	 * @return int
-	 */
-	public function getRevision() {
-		return $this->revision;
 	}
 
 	/**
@@ -162,10 +202,66 @@ class sly_Model_Base_Article extends sly_Model_Base {
 	}
 
 	/**
-	 * @param string $updateuser
+	 * @param int $clang
 	 */
-	public function setUpdateUser($updateuser) {
-		$this->updateuser = $updateuser;
+	public function setClang($clang) {
+		$this->clang = (int) $clang;
+	}
+
+	/**
+	 * @param int $revision
+	 */
+	public function setRevision($revision) {
+		$this->revision = (int) $revision;
+	}
+
+	/**
+	 * @param boolean $isLatest
+	 */
+	public function setLatest($isLatest) {
+		$this->latest = $isLatest ? 1 : 0;
+	}
+
+	/**
+	 * @param boolean $online
+	 */
+	public function setOnline($online) {
+		$this->online = $online ? 1 : 0;
+	}
+
+	/**
+	 * @param boolean $deleted
+	 */
+	public function setDeleted($deleted) {
+		$this->deleted = $deleted ? 1 : 0;
+	}
+
+	/**
+	 * @param string $type
+	 */
+	public function setType($type) {
+		$this->type = (string) $type;
+	}
+
+	/**
+	 * @param int $re_id
+	 */
+	public function setParentId($re_id) {
+		$this->re_id = (int) $re_id;
+	}
+
+	/**
+	 * @param string $path
+	 */
+	public function setPath($path) {
+		$this->path = $path;
+	}
+
+	/**
+	 * @param int $position
+	 */
+	public function setPosition($position) {
+		$this->pos = (int) $position;
 	}
 
 	/**
@@ -180,34 +276,6 @@ class sly_Model_Base_Article extends sly_Model_Base {
 	 */
 	public function setCatPosition($position) {
 		$this->catpos = (int) $position;
-	}
-
-	/**
-	 * @param mixed $updatedate  unix timestamp or date using 'YYYY-MM-DD HH:MM:SS' format
-	 */
-	public function setCreateDate($createdate) {
-		$this->createdate = sly_Util_String::isInteger($createdate) ? (int) $createdate : strtotime($createdate);
-	}
-
-	/**
-	 * @param int $clang
-	 */
-	public function setClang($clang) {
-		$this->clang = (int) $clang;
-	}
-
-	/**
-	 * @param int $re_id
-	 */
-	public function setParentId($re_id) {
-		$this->re_id = (int) $re_id;
-	}
-
-	/**
-	 * @param int $position
-	 */
-	public function setPosition($position) {
-		$this->pos = (int) $position;
 	}
 
 	/**
@@ -227,6 +295,13 @@ class sly_Model_Base_Article extends sly_Model_Base {
 	/**
 	 * @param mixed $updatedate  unix timestamp or date using 'YYYY-MM-DD HH:MM:SS' format
 	 */
+	public function setCreateDate($createdate) {
+		$this->createdate = sly_Util_String::isInteger($createdate) ? (int) $createdate : strtotime($createdate);
+	}
+
+	/**
+	 * @param mixed $updatedate  unix timestamp or date using 'YYYY-MM-DD HH:MM:SS' format
+	 */
 	public function setUpdateDate($updatedate) {
 		$this->updatedate = sly_Util_String::isInteger($updatedate) ? (int) $updatedate : strtotime($updatedate);
 	}
@@ -239,57 +314,17 @@ class sly_Model_Base_Article extends sly_Model_Base {
 	}
 
 	/**
+	 * @param string $updateuser
+	 */
+	public function setUpdateUser($updateuser) {
+		$this->updateuser = $updateuser;
+	}
+
+	/**
 	 * @param string $attributes
 	 */
 	public function setAttributes($attributes) {
 		$this->attributes = $attributes;
-	}
-
-	/**
-	 * @param string $path
-	 */
-	public function setPath($path) {
-		$this->path = $path;
-	}
-
-	/**
-	 * @param string $type
-	 */
-	public function setType($type) {
-		$this->type = (string) $type;
-	}
-
-	/**
-	 * @param int $revision
-	 */
-	public function setRevision($revision) {
-		$this->revision = (int) $revision;
-	}
-
-	/**
-	 *
-	 * @param boolean $online
-	 */
-	public function setOnline($online) {
-		$this->online = $online ? 1 : 0;
-	}
-
-	/**
-	 * @return boolean
-	 */
-	public function isOnline() {
-		return $this->online ? true : false;
-	}
-
-	/**
-	 * @return boolean
-	 */
-	public function isOffline() {
-		return!$this->isOnline();
-	}
-
-	public function isDeleted() {
-		return $this->deleted ? true : false;
 	}
 
 	/**
