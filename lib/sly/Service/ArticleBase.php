@@ -258,14 +258,4 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base implements
 		$type = $this->getModelType();
 		return 'SLY_'.strtoupper(substr($type, 0, 3)).'_'.$name;
 	}
-
-	/**
-	 * gets online status of article/category
-	 * @param  array $items  sly_Model_Base_Article
-	 * @return boolean
-	 */
-	protected function getOnlineStatus(sly_Model_Base_Article $item) {
-		$sql = $this->container->getPersistence();
-		return $sql->magicFetch($this->getTableName(), 'MAX(revision)', array('id' => $item->getId(), 'clang' => $item->getClang())) == $item->getRevision();
-	}
 }
