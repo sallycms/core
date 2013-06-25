@@ -53,18 +53,20 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 
 		return new sly_Model_Article(array(
 			        'id' => $params['id'],
+			     'clang' => $params['clang'],
+			  'revision' => 0,
+			    'online' => !empty($params['online']),
+			    'latest' => !empty($params['latest']),
+			   'deleted' => 0,
 			     're_id' => $params['parent'],
-			      'name' => $params['name'],
-			   'catname' => $catname,
-			    'catpos' => 0,
-			'attributes' => '',
-			 'startpage' => 0,
-			       'pos' => $params['position'],
 			      'path' => $params['path'],
 			      'type' => $params['type'],
-			     'clang' => $params['clang'],
-			   'deleted' => 0,
-			  'revision' => 0
+			       'pos' => $params['position'],
+			      'name' => $params['name'],
+			    'catpos' => 0,
+			   'catname' => $catname,
+			 'startpage' => 0,
+			'attributes' => ''
 		));
 	}
 
@@ -278,13 +280,18 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 
 		try {
 			$touched->setRevision($this->getMaxRevision($article) + 1);
+			$touched->setLatest(true);
 			$touched->setCreateColumns($user);
+
+			// update old latest revision
+			$sql->update('article', array('latest' => 0, 'online' => 0), array('id' => $article->getId(), 'clang' => $article->getClang()));
+
 			$touched = $this->insert($touched);
 
 			$this->copyContent($article, $touched, $user, $skipSliceIds);
 
 			$this->getDispatcher()->notify('SLY_ART_TOUCHED', $touched, array(
-				'source'  => $article,
+				'source' => $article,
 			));
 
 			$sql->commitTrx($trx);

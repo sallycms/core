@@ -111,13 +111,16 @@ abstract class sly_Service_ArticleManager extends sly_Service_ArticleBase {
 			foreach ($languages as $clangID) {
 				$obj = $this->buildModel(array(
 					      'id' => $newID,
+					   'clang' => $clangID,
+					'revision' => 0,
+					 'latest'  => 1,
+					 'online'  => 0,
+					 'deleted' => 0,
 					  'parent' => $parentID,
-					    'name' => $name,
-					'position' => $position,
 					    'path' => $path,
 					    'type' => $type,
-					   'clang' => $clangID,
-					'revision' => 0
+					'position' => $position,
+					    'name' => $name
 				));
 
 				$obj->setUpdateColumns($user);
