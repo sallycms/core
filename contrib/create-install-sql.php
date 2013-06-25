@@ -36,7 +36,7 @@ $table = createTable($schema, 'sly_article');
 $table->addColumn('id',         'integer')->setUnsigned(true);
 $table->addColumn('clang',      'integer')->setUnsigned(true);
 $table->addColumn('revision',   'integer')->setUnsigned(true)->setDefault(0);
-$table->addColumn('tip',        'boolean')->setDefault('0');
+$table->addColumn('latest',     'boolean')->setDefault('0');
 $table->addColumn('online',     'boolean')->setDefault('0');
 $table->addColumn('deleted',    'boolean')->setDefault('0');
 $table->addColumn('type',       'string')->setLength(64);
