@@ -76,79 +76,98 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base implements
 	 * @param  int      $offset
 	 * @param  int      $limit
 	 * @param  string   $having
-	 * @param  boolean  $findOnline
+	 * @param  int      $revStrategy  FIND_REVISION_ONLINE, FIND_REVISION_LATEST or null to disable any kind of revision filtering
 	 * @return array
 	 */
-	public function find($where = null, $group = null, $order = null, $offset = null, $limit = null, $having = null, $findOnline = false) {
-		$db         = $this->getPersistence();
-		$where      = $this->fixWhereClause($where);
-		$tableName  = $db->getPrefix().$this->getTableName();
-		$innerQuery = $db->getSQLbuilder($tableName);
-		$outerQuery = $db->getSQLbuilder($tableName);
-		$return     = array();
+	public function find($where = null, $group = null, $order = null, $offset = null, $limit = null, $having = null, $revStrategy = self::FIND_REVISION_LATEST) {
+		$db        = $this->getPersistence();
+		$where     = $this->fixWhereClause($where);
+		$tableName = $db->getPrefix().$this->getTableName();
+		$query     = $db->getSQLbuilder($tableName);
+		$return    = array();
 
-		// SELECT * FROM sly_article WHERE (id, clang, revision) IN (
-		//    SELECT id, clang, MAX(revision) FROM sly_article WHERE $where GROUP BY id, clang[, $group][ HAVING $having][ ORDER BY $order]
-		// )[ ORDER BY $order][ LIMIT [$offset,]$limit]
+		// SELECT * FROM sly_article
+		// WHERE ($where) AND (latest = 1[ OR online = 1])
+		// [GROUP BY $group] [HAVING $having]
+		// ORDER BY online DESC[, $order]
+		// [LIMIT [$offset,]$limit]
 
-		// Having MAX(r) in there does not cause issues when revision is also part
-		// of the WHERE clause, it just ensures the correct revision to be chosen.
-		// The ORDER BY clause must be present in both queries, as it can have an
-		// effect on the actual selection (inner). It must be present on the outer
-		// so the final result is sorted as the caller expected it.
-		// The LIMIT clause may NOT be part of the inner query, as it's not yet
-		// supported by neither MySQL nor MariaDB.
+		// transform $where into a string, so we can add our rev strategy clauses
 
-		$group = $group ? ('id, clang, '.$group) : 'id, clang';
+		$query->where($where);
 
-		$innerQuery->select('id, clang, MAX(revision)');
-		$innerQuery->where($where);
-		$innerQuery->group($group);
+		$where = $query->get_where_clause();
+		$strat = null;
 
-		if ($having) $innerQuery->having($having);
-		if ($order)  $innerQuery->order($order);
+		switch ($revStrategy) {
+			case self::FIND_REVISION_ONLINE: $strat = 'latest = 1 OR online = 1'; break;
+			case self::FIND_REVISION_LATEST: $strat = 'latest = 1';               break;
+			default:                         $strat = null;                       break;
+		}
 
-		$outerQuery->select('*');
-		$outerQuery->where('(id, clang, revision) IN ('.$innerQuery->to_s().')');
+		if ($where === null) {
+			$where = $strat;
+		}
+		elseif ($strat) {
+			$where = "($where) AND ($strat)";
+		}
 
-		if ($order)  $outerQuery->order($order);
-		if ($offset) $outerQuery->offset($offset);
-		if ($limit)  $outerQuery->limit($limit);
+		// construct the real query
 
-		$db->query($outerQuery, $innerQuery->bind_values());
+		$order  = $order ? "online DESC, latest DESC, $order" : 'online DESC, latest DESC';
+		$values = $query->bind_values();
 
-		foreach ($db as $row) {
-			$item = $this->makeInstance($row);
+		array_unshift($values, $where);
+		call_user_func_array(array($query, 'where'), $values);
 
-			if ($findOnline) {
-				$item->setOnline(true);
+		$query->select('*');
+		$query->order($order);
+
+		if ($group)  $query->group($group);
+		if ($offset) $query->offset($offset);
+		if ($limit)  $query->limit($limit);
+
+		// fetch data
+
+		$db->query($query, $query->bind_values());
+
+		$fetched = array();
+
+		foreach ($db->all() as $row) {
+			// based on the revision strategy, we only consider a subset of found revisions;
+			// perform the filtering before constructing the actual model instance
+
+			if ($revStrategy === self::FIND_REVISION_ONLINE) {
+				// only take the first row per article
+				$key = $row['id'].'_'.$row['clang'];
+				if (isset($fetched[$key])) continue;
+
+				$fetched[$key] = 1;
 			}
-			else {
-				$item->setOnline($this->getOnlineStatus($item));
-			}
 
-			$return[] = $item;
+			$return[] = $this->makeInstance($row);
 		}
 
 		return $return;
 	}
 
 	/**
+	 * finds articles and return the first one
 	 *
-	 * @param mixed   $where
-	 * @param boolean $findOnline
+	 * @param mixed $where
+	 * @param int   $revStrategy  FIND_REVISION_ONLINE, FIND_REVISION_LATEST or null to disable any kind of revision filtering
 	 */
-	public function findOne($where = null, $findOnline = false) {
-		$items = $this->find($where, null, null, null, 1, null, $findOnline);
+	public function findOne($where = null, $revStrategy = self::FIND_REVISION_LATEST) {
+		$items = $this->find($where, null, null, null, 1, null, $revStrategy);
 		return !empty($items) ? $items[0] : null;
 	}
 
 	/**
-	 * finds article by id clang and revision
+	 * finds article by id, clang and revision
 	 *
 	 * @param  int $id
 	 * @param  int $clang
-	 * @param  int $revision          if null the latest revision will be fetched
+	 * @param  int $revision           a specific revision or one of the FIND_* constants
 	 * @return sly_Model_Base_Article
 	 */
 	protected function findByPK($id, $clang, $revision) {
@@ -165,7 +184,7 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base implements
 			$where['revision'] = (int) $revision;
 		}
 
-		return $this->findOne($where, $revision === self::FIND_REVISION_ONLINE);
+		return $this->findOne($where, $revision >= 0 ? null : $revision);
 	}
 
 	/**
