@@ -299,8 +299,38 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 			$this->update($article);
 
 			$this->getDispatcher()->notify('SLY_ART_ONLINE', $article, array(
-				'previous' => $prevOnline
+				'previous' => $prevOnline,
+				'user'     => $user
 			));
+
+			$sql->commitTrx($trx);
+		}
+		catch (Exception $e) {
+			$sql->rollBackTrx($trx, $e);
+		}
+
+		return $article;
+	}
+
+	/**
+	 * @param sly_Model_Article $article
+	 * @param sly_Model_User    $user
+	 */
+	public function setOffline(sly_Model_Article $article, sly_Model_User $user = null) {
+		if ($article->isOffline()) {
+			return $article;
+		}
+
+		$user = $this->getActor($user, __METHOD__);
+		$sql  = $this->getPersistence();
+		$trx  = $sql->beginTrx();
+
+		try {
+			// set the article offline
+			$article->setOnline(false);
+			$this->update($article);
+
+			$this->getDispatcher()->notify('SLY_ART_OFFLINE', $article, array('user' => $user));
 
 			$sql->commitTrx($trx);
 		}
