@@ -55,8 +55,8 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 			        'id' => $params['id'],
 			     'clang' => $params['clang'],
 			  'revision' => 0,
-			    'online' => !empty($params['online']),
-			    'latest' => !empty($params['latest']),
+			    'online' => empty($params['online']) ? 0 : 1,
+			    'latest' => empty($params['latest']) ? 0 : 1,
 			   'deleted' => 0,
 			     're_id' => $params['parent'],
 			      'path' => $params['path'],
@@ -281,6 +281,7 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 		try {
 			$touched->setRevision($this->getMaxRevision($article) + 1);
 			$touched->setLatest(true);
+			$touched->setOnline(true);
 			$touched->setCreateColumns($user);
 
 			// update old latest revision

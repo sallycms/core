@@ -114,7 +114,7 @@ abstract class sly_Service_ArticleManager extends sly_Service_ArticleBase {
 					   'clang' => $clangID,
 					'revision' => 0,
 					 'latest'  => 1,
-					 'online'  => 0,
+					 'online'  => 1,
 					 'deleted' => 0,
 					  'parent' => $parentID,
 					    'path' => $path,
