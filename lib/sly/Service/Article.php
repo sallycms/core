@@ -289,13 +289,15 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 			// revision of an article. Even if the core behaviour is primitive, it might
 			// change.
 			$prevOnline = $this->findByPK($id, $clang, self::FIND_REVISION_ONLINE);
-			$prevOnline->setOnline(false);
+
+			// update the old online article
+			if ($prevOnline) {
+				$prevOnline->setOnline(false);
+				$this->update($prevOnline);
+			}
 
 			// update the new online revision
 			$article->setOnline(true);
-
-			// update database
-			$this->update($prevOnline);
 			$this->update($article);
 
 			$this->getDispatcher()->notify('SLY_ART_ONLINE', $article, array(
