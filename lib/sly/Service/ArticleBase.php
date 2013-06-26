@@ -9,8 +9,9 @@
  */
 
 abstract class sly_Service_ArticleBase extends sly_Service_Model_Base implements sly_ContainerAwareInterface {
-	const FIND_REVISION_LATEST = -2;
 	const FIND_REVISION_ONLINE = -1;
+	const FIND_REVISION_LATEST = -2;
+	const FIND_REVISION_BEST   = -3;
 
 	protected $tablename = 'article'; ///< string
 	protected $container;             ///< sly_Container
@@ -100,9 +101,10 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base implements
 		$strat = null;
 
 		switch ($revStrategy) {
-			case self::FIND_REVISION_ONLINE: $strat = 'online = 1'; break;
-			case self::FIND_REVISION_LATEST: $strat = 'latest = 1'; break;
-			default:                         $strat = null;         break;
+			case self::FIND_REVISION_ONLINE: $strat = 'online = 1';               break;
+			case self::FIND_REVISION_LATEST: $strat = 'latest = 1';               break;
+			case self::FIND_REVISION_BEST:   $strat = 'latest = 1 OR online = 1'; break;
+			default:                         $strat = null;                       break;
 		}
 
 		if ($where === null) {
@@ -114,6 +116,7 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base implements
 
 		// construct the real query
 
+		$order  = $order ? "$order, online DESC, latest DESC" : 'online DESC, latest DESC';
 		$values = $query->bind_values();
 
 		array_unshift($values, $where);
@@ -130,7 +133,20 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base implements
 
 		$db->query($query, $query->bind_values());
 
+		$fetched = array();
+
 		foreach ($db->all() as $row) {
+			// based on the revision strategy, we only consider a subset of found revisions;
+			// perform the filtering before constructing the actual model instance
+
+			if ($revStrategy === self::FIND_REVISION_BEST) {
+				// only take the first row per article
+				$key = $row['id'].'_'.$row['clang'];
+				if (isset($fetched[$key])) continue;
+
+				$fetched[$key] = 1;
+			}
+
 			$return[] = $this->makeInstance($row);
 		}
 
