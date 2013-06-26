@@ -272,6 +272,49 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 	 * @param sly_Model_Article $article
 	 * @param sly_Model_User    $user
 	 */
+	public function setOnline(sly_Model_Article $article, sly_Model_User $user = null) {
+		if ($article->isOnline()) {
+			return $article;
+		}
+
+		$user  = $this->getActor($user, __METHOD__);
+		$sql   = $this->getPersistence();
+		$trx   = $sql->beginTrx();
+		$id    = $article->getId();
+		$clang = $article->getClang();
+
+		try {
+			// As we expect other complex addOns to replace this method, we make it a
+			// default to give all listeners access to the previous and current online
+			// revision of an article. Even if the core behaviour is primitive, it might
+			// change.
+			$prevOnline = $this->findByPK($id, $clang, self::FIND_REVISION_ONLINE);
+			$prevOnline->setOnline(false);
+
+			// update the new online revision
+			$article->setOnline(true);
+
+			// update database
+			$this->update($prevOnline);
+			$this->update($article);
+
+			$this->getDispatcher()->notify('SLY_ART_ONLINE', $article, array(
+				'previous' => $prevOnline
+			));
+
+			$sql->commitTrx($trx);
+		}
+		catch (Exception $e) {
+			$sql->rollBackTrx($trx, $e);
+		}
+
+		return $article;
+	}
+
+	/**
+	 * @param sly_Model_Article $article
+	 * @param sly_Model_User    $user
+	 */
 	public function touch(sly_Model_Article $article, sly_Model_User $user = null, $skipSliceIds = array()) {
 		$user    = $this->getActor($user, __METHOD__);
 		$touched = clone $article;
