@@ -29,7 +29,7 @@ class sly_Service_Category extends sly_Service_ArticleManager {
 	 * @return mixed                the condition either as an array or as a string
 	 */
 	protected function getSiblingQuery($categoryID, $clang = null, $asArray = false) {
-		$where = array('re_id' => (int) $categoryID, 'startpage' => 1, 'revision' => 0);
+		$where = array('re_id' => (int) $categoryID, 'startpage' => 1);
 
 		if ($clang !== null) {
 			$where['clang'] = (int) $clang;
