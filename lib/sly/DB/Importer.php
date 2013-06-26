@@ -55,8 +55,12 @@ class sly_DB_Importer {
 		$dumpVersion = $dump->getVersion();
 		$thisVersion = sly_Core::getVersion('X.Y.Y');
 
-		if ($dumpVersion === null || !sly_Util_Versions::isCompatible($dumpVersion)) {
+		if ($dumpVersion === null) {
 			throw new sly_Exception(t('importer_no_valid_import_file_version'));
+		}
+
+		if (!sly_Util_Versions::isCompatible($dumpVersion)) {
+			throw new sly_Exception(t('importer_dump_is_incompatible', $dumpVersion, $thisVersion));
 		}
 	}
 
