@@ -81,13 +81,16 @@ class sly_Service_Package {
 	 * @return boolean
 	 */
 	public function exists($package, $forceRefresh = false) {
-		$exists = $forceRefresh ? null : $this->getCache($package, 'exists');
+		$cached_exists = $this->getCache($package, 'exists');
+		$exists = $forceRefresh ? null : $cached_exists;
 
 		if ($exists === null) {
 			$base   = $this->baseDirectory($package);
 			$exists = file_exists($base.'composer.json');
 
-			$this->setCache($package, 'exists', $exists);
+			if ($cached_exists !== $exists) {
+				$this->setCache($package, 'exists', $exists);
+			}
 		}
 
 		return $exists;
@@ -344,16 +347,21 @@ class sly_Service_Package {
 	 * @return array  list of packages (cached if possible)
 	 */
 	public function getPackages() {
-		$packages = $this->getCache('', 'packages');
+		$packages_cached = $this->getCache('', 'packages');
 
-		if ($packages === null || ($this->refreshed === false && sly_Core::isDeveloperMode())) {
+		if ($packages_cached === null || ($this->refreshed === false && sly_Core::isDeveloperMode())) {
 			$packages = $this->findPackages();
 
 			$this->refreshed = true;
-			$this->setCache('', 'packages', $packages);
+
+			if ($packages_cached !== $packages) {
+				$this->setCache('', 'packages', $packages);
+			}
+
+			return $packages;
 		}
 
-		return $packages;
+		return $packages_cached;
 	}
 
 	/**
