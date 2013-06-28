@@ -8,22 +8,30 @@
  * http://www.opensource.org/licenses/mit-license.php
  */
 
+use wv\BabelCache\CacheInterface;
+
 /**
+ * Service class for managing packages
+ *
+ * This class only ever sees Composer packages and has no Sally addOn
+ * semantics built into it. Use the addOn service for accessing addOn stuff and
+ * the addOn manager to perform more complex operations like installating them.
+ *
  * @author  christoph@webvariants.de
  * @ingroup service
  */
 class sly_Service_Package {
 	protected $sourceDir; ///< string
-	protected $cache;     ///< BabelCache_Interface
+	protected $cache;     ///< CacheInterface
 	protected $composers; ///< array
 	protected $refreshed; ///< boolean
 	protected $namespace; ///< string
 
 	/**
-	 * @param string               $sourceDir
-	 * @param BabelCache_Interface $cache
+	 * @param string         $sourceDir
+	 * @param CacheInterface $cache
 	 */
-	public function __construct($sourceDir, BabelCache_Interface $cache) {
+	public function __construct($sourceDir, CacheInterface $cache) {
 		$this->sourceDir = sly_Util_Directory::normalize($sourceDir).DIRECTORY_SEPARATOR;
 		$this->cache     = $cache;
 		$this->composers = array();
@@ -35,7 +43,7 @@ class sly_Service_Package {
 	 * Clears the addOn metadata cache
 	 */
 	public function clearCache() {
-		$this->cache->flush('sly.package', true);
+		$this->cache->clear('sly.package', true);
 		$this->composers = array();
 		$this->refreshed = false;
 	}
@@ -73,13 +81,16 @@ class sly_Service_Package {
 	 * @return boolean
 	 */
 	public function exists($package, $forceRefresh = false) {
-		$exists = $forceRefresh ? null : $this->getCache($package, 'exists');
+		$cached_exists = $this->getCache($package, 'exists');
+		$exists = $forceRefresh ? null : $cached_exists;
 
 		if ($exists === null) {
 			$base   = $this->baseDirectory($package);
 			$exists = file_exists($base.'composer.json');
 
-			$this->setCache($package, 'exists', $exists);
+			if ($cached_exists !== $exists) {
+				$this->setCache($package, 'exists', $exists);
+			}
 		}
 
 		return $exists;
@@ -336,16 +347,21 @@ class sly_Service_Package {
 	 * @return array  list of packages (cached if possible)
 	 */
 	public function getPackages() {
-		$packages = $this->getCache('', 'packages');
+		$packages_cached = $this->getCache('', 'packages');
 
-		if ($packages === null || ($this->refreshed === false && sly_Core::isDeveloperMode())) {
+		if ($packages_cached === null || ($this->refreshed === false && sly_Core::isDeveloperMode())) {
 			$packages = $this->findPackages();
 
 			$this->refreshed = true;
-			$this->setCache('', 'packages', $packages);
+
+			if ($packages_cached !== $packages) {
+				$this->setCache('', 'packages', $packages);
+			}
+
+			return $packages;
 		}
 
-		return $packages;
+		return $packages_cached;
 	}
 
 	/**

@@ -13,8 +13,11 @@
  */
 abstract class sly_Service_File_Base {
 	protected $cache;
+	protected $filePerm;
 
-	public function __construct() {
+	public function __construct($filePermissions) {
+		$this->filePerm = $filePermissions === null ? null : (int) $filePermissions;
+
 		$this->clearCache();
 	}
 
@@ -92,7 +95,7 @@ abstract class sly_Service_File_Base {
 	 */
 	public function load($filename, $forceCached = false, $disableRuntimeCache = false) {
 		if (mb_strlen($filename) === 0 || !is_string($filename)) {
-			throw new sly_Exception('No file given!');
+			throw new InvalidArgumentException('No file given!');
 		}
 
 		if (!$disableRuntimeCache) {
@@ -104,7 +107,7 @@ abstract class sly_Service_File_Base {
 		}
 
 		if (!is_file($filename)) {
-			throw new sly_Exception(t('file_not_found', $filename));
+			throw new sly_Exception('File '.$filename.' not found');
 		}
 
 		$cachefile = $this->getCacheFile($filename);
@@ -138,7 +141,7 @@ abstract class sly_Service_File_Base {
 			$exists = file_exists($cachefile);
 
 			file_put_contents($cachefile, '<?php $config = '.var_export($config, true).';', LOCK_EX);
-			if (!$exists) chmod($cachefile, sly_Core::getFilePerm());
+			if (!$exists) $this->chmod($cachefile);
 		}
 
 		if (!$disableRuntimeCache) {
@@ -152,12 +155,15 @@ abstract class sly_Service_File_Base {
 		$cacheFile   = $this->getCacheFile($filename);
 		$exists      = file_exists($filename);
 		$cacheExists = file_exists($cacheFile);
+
 		if ($exists) {
 			unlink($filename);
 		}
+
 		if ($cacheExists) {
 			unlink($cacheFile);
 		}
+
 		$this->clearCache();
 	}
 
@@ -168,6 +174,15 @@ abstract class sly_Service_File_Base {
 	public function dump($filename, $data) {
 		$exists = file_exists($filename);
 		$this->writeFile($filename, $data);
-		if (!$exists) chmod($filename, sly_Core::getFilePerm());
+		if (!$exists) $this->chmod($filename);
+	}
+
+	/**
+	 * @param string $filename
+	 */
+	public function chmod($filename) {
+		if ($this->filePerm !== null) {
+			chmod($filename, $this->filePerm);
+		}
 	}
 }

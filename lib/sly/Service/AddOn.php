@@ -8,31 +8,35 @@
  * http://www.opensource.org/licenses/mit-license.php
  */
 
+use Gaufrette\Filesystem;
+use wv\BabelCache\CacheInterface;
+use wv\BabelCache\Util;
+
 /**
  * @author  christoph@webvariants.de
  * @ingroup service
  */
 class sly_Service_AddOn {
 	protected $config;     ///< sly_Configuration
-	protected $cache;      ///< BabelCache_Interface
+	protected $cache;      ///< CacheInterface
 	protected $pkgService; ///< sly_Service_Package
 	protected $vndService; ///< sly_Service_Package  vendor package service (optional)
-	protected $dynDir;     ///< string
+	protected $dynFs;      ///< Filesystem
 
 	const SALLY_PKGKEY     = 'sallycms/sallycms';
 	const INSTALLER_PKGKEY = 'sallycms/composer-installer';
 
 	/**
-	 * @param sly_Configuration    $config
-	 * @param BabelCache_Interface $cache
-	 * @param sly_Service_Package  $pkgService
-	 * @param string               $dynDir
+	 * @param sly_Configuration   $config
+	 * @param CacheInterface      $cache
+	 * @param sly_Service_Package $pkgService
+	 * @param Filesystem          $dynFs
 	 */
-	public function __construct(sly_Configuration $config, BabelCache_Interface $cache, sly_Service_Package $pkgService, $dynDir) {
+	public function __construct(sly_Configuration $config, CacheInterface $cache, sly_Service_Package $pkgService, Filesystem $dynFs) {
 		$this->config     = $config;
-		$this->cache     = $cache;
+		$this->cache      = $cache;
 		$this->pkgService = $pkgService;
-		$this->dynDir     = sly_Util_Directory::normalize($dynDir).DIRECTORY_SEPARATOR;
+		$this->dynFs      = $dynFs;
 	}
 
 	/**
@@ -62,7 +66,7 @@ class sly_Service_AddOn {
 	 */
 	public function setProperty($addon, $property, $value) {
 		$this->clearCache();
-		return $this->config->set($this->getConfPath($addon).'/'.$property, $value);
+		return $this->config->set($this->getConfPath($addon).'/'.$property, $value)->store();
 	}
 
 	/**
@@ -75,16 +79,6 @@ class sly_Service_AddOn {
 	 */
 	public function getProperty($addon, $property, $default = null) {
 		return $this->config->get($this->getConfPath($addon).'/'.$property, $default);
-	}
-
-	/**
-	 * @param  string $type   'internal' or 'public'
-	 * @param  string $addon  addon name
-	 * @return string
-	 */
-	public function dynDirectory($type, $addon) {
-		$dir = $this->dynDir.$type.DIRECTORY_SEPARATOR.str_replace('/', DIRECTORY_SEPARATOR, $addon);
-		return sly_Util_Directory::create($dir);
 	}
 
 	/**
@@ -103,7 +97,7 @@ class sly_Service_AddOn {
 	 */
 	public function filterByProperty($property, $value = true, $isComposerKey = false) {
 		$cache  = $this->cache;
-		$key    = sly_Cache::generateKey('filter', $property, $value, $isComposerKey);
+		$key    = Util::generateKey('filter', $property, $value, $isComposerKey);
 		$result = $cache->get('sly.addon', $key);
 
 		if (!is_array($result)) {
@@ -241,23 +235,23 @@ class sly_Service_AddOn {
 	}
 
 	/**
-	 * Get the full path to the public directory
+	 * Get the filesystem for dynamic files of an addOn
 	 *
 	 * @param  string $addon  addon name
-	 * @return string         full path
+	 * @return Filesystem
 	 */
-	public function publicDirectory($addon) {
-		return $this->dynDirectory('public', $addon);
+	public function getDynFilesystem($addon) {
+		return new sly_Filesystem_Prefixed($this->dynFs, $addon);
 	}
 
 	/**
-	 * Get the full path to the internal directory
+	 * Get the path to the temp directory for an addOn
 	 *
 	 * @param  string $addon  addon name
-	 * @return string         full path
+	 * @return string
 	 */
-	public function internalDirectory($addon) {
-		return $this->dynDirectory('internal', $addon);
+	public function getTempDirectory($addon) {
+		return sly_Util_Directory::create(SLY_TEMPFOLDER.'/'.$addon, null, true);
 	}
 
 	/**
@@ -326,7 +320,7 @@ class sly_Service_AddOn {
 	 * Clears the addOn metadata cache
 	 */
 	public function clearCache() {
-		$this->cache->flush('sly.addon', true);
+		$this->cache->clear('sly.addon', true);
 		$this->pkgService->clearCache();
 	}
 

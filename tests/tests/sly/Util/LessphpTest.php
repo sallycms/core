@@ -27,11 +27,11 @@ class sly_Util_LessphpTest extends PHPUnit_Framework_TestCase {
 	}
 
 	public function testImports() {
-		$here  = dirname(__FILE__);
+		$here  = __DIR__;
 		$rel   = sly_Util_Directory::getRelative($here);
 		$mixin = '.clear() { overflow: auto; }';
 		file_put_contents($here.DIRECTORY_SEPARATOR.'mixin.less', $mixin);
-		sly_Core::config()->setStatic('LESS_IMPORT_DIRS', array($rel));
+		sly_Core::config()->setStatic('less_import_dirs', array($rel));
 
 		$input  = "@import 'mixin.less'; a { .clear; }";
 		$output = sly_Util_Lessphp::processString($input);

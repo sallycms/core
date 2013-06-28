@@ -30,7 +30,7 @@ print "Hallo Welt!";
 print \$x + 5;
 TESTFILE;
 
-		$service = sly_Service_Factory::getModuleService();
+		$service = sly_Core::getContainer()->getModuleService();
 		$folder  = $service->getFolder();
 
 		// create test template file
@@ -54,7 +54,7 @@ TESTFILE;
 	}
 
 	public function testGetParams() {
-		$service = sly_Service_Factory::getModuleService();
+		$service = sly_Core::getContainer()->getModuleService();
 
 		$this->assertEquals(self::$uniqid, $service->get(self::$uniqid, 'name'));
 		$this->assertEquals('Hallo Welt', $service->getTitle(self::$uniqid));

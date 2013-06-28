@@ -121,7 +121,8 @@ class sly_Slice_Values {
 		}
 
 		foreach ($filenames as $name) {
-			if (file_exists(SLY_MEDIAFOLDER.'/'.$name)) {
+			$medium = sly_Util_Medium::findByFilename($name);
+			if ($medium && $medium->exists()) {
 				$res[] = $name;
 			}
 		}
@@ -228,6 +229,6 @@ class sly_Slice_Values {
 			throw new sly_Exception('Call to undefined method '.get_class($this).'::'.$method.'()');
 		}
 
-		return $dispatcher->filter($event, null, array('method' => $method, 'arguments' => $arguments, 'object' => $this));
+		return $dispatcher->filter($event, $this, array('method' => $method, 'arguments' => $arguments, 'object' => $this));
 	}
 }

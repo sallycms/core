@@ -19,8 +19,8 @@ class sly_DB_PDO_Driver_SQLITE extends sly_DB_PDO_Driver {
 	public function getDSN() {
 		if (empty($this->database)) return 'sqlite::memory:';
 
-		$dbFile = sly_Util_Directory::join(SLY_DYNFOLDER, 'internal/sally/sqlite', preg_replace('#[^a-z0-9-_.,]#i', '_', $this->database).'.sq3');
-		$dir    = dirname($dbFile);
+		$dir    = SLY_DATAFOLDER;
+		$dbFile = sly_Util_Directory::join($dir, '/projectdb', preg_replace('#[^a-z0-9-_.,]#i', '_', $this->database).'.sq3');
 
 		if (!sly_Util_Directory::create($dir)) {
 			throw new sly_DB_PDO_Exception('Konnte Datenverzeichnis für Datenbank '.$this->database.' nicht erzeugen.');

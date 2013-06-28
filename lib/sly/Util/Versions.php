@@ -26,7 +26,7 @@ class sly_Util_Versions {
 	 * @return string
 	 */
 	public static function set($path, $version) {
-		return sly_Core::config()->set('versions/'.$path, $version);
+		return sly_Core::config()->set('versions/'.$path, $version)->store();
 	}
 
 	/**
@@ -37,7 +37,7 @@ class sly_Util_Versions {
 	 * @return boolean              true if it matches, else false
 	 */
 	public static function isCompatible($constraints, $version = null) {
-		$version = $version === null ? sly_Core::getVersion('X.Y.Z') : $version;
+		$version = $version === null ? sly_Core::getVersion('R') : $version;
 		$parser  = new sly_Service_VersionParser();
 		$checks  = $parser->parseConstraints($constraints);
 		$version = $parser->normalize($version);
@@ -60,6 +60,6 @@ class sly_Util_Versions {
 	 * @param  string $component
 	 */
 	public static function remove($component) {
-		sly_Core::config()->remove('versions/'.$component);
+		sly_Core::config()->remove('versions/'.$component)->store();
 	}
 }

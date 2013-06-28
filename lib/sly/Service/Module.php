@@ -9,7 +9,7 @@
  */
 
 /**
- * Service-Klasse für Module
+ * Service class for managing modules
  *
  * @author  christoph@webvariants.de
  * @ingroup service

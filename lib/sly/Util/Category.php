@@ -22,11 +22,10 @@ class sly_Util_Category {
 	 * checks whether a category exists or not
 	 *
 	 * @param  int $categoryID
-	 * @param  int $clang
 	 * @return boolean
 	 */
-	public static function exists($categoryID, $clang = null) {
-		return self::isValid(self::findById($categoryID, $clang));
+	public static function exists($categoryID) {
+		return sly_Core::getContainer()->getCategoryService()->exists($categoryID);
 	}
 
 	/**
@@ -47,7 +46,12 @@ class sly_Util_Category {
 	public static function findById($categoryID, $clang = null, $default = null) {
 		$service    = sly_Core::getContainer()->getCategoryService();
 		$categoryID = (int) $categoryID;
-		$cat        = $service->findById($categoryID, $clang);
+
+		if ($clang === false || $clang === null) {
+			$clang = sly_Core::getCurrentClang();
+		}
+
+		$cat        = $service->findByPK($categoryID, $clang);
 
 		if ($cat) return $cat;
 
@@ -74,7 +78,10 @@ class sly_Util_Category {
 	 * @return array
 	 */
 	public static function findByParentId($parentID, $ignoreOfflines = false, $clang = null) {
-		return sly_Core::getContainer()->getCategoryService()->findByParentId($parentID, $ignoreOfflines, $clang);
+		if ($clang === false || $clang === null) {
+			$clang = sly_Core::getCurrentClang();
+		}
+		return sly_Core::getContainer()->getCategoryService()->findByParentId($parentID, $clang, $ignoreOfflines);
 	}
 
 	/**
@@ -83,54 +90,9 @@ class sly_Util_Category {
 	 * @return array
 	 */
 	public static function getRootCategories($ignoreOfflines = false, $clang = null) {
-		return self::findByParentId(0, $ignoreOfflines, $clang);
-	}
-
-	/**
-	 * @param  sly_Model_User $user
-	 * @param  int            $categoryID
-	 * @return boolean
-	 */
-	public static function canReadCategory(sly_Model_User $user, $categoryID) {
-		if ($user->isAdmin()) return true;
-		static $canReadCache;
-
-		$userID = $user->getId();
-
-		if (!isset($canReadCache[$userID])) {
-			$canReadCache[$userID] = array();
+		if ($clang === false || $clang === null) {
+			$clang = sly_Core::getCurrentClang();
 		}
-
-		if (!isset($canReadCache[$userID][$categoryID])) {
-			$canReadCache[$userID][$categoryID] = false;
-
-			if (sly_Util_Article::canEditContent($user, $categoryID)) {
-				$canReadCache[$userID][$categoryID] = true;
-			}
-			else {
-				// check all children for write rights
-				$article = self::findById($categoryID);
-
-				if ($article) {
-					$path = $article->getPath().$article->getId().'|%';
-				}
-				else {
-					$path = '|%';
-				}
-
-				$query  = sly_DB_Persistence::getInstance();
-				$prefix = sly_Core::getTablePrefix();
-				$query->query('SELECT DISTINCT id FROM '.$prefix.'article WHERE path LIKE ?', array($path));
-
-				foreach ($query as $row) {
-					if (sly_Util_Article::canEditContent($user, $row['id'])) {
-						$canReadCache[$userID][$categoryID] = true;
-						break;
-					}
-				}
-			}
-		}
-
-		return isset($canReadCache[$userID][$categoryID]) ? $canReadCache[$userID][$categoryID] : false;
+		return self::findByParentId(0, $clang, $ignoreOfflines);
 	}
 }

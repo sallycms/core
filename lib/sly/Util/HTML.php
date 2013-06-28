@@ -36,6 +36,7 @@ class sly_Util_HTML {
 	}
 
 	/**
+	 * @deprecated moved to sallycms-backend sly_Helper_Sprite
 	 * @param  string $target
 	 * @param  string $text
 	 * @param  string $class
@@ -206,5 +207,16 @@ class sly_Util_HTML {
 		}
 
 		return $content;
+	}
+
+	public static function getDatetimeTag($timestamp) {
+		if ($timestamp === null) {
+			$timestamp = time();
+		}
+		elseif (!sly_Util_String::isInteger($timestamp)) {
+			$timestamp = strtotime($timestamp);
+		}
+
+		return '<abbr class="timeago" title="'.date('Y-m-d\TG:i:sP', $timestamp).'">'.sly_Util_String::formatDatetime($timestamp).'</abbr>';
 	}
 }

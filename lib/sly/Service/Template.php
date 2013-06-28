@@ -9,7 +9,7 @@
  */
 
 /**
- * Service-Klasse für Templates
+ * Service class for managing templates
  *
  * @author  christoph@webvariants.de
  * @ingroup service
