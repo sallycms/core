@@ -122,7 +122,7 @@ class sly_Configuration implements sly_ContainerAwareInterface {
 			throw new sly_Exception('Empty key is not allowed!');
 		}
 
-		if (!empty($value) && sly_Util_Array::isAssoc($value)) {
+		if (!empty($value) && sly_Util_Array::isAssoc($value) && $store->has($key)) {
 			$key = trim($key, '/');
 
 			foreach ($value as $ikey => $val) {
