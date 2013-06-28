@@ -19,6 +19,7 @@ $router = function($server) {
 	// route other app URIs (be careful not to confuse the assets)
 	if (preg_match('#^backend(?!/assets/)(/|$)#', $reqUri)) return array('backend', 'backend');
 	if (preg_match('#^setup(?!/assets/)(/|$)#', $reqUri))   return array('setup',   'setup');
+	if (preg_match('#^assets/#', $reqUri))                  return array('assets',  '/');
 
 	// everything else goes through the frontend
 	return array('frontend', '/');
