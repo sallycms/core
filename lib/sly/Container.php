@@ -335,6 +335,13 @@ class sly_Container extends Pimple implements Countable {
 			return new sly_Slice_RendererImpl($container['sly-service-module']);
 		});
 
+		$this['sly-filehasher'] = $this->share(function($container) {
+			$instID = $container['sly-config']->get('instname');
+			$cache  = $container['sly-cache'];
+
+			return new sly_Service_FileHasher($cache, $instID);
+		});
+
 		//////////////////////////////////////////////////////////////////////////
 		// allow to overwrite default recipes
 
@@ -763,6 +770,13 @@ class sly_Container extends Pimple implements Countable {
 	 */
 	public function getDynFilesystem() {
 		return $this->get('sly-filesystem-dyn');
+	}
+
+	/**
+	 * @return sly_Service_FileHasher
+	 */
+	public function getFilehasher() {
+		return $this->get('sly-filehasher');
 	}
 
 	/*          setters for objects that are commonly set          */
