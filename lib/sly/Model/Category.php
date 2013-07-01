@@ -31,7 +31,7 @@ class sly_Model_Category extends sly_Model_Base_Article {
 	public function getStartArticle() {
 		$service = sly_Core::getContainer()->getArticleService();
 
-		return $service->findByPK($this->getId(), $this->getClang(), sly_Service_Article::FIND_REVISION_ONLINE);
+		return $service->findByPK($this->getId(), $this->getClang(), sly_Service_Article::FIND_REVISION_BEST);
 	}
 
 	/**
