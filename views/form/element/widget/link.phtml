@@ -18,7 +18,7 @@ if ($value === '') {
 	$artID = '';
 }
 else {
-	$category = sly_Util_Article::findById($artID)->getCategoryId();
+	$category = sly_Util_Article::findById($artID, null, sly_Service_Article::FIND_REVISION_BEST)->getCategoryId();
 }
 
 $typeFilter     = '';
