@@ -142,12 +142,21 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base implements
 			if ($revStrategy === self::FIND_REVISION_BEST) {
 				// only take the first row per article
 				$key = $row['id'].'_'.$row['clang'];
-				if (isset($fetched[$key])) continue;
+				if (isset($fetched[$key])) {
+					if (!$row['online']) // online revision may overwrite latest revision
+						continue;
+				}
 
-				$fetched[$key] = 1;
+				$fetched[$key] = $row;
+			} else {
+				$return[] = $this->makeInstance($row);
 			}
+		}
 
-			$return[] = $this->makeInstance($row);
+		if ($revStrategy === self::FIND_REVISION_BEST) {
+			foreach ($fetched as $row) {
+				$return[] = $this->makeInstance($row);
+			}
 		}
 
 		return $return;
