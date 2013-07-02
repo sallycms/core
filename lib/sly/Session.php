@@ -63,11 +63,14 @@ class sly_Session {
 	}
 
 	/**
-	 * Remove all data from the session
+	 * Remove all data, destroy and close session
 	 */
 	public function destroy() {
+		$params = session_get_cookie_params();
+		setcookie(session_name(), '', 0, $params['path'], $params['domain'], $params['secure'], isset($params['httponly']));
 		session_destroy();
 		$_SESSION = array();
+		session_write_close();
 	}
 
 	/**
