@@ -111,8 +111,12 @@ class sly_Util_HTTP {
 			return self::getAbsoluteUrl($targetArticle, $clang, $parameters, $divider, $secure);
 		}
 
-		$articleID = self::resolveArticle($targetArticle);
-		$article   = sly_Util_Article::findById($articleID, $clang);
+		if (is_object($targetArticle) && $targetArticle instanceof sly_Model_Base_Article && ($clang === null || $clang == $targetArticle->getClang())) {
+			$article = $targetArticle;
+		} else {
+			$articleID = self::resolveArticle($targetArticle);
+			$article   = sly_Util_Article::findById($articleID, $clang);
+		}
 
 		return $article->getUrl($parameters, $divider);
 	}
