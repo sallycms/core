@@ -121,6 +121,8 @@ class sly_Request {
 		return $request;
 	}
 
+	private $__base_url = array();
+
 	/**
 	 * Get the absolute base URL to the project's root (frontend)
 	 *
@@ -130,6 +132,10 @@ class sly_Request {
 	 * @return string
 	 */
 	public function getBaseUrl($addScriptPath = false, $forceProtocol = null, $forcePort = null) {
+		$key = json_encode(array($addScriptPath, $forceProtocol, $forcePort));
+		if (array_key_exists($key, $this->__base_url))
+			return $this->__base_url[$key];
+
 		$protocol = $forceProtocol === null ? $this->getScheme() : $forceProtocol;
 		$host     = $this->getHost();
 		$port     = $this->getPort();
@@ -148,7 +154,7 @@ class sly_Request {
 			}
 		}
 
-		return rtrim(sprintf('%s://%s%s%s', $protocol, $host, $port, $path), '/');
+		return $this->__base_url[$key] = rtrim(sprintf('%s://%s%s%s', $protocol, $host, $port, $path), '/');
 	}
 
 	/**
@@ -390,17 +396,27 @@ class sly_Request {
 		return $this->isSecure() ? 'https' : 'http';
 	}
 
+	private $__port = null;
+	private $__port_trust = null;
+
 	/**
 	 * Returns the port on which the request is made
 	 *
 	 * @return int
 	 */
 	public function getPort() {
-		if (self::$trustProxy && $this->headers->has('X-Forwarded-Port')) {
-			return (int) $this->headers->get('X-Forwarded-Port', 'int', 80);
+		if (self::$trustProxy) {
+			if ($this->__port_trust !== null)
+				return $this->__port_trust;
+
+			if ($this->headers->has('X-Forwarded-Port')) {
+				return $this->__port_trust = (int) $this->headers->get('X-Forwarded-Port', 'int', 80);
+			}
 		}
 
-		return $this->server->get('SERVER_PORT', 'int', 80);
+		if ($this->__port !== null)
+			return $this->__port;
+		return $this->__port = $this->server->get('SERVER_PORT', 'int', 80);
 	}
 
 	/**
@@ -482,19 +498,33 @@ class sly_Request {
 		return '' === $qs ? null : $qs;
 	}
 
+	private $__secure = null;
+	private $__secure_trust = null;
+
 	/**
 	 * Checks whether the request is secure or not
 	 *
 	 * @return boolean
 	 */
 	public function isSecure() {
-		return (
-			(strtolower($this->server->get('HTTPS')) === 'on' || $this->server->get('HTTPS') == 1)
-			||
-			(self::$trustProxy && strtolower($this->headers->get('SSL-HTTPS')) == 'on' || $this->headers->get('SSL-HTTPS') == 1)
-			||
-			(self::$trustProxy && strtolower($this->headers->get('X-Forwarded-Proto')) == 'https')
-		);
+		if ($this->__secure === null) {
+			$this->__secure = strtolower($this->server->get('HTTPS')) === 'on' || $this->server->get('HTTPS') == 1;
+		}
+
+		if ($this->__secure) {
+			return true;
+		}
+
+		if (self::$trustProxy) {
+			if ($this->__secure_trust !== null) {
+				return $this->__secure_trust;
+			}
+
+			return $this->__secure_trust = (strtolower($this->headers->get('SSL-HTTPS')) == 'on'|| $this->headers->get('SSL-HTTPS') == 1)
+					|| (strtolower($this->headers->get('X-Forwarded-Proto')) == 'https');
+		}
+
+		return false;
 	}
 
 	/**

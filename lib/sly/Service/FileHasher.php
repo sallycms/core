@@ -34,16 +34,17 @@ class sly_Service_FileHasher {
 		}
 	}
 
-	public function hash($filename, $silent = true) {
+	public function hash($filename, $silent = true, $mtime = null) {
 		// skip all this if we did it already
 		//
 		if (array_key_exists($filename, $this->hashes)) {
 			return $this->hashes[$filename];
 		}
 
-		// determine last file change
-
-		$mtime = @filemtime($filename);
+		// determine last file change if not given by parameter
+		if ($mtime === null) {
+			$mtime = @filemtime($filename);
+		}
 
 		if ($mtime === false) {
 			if ($silent) {
@@ -59,7 +60,7 @@ class sly_Service_FileHasher {
 		$key  = $this->key($filename);
 		$data = $this->cache->get(self::CACHE_NAMESPACE, $key, null);
 
-		if ($data && $data['mtime'] === $mtime) {
+		if ($data && $data['mtime'] >= $mtime) {
 			$this->hashes[$filename] = $data['hash'];
 
 			return $data['hash'];
