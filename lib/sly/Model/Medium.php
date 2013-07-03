@@ -117,8 +117,9 @@ class sly_Model_Medium extends sly_Model_Base_Id {
 	 */
 	public function exists() {
 		$fs = sly_Core::getContainer()->getMediaFilesystem();
+		$exists = sly_Core::config()->get('media/exists', false);
 
-		return strlen($this->filename) > 0 && $fs->has($this->filename);
+		return strlen($this->filename) > 0 && ($exists || $fs->has($this->filename));
 	}
 
 	/**
