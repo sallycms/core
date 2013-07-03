@@ -36,7 +36,8 @@ class sly_Model_Article extends sly_Model_Base_Article {
 	public function getCategory() {
 		$catService = sly_Core::getContainer()->getCategoryService();
 
-		return $catService->findByPK($this->getCategoryId(), $this->getClang(), $this->getRevision());
+		$revision = $this->isStartArticle() ? $this->getRevision() : sly_Service_ArticleBase::FIND_REVISION_BEST;
+		return $catService->findByPK($this->getCategoryId(), $this->getClang(), $revision);
 	}
 
 	/**
