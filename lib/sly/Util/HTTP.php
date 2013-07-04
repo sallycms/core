@@ -111,7 +111,7 @@ class sly_Util_HTTP {
 			return self::getAbsoluteUrl($targetArticle, $clang, $parameters, $divider, $secure);
 		}
 
-		if (is_object($targetArticle) && $targetArticle instanceof sly_Model_Base_Article && ($clang === null || $clang == $targetArticle->getClang())) {
+		if ($targetArticle instanceof sly_Model_Base_Article && ($clang === null || $clang == $targetArticle->getClang())) {
 			$article = $targetArticle;
 		} else {
 			$articleID = self::resolveArticle($targetArticle);
