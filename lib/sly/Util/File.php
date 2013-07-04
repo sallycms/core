@@ -77,7 +77,7 @@ class sly_Util_File {
 	 * @return string
 	 */
 	public static function iterateFilename($filename, Filesystem $fs = null, $extension = null) {
-		$fs = $fs ?: $container->get('sly-filesystem-media');
+		$fs = $fs ?: sly_Core::getContainer()->getMediaFilesystem();
 
 		if ($fs->has($filename)) {
 			$extension = $extension === null ? self::getExtension($filename) : $extension;
