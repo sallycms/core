@@ -18,8 +18,9 @@ class sly_Container extends Pimple implements Countable {
 	 * @param array $values  initial values
 	 */
 	public function __construct(array $values = array()) {
-		$this['sly-current-article-id'] = null;
-		$this['sly-current-lang-id']    = null;
+		$this['sly-current-article-id']       = null;
+		$this['sly-current-lang-id']          = null;
+		$this['sly-current-article-revision'] = null;
 
 		//////////////////////////////////////////////////////////////////////////
 		// needed variables
@@ -459,6 +460,13 @@ class sly_Container extends Pimple implements Countable {
 	}
 
 	/**
+	 * @return int|null
+	 */
+	public function getCurrentArticleRevision() {
+		return $this['sly-current-article-revision'];
+	}
+
+	/**
 	 * @return string
 	 */
 	public function getEnvironment() {
@@ -803,6 +811,14 @@ class sly_Container extends Pimple implements Countable {
 	 */
 	public function setCurrentLanguageId($langID) {
 		return $this->set('sly-current-lang-id', (int) $langID);
+	}
+
+	/**
+	 * @param  int $revision  the new current article revision
+	 * @return sly_Container  reference to self
+	 */
+	public function setCurrentArticleRevision($revision) {
+		return $this->set('sly-current-article-revision', (int) $revision);
 	}
 
 	/**
