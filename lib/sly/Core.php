@@ -257,8 +257,13 @@ class sly_Core {
 	public static function getCurrentArticle($clang = null) {
 		$articleID = self::getCurrentArticleId();
 		$clang     = $clang === null ? self::getCurrentClang() : (int) $clang;
+		$revision  = self::getContainer()->get('sly-current-article-revision');
 
-		return sly_Util_Article::findById($articleID, $clang);
+		if ($revision === null) {
+			 $revision = sly_Service_Article::FIND_REVISION_LATEST;
+		}
+
+		return sly_Util_Article::findById($articleID, $clang, $revision);
 	}
 
 	/**
