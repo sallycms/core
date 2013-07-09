@@ -121,8 +121,7 @@ class sly_Slice_Values {
 		}
 
 		foreach ($filenames as $name) {
-			$medium = sly_Util_Medium::findByFilename($name);
-			if ($medium && $medium->exists()) {
+			if (sly_Util_Medium::findByFilename($name) instanceof sly_Model_Medium) {
 				$res[] = $name;
 			}
 		}
