@@ -21,6 +21,7 @@ class sly_Table extends sly_Viewable {
 	protected $enableSearching;     ///< boolean
 	protected $enableDragAndDrop;   ///< boolean
 	protected $dragAndDropHandler;  ///< boolean
+	protected $pagerParam;          ///< string
 	protected $totalElements;       ///< int
 	protected $caption;             ///< string
 	protected $searchParams;        ///< array
@@ -45,6 +46,7 @@ class sly_Table extends sly_Viewable {
 		$this->enableSearching    = false;
 		$this->enableDragAndDrop  = false;
 		$this->dragAndDropHandler = '';
+		$this->pagerParam         = null;
 		$this->totalElements      = null;
 		$this->caption            = null;
 		$this->searchParams       = null;
@@ -94,13 +96,23 @@ class sly_Table extends sly_Viewable {
 	}
 
 	/**
+	 * @param int $perPage
+	 */
+	public function setPagerParam($pagerParam) {
+		$this->pagerParam = trim($pagerParam);
+	}
+
+	/**
 	 * @param  int         $totalElements  leave this to null to disable the pager
 	 * @param  sly_Request $request        the request to use
 	 * @return string                      the rendered header
 	 */
 	protected function renderHeader($totalElements = null, sly_Request $request) {
 		$this->totalElements = $totalElements;
-		return $this->renderView('header.phtml', compact('totalElements', 'request'));
+
+		$pagerParam = 'p_'.($this->pagerParam === null ? $this->id : $this->pagerParam);
+
+		return $this->renderView('header.phtml', compact('totalElements', 'request', 'pagerParam'));
 	}
 
 	/**

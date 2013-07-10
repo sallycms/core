@@ -9,7 +9,7 @@
  */
 
 $tableID        = $this->id;
-$currentPage    = abs($request->get('p_'.$tableID, 'int', 0));
+$currentPage    = abs($request->get($pagerParam, 'int', 0));
 $hasPager       = $this->hasPager();
 $hasSearch      = $this->hasSearch();
 $hasDragAndDrop = $this->hasDragAndDrop();
@@ -18,8 +18,9 @@ $this->surroundingHTML = '';
 ob_start();
 
 if (!sly_Table::isDragAndDropMode() && $hasPager) {
-	$pager = new sly_Util_Pager($currentPage, $this->totalElements, sly_Table::$perPage);
-	$pager = $pager->getHTMLString($_GET, 'p_'.$tableID);
+	$pager  = new sly_Util_Pager($currentPage, $this->totalElements, sly_Table::$perPage);
+	$params = $request->get->all();
+	$pager  = $pager->getHTMLString($params, $pagerParam);
 
 	print '<p class="sly-table-extras-pager">'.t('pages').': '.$pager.'</p>';
 }
@@ -27,7 +28,7 @@ if (!sly_Table::isDragAndDropMode() && $hasPager) {
 if ($this->enableDragAndDrop && ($hasSearch || $hasPager)) {
 	$params = $request->get->all();
 
-	unset($params['p_'.$tableID]);
+	unset($params[$pagerParam]);
 	unset($params['q_'.$tableID]);
 
 	if (sly_Table::isDragAndDropMode()) {
@@ -52,7 +53,7 @@ if (!sly_Table::isDragAndDropMode() && $hasSearch) {
 	$getParams = $this->searchParams === null ? $_GET : $this->searchParams;
 
 	foreach ($getParams as $name => $value) {
-		if ($name !== 'p_'.$this->id && $name !== $key && is_scalar($value)) {
+		if ($name !== $pagerParam && $name !== $key && is_scalar($value)) {
 			print '<input type="hidden" name="'.sly_html($name).'" value="'.sly_html($value).'" />';
 		}
 	}
