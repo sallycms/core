@@ -122,6 +122,19 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 	}
 
 	/**
+	 * return the total number of revisions
+	 *
+	 * @param  sly_Model_Base_Article $article
+	 * @return int
+	 */
+	public function countRevisions(sly_Model_Base_Article $article) {
+		$where  = array('id' => $article->getId(), 'clang' => $article->getClang());
+		$db     = $this->getPersistence();
+
+		return $db->magicFetch($this->getTableName(), 'COUNT(*)', $where);
+	}
+
+	/**
 	 * @throws sly_Exception
 	 * @param  int            $categoryID
 	 * @param  string         $name
@@ -136,7 +149,7 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 
 	/**
 	 * @throws sly_Exception
-	 * @param  sly_Model_Article_Base $obj
+	 * @param  sly_Model_Base_Article $obj
 	 * @param  string                 $name
 	 * @param  mixed                  $position
 	 * @param  sly_Model_User         $user        updateuser or null for the current user
