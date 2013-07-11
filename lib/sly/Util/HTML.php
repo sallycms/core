@@ -177,10 +177,12 @@ class sly_Util_HTML {
 	 * Replaces sally://ARTICLEID and sally://ARTICLEID-CLANGID in
 	 * the $content by article http URLs.
 	 *
-	 * @param  string $content
+	 * @param  string  $content
+	 * @param  boolean $absolute
+	 * @param  boolean $secure    force HTTPS (true) or HTTP (false) URL, use null for the current protocol
 	 * @return string
 	 */
-	public static function replaceSallyLinks($content) {
+	public static function replaceSallyLinks($content, $absolute = false, $secure = null) {
 		preg_match_all('#sally://([0-9]+)(?:-([0-9]+))?/?#', $content, $matches, PREG_OFFSET_CAPTURE | PREG_SET_ORDER);
 
 		$skew = 0;
@@ -193,7 +195,7 @@ class sly_Util_HTML {
 			$clang    = isset($match[2]) ? (int) $match[2][0] : null;
 
 			try {
-				$repl = sly_Util_Article::getUrl($id, $clang);
+				$repl = sly_Util_Article::getUrl($id, $clang, array(), '&amp;', $absolute, $secure);
 			}
 			catch (Exception $e) {
 				$repl = '#';
