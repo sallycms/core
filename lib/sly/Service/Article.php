@@ -527,6 +527,8 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 				$duplicate->setUpdateColumns($user);
 				$duplicate->setCreateColumns($user);
 				$duplicate->setRevision(0);
+				$duplicate->setOnline(false);
+				$duplicate->setLatest(true);
 
 				// make sure that when copying start articles
 				// we actually create an article and not a category
