@@ -717,12 +717,14 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 	 * @return string
 	 */
 	public function getUrl(sly_Model_Base_Article $article, $params = '', $divider = '&amp;', $disableCache = false) {
-		$id    = $article->getId();
-		$clang = $article->getClang();
+		$id     = $article->getId();
+		$clang  = $article->getClang();
+		$rev    = $article->getRevision();
+		$online = $article->isOnline();
 
 		// cache the URLs for this request (unlikely to change)
 
-		$cacheKey = substr(md5($id.'_'.$clang.'_'.json_encode($params).'_'.$divider), 0, 10);
+		$cacheKey = substr(md5($id.'_'.$clang.'_'.$rev.'_'.json_encode($params).'_'.$divider), 0, 10);
 
 		if (!$disableCache && isset($this->urlCache[$cacheKey])) {
 			return $this->urlCache[$cacheKey];
@@ -742,11 +744,14 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 				$id = $redirect;
 			}
 			elseif ($redirect instanceof sly_Model_Article) {
-				$id    = $redirect->getId();
-				$clang = $redirect->getClang();
+				$id     = $redirect->getId();
+				$clang  = $redirect->getClang();
+				$rev    = $redirect->getRevision();
+				$online = $redirect->isOnline();
 			}
 			else {
 				$this->urlCache[$cacheKey] = $redirect;
+
 				return $redirect;
 			}
 		}
@@ -757,6 +762,8 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 		$url         = $dispatcher->filter('URL_REWRITE', '', array(
 			'id'            => $id,
 			'clang'         => $clang,
+			'revision'      => $rev,
+			'online'        => $online,
 			'params'        => $paramString,
 			'divider'       => $divider,
 			'disable_cache' => $disableCache
@@ -771,6 +778,10 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 
 			if (count($languages) > 1 && $clang != $defClang) {
 				$clangString = $divider.'clang='.$clang;
+			}
+
+			if (!$online) {
+				$clangString = $divider.'revision='.$rev;
 			}
 
 			$url = 'index.php?article_id='.$id.$clangString.$paramString;
