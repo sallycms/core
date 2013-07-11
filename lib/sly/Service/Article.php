@@ -553,7 +553,9 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 			$sql->rollBackTrx($trx, $e);
 		}
 
-		return $duplicate;
+		$defClang = $this->container['sly-config']->get('default_clang_id');
+
+		return $this->findByPK($newID, $defClang, self::FIND_REVISION_LATEST);
 	}
 
 	/**
