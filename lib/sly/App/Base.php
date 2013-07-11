@@ -10,7 +10,6 @@
 
 abstract class sly_App_Base implements sly_App_Interface {
 	protected $container;
-	protected $dispatcher;
 	protected $controller;
 	protected $action;
 
@@ -30,19 +29,6 @@ abstract class sly_App_Base implements sly_App_Interface {
 	 */
 	public function getContainer() {
 		return $this->container;
-	}
-
-	/**
-	 * get request dispatcher
-	 *
-	 * @return sly_Dispatcher
-	 */
-	protected function getDispatcher() {
-		if ($this->dispatcher === null) {
-			$this->dispatcher = new sly_Dispatcher($this->getContainer(), $this->getControllerClassPrefix());
-		}
-
-		return $this->dispatcher;
 	}
 
 	/**
@@ -90,7 +76,7 @@ abstract class sly_App_Base implements sly_App_Interface {
 	protected function notifySystemOfController() {
 		$name       = $this->getCurrentControllerName();
 		$controller = $this->getCurrentController();
-		$dispatcher = $this->getContainer()->getDispatcher();
+		$dispatcher = $this->getContainer()->getDispatcher(); // event dispatcher, not the request dispatcher
 		$params     = array(
 			'app'    => $this,
 			'name'   => $name,
@@ -112,11 +98,7 @@ abstract class sly_App_Base implements sly_App_Interface {
 			return null;
 		}
 
-		$dispatcher = $this->getDispatcher();
-		$className  = $dispatcher->getControllerClass($name);
-		$controller = $dispatcher->getController($className);
-
-		return $controller;
+		return $this->getDispatcher()->getController($name);
 	}
 
 	/**
@@ -166,10 +148,16 @@ abstract class sly_App_Base implements sly_App_Interface {
 		$fsService->registerStreamWrapper($fsMap);
 	}
 
+	/**
+	 * get request dispatcher
+	 *
+	 * @return sly_Dispatcher
+	 */
+	abstract protected function getDispatcher();
+
 	abstract protected function prepareRouter(sly_Container $container);
 	abstract protected function getControllerFromRequest(sly_Request $request);
 	abstract protected function getActionFromRequest(sly_Request $request);
 
-	abstract public function getControllerClassPrefix();
 	abstract public function getCurrentControllerName();
 }

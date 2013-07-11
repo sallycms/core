@@ -8,20 +8,16 @@
  * http://www.opensource.org/licenses/mit-license.php
  */
 
-class sly_Dispatcher {
+abstract class sly_Dispatcher {
 	protected $container;
-	protected $prefix;
-	protected $pearStyle;
 
 	/**
 	 * Constructor
 	 *
 	 * @param sly_Container $container
 	 */
-	public function __construct(sly_Container $container, $containerClassPrefix, $pearStyle = true) {
+	public function __construct(sly_Container $container) {
 		$this->container = $container;
-		$this->prefix    = $containerClassPrefix;
-		$this->pearStyle = !!$pearStyle;
 	}
 
 	/**
@@ -32,6 +28,30 @@ class sly_Dispatcher {
 	public function getContainer() {
 		return $this->container;
 	}
+
+	/**
+	 * return the DI container identifier for a controller
+	 *
+	 * This identifier controls both how controllers are found and how their
+	 * created instaces are stored. The implementation should not check for any
+	 * existing service, but rather only check if $name is syntactically valid
+	 * and then return the identifier.
+	 *
+	 * @param  string $name  controller name, e.g. 'login'
+	 * @return string        identifier, e.g. 'sly-controller-backend-login'
+	 */
+	abstract public function getControllerIdentifier($name);
+
+	/**
+	 * create a controller instance
+	 *
+	 * This method is called if no container has been defined in the service. It
+	 * should contruct the class name and then instantiate the controller.
+	 *
+	 * @param  string $name              controller name, e.g. 'login'
+	 * @return sly_Controller_Interface  controller instance
+	 */
+	abstract protected function buildController($name);
 
 	/**
 	 * call an action on a controller
@@ -77,9 +97,11 @@ class sly_Dispatcher {
 		// build controller instance and check permissions
 		try {
 			if (!($controller instanceof sly_Controller_Interface)) {
-				$className  = $this->getControllerClass($controller);
-				$controller = $this->getController($className);
+				$controller = $this->getController($controller, null);
 			}
+
+			// check if the action is valid
+			$this->checkAction($controller, $action);
 
 			// inject current request and container
 			$this->setupController($controller);
@@ -93,9 +115,6 @@ class sly_Dispatcher {
 				return $this->runController($controller, 'generic', $action);
 			}
 
-			// check if the action is valid
-			$this->checkAction($controller, $action);
-
 			// classic controllers should have a basic exception handling provided by us.
 			return $this->runController($controller, $action);
 		}
@@ -108,43 +127,47 @@ class sly_Dispatcher {
 	 * get controller by name
 	 *
 	 * @throws sly_Controller_Exception
-	 * @param  string $className
+	 * @param  string $name              the controller name (e.g. 'login')
 	 * @param  string $action
 	 * @return sly_Controller_Interface  the controller
 	 */
-	public function getController($className, $action = null) {
-		static $instances = array();
+	public function getController($name, $action = null) {
+		$identifier = $this->getControllerIdentifier($name);
+		$container  = $this->getContainer();
 
-		if (!isset($instances[$className])) {
-			$this->checkController($className);
-			$instances[$className] = new $className();
+		if (!isset($container[$identifier])) {
+			$container[$identifier] = $controller = $this->buildController($name);
+		}
+		else {
+			$controller = $container[$identifier];
+		}
+
+		if (!($controller instanceof sly_Controller_Interface)) {
+			throw new sly_Controller_Exception(t('does_not_implement', get_class($controller), 'sly_Controller_Interface'), 404);
 		}
 
 		if ($action) {
-			$this->checkAction($className, $action);
+			$this->checkAction($controller, $action);
 		}
 
-		return $instances[$className];
+		return $controller;
 	}
 
-	public function checkController($controllerOrClass) {
-		if (is_string($controllerOrClass)) {
-			if (!class_exists($controllerOrClass)) {
-				throw new sly_Controller_Exception(t('unknown_controller', $controllerOrClass), 404);
-			}
-
-			$reflector = new ReflectionClass($controllerOrClass);
-
-			if ($reflector->isAbstract()) {
-				throw new sly_Controller_Exception(t('unknown_controller', $controllerOrClass), 404);
-			}
-
-			if (!$reflector->implementsInterface('sly_Controller_Interface')) {
-				throw new sly_Controller_Exception(t('does_not_implement', $controllerOrClass, 'sly_Controller_Interface'), 404);
-			}
+	/**
+	 * check if a class name points to an existing, non-abstract class
+	 *
+	 * @throws sly_Controller_Exception  if the class name is invalid
+	 * @param  string $className
+	 */
+	protected function checkControllerClass($className) {
+		if (!class_exists($className)) {
+			throw new sly_Controller_Exception(t('unknown_controller', $className), 404);
 		}
-		elseif (!($controllerOrClass instanceof sly_Controller_Interface)) {
-			throw new sly_Controller_Exception(t('does_not_implement', $controllerOrClass, 'sly_Controller_Interface'), 404);
+
+		$reflector = new ReflectionClass($className);
+
+		if ($reflector->isAbstract()) {
+			throw new sly_Controller_Exception(t('unknown_controller', $className), 404);
 		}
 	}
 
@@ -155,10 +178,8 @@ class sly_Dispatcher {
 	 * @param  string $controllerOrClassName
 	 * @param  string $action
 	 */
-	public function checkAction($controllerOrClass, $action) {
-		$this->checkController($controllerOrClass);
-
-		$className = is_object($controllerOrClass) ? get_class($controllerOrClass) : $controllerOrClass;
+	protected function checkAction($controller, $action) {
+		$className = get_class($controller);
 		$reflector = new ReflectionClass($className);
 		$methods   = $reflector->getMethods(ReflectionMethod::IS_PUBLIC);
 
@@ -171,51 +192,11 @@ class sly_Dispatcher {
 			}
 		}
 
-		$method = strtolower($action).'action';
+		$method = strtolower($action).'Action';
 
-		if (!in_array($method, $methods)) {
+		if (!in_array(strtolower($method), $methods)) {
 			throw new sly_Controller_Exception(t('unknown_action', $method, $className), 404);
 		}
-	}
-
-	/**
-	 * check if a controller exists
-	 *
-	 * @param  string $controller  controller name like 'structure'
-	 * @return boolean
-	 */
-	public function isControllerAvailable($controller) {
-		return class_exists($this->getControllerClass($controller));
-	}
-
-	/**
-	 * return classname for &page=whatever
-	 *
-	 * It will return sly_Controller_System for &page=system
-	 * and sly_Controller_System_Languages for &page=system_languages. If PEAR
-	 * style is disabled, then \ will be used as a separator, leading to class
-	 * names like sly\Controller\System\Languages.
-	 *
-	 * @throws sly_Controller_Exception  if the controller name is invalid
-	 * @param  string $controller        controller name like 'structure'
-	 * @return string
-	 */
-	public function getControllerClass($controller) {
-		// controller names make start with a number because we have our prefix,
-		// so sly_Controller_23 is perfectly valid (but still stupid). They are
-		// not allowed to start or end with an underscore, however.
-		if (mb_strlen($controller) === 0 || !preg_match('#^[0-9a-z][0-9a-z_]*$#is', $controller) || mb_substr($controller, -1) === '_') {
-			throw new sly_Controller_Exception(t('unknown_controller', $controller), 404);
-		}
-
-		$className = $this->prefix;
-		$parts     = explode('_', strtolower($controller));
-
-		foreach ($parts as $part) {
-			$className .= ($this->pearStyle ? '_' : '\\').ucfirst($part);
-		}
-
-		return $className;
 	}
 
 	/**
