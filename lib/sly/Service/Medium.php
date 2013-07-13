@@ -360,7 +360,7 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id implements sly_Contai
 		$this->save($medium);
 
 		// notify the listeners and clear our own cache
-		$this->cache->remove('sly.medium', $medium->getId());
+		$this->cache->delete('sly.medium', $medium->getId());
 		$this->dispatcher->notify('SLY_MEDIA_UPDATED', $medium, compact('user'));
 	}
 
@@ -401,7 +401,7 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id implements sly_Contai
 		}
 
 		$this->cache->clear('sly.medium.list');
-		$this->cache->remove('sly.medium', $medium->getId());
+		$this->cache->delete('sly.medium', $medium->getId());
 
 		$this->dispatcher->notify('SLY_MEDIA_DELETED', $medium);
 

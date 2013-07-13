@@ -30,7 +30,7 @@ class sly_Service_FileHasher {
 		}
 		else {
 			unset($this->hashes[$filename]);
-			$this->cache->remove(self::CACHE_NAMESPACE, $this->key($filename));
+			$this->cache->delete(self::CACHE_NAMESPACE, $this->key($filename));
 		}
 	}
 
