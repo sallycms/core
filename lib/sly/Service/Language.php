@@ -79,7 +79,7 @@ class sly_Service_Language extends sly_Service_Model_Base_Id {
 	 * @return sly_Model_Base
 	 */
 	public function save(sly_Model_Base $model) {
-		$this->cache->remove('sly.language', 'all');
+		$this->cache->delete('sly.language', 'all');
 
 		$result = parent::save($model);
 
