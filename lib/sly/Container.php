@@ -149,7 +149,7 @@ class sly_Container extends Pimple implements Countable {
 				$cache = $factory->getCache($fallback);
 			}
 
-			return new wv\BabelCache\Cache\Compat($cache);
+			return new wv\BabelCache\Decorator\Compat($cache);
 		});
 
 		$this['sly-flash-message'] = $this->share(function($container) {
