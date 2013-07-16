@@ -635,7 +635,7 @@ class sly_Container extends Pimple implements Countable {
 	/**
 	 * get asset service
 	 *
-	 * @return sly_Service_Asset
+	 * @return \sly\Assets\Service
 	 */
 	public function getAssetService() {
 		return $this['sly-service-asset'];
