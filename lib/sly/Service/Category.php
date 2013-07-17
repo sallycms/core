@@ -55,18 +55,20 @@ class sly_Service_Category extends sly_Service_ArticleManager {
 	protected function buildModel(array $params) {
 		return new sly_Model_Category(array(
 			        'id' => $params['id'],
+			     'clang' => $params['clang'],
+			  'revision' => 0,
+			    'online' => empty($params['online']) ? 0 : 1,
+			    'latest' => empty($params['latest']) ? 0 : 1,
+			   'deleted' => 0,
 			     're_id' => $params['parent'],
-			      'name' => $params['name'],
-			   'catname' => $params['name'],
-			    'catpos' => $params['position'],
-			'attributes' => '',
-			 'startpage' => 1,
-			       'pos' => 1,
 			      'path' => $params['path'],
 			      'type' => $params['type'],
-			     'clang' => $params['clang'],
-			   'deleted' => 0,
-			  'revision' => 0
+			       'pos' => 1,
+			      'name' => $params['name'],
+			    'catpos' => $params['position'],
+			   'catname' => $params['name'],
+			 'startpage' => 1,
+			'attributes' => ''
 		));
 	}
 
