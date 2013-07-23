@@ -123,13 +123,13 @@ class sly_Util_HTML {
 		}
 
 		if ($image instanceof sly_Model_Medium) {
-			$src   = $base.'data/mediapool/'.$image->getFilename();
+			$src   = $base.'mediapool/'.$image->getFilename();
 			$alt   = $image->getTitle();
 			$title = $image->getTitle();
 		}
 		else {
 			if ($forceUri) {
-				$src = $base.'data/mediapool/'.$image;
+				$src = $base.'mediapool/'.$image;
 			}
 			else {
 				// a transparent 1x1 sized PNG, 81byte in size
