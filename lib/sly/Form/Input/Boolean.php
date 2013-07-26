@@ -50,11 +50,13 @@ abstract class sly_Form_Input_Boolean extends sly_Form_Input_Base {
 		$this->attributes['checked'] = $this->getDisplayValue() ? 'checked' : '';
 		$attributeString = $this->getAttributeString();
 
-		return
+		$html =
 		'<span>'.
 			'<input '.$attributeString.' /> '.
-			'<label class="sly-inline" for="'.$this->attributes['id'].'">'.sly_translate($this->description, true).'</label>'.
+			(!empty($this->description) ? '<label class="sly-inline" for="'.$this->attributes['id'].'">'.sly_translate($this->description, true).'</label>' : '').
 		'</span>';
+
+		return $html;
 	}
 
 	/**

@@ -103,8 +103,9 @@ class sly_Slice_Renderer {
 		// Allow addOns to alter the output before it's returned.
 		$container  = sly_Core::getContainer();
 		$dispatcher = $container->getDispatcher();
+		$slice      = func_get_arg(0);
 		$output     = $dispatcher->filter('SLY_SLICE_POST_RENDER', $output, array(
-			'slice'  => func_get_arg(0),
+			'slice'  => $slice,
 			'module' => $this->moduleName,
 			'values' => $this->values
 		));
