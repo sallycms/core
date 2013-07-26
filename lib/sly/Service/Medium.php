@@ -340,7 +340,7 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id implements sly_Contai
 
 		$fileURI = $this->getFullPath($medium);
 
-		$service->uploadFile($fileData, $filename, false, false);
+		$service->uploadFile($fileData, $medium->getFilename(), false, false);
 
 		// update the medium
 
