@@ -399,7 +399,7 @@ abstract class sly_Service_DevelopBase {
 					}
 				}
 
-				$result = call_user_func_array($evaluator, array($name, $filter));
+				$result = call_user_func_array($evaluator, array($param, $filter));
 
 				// if the result is not false or empty or something go on with the result
 				if (!empty($result)) {
