@@ -35,14 +35,14 @@ abstract class sly_App_Base implements sly_App_Interface {
 	 * initialize the app
 	 */
 	public function initialize() {
+		// register listeners
+		sly_Core::registerListeners();
+
 		// boot addOns
 		sly_Core::loadAddOns();
 
 		// setup the stream wrappers
 		$this->registerStreamWrapper();
-
-		// register listeners
-		sly_Core::registerListeners();
 
 		// synchronize develop
 		$this->syncDevelopFiles();
