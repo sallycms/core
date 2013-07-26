@@ -37,7 +37,25 @@ class sly_Service_File_YAML extends sly_Service_File_Base {
 	 */
 	protected function writeFile($filename, $data) {
 		$this->checkForSfYaml();
-		return file_put_contents($filename, sfYaml::dump($data, 5), LOCK_EX);
+
+		// be careful with the current locale, as it can affect how floats are
+		// dumped (3.41 => German => 3,41 => is being parsed as junk once the file
+		// is loaded again); see https://github.com/symfony/Yaml/blob/master/Inline.php
+		// for the source of this workaround
+
+		$locale = setlocale(LC_NUMERIC, 0);
+
+		if (false !== $locale) {
+			setlocale(LC_NUMERIC, 'C');
+		}
+
+		$yaml = sfYaml::dump($data, 5);
+
+		if (false !== $locale) {
+			setlocale(LC_NUMERIC, $locale);
+		}
+
+		return file_put_contents($filename, $yaml, LOCK_EX);
 	}
 
 	protected function checkForSfYaml() {
