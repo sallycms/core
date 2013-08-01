@@ -305,6 +305,9 @@ class sly_Response {
 		$this->sendHeaders();
 		$this->sendContent();
 
+		// maybe someone wants to do some cleanup after response is sent
+		$dispatcher->notify('SLY_RESPONSE_SENT', $this);
+
 		if (function_exists('fastcgi_finish_request')) {
 			fastcgi_finish_request();
 		}
