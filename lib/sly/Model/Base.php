@@ -126,7 +126,10 @@ abstract class sly_Model_Base {
 				if ($type === 'date' || $type === 'datetime') {
 					$type = 'int';
 
-					if (!sly_Util_String::isInteger($hash[$name])) {
+					if ($hash[$name] === '0000-00-00' || $hash[$name] === '0000-00-00 00:00:00') {
+						$type = 'null';
+					}
+					elseif (!sly_Util_String::isInteger($hash[$name])) {
 						$hash[$name] = strtotime($hash[$name].' UTC');
 					}
 				}
@@ -136,6 +139,7 @@ abstract class sly_Model_Base {
 					if (is_string($value)) {
 						$value = json_decode($value, true);
 					}
+
 					if (!is_array($value)) {
 						$value = array();
 					}
