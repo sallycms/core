@@ -379,12 +379,10 @@ class sly_Service_ArticleSlice implements sly_ContainerAwareInterface {
 
 			$sql->commitTrx($trx);
 
-			return true;
+			return $articleSlice;
 		}
 		catch (Exception $e) {
 			$sql->rollBackTrx($trx, $e);
-
-			return false;
 		}
 	}
 
@@ -397,6 +395,7 @@ class sly_Service_ArticleSlice implements sly_ContainerAwareInterface {
 	 * @param  int            $slice_id   article slice ID
 	 * @param  string         $direction  direction to move, either 'up' or 'down'
 	 * @param  sly_Model_User $user       updateuser or null for current user
+	 * @return sly_Model_ArticleSlice     the moved slice
 	 */
 	public function move($slice_id, $direction, sly_Model_User $user = null) {
 		$slice_id = (int) $slice_id;
