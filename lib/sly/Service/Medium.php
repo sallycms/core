@@ -427,7 +427,7 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id implements sly_Contai
 		$sql->query($query, $data);
 
 		foreach ($sql->all() as $row) {
-			$article  = $service->findById($row['article_id'], $row['clang'], $row['revision']);
+			$article  = $service->findByPK($row['article_id'], $row['clang'], $row['revision']);
 			$usages[] = array(
 				'object' => $article,
 				'type'   => 'sly-article'
