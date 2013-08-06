@@ -166,7 +166,7 @@ class sly_Util_Article {
 	 * @return string
 	 */
 	public static function getUrl($articleID, $clang = null, $params = array(), $divider = '&amp;', $absolute = false, $secure = null) {
-		$article = self::findById($articleID, $clang, null, $articleID);
+		$article = self::findById($articleID, $clang, sly_Service_Article::FIND_REVISION_ONLINE, $articleID);
 
 		// if no article was found, the default value, an integer (articleID), will be returned
 		if (!($article instanceof sly_Model_Article)) {
