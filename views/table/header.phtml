@@ -13,19 +13,20 @@ $currentPage    = abs($request->get('p_'.$tableID, 'int', 0));
 $hasPager       = $this->hasPager();
 $hasSearch      = $this->hasSearch();
 $hasDragAndDrop = $this->hasDragAndDrop();
+$getParams      = $request->get->all();
 
 $this->surroundingHTML = '';
 ob_start();
 
 if (!sly_Table::isDragAndDropMode() && $hasPager) {
 	$pager = new sly_Util_Pager($currentPage, $this->totalElements, sly_Table::$perPage);
-	$pager = $pager->getHTMLString($_GET, 'p_'.$tableID);
+	$pager = $pager->getHTMLString($getParams, 'p_'.$tableID);
 
 	print '<p class="sly-table-extras-pager">'.t('pages').': '.$pager.'</p>';
 }
 
 if ($this->enableDragAndDrop && ($hasSearch || $hasPager)) {
-	$params = $request->get->all();
+	$params = $getParams;
 
 	unset($params['p_'.$tableID]);
 	unset($params['q_'.$tableID]);
@@ -49,7 +50,7 @@ if (!sly_Table::isDragAndDropMode() && $hasSearch) {
 	print '<form method="get" action="index.php">';
 	print '<p class="sly-table-extras-filter">'.t('filter').': ';
 
-	$getParams = $this->searchParams === null ? $_GET : $this->searchParams;
+	$getParams = $this->searchParams === null ? $getParams : $this->searchParams;
 
 	foreach ($getParams as $name => $value) {
 		if ($name !== 'p_'.$this->id && $name !== $key && is_scalar($value)) {
