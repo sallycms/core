@@ -53,8 +53,8 @@ class sly_Router_Base implements sly_Router_Interface {
 		}
 
 		foreach ($routeMatch as $key => $value) {
-			if (ctype_digit($key)) {
-				$key = 'match'.$key;
+			if (is_int($key)) {
+				continue;
 			}
 
 			$request->get->set($key, $value);
