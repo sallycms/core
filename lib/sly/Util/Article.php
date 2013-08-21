@@ -87,8 +87,8 @@ class sly_Util_Article {
 	 * @param  int $clang
 	 * @return sly_Model_Article
 	 */
-	public static function findSiteStartArticle($clang = null) {
-		return self::findById(sly_Core::getSiteStartArticleId(), $clang);
+	public static function findSiteStartArticle($clang = null, $revision = sly_Service_Article::FIND_REVISION_ONLINE) {
+		return self::findById(sly_Core::getSiteStartArticleId(), $clang, $revision);
 	}
 
 	/**
