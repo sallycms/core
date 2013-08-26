@@ -248,13 +248,13 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 	 * @param  sly_Model_Article $article
 	 * @param  string            $type
 	 * @param  sly_Model_User    $user     updateuser or null for the current user
-	 * @return boolean
+	 * @return sly_Model_Article
 	 */
 	public function setType(sly_Model_Article $article, $type, sly_Model_User $user = null) {
 		$oldType = $article->getType();
 
 		if ($oldType === $type) {
-			return true;
+			return $article;
 		}
 
 		$user = $this->getActor($user, __METHOD__);
@@ -273,12 +273,12 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 			$this->getDispatcher()->notify('SLY_ART_TYPE', $article, array('old_type' => $oldType, 'user' => $user));
 
 			$sql->commitTrx($trx);
+
+			return $article;
 		}
 		catch (Exception $e) {
 			$sql->rollBackTrx($trx, $e);
 		}
-
-		return true;
 	}
 
 	/**
