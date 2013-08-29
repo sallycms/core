@@ -10,7 +10,7 @@
 
 // determine application based on the request URI
 
-$router = function($server) {
+function _sly_router($server) {
 	$base   = dirname($server['SCRIPT_NAME']);
 	$reqUri = substr($server['REQUEST_URI'], strlen($base));
 	$reqUri = preg_replace('/[?&].*$/', '', $reqUri);
@@ -23,6 +23,6 @@ $router = function($server) {
 
 	// everything else goes through the frontend
 	return array('frontend', '/');
-};
+}
 
-return $router($_SERVER);
+return _sly_router($_SERVER);
