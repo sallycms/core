@@ -17,13 +17,11 @@ abstract class sly_BaseTest extends PHPUnit_Extensions_Database_TestCase {
 	 */
 	public function getConnection() {
 		if (!$this->pdo) {
-			$data = sly_Core::config()->get('DATABASE');
-			$conn = sly_DB_PDO_Connection::getInstance($data['DRIVER'], $data['HOST'], $data['LOGIN'], $data['PASSWORD'], $data['NAME']);
-
+			$conn      = sly_Core::getContainer()->get('sly-pdo-connection');
 			$this->pdo = $conn->getPDO();
 		}
 
-		return $this->createDefaultDBConnection($this->pdo, $data['NAME']);
+		return $this->createDefaultDBConnection($this->pdo);
 	}
 
 	public function setUp() {
@@ -34,6 +32,11 @@ abstract class sly_BaseTest extends PHPUnit_Extensions_Database_TestCase {
 			foreach ($this->getRequiredAddOns() as $addon) {
 				$this->loadAddOn($addon);
 			}
+
+			// login the dummy user
+			$service = sly_Core::getContainer()->getUserService();
+			$user    = $service->findById(SLY_TESTING_USER_ID);
+			$service->setCurrentUser($user);
 
 			$this->setup = true;
 		}
@@ -47,7 +50,7 @@ abstract class sly_BaseTest extends PHPUnit_Extensions_Database_TestCase {
 		$comp = new PHPUnit_Extensions_Database_DataSet_CompositeDataSet(array());
 
 		if ($name !== null) {
-			$core = new PHPUnit_Extensions_Database_DataSet_YamlDataSet(dirname(__FILE__).'/../../datasets/'.$name.'.yml');
+			$core = new PHPUnit_Extensions_Database_DataSet_YamlDataSet(__DIR__.'/../../datasets/'.$name.'.yml');
 			$comp->addDataSet($core);
 		}
 
@@ -73,7 +76,7 @@ abstract class sly_BaseTest extends PHPUnit_Extensions_Database_TestCase {
 	}
 
 	protected function loadAddOn($addon) {
-		$service = sly_Service_Factory::getAddOnManagerService();
+		$service = sly_Core::getContainer()->getAddOnManagerService();
 		$service->load($addon, true, sly_Core::getContainer());
 	}
 

@@ -50,23 +50,23 @@ class sly_Util_AddOn {
 	}
 
 	/**
-	 * returns the full path to the public directory
+	 * Get the filesystem containing an addOn's dynamic files
 	 *
-	 * @param  string $addon  addOn name
-	 * @return string
+	 * @param  string $addon  addon name
+	 * @return Filesystem
 	 */
-	public static function publicDirectory($addon) {
-		return self::getService()->publicDirectory($addon);
+	public static function dynFilesystem($addon) {
+		return self::getService()->getDynFilesystem($addon);
 	}
 
 	/**
-	 * returns the full path to the internal directory
+	 * Get the full path to an addOn's temp directory
 	 *
-	 * @param  string $addon  addOn name
-	 * @return string
+	 * @param  string $addon  addon name
+	 * @return Filesystem
 	 */
-	public static function internalDirectory($addon) {
-		return self::getService()->internalDirectory($addon);
+	public static function tempDirectory($addon) {
+		return self::getService()->getTempDirectory($addon);
 	}
 
 	/**

@@ -49,16 +49,6 @@ abstract class sly_ErrorHandler_Base {
 	 * @return string
 	 */
 	protected function getRelativeFilename($file) {
-		if (strpos($file, "eval()'d code")) {
-			return "eval()'d code";
-		}
-
-		$base = SLY_BASE;
-
-		if (strlen($file) >= strlen($base) && substr($file, 0, strlen($base)) === $base) {
-			return '/'.str_replace("\\", '/', substr($file, strlen($base) + 1)); // +1 schneidet den (Back)Slash ab
-		}
-
-		return $file;
+		return sly_Util_File::getRelativeFilename($file);
 	}
 }

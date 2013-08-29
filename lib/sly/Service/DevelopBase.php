@@ -210,7 +210,7 @@ abstract class sly_Service_DevelopBase {
 	 * @param array $data
 	 */
 	protected function setData($data) {
-		$this->config->set($this->getClassIdentifier().'/data', $data);
+		$this->config->set($this->getClassIdentifier().'/data', $data)->store();
 		$this->data = $data;
 	}
 
@@ -257,7 +257,7 @@ abstract class sly_Service_DevelopBase {
 	 */
 	protected function resetRefreshTime($time = null) {
 		if ($time === null) $time = time();
-		$this->config->set($this->getClassIdentifier().'/last_refresh', $time);
+		$this->config->set($this->getClassIdentifier().'/last_refresh', $time)->store();
 		$this->lastRefreshTime = $time;
 	}
 

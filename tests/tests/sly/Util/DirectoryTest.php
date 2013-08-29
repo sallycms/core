@@ -52,7 +52,7 @@ class sly_Util_DirectoryTest extends PHPUnit_Framework_TestCase {
 	}
 
 	public function testDirRecognition() {
-		$here     = realpath(dirname(__FILE__));
+		$here     = realpath(__DIR__);
 		$testPath = sly_Util_Directory::join($here, '4986z9irugh3wiufzgeu');
 
 		// create the instance without creating the dir

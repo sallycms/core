@@ -17,7 +17,7 @@ class sly_Service_File_JSON extends sly_Service_File_Base {
 	 * @return string
 	 */
 	protected function getCacheDir() {
-		$dir = SLY_DYNFOLDER.'/internal/sally/json-cache';
+		$dir = SLY_TEMPFOLDER.'/sally/json-cache';
 		return sly_Util_Directory::create($dir, null, true);
 	}
 
@@ -37,6 +37,9 @@ class sly_Service_File_JSON extends sly_Service_File_Base {
 	 * @return int               number of written bytes
 	 */
 	protected function writeFile($filename, $data) {
-		return file_put_contents($filename, json_encode($data), LOCK_EX);
+		// JSON formatting is available since PHP 5.4. Since we prettyprint
+		// YAML, we should do it here as well, if possible.
+		// 448 is (JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE).
+		return file_put_contents($filename, json_encode($data, 448), LOCK_EX);
 	}
 }

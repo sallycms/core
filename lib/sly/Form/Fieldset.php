@@ -269,4 +269,45 @@ class sly_Form_Fieldset extends sly_Viewable {
 
 		throw new sly_Form_Exception(t('view_not_found', $file));
 	}
+
+	/**
+	 * Add a new class to the form
+	 *
+	 * This method will add a CSS class to the form tag. You can give mutliple
+	 * classes at once, the method will split them up and add them one at a time,
+	 * ensuring that they are unique.
+	 *
+	 * @param  string $class  the CSS class
+	 * @return sly_Form       the current object
+	 */
+	public function addClass($class) {
+		$old     = $this->getAttribute('class', '');
+		$classes = array_unique(array_filter(explode(' ', $class.' '.$old)));
+
+		$this->setAttribute('class', implode(' ', $classes));
+
+		return $this;
+	}
+
+	/**
+	 * Remove all classes
+	 *
+	 * This method removes all set CSS classes for this form.
+	 *
+	 * @return sly_Form  the current object
+	 */
+	public function clearClasses() {
+		$this->setAttribute('class', '');
+
+		return $this;
+	}
+
+	/**
+	 * Get all classes
+	 *
+	 * @return array  the list of CSS classes for this form
+	 */
+	public function getClasses() {
+		return explode(' ', $this->getAttribute('class', ''));
+	}
 }

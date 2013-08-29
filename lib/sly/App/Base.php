@@ -10,7 +10,6 @@
 
 abstract class sly_App_Base implements sly_App_Interface {
 	protected $container;
-	protected $dispatcher;
 	protected $controller;
 	protected $action;
 
@@ -33,24 +32,14 @@ abstract class sly_App_Base implements sly_App_Interface {
 	}
 
 	/**
-	 * get request dispatcher
-	 *
-	 * @return sly_Dispatcher
-	 */
-	protected function getDispatcher() {
-		if ($this->dispatcher === null) {
-			$this->dispatcher = new sly_Dispatcher($this->getContainer(), $this->getControllerClassPrefix());
-		}
-
-		return $this->dispatcher;
-	}
-
-	/**
 	 * initialize the app
 	 */
 	public function initialize() {
 		// boot addOns
 		sly_Core::loadAddOns();
+
+		// setup the stream wrappers
+		$this->registerStreamWrapper();
 
 		// register listeners
 		sly_Core::registerListeners();
@@ -76,7 +65,6 @@ abstract class sly_App_Base implements sly_App_Interface {
 		if (sly_Core::isDeveloperMode() || ($user && $user->isAdmin())) {
 			$container->getTemplateService()->refresh();
 			$container->getModuleService()->refresh();
-			$container->getAssetService()->validateCache();
 		}
 	}
 
@@ -88,7 +76,7 @@ abstract class sly_App_Base implements sly_App_Interface {
 	protected function notifySystemOfController() {
 		$name       = $this->getCurrentControllerName();
 		$controller = $this->getCurrentController();
-		$dispatcher = $this->getContainer()->getDispatcher();
+		$dispatcher = $this->getContainer()->getDispatcher(); // event dispatcher, not the request dispatcher
 		$params     = array(
 			'app'    => $this,
 			'name'   => $name,
@@ -110,11 +98,7 @@ abstract class sly_App_Base implements sly_App_Interface {
 			return null;
 		}
 
-		$dispatcher = $this->getDispatcher();
-		$className  = $dispatcher->getControllerClass($name);
-		$controller = $dispatcher->getController($className);
-
-		return $controller;
+		return $this->getDispatcher()->getController($name);
 	}
 
 	/**
@@ -131,7 +115,10 @@ abstract class sly_App_Base implements sly_App_Interface {
 	}
 
 	protected function setDefaultTimezone() {
-		date_default_timezone_set(sly_Core::getTimezone());
+		$tz = sly_Core::getTimezone() ?: @date_default_timezone_get();
+		$tz = $tz ?: 'Europe/Berlin';
+
+		date_default_timezone_set($tz);
 	}
 
 	protected function performRouting(sly_Request $request) {
@@ -153,10 +140,24 @@ abstract class sly_App_Base implements sly_App_Interface {
 		return $retval;
 	}
 
+	protected function registerStreamWrapper() {
+		$container = $this->getContainer();
+		$fsMap     = $container['sly-filesystem-map'];
+		$fsService = $container['sly-service-filesystem'];
+
+		$fsService->registerStreamWrapper($fsMap);
+	}
+
+	/**
+	 * get request dispatcher
+	 *
+	 * @return sly_Dispatcher
+	 */
+	abstract protected function getDispatcher();
+
 	abstract protected function prepareRouter(sly_Container $container);
 	abstract protected function getControllerFromRequest(sly_Request $request);
 	abstract protected function getActionFromRequest(sly_Request $request);
 
-	abstract public function getControllerClassPrefix();
 	abstract public function getCurrentControllerName();
 }

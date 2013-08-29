@@ -41,26 +41,45 @@ class sly_Model_User extends sly_Model_Base_Id {
 	); ///< array
 
 	/**
-	 * @param array $params
+	 * Constructor
+	 *
+	 * Both $default* variables are resolved by using the config if set to null.
+	 *
+	 * @param array  $params
+	 * @param string $defaultStartpage  startpage to use if the user has none set yet
+	 * @param string $defaultLocale     backend locale to use if none is set yet
 	 */
-	public function __construct($params = array()) {
+	public function __construct($params = array(), $defaultStartpage = null, $defaultLocale = null) {
 		parent::__construct($params);
-		$this->evalRights();
+
+		$this->evalRights($defaultStartpage, $defaultLocale);
 	}
 
-	protected function evalRights() {
-		$config      = sly_Core::config();
+	/**
+	 * Evaluate the encoded rights
+	 *
+	 * Both $default* variables are resolved by using the config if set to null.
+	 *
+	 * @param string $defaultStartpage  startpage to use if the user has none set yet
+	 * @param string $defaultLocale     backend locale to use if none is set yet
+	 */
+	protected function evalRights($defaultStartpage = null, $defaultLocale = null) {
+		if ($defaultStartpage === null || $defaultLocale === null) {
+			$config = sly_Core::getContainer()->getConfig();
+		}
 
-		$this->startpage     = $config->get('START_PAGE');
-		$this->backendLocale = sly_Core::getDefaultLocale();
+		$this->startpage     = $defaultStartpage === null ? $config->get('start_page') : $defaultStartpage;
+		$this->backendLocale = $defaultLocale === null ? $config->get('default_locale') : $defaultLocale;
 		$this->isAdmin       = false;
 
 		if (isset($this->attributes['isAdmin'])) {
-			$this->isAdmin = $this->attributes['isAdmin'];
+			$this->isAdmin = (boolean) $this->attributes['isAdmin'];
 		}
+
 		if (isset($this->attributes['startpage'])) {
 			$this->startpage = $this->attributes['startpage'];
 		}
+
 		if (isset($this->attributes['backendLocale'])) {
 			$this->backendLocale = $this->attributes['backendLocale'];
 		}
@@ -73,7 +92,7 @@ class sly_Model_User extends sly_Model_Base_Id {
 	/**
 	 * Sets a password into the user model.
 	 *
-	 * This method is doing the hashing. Mage sure the createdate is set before.
+	 * This method is doing the hashing.
 	 *
 	 * @param string $password  The password (plain)
 	 */
@@ -81,6 +100,7 @@ class sly_Model_User extends sly_Model_Base_Id {
 		if (mb_strlen($password) === 0) {
 			throw new sly_Exception(t('no_password_given'));
 		}
+
 		$this->setHashedPassword(sly_Util_Password::hash($password));
 	}
 
@@ -134,9 +154,6 @@ class sly_Model_User extends sly_Model_Base_Id {
 	public function getTimeZone()    { return $this->timezone;    } ///< @return string
 	public function getRevision()    { return $this->revision;    } ///< @return int
 
-
-	// helpers for attributes
-
 	/**
 	 * sets an attribute
 	 *
@@ -144,7 +161,7 @@ class sly_Model_User extends sly_Model_Base_Id {
 	 * @param mixed $value
 	 */
 	public function setAttribute($key, $value) {
-		$this->attributes[(string)$key] = $value;
+		$this->attributes[(string) $key] = $value;
 	}
 
 	/**
@@ -155,10 +172,11 @@ class sly_Model_User extends sly_Model_Base_Id {
 	 */
 	public function getAttribute($key, $default = null) {
 		$key = (string) $key;
-		if (isset($this->attributes[$key]))
-		{
+
+		if (isset($this->attributes[$key])) {
 			return $this->attributes[$key];
 		}
+
 		return $default;
 	}
 
@@ -167,9 +185,7 @@ class sly_Model_User extends sly_Model_Base_Id {
 	 * @param boolean $isAdmin
 	 */
 	public function setIsAdmin($isAdmin) {
-		$isAdmin       = (boolean) $isAdmin;
-		$this->isAdmin = $isAdmin;
-		$this->attributes['isAdmin'] = $isAdmin;
+		$this->isAdmin = $this->attributes['isAdmin'] = (boolean) $isAdmin;
 	}
 
 	/**
@@ -177,8 +193,7 @@ class sly_Model_User extends sly_Model_Base_Id {
 	 * @param string $startPage
 	 */
 	public function setStartPage($startPage) {
-		$this->startpage = $startPage;
-		$this->attributes['startpage'] = $startPage;
+		$this->startpage = $this->attributes['startpage'] = $startPage;
 	}
 
 	/**
@@ -186,8 +201,7 @@ class sly_Model_User extends sly_Model_Base_Id {
 	 * @param string $backendLocale
 	 */
 	public function setBackendLocale($backendLocale) {
-		$this->backendLocale = $backendLocale;
-		$this->attributes['backendLocale'] = $backendLocale;
+		$this->backendLocale = $this->attributes['backendLocale'] = $backendLocale;
 	}
 
 	public function getStartPage()     { return $this->startpage;     } ///< @return string
@@ -198,19 +212,21 @@ class sly_Model_User extends sly_Model_Base_Id {
 	 * @return array
 	 */
 	public function getAllowedCLangs() {
-		$allowedLanguages = array();
+		$service = sly_Core::getContainer()->getLanguageService();
+		$allowed = array();
 
-		foreach (sly_Util_Language::findAll(true) as $language) {
+		foreach ($service->findAll(true) as $language) {
 			if ($this->isAdmin() || $this->hasRight('language', 'access', $language)) {
-				$allowedLanguages[] = $language;
+				$allowed[] = $language;
 			}
 		}
 
-		return $allowedLanguages;
+		return $allowed;
 	}
 
 	/**
 	 * @deprecated since 0.8 use hasPermission() instead
+	 *
 	 * @param  string $context
 	 * @param  string $right
 	 * @return boolean
@@ -232,6 +248,8 @@ class sly_Model_User extends sly_Model_Base_Id {
 	 * @return int
 	 */
 	public function delete() {
-		return sly_Core::getContainer()->getUserService()->deleteById($this->id);
+		$service = sly_Core::getContainer()->getUserService();
+
+		return $service->deleteById($this->id);
 	}
 }

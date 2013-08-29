@@ -15,7 +15,7 @@ class sly_Service_LanguageTest extends sly_BaseTest {
 
 	protected function getService() {
 		static $service = null;
-		if (!$service) $service = sly_Service_Factory::getLanguageService();
+		if (!$service) $service = sly_Core::getContainer()->getLanguageService();
 		return $service;
 	}
 
@@ -51,7 +51,7 @@ class sly_Service_LanguageTest extends sly_BaseTest {
 	 */
 	public function testDelete() {
 		$service  = $this->getService();
-		$aService = sly_Service_Factory::getArticleService();
+		$aService = sly_Core::getContainer()->getArticleService();
 		$articles = count($aService->find());
 		$lang     = $service->create(array('name' => 'test', 'locale' => 'xx_YY'));
 		$id       = $lang->getId();
@@ -71,12 +71,12 @@ class sly_Service_LanguageTest extends sly_BaseTest {
 	 */
 	public function testDuplicatesArticles() {
 		$service  = $this->getService();
-		$aService = sly_Service_Factory::getArticleService();
+		$aService = sly_Core::getContainer()->getArticleService();
 		$articles = count($aService->find()) / 2; // there are two languages in sally-demopage
 		$lang     = $service->create(array('name' => 'test', 'locale' => 'xx_YY'));
 		$id       = $lang->getId();
 
 		$this->assertCount(3*$articles, $aService->find());
-		$this->assertInstanceOf('sly_Model_Article', $aService->findById(6, $id));
+		$this->assertInstanceOf('sly_Model_Article', $aService->findByPK(6, $id));
 	}
 }

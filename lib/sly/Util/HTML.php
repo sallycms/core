@@ -36,6 +36,7 @@ class sly_Util_HTML {
 	}
 
 	/**
+	 * @deprecated moved to sallycms-backend sly_Helper_Sprite
 	 * @param  string $target
 	 * @param  string $text
 	 * @param  string $class
@@ -122,13 +123,13 @@ class sly_Util_HTML {
 		}
 
 		if ($image instanceof sly_Model_Medium) {
-			$src   = $base.'data/mediapool/'.$image->getFilename();
+			$src   = $base.'mediapool/'.$image->getFilename();
 			$alt   = $image->getTitle();
 			$title = $image->getTitle();
 		}
 		else {
 			if ($forceUri) {
-				$src = $base.'data/mediapool/'.$image;
+				$src = $base.'mediapool/'.$image;
 			}
 			else {
 				// a transparent 1x1 sized PNG, 81byte in size
@@ -176,10 +177,12 @@ class sly_Util_HTML {
 	 * Replaces sally://ARTICLEID and sally://ARTICLEID-CLANGID in
 	 * the $content by article http URLs.
 	 *
-	 * @param  string $content
+	 * @param  string  $content
+	 * @param  boolean $absolute
+	 * @param  boolean $secure    force HTTPS (true) or HTTP (false) URL, use null for the current protocol
 	 * @return string
 	 */
-	public static function replaceSallyLinks($content) {
+	public static function replaceSallyLinks($content, $absolute = false, $secure = null) {
 		preg_match_all('#sally://([0-9]+)(?:-([0-9]+))?/?#', $content, $matches, PREG_OFFSET_CAPTURE | PREG_SET_ORDER);
 
 		$skew = 0;
@@ -192,7 +195,7 @@ class sly_Util_HTML {
 			$clang    = isset($match[2]) ? (int) $match[2][0] : null;
 
 			try {
-				$repl = sly_Util_Article::getUrl($id, $clang);
+				$repl = sly_Util_Article::getUrl($id, $clang, array(), '&amp;', $absolute, $secure);
 			}
 			catch (Exception $e) {
 				$repl = '#';
@@ -206,5 +209,16 @@ class sly_Util_HTML {
 		}
 
 		return $content;
+	}
+
+	public static function getDatetimeTag($timestamp) {
+		if ($timestamp === null) {
+			$timestamp = time();
+		}
+		elseif (!sly_Util_String::isInteger($timestamp)) {
+			$timestamp = strtotime($timestamp);
+		}
+
+		return '<abbr class="timeago" title="'.date('Y-m-d\TG:i:sP', $timestamp).'">'.sly_Util_String::formatDatetime($timestamp).'</abbr>';
 	}
 }

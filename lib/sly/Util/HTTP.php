@@ -46,22 +46,20 @@ class sly_Util_HTTP {
 			$noticeText = t('redirect_to', sly_html($targetUrl));
 		}
 
-		$stati = array(
-			300 => 'Multiple Choices',
-			301 => 'Moved Permanently',
-			302 => 'Found',
-			303 => 'See Other',
-			305 => 'Use Proxy',
-			307 => 'Temporary Redirect'
-		);
+		// Use the system's response, so other components can interfere with the
+		// redirect and change stuff before it's actually sent.
 
-		$status = isset($stati[$status]) ? $status : 301;
-		$text   = $stati[$status];
+		$response = sly_Core::getContainer()->get('sly-response');
 
-		while (ob_get_level()) ob_end_clean();
-		header('HTTP/1.0 '.$status.' '.$text);
-		header('Location: '.$targetUrl);
-		exit($noticeText);
+		if ($noticeText !== '') {
+			$response->setContent($noticeText);
+		}
+
+		$response->setStatusCode($status);
+		$response->setHeader('Location', $targetUrl);
+		$response->send();
+
+		exit(0);
 	}
 
 	/**
@@ -111,8 +109,12 @@ class sly_Util_HTTP {
 			return self::getAbsoluteUrl($targetArticle, $clang, $parameters, $divider, $secure);
 		}
 
-		$articleID = self::resolveArticle($targetArticle);
-		$article   = sly_Util_Article::findById($articleID, $clang);
+		if ($targetArticle instanceof sly_Model_Base_Article && ($clang === null || $clang == $targetArticle->getClang())) {
+			$article = $targetArticle;
+		} else {
+			$articleID = self::resolveArticle($targetArticle);
+			$article   = sly_Util_Article::findById($articleID, $clang);
+		}
 
 		return $article->getUrl($parameters, $divider);
 	}

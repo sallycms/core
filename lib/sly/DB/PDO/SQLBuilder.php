@@ -87,6 +87,13 @@ abstract class sly_DB_PDO_SQLBuilder {
 	}
 
 	/**
+	 * @return array
+	 */
+	public function get_where_clause() {
+		return $this->where;
+	}
+
+	/**
 	 * @return sly_DB_PDO_SQLBuilder this
 	 */
 	public function where(/* (conditions, values) || (hash) */) {

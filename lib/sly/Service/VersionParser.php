@@ -8,8 +8,8 @@
  * For the full copyright and license information, please go to
  * https://github.com/composer/composer/blob/master/LICENSE.
  *
- * This file was partially re-written to be PHP 5.2.x compatible and omit some
- * features not used in SallyCMS. Those changes are (c) 2012 webvariants GbR.
+ * This file was partially re-written to omit features not used in SallyCMS.
+ * Those changes are (c) 2013 webvariants GbR.
  */
 
 class sly_Service_VersionParser {
@@ -65,6 +65,40 @@ class sly_Service_VersionParser {
 		$stability = strtolower($stability);
 
 		return $stability === 'rc' ? 'RC' : $stability;
+	}
+
+	public function getPackageVersionDetails($packageDir) {
+		$json     = $packageDir.'/composer.json';
+		$composer = new sly_Util_Composer($json);
+		$version  = $composer->getKey('version');
+
+		return $this->getVersionDetails($version);
+	}
+
+	public function getVersionDetails($version) {
+		$raw      = $version;
+		$version  = $this->normalize($version);
+		$result   = array(
+			'major'     => null,
+			'minor'     => null,
+			'bugfix'    => null,
+			'build'     => null,
+			'stability' => self::parseStability($version),
+			'full'      => $version,
+			'raw'       => $raw
+		);
+
+		if ('dev-' !== strtolower(substr($version, 0, 4))) {
+			$parts = explode('-', $version, 2);
+			$nums  = explode('.', $parts[0]);
+
+			$result['major']  = (int) $nums[0];
+			$result['minor']  = (int) $nums[1];
+			$result['bugfix'] = (int) $nums[2];
+			$result['build']  = (int) $nums[3];
+		}
+
+		return $result;
 	}
 
 	/**
@@ -290,7 +324,7 @@ class sly_Service_VersionParser {
 					}
 				}
 
-				return array(array($matches[1] ? $matches[1] : '=', $version));
+				return array(array($matches[1] ?: '=', $version));
 			}
 			catch (Exception $e) {
 				// ignore
