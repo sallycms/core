@@ -154,7 +154,7 @@ class sly_Request {
 			}
 		}
 
-		return $this->__base_url[$key] = rtrim(sprintf('%s://%s%s%s', $protocol, $host, $port, $path), '/');
+		return rtrim(sprintf('%s://%s%s%s', $protocol, $host, $port, $path), '/');
 	}
 
 	/**
