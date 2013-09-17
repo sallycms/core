@@ -16,10 +16,15 @@ if (!file_exists($vendor.'/autoload.php')) {
 	$vendor = dirname(__DIR__).DIRECTORY_SEPARATOR.'vendor';
 
 	if (!file_exists($vendor.'/autoload.php')) {
-		print
-			'You must set up the project dependencies, run the following commands:'.PHP_EOL.
-			'php composer.phar install'.PHP_EOL;
-		exit(1);
+		// if we are the dependency of an addOn, there is no 'sally/vendor/', but instead 'vendor/'
+		$vendor = dirname(dirname(__DIR__)).DIRECTORY_SEPARATOR.'vendor';
+
+		if (!file_exists($vendor.'/autoload.php')) {
+			print
+				'You must set up the project dependencies, run the following commands:'.PHP_EOL.
+				'php composer.phar install'.PHP_EOL;
+			exit(1);
+		}
 	}
 }
 
