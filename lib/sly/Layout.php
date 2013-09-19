@@ -209,7 +209,7 @@ abstract class sly_Layout extends sly_Viewable {
 	 */
 	public function setBodyAttr($name, $value) {
 		$name  = trim($name);
-		$value = trim($value);
+		$value = $this->isEmptyValue($value) ? null : trim($value);
 
 		if (sly_Util_String::startsWith($name, 'on')) {
 			$this->addJavaScript('window.'.$name.' = function() { '.$value.' }');
@@ -227,7 +227,7 @@ abstract class sly_Layout extends sly_Viewable {
 	 */
 	public function getBodyAttr($name = null) {
 		if ($name === null) return $this->bodyAttrs;
-		return isset($this->bodyAttrs[$name]) ? $this->bodyAttrs[$name] : null;
+		return array_key_exists($name, $this->bodyAttrs) ? $this->bodyAttrs[$name] : null;
 	}
 
 	/**
@@ -253,10 +253,9 @@ abstract class sly_Layout extends sly_Viewable {
 	 * @param string $value  attribute value
 	 */
 	public function setHtmlAttr($name, $value) {
-		$name  = trim($name);
-		$value = trim($value);
+		$name = trim($name);
 
-		$this->htmlAttrs[$name] = $value;
+		$this->htmlAttrs[$name] = $this->isEmptyValue($value) ? null : trim($value);
 	}
 
 	/**
@@ -267,7 +266,7 @@ abstract class sly_Layout extends sly_Viewable {
 	 */
 	public function getHtmlAttr($name = null) {
 		if ($name === null) return $this->htmlAttrs;
-		return isset($this->htmlAttrs[$name]) ? $this->htmlAttrs[$name] : null;
+		return array_key_exists($name, $this->htmlAttrs) ? $this->htmlAttrs[$name] : null;
 	}
 
 	/**
@@ -473,5 +472,19 @@ abstract class sly_Layout extends sly_Viewable {
 		if (file_exists($full)) return $full;
 
 		throw new sly_Exception(t('view_not_found', $file));
+	}
+
+	/**
+	 * Check if an attribute value is considered empty
+	 *
+	 * "Empty" means that there should be no '=""' in an HTML layout (as opposed
+	 * to having an empty string, which is a valid value and will be printed as
+	 * '=""' even in HTML).
+	 *
+	 * @param  mixed   $value
+	 * @return boolean
+	 */
+	protected function isEmptyValue($value) {
+		return ($value === null) || ($value === false);
 	}
 }
