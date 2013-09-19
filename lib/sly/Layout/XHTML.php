@@ -22,6 +22,9 @@ class sly_Layout_XHTML extends sly_Layout {
 	protected $language;                ///< string
 	protected $scriptsAtBottom = false; ///< boolean
 
+	public function __construct() {
+		$this->setHtmlAttr('xmlns', 'http://www.w3.org/1999/xhtml');
+	}
 	/**
 	 * Set the page to be transitional
 	 *
@@ -40,6 +43,8 @@ class sly_Layout_XHTML extends sly_Layout {
 	 */
 	public function setLanguage($language) {
 		$this->language = $language;
+		$this->setHtmlAttr('lang', $language);
+		$this->setHtmlAttr('xml:lang', $language);
 	}
 
 	/**
@@ -100,15 +105,18 @@ class sly_Layout_XHTML extends sly_Layout {
 	}
 
 	protected function printBodyAttrs() {
-		$this->printHeadElements(' %s="%s"', $this->bodyAttrs);
+		$this->printHeadElements(' %s="%s"', $this->bodyAttrs, ' %s=""');
 	}
 
+	protected function printHtmlAttrs() {
+		$this->printHeadElements(' %s="%s"', $this->htmlAttrs, ' %s=""');
+	}
 	protected function printMetas() {
-		$this->printHeadElements("\t".'<meta name="%s" content="%s" />'."\n", $this->metas);
+		$this->printHeadElements("\t".'<meta name="%s" content="%s" />'."\n", $this->metas, null);
 	}
 
 	protected function printHttpMetas() {
-		$this->printHeadElements("\t".'<meta http-equiv="%s" content="%s" />'."\n", $this->httpMetas);
+		$this->printHeadElements("\t".'<meta http-equiv="%s" content="%s" />'."\n", $this->httpMetas, null);
 	}
 
 	/**
@@ -139,10 +147,13 @@ class sly_Layout_XHTML extends sly_Layout {
 	/**
 	 * @param string $format
 	 * @param array  $data
+	 * @param string $emptyFormat
 	 */
-	private function printHeadElements($format, $data) {
+	protected function printHeadElements($format, $data, $emptyFormat) {
 		foreach ($data as $key => $value) {
-			printf($format, sly_html(trim($key)), sly_html(trim($value)));
+			$frmt = ($emptyFormat !== null && ($value === null || $value === false)) ? $emptyFormat : $format;
+
+			printf($frmt, sly_html(trim($key)), sly_html(trim($value)));
 		}
 	}
 }

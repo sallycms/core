@@ -39,4 +39,12 @@ class sly_Layout_XHTML5 extends sly_Layout_XHTML {
 	public function printHeader() {
 		print $this->renderView('layout/xhtml5/head.phtml');
 	}
+
+	protected function printBodyAttrs() {
+		$this->printHeadElements(' %s="%s"', $this->bodyAttrs, ' %s');
+	}
+
+	protected function printHtmlAttrs() {
+		$this->printHeadElements(' %s="%s"', $this->htmlAttrs, ' %s');
+	}
 }
