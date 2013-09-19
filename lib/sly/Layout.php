@@ -27,6 +27,7 @@ abstract class sly_Layout extends sly_Viewable {
 	protected $javaScriptFiles = array();  ///< array
 	protected $feedFiles       = array();  ///< array
 	protected $bodyAttrs       = array();  ///< array
+	protected $htmlAttrs       = array();  ///< array
 	protected $httpMetas       = array();  ///< array
 	protected $metas           = array();  ///< array
 	protected $links           = array();  ///< array
@@ -208,7 +209,7 @@ abstract class sly_Layout extends sly_Viewable {
 	 */
 	public function setBodyAttr($name, $value) {
 		$name  = trim($name);
-		$value = trim($value);
+		$value = $this->isEmptyValue($value) ? null : trim($value);
 
 		if (sly_Util_String::startsWith($name, 'on')) {
 			$this->addJavaScript('window.'.$name.' = function() { '.$value.' }');
@@ -226,7 +227,7 @@ abstract class sly_Layout extends sly_Viewable {
 	 */
 	public function getBodyAttr($name = null) {
 		if ($name === null) return $this->bodyAttrs;
-		return isset($this->bodyAttrs[$name]) ? $this->bodyAttrs[$name] : null;
+		return array_key_exists($name, $this->bodyAttrs) ? $this->bodyAttrs[$name] : null;
 	}
 
 	/**
@@ -243,6 +244,28 @@ abstract class sly_Layout extends sly_Viewable {
 		}
 
 		$this->setBodyAttr('class', implode(' ', array_unique($classes)));
+	}
+
+	/**
+	 * Add an attribute to the html tag
+	 *
+	 * @param string $name   attribute name
+	 * @param string $value  attribute value
+	 */
+	public function setHtmlAttr($name, $value) {
+		$name = trim($name);
+		$this->htmlAttrs[$name] = $this->isEmptyValue($value) ? null : trim($value);
+	}
+
+	/**
+	 * Get html attribute(s)
+	 *
+	 * @param  string $name  the attribute name or null for 'all'
+	 * @return mixed         either an array or a string
+	 */
+	public function getHtmlAttr($name = null) {
+		if ($name === null) return $this->htmlAttrs;
+		return array_key_exists($name, $this->htmlAttrs) ? $this->htmlAttrs[$name] : null;
 	}
 
 	/**
@@ -448,5 +471,19 @@ abstract class sly_Layout extends sly_Viewable {
 		if (file_exists($full)) return $full;
 
 		throw new sly_Exception(t('view_not_found', $file));
+	}
+
+	/**
+	 * Check if an attribute value is considered empty
+	 *
+	 * "Empty" means that there should be no '=""' in an HTML layout (as opposed
+	 * to having an empty string, which is a valid value and will be printed as
+	 * '=""' even in HTML).
+	 *
+	 * @param  mixed   $value
+	 * @return boolean
+	 */
+	protected function isEmptyValue($value) {
+		return ($value === null) || ($value === false);
 	}
 }
