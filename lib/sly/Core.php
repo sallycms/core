@@ -482,7 +482,7 @@ class sly_Core {
 		$container = self::getContainer();
 
 		$container->getAddOnManagerService()->loadAddOns($container);
-		$container->getDispatcher()->notify('SLY_ADDONS_LOADED');
+		$container->getDispatcher()->notify('SLY_ADDONS_LOADED', $container);
 	}
 
 	public static function registerListeners() {
