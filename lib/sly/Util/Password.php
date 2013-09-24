@@ -14,12 +14,13 @@
  * @ingroup util
  */
 class sly_Util_Password {
-	const BCRYPT_COST_FACTOR = 10;    ///< int     remember, this is used exponentially
-	const ITERATIONS_PBKDF2  = 500;   ///< int     iteration count for PBKDF2
-	const ITERATIONS_SHA1    = 50000; ///< int     iteration count for fast hashing algorithms like SHA-*
-	const ALGORITHM_BLOWFISH = '2a';  ///< string  aka bcrypt
-	const ALGORITHM_PBKDF2   = 'XX';  ///< string  pseudo-identifier
-	const ALGORITHM_SHA1     = 'ZZ';  ///< string  pseudo-identifier to let us know we had to fall back to SHA-1
+	const MAX_PASSWORD_LENGTH = 4096;  ///< int     max allowed length of a password
+	const BCRYPT_COST_FACTOR  = 10;    ///< int     remember, this is used exponentially
+	const ITERATIONS_PBKDF2   = 500;   ///< int     iteration count for PBKDF2
+	const ITERATIONS_SHA1     = 50000; ///< int     iteration count for fast hashing algorithms like SHA-*
+	const ALGORITHM_BLOWFISH  = '2a';  ///< string  aka bcrypt
+	const ALGORITHM_PBKDF2    = 'XX';  ///< string  pseudo-identifier
+	const ALGORITHM_SHA1      = 'ZZ';  ///< string  pseudo-identifier to let us know we had to fall back to SHA-1
 
 	/**
 	 * Hash a password
@@ -34,6 +35,8 @@ class sly_Util_Password {
 	 * @return string
 	 */
 	public static function hash($password) {
+		self::checkPasswordLength($password);
+
 		// total #win: use bcrypt
 		if (defined('CRYPT_BLOWFISH') && CRYPT_BLOWFISH) {
 			return self::bcrypt($password);
@@ -49,6 +52,8 @@ class sly_Util_Password {
 	}
 
 	public static function verify($password, $hash, $saltForOldschoolHash = null) {
+		self::checkPasswordLength($password);
+
 		if (strlen($hash) === 0) return false;
 
 		// assume old-school hashing (Sally < 0.7)
@@ -289,5 +294,11 @@ class sly_Util_Password {
 		}
 
 		return $base64Encode ? base64_encode($data) : $data;
+	}
+
+	public static function checkPasswordLength($password) {
+		if (strlen($password) > self::MAX_PASSWORD_LENGTH) {
+			throw new sly_Exception('Invalid password.');
+		}
 	}
 }
