@@ -342,6 +342,10 @@ class sly_Container extends Pimple implements Countable {
 
 			return new sly_Service_FileHasher($cache, $instID);
 		});
+		
+		$this['sly-i18n'] = $this->share(function($container) {
+			return new sly_I18N(null, null, false);
+		});
 
 		//////////////////////////////////////////////////////////////////////////
 		// allow to overwrite default recipes
