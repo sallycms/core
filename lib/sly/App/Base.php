@@ -45,7 +45,9 @@ abstract class sly_App_Base implements sly_App_Interface {
 		sly_Core::registerListeners();
 
 		// synchronize develop
-		$this->syncDevelopFiles();
+		if (sly_Core::isDeveloperMode()) {
+			$this->syncDevelopFiles();
+		}
 	}
 
 	/**
@@ -55,17 +57,10 @@ abstract class sly_App_Base implements sly_App_Interface {
 	 * asset cache, if the site is in devmode or an admin is logged in.
 	 */
 	protected function syncDevelopFiles() {
-		$user      = null;
 		$container = $this->getContainer();
 
-		if (sly_Core::isBackend()) {
-			$user = $container->getUserService()->getCurrentUser();
-		}
-
-		if (sly_Core::isDeveloperMode() || ($user && $user->isAdmin())) {
-			$container->getTemplateService()->refresh();
-			$container->getModuleService()->refresh();
-		}
+		$container->getTemplateService()->refresh();
+		$container->getModuleService()->refresh();
 	}
 
 	/**
