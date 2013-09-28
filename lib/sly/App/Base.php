@@ -36,7 +36,7 @@ abstract class sly_App_Base implements sly_App_Interface {
 	 */
 	public function initialize() {
 		// boot addOns
-		sly_Core::loadAddOns();
+		$this->loadAddOns();
 
 		// setup the stream wrappers
 		$this->registerStreamWrapper();
@@ -48,6 +48,13 @@ abstract class sly_App_Base implements sly_App_Interface {
 		if (sly_Core::isDeveloperMode()) {
 			$this->syncDevelopFiles();
 		}
+	}
+	
+	protected function loadAddons() {
+		$container = $this->getContainer();
+
+		$container->getAddOnManagerService()->loadAddOns($container);
+		$container->getDispatcher()->notify('SLY_ADDONS_LOADED', $container);
 	}
 
 	/**
