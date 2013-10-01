@@ -182,7 +182,20 @@ class sly_Service_AddOn {
 			$ignore  = array_merge($ignore, $vendors);
 		}
 
-		return $this->pkgService->getRequirements($addon, $recursive, $ignore);
+		// get *all* requirements, including those vendor packages that are not
+		// yet known (or else they would have been ignored via $ignore)
+		$requirements = $this->pkgService->getRequirements($addon, $recursive, $ignore);
+
+		// remove all elements we don't know (basically we are removing all non-addOn
+		// dependencies, assuming thet all required packages are present due to
+		// Composer doing the right thing)
+		foreach ($requirements as $idx => $requirement) {
+			if (!$this->exists($requirement)) {
+				unset($requirements[$idx]);
+			}
+		}
+
+		return array_values($requirements);
 	}
 
 	/**
