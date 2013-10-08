@@ -534,10 +534,10 @@ class sly_Service_AddOn_Manager {
 
 			if ($activated) {
 				$requires = $aservice->getRequirements($addon, false);
-
 				$this->collectLoadingInfo($requires);
-				$this->loadInfo[$addon] = array($installed, $activated);
 			}
+
+			$this->loadInfo[$addon] = array($installed, $activated);
 		}
 	}
 
