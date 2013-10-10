@@ -20,6 +20,7 @@
  */
 class sly_Form_DateTime extends sly_Form_ElementBase implements sly_Form_IElement {
 	protected $withTime; ///< boolean  toggles the time picker addon
+	protected $dateformat = null; // strftime format - if null using translations of 'datetimeformat' or 'dateformat'
 
 	/**
 	 * Constructor
@@ -80,5 +81,13 @@ class sly_Form_DateTime extends sly_Form_ElementBase implements sly_Form_IElemen
 	 */
 	public function getDisplayValue() {
 		return $this->getDisplayValueHelper('string', false);
+	}
+
+	public function setDateformat($strftime_format) {
+		$this->dateformat = $strftime_format;
+	}
+
+	public function getDateformat() {
+		return $this->dateformat;
 	}
 }
