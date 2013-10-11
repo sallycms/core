@@ -72,6 +72,10 @@ class sly_I18N implements sly_I18N_Base {
 		}
 
 		setlocale(LC_ALL, $locales);
+
+		if (class_exists('Locale') && $this->hasMsg('intl_locale')) {
+			Locale::setDefault($this->msg('intl_locale'));
+		}
 	}
 
 	/**
@@ -125,8 +129,6 @@ class sly_I18N implements sly_I18N_Base {
 	 * @return string       translated message or the key like in translate:key when not found
 	 */
 	public function msg($key) {
-		//var_dump($this->locale);
-		//var_dump($this->paths);
 		if (!$this->hasMsg($key)) {
 			return '[translate:'.$key.']';
 		}
