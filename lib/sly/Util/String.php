@@ -59,7 +59,7 @@ class sly_Util_String {
 	public static function strToUpper($string) {
 		if (is_string($string)) {
 			$string = str_replace('ß', 'ss', $string);
-			$string = mb_strtoupper($string, 'UTF-8');
+			$string = mb_strtoupper($string);
 		}
 
 		return $string;
@@ -73,8 +73,18 @@ class sly_Util_String {
 	 * @return string
 	 */
 	public static function formatNumber($number, $decimals = -1) {
-		$locale   = localeconv();
-		$decimals = $decimals < 0 ? $locale['frac_digits'] : $decimals;
+		// use intl extension if possible
+		if (class_exists('NumberFormatter')) {
+			$formatter = new NumberFormatter(Locale::DEFAULT_LOCALE, NumberFormatter::DECIMAL);
+
+			if ($decimals >= 0) {
+				$formatter->setAttribute(NumberFormatter::FRACTION_DIGITS, $decimals);
+			}
+
+			return $formatter->format($number);
+		}
+
+		$locale = localeconv();
 		return number_format($number, $decimals, $locale['decimal_point'], $locale['thousands_sep']);
 	}
 
@@ -127,6 +137,20 @@ class sly_Util_String {
 	 * @return string
 	 */
 	public static function formatDatetime($timestamp = null) {
+		if (class_exists('IntlDateFormatter')) {
+			if ($timestamp === null) $timestamp = time();
+			elseif (!self::isInteger($timestamp)) $timestamp = strtotime($timestamp);
+
+			$formatter = new IntlDateFormatter(Locale::DEFAULT_LOCALE, IntlDateFormatter::LONG, IntlDateFormatter::SHORT);
+			$pattern   = $formatter->getPattern();
+
+			// make sure we use the abbreviated month name
+			$pattern = str_replace('MMMM', 'MMM', $pattern);
+			$formatter->setPattern($pattern);
+
+			return $formatter->format($timestamp);
+		}
+
 		return self::formatStrftime(t('datetimeformat'), $timestamp);
 	}
 
