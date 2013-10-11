@@ -66,19 +66,6 @@ class sly_Util_String {
 	}
 
 	/**
-	 * @param  string $text
-	 * @return string
-	 */
-	public static function replaceUmlauts($text) {
-		static $specials = array(
-			array('Ä', 'ä',  'á', 'à', 'é', 'è', 'Ö',  'ö',  'Ü' , 'ü' , 'ß', '&', 'ç'),
-			array('Ae','ae', 'a', 'a', 'e', 'e', 'Oe', 'oe', 'Ue', 'ue', 'ss', '', 'c')
-		);
-
-		return str_replace($specials[0], $specials[1], $text);
-	}
-
-	/**
 	 * Format a number according to the current locale
 	 *
 	 * @param  numeric $number
