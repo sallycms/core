@@ -352,7 +352,7 @@ abstract class sly_DB_PDO_SQLBuilder {
 	 * @return string
 	 */
 	protected function build_insert() {
-		$keys = implode(',', array_keys($this->quote_identifier($this->data)));
+		$keys = implode(',', $this->quote_identifier(array_keys($this->data)));
 		$e    = new sly_DB_PDO_Expression("INSERT INTO $this->table ($keys) VALUES (?)", array_values($this->data));
 
 		$e->set_connection($this->connection);
