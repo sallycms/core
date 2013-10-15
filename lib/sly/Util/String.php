@@ -346,14 +346,6 @@ class sly_Util_String {
 	}
 
 	/**
-	 * @param  string $text
-	 * @return string
-	 */
-	public static function escapePHP($text) {
-		return str_replace(array('<?', '?>'), array('&lt;?', '?&gt;'), $text);
-	}
-
-	/**
 	 * @deprecated  since 0.9, use sly_Util_File::getExtension() instead
 	 *
 	 * @param  string $filename
