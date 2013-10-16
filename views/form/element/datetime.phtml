@@ -62,5 +62,6 @@ $attrs['name']     = $name;
 $attrs['id']       = $id;
 $attrs['value']    = $value === null ? '' : $value;
 $attrs['required'] = $this->getAttribute('required') ? 'required' : '';
+$attrs['disabled'] = $this->getAttribute('disabled') ? 'disabled' : '';
 
 print '<input '.sly_Util_HTML::buildAttributeString($attrs).' />';
