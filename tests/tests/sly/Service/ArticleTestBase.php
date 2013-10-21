@@ -24,7 +24,12 @@ abstract class sly_Service_ArticleTestBase extends sly_StructureTest {
 	}
 
 	protected function move($id, $to, $clang) {
-		$cat = $this->getService()->findByPK($id, $clang);
-		$this->getService()->edit($cat, $cat->getName(), $to);
+		$art = $this->getService()->findByPK($id, $clang);
+
+		if (!$art) {
+			$this->fail('Could not find article '.$id.'/'.$clang.'.');
+		}
+
+		$this->getService()->edit($art, $art->getName(), $to);
 	}
 }
