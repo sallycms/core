@@ -226,7 +226,7 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 	 * @param  boolean $findOnline
 	 * @return array
 	 */
-	public function findArticlesByCategory($categoryId, $clang, $ignoreOfflines = false ) {
+	public function findArticlesByCategory($categoryId, $clang, $ignoreOfflines = false) {
 		return $this->findElementsInCategory($categoryId, $clang, $ignoreOfflines);
 	}
 
