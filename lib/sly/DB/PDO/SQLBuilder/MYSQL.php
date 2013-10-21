@@ -31,4 +31,15 @@ class sly_DB_PDO_SQLBuilder_MYSQL extends sly_DB_PDO_SQLBuilder {
 	public function build_list_tables() {
 		return 'SHOW TABLES';
 	}
+
+	public function quote_identifier($identifier) {
+		if (is_array($identifier)) {
+			foreach ($identifier as &$v)
+				$v = $this->quote_identifier($v);
+			return $identifier;
+		}
+		if (strpos($identifier, '`') !== false)
+			return $identifier;
+		return implode('.', array_map(function($v) { return '`' . $v . '`'; }, explode('.', $identifier)));
+	}
 }

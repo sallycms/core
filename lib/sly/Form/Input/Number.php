@@ -68,7 +68,7 @@ class sly_Form_Input_Number extends sly_Form_Input_Base {
 	 * @return sly_Form_Input_Number  the object itself
 	 */
 	public function setStep($step) {
-		$this->step = (int) $step;
+		$this->step = $step;
 		return $this;
 	}
 

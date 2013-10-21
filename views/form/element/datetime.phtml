@@ -34,7 +34,9 @@ if ($value === false) {
 // prepare formatting
 
 $type       = $this->withTime() ? 'datetime-local' : 'date';
-$dateformat = t($this->withTime() ? 'datetimeformat' : 'dateformat');
+$dateformat = $this instanceof sly_Form_DateTime ? $this->getDateformat() : null;
+if (!$dateformat)
+	$dateformat = t($this->withTime() ? 'datetimeformat' : 'dateformat');
 $formatJS   = str_replace(
 	array('%a',  '%A',   '%b',  '%B',   '%e', '%d', /* '??', */ '%m', '%y', '%Y',  '%H',  '%M'),
 	array('ddd', 'dddd', 'mmm', 'mmmm', 'd',  'dd', /* 'm',  */ 'mm', 'yy', 'yyyy', 'HH', 'MM'),
@@ -62,5 +64,7 @@ $attrs['name']     = $name;
 $attrs['id']       = $id;
 $attrs['value']    = $value === null ? '' : $value;
 $attrs['required'] = $this->getAttribute('required') ? 'required' : '';
+$attrs['disabled'] = $this->getAttribute('disabled') ? 'disabled' : '';
+$attrs['readonly'] = $this->getAttribute('readonly') ? 'readonly' : '';
 
 print '<input '.sly_Util_HTML::buildAttributeString($attrs).' />';

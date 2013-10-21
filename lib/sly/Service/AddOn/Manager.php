@@ -487,39 +487,57 @@ class sly_Service_AddOn_Manager {
 			$this->deactivateIncompatible();
 		}
 
-		$aservice = $this->addOnService;
-		$pservice = $this->pkgService;
-		$order    = $this->cache->get('sly.addon', 'order');
+		$aservice       = $this->addOnService;
+		$pservice       = $this->pkgService;
+		$this->loadInfo = $this->cache->get('sly.addon', 'order');
 
 		// if there is no cache yet, we load all addons the slow way
-		if (!is_array($order)) {
+		if (!is_array($this->loadInfo)) {
 			// reset our helper to keep track of the addon stati
 			$this->loadInfo = array();
 
-			foreach ($aservice->getRegisteredAddOns() as $pkg) {
-				$this->load($pkg, false, $container);
-			}
+			$this->collectLoadingInfo($aservice->getRegisteredAddOns());
 
 			// and now we have a nice list that we can cache
 			$this->cache->set('sly.addon', 'order', $this->loadInfo);
 		}
 
-		// yay, a cache, let's skip the whole dependency stuff
-		else {
-			foreach ($order as $addon => $info) {
-				list($installed, $activated) = $info;
+		// first load all configs
+		foreach ($this->loadInfo as $addon => $info) {
+			list($installed, $activated) = $info;
 
-				// load addon config files
-				$this->loadConfig($addon, $installed, $activated);
+			// load addon config files
+			$this->loadConfig($addon, $installed, $activated);
+		}
 
-				// init the addon
-				if ($activated) {
-					$bootFile = $pservice->baseDirectory($addon).'boot.php';
-					$this->req($bootFile, $container);
+		// then boot the addons
+		foreach ($this->loadInfo as $addon => $info) {
+			list($installed, $activated) = $info;
 
-					$this->loaded[$addon] = 1;
-				}
+			// init the addon
+			if ($activated) {
+				$bootFile = $pservice->baseDirectory($addon).'boot.php';
+				$this->req($bootFile, $container);
+
+				$this->loaded[$addon] = 1;
 			}
+		}
+	}
+
+	protected function collectLoadingInfo($addOnsToLoad) {
+		$aservice = $this->addOnService;
+
+		foreach($addOnsToLoad as $addon) {
+			$compatible = $aservice->isCompatible($addon);
+			$activated  = $compatible && $aservice->isAvailable($addon);
+			$installed  = $compatible && ($activated || $aservice->isInstalled($addon));
+
+			if ($activated) {
+				$requires = $aservice->getRequirements($addon, false);
+				$this->collectLoadingInfo($requires);
+			}
+
+			$this->loadInfo[$addon] = array($installed, $activated);
 		}
 	}
 
@@ -581,7 +599,6 @@ class sly_Service_AddOn_Manager {
 	 * @param boolean $activated
 	 */
 	protected function loadConfig($addon, $installed, $activated) {
-		$aservice = $this->addOnService;
 		$pservice = $this->pkgService;
 
 		if ($installed || $activated) {

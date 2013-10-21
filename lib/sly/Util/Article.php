@@ -75,7 +75,7 @@ class sly_Util_Article {
 		$id = self::resolveConstant($default);
 
 		if ($id !== null) {
-			$article = $service->findById($id, $clang);
+			$article = $service->findByPK($id, $clang);
 			if ($article) return $article;
 			throw new sly_Exception('Could not find a matching article, giving up.');
 		}

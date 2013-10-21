@@ -38,7 +38,7 @@ class sly_DB_PDO_Persistence extends sly_DB_Persistence {
 	 * @throws sly_DB_PDO_Exception
 	 * @param  string $query
 	 * @param  array  $data
-	 * @return boolean               always true
+	 * @return sly_DB_PDO_Persistence
 	 */
 	public function query($query, $data = array()) {
 		try {
@@ -54,7 +54,7 @@ class sly_DB_PDO_Persistence extends sly_DB_Persistence {
 			$this->error();
 		}
 
-		return true;
+		return $this;
 	}
 
 	/**

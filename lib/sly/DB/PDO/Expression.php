@@ -24,6 +24,8 @@ class sly_DB_PDO_Expression {
 	private $expressions;       ///< array
 	private $values = array();  ///< array
 	private $connection;        ///< PDO
+	/** @var sly_DB_PDO_SQLBuilder */
+	private $sql_builder = null;///<sly_DB_PDO_SQLBuilder
 
 	/**
 	 * @param mixed $expressions
@@ -98,6 +100,14 @@ class sly_DB_PDO_Expression {
 	}
 
 	/**
+	 *
+	 * @param sly_DB_PDO_SQLBuilder $sql_builder
+	 */
+	public function set_sql_builder($sql_builder) {
+		$this->sql_builder = $sql_builder;
+	}
+
+	/**
 	 * @throws sly_DB_PDO_Expression_Exception
 	 * @param  boolean $substitute
 	 * @param  array   $options
@@ -151,19 +161,19 @@ class sly_DB_PDO_Expression {
 					throw new sly_DB_PDO_Expression_Exception('Invalid condition: array must not be empty for "'.$name.'".');
 				}
 				elseif (count($value) === 1) {
-					$conditions[] = $name.' = ?';
+					$conditions[] = $this->quote_identifier($name) .' = ?';
 				}
 				else {
-					$conditions[] = $name.' IN (?)';
+					$conditions[] = $this->quote_identifier($name) .' IN (?)';
 				}
 
 				$params[] = $value;
 			}
 			elseif ($value === null) {
-				$conditions[] = $name.' IS NULL';
+				$conditions[] = $this->quote_identifier($name) .' IS NULL';
 			}
 			else {
-				$conditions[] = $name.' = ?';
+				$conditions[] = $this->quote_identifier($name) .' = ?';
 				$params[]     = $value;
 			}
 		}
@@ -221,5 +231,12 @@ class sly_DB_PDO_Expression {
 		}
 
 		return "'".str_replace("'", "''", $value)."'";
+	}
+
+	private function quote_identifier($identifier) {
+		if ($this->sql_builder)
+			return $this->sql_builder->quote_identifier($identifier);
+
+		return $identifier;
 	}
 }
