@@ -131,10 +131,10 @@ class sly_Service_ArticleExTest extends sly_Service_ArticleTestBase {
 		////////////////////////////////////////////////////////////
 		// copy the article in it's own category (root)
 
-		$newID = $service->copy(6, $root);
-		$articles[] = $newID;
+		$newArt = $service->copy(6, $root);
+		$articles[] = $newArt->getId();
 
-		$this->assertInternalType('int', $newID);
+		$this->assertInstanceOf('sly_Model_Article', $newArt);
 
 		$arts = $service->findArticlesByCategory($root, self::$clangA);
 		$this->assertCount(4, $arts);
@@ -145,7 +145,7 @@ class sly_Service_ArticleExTest extends sly_Service_ArticleTestBase {
 
 		$last = array_pop($arts);
 
-		$this->assertEquals($newID, $last->getId());
+		$this->assertEquals($newArt->getId(), $last->getId());
 		$this->assertEquals(4, $last->getPosition());
 		$this->assertEquals('', $last->getCatName());
 
@@ -154,19 +154,19 @@ class sly_Service_ArticleExTest extends sly_Service_ArticleTestBase {
 		$arts = $service->findArticlesByCategory($root, self::$clangB);
 		$this->assertCount(4, $arts);
 
-		$service->deleteById($newID);
+		$service->deleteByArticle($newArt);
 
 		////////////////////////////////////////////////////////////
 		// copy the article in another category
 
-		$cat   = 1;
-		$newID = $service->copy(6, $cat);
+		$cat    = 1;
+		$newArt = $service->copy(6, $cat);
 
-		$this->assertInternalType('int', $newID);
+		$this->assertInternalType('int', $newArt->getId());
 
 		$arts = $service->findArticlesByCategory($cat, self::$clangA);
 		$this->assertCount(2, $arts);
-		$this->assertEquals($newID, end($arts)->getId());
+		$this->assertEquals($newArt->getId(), end($arts)->getId());
 		$this->assertEquals(reset($arts)->getName(), end($arts)->getCatName());
 	}
 
@@ -181,11 +181,13 @@ class sly_Service_ArticleExTest extends sly_Service_ArticleTestBase {
 	 */
 	public function testCopyStartArticle() {
 		$service = $this->getService();
-		$newID   = $service->copy(1, 0);
+		$newArt  = $service->copy(1, 0);
 
-		$this->assertInternalType('int', $newID);
+		$this->assertInstanceOf('sly_Model_Article', $newArt);
 
-		$art = $service->findByPK($newID, self::$clangA);
+		$newID = $newArt->getId();
+		$art   = $service->findByPK($newID, self::$clangA);
+
 		$this->assertEquals(0, $art->getStartpage());
 		$this->assertEquals(0, $art->getCatPosition());
 
