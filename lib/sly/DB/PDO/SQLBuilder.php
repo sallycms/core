@@ -313,6 +313,7 @@ abstract class sly_DB_PDO_SQLBuilder {
 		if ($num_args == 1 && sly_Util_Array::isAssoc($args[0])) {
 			$e = new sly_DB_PDO_Expression($args[0]);
 			$e->set_connection($this->connection);
+			$e->set_sql_builder($this);
 			$this->where = $e->to_s();
 			$this->where_values = sly_Util_Array::flatten($e->values());
 		}
@@ -324,6 +325,7 @@ abstract class sly_DB_PDO_SQLBuilder {
 				if (is_array($value)) {
 					$e = new sly_DB_PDO_Expression($args[0]);
 					$e->set_connection($this->connection);
+					$e->set_sql_builder($this);
 					$e->bind_values($values);
 					$this->where = $e->to_s();
 					$this->where_values = sly_Util_Array::flatten($e->values());
@@ -350,7 +352,7 @@ abstract class sly_DB_PDO_SQLBuilder {
 	 * @return string
 	 */
 	protected function build_insert() {
-		$keys = implode(',', array_keys($this->data));
+		$keys = implode(',', $this->quote_identifier(array_keys($this->data)));
 		$e    = new sly_DB_PDO_Expression("INSERT INTO $this->table ($keys) VALUES (?)", array_values($this->data));
 
 		$e->set_connection($this->connection);
@@ -381,13 +383,17 @@ abstract class sly_DB_PDO_SQLBuilder {
 	 */
 	protected function build_update() {
 		$fields = array_keys($this->data);
-		$sql    = "UPDATE $this->table SET ".implode(' = ?, ', $fields).' = ?';
+		$sql    = "UPDATE $this->table SET ".implode(' = ?, ', $this->quote_identifier($fields)).' = ?';
 
 		if ($this->where) {
 			$sql .= " WHERE $this->where";
 		}
 
 		return $sql;
+	}
+
+	public function quote_identifier($identifier) {
+		return $identifier;
 	}
 
 	/**

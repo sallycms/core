@@ -226,7 +226,7 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 	 * @param  boolean $findOnline
 	 * @return array
 	 */
-	public function findArticlesByCategory($categoryId, $clang, $ignoreOfflines = false ) {
+	public function findArticlesByCategory($categoryId, $clang, $ignoreOfflines = false) {
 		return $this->findElementsInCategory($categoryId, $clang, $ignoreOfflines);
 	}
 
@@ -482,7 +482,7 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 	 * @param  int            $id      article ID
 	 * @param  int            $target  target category ID
 	 * @param  sly_Model_User $user    creator for copies or null for the current user
-	 * @return int                     the new article's ID
+	 * @return sly_Model_Article       the new article
 	 */
 	public function copy($id, $target, sly_Model_User $user = null) {
 		$id     = (int) $id;

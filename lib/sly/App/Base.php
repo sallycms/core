@@ -36,7 +36,7 @@ abstract class sly_App_Base implements sly_App_Interface {
 	 */
 	public function initialize() {
 		// boot addOns
-		sly_Core::loadAddOns();
+		$this->loadAddOns();
 
 		// setup the stream wrappers
 		$this->registerStreamWrapper();
@@ -45,7 +45,16 @@ abstract class sly_App_Base implements sly_App_Interface {
 		sly_Core::registerListeners();
 
 		// synchronize develop
-		$this->syncDevelopFiles();
+		if (sly_Core::isDeveloperMode()) {
+			$this->syncDevelopFiles();
+		}
+	}
+	
+	protected function loadAddons() {
+		$container = $this->getContainer();
+
+		$container->getAddOnManagerService()->loadAddOns($container);
+		$container->getDispatcher()->notify('SLY_ADDONS_LOADED', $container);
 	}
 
 	/**
@@ -55,17 +64,10 @@ abstract class sly_App_Base implements sly_App_Interface {
 	 * asset cache, if the site is in devmode or an admin is logged in.
 	 */
 	protected function syncDevelopFiles() {
-		$user      = null;
 		$container = $this->getContainer();
 
-		if (sly_Core::isBackend()) {
-			$user = $container->getUserService()->getCurrentUser();
-		}
-
-		if (sly_Core::isDeveloperMode() || ($user && $user->isAdmin())) {
-			$container->getTemplateService()->refresh();
-			$container->getModuleService()->refresh();
-		}
+		$container->getTemplateService()->refresh();
+		$container->getModuleService()->refresh();
 	}
 
 	/**
