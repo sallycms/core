@@ -604,6 +604,18 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 				$newStarter = $this->findByPK($articleID, $clang, self::FIND_REVISION_LATEST)->toHash();
 				$oldStarter = $this->findByPK($oldCat, $clang, self::FIND_REVISION_LATEST)->toHash();
 
+				foreach ($newStarter as $k => $v) {
+					if (!in_array($k, $params)) {
+						unset($newStarter[$k]);
+					}
+				}
+
+				foreach ($oldStarter as $k => $v) {
+					if (!in_array($k, $params)) {
+						unset($oldStarter[$k]);
+					}
+				}
+
 				foreach ($params as $param) {
 					$t = $newStarter[$param];
 					$newStarter[$param] = $oldStarter[$param];
