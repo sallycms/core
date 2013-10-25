@@ -268,6 +268,15 @@ class sly_Service_User extends sly_Service_Model_Base_Id {
 	 * @return boolean                   true if the passwords match, otherwise false.
 	 */
 	public function checkPassword(sly_Model_User $user, $password) {
-		return sly_Util_Password::verify($password, $user->getPassword(), $user->getCreateDate());
+		// Old Sally versions used the createdate as the salt for the password.
+		// As have changed since then not only from UNIX timestamps to MySQL
+		// datetimes, but also to storing UTC, we now have to go back one more
+		// time to build the proper salt (only needed if the password hasn't
+		// been upgraded already).
+		// Kill this once we don't expect old Sally versions to be migrated
+		// anymore.
+		$localCreateDate = strtotime(gmdate('Y-m-d H:i:s', $user->getCreateDate()));
+
+		return sly_Util_Password::verify($password, $user->getPassword(), $localCreateDate);
 	}
 }
