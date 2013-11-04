@@ -94,7 +94,7 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id {
 	 * @param  string $extension
 	 * @return array
 	 */
-	public function findMediaByExtension($extension) {
+	public function findMediaByExtension($extension, $orderBy = 'filename', $direction = 'ASC') {
 		$namespace = 'sly.medium.list';
 		$list      = $this->cache->get($namespace, $extension, null);
 
@@ -102,7 +102,7 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id {
 			$sql  = $this->getPersistence();
 			$list = array();
 
-			$sql->select('file', 'id', array('SUBSTRING(filename, LOCATE(".", filename) + 1)' => $extension), null, 'filename');
+			$sql->select('file', 'id', array('SUBSTRING(filename, LOCATE(".", filename) + 1)' => $extension), null, $orderBy.' '.$direction);
 			foreach ($sql as $row) $list[] = (int) $row['id'];
 
 			$this->cache->set($namespace, $extension, $list);
@@ -121,7 +121,7 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id {
 	 * @param  int $categoryId
 	 * @return array
 	 */
-	public function findMediaByCategory($categoryId) {
+	public function findMediaByCategory($categoryId, $orderBy = 'filename', $direction = 'ASC') {
 		$categoryId = (int) $categoryId;
 		$namespace  = 'sly.medium.list';
 		$list       = $this->cache->get($namespace, $categoryId, null);
@@ -131,7 +131,7 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id {
 			$sql   = $this->getPersistence();
 			$where = array('category_id' => $categoryId);
 
-			$sql->select('file', 'id', $where, null, 'filename');
+			$sql->select('file', 'id', $where, null, $orderBy.' '.$direction);
 			foreach ($sql as $row) $list[] = (int) $row['id'];
 
 			$this->cache->set($namespace, $categoryId, $list);
