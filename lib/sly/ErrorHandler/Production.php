@@ -19,8 +19,7 @@
  * @since  0.5
  */
 class sly_ErrorHandler_Production extends sly_ErrorHandler_Base implements sly_ErrorHandler {
-	protected $runShutdown = true;  ///< bool     if true, the shutdown function will be executed
-	protected $log         = null;  ///< sly_Log  logger instance
+	protected $log = null;  ///< sly_Log  logger instance
 
 	const MAX_LOGFILE_SIZE = 1048576; ///< int  max filesize before rotation starts (1 MB)
 	const MAX_LOGFILES     = 10;      ///< int  max number of rotated logfiles to keep
@@ -37,15 +36,18 @@ class sly_ErrorHandler_Production extends sly_ErrorHandler_Base implements sly_E
 		ini_set('log_errors', 'Off');
 		ini_set('html_errors', 'Off');
 
-		set_exception_handler(array($this, 'handleException'));
-		set_error_handler(array($this, 'handleError'));
-		register_shutdown_function(array($this, 'shutdownFunction'));
+		set_exception_handler(array($this, 'onCaughtException'));
+		set_error_handler(array($this, 'onCaughtError'));
+		register_shutdown_function(array($this, 'onShutdown'));
+		$this->runShutdown = true;
 
 		// Init the sly_Log instance so we don't fail when loading classes result
 		// in errors like E_STRICT. See PHP Bug #54054 for details.
 		$this->log = sly_Log::getInstance('errors');
 		$this->log->setFormat('[%date% %time%] %message%');
 		$this->log->enableRotation(self::MAX_LOGFILE_SIZE, self::MAX_LOGFILES);
+
+		return true;
 	}
 
 	/**
@@ -54,34 +56,10 @@ class sly_ErrorHandler_Production extends sly_ErrorHandler_Base implements sly_E
 	 * Call this if you don't want the error handling anymore.
 	 */
 	public function uninit() {
-		parent::uninit();
+		restore_exception_handler();
+		restore_error_handler();
+
 		$this->runShutdown = false;
-	}
-
-	/**
-	 * Handle regular PHP errors
-	 *
-	 * This method is called when a notice, warning or error happened. It will
-	 * log the error, but not print it.
-	 *
-	 * @param int    $severity
-	 * @param string $message
-	 * @param string $file
-	 * @param int    $line
-	 * @param array  $context
-	 */
-	public function handleError($severity, $message, $file, $line, array $context = null) {
-		$errorLevel = error_reporting();
-
-		// only perform special handling when required
-		if ($severity & $errorLevel) {
-			$this->handleProblem(self::$codes[$severity], $message, $file, $line, $severity);
-		}
-
-		// always die away if the problem was *really* bad
-		if ($severity & (E_ERROR | E_PARSE | E_USER_ERROR)) {
-			$this->aaaauuuggghhhh(array('type' => $severity, 'message' => $message, 'file' => $file, 'line' => $line));
-		}
 	}
 
 	/**
@@ -91,32 +69,9 @@ class sly_ErrorHandler_Production extends sly_ErrorHandler_Base implements sly_E
 	 * log the exception and stop the script execution by displaying a neutral
 	 * error page.
 	 *
-	 * @param Exception $exception
+	 * @param Exception $e
 	 */
-	public function handleException(Exception $exception) {
-		// perform normal error handling (logging)
-		$this->handleProblem(get_class($exception), $exception->getMessage(), $exception->getFile(), $exception->getLine(), $exception->getCode());
-
-		// always die away if *really* severe
-		$this->aaaauuuggghhhh($exception);
-	}
-
-	/**
-	 * Handle all errors
-	 *
-	 * This method is called for both exceptions and errors and performs the
-	 * actual logging.
-	 *
-	 * @param string $errorName
-	 * @param string $message
-	 * @param string $file
-	 * @param int    $line
-	 * @param int    $errorCode
-	 */
-	protected function handleProblem($errorName, $message, $file, $line, $errorCode = -1) {
-		$file    = $this->getRelativeFilename($file);
-		$message = trim($message);
-
+	public function handleException(Exception $e) {
 		if (isset($_SERVER['REQUEST_METHOD'])) {
 			$req = $_SERVER['REQUEST_METHOD'].' '.$_SERVER['REQUEST_URI'];
 		}
@@ -125,26 +80,14 @@ class sly_ErrorHandler_Production extends sly_ErrorHandler_Base implements sly_E
 		}
 
 		// doesn't really matter what method we call since we use our own format
-		$this->log->error("PHP $errorName ($errorCode): $message in $file line $line [$req]");
-	}
-
-	/**
-	 * Shutdown function
-	 *
-	 * This method is called when the scripts exits. It checks for unhandled
-	 * errors and calls the regular error handling when necessarry.
-	 *
-	 * Call uninit() if you do not want this function to perform anything.
-	 */
-	public function shutdownFunction() {
-		if ($this->runShutdown) {
-			$e = error_get_last();
-
-			// run regular error handling when there's an error
-			if (isset($e['type'])) {
-				$this->handleError($e['type'], $e['message'], $e['file'], $e['line'], null);
-			}
-		}
+		$this->log->error(sprintf('%s (%d): %s in %s line %d [%s]',
+			$e instanceof sly_ErrorHandler_ErrorException ? 'PHP '.$e->getName() : get_class($e),
+			$e->getCode(),
+			trim($e->getMessage()),
+			$this->getRelativeFilename($e->getFile()),
+			$e->getLine(),
+			$req
+		));
 	}
 
 	/**
@@ -153,9 +96,9 @@ class sly_ErrorHandler_Production extends sly_ErrorHandler_Base implements sly_E
 	 * This method is the last one that is called when a script dies away and is
 	 * responsible for displaying the error page and sending the HTTP500 header.
 	 *
-	 * @param mixed $error  the error that caused the script to die (array or Exception)
+	 * @param Exception $e  the error that caused the script to die
 	 */
-	protected function aaaauuuggghhhh($error) {
+	protected function aaaauuuggghhhh(Exception $e) {
 		while (ob_get_level()) ob_end_clean();
 		ob_start('ob_gzhandler');
 
@@ -170,7 +113,6 @@ class sly_ErrorHandler_Production extends sly_ErrorHandler_Base implements sly_E
 		}
 
 		include $errorpage;
-		die;
 	}
 
 	/**
