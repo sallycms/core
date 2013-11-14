@@ -1,33 +1,35 @@
-<?php
-$texts = array(
-	array('Weeh! Seems like Murphy was right once again...', 'Murphy Strikes Again!'),
-	array('Castle of Aaauuuggghhh...', 'Castle of Aaauuuggghhh...'),
-	array('No 9000 computer has ever made a misstake.', 'HAL says...'),
-	array('I pity the fool who has to see this.', 'Mr. T says...')
-);
-$text = $texts[rand(0, count($texts) - 1)];
-?><!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 	<meta charset="utf-8">
-	<title><?php echo sly_html($text[1]) ?></title>
+	<title>Aw, snap!</title>
 	<meta name="robots" content="none,noarchive">
 	<style>
-	h1, p { font-family:Calibri; }
-	#horizon { background-color:transparent; position:absolute; top:50%; left:0px; width:100%; margin-top:-100px; text-align:center; min-width:700px; }
-	#wrapper { margin:0px auto; background-color:#fff; position:relative; text-align:left; width:700px; height:100px; }
-	.beast { position:fixed; right: 3px; bottom: 3px; }
+	body { background:#233040; }
+	h1, p { font-family:Calibri, sans-serif; color:white; font-size: 2em; }
+	p { font-size: 1em; }
+	#horizon { position:absolute; top:40%; left:0px; width:100%; margin-top:-100px; text-align:center; min-width:650px; }
+	#wrapper { margin:0px auto; position:relative; text-align:left; width:650px; height:100px; }
+	.beast { position:fixed; right: 25px; bottom: 5px; }
+	a, a:visited, a:active, a:hover { color:#7CB900; text-decoration:underline; }
+	.center { text-align:center; }
 	</style>
 </head>
 <body>
 <div id="horizon">
 	<div id="wrapper">
-		<h1><?php echo sly_html($text[0]) ?></h1>
-		<p>Es trat ein interner Fehler beim Verarbeiten Ihrer Anfrage auf. Bitte versuchen Sie es später noch einmal.</p>
+		<h1>Aw, snap!</h1>
+		<p>Es trat ein Fehler beim Verarbeiten Ihrer Anfrage auf. Bitte versuchen Sie es später noch einmal.<br>
+		Wir entschuldigen uns für entstandene Unannehmlichkeiten.</p>
+
+		<p>An internal error occured while handling your request. Please try again later.<br>
+		We would like to apologize for any inconvenience this may have caused.</p>
+
+		<p class="center"><a href="/">zur Startseite / go to homepage</a></p>
 	</div>
 </div>
 <!-- Illustration provided by The Oatmeal -->
 <?php $beast = base64_encode(file_get_contents(__DIR__.'/beast.png')); ?>
-<img src="data:image/png;base64,<?php echo $beast ?>" alt="" class="beast" />
+<img src="data:image/png;base64,<?php print $beast ?>" alt="" class="beast" title="All your servers are belong to us!">
 </body>
 </html>

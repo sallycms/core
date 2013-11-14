@@ -12,7 +12,7 @@
  * @author Christoph
  * @since  0.5
  */
-class sly_ErrorHandler_Development extends sly_ErrorHandler_Base implements sly_ErrorHandler {
+class sly_ErrorHandler_Development extends sly_ErrorHandler_Base {
 	/**
 	 * Initialize error handler
 	 *
@@ -37,10 +37,9 @@ class sly_ErrorHandler_Development extends sly_ErrorHandler_Base implements sly_
 	/**
 	 * Handle a catched exception
 	 *
-	 * This method will just print the exception.
+	 * This method does nothing.
 	 */
 	public function handleException(Exception $e) {
-		print $e;
-		die;
+		/* do nothing */
 	}
 }
