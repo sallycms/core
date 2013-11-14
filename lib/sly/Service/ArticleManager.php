@@ -109,12 +109,13 @@ abstract class sly_Service_ArticleManager extends sly_Service_ArticleBase {
 			$event = $this->getEvent('ADDED');
 
 			foreach ($languages as $clangID) {
-				$obj = $this->buildModel(array(
+				$online = $this->getInitialOnlineState($parentID, $type, $clangID);
+				$obj    = $this->buildModel(array(
 					      'id' => $newID,
 					   'clang' => $clangID,
 					'revision' => 0,
 					 'latest'  => 1,
-					 'online'  => 1,
+					 'online'  => $online ? 1 : 0,
 					 'deleted' => 0,
 					  'parent' => $parentID,
 					    'path' => $path,
@@ -137,6 +138,7 @@ abstract class sly_Service_ArticleManager extends sly_Service_ArticleBase {
 					'path'     => $path,
 					'type'     => $type,
 					'user'     => $user,
+					'online'   => $online ? 1 : 0,
 					'revision' => 0
 				));
 			}
@@ -278,5 +280,17 @@ abstract class sly_Service_ArticleManager extends sly_Service_ArticleBase {
 		$order      = $this->getPositionField();
 
 		return $this->find($where, null, $order, null, null, null, $findOnline === true ? self::FIND_REVISION_ONLINE : self::FIND_REVISION_LATEST);
+	}
+
+	/**
+	 * Determine the online state of a newly created article
+	 *
+	 * @param  int    $categoryID
+	 * @param  string $artType
+	 * @param  int    $clang
+	 * @return boolean
+	 */
+	protected function getInitialOnlineState($categoryID, $artType, $clang) {
+		return true;
 	}
 }

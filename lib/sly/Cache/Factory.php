@@ -74,6 +74,17 @@ class sly_Cache_Factory extends Factory {
 	}
 
 	/**
+	 * Return ElastiCache configuration endpoint
+	 *
+	 * This method should return a tupel of [hostname, port].
+	 *
+	 * @return array  array(host, port) or null
+	 */
+	public function getElastiCacheEndpoint() {
+		return isset($this->config['elasticache']) ? $this->config['elasticache'] : null;
+	}
+
+	/**
 	 * Return caching prefix (only useful for in-memory caches)
 	 *
 	 * @return string  the prefix
