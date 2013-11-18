@@ -342,7 +342,7 @@ class sly_Container extends Pimple implements Countable {
 
 			return new sly_Service_FileHasher($cache, $instID);
 		});
-		
+
 		$this['sly-i18n'] = $this->share(function($container) {
 			return new sly_I18N(null, null, false);
 		});
@@ -382,11 +382,11 @@ class sly_Container extends Pimple implements Countable {
 	 * Returns a closure that stores the result of the given closure for
 	 * uniqueness in the scope of this instance of Pimple.
 	 *
-	 * @param  Closure $callable            a closure to wrap for uniqueness
-	 * @param  bool    $injectOptionalDeps  whether to automatically wrap in inject() as well
-	 * @return Closure                      the wrapped closure
+	 * @param  mixed $callable            a closure to wrap for uniqueness
+	 * @param  bool  $injectOptionalDeps  whether to automatically wrap in inject() as well
+	 * @return mixed                      the wrapped closure
 	 */
-	public static function share(Closure $callable, $injectOptionalDeps = true) {
+	public static function share($callable, $injectOptionalDeps = true) {
 		if ($injectOptionalDeps) {
 			$callable = self::inject($callable);
 		}
