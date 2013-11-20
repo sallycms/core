@@ -395,7 +395,8 @@ class sly_DB_PDO_Persistence extends sly_DB_Persistence {
 	 */
 	protected function error() {
 		$message = 'Es trat ein Datenbank-Fehler auf: ';
-		throw new sly_DB_PDO_Exception($message.'Fehlercode: '. $this->getErrno() .' '.$this->getError());
+		$error   = $this->statement->errorInfo();
+		throw new sly_DB_PDO_Exception($message.'Fehlercode: '. $error[0] .' '.$error[2], $error[1]);
 	}
 
 	/**
