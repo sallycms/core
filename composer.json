@@ -15,7 +15,7 @@
             "homepage": "http://www.webvariants.de/"
         }
     ],
-    "version": "0.9.x-dev",
+    "version": "0.9.0-alpha2",
     "homepage": "http://www.sallycms.de/",
     "license": "MIT",
     "autoload": {
