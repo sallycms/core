@@ -73,11 +73,11 @@ class sly_Util_Category {
 
 	/**
 	 * @param  int     $parentID
-	 * @param  boolean $ignoreOfflines
 	 * @param  int     $clang
+	 * @param  boolean $ignoreOfflines
 	 * @return array
 	 */
-	public static function findByParentId($parentID, $ignoreOfflines = false, $clang = null) {
+	public static function findByParentId($parentID, $clang = null, $ignoreOfflines = false) {
 		if ($clang === false || $clang === null) {
 			$clang = sly_Core::getCurrentClang();
 		}
