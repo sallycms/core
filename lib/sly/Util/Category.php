@@ -73,11 +73,11 @@ class sly_Util_Category {
 
 	/**
 	 * @param  int     $parentID
-	 * @param  int     $clang
 	 * @param  boolean $ignoreOfflines
+	 * @param  int     $clang
 	 * @return array
 	 */
-	public static function findByParentId($parentID, $clang = null, $ignoreOfflines = false) {
+	public static function findByParentId($parentID, $ignoreOfflines = false, $clang = null) {
 		if ($clang === false || $clang === null) {
 			$clang = sly_Core::getCurrentClang();
 		}
@@ -93,6 +93,6 @@ class sly_Util_Category {
 		if ($clang === false || $clang === null) {
 			$clang = sly_Core::getCurrentClang();
 		}
-		return self::findByParentId(0, $clang, $ignoreOfflines);
+		return self::findByParentId(0, $ignoreOfflines, $clang);
 	}
 }
