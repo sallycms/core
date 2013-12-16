@@ -50,7 +50,7 @@ class sly_Service_Category extends sly_Service_ArticleManager {
 	 * build a new model from parameters
 	 *
 	 * @param  array  $params
-	 * @return sly_Model_Article
+	 * @return sly_Model_Category
 	 */
 	protected function buildModel(array $params) {
 		return new sly_Model_Category(array(
@@ -77,7 +77,32 @@ class sly_Service_Category extends sly_Service_ArticleManager {
 	 * @return sly_Model_Category
 	 */
 	protected function makeInstance(array $params) {
+		$params['revision'] = 0;
+
 		return new sly_Model_Category($params);
+	}
+
+	/**
+	 * find latest revisions of articles
+	 *
+	 * @param  mixed    $where
+	 * @param  string   $group
+	 * @param  string   $order
+	 * @param  int      $offset
+	 * @param  int      $limit
+	 * @param  string   $having
+	 * @param  int      $revStrategy  FIND_REVISION_ONLINE, FIND_REVISION_LATEST or null to disable any kind of revision filtering
+	 * @return array
+	 */
+	public function find($where = null, $group = null, $order = null, $offset = null, $limit = null, $having = null, $revStrategy = self::FIND_REVISION_LATEST) {
+		if (is_string($where)) {
+			$where = "($where) AND revision = 0";
+		}
+		else {
+			$where['revision'] = 0;
+		}
+
+		return parent::find($where, $group, $order, $offset, $limit, $having, null);
 	}
 
 	/**
@@ -210,7 +235,7 @@ class sly_Service_Category extends sly_Service_ArticleManager {
 	 * @param  int $clang      the language
 	 * @return array           sorted list of category IDs
 	 */
-	public function findTree($parentID, $clang, $findOnline = false) {
+	public function findTree($parentID, $clang) {
 		$parentID = (int) $parentID;
 		$clang    = (int) $clang;
 
@@ -234,7 +259,7 @@ class sly_Service_Category extends sly_Service_ArticleManager {
 	 * @param sly_Model_User $user         updateuser or null for the current user
 	 */
 	public function move($id, $targetID, sly_Model_User $user = null) {
-		$id  = (int) $id;
+		$id          = (int) $id;
 		$targetID    = (int) $targetID;
 		$defaultLang = $this->getDefaultLanguageId();
 		$user        = $this->getActor($user, __METHOD__);

@@ -15,6 +15,13 @@
  */
 class sly_Model_Article extends sly_Model_Base_Article {
 	/**
+	 * @param int $revision
+	 */
+	public function setRevision($revision) {
+		$this->revision = (int) $revision;
+	}
+
+	/**
 	 * @return boolean
 	 */
 	public function isStartArticle() {
