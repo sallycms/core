@@ -140,6 +140,7 @@ class sly_Service_MediaCategory extends sly_Service_Model_Base_Id implements sly
 	 * @return array
 	 */
 	protected function findBy($cacheKey, $where, $sortBy, $asObjects = true) {
+		$cacheKey = md5($cacheKey); // sanitise filename for cache
 		$namespace = 'sly.mediacat.list';
 		$list      = $this->cache->get($namespace, $cacheKey, null);
 
