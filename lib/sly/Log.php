@@ -48,9 +48,11 @@ class sly_Log {
 	 */
 	public static function setLogDirectory($dir) {
 		if (!is_dir($dir)) {
-			if (!class_exists('sly_Util_Directory') || !sly_Util_Directory::create($dir)) {
+			if (!class_exists('sly_Util_Directory')) {
 				throw new sly_Exception('Could not find log directory "'.$dir.'".');
 			}
+
+			sly_Util_Directory::create($dir, null, true);
 		}
 
 		self::$targetDir = rtrim(realpath($dir), DIRECTORY_SEPARATOR);

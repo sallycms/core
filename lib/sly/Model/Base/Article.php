@@ -209,13 +209,6 @@ class sly_Model_Base_Article extends sly_Model_Base {
 	}
 
 	/**
-	 * @param int $revision
-	 */
-	public function setRevision($revision) {
-		$this->revision = (int) $revision;
-	}
-
-	/**
 	 * @param boolean $isLatest
 	 */
 	public function setLatest($isLatest) {
