@@ -101,20 +101,18 @@ abstract class sly_Service_DevelopBase {
 				continue;
 			}
 
-			$parser = new sly_Util_ParamParser($file);
-			$data   = $parser->get();
+			$data = $this->parseMetadata($file);
+			$name = array_key_exists('name', $data) ? $data['name'] : null;
 
 			if (empty($data) && $known) {
 				$modified = true;
 			}
 
-			$name = $parser->get('name', null);
-
 			if (!$this->areParamsValid($name, $data, $newData, $basename, $type)) {
 				continue;
 			}
 
-			$newData[$name][$type][$arrayKey] = $this->buildData($basename, $mtime, $parser->get());
+			$newData[$name][$type][$arrayKey] = $this->buildData($basename, $mtime, $data);
 
 			$modified = true;
 		}
@@ -128,6 +126,18 @@ abstract class sly_Service_DevelopBase {
 			$this->resetRefreshTime();
 			$this->dispatcher->notify('SLY_DEVELOP_REFRESHED');
 		}
+	}
+
+	/**
+	 * Read the file's annotations
+	 *
+	 * @param  string $file  the full filename
+	 * @return array         metadata
+	 */
+	protected function parseMetadata($file) {
+		$parser = new sly_Util_ParamParser($file);
+
+		return $parser->get(null);
 	}
 
 	/**
@@ -210,7 +220,7 @@ abstract class sly_Service_DevelopBase {
 	 * @param array $data
 	 */
 	protected function setData($data) {
-		$this->config->set($this->getClassIdentifier().'/data', $data);
+		$this->config->set($this->getClassIdentifier().'/data', $data)->store();
 		$this->data = $data;
 	}
 
@@ -257,7 +267,7 @@ abstract class sly_Service_DevelopBase {
 	 */
 	protected function resetRefreshTime($time = null) {
 		if ($time === null) $time = time();
-		$this->config->set($this->getClassIdentifier().'/last_refresh', $time);
+		$this->config->set($this->getClassIdentifier().'/last_refresh', $time)->store();
 		$this->lastRefreshTime = $time;
 	}
 

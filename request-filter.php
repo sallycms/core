@@ -10,15 +10,15 @@
 
 // remove magic quotes (function is deprecated as of PHP 5.4, so we either
 // have to check the PHP version or suppress the E_DEPRECATED warning)
-if (@get_magic_quotes_gpc()) {
-	function stripslashes_ref(&$value) {
+if (function_exists('get_magic_quotes_gpc') && get_magic_quotes_gpc()) {
+	$stripper = function(&$value) {
 		$value = stripslashes($value);
-	}
+	};
 
-	array_walk_recursive($_GET,     'stripslashes_ref');
-	array_walk_recursive($_POST,    'stripslashes_ref');
-	array_walk_recursive($_COOKIE,  'stripslashes_ref');
-	array_walk_recursive($_REQUEST, 'stripslashes_ref');
+	array_walk_recursive($_GET,     $stripper);
+	array_walk_recursive($_POST,    $stripper);
+	array_walk_recursive($_COOKIE,  $stripper);
+	array_walk_recursive($_REQUEST, $stripper);
 }
 
 // remove all globals

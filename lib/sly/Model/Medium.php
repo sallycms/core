@@ -8,6 +8,8 @@
  * http://www.opensource.org/licenses/mit-license.php
  */
 
+use Gaufrette\Filesystem;
+
 /**
  * Business Model Klasse für Medien
  *
@@ -24,7 +26,6 @@ class sly_Model_Medium extends sly_Model_Base_Id {
 	protected $height;       ///< int
 	protected $width;        ///< int
 	protected $updatedate;   ///< int
-	protected $re_file_id;   ///< int
 	protected $createuser;   ///< string
 	protected $originalname; ///< string
 	protected $attributes;   ///< string
@@ -35,7 +36,7 @@ class sly_Model_Medium extends sly_Model_Base_Id {
 		'updateuser' => 'string', 'category_id' => 'int', 'revision' => 'int',
 		'title' => 'string', 'createdate' => 'datetime', 'filename' => 'string',
 		'height' => 'int', 'width' => 'int', 'updatedate' => 'datetime',
-		're_file_id' => 'int', 'createuser' => 'string', 'originalname' => 'string',
+		'createuser' => 'string', 'originalname' => 'string',
 		'attributes' => 'string', 'filetype' => 'string', 'filesize' => 'string'
 	); ///< array
 
@@ -48,7 +49,6 @@ class sly_Model_Medium extends sly_Model_Base_Id {
 	public function getHeight()       { return $this->height;       } ///< @return int
 	public function getWidth()        { return $this->width;        } ///< @return int
 	public function getUpdateDate()   { return $this->updatedate;   } ///< @return int
-	public function getReFileId()     { return $this->re_file_id;   } ///< @return int
 	public function getCreateUser()   { return $this->createuser;   } ///< @return string
 	public function getOriginalName() { return $this->originalname; } ///< @return string
 	public function getAttributes()   { return $this->attributes;   } ///< @return string
@@ -62,7 +62,6 @@ class sly_Model_Medium extends sly_Model_Base_Id {
 	public function setFilename($filename)         { $this->filename     = $filename;     } ///< @param string $filename
 	public function setHeight($height)             { $this->height       = $height;       } ///< @param int    $height
 	public function setWidth($width)               { $this->width        = $width;        } ///< @param int    $width
-	public function setReFileId($re_file_id)       { $this->re_file_id   = $re_file_id;   } ///< @param int    $re_file_id
 	public function setCreateUser($createuser)     { $this->createuser   = $createuser;   } ///< @param string $createuser
 	public function setOriginalName($originalname) { $this->originalname = $originalname; } ///< @param string $originalname
 	public function setAttributes($attributes)     { $this->attributes   = $attributes;   } ///< @param string $attributes
@@ -88,7 +87,15 @@ class sly_Model_Medium extends sly_Model_Base_Id {
 	 */
 	public function getCategory() {
 		$service = sly_Core::getContainer()->getMediaCategoryService();
+
 		return $service->findById($this->category_id);
+	}
+
+	/**
+	 * @return string
+	 */
+	public function getFullPath() {
+		return sly_Core::getContainer()->getMediumService()->getFullPath($this);
 	}
 
 	/**
@@ -109,20 +116,16 @@ class sly_Model_Medium extends sly_Model_Base_Id {
 	 * @return boolean
 	 */
 	public function exists() {
-		return strlen($this->filename) > 0 && file_exists(SLY_MEDIAFOLDER.'/'.$this->filename);
-	}
+		$fs = sly_Core::getContainer()->getMediaFilesystem();
+		$exists = sly_Core::config()->get('media/exists', false);
 
-	/**
-	 * @return string
-	 */
-	public function getFullPath() {
-		return SLY_MEDIAFOLDER.'/'.$this->filename;
+		return strlen($this->filename) > 0 && ($exists || $fs->has($this->filename));
 	}
 
 	/**
 	 * @return string
 	 */
 	public function getUrl($absolutePath = false) {
-		return ($absolutePath ? sly_Util_HTTP::getBaseUrl(true).'/' : '').'data/mediapool/'.$this->filename;
+		return ($absolutePath ? sly_Util_HTTP::getBaseUrl(true).'/' : '').'mediapool/'.$this->filename;
 	}
 }

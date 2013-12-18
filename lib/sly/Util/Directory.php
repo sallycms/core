@@ -42,8 +42,10 @@ class sly_Util_Directory {
 			$base = dirname($path);
 			$perm = $perm === null ? sly_Core::getDirPerm() : (int) $perm;
 
-			// create base path (walking recursively from the end to SLY_BASE, basically)
-			if (!self::create($base, $perm, $throwException)) return false;
+			// create base path (walking recursively from the end to SLY_BASE, basically);
+			// make sure that we don't accidentally run into an endless loop, whyn trying
+			// to create "/foo/bar" on Windows (dirname("/foo") === '')
+			if ($base !== false && $base !== '' && !self::create($base, $perm, $throwException)) return false;
 
 			// try to create the directory
 			if (@mkdir($path)) {

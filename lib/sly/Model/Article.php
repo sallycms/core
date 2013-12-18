@@ -15,6 +15,13 @@
  */
 class sly_Model_Article extends sly_Model_Base_Article {
 	/**
+	 * @param int $revision
+	 */
+	public function setRevision($revision) {
+		$this->revision = (int) $revision;
+	}
+
+	/**
 	 * @return boolean
 	 */
 	public function isStartArticle() {
@@ -34,7 +41,10 @@ class sly_Model_Article extends sly_Model_Base_Article {
 	 * @return sly_Model_Category
 	 */
 	public function getCategory() {
-		return sly_Core::getContainer()->getCategoryService()->findById($this->getCategoryId(), $this->getClang());
+		$catService = sly_Core::getContainer()->getCategoryService();
+
+		$revision = $this->isStartArticle() ? $this->getRevision() : sly_Service_ArticleBase::FIND_REVISION_BEST;
+		return $catService->findByPK($this->getCategoryId(), $this->getClang(), $revision);
 	}
 
 	/**
@@ -47,14 +57,15 @@ class sly_Model_Article extends sly_Model_Base_Article {
 	}
 
 	/**
+	 * @param  sly_Service_Template $tplService
 	 * @return boolean
 	 */
 	public function hasTemplate() {
 		if ($this->hasType()) {
 			$templateName    = $this->getTemplateName();
-			$templateService = sly_Core::getContainer()->getTemplateService();
+			$tplService      = sly_Core::getContainer()->getTemplateService();
 
-			return !empty($templateName) && $templateService->exists($templateName);
+			return !empty($templateName) && $tplService->exists($templateName);
 		}
 
 		return false;
@@ -66,18 +77,21 @@ class sly_Model_Article extends sly_Model_Base_Article {
 	 * @return string  the template name
 	 */
 	public function getTemplateName() {
-		return sly_Core::getContainer()->getArticleTypeService()->getTemplate($this->type);
+		$atService = sly_Core::getContainer()->getArticleTypeService();
+
+		return $atService->getTemplate($this->type);
 	}
 
 	/**
-	 * returns the articlecontent for a given slot, or if empty for all slots
+	 * returns the article content for a given slot, or if empty for all slots
 	 *
-	 * @param  string $slot
+	 * @param  string        $slot
+	 * @param  sly_Container $container
 	 * @return string
 	 */
-	public function getContent($slot = null) {
+	public function getContent($slot = null, sly_Container $container = null) {
 		$content       = '';
-		$container     = sly_Core::getContainer();
+		$container     = $container ?: sly_Core::getContainer();
 		$moduleService = $container->getModuleService();
 		$typeService   = $container->getArticleTypeService();
 
@@ -90,7 +104,11 @@ class sly_Model_Article extends sly_Model_Base_Article {
 			}
 
 			if (!$typeService->hasModule($this->getType(), $module, $slice->getSlot())) {
-				trigger_error('Module '.$module.' is not allowed in type/slot '.$this->getType().'/'.$slice->getSlot(), E_USER_WARNING);
+				trigger_error(
+					'Module '.$module.' is not allowed in type/slot '.$this->getType().'/'.$slice->getSlot().
+					' (id/clang/rev: '.$this->getId().'/'.$this->getClang().'/'.$this->getRevision().')',
+					E_USER_WARNING
+				);
 				continue;
 			}
 
@@ -101,7 +119,13 @@ class sly_Model_Article extends sly_Model_Base_Article {
 	}
 
 	public function getSlices($slot = null) {
-		return sly_Util_ArticleSlice::findByArticle($this->getId(), $this->getClang(), $slot);
+		$service = sly_Core::getContainer()->getArticleSliceService();
+
+		return $service->findByArticle($this, $slot);
+	}
+
+	public function countSlices($slot = null) {
+		return count($this->getSlices($slot));
 	}
 
 	/**

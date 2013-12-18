@@ -11,20 +11,20 @@
 abstract class sly_Service_CategoryTestBase extends sly_StructureTest {
 	protected function getService() {
 		static $service = null;
-		if (!$service) $service = sly_Service_Factory::getCategoryService();
+		if (!$service) $service = sly_Core::getContainer()->getCategoryService();
 		return $service;
 	}
 
-	protected function assertPosition($id, $pos, $clang = 1) {
+	protected function assertPosition($id, $pos, $clang = 5) {
 		$service = $this->getService();
-		$cat     = $service->findById($id, $clang);
+		$cat     = $service->findByPK($id, $clang);
 		$msg     = 'Position of category '.$id.' should be '.$pos.'.';
 
 		$this->assertEquals($pos, $cat->getCatPosition(), $msg);
 	}
 
-	protected function move($id, $to, $clang = 1) {
-		$cat = $this->getService()->findById($id, $clang);
-		$this->getService()->edit($id, $clang, $cat->getCatName(), $to);
+	protected function move($id, $to, $clang) {
+		$cat = $this->getService()->findByPK($id, $clang);
+		$this->getService()->edit($cat, $cat->getCatName(), $to);
 	}
 }

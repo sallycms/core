@@ -10,7 +10,6 @@
 
 abstract class sly_App_Base implements sly_App_Interface {
 	protected $container;
-	protected $dispatcher;
 	protected $controller;
 	protected $action;
 
@@ -33,30 +32,29 @@ abstract class sly_App_Base implements sly_App_Interface {
 	}
 
 	/**
-	 * get request dispatcher
-	 *
-	 * @return sly_Dispatcher
-	 */
-	protected function getDispatcher() {
-		if ($this->dispatcher === null) {
-			$this->dispatcher = new sly_Dispatcher($this->getContainer(), $this->getControllerClassPrefix());
-		}
-
-		return $this->dispatcher;
-	}
-
-	/**
 	 * initialize the app
 	 */
 	public function initialize() {
 		// boot addOns
-		sly_Core::loadAddOns();
+		$this->loadAddOns();
+
+		// setup the stream wrappers
+		$this->registerStreamWrapper();
 
 		// register listeners
 		sly_Core::registerListeners();
 
 		// synchronize develop
-		$this->syncDevelopFiles();
+		if (sly_Core::isDeveloperMode()) {
+			$this->syncDevelopFiles();
+		}
+	}
+	
+	protected function loadAddons() {
+		$container = $this->getContainer();
+
+		$container->getAddOnManagerService()->loadAddOns($container);
+		$container->getDispatcher()->notify('SLY_ADDONS_LOADED', $container);
 	}
 
 	/**
@@ -66,18 +64,10 @@ abstract class sly_App_Base implements sly_App_Interface {
 	 * asset cache, if the site is in devmode or an admin is logged in.
 	 */
 	protected function syncDevelopFiles() {
-		$user      = null;
 		$container = $this->getContainer();
 
-		if (sly_Core::isBackend()) {
-			$user = $container->getUserService()->getCurrentUser();
-		}
-
-		if (sly_Core::isDeveloperMode() || ($user && $user->isAdmin())) {
-			$container->getTemplateService()->refresh();
-			$container->getModuleService()->refresh();
-			$container->getAssetService()->validateCache();
-		}
+		$container->getTemplateService()->refresh();
+		$container->getModuleService()->refresh();
 	}
 
 	/**
@@ -88,7 +78,7 @@ abstract class sly_App_Base implements sly_App_Interface {
 	protected function notifySystemOfController() {
 		$name       = $this->getCurrentControllerName();
 		$controller = $this->getCurrentController();
-		$dispatcher = $this->getContainer()->getDispatcher();
+		$dispatcher = $this->getContainer()->getDispatcher(); // event dispatcher, not the request dispatcher
 		$params     = array(
 			'app'    => $this,
 			'name'   => $name,
@@ -110,11 +100,7 @@ abstract class sly_App_Base implements sly_App_Interface {
 			return null;
 		}
 
-		$dispatcher = $this->getDispatcher();
-		$className  = $dispatcher->getControllerClass($name);
-		$controller = $dispatcher->getController($className);
-
-		return $controller;
+		return $this->getDispatcher()->getController($name);
 	}
 
 	/**
@@ -131,7 +117,7 @@ abstract class sly_App_Base implements sly_App_Interface {
 	}
 
 	protected function setDefaultTimezone() {
-		$this->setTimezone(sly_Core::getTimezone());
+		$this->setTimezone((sly_Core::getTimezone() ?: @date_default_timezone_get()) ?: 'Europe/Berlin');
 	}
 
 	protected function setTimezone($timezone) {
@@ -158,10 +144,24 @@ abstract class sly_App_Base implements sly_App_Interface {
 		return $retval;
 	}
 
+	protected function registerStreamWrapper() {
+		$container = $this->getContainer();
+		$fsMap     = $container['sly-filesystem-map'];
+		$fsService = $container['sly-service-filesystem'];
+
+		$fsService->registerStreamWrapper($fsMap);
+	}
+
+	/**
+	 * get request dispatcher
+	 *
+	 * @return sly_Dispatcher
+	 */
+	abstract protected function getDispatcher();
+
 	abstract protected function prepareRouter(sly_Container $container);
 	abstract protected function getControllerFromRequest(sly_Request $request);
 	abstract protected function getActionFromRequest(sly_Request $request);
 
-	abstract public function getControllerClassPrefix();
 	abstract public function getCurrentControllerName();
 }

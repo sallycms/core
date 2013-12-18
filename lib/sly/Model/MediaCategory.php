@@ -67,14 +67,18 @@ class sly_Model_MediaCategory extends sly_Model_Base_Id {
 	 * @return sly_Model_MediaCategory
 	 */
 	public function getParent() {
-		return sly_Util_MediaCategory::findById($this->re_id);
+		$service = sly_Core::getContainer()->getMediaCategoryService();
+
+		return $service->findById($this->re_id);
 	}
 
 	/**
 	 * @return array
 	 */
 	public function getChildren() {
-		return sly_Util_MediaCategory::findByParentId($this->id);
+		$service = sly_Core::getContainer()->getMediaCategoryService();
+
+		return $service->findByParentId($this->id);
 	}
 
 	/**
@@ -92,11 +96,13 @@ class sly_Model_MediaCategory extends sly_Model_Base_Id {
 		$list = array();
 
 		if ($this->path) {
-			$list = array_filter(explode('|', $this->path));
+			$list = array_map('intval', array_filter(explode('|', $this->path)));
 
 			if ($asInstances) {
+				$service = sly_Core::getContainer()->getMediaCategoryService();
+
 				foreach ($list as $idx => $catID) {
-					$list[$idx] = sly_Util_MediaCategory::findById($catID);
+					$list[$idx] = $service->findById($catID);
 				}
 			}
 		}
@@ -105,7 +111,7 @@ class sly_Model_MediaCategory extends sly_Model_Base_Id {
 	}
 
 	/**
-	 * @param  mixed $reference
+	 * @param  mixed $reference  either another category instance or a category ID
 	 * @return boolean
 	 */
 	public function inParentTree($reference) {
@@ -119,6 +125,8 @@ class sly_Model_MediaCategory extends sly_Model_Base_Id {
 	 * @return array
 	 */
 	public function getMedia() {
-		return sly_Util_Medium::findByCategory($this->id);
+		$service = sly_Core::getContainer()->getMediumService();
+
+		return $service->findMediaByCategory($this->id);
 	}
 }

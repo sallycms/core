@@ -297,6 +297,18 @@ class sly_Util_Pager {
 	}
 
 	/**
+	 *
+	 * @param  string                    $label
+	 * @param  string                    $pageParamName
+	 * @return sly_Form_Select_DropDown
+	 */
+	public function getSelect($label, $pageParamName = 'p') {
+		$pages  = \array_combine(range(0, $this->pages-1), range(1, $this->pages));
+		$select = new \sly_Form_Select_DropDown($pageParamName, $label, $this->currentPage, $pages);
+		return $select;
+	}
+
+	/**
 	 * @param  string $filename
 	 * @param  array  $getParams
 	 * @param  string $pageParamName

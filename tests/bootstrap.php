@@ -13,18 +13,19 @@ if (PHP_SAPI !== 'cli') {
 }
 
 $travis = getenv('TRAVIS') !== false;
-$here   = dirname(__FILE__);
+$here   = __DIR__;
 $root   = dirname($here);
 
-// define vital paths
-define('SLY_BASE',          $root);
-define('SLY_DEVELOPFOLDER', $here.DIRECTORY_SEPARATOR.'develop');
-define('SLY_MEDIAFOLDER',   $here.DIRECTORY_SEPARATOR.'mediapool');
-define('SLY_ADDONFOLDER',   $here.DIRECTORY_SEPARATOR.'addons');
-define('SLY_VENDORFOLDER',  $root.DIRECTORY_SEPARATOR.'vendor');
-define('SLY_DATAFOLDER',    $here.DIRECTORY_SEPARATOR.'data'.DIRECTORY_SEPARATOR.'run-'.uniqid());
+// define Testuser
+if (!defined('SLY_TESTING_USER_ID')) define('SLY_TESTING_USER_ID', 1);
 
-if (!is_dir(SLY_MEDIAFOLDER)) mkdir(SLY_MEDIAFOLDER);
+// define vital paths
+if (!defined('SLY_BASE'))          define('SLY_BASE',          $root);
+if (!defined('SLY_DEVELOPFOLDER')) define('SLY_DEVELOPFOLDER', $here.DIRECTORY_SEPARATOR.'develop');
+if (!defined('SLY_ADDONFOLDER'))   define('SLY_ADDONFOLDER',   $here.DIRECTORY_SEPARATOR.'addons');
+if (!defined('SLY_VENDORFOLDER'))  define('SLY_VENDORFOLDER',  $root.DIRECTORY_SEPARATOR.'vendor');
+if (!defined('SLY_DATAFOLDER'))    define('SLY_DATAFOLDER',    $here.DIRECTORY_SEPARATOR.'data'.DIRECTORY_SEPARATOR.'run-'.uniqid());
+
 if (!is_dir(SLY_ADDONFOLDER)) mkdir(SLY_ADDONFOLDER);
 if (!is_dir(SLY_DATAFOLDER))  mkdir(SLY_DATAFOLDER, 0777, true);
 

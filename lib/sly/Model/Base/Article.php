@@ -15,30 +15,43 @@
  */
 class sly_Model_Base_Article extends sly_Model_Base {
 	protected $id;          ///< int
-	protected $updateuser;  ///< string
-	protected $status;      ///< int
+	protected $clang;       ///< int
+	protected $revision;    ///< int
+	protected $latest;      ///< int
+	protected $online;      ///< int
+	protected $deleted;     ///< int
+	protected $type;        ///< string
+	protected $re_id;       ///< int
+	protected $path;        ///< string
+	protected $pos;         ///< int
 	protected $name;        ///< string
 	protected $catpos;      ///< int
-	protected $createdate;  ///< int
-	protected $clang;       ///< int
-	protected $re_id;       ///< int
-	protected $pos;         ///< int
 	protected $catname;     ///< string
 	protected $startpage;   ///< int
+	protected $createdate;  ///< int
 	protected $updatedate;  ///< int
 	protected $createuser;  ///< string
+	protected $updateuser;  ///< string
 	protected $attributes;  ///< string
-	protected $path;        ///< string
-	protected $type;        ///< string
-	protected $revision;    ///< int
 
-	protected $_pk = array('id' => 'int', 'clang' => 'int'); ///< array
+	protected $_pk = array('id' => 'int', 'clang' => 'int', 'revision' => 'int'); ///< array
 	protected $_attributes = array(
-		'updateuser' => 'string', 'status' => 'int', 'name' => 'string',
-		'catpos' => 'int', 'createdate' => 'datetime', 're_id' => 'int', 'pos' => 'int',
-		'catname' => 'string', 'startpage' => 'int', 'updatedate' => 'datetime',
-		'createuser' => 'string', 'attributes' => 'string', 'path' => 'string',
-		'type' => 'string', 'revision' => 'int'
+		'latest'     => 'int',
+		'online'     => 'int',
+		'deleted'    => 'int',
+		'type'       => 'string',
+		're_id'      => 'int',
+		'path'       => 'string',
+		'pos'        => 'int',
+		'name'       => 'string',
+		'catpos'     => 'int',
+		'catname'    => 'string',
+		'startpage'  => 'int',
+		'createdate' => 'datetime',
+		'updatedate' => 'datetime',
+		'createuser' => 'string',
+		'updateuser' => 'string',
+		'attributes' => 'string'
 	); ///< array
 
 	/**
@@ -49,17 +62,73 @@ class sly_Model_Base_Article extends sly_Model_Base {
 	}
 
 	/**
-	 * @return string
+	 * @return int
 	 */
-	public function getUpdateUser() {
-		return $this->updateuser;
+	public function getClang() {
+		return $this->clang;
 	}
 
 	/**
 	 * @return int
 	 */
-	public function getStatus() {
-		return $this->status;
+	public function getRevision() {
+		return $this->revision;
+	}
+
+	/**
+	 * @return boolean
+	 */
+	public function isLatest() {
+		return $this->latest ? true : false;
+	}
+
+	/**
+	 * @return boolean
+	 */
+	public function isOnline() {
+		return $this->online ? true : false;
+	}
+
+	/**
+	 * @return boolean
+	 */
+	public function isOffline() {
+		return!$this->isOnline();
+	}
+
+	/**
+	 * @return boolean
+	 */
+	public function isDeleted() {
+		return $this->deleted ? true : false;
+	}
+
+	/**
+	 * @return string
+	 */
+	public function getType() {
+		return $this->type;
+	}
+
+	/**
+	 * @return int
+	 */
+	public function getParentId() {
+		return $this->re_id;
+	}
+
+	/**
+	 * @return string
+	 */
+	public function getPath() {
+		return $this->path;
+	}
+
+	/**
+	 * @return int
+	 */
+	public function getPosition() {
+		return $this->pos;
 	}
 
 	/**
@@ -74,34 +143,6 @@ class sly_Model_Base_Article extends sly_Model_Base {
 	 */
 	public function getCatPosition() {
 		return $this->catpos;
-	}
-
-	/**
-	 * @return int
-	 */
-	public function getCreateDate() {
-		return $this->createdate;
-	}
-
-	/**
-	 * @return int
-	 */
-	public function getClang() {
-		return $this->clang;
-	}
-
-	/**
-	 * @return int
-	 */
-	public function getParentId() {
-		return $this->re_id;
-	}
-
-	/**
-	 * @return int
-	 */
-	public function getPosition() {
-		return $this->pos;
 	}
 
 	/**
@@ -121,6 +162,13 @@ class sly_Model_Base_Article extends sly_Model_Base {
 	/**
 	 * @return int
 	 */
+	public function getCreateDate() {
+		return $this->createdate;
+	}
+
+	/**
+	 * @return int
+	 */
 	public function getUpdateDate() {
 		return $this->updatedate;
 	}
@@ -135,29 +183,15 @@ class sly_Model_Base_Article extends sly_Model_Base {
 	/**
 	 * @return string
 	 */
+	public function getUpdateUser() {
+		return $this->updateuser;
+	}
+
+	/**
+	 * @return string
+	 */
 	public function getAttributes() {
 		return $this->attributes;
-	}
-
-	/**
-	 * @return string
-	 */
-	public function getPath() {
-		return $this->path;
-	}
-
-	/**
-	 * @return string
-	 */
-	public function getType() {
-		return $this->type;
-	}
-
-	/**
-	 * @return int
-	 */
-	public function getRevision() {
-		return $this->revision;
 	}
 
 	/**
@@ -168,17 +202,59 @@ class sly_Model_Base_Article extends sly_Model_Base {
 	}
 
 	/**
-	 * @param string $updateuser
+	 * @param int $clang
 	 */
-	public function setUpdateUser($updateuser) {
-		$this->updateuser = $updateuser;
+	public function setClang($clang) {
+		$this->clang = (int) $clang;
 	}
 
 	/**
-	 * @param int $status
+	 * @param boolean $isLatest
 	 */
-	public function setStatus($status) {
-		$this->status = (int) $status;
+	public function setLatest($isLatest) {
+		$this->latest = $isLatest ? 1 : 0;
+	}
+
+	/**
+	 * @param boolean $online
+	 */
+	public function setOnline($online) {
+		$this->online = $online ? 1 : 0;
+	}
+
+	/**
+	 * @param boolean $deleted
+	 */
+	public function setDeleted($deleted) {
+		$this->deleted = $deleted ? 1 : 0;
+	}
+
+	/**
+	 * @param string $type
+	 */
+	public function setType($type) {
+		$this->type = (string) $type;
+	}
+
+	/**
+	 * @param int $re_id
+	 */
+	public function setParentId($re_id) {
+		$this->re_id = (int) $re_id;
+	}
+
+	/**
+	 * @param string $path
+	 */
+	public function setPath($path) {
+		$this->path = $path;
+	}
+
+	/**
+	 * @param int $position
+	 */
+	public function setPosition($position) {
+		$this->pos = (int) $position;
 	}
 
 	/**
@@ -193,34 +269,6 @@ class sly_Model_Base_Article extends sly_Model_Base {
 	 */
 	public function setCatPosition($position) {
 		$this->catpos = (int) $position;
-	}
-
-	/**
-	 * @param mixed $updatedate  unix timestamp or date using 'YYYY-MM-DD HH:MM:SS' format
-	 */
-	public function setCreateDate($createdate) {
-		$this->createdate = sly_Util_String::isInteger($createdate) ? (int) $createdate : strtotime($createdate);
-	}
-
-	/**
-	 * @param int $clang
-	 */
-	public function setClang($clang) {
-		$this->clang = (int) $clang;
-	}
-
-	/**
-	 * @param int $re_id
-	 */
-	public function setParentId($re_id) {
-		$this->re_id = (int) $re_id;
-	}
-
-	/**
-	 * @param int $position
-	 */
-	public function setPosition($position) {
-		$this->pos = (int) $position;
 	}
 
 	/**
@@ -240,6 +288,13 @@ class sly_Model_Base_Article extends sly_Model_Base {
 	/**
 	 * @param mixed $updatedate  unix timestamp or date using 'YYYY-MM-DD HH:MM:SS' format
 	 */
+	public function setCreateDate($createdate) {
+		$this->createdate = sly_Util_String::isInteger($createdate) ? (int) $createdate : strtotime($createdate);
+	}
+
+	/**
+	 * @param mixed $updatedate  unix timestamp or date using 'YYYY-MM-DD HH:MM:SS' format
+	 */
 	public function setUpdateDate($updatedate) {
 		$this->updatedate = sly_Util_String::isInteger($updatedate) ? (int) $updatedate : strtotime($updatedate);
 	}
@@ -252,6 +307,13 @@ class sly_Model_Base_Article extends sly_Model_Base {
 	}
 
 	/**
+	 * @param string $updateuser
+	 */
+	public function setUpdateUser($updateuser) {
+		$this->updateuser = $updateuser;
+	}
+
+	/**
 	 * @param string $attributes
 	 */
 	public function setAttributes($attributes) {
@@ -259,116 +321,26 @@ class sly_Model_Base_Article extends sly_Model_Base {
 	}
 
 	/**
-	 * @param string $path
-	 */
-	public function setPath($path) {
-		$this->path = $path;
-	}
-
-	/**
-	 * @param string $type
-	 */
-	public function setType($type) {
-		$this->type = $type;
-	}
-
-	/**
-	 * @param int $revision
-	 */
-	public function setRevision($revision) {
-		$this->revision = (int) $revision;
-	}
-
-	/**
-	 * @return boolean
-	 */
-	public function isOnline() {
-		return $this->getStatus() == 1;
-	}
-
-	/**
-	 * @return boolean
-	 */
-	public function isOffline() {
-		return!$this->isOnline();
-	}
-
-	/**
 	 * return the url
 	 *
-	 * @param  mixed   $params
-	 * @param  string  $divider
-	 * @param  boolean $disableCache
+	 * @param  mixed               $params
+	 * @param  string              $divider
+	 * @param  boolean             $disableCache
+	 * @param  sly_Service_Article $service
 	 * @return string
 	 */
-	public function getUrl($params = '', $divider = '&amp;', $disableCache = false) {
-		static $urlCache = array();
+	public function getUrl($params = '', $divider = '&amp;', $disableCache = false, sly_Service_Article $service = null) {
+		$service = $service ?: sly_Core::getContainer()->getArticleService();
 
-		$id    = $this->getId();
-		$clang = $this->getClang();
-
-		// cache the URLs for this request (unlikely to change)
-
-		$cacheKey = substr(md5($id.'_'.$clang.'_'.json_encode($params).'_'.$divider), 0, 10);
-
-		if (!$disableCache && isset($urlCache[$cacheKey])) {
-			return $urlCache[$cacheKey];
-		}
-
-		$dispatcher = sly_Core::dispatcher();
-		$redirect   = $dispatcher->filter('SLY_URL_REDIRECT', $this, array(
-			'params'       => $params,
-			'divider'      => $divider,
-			'disableCache' => $disableCache
-		));
-
-		// the listener must return an article (sly_Model_Article or int (ID)) or URL (string) to modify the returned URL
-		if ($redirect && $redirect !== $this) {
-			if (is_integer($redirect)) {
-				$id = $redirect;
-			}
-			elseif ($redirect instanceof sly_Model_Article) {
-				$id    = $redirect->getId();
-				$clang = $redirect->getClang();
-			}
-			else {
-				return $redirect;
-			}
-		}
-
-		// check for any fancy URL addOns
-
-		$paramString = sly_Util_HTTP::queryString($params, $divider);
-		$url         = $dispatcher->filter('URL_REWRITE', '', array(
-			'id'            => $id,
-			'clang'         => $clang,
-			'params'        => $paramString,
-			'divider'       => $divider,
-			'disable_cache' => $disableCache
-		));
-
-		// if no listener is available, generate plain index.php?article_id URLs
-
-		if (empty($url)) {
-			$clangString  = '';
-			$multilingual = sly_Util_Language::isMultilingual();
-
-			if ($multilingual && $clang != sly_Core::getDefaultClangId()) {
-				$clangString = $divider.'clang='.$clang;
-			}
-
-			$url = 'index.php?article_id='.$id.$clangString.$paramString;
-		}
-
-		$urlCache[$cacheKey] = $url;
-		return $url;
+		return $service->getUrl($this, $params, $divider, $disableCache);
 	}
 
 	/**
 	 * @return array
 	 */
 	public function getParentTree() {
-		$return = array();
+		$return     = array();
+		$catService = sly_Core::getContainer()->getCategoryService();
 
 		$explode = explode('|', $this->getPath());
 		$explode = array_filter($explode);
@@ -378,7 +350,7 @@ class sly_Model_Base_Article extends sly_Model_Base {
 		}
 
 		foreach ($explode as $var) {
-			$return[] = sly_Util_Category::findById($var, $this->getClang());
+			$return[] = $catService->findByPK($var, $this->getClang());
 		}
 
 		return $return;

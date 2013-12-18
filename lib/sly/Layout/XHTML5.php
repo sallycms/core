@@ -20,6 +20,17 @@ class sly_Layout_XHTML5 extends sly_Layout_XHTML {
 	 */
 	public function setManifest($manifest) {
 		$this->manifest = $manifest;
+		$this->setHtmlAttr('manifest', $manifest);
+	}
+
+	/**
+	 * Set the document language
+	 *
+	 * @param string $language  the short locale (de, en, fr, ...)
+	 */
+	public function setLanguage($language) {
+		$this->language = $language;
+		$this->setHtmlAttr('lang', $language);
 	}
 
 	/**

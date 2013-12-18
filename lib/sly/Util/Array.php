@@ -92,7 +92,7 @@ class sly_Util_Array {
 		$res  = $this->array;
 
 		foreach ($path as $step) {
-			if (!array_key_exists($step, $res)) {
+			if (!is_array($res) || !array_key_exists($step, $res)) {
 				$this->resultCache[$key] = $default;
 				return $default;
 			}

@@ -8,14 +8,17 @@
  * http://www.opensource.org/licenses/mit-license.php
  */
 
-$type         = sly_Util_Language::isMultilingual() ? 'multilingual' : 'monolingual';
-$formRowClass = array('sly-form-row', 'sly-num'.$rowNum, 'sly-form-'.$type);
-$element      = reset($elements); // in multilingual rows, there can only be one...
-$containerID  = $element->getDisplayName();
-$values       = sly_makeArray($element->getAttribute('value'));
-$origElement  = $element;
-$elements     = array();
-$isEqual      = $request->post('equal__'.$origElement->getDisplayName(), 'boolean', false);
+$user           = sly_Util_User::getCurrentUser();
+$allowedClangs  = $user->getAllowedCLangs();
+$isMultilingual = count($allowedClangs) > 1;
+$type           = $isMultilingual ? 'multilingual' : 'monolingual';
+$formRowClass   = array('sly-form-row', 'sly-num'.$rowNum, 'sly-form-'.$type);
+$element        = reset($elements); // in multilingual rows, there can only be one...
+$containerID    = $element->getDisplayName();
+$values         = sly_makeArray($element->getAttribute('value'));
+$origElement    = $element;
+$elements       = array();
+$isEqual        = $request->post('equal__'.$origElement->getDisplayName(), 'boolean', false);
 
 if (method_exists($element, 'getChecks')) {
 	$values = $element->getChecks();
@@ -26,7 +29,7 @@ else {
 
 $equalValue = $origElement->getDisplayValue();
 
-foreach (sly_Util_Language::findAll(true) as $clangID) {
+foreach ($allowedClangs as $clangID) {
 	if (!isset($values[$clangID])) {
 		$values[$clangID] = $equalValue;
 	}
@@ -86,7 +89,7 @@ else {
 	}
 }
 
-$rel   = sly_Util_Language::isMultilingual() ? $containerID : '';
+$rel   = $isMultilingual ? $containerID : '';
 $style = $rel && !$isEqual ? 'display:none' : '';
 $langs = sly_Util_Language::findAll();
 
@@ -94,7 +97,7 @@ print $this->renderView('row_i18n_helper.phtml', compact('element', 'formRowClas
 
 // print the extended multilingual view
 
-if (sly_Util_Language::isMultilingual()) {
+if ($isMultilingual) {
 	$style = $isEqual ? ' style="display:none"' : '';
 	print '<div class="sly-form-i18n-container c-'.$containerID.'"'.$style.'>';
 

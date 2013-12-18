@@ -8,23 +8,25 @@
  * http://www.opensource.org/licenses/mit-license.php
  */
 
+use wv\BabelCache\CacheInterface;
+
 /**
  * @author  christoph@webvariants.de
  * @ingroup service
  */
 class sly_Service_Language extends sly_Service_Model_Base_Id {
 	protected $tablename = 'clang'; ///< string
-	protected $cache;               ///< BabelCache_Interface
+	protected $cache;               ///< CacheInterface
 	protected $dispatcher;          ///< sly_Event_IDispatcher
 
 	/**
 	 * Constructor
 	 *
 	 * @param sly_DB_Persistence    $persistence
-	 * @param BabelCache_Interface  $cache
+	 * @param CacheInterface        $cache
 	 * @param sly_Event_IDispatcher $dispatcher
 	 */
-	public function __construct(sly_DB_Persistence $persistence, BabelCache_Interface $cache, sly_Event_IDispatcher $dispatcher) {
+	public function __construct(sly_DB_Persistence $persistence, CacheInterface $cache, sly_Event_IDispatcher $dispatcher) {
 		parent::__construct($persistence);
 
 		$this->cache      = $cache;
@@ -82,7 +84,7 @@ class sly_Service_Language extends sly_Service_Model_Base_Id {
 		$result = parent::save($model);
 
 		// notify listeners
-		$this->dispatcher->notify('CLANG_UPDATED', $model);
+		$this->dispatcher->notify('SLY_CLANG_UPDATED', $model);
 
 		return $result;
 	}
@@ -93,7 +95,7 @@ class sly_Service_Language extends sly_Service_Model_Base_Id {
 	 * @return sly_Model_Language
 	 */
 	public function create($params) {
-		$langs = sly_Util_Language::findAll(); // TODO: avoid wrapper around ourselves
+		$langs = $this->findAll();
 
 		// if there are no languages yet, don't attempt to copy anything
 
@@ -101,12 +103,8 @@ class sly_Service_Language extends sly_Service_Model_Base_Id {
 			$newLanguage = parent::create($params);
 		}
 		else {
-			$sql    = $this->getPersistence();
-			$ownTrx = !$sql->isTransRunning();
-
-			if ($ownTrx) {
-				$sql->beginTransaction();
-			}
+			$sql = $this->getPersistence();
+			$trx = $sql->beginTrx();
 
 			try {
 				$newLanguage = parent::create($params);
@@ -119,26 +117,19 @@ class sly_Service_Language extends sly_Service_Model_Base_Id {
 					$sourceID = reset($ids);
 				}
 
-				$sql->query(str_replace('~', sly_Core::getTablePrefix(),
-					'INSERT INTO ~article (id,re_id,name,catname,catpos,attributes,'.
-					'startpage,pos,path,status,createdate,updatedate,type,clang,createuser,'.
-					'updateuser,revision) '.
-					'SELECT id,re_id,name,catname,catpos,attributes,startpage,pos,path,0,createdate,'.
-					'updatedate,type,?,createuser,updateuser,revision '.
+				$sql->query(str_replace('~', $sql->getPrefix(),
+					'INSERT INTO ~article '.
+						'(id,clang,revision,latest,online,deleted,type,re_id,path,pos,name,catpos,catname,startpage,createdate,updatedate,createuser,updateuser,attributes) '.
+					'SELECT '.
+						'id,?,revision,latest,0,deleted,type,re_id,path,pos,name,catpos,catname,startpage,createdate,updatedate,createuser,updateuser,attributes '.
 					'FROM ~article WHERE clang = ?'),
 					array($newLanguage->getId(), $sourceID)
 				);
 
-				if ($ownTrx) {
-					$sql->commit();
-				}
+				$sql->commitTrx($trx);
 			}
 			catch (Exception $e) {
-				if ($ownTrx) {
-					$sql->rollBack();
-				}
-
-				throw $e;
+				$sql->rollBackTrx($trx, $e);
 			}
 		}
 
@@ -147,7 +138,7 @@ class sly_Service_Language extends sly_Service_Model_Base_Id {
 		$this->cache->set('sly.language', 'all', $langs);
 
 		// notify listeners
-		$this->dispatcher->notify('CLANG_ADDED', $newLanguage, array('id' => $newLanguage->getId(), 'language' => $newLanguage));
+		$this->dispatcher->notify('SLY_CLANG_ADDED', $newLanguage, array('id' => $newLanguage->getId(), 'language' => $newLanguage));
 
 		return $newLanguage;
 	}
@@ -166,55 +157,40 @@ class sly_Service_Language extends sly_Service_Model_Base_Id {
 	 * @return int
 	 */
 	public function delete($where) {
-		$db = $this->getPersistence();
-
 		// find all languages first
 		$toDelete = $this->find($where);
-		$allLangs = sly_Util_Language::findAll(); // TODO: avoid wrapper around ourselves
-
-		// delete
-		$res = parent::delete($where);
-
-		// update cache (so that addOns can access fresh clang data when listening to CLANG_DELETED)
-		foreach ($toDelete as $language) {
-			unset($allLangs[$language->getId()]);
-		}
-
-		$this->cache->set('sly.language', 'all', $allLangs);
 
 		// remove
-		$db     = $this->getPersistence();
-		$ownTrx = !$db->isTransRunning();
-
-		if ($ownTrx) {
-			$db->beginTransaction();
-		}
+		$res = false;
+		$db  = $this->getPersistence();
+		$pre = $db->getPrefix();
+		$trx = $db->beginTrx();
 
 		try {
+			// delete
+			$res = parent::delete($where);
+
 			foreach ($toDelete as $language) {
 				$params = array('clang' => $language->getId());
-				$db->delete('article', $params);
-				$db->delete('article_slice', $params);
 
-				$this->dispatcher->notify('CLANG_DELETED', $language, array(
+				$db->query('DELETE FROM '.$pre.'slice WHERE id IN (SELECT slice_id FROM '.$pre.'article_slice WHERE clang = :clang)', $params);
+				$db->delete('article_slice', $params);
+				$db->delete('article', $params);
+
+				$this->dispatcher->notify('SLY_CLANG_DELETED', $language, array(
 					'id'   => $language->getId(),
 					'name' => $language->getName()
 				));
 			}
 
-			if ($ownTrx) {
-				$db->commit();
-			}
+			$db->commitTrx($trx);
 		}
 		catch (Exception $e) {
-			if ($ownTrx) {
-				$db->rollBack();
-			}
-
-			throw $e;
+			$db->rollBackTrx($trx, $e);
 		}
 
-		sly_Core::clearCache();
+		sly_Core::clearCache(array('reason' => 'SLY_CLANG_DELETED'));
+
 		return $res;
 	}
 }

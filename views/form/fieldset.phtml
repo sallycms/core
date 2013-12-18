@@ -44,7 +44,7 @@ $legend = sly_translate($this->legend);
 		$registry = sly_Core::getTempRegistry();
 
 		if ($this->isMultilingual() && sly_Util_Language::isMultilingual() && !$registry->has('sly.form.i18n.checkimg')) {
-			sly_Core::getLayout()->addJavaScriptFile('assets/js/jquery.imgcheckbox.min.js');
+			sly_Core::getLayout()->addJavaScriptFile(sly\Assets\Util::appUri('js/jquery.imgcheckbox.min.js'));
 			$registry->set('sly.form.i18n.checkimg', true);
 		}
 

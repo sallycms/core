@@ -134,15 +134,15 @@ class sly_DB_PDO_PersistenceTest extends sly_BaseTest {
 	 */
 	public function testQuery() {
 		// most primitive queries
-		$this->assertTrue(self::$pers->query('SELECT 1'));
+		$this->assertSame(self::$pers, self::$pers->query('SELECT 1'));
 		$this->assertResultSet(array(array('1' => '1')));
 
 		// simple placeholders
-		$this->assertTrue(self::$pers->query('SELECT 1,?', array('test')));
+		$this->assertSame(self::$pers, self::$pers->query('SELECT 1,?', array('test')));
 		$this->assertResultSet(array(array('1' => '1', 'test' => 'test')));
 
 		// named placeholders
-		$this->assertTrue(self::$pers->query('SELECT 1,:foo', array('foo' => 'testX')));
+		$this->assertSame(self::$pers, self::$pers->query('SELECT 1,:foo', array('foo' => 'testX')));
 		$this->assertResultSet(array(array('1' => '1', 'testX' => 'testX')));
 	}
 
@@ -152,7 +152,7 @@ class sly_DB_PDO_PersistenceTest extends sly_BaseTest {
 	public function testSelect($expected, $table, $select, $where, $group = null, $order = null, $offset = null, $limit = null, $having = null, $joins = null) {
 		$result = self::$pers->select($table, $select, $where, $group, $order, $offset, $limit, $having, $joins);
 
-		$this->assertTrue($result);
+		$this->assertSame(self::$pers, $result);
 		$this->assertResultSet($expected);
 	}
 

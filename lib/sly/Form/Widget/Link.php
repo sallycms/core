@@ -68,7 +68,7 @@ class sly_Form_Widget_Link extends sly_Form_Widget_LinkBase implements sly_Form_
 	}
 
 	public static function getFullName($articleID) {
-		$article = sly_Util_Article::findById($articleID);
+		$article = sly_Util_Article::findById($articleID, null, sly_Service_Article::FIND_REVISION_BEST);
 		$value   = '';
 
 		if ($article) {

@@ -8,17 +8,19 @@
  * http://www.opensource.org/licenses/mit-license.php
  */
 
+use wv\BabelCache\CacheInterface;
+
 /**
- * DB Model Klasse für Medienkategorien
+ * Service class for managing media categories
  *
  * @author  christoph@webvariants.de
  * @ingroup service
  */
-class sly_Service_MediaCategory extends sly_Service_Model_Base_Id {
+class sly_Service_MediaCategory extends sly_Service_Model_Base_Id implements sly_ContainerAwareInterface {
 	protected $tablename = 'file_category'; ///< string
-	protected $cache;                       ///< BabelCache_Interface
+	protected $cache;                       ///< CacheInterface
 	protected $dispatcher;                  ///< sly_Event_IDispatcher
-	protected $mediumService;               ///< sly_Service_Medium
+	protected $container;                   ///< sly_Container
 
 	const ERR_CAT_HAS_MEDIA   = 1; ///< int
 	const ERR_CAT_HAS_SUBCATS = 2; ///< int
@@ -26,27 +28,30 @@ class sly_Service_MediaCategory extends sly_Service_Model_Base_Id {
 	/**
 	 * Constructor
 	 *
-	 * Note that you have to call setMediumService() afterwards to have a
-	 * fully-functional service.
-	 *
 	 * @param sly_DB_Persistence    $persistence
-	 * @param BabelCache_Interface  $cache
+	 * @param CacheInterface        $cache
 	 * @param sly_Event_IDispatcher $dispatcher
 	 */
-	public function __construct(sly_DB_Persistence $persistence, BabelCache_Interface $cache, sly_Event_IDispatcher $dispatcher) {
+	public function __construct(sly_DB_Persistence $persistence, CacheInterface $cache, sly_Event_IDispatcher $dispatcher) {
 		parent::__construct($persistence);
 
 		$this->cache      = $cache;
 		$this->dispatcher = $dispatcher;
 	}
 
+	public function setContainer(sly_Container $container = null) {
+		$this->container = $container;
+	}
+
 	/**
-	 * Set medium service
-	 *
-	 * @param sly_Service_Medium $service
+	 * @return sly_Service_Medium
 	 */
-	public function setMediumService(sly_Service_Medium $service) {
-		$this->mediumService = $service;
+	protected function getMediumService() {
+		if (!$this->container) {
+			throw new LogicException('Container must be set before media can be handled.');
+		}
+
+		return $this->container->getMediumService();
 	}
 
 	/**
@@ -79,6 +84,13 @@ class sly_Service_MediaCategory extends sly_Service_Model_Base_Id {
 		}
 
 		return $cat;
+	}
+
+	/**
+	 * @return array
+	 */
+	public function findAll() {
+		return $this->findBy('all', null, 'name');
 	}
 
 	/**
@@ -180,10 +192,10 @@ class sly_Service_MediaCategory extends sly_Service_Model_Base_Id {
 		$this->save($category);
 
 		// update cache
-		$this->cache->flush('sly.mediacat.list');
+		$this->cache->clear('sly.mediacat.list');
 
 		// notify system
-		$this->dispatcher->notify('SLY_MEDIACAT_ADDED', $category, compact('user'));
+		$this->dispatcher->notify('SLY_MEDIACAT_ADDED', $category, compact('user', 'parent'));
 
 		return $category;
 	}
@@ -207,7 +219,7 @@ class sly_Service_MediaCategory extends sly_Service_Model_Base_Id {
 		$this->save($cat);
 
 		// update cache
-		$this->cache->flush('sly.mediacat');
+		$this->cache->clear('sly.mediacat');
 
 		// notify system
 		$this->dispatcher->notify('SLY_MEDIACAT_UPDATED', $cat, compact('user'));
@@ -248,18 +260,9 @@ class sly_Service_MediaCategory extends sly_Service_Model_Base_Id {
 			throw new sly_Exception(t('category_is_not_empty'), self::ERR_CAT_HAS_MEDIA);
 		}
 
-		$service = $this->mediumService;
-
-		if (!($service instanceof sly_Service_Medium)) {
-			throw new LogicException('You must set the medium service with ->setMediumService() before you can delete categories.');
-		}
-
-		$db     = $this->getPersistence();
-		$ownTrx = !$db->isTransRunning();
-
-		if ($ownTrx) {
-			$db->beginTransaction();
-		}
+		$service = $this->getMediumService();
+		$db      = $this->getPersistence();
+		$trx     = $db->beginTrx();
 
 		try {
 			// delete subcats
@@ -275,21 +278,15 @@ class sly_Service_MediaCategory extends sly_Service_Model_Base_Id {
 			// delete cat itself
 			$db->delete('file_category', array('id' => $cat->getId()));
 
-			if ($ownTrx) {
-				$db->commit();
-			}
+			$db->commitTrx($trx);
 		}
 		catch (Exception $e) {
-			if ($ownTrx) {
-				$db->rollBack();
-			}
-
-			throw $e;
+			$db->rollBackTrx($trx, $e);
 		}
 
 		// update cache
-		$this->cache->flush('sly.mediacat');
-		$this->cache->flush('sly.mediacat.list');
+		$this->cache->clear('sly.mediacat');
+		$this->cache->clear('sly.mediacat.list');
 
 		// notify system
 		$this->dispatcher->notify('SLY_MEDIACAT_DELETED', $cat);

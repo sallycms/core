@@ -39,7 +39,7 @@ class sly_Util_ArticleSlice {
 	 */
 	public static function findById($articleSliceID) {
 		$articleSliceID = (int) $articleSliceID;
-		return sly_Core::getContainer()->getArticleSliceService()->findById($articleSliceID);
+		return sly_Core::getContainer()->getArticleSliceService()->findOne(array('id' => $articleSliceID));
 	}
 
 	/**
@@ -72,16 +72,13 @@ class sly_Util_ArticleSlice {
 	/**
 	 * find all slices within an article
 	 *
-	 * @param  int    $articleId
-	 * @param  int    $clang      give null for the current language
-	 * @param  string $slot
+	 * @param  sly_Model_Article  $article   an article
+	 * @param  string             $slot
 	 * @return array              list of sly_Model_ArticleSlice objects
 	 */
-	public static function findByArticle($articleId, $clang = null, $slot = null) {
-		$articleId = (int) $articleId;
-		$clang     = $clang === null ? sly_Core::getCurrentClang() : (int) $clang;
-		$where     = array('article_id' => $articleId, 'clang' => $clang);
-		$order     = 'pos ASC';
+	public static function findByArticle(sly_Model_Article $article, $slot = null) {
+		$where = array('article_id' => $article->getId(), 'clang' => $article->getClang(), 'revision' => $article->getRevision());
+		$order = 'pos ASC';
 
 		if ($slot !== null) {
 			$where['slot'] = $slot;

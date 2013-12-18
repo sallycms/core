@@ -24,15 +24,16 @@ class sly_Form_Text extends sly_Form_ElementBase implements sly_Form_IElement {
 	/**
 	 * Constructor
 	 *
-	 * @param string $label  the label
-	 * @param string $text   the content
-	 * @param string $id     optional ID
+	 * @param string  $label   the label
+	 * @param string  $text    the content
+	 * @param string  $id      optional ID
+	 * @param boolean $isHTML  whether or not the $text should be treated as HTML
 	 */
-	public function __construct($label, $text, $id = null) {
+	public function __construct($label, $text, $id = null, $isHTML = false) {
 		$id = $id === null ? 'a'.uniqid() : $id;
 		parent::__construct('', $label, '', $id);
 		$this->content = $text;
-		$this->isHTML  = false;
+		$this->isHTML  = !!$isHTML;
 
 		$this->addOuterClass('sly-form-read-row');
 		$this->addClass('sly-form-read');

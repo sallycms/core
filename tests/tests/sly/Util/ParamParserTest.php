@@ -10,7 +10,7 @@
 
 class sly_Util_ParamParserTest extends PHPUnit_Framework_TestCase {
 	public static function setUpBeforeClass() {
-		$filename = dirname(__FILE__).'/template1.php';
+		$filename = __DIR__.'/template1.php';
 		$testfile = <<<TESTFILE
 <?php
 
@@ -45,7 +45,7 @@ TESTFILE;
 
 		file_put_contents($filename, $testfile);
 
-		$filename = dirname(__FILE__).'/template2.php';
+		$filename = __DIR__.'/template2.php';
 		$testfile = <<<TESTFILE
 <?php
 
@@ -61,12 +61,12 @@ TESTFILE;
 
 		file_put_contents($filename, $testfile);
 
-		$filename = dirname(__FILE__).'/template3.php';
+		$filename = __DIR__.'/template3.php';
 		$testfile = "<?php\nprint 'Hallo Welt!';";
 
 		file_put_contents($filename, $testfile);
 
-		$filename = dirname(__FILE__).'/template4.php';
+		$filename = __DIR__.'/template4.php';
 		$testfile = <<<TESTFILE
 <?php
 
@@ -86,14 +86,14 @@ TESTFILE;
 	}
 
 	public static function tearDownAfterClass() {
-		unlink(dirname(__FILE__).'/template1.php');
-		unlink(dirname(__FILE__).'/template2.php');
-		unlink(dirname(__FILE__).'/template3.php');
-		unlink(dirname(__FILE__).'/template4.php');
+		unlink(__DIR__.'/template1.php');
+		unlink(__DIR__.'/template2.php');
+		unlink(__DIR__.'/template3.php');
+		unlink(__DIR__.'/template4.php');
 	}
 
 	public function testParsing() {
-		$filename = dirname(__FILE__).'/template1.php';
+		$filename = __DIR__.'/template1.php';
 		$parser   = new sly_Util_ParamParser($filename);
 		$params   = array(
 			'test_boolean' => true,
@@ -113,7 +113,7 @@ TESTFILE;
 	}
 
 	public function testEmpty() {
-		$filename = dirname(__FILE__).'/template3.php';
+		$filename = __DIR__.'/template3.php';
 		$parser   = new sly_Util_ParamParser($filename);
 
 		$this->assertEquals(array(), $parser->get());
@@ -123,7 +123,7 @@ TESTFILE;
 	 * @depends testParsing
 	 */
 	public function testCachedResults(sly_Util_ParamParser $parser) {
-		$filename = dirname(__FILE__).'/template1.php';
+		$filename = __DIR__.'/template1.php';
 		$testfile = <<<TESTFILE
 <?php
 
@@ -152,14 +152,14 @@ TESTFILE;
 	 * @expectedException PHPUnit_Framework_Error
 	 */
 	public function testInvalidValue() {
-		$parser = new sly_Util_ParamParser(dirname(__FILE__).'/template2.php');
+		$parser = new sly_Util_ParamParser(__DIR__.'/template2.php');
 		$params = array('test_invalid' => '{foo:}');
 
 		$this->assertEquals($params, $parser->get());
 	}
 
 	public function testInvalidTag() {
-		$parser = new sly_Util_ParamParser(dirname(__FILE__).'/template4.php');
+		$parser = new sly_Util_ParamParser(__DIR__.'/template4.php');
 		$params = array('test' => 'foo', 'foo' => 'test');
 
 		$this->assertEquals($params, $parser->get());

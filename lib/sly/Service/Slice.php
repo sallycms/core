@@ -9,7 +9,7 @@
  */
 
 /**
- * DB Model Klasse für Slices
+ * Service class for managing slices
  *
  * @author  zozi@webvariants.de
  * @ingroup service

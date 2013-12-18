@@ -55,7 +55,7 @@ abstract class sly_Model_Base {
 	 */
 	public function setUpdateColumns($user = null) {
 		if (!is_string($user) && !($user instanceof sly_Model_User)) {
-			$user = sly_Util_User::getCurrentUser();
+			$user = sly_Core::getContainer()->getUserService()->getCurrentUser();
 
 			if (!$user) {
 				throw new sly_Exception(t('operation_requires_user_context', __METHOD__));
@@ -75,7 +75,7 @@ abstract class sly_Model_Base {
 	 */
 	public function setCreateColumns($user = null) {
 		if (!is_string($user) && !($user instanceof sly_Model_User)) {
-			$user = sly_Util_User::getCurrentUser();
+			$user = sly_Core::getContainer()->getUserService()->getCurrentUser();
 
 			if (!$user) {
 				throw new sly_Exception(t('operation_requires_user_context', __METHOD__));
@@ -126,7 +126,10 @@ abstract class sly_Model_Base {
 				if ($type === 'date' || $type === 'datetime') {
 					$type = 'int';
 
-					if (!sly_Util_String::isInteger($hash[$name])) {
+					if ($hash[$name] === '0000-00-00' || $hash[$name] === '0000-00-00 00:00:00') {
+						$type = 'null';
+					}
+					elseif (!sly_Util_String::isInteger($hash[$name])) {
 						$hash[$name] = strtotime($hash[$name].' UTC');
 					}
 				}
@@ -136,6 +139,7 @@ abstract class sly_Model_Base {
 					if (is_string($value)) {
 						$value = json_decode($value, true);
 					}
+
 					if (!is_array($value)) {
 						$value = array();
 					}

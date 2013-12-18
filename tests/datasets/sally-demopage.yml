@@ -17,7 +17,6 @@ sly_article:
       startpage: 1
       pos: 1
       path: '|'
-      status: 1
       type: default
       clang: 5
       createdate: '2011-07-30 15:08:10'
@@ -25,6 +24,8 @@ sly_article:
       createuser: admin
       updateuser: admin
       revision: 0
+      latest: 1
+      online: 1
    -
       id: 2
       re_id: 0
@@ -35,7 +36,6 @@ sly_article:
       startpage: 1
       pos: 1
       path: '|'
-      status: 1
       type: default
       clang: 5
       createdate: '2011-07-30 15:08:20'
@@ -43,6 +43,8 @@ sly_article:
       createuser: admin
       updateuser: admin
       revision: 0
+      latest: 1
+      online: 1
    -
       id: 3
       re_id: 0
@@ -53,7 +55,6 @@ sly_article:
       startpage: 1
       pos: 1
       path: '|'
-      status: 1
       type: default
       clang: 5
       createdate: '2011-07-30 15:08:25'
@@ -61,6 +62,8 @@ sly_article:
       createuser: admin
       updateuser: admin
       revision: 0
+      latest: 1
+      online: 1
    -
       id: 4
       re_id: 0
@@ -71,7 +74,6 @@ sly_article:
       startpage: 1
       pos: 1
       path: '|'
-      status: 0                            # <-- an offline cat in clang 5
       type: ''
       clang: 5
       createdate: '2011-08-01 22:20:14'
@@ -79,6 +81,8 @@ sly_article:
       createuser: admin
       updateuser: admin
       revision: 0
+      latest: 1
+      online: 1
    -
       id: 5
       re_id: 0
@@ -89,7 +93,6 @@ sly_article:
       startpage: 1
       pos: 1
       path: '|'
-      status: 1
       type: ''
       clang: 5
       createdate: '2011-08-01 22:20:23'
@@ -97,6 +100,8 @@ sly_article:
       createuser: admin
       updateuser: admin
       revision: 0
+      latest: 1
+      online: 1
    -
       id: 6
       re_id: 0
@@ -107,7 +112,6 @@ sly_article:
       startpage: 0
       pos: 1
       path: '|'
-      status: 1
       type: default
       clang: 5
       createdate: '2011-08-01 22:20:47'
@@ -115,6 +119,8 @@ sly_article:
       createuser: admin
       updateuser: admin
       revision: 0
+      latest: 1
+      online: 1
    -
       id: 7
       re_id: 0
@@ -125,7 +131,6 @@ sly_article:
       startpage: 0
       pos: 2
       path: '|'
-      status: 1
       type: ''
       clang: 5
       createdate: '2011-08-01 22:20:54'
@@ -133,6 +138,8 @@ sly_article:
       createuser: admin
       updateuser: admin
       revision: 0
+      latest: 1
+      online: 1
    -
       id: 8
       re_id: 0
@@ -143,7 +150,6 @@ sly_article:
       startpage: 0
       pos: 3
       path: '|'
-      status: 1
       type: ''
       clang: 5
       createdate: '2011-08-01 22:21:00'
@@ -151,6 +157,8 @@ sly_article:
       createuser: admin
       updateuser: admin
       revision: 0
+      latest: 1
+      online: 1
    -
       id: 1
       re_id: 0
@@ -161,7 +169,6 @@ sly_article:
       startpage: 1
       pos: 1
       path: '|'
-      status: 0
       type: default
       clang: 7
       createdate: '2011-07-30 15:08:10'
@@ -169,6 +176,8 @@ sly_article:
       createuser: admin
       updateuser: admin
       revision: 0
+      latest: 1
+      online: 1
    -
       id: 2
       re_id: 0
@@ -179,7 +188,6 @@ sly_article:
       startpage: 1
       pos: 1
       path: '|'
-      status: 0
       type: default
       clang: 7
       createdate: '2011-07-30 15:08:20'
@@ -187,6 +195,8 @@ sly_article:
       createuser: admin
       updateuser: admin
       revision: 0
+      latest: 1
+      online: 1
    -
       id: 3
       re_id: 0
@@ -197,7 +207,6 @@ sly_article:
       startpage: 1
       pos: 1
       path: '|'
-      status: 0
       type: default
       clang: 7
       createdate: '2011-07-30 15:08:25'
@@ -205,6 +214,8 @@ sly_article:
       createuser: admin
       updateuser: admin
       revision: 0
+      latest: 1
+      online: 1
    -
       id: 4
       re_id: 0
@@ -215,7 +226,6 @@ sly_article:
       startpage: 1
       pos: 1
       path: '|'
-      status: 0
       type: ''
       clang: 7
       createdate: '2011-08-01 22:20:14'
@@ -223,6 +233,8 @@ sly_article:
       createuser: admin
       updateuser: admin
       revision: 0
+      latest: 1
+      online: 1
    -
       id: 5
       re_id: 0
@@ -233,7 +245,6 @@ sly_article:
       startpage: 1
       pos: 1
       path: '|'
-      status: 0
       type: ''
       clang: 7
       createdate: '2011-08-01 22:20:23'
@@ -241,6 +252,8 @@ sly_article:
       createuser: admin
       updateuser: admin
       revision: 0
+      latest: 1
+      online: 1
    -
       id: 6
       re_id: 0
@@ -251,7 +264,6 @@ sly_article:
       startpage: 0
       pos: 1
       path: '|'
-      status: 0
       type: default
       clang: 7
       createdate: '2011-08-01 22:20:47'
@@ -259,6 +271,8 @@ sly_article:
       createuser: admin
       updateuser: admin
       revision: 0
+      latest: 1
+      online: 1
    -
       id: 7
       re_id: 0
@@ -269,7 +283,6 @@ sly_article:
       startpage: 0
       pos: 2
       path: '|'
-      status: 0
       type: ''
       clang: 7
       createdate: '2011-08-01 22:20:54'
@@ -277,6 +290,8 @@ sly_article:
       createuser: admin
       updateuser: admin
       revision: 0
+      latest: 1
+      online: 1
    -
       id: 8
       re_id: 0
@@ -287,7 +302,6 @@ sly_article:
       startpage: 0
       pos: 3
       path: '|'
-      status: 0
       type: ''
       clang: 7
       createdate: '2011-08-01 22:21:00'
@@ -295,6 +309,8 @@ sly_article:
       createuser: admin
       updateuser: admin
       revision: 0
+      latest: 1
+      online: 1
 sly_article_slice:
    -
       id: 1

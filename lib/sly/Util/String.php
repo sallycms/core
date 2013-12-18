@@ -66,19 +66,6 @@ class sly_Util_String {
 	}
 
 	/**
-	 * @param  string $text
-	 * @return string
-	 */
-	public static function replaceUmlauts($text) {
-		static $specials = array(
-			array('Ä', 'ä',  'á', 'à', 'é', 'è', 'Ö',  'ö',  'Ü' , 'ü' , 'ß', '&', 'ç'),
-			array('Ae','ae', 'a', 'a', 'e', 'e', 'Oe', 'oe', 'Ue', 'ue', 'ss', '', 'c')
-		);
-
-		return str_replace($specials[0], $specials[1], $text);
-	}
-
-	/**
 	 * Format a number according to the current locale
 	 *
 	 * @param  numeric $number
@@ -178,7 +165,7 @@ class sly_Util_String {
 	}
 
 	/**
-	 * shortens a filename to a max lenght and leaves an optional suffix
+	 * shortens a filename to a max length and leaves an optional suffix
 	 * prior to the extension
 	 *
 	 * @param  string $name          filename to be shorten
@@ -335,20 +322,13 @@ class sly_Util_String {
 	}
 
 	/**
-	 * @param  string $text
-	 * @return string
-	 */
-	public static function escapePHP($text) {
-		return str_replace(array('<?', '?>'), array('&lt;?', '?&gt;'), $text);
-	}
-
-	/**
+	 * @deprecated  since 0.9, use sly_Util_File::getExtension() instead
+	 *
 	 * @param  string $filename
 	 * @return string
 	 */
 	public static function getFileExtension($filename) {
-		$lastDotPos = mb_strrpos($filename, '.');
-		return $lastDotPos === false ? '' : mb_substr($filename, $lastDotPos + 1);
+		return sly_Util_File::getExtension($filename);
 	}
 
 	/**
@@ -357,13 +337,19 @@ class sly_Util_String {
 	 * @return string          a human readable representation of $value
 	 */
 	public static function stringify($value, array $options = array()) {
+		$quote   = !empty($options['quote']);
+		$compact = !empty($options['compact']);
+		$depth   = isset($options['__depth']) ? $options['__depth'] : 2;
+
+		$options['__depth'] = $depth - 1;
+
 		switch (gettype($value)) {
 			case 'integer':
 				$value = $value;
 				break;
 
 			case 'string':
-				$value = empty($options['quote']) ? $value : '"'.$value.'"';
+				$value = $quote ? '"'.$value.'"' : $value;
 				break;
 
 			case 'boolean':
@@ -371,12 +357,53 @@ class sly_Util_String {
 				break;
 
 			case 'double':
-				$value = str_replace('.', ',', round($value, 8));
+				$value = str_replace('.', ',', round($value, $compact ? 8 : 3));
 				break;
 
 			case 'array':
+				if (empty($options['compact'])) {
+					$value = print_r($value, true);
+				}
+				else {
+					$assoc = sly_Util_Array::isAssoc($value);
+					$nice  = array();
+
+					foreach ($value as $key => $val) {
+						switch (gettype($val)) {
+							case 'array':
+								if ($depth > 0) {
+									$val = self::stringify($val, $options);
+								}
+								else {
+									$val = 'array('.count($val).')';
+								}
+
+							default:
+								$val = self::stringify($val, $options);
+						}
+
+						if ($assoc) {
+							$nice[] = '"'.$key.'":'.$val;
+						}
+						else {
+							$nice[] = $val;
+						}
+					}
+
+					$nice  = implode($assoc ? ', ' : ',', $nice);
+					$value = ($assoc ? '{' : '[').$nice.($assoc ? '}' : ']');
+				}
+
+				break;
+
 			case 'object':
-				$value = print_r($value, true);
+				if (empty($options['compact'])) {
+					$value = print_r($value, true);
+				}
+				else {
+					$value = 'object('.get_class($value).')';
+				}
+
 				break;
 
 			case 'NULL':

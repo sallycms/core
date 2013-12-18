@@ -254,6 +254,7 @@ abstract class sly_Layout extends sly_Viewable {
 	 */
 	public function setHtmlAttr($name, $value) {
 		$name = trim($name);
+
 		$this->htmlAttrs[$name] = $this->isEmptyValue($value) ? null : trim($value);
 	}
 
