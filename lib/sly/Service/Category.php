@@ -95,14 +95,18 @@ class sly_Service_Category extends sly_Service_ArticleManager {
 	 * @return array
 	 */
 	public function find($where = null, $group = null, $order = null, $offset = null, $limit = null, $having = null, $revStrategy = self::FIND_REVISION_LATEST) {
-		if (is_string($where)) {
-			$where = "($where) AND revision = 0";
-		}
-		else {
-			$where['revision'] = 0;
+
+		if ($revStrategy !== self::FIND_REVISION_ONLINE) {
+			if (is_string($where)) {
+				$where = "($where) AND revision = 0";
+			}
+			else {
+				$where['revision'] = 0;
+			}
+			$revStrategy = null;
 		}
 
-		return parent::find($where, $group, $order, $offset, $limit, $having, null);
+		return parent::find($where, $group, $order, $offset, $limit, $having, $revStrategy);
 	}
 
 	/**
