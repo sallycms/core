@@ -37,7 +37,11 @@ class sly_Service_ArticleType {
 	/**
 	 * @return array
 	 */
-	public function getArticleTypes() {
+	public function getArticleTypes($keysOnly = false) {
+		if ($keysOnly) {
+			return array_keys($this->data);
+		}
+
 		$types = array();
 
 		foreach (array_keys($this->data) as $name) {
