@@ -263,8 +263,11 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id {
 			throw new sly_Exception($e->getMessage());
 		}
 
+		$hash = md5($medium->getFilename());
+
 		$this->cache->flush('sly.medium.list');
 		$this->cache->delete('sly.medium', $medium->getId());
+		$this->cache->delete('sly.medium', $hash);
 
 		$this->dispatcher->notify('SLY_MEDIA_DELETED', $medium);
 
