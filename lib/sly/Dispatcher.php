@@ -271,6 +271,6 @@ abstract class sly_Dispatcher {
 
 		// call the system error handler
 		$handler = $this->getContainer()->getErrorHandler();
-		$handler->handleException($e); // dies away (does not use sly_Response)
+		$handler->onCaughtException($e); // dies away (does not use sly_Response)
 	}
 }

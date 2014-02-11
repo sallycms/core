@@ -32,6 +32,15 @@ class sly_DB_PDO_Connection {
 	}
 
 	/**
+	 * @param PDO $pdo               PDO instance
+	 * @param sly_DB_PDO_Connection  self
+	 */
+	public function setPDO(PDO $pdo) {
+		$this->pdo = $pdo;
+		return $this;
+	}
+
+	/**
 	 * @return PDO  PDO instance
 	 */
 	public function getPDO() {
