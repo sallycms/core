@@ -138,9 +138,9 @@ abstract class sly_Controller_Base {
 		// func_get_arg() does not return the default argument, so we have to check
 		// how many arguments were passed.
 
-		if (func_get_arg(2) || func_num_args() < 3) ob_start();
+		if (func_num_args() < 3 || func_get_arg(2)) ob_start();
 		include $this->getViewFolder().func_get_arg(0);
-		if (func_get_arg(2) || func_num_args() < 3) return ob_get_clean();
+		if (func_num_args() < 3 || func_get_arg(2)) return ob_get_clean();
 	}
 
 	/**
