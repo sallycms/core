@@ -24,6 +24,9 @@ class sly_ErrorHandler_Development extends sly_ErrorHandler_Base {
 	public function init() {
 		error_reporting(E_ALL | E_STRICT | E_DEPRECATED);
 		ini_set('display_errors', 'On');
+		set_error_handler(array($this, 'onCaughtError'));
+		register_shutdown_function(array($this, 'onShutdown'));
+		$this->runShutdown = true;
 	}
 
 	/**
