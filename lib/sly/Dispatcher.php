@@ -101,7 +101,9 @@ abstract class sly_Dispatcher {
 			}
 
 			// check if the action is valid
-			$this->checkAction($controller, $action);
+			if (!($controller instanceof sly_Controller_Generic)) {
+				$this->checkAction($controller, $action);
+			}
 
 			// inject current request and container
 			$this->setupController($controller);
