@@ -338,7 +338,7 @@ class sly_Service_ArticleSlice implements sly_ContainerAwareInterface {
 			$clang      = $article->getClang();
 			$revision   = $article->getRevision();
 
-			// if it equals $curPos is eighter $maxPos, or 0 and should be moved
+			// if it equals $curPos is either $maxPos, or 0 and should be moved
 			// out of range
 			if ($newPos === $curPos) {
 				throw new sly_Exception_ArticleSlicePositionOutOfBounds();
@@ -350,22 +350,39 @@ class sly_Service_ArticleSlice implements sly_ContainerAwareInterface {
 				throw new sly_Exception_ArticleSliceNotFound(t('slice_not_found'));
 			}
 
+			// We have to move all slices with positions between [oldPos] and [newPos] be one position.
+			// This will also include the slice we're moving as well, but that's okay, we will set its
+			// position later on to $newPos manually.
+			// Whether we add or substract depends on the relation between oldPos and newPos.
+
 			$op    = ($newPos < $curPos) ? '+' : '-';
-			$rel   = ($newPos < $curPos) ? '<=' : '>=';
+			$lower = min($newPos, $curPos);
+			$upper = max($newPos, $curPos);
 			$table = $this->tablename;
 
-			//move other slices
-			$sql->query(sprintf(
-				'UPDATE %s'.$table.' SET pos = pos %s 1 ' .
-				'WHERE article_id = ? AND clang = ? AND slot = ? ' .
-				'AND revision = ? AND pos %s ?', $sql->getPrefix(), $op, $rel), array(
+			// It's possible to get out of range (if someone would move the first slice one position
+			// down, the BETWEEN clause would read 'BETWEEN 0 AND 1'; and we would do pos = pos - 1;
+			// both combined lead to negative position values), so we have to take special care of
+			// handling the 'zero case'.
+
+			if ($newPos > $curPos) {
+				$lower++;
+			}
+
+			// move other slices
+			$sql->query(
+				sprintf(
+					'UPDATE %s%s SET pos = pos %s 1 WHERE article_id = ? AND clang = ? AND slot = ? AND revision = ? AND pos BETWEEN %d AND %d',
+					$sql->getPrefix(), $table, $op, $lower, $upper
+				), array(
 					$articleId,
 					$clang,
 					$slot,
-					$revision,
-					$newPos
+					$revision
 				)
 			);
+
+			// Now we can fix the position of our special slice.
 
 			$articleSlice->setPosition($newPos);
 			$articleSlice->setUpdateColumns($user);
