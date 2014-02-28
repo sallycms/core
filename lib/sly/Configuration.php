@@ -236,6 +236,7 @@ class sly_Configuration {
 		}
 		// geladene konfiguration in globale konfiguration mergen
 		$this->setInternal($key, $config, $mode, $force);
+		$this->clearCache();
 
 		$this->loadedConfigFiles[$filename] = true;
 
@@ -355,8 +356,6 @@ class sly_Configuration {
 		$mode = $this->getStoreMode($key, $mode, $force);
 
 		$this->mode[$key] = $mode;
-		$this->cache      = null;
-		$this->dropCacheFile();
 
 		switch ($mode) {
 			case self::STORE_STATIC:
@@ -364,11 +363,13 @@ class sly_Configuration {
 				break;
 
 			case self::STORE_LOCAL:
+				$this->clearCache();
 				$this->localConfigModified = true;
 				$this->localConfig->set($key, $value);
 				break;
 
 			case self::STORE_PROJECT:
+				$this->clearCache();
 				$this->projectConfigModified = true;
 				$this->projectConfig->set($key, $value);
 		}
