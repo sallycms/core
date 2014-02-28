@@ -27,11 +27,10 @@ class sly_Configuration {
 	private $projectConfig;         ///< sly_Util_Array
 	private $cache;                 ///< sly_Util_Array
 	private $fileService;           ///< sly_Service_File_Base
-	private $dir;                    ///< string
+	private $dir;                   ///< string
 	private $flush;                 ///< boolean
 	private $localConfigModified;   ///< boolean
 	private $projectConfigModified; ///< boolean
-	private $enableCaching;         ///< boolean
 
 	/**
 	 * Create a new instance. Having more than one instance with
@@ -42,31 +41,20 @@ class sly_Configuration {
 	public function __construct(sly_Service_File_Base $fileService, $configDir) {
 		$this->fileService           = $fileService;
 		$this->dir                   = $configDir;
-		$this->cache                 = null;
 		$this->flush                 = true;
 		$this->localConfigModified   = false;
 		$this->projectConfigModified = false;
-		$this->enableCaching         = false;
-
-		if (!$this->loadFromCacheFile()) {
-			$this->mode              = array();
-			$this->loadedConfigFiles = array();
-			$this->staticConfig      = new sly_Util_Array();
-			$this->localConfig       = new sly_Util_Array();
-			$this->projectConfig     = new sly_Util_Array();
-		}
+		$this->mode                  = array();
+		$this->loadedConfigFiles     = array();
+		$this->staticConfig          = new sly_Util_Array();
+		$this->localConfig           = new sly_Util_Array();
+		$this->projectConfig         = new sly_Util_Array();
+		$this->cache                 = new sly_Util_Array();
 	}
 
 	public function __destruct() {
 		if ($this->flush) {
 			$this->flush();
-
-			if ($this->enableCaching) {
-				$this->createCacheFile();
-			}
-			else {
-				$this->dropCacheFile();
-			}
 		}
 	}
 
@@ -77,15 +65,6 @@ class sly_Configuration {
 	 */
 	public function setFlushOnDestruct($enabled) {
 		$this->flush = (boolean) $enabled;
-	}
-
-	/**
-	 * activate/deactivate writing the configuration cache file
-	 *
-	 * @param boolean $enabled
-	 */
-	public function setCachingEnabled($enabled) {
-		$this->enableCaching = (boolean) $enabled;
 	}
 
 	/**
@@ -236,7 +215,6 @@ class sly_Configuration {
 		}
 		// geladene konfiguration in globale konfiguration mergen
 		$this->setInternal($key, $config, $mode, $force);
-		$this->clearCache();
 
 		$this->loadedConfigFiles[$filename] = true;
 
@@ -266,9 +244,9 @@ class sly_Configuration {
 	 * @param string $key  the key to remove
 	 */
 	public function remove($key) {
-		$this->localConfigModified   = $this->localConfig->remove($key);;
+		$this->localConfigModified   = $this->localConfig->remove($key);
 		$this->projectConfigModified = $this->projectConfig->remove($key);
-		$this->cache = null;
+		$this->clearCache();
 	}
 
 	/**
@@ -324,11 +302,6 @@ class sly_Configuration {
 		return $this->setInternal($key, $value, $mode);
 	}
 
-	public function clearCache() {
-		$this->cache = null;
-		$this->dropCacheFile();
-	}
-
 	/**
 	 * @throws sly_Exception   if the key is invalid or has the wrong mode
 	 * @param  string  $key    the key to set the value to
@@ -363,16 +336,16 @@ class sly_Configuration {
 				break;
 
 			case self::STORE_LOCAL:
-				$this->clearCache();
 				$this->localConfigModified = true;
 				$this->localConfig->set($key, $value);
 				break;
 
 			case self::STORE_PROJECT:
-				$this->clearCache();
 				$this->projectConfigModified = true;
 				$this->projectConfig->set($key, $value);
 		}
+
+		$this->clearCache();
 
 		return true;
 	}
@@ -405,63 +378,6 @@ class sly_Configuration {
 		return $mode;
 	}
 
-	protected function createCacheFile() {
-		// disabled for now, as there seem to be some bugs still unresolved
-		//return false;
-
-		$file = $this->getCacheFile();
-
-		if (!file_exists($file)) {
-			$data = array(
-				'mode'              => $this->mode,
-				'loadedConfigFiles' => $this->loadedConfigFiles,
-				'staticConfig'      => $this->staticConfig->get('/'),
-				'localConfig'       => $this->localConfig->get('/'),
-				'projectConfig'     => $this->projectConfig->get('/')
-			);
-			$this->fileService->dump($file, $data);
-		}
-	}
-
-	protected function loadFromCacheFile() {
-		// disabled for now, as there seem to be some bugs still unresolved
-		//return false;
-
-		$file = $this->getCacheFile();
-
-		if (!file_exists($file)) {
-			return false;
-		}
-
-		$data = $this->fileService->load($file, false, true);
-
-		$this->mode              = $data['mode'];
-		$this->loadedConfigFiles = $data['loadedConfigFiles'];
-		$this->staticConfig      = new sly_Util_Array($data['staticConfig']);
-		$this->localConfig       = new sly_Util_Array($data['localConfig']);
-		$this->projectConfig     = new sly_Util_Array($data['projectConfig']);
-		return true;
-	}
-
-	protected function getCacheFile() {
-		static $file = false;
-
-		if ($file === false) {
-			$dir = SLY_DYNFOLDER.'/internal/sally/configuration';
-			sly_Util_Directory::create($dir, sly_Core::DEFAULT_DIRPERM, true);
-			$file = $dir.'/cache';
-		}
-
-		return $file;
-	}
-
-	protected function dropCacheFile() {
-		$file = $this->getCacheFile();
-		if (file_exists($file)) {
-			$this->fileService->remove($file);
-		}
-	}
-
 	/**
 	 * write the local and projectconfiguration to disc
 	 */
@@ -475,14 +391,18 @@ class sly_Configuration {
 		}
 	}
 
+	public function clearCache() {
+		$this->cache->remove('');
+	}
+
 	/**
 	 * warm up the internal cache for get/has operations
 	 */
 	protected function warmUp() {
-		if ($this->cache === null) {
+		if (empty($this->cache->get(null))) {
 			// build merged config cache
-			$this->cache = array_replace_recursive($this->staticConfig->get('/', array()), $this->localConfig->get('/', array()), $this->projectConfig->get('/', array()));
-			$this->cache = new sly_Util_Array($this->cache);
+			$data = array_replace_recursive($this->staticConfig->get(null), $this->localConfig->get(null), $this->projectConfig->get(null));
+			$this->cache->set('/', $data);
 		}
 	}
 }

@@ -115,9 +115,6 @@ class sly_Core {
 
 		$container->set('sly-environment', $environment);
 
-		// now that we now about the environment, we can toggle the config caching
-		$config->setCachingEnabled($environment === 'prod');
-
 		return $container;
 	}
 
