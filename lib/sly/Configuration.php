@@ -399,7 +399,8 @@ class sly_Configuration {
 	 * warm up the internal cache for get/has operations
 	 */
 	protected function warmUp() {
-		if (empty($this->cache->get(null))) {
+		$cache = $this->cache->get(null);
+		if (empty($cache)) {
 			// build merged config cache
 			$data = array_replace_recursive($this->staticConfig->get(null), $this->localConfig->get(null), $this->projectConfig->get(null));
 			$this->cache->set('/', $data);
