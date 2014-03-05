@@ -67,6 +67,9 @@ abstract class sly_ErrorHandler_Base implements sly_ErrorHandler {
 		$error = new sly_ErrorHandler_ErrorException($severity, $message, $file, $line, $trace);
 
 		$this->onCaughtException($error);
+
+		// make sure the original error handling from PHP is called (i.e. printing the error message when display_errors is on)
+		return false;
 	}
 
 	/**
