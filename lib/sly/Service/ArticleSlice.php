@@ -132,7 +132,7 @@ class sly_Service_ArticleSlice implements sly_ContainerAwareInterface {
 	}
 
 	/**
-	 * Deletes articleSlices. If pos === null then delete all aqll slices in slot,
+	 * Deletes articleSlices. If $pos === null then delete all slices in slot,
 	 * If $slot === null too then delete all slices for the article
 	 *
 	 * @param  sly_Model_Article $article
