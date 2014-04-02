@@ -294,7 +294,7 @@ class sly_Service_ArticleSlice implements sly_ContainerAwareInterface {
 			$slice = new sly_Model_Slice();
 			$slice->setModule($module);
 			$slice->setValues($values);
-			$slice = $sliceService->save($slice);
+			$sliceService->save($slice);
 
 			$articleSlice = new sly_Model_ArticleSlice();
 			$articleSlice->setPosition($target);
