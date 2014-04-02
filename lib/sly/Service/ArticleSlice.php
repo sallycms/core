@@ -141,35 +141,35 @@ class sly_Service_ArticleSlice implements sly_ContainerAwareInterface {
 	 * @throws sly_Exception
 	 */
 	public function delete(sly_Model_Article $article, $slot = null, $pos = null) {
+		$self           = $this;
+		$dispatcher     = $this->getDispatcher();
+		$sql            = $this->getPersistence();
+		$prefix         = $sql->getPrefix();
+		$sliceService   = $this->getSliceService();
 		$articleService = $this->getArticleService();
-		$article        = $articleService->touch($article);
+		$tableName      = $this->tablename;
 
-		$where = array(
-			'article_id' => $article->getId(),
-			'clang'      => $article->getClang(),
-			'revision'   => $article->getRevision()
-		);
+		$sql->transactional(function() use ($self, $sql, $dispatcher, $article, $pos, $slot, $prefix, $articleService, $sliceService, $tableName) {
+			$article = $articleService->touch($article);
 
-		if ($pos !== null && $slot === null) {
-			throw new sly_Exception();
-		}
+			$where = array(
+				'article_id' => $article->getId(),
+				'clang'      => $article->getClang(),
+				'revision'   => $article->getRevision()
+			);
 
-		if ($slot !== null) {
-			$where['slot'] = $slot;
-		}
+			if ($pos !== null && $slot === null) {
+				throw new sly_Exception();
+			}
 
-		if ($pos !== null) {
-			$where['pos'] = $pos;
-		}
+			if ($slot !== null) {
+				$where['slot'] = $slot;
+			}
 
-		$self         = $this;
-		$dispatcher   = $this->getDispatcher();
-		$sql          = $this->getPersistence();
-		$prefix       = $sql->getPrefix();
-		$sliceService = $this->getSliceService();
-		$tableName    = $this->tablename;
-
-		$sql->transactional(function() use ($self, $sql, $dispatcher, $where, $pos, $slot, $prefix, $sliceService, $tableName) {
+			if ($pos !== null) {
+				$where['pos'] = $pos;
+			}
+			
 			$articleSlices = $self->find($where);
 
 			// fix order if it's only one article slice
