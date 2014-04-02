@@ -253,35 +253,32 @@ class sly_Service_ArticleSlice implements sly_ContainerAwareInterface {
 	 * @return sly_Model_ArticleSlice
 	 */
 	public function add(sly_Model_Article $article, $slot, $module, array $values, $pos = null, sly_Model_User $user = null) {
+		// validate template and slot
+
+		$tmplService = $this->container->getTemplateService();
+		$template    = $article->getTemplateName();
+
 		if (!$article->hasTemplate()) {
 			throw new sly_Exception(t('article_has_no_template'));
 		}
-
-		$artService  = $this->getArticleService();
-		$tmplService = $this->container->getTemplateService();
-		$article     = $artService->touch($article, $user);
-		$template    = $article->getTemplateName();
-
 		if (!$tmplService->hasSlot($template, $slot)) {
 			throw new sly_Exception(t('article_has_no_such_slot', $slot));
 		}
-
-		$user     = $this->getActor($user, __METHOD__);
-		$artID    = $article->getId();
-		$clang    = $article->getClang();
-		$revision = $article->getRevision();
 
 		// prepare database transaction
 
 		$sql          = $this->getPersistence();
 		$dispatcher   = $this->getDispatcher();
 		$sliceService = $this->getSliceService();
+		$artService   = $this->getArticleService();
 
 		$trx = $sql->beginTrx();
 
 		try {
-			$maxPos = $this->getMaxPosition($article, $slot);
-			$target = $maxPos + 1;
+			$user    = $this->getActor($user, __METHOD__);
+			$article = $artService->touch($article, $user);
+			$maxPos  = $this->getMaxPosition($article, $slot);
+			$target  = $maxPos + 1;
 
 			if ($pos !== null) {
 				if ($pos < 0) {
@@ -305,7 +302,6 @@ class sly_Service_ArticleSlice implements sly_ContainerAwareInterface {
 			$articleSlice->setSlice($slice);
 			$articleSlice->setSlot($slot);
 			$articleSlice->setArticle($article);
-			$articleSlice->setRevision($revision);
 
 			$this->insert($articleSlice);
 
