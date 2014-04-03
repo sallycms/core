@@ -169,7 +169,7 @@ class sly_Service_ArticleSlice implements sly_ContainerAwareInterface {
 			if ($pos !== null) {
 				$where['pos'] = $pos;
 			}
-			
+
 			$articleSlices = $self->find($where);
 
 			// fix order if it's only one article slice
@@ -266,15 +266,13 @@ class sly_Service_ArticleSlice implements sly_ContainerAwareInterface {
 		}
 
 		// prepare database transaction
-
+		$self         = $this;
 		$sql          = $this->getPersistence();
 		$dispatcher   = $this->getDispatcher();
 		$sliceService = $this->getSliceService();
 		$artService   = $this->getArticleService();
 
-		$trx = $sql->beginTrx();
-
-		try {
+		return $sql->transactional(function() use ($self, $article, $slot, $module, $values, $user, $sliceService, $artService, $dispatcher) {
 			$user    = $this->getActor($user, __METHOD__);
 			$article = $artService->touch($article, $user);
 			$maxPos  = $this->getMaxPosition($article, $slot);
@@ -303,17 +301,12 @@ class sly_Service_ArticleSlice implements sly_ContainerAwareInterface {
 			$articleSlice->setSlot($slot);
 			$articleSlice->setArticle($article);
 
-			$this->insert($articleSlice);
+			$self->insert($articleSlice);
 
 			$dispatcher->notify('SLY_SLICE_ADDED', $articleSlice);
 
-			$sql->commitTrx($trx);
-		}
-		catch (Exception $e) {
-			$sql->rollBackTrx($trx, $e);
-		}
-
-		return $articleSlice;
+			return $articleSlice;
+		});
 	}
 
 	public function moveTo(sly_Model_Article $article, $slot, $curPos, $newPos, sly_Model_User $user = null) {
