@@ -819,4 +819,18 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 	public function clearUrlCache() {
 		$this->urlCache = array();
 	}
+
+	public function purgeArticleRevision(sly_Model_Article $article) {
+		$articleSliceService = $this->container->getArticleSliceService();
+		$eventDispatcher     = $this->container->getDispatcher();
+		$sql                 = $this->getPersistence();
+		$tableName           = $this->getTableName();
+
+		$sql->transactional(function() use ($sql, $tableName, $article, $articleSliceService, $eventDispatcher) {
+			$articleSliceService->delete($article, null, null, null, false);
+			$sql->delete($tableName, $article->getPKHash());
+
+			$eventDispatcher->notify('SLY_ART_REVISION_DELETED', $article);
+		});
+	}
 }
