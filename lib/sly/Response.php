@@ -137,8 +137,13 @@ class sly_Response {
 	 * @return sly_Response
 	 */
 	public function setContentType($type, $charset = null) {
+		if ($charset !== null) {
+			$this->setCharset($charset);
+			$type .= '; charset='.$charset;
+		}
+
 		$this->setHeader('content-type', $type);
-		if ($charset !== null) $this->setCharset($charset);
+
 		return $this;
 	}
 
