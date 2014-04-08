@@ -313,14 +313,14 @@ class sly_Request {
 	}
 
 	/**
-	* Normalizes a query string
-	*
-	* It builds a normalized query string, where keys/value pairs are
-	* alphabetized, have consistent escaping and unneeded delimiters are removed.
-	*
-	* @param  string $qs  query string
-	* @return string      a normalized query string for the Request
-	*/
+	 * Normalizes a query string
+	 *
+	 * It builds a normalized query string, where keys/value pairs are
+	 * alphabetized, have consistent escaping and unneeded delimiters are removed.
+	 *
+	 * @param  string $qs  query string
+	 * @return string      a normalized query string for the Request
+	 */
 	public static function normalizeQueryString($qs) {
 		if ('' == $qs) {
 			return '';
@@ -482,6 +482,15 @@ class sly_Request {
 		}
 
 		return $this->requestUri;
+	}
+
+	/**
+	 * Returns the requested URI without any query string
+	 *
+	 * @return string  the raw URI (i.e. not urldecoded)
+	 */
+	public function getRequestPath() {
+		return preg_replace('/[&?].*/', '', $this->getRequestUri());
 	}
 
 	/**
