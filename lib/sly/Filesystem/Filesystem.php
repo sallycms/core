@@ -9,13 +9,34 @@
  */
 
 use Gaufrette\Filesystem;
+use Gaufrette\Adapter;
 
 /**
  * Custom filesystem
- *
- * This class only exists to fix a bug in listKeys().
  */
 class sly_Filesystem_Filesystem extends Filesystem {
+	protected $protocol;
+
+	/**
+	 * Constructor
+	 *
+	 * @param Adapter $adapter
+	 * @param string  $protocol
+	 */
+	public function __construct(Adapter $adapter, $protocol = null) {
+		parent::__construct($adapter);
+		$this->protocol = $protocol;
+	}
+
+	/**
+	 * Get the protocol this filesystem is registered under
+	 *
+	 * @return string  a string like 'media' (without '://')
+	 */
+	public function getProtocol() {
+		return $this->protocol;
+	}
+
 	/**
 	 * Lists keys beginning with given prefix
 	 * (no wildcard / regex matching)
