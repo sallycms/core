@@ -45,6 +45,13 @@ class sly_Filesystem_Prefixed extends Filesystem {
 	/**
 	 * {@inheritdoc}
 	 */
+	public function getProtocol() {
+		return $this->fs->getProtocol();
+	}
+
+	/**
+	 * {@inheritdoc}
+	 */
 	public function has($key) {
 		return $this->fs->has($this->prefix.Path::normalize($key));
 	}
