@@ -14,7 +14,7 @@ use Gaufrette\Adapter;
 /**
  * Custom filesystem
  */
-class sly_Filesystem_Filesystem extends Filesystem {
+class sly_Filesystem_Filesystem extends Filesystem implements sly_Filesystem_Interface {
 	protected $protocol;
 
 	/**
@@ -29,10 +29,8 @@ class sly_Filesystem_Filesystem extends Filesystem {
 	}
 
 	/**
-	 * Get the protocol this filesystem is registered under
-	 *
-	 * @return string  a string like 'media' (without '://')
-	 */
+     * {@inheritDoc}
+     */
 	public function getProtocol() {
 		return $this->protocol;
 	}
