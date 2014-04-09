@@ -34,8 +34,12 @@ class sly_Util_Session {
 				session_set_cookie_params($params['lifetime'], $params['path'], $params['domain'], $params['secure'], true);
 
 				session_start();
+
+				return true;
 			}
 		}
+
+		return false;
 	}
 
 	/**
