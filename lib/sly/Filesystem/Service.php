@@ -19,7 +19,7 @@ class sly_Filesystem_Service {
 	 *
 	 * @param Gaufrette\Filesystem $fs  the filesystem to work with
 	 */
-	public function __construct(Filesystem $fs) {
+	public function __construct(sly_Filesystem_Interface $fs) {
 		$this->fs = $fs;
 	}
 
@@ -29,7 +29,7 @@ class sly_Filesystem_Service {
 	 * @param  Gaufrette\Filesystem $fs
 	 * @return sly_Filesystem_Service
 	 */
-	public static function create(Filesystem $fs) {
+	public static function create(sly_Filesystem_Interface $fs) {
 		return new self($fs);
 	}
 
