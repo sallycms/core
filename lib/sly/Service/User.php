@@ -238,9 +238,7 @@ class sly_Service_User extends sly_Service_Model_Base_Id {
 		$loginOK = false;
 
 		if ($user instanceof sly_Model_User) {
-			$loginOK = $user->getLastTryDate() < time()-$this->config->get('relogindelay')
-					&& $user->getStatus() == 1
-					&& $this->checkPassword($user, $password);
+			$loginOK = $this->isValidLogin($user, $password);
 
 			if ($loginOK) {
 				$session = sly_Core::getSession();
@@ -250,12 +248,7 @@ class sly_Service_User extends sly_Service_Model_Base_Id {
 				sly_Util_Csrf::setToken(null, $session);
 
 				// upgrade hash if possible
-				$current  = $user->getPassword();
-				$upgraded = sly_Util_Password::upgrade($password, $current);
-
-				if ($upgraded) {
-					$user->setHashedPassword($upgraded);
-				}
+				$this->upgradePasswordHash($user, $password);
 			}
 
 			$user->setLastTryDate(time());
@@ -270,6 +263,22 @@ class sly_Service_User extends sly_Service_Model_Base_Id {
 	public function logout() {
 		sly_Core::getSession()->flush();
 		self::$currentUser = null;
+	}
+
+	protected function upgradePasswordHash(sly_Model_User $user, $password) {
+		$current  = $user->getPassword();
+		$upgraded = sly_Util_Password::upgrade($password, $current);
+
+		if ($upgraded) {
+			$user->setHashedPassword($upgraded);
+		}
+	}
+
+	protected function isValidLogin(sly_Model_User $user, $password) {
+		return
+			   $user->getStatus() == 1
+			&& $user->getLastTryDate() < (time() - $this->config->get('relogindelay'))
+			&& $this->checkPassword($user, $password);
 	}
 
 	/**
