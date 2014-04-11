@@ -15,7 +15,12 @@ interface sly_Filesystem_Interface {
 	 *
 	 * @return string  a string like 'media' (without '://')
 	 */
-	public function getProtocol();
+	public function getDomain();
+
+	/**
+	 * Returns the URI for a key
+	 */
+	public function getPath($key);
 
 	public function has($key);
 

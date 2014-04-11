@@ -34,6 +34,15 @@ class sly_Filesystem_Service {
 	}
 
 	/**
+	 *
+	 * @param  string  $key
+	 * @return string  file URI
+	 */
+	public function getURI($key) {
+		return 'sly://'.$this->fs->getPath($key);
+	}
+
+	/**
 	 * Delete multiple files
 	 *
 	 * @param  array $filenames

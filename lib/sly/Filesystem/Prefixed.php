@@ -45,8 +45,15 @@ class sly_Filesystem_Prefixed extends Filesystem implements sly_Filesystem_Inter
 	/**
 	 * {@inheritdoc}
 	 */
-	public function getProtocol() {
-		return $this->fs->getProtocol();
+	public function getDomain() {
+		return $this->fs->getDomain();
+	}
+
+	/**
+     * {@inheritDoc}
+     */
+	public function getPath($key) {
+		return $this->fs->getDomain().'/'.$this->prefix.$key;
 	}
 
 	/**

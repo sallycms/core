@@ -15,7 +15,7 @@ use Gaufrette\Adapter;
  * Custom filesystem
  */
 class sly_Filesystem_Filesystem extends Filesystem implements sly_Filesystem_Interface {
-	protected $protocol;
+	protected $domain;
 
 	/**
 	 * Constructor
@@ -23,16 +23,23 @@ class sly_Filesystem_Filesystem extends Filesystem implements sly_Filesystem_Int
 	 * @param Adapter $adapter
 	 * @param string  $protocol
 	 */
-	public function __construct(Adapter $adapter, $protocol = null) {
+	public function __construct(Adapter $adapter, $domain = null) {
 		parent::__construct($adapter);
-		$this->protocol = $protocol;
+		$this->domain = $domain;
 	}
 
 	/**
      * {@inheritDoc}
      */
-	public function getProtocol() {
-		return $this->protocol;
+	public function getDomain() {
+		return $this->domain;
+	}
+
+	/**
+     * {@inheritDoc}
+     */
+	public function getPath($key) {
+		return $this->getDomain().'/'.$key;
 	}
 
 	/**
