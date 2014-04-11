@@ -21,7 +21,7 @@ class sly_Filesystem_Filesystem extends Filesystem implements sly_Filesystem_Int
 	 * Constructor
 	 *
 	 * @param Adapter $adapter
-	 * @param string  $protocol
+	 * @param string  $domain
 	 */
 	public function __construct(Adapter $adapter, $domain = null) {
 		parent::__construct($adapter);
