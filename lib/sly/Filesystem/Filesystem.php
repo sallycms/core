@@ -14,27 +14,32 @@ use Gaufrette\Adapter;
 /**
  * Custom filesystem
  */
-class sly_Filesystem_Filesystem extends Filesystem {
-	protected $protocol;
+class sly_Filesystem_Filesystem extends Filesystem implements sly_Filesystem_Interface {
+	protected $domain;
 
 	/**
 	 * Constructor
 	 *
 	 * @param Adapter $adapter
-	 * @param string  $protocol
+	 * @param string  $domain
 	 */
-	public function __construct(Adapter $adapter, $protocol = null) {
+	public function __construct(Adapter $adapter, $domain = null) {
 		parent::__construct($adapter);
-		$this->protocol = $protocol;
+		$this->domain = $domain;
 	}
 
 	/**
-	 * Get the protocol this filesystem is registered under
-	 *
-	 * @return string  a string like 'media' (without '://')
-	 */
-	public function getProtocol() {
-		return $this->protocol;
+     * {@inheritDoc}
+     */
+	public function getDomain() {
+		return $this->domain;
+	}
+
+	/**
+     * {@inheritDoc}
+     */
+	public function getPath($key) {
+		return $this->getDomain().'/'.$key;
 	}
 
 	/**
