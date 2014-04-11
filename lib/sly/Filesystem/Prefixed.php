@@ -20,7 +20,7 @@ use Gaufrette\Util\Path;
  * It's implemented as a wrapper to allow easier run-time wrapping of the
  * major filesystem instances by services.
  */
-class sly_Filesystem_Prefixed extends Filesystem {
+class sly_Filesystem_Prefixed extends Filesystem implements sly_Filesystem_Interface {
 	protected $prefix;
 	protected $fs;
 
@@ -45,8 +45,15 @@ class sly_Filesystem_Prefixed extends Filesystem {
 	/**
 	 * {@inheritdoc}
 	 */
-	public function getProtocol() {
-		return $this->fs->getProtocol();
+	public function getDomain() {
+		return $this->fs->getDomain();
+	}
+
+	/**
+     * {@inheritDoc}
+     */
+	public function getPath($key) {
+		return $this->fs->getDomain().'/'.$this->prefix.$key;
 	}
 
 	/**
