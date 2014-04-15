@@ -25,23 +25,18 @@ class sly_Slice_RendererImpl implements sly_Slice_Renderer {
 
 	/**
 	 *
-	 * @param  string  $moduleName
-	 * @param  array   $values
-	 * @param  string  $dataIndex
+	 * @param  sly_Model_ISlice  $slice
+	 * @param  string            $dataIndex
 	 * @return string
 	 * @throws sly_Exception
 	 */
-	public function renderInput($moduleName, $values, $dataIndex) {
-		if (!$this->moduleService->exists($moduleName)) {
+	public function renderInput(sly_Model_ISlice $slice, $dataIndex) {
+		if (!$this->moduleService->exists($slice->getModule())) {
 			throw new sly_Exception('Module does not exists!');
 		}
 
-		if (!sly_Util_Array::isAssoc($values)) {
-			throw new sly_Exception('Values must be assoc array!');
-		}
-
-		$filename = $this->moduleService->getFolder().DIRECTORY_SEPARATOR.$this->moduleService->getInputFilename($moduleName);
-		$values   = new sly_Slice_Values($values);
+		$filename = $this->moduleService->getFolder().DIRECTORY_SEPARATOR.$this->moduleService->getInputFilename($slice->getModule());
+		$values   = new sly_Slice_Values($slice->getValues());
 		$form     = new sly_Slice_Form();
 
 		ob_start();
