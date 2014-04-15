@@ -283,8 +283,7 @@ class sly_Service_ArticleSlice implements sly_ContainerAwareInterface {
 				$article = $artService->touch($article);
 			}
 
-			$maxPos  = $this->getMaxPosition($article, $slot);
-			$target  = $maxPos + 1;
+			$target = $self->countSlices($article, $slot);
 
 			if ($pos !== null) {
 				if ($pos < 0) {
@@ -332,11 +331,11 @@ class sly_Service_ArticleSlice implements sly_ContainerAwareInterface {
 				$article = $artService->touch($article);
 			}
 
-			$maxPos     = $this->getMaxPosition($article, $slot);
-			$newPos     = max(array(0, min(array($newPos, $maxPos)))); // normalize
-			$articleId  = $article->getId();
-			$clang      = $article->getClang();
-			$revision   = $article->getRevision();
+			$maxPos    = $this->countSlices($article, $slot);
+			$newPos    = max(array(0, min(array($newPos, $maxPos)))); // normalize
+			$articleId = $article->getId();
+			$clang     = $article->getClang();
+			$revision  = $article->getRevision();
 
 			// if it equals $curPos is either $maxPos, or 0 and should be moved
 			// out of range
@@ -489,16 +488,16 @@ class sly_Service_ArticleSlice implements sly_ContainerAwareInterface {
 	}
 
 	/**
-	 * get the maximum position in a slot
+	 * get the total number of sllices in a slot
 	 *
 	 * @param  sly_Model_Article $article  an article
 	 * @param  string            $slot     a slot (identifier) in this article
 	 * @return int                         maximum value of pos
 	 */
-	protected function getMaxPosition(sly_Model_Article $article, $slot) {
+	public function countSlices(sly_Model_Article $article, $slot) {
 		$sql = $this->getPersistence();
 
-		return (int) $sql->magicFetch($this->tablename, 'MAX(pos)', array('article_id' => $article->getId(), 'clang' => $article->getClang(), 'slot' => $slot, 'revision' => $article->getRevision()));
+		return (int) $sql->magicFetch($this->tablename, 'COUNT(*)', array('article_id' => $article->getId(), 'clang' => $article->getClang(), 'slot' => $slot, 'revision' => $article->getRevision()));
 	}
 
 	protected function getActor(sly_Model_User $user = null, $methodName = null) {
