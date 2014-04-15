@@ -229,7 +229,7 @@ class sly_Service_ArticleSlice implements sly_ContainerAwareInterface {
 			));
 
 			if (!$articleSlice) {
-				throw new sly_Exception_ArticleSliceNotFound(t('slice_not_found'));
+				throw new sly_Exception_ArticleSliceNotFound(t('slice_not_found', $article->getId().'/'.$article->getClang().'@'.$pos));
 			}
 
 			$slice = $articleSlice->getSlice();
