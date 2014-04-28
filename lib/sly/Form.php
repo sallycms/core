@@ -53,13 +53,14 @@ class sly_Form extends sly_Form_Base {
 	 * @param string $id      the form ID (optional)
 	 */
 	public function __construct($action, $method, $title, $name = '', $id = '') {
-		$this->action   = $action;
-		$this->method   = strtoupper($method) === 'GET' ? 'GET' : 'POST';
-		$this->title    = $title;
-		$this->name     = $name;
-		$this->id       = $id;
-		$this->enctype  = false;
-		$this->classes  = array();
+		$this->setAction($action);
+		$this->setMethod($method);
+
+		$this->title   = $title;
+		$this->name    = $name;
+		$this->id      = $id;
+		$this->enctype = false;
+		$this->classes = array();
 
 		$this->submitButton    = new sly_Form_Input_Button('submit', 'submit', t('save'));
 		$this->resetButton     = new sly_Form_Input_Button('reset', 'reset', t('reset'));
@@ -74,12 +75,43 @@ class sly_Form extends sly_Form_Base {
 	}
 
 	/**
+	 * Get the form's target URI
+	 *
+	 * @return string  the action
+	 */
+	public function getAction() {
+		return $this->action;
+	}
+
+	/**
+	 * Set the action
+	 *
+	 * @param  string $action  the new action
+	 * @return sly_Form        the current object
+	 */
+	public function setAction($action) {
+		$this->action = trim($action);
+		return $this;
+	}
+
+	/**
 	 * Get the form's method (GET or POST)
 	 *
 	 * @return string  the method
 	 */
 	public function getMethod() {
 		return $this->method;
+	}
+
+	/**
+	 * Set the method
+	 *
+	 * @param  string $method  the new method
+	 * @return sly_Form        the current object
+	 */
+	public function setMethod($method) {
+		$this->method = strtoupper($method) === 'GET' ? 'GET' : 'POST';
+		return $this;
 	}
 
 	/**
