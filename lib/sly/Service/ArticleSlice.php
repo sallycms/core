@@ -278,7 +278,7 @@ class sly_Service_ArticleSlice implements sly_ContainerAwareInterface {
 		$sliceService = $this->getSliceService();
 		$artService   = $this->getArticleService();
 
-		return $sql->transactional(function() use ($self, $article, $slot, $module, $values, $user, $useVersioning, $sliceService, $artService, $dispatcher) {
+		return $sql->transactional(function() use ($self, $article, $slot, $module, $values, $user, $useVersioning, $sliceService, $artService, $dispatcher, $pos) {
 			if ($useVersioning) {
 				$article = $artService->touch($article);
 			}
