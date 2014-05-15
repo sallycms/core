@@ -370,7 +370,7 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 			$touched->setRevision($this->getMaxRevision($article) + 1);
 			$touched->setLatest(true);
 			$touched->setOnline(true);
-			$touched->setCreateColumns($user);
+			$this->setUpdateColumns($user);
 
 			// update old latest revision
 			$sql->update('article', array('latest' => 0, 'online' => 0), array('id' => $article->getId(), 'clang' => $article->getClang()));
