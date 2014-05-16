@@ -128,7 +128,7 @@ class sly_Service_ArticleSlice implements sly_ContainerAwareInterface {
 	 * @param  sly_Model_ArticleSlice  $article
 	 */
 	public function deleteByArticleSlice(sly_Model_ArticleSlice $slice, $useVersioning = true) {
-		return $this->delete($slice->getArticle(), $slice->getSlot(), $slice->getPosition(), $useVersioning = true);
+		return $this->delete($slice->getArticle(), $slice->getSlot(), $slice->getPosition(), $useVersioning);
 	}
 
 	/**
