@@ -24,7 +24,8 @@
 	sly_Core::dispatcher()->notify('PAGE_HEADER', $this);
 
 	if ($this->favIcon !== null) {
-		$this->addLink('shortcut icon', $this->favIcon, 'image/x-icon');
+		print "\n\t<!--[if IE]><link rel=\"shortcut icon\" href=\"".$this->favIcon."\"><![endif]-->\n";
+		$this->addLink('icon', $this->favIcon, 'image/x-icon');
 	}
 
 	$this->printHttpMetas();
