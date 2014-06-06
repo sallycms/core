@@ -359,6 +359,7 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 	/**
 	 * @param sly_Model_Article $article
 	 * @param sly_Model_User    $user
+	 * @param array             $skipSliceIds
 	 */
 	public function touch(sly_Model_Article $article, sly_Model_User $user = null, $skipSliceIds = array()) {
 		$user    = $this->getActor($user, __METHOD__);
