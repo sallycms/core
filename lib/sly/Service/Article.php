@@ -831,7 +831,7 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 		$sql->transactional(function() use ($sql, $tableName, $article, $articleSliceService, $eventDispatcher) {
 			$articleSliceService->delete($article, null, null, false);
 			if ($article->isLatest()) {
-				$sql->query('UPDATE '.$sql->getPrefix().$tableName.' SET latest = '.$sql->quote(1).' WHERE id = '.$sql->quote($article->getId()).' AND clang = '.$sql->quote($article->getClang()).' AND revision < '.$sql->quote($article->getRevision()).' LIMIT 1');
+				$sql->query('UPDATE '.$sql->getPrefix().$tableName.' SET latest = '.$sql->quote(1).' WHERE id = '.$sql->quote($article->getId()).' AND clang = '.$sql->quote($article->getClang()).' AND revision < '.$sql->quote($article->getRevision()).' ORDER BY revision DESC LIMIT 1');
 			}
 			$sql->delete($tableName, $article->getPKHash());
 
