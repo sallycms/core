@@ -120,15 +120,20 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id implements sly_Contai
 	 * @param  string $extension
 	 * @return array
 	 */
-	public function findMediaByExtension($extension, $orderBy = 'filename', $direction = 'ASC') {
+	public function findMediaByExtension($extension, $orderBy = 'filename', $direction = 'ASC', $includeDeleted = false) {
 		$namespace = 'sly.medium.list';
 		$list      = $this->cache->get($namespace, $extension, null);
 
 		if ($list === null) {
-			$sql  = $this->getPersistence();
-			$list = array();
+			$sql   = $this->getPersistence();
+			$list  = array();
+			$where = array('SUBSTRING(filename, LOCATE(".", filename) + 1)' => $extension);
 
-			$sql->select('file', 'id', array('SUBSTRING(filename, LOCATE(".", filename) + 1)' => $extension), null, $orderBy.' '.$direction);
+			if (!$includeDeleted) {
+				$where['deleted'] = 0;
+			}
+
+			$sql->select('file', 'id', $where, null, $orderBy.' '.$direction);
 			foreach ($sql as $row) $list[] = (int) $row['id'];
 
 			$this->cache->set($namespace, $extension, $list);
@@ -140,6 +145,10 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id implements sly_Contai
 			$objlist[] = $this->findById($id);
 		}
 
+		if (!$includeDeleted) {
+			$objlist = $this->filterOutDeleted($objlist);
+		}
+
 		return $objlist;
 	}
 
@@ -147,7 +156,7 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id implements sly_Contai
 	 * @param  int $categoryId
 	 * @return array
 	 */
-	public function findMediaByCategory($categoryId, $orderBy = 'filename', $direction = 'ASC') {
+	public function findMediaByCategory($categoryId, $orderBy = 'filename', $direction = 'ASC', $includeDeleted = false) {
 		$categoryId = (int) $categoryId;
 		$namespace  = 'sly.medium.list';
 		$list       = $this->cache->get($namespace, $categoryId, null);
@@ -156,6 +165,10 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id implements sly_Contai
 			$list  = array();
 			$sql   = $this->getPersistence();
 			$where = array('category_id' => $categoryId);
+
+			if (!$includeDeleted) {
+				$where['deleted'] = 0;
+			}
 
 			$sql->select('file', 'id', $where, null, $orderBy.' '.$direction);
 			foreach ($sql as $row) $list[] = (int) $row['id'];
@@ -167,6 +180,10 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id implements sly_Contai
 
 		foreach ($list as $id) {
 			$objlist[] = $this->findById($id);
+		}
+
+		if (!$includeDeleted) {
+			$objlist = $this->filterOutDeleted($objlist);
 		}
 
 		return $objlist;
@@ -284,6 +301,7 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id implements sly_Contai
 		$file->setFilesize(filesize($fileURI));
 		$file->setCategoryId($categoryID);
 		$file->setRevision(0);
+		$file->setDeleted(false);
 		$file->setAttributes('');
 		$file->setCreateColumns($user);
 
@@ -303,6 +321,10 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id implements sly_Contai
 
 		if (!file_exists($newFile)) {
 			throw new sly_Exception(t('file_not_found', $newFile));
+		}
+
+		if ($medium->isDeleted()) {
+			throw new sly_Exception(t('deleted_files_cannot_be_replaced'));
 		}
 
 		// check if the type of the new file matches the old one
@@ -327,6 +349,10 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id implements sly_Contai
 	public function replaceByUpload(sly_Model_Medium $medium, array $fileData) {
 		$service = new sly_Filesystem_Service($this->mediaFs);
 		$service->checkUpload($fileData);
+
+		if ($medium->isDeleted()) {
+			throw new sly_Exception(t('deleted_files_cannot_be_replaced'));
+		}
 
 		// check if the type of the new file matches the old one
 
@@ -386,14 +412,8 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id implements sly_Contai
 		}
 
 		try {
-			$sql = $this->getPersistence();
-			$sql->delete('file', array('id' => $medium->getId()));
-
-			$filename = $medium->getFilename();
-
-			if ($this->mediaFs->has($filename)) {
-				$this->mediaFs->delete($filename);
-			}
+			$medium->setDeleted(true);
+			$this->save($medium);
 		}
 		catch (Exception $e) {
 			// re-wrap DB & PDO exceptions
@@ -455,5 +475,15 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id implements sly_Contai
 				$medium->setHeight($size[1]);
 			}
 		}
+	}
+
+	protected function filterOutDeleted(array $media) {
+		foreach ($media as $idx => $medium) {
+			if ($medium->isDeleted()) {
+				unset($media[$idx]);
+			}
+		}
+
+		return array_values($media);
 	}
 }
