@@ -1,0 +1,10 @@
+setup: false
+instname: sly59f008fea53fb4447830
+caching_strategy: blackhole
+database:
+  driver: mysql
+  host: localhost
+  login: root
+  password: ''
+  name: sally_test
+  table_prefix: sly_
