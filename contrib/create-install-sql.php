@@ -108,6 +108,7 @@ $table->addColumn('filetype',     'string')->setLength(255);
 $table->addColumn('filesize',     'integer')->setUnsigned(true);
 $table->addColumn('width',        'integer')->setUnsigned(true)->setNotnull(false);
 $table->addColumn('height',       'integer')->setUnsigned(true)->setNotnull(false);
+$table->addColumn('deleted',      'boolean')->setDefault('0');
 userCols($table);
 $table->addColumn('attributes',   'text')->setNotnull(false);
 
