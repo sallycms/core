@@ -8,7 +8,6 @@
  * http://www.opensource.org/licenses/mit-license.php
  */
 
-use Gaufrette\Filesystem;
 use Gaufrette\Util\Path;
 use wv\BabelCache\CacheInterface;
 
@@ -23,7 +22,7 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id implements sly_Contai
 	protected $cache;              ///< CacheInterface
 	protected $dispatcher;         ///< sly_Event_IDispatcher
 	protected $container;          ///< sly_Container
-	protected $mediaFs;            ///< Filesystem
+	protected $mediaFs;            ///< sly_Filesystem_Interface
 	protected $extBlacklist;       ///< array
 	protected $fsBaseUri;          ///< string
 
@@ -37,7 +36,7 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id implements sly_Contai
 	 * @param array                 $extBlacklist
 	 * @param string                $fsBaseUri
 	 */
-	public function __construct(sly_DB_Persistence $persistence, CacheInterface $cache, sly_Event_IDispatcher $dispatcher, Filesystem $mediaFs, array $extBlacklist, $fsBaseUri) {
+	public function __construct(sly_DB_Persistence $persistence, CacheInterface $cache, sly_Event_IDispatcher $dispatcher, sly_Filesystem_Interface $mediaFs, array $extBlacklist, $fsBaseUri) {
 		parent::__construct($persistence);
 
 		$this->cache        = $cache;
@@ -68,6 +67,20 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id implements sly_Contai
 	 */
 	protected function makeInstance(array $params) {
 		return new sly_Model_Medium($params);
+	}
+
+	public function find($where = null, $group = null, $order = null, $offset = null, $limit = null, $having = null) {
+		if (is_string($where) && !empty($where)) {
+			$where = "($where) AND deleted = 0";
+		}
+		else if (is_array($where)) {
+			$where['deleted'] = 0;
+		}
+		else {
+			$where = array('deleted' => 0);
+		}
+
+		return parent::find($where, $group, $order, $offset, $limit, $having);
 	}
 
 	/**
@@ -104,7 +117,7 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id implements sly_Contai
 
 		if ($id === null) {
 			$db = $this->getPersistence();
-			$id = $db->magicFetch('file', 'id', array('filename' => $filename));
+			$id = $db->magicFetch('file', 'id', array('filename' => $filename, 'deleted' => 0));
 
 			if ($id === false) {
 				return null;
@@ -120,18 +133,14 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id implements sly_Contai
 	 * @param  string $extension
 	 * @return array
 	 */
-	public function findMediaByExtension($extension, $orderBy = 'filename', $direction = 'ASC', $includeDeleted = false) {
+	public function findMediaByExtension($extension, $orderBy = 'filename', $direction = 'ASC') {
 		$namespace = 'sly.medium.list';
 		$list      = $this->cache->get($namespace, $extension, null);
 
 		if ($list === null) {
 			$sql   = $this->getPersistence();
 			$list  = array();
-			$where = array('SUBSTRING(filename, LOCATE(".", filename) + 1)' => $extension);
-
-			if (!$includeDeleted) {
-				$where['deleted'] = 0;
-			}
+			$where = array('SUBSTRING(filename, LOCATE(".", filename) + 1)' => $extension, 'deleted' => 0);
 
 			$sql->select('file', 'id', $where, null, $orderBy.' '.$direction);
 			foreach ($sql as $row) $list[] = (int) $row['id'];
@@ -152,7 +161,7 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id implements sly_Contai
 	 * @param  int $categoryId
 	 * @return array
 	 */
-	public function findMediaByCategory($categoryId, $orderBy = 'filename', $direction = 'ASC', $includeDeleted = false) {
+	public function findMediaByCategory($categoryId, $orderBy = 'filename', $direction = 'ASC') {
 		$categoryId = (int) $categoryId;
 		$namespace  = 'sly.medium.list';
 		$list       = $this->cache->get($namespace, $categoryId, null);
@@ -160,11 +169,7 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id implements sly_Contai
 		if ($list === null) {
 			$list  = array();
 			$sql   = $this->getPersistence();
-			$where = array('category_id' => $categoryId);
-
-			if (!$includeDeleted) {
-				$where['deleted'] = 0;
-			}
+			$where = array('category_id' => $categoryId, 'deleted' => 0);
 
 			$sql->select('file', 'id', $where, null, $orderBy.' '.$direction);
 			foreach ($sql as $row) $list[] = (int) $row['id'];
