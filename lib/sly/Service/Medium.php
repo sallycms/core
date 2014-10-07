@@ -145,10 +145,6 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id implements sly_Contai
 			$objlist[] = $this->findById($id);
 		}
 
-		if (!$includeDeleted) {
-			$objlist = $this->filterOutDeleted($objlist);
-		}
-
 		return $objlist;
 	}
 
@@ -180,10 +176,6 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id implements sly_Contai
 
 		foreach ($list as $id) {
 			$objlist[] = $this->findById($id);
-		}
-
-		if (!$includeDeleted) {
-			$objlist = $this->filterOutDeleted($objlist);
 		}
 
 		return $objlist;
@@ -475,15 +467,5 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id implements sly_Contai
 				$medium->setHeight($size[1]);
 			}
 		}
-	}
-
-	protected function filterOutDeleted(array $media) {
-		foreach ($media as $idx => $medium) {
-			if ($medium->isDeleted()) {
-				unset($media[$idx]);
-			}
-		}
-
-		return array_values($media);
 	}
 }
