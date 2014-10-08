@@ -92,20 +92,6 @@ class sly_Service_DeletedMedium extends sly_Service_Model_Base_Id implements sly
 		return $medium;
 	}
 
-	/*public function getFullPath(sly_Model_Medium $medium) {
-		return $this->fsBaseUri.$medium->getFilename();
-	}*/
-
-	/**
-	 * Check if a file exists in the media filesystem
-	 *
-	 * @param  string $filename  e.g. 'foo.jpg'
-	 * @return boolean
-	 */
-	/*public function fileExists($filename) {
-		return $this->mediaFs->has(basename($filename));
-	}*/
-
 	/**
 	 * @throws sly_Exception
 	 * @param  int $mediumID
