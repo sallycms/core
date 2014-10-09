@@ -8,7 +8,6 @@
  * http://www.opensource.org/licenses/mit-license.php
  */
 
-use Gaufrette\Util\Path;
 use wv\BabelCache\CacheInterface;
 
 /**
@@ -111,23 +110,22 @@ class sly_Service_DeletedMedium extends sly_Service_Model_Base_Id implements sly
 			throw new sly_Exception(t('medium_not_found'));
 		}
 
-		$sql     = $this->persistence;
-		$mediaFs = $this->mediaFs;
-		$table   = $this->tablename;
+		$sql        = $this->persistence;
+		$mediaFs    = $this->mediaFs;
+		$table      = $this->tablename;
+		$dispatcher = $this->dispatcher;
 
 		try {
-			$sql->transactional(function() use ($medium, $mediaFs, $sql, $table){
+			$sql->transactional(function() use ($medium, $mediaFs, $sql, $dispatcher, $table){
 				$mediaFs->delete(basename($medium->getFilename()));
 				$sql->delete($table, $medium->getPKHash());
-
+				$dispatcher->notify('SLY_MEDIA_PERMANENT_DELETED', $medium);
 			});
 		}
 		catch (Exception $e) {
 			// re-wrap DB & PDO exceptions
 			throw new sly_Exception($e->getMessage());
 		}
-
-		$this->dispatcher->notify('SLY_MEDIA_PERMANENT_DELETED', $medium);
 	}
 
 	/**
