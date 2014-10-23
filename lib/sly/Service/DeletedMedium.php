@@ -152,10 +152,13 @@ class sly_Service_DeletedMedium extends sly_Service_Model_Base_Id implements sly
 				$medium->setCategoryId(0);
 			}
 
+			$hash = md5($medium->getFilename());
+
 			$medium->setDeleted(0);
 			$this->save($medium);
 			$this->cache->clear('sly.medium.list');
 			$this->cache->delete('sly.medium', $medium->getId());
+			$this->cache->delete('sly.medium', $hash);
 		}
 		catch (Exception $e) {
 			// re-wrap DB & PDO exceptions
