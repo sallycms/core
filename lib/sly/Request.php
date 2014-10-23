@@ -272,8 +272,8 @@ class sly_Request {
 	 * $_FILES is never override, see rfc1867
 	 */
 	public function overrideGlobals() {
-		$_GET     = $this->query->all();
-		$_POST    = $this->request->all();
+		$_GET     = $this->get->all();
+		$_POST    = $this->post->all();
 		$_SERVER  = $this->server->all();
 		$_COOKIE  = $this->cookies->all();
 		$_REQUEST = $this->buildRequestArray($_GET, $_POST, $_COOKIE);
@@ -832,5 +832,9 @@ class sly_Request {
 		}
 
 		return $requestUri;
+	}
+
+	public function overrideGet($get) {
+		$this->get = new sly_Util_ArrayObject($get);
 	}
 }
