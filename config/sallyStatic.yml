@@ -30,9 +30,9 @@ environment: dev
 database:
   driver: mysql
   host: localhost
-  login: sally
+  user: sally
   password: ''
-  name: sally_base
+  dbname: sally_base
   table_prefix: sly_
 
 # BabelCache configuration. Only uncomment those settings you actually need,
