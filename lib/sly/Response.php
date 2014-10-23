@@ -137,8 +137,13 @@ class sly_Response {
 	 * @return sly_Response
 	 */
 	public function setContentType($type, $charset = null) {
+		if ($charset !== null) {
+			$this->setCharset($charset);
+			$type .= '; charset='.$charset;
+		}
+
 		$this->setHeader('content-type', $type);
-		if ($charset !== null) $this->setCharset($charset);
+
 		return $this;
 	}
 
@@ -283,20 +288,13 @@ class sly_Response {
 		$dispatcher->notify('SLY_SEND_RESPONSE', $this);
 
 		// safely enable gzip output
-		if (!sly_ini_get('zlib.output_compression')) {
-			if (@ob_start('ob_gzhandler') === false) {
-				// manually send content length if everything fails and we're not streaming
-				if ($this->content !== null) {
-					$this->setHeader('Content-Length', mb_strlen($this->content, '8bit'));
-				}
-			}
-		}
+		$this->enableGzip();
 
 		if (!$request) {
 			$request = sly_Core::getRequest();
 		}
 
-		// RFC 2616 said every not explicitly keep-alive Connection should receice a Connection: close,
+		// RFC 2616 said every not explicitly keep-alive Connection should receive a Connection: close,
 		// but at least Apache Websever breaks this, if the client sends just nothing (which is also not compliant).
 		if ($request->header('Connection') !== 'keep-alive') {
 			$this->setHeader('Connection', 'close');
@@ -310,6 +308,18 @@ class sly_Response {
 
 		if (function_exists('fastcgi_finish_request')) {
 			fastcgi_finish_request();
+		}
+	}
+
+	protected function enableGzip() {
+		// safely enable gzip output
+		if (!sly_ini_get('zlib.output_compression')) {
+			if (@ob_start('ob_gzhandler') === false) {
+				// manually send content length if everything fails and we're not streaming
+				if ($this->content !== null) {
+					$this->setHeader('Content-Length', mb_strlen($this->content, '8bit'));
+				}
+			}
 		}
 	}
 

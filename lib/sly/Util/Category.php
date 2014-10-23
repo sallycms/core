@@ -93,6 +93,6 @@ class sly_Util_Category {
 		if ($clang === false || $clang === null) {
 			$clang = sly_Core::getCurrentClang();
 		}
-		return self::findByParentId(0, $clang, $ignoreOfflines);
+		return self::findByParentId(0, $ignoreOfflines, $clang);
 	}
 }

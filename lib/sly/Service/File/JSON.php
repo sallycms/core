@@ -10,6 +10,8 @@
 
 /**
  * @ingroup util
+ * @deprecated  Do not use this class, it adds an incredible overhead to simply reading the
+ *              file and doing a json_decode() on its content.
  */
 class sly_Service_File_JSON extends sly_Service_File_Base {
 	/**

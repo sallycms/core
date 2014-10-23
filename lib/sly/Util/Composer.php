@@ -69,7 +69,7 @@ class sly_Util_Composer {
 					$filename = $composerDir.'/'.$filename;
 
 					if (file_exists($filename)) {
-						$data = sly_Util_JSON::load($filename, false, true);
+						$data = json_decode(file_get_contents($filename), true);
 
 						foreach ($data as $package) {
 							if (isset($package['name']) && $package['name'] === $this->package) {
@@ -86,7 +86,7 @@ class sly_Util_Composer {
 			}
 
 			if (!$found && file_exists($this->filename)) {
-				$this->data  = sly_Util_JSON::load($this->filename, false, true);
+				$this->data  = json_decode(file_get_contents($this->filename), true);
 				$this->mtime = filemtime($this->filename);
 				$this->proxy = null;
 			}

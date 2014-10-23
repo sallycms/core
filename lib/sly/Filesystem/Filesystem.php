@@ -9,13 +9,39 @@
  */
 
 use Gaufrette\Filesystem;
+use Gaufrette\Adapter;
 
 /**
  * Custom filesystem
- *
- * This class only exists to fix a bug in listKeys().
  */
-class sly_Filesystem_Filesystem extends Filesystem {
+class sly_Filesystem_Filesystem extends Filesystem implements sly_Filesystem_Interface {
+	protected $domain;
+
+	/**
+	 * Constructor
+	 *
+	 * @param Adapter $adapter
+	 * @param string  $domain
+	 */
+	public function __construct(Adapter $adapter, $domain = null) {
+		parent::__construct($adapter);
+		$this->domain = $domain;
+	}
+
+	/**
+     * {@inheritDoc}
+     */
+	public function getDomain() {
+		return $this->domain;
+	}
+
+	/**
+     * {@inheritDoc}
+     */
+	public function getPath($key) {
+		return $this->getDomain().'/'.$key;
+	}
+
 	/**
 	 * Lists keys beginning with given prefix
 	 * (no wildcard / regex matching)

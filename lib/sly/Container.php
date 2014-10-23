@@ -253,6 +253,15 @@ class sly_Container extends Pimple implements Countable {
 			return new sly_Service_Medium($persistence, $cache, $dispatcher, $filesystem, $blocked, $fsBaseUri);
 		});
 
+		$this['sly-service-deletedmedium'] = $this->share(function($container) {
+			$persistence = $container['sly-persistence'];
+			$cache       = $container['sly-cache'];
+			$dispatcher  = $container['sly-dispatcher'];
+			$filesystem  = $container['sly-filesystem-media'];
+
+			return new sly_Service_DeletedMedium($persistence, $cache, $dispatcher, $filesystem);
+		});
+
 		$this['sly-service-module'] = $this->share(function($container) {
 			return new sly_Service_Module($container['sly-config'], $container['sly-dispatcher']);
 		});
@@ -297,27 +306,20 @@ class sly_Container extends Pimple implements Countable {
 		//////////////////////////////////////////////////////////////////////////
 		// filesystems
 
-		$getLocalFilesystem = function($dir, $isPrivate) {
-			// make sure the mediapool directory exists, as Gaufrette is not going to create it for us
-			if ($isPrivate) {
-				$dir = sly_Util_Directory::createHttpProtected($dir, true);
-			}
-			else {
-				$dir = sly_Util_Directory::create($dir, null, true);
-			}
-
+		$getLocalFilesystem = function($protocol, $dir) {
+			$dir     = sly_Util_Directory::create($dir, null, true);
 			$adapter = new Gaufrette\Adapter\Local($dir);
-			$fs      = new sly_Filesystem_Filesystem($adapter);
+			$fs      = new sly_Filesystem_Filesystem($adapter, $protocol);
 
 			return $fs;
 		};
 
 		$this['sly-filesystem-media'] = $this->share(function($container) use ($getLocalFilesystem) {
-			return $getLocalFilesystem(SLY_DATAFOLDER.DIRECTORY_SEPARATOR.'mediapool', false);
+			return $getLocalFilesystem('media', SLY_DATAFOLDER.DIRECTORY_SEPARATOR.'mediapool');
 		});
 
 		$this['sly-filesystem-dyn'] = $this->share(function($container) use ($getLocalFilesystem) {
-			return $getLocalFilesystem(SLY_DATAFOLDER.DIRECTORY_SEPARATOR.'dyn', true);
+			return $getLocalFilesystem('dyn', SLY_DATAFOLDER.DIRECTORY_SEPARATOR.'dyn');
 		});
 
 		$this['sly-filesystem-map'] = $this->share(function($container) {
@@ -679,6 +681,15 @@ class sly_Container extends Pimple implements Countable {
 	 */
 	public function getMediumService() {
 		return $this['sly-service-medium'];
+	}
+
+	/**
+	 * get medium service
+	 *
+	 * @return sly_Service_DeletedMedium
+	 */
+	public function getDeletedMediumService() {
+		return $this['sly-service-deletedmedium'];
 	}
 
 	/**

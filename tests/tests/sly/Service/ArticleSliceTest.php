@@ -39,6 +39,7 @@ class ArticleSliceTest extends sly_BaseTest {
 		$aid      = $article->getId();
 
 		$slice = $service->add($article, 'test', 'test1', array('test' => '1'), 0);
+		$this->assertNotSame(sly_Model_Base_Id::NEW_ID, $slice->getId());
 		$this->assertEquals('test1', $slice->getModule());
 		$this->assertEquals(array('test' => '1'), $slice->getValues());
 
@@ -79,7 +80,7 @@ class ArticleSliceTest extends sly_BaseTest {
 	/**
 	 * @depends testAdd
 	 */
-	public function testMove() {
+	public function testMovingSlicesMovesContentAsWell() {
 		$service  = $this->getService();
 		$aservice = $this->getArticleService();
 		$article  = $this->dummyArticle();
@@ -97,6 +98,102 @@ class ArticleSliceTest extends sly_BaseTest {
 		$this->assertEquals('not empty test', $slices[0]->getValue('test'));
 		$this->assertEquals('not empty', $slices[1]->getValue('test'));
 		$this->assertGreaterThan($article->getRevision(), $articleNewRevision->getRevision());
+	}
+
+	/**
+	 * @depends       testMovingSlicesMovesContentAsWell
+	 * @dataProvider  generalMovementPatternsProvider
+	 */
+	public function testGeneralMovementPatterns($oldPos, $newPos, $expectedOrder) {
+		$service  = $this->getService();
+		$aservice = $this->getArticleService();
+		$article  = $this->dummyArticle();
+		$aid      = $article->getId();
+		$slices   = array();
+		$slot     = 'test';
+		$module   = 'test1';
+		$clang    = 5;
+
+		// create four dummy slices
+
+		for ($i = 0; $i < 4; ++$i) {
+			// put values like 'a', 'b', 'c', ... in the slice, so we can later check their
+			// order (as their IDs will change when the article is touched)
+			$slice   = $service->add($article, $slot, $module, array('char' => chr(97 + $i)));
+			$article = $aservice->findByPK($aid, $clang); // re-fetch due to changed revision
+		}
+
+		// perform the move operation
+
+		$service->moveTo($article, $slot, $oldPos, $newPos);
+
+		// query the new slice order
+
+		$article   = $aservice->findByPK($aid, $clang);
+		$newSlices = $service->findByArticle($article, $slot);
+		$newOrder  = '';
+		$pos       = 0;
+
+		foreach ($newSlices as $newSlice) {
+			$newOrder .= $newSlice->getValue('char');
+
+			// make sure the object has the correct pos value
+			// (this one can be broken even though the order of all slices is okay, like in 0 3 4 42)
+			$this->assertSame($pos++, $newSlice->getPosition());
+		}
+
+		$this->assertSame($expectedOrder, $newOrder);
+	}
+
+	public function generalMovementPatternsProvider() {
+		// initial order is 'abcd', where 'a' is pos 0, 'b' is pos 1 etc.
+
+		return array(
+			array(0, 1,   'bacd'),
+			array(1, 0,   'bacd'),
+			array(0, 2,   'bcad'),
+			array(0, 3,   'bcda'),
+			array(0, 4,   'bcda'), // should be normalized automatically
+			array(0, 420, 'bcda'), // dito
+			array(3, 0,   'dabc'),
+			array(3, 2,   'abdc')
+		);
+	}
+
+	/**
+	 * @depends           testGeneralMovementPatterns
+	 * @dataProvider      illegalMovementPatternsProvider
+	 * @expectedException sly_Exception
+	 */
+	public function testIllegalMovementPatterns($oldPos, $newPos) {
+		$service  = $this->getService();
+		$aservice = $this->getArticleService();
+		$article  = $this->dummyArticle();
+		$aid      = $article->getId();
+		$slices   = array();
+		$slot     = 'test';
+		$module   = 'test1';
+		$clang    = 5;
+
+		// create four dummy slices
+
+		for ($i = 0; $i < 4; ++$i) {
+			$slice   = $service->add($article, $slot, $module, array());
+			$article = $aservice->findByPK($aid, $clang); // re-fetch due to changed revision
+		}
+
+		// perform the move operation (this should explode)
+
+		$service->moveTo($article, $slot, $oldPos, $newPos);
+	}
+
+	public function illegalMovementPatternsProvider() {
+		return array(
+			array(-1,  1),
+			array(420, 0),
+			array(0,   0),
+			array(420, 420)
+		);
 	}
 
 	/**

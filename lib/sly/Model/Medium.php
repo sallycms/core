@@ -37,7 +37,8 @@ class sly_Model_Medium extends sly_Model_Base_Id {
 		'title' => 'string', 'createdate' => 'datetime', 'filename' => 'string',
 		'height' => 'int', 'width' => 'int', 'updatedate' => 'datetime',
 		'createuser' => 'string', 'originalname' => 'string',
-		'attributes' => 'string', 'filetype' => 'string', 'filesize' => 'string'
+		'attributes' => 'string', 'filetype' => 'string', 'filesize' => 'string',
+		'deleted' => 'int'
 	); ///< array
 
 	public function getUpdateUser()   { return $this->updateuser;   } ///< @return string
@@ -69,6 +70,13 @@ class sly_Model_Medium extends sly_Model_Base_Id {
 	public function setFilesize($filesize)         { $this->filesize     = $filesize;     } ///< @param int    $filesize
 
 	/**
+	 * @return boolean
+	 */
+	public function isDeleted() {
+		return $this->deleted ? true : false;
+	}
+
+	/**
 	 * @param mixed $createdate  unix timestamp or date using 'YYYY-MM-DD HH:MM:SS' format
 	 */
 	public function setCreateDate($createdate) {
@@ -80,6 +88,13 @@ class sly_Model_Medium extends sly_Model_Base_Id {
 	 */
 	public function setUpdateDate($updatedate) {
 		$this->updatedate = sly_Util_String::isInteger($updatedate) ? (int) $updatedate : strtotime($updatedate);
+	}
+
+	/**
+	 * @param boolean $deleted
+	 */
+	public function setDeleted($deleted) {
+		$this->deleted = $deleted ? 1 : 0;
 	}
 
 	/**

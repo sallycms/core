@@ -20,6 +20,7 @@
 abstract class sly_Form_Widget_MediaBase extends sly_Form_ElementBase {
 	protected $filetypes  = array();
 	protected $categories = array();
+	protected $readonly   = false;
 
 	/**
 	 * @return sly_Form_Widget_MediaBase  the widget itself
@@ -80,5 +81,27 @@ abstract class sly_Form_Widget_MediaBase extends sly_Form_ElementBase {
 	public function clearFiletypeFilter() {
 		$this->filetypes = array();
 		return $this;
+	}
+
+	/**
+	 * Sets the input to read-only
+	 *
+	 * @param  boolean $readonly          true to set the widget readonly
+	 * @return sly_Form_Widget_MediaBase  the widget itself
+	 */
+	public function setReadOnly($readonly = true) {
+		$this->readonly = $readonly;
+
+		return $this;
+	}
+
+	protected function canAccessMedia() {
+		$user = sly_Util_User::getCurrentUser();
+
+		if (!$user || (!$user->isAdmin() && !$user->hasRight('pages', 'mediapool'))) {
+			return false;
+		}
+
+		return true;
 	}
 }

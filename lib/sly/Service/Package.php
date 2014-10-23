@@ -380,7 +380,7 @@ class sly_Service_Package {
 		$installed = $root.'composer/installed.json';
 
 		if (file_exists($installed)) {
-			$data = sly_Util_JSON::load($installed);
+			$data = json_decode(file_get_contents($installed), true);
 
 			foreach ($data as $pkg) {
 				if (is_dir($root.$pkg['name'])) {
@@ -391,7 +391,7 @@ class sly_Service_Package {
 			$installed = $root.'composer/installed_dev.json';
 
 			if (file_exists($installed)) {
-				$data = sly_Util_JSON::load($installed);
+				$data = json_decode(file_get_contents($installed), true);
 
 				foreach ($data as $pkg) {
 					if (is_dir($root.$pkg['name'])) {

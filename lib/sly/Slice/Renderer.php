@@ -13,6 +13,6 @@
  * @author zozi@webvariants.de
  */
 interface sly_Slice_Renderer {
-	public function renderInput($moduleName, $values, $dataIndex);
+	public function renderInput(sly_Model_ISlice $slice, $dataIndex);
 	public function renderOutput(sly_Model_ISlice $slice);
 }

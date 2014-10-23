@@ -338,16 +338,20 @@ class sly_Model_Base_Article extends sly_Model_Base {
 	/**
 	 * @return array
 	 */
-	public function getParentTree() {
-		$return     = array();
-		$catService = sly_Core::getContainer()->getCategoryService();
-
+	public function getParentTree($asObjects = true) {
 		$explode = explode('|', $this->getPath());
 		$explode = array_filter($explode);
 
 		if ($this->getStartpage() == 1) {
 			$explode[] = $this->getId();
 		}
+
+		if (!$asObjects) {
+			return $explode;
+		}
+
+		$return     = array();
+		$catService = sly_Core::getContainer()->getCategoryService();
 
 		foreach ($explode as $var) {
 			$return[] = $catService->findByPK($var, $this->getClang());
@@ -361,15 +365,6 @@ class sly_Model_Base_Article extends sly_Model_Base {
 	 * @return boolean
 	 */
 	public function inParentTree(sly_Model_Base_Article $anObj) {
-		$tree = $this->getParentTree();
-
-		foreach ($tree as $treeObj) {
-			if ($treeObj->getId() == $anObj->getId()) {
-				return true;
-			}
-		}
-
-		return false;
+		return in_array($anObj->getId(), $this->getParentTree(false), true);
 	}
-
 }

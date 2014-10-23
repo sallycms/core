@@ -162,6 +162,8 @@ class sly_Util_Array {
 	public function remove($key) {
 		$key = trim($key, '/');
 
+		$this->resultCache = array();
+
 		if (empty($key)) {
 			$this->array = array();
 			return true;
