@@ -9,7 +9,7 @@
  * https://github.com/composer/composer/blob/master/LICENSE.
  *
  * This file was partially re-written to omit features not used in SallyCMS.
- * Those changes are (c) 2013 webvariants GbR.
+ * Those changes are (c) 2014 webvariants GmbH & Co. KG.
  */
 
 class sly_Service_VersionParser {
