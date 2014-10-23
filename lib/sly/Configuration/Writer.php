@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright (c) 2013, webvariants GbR, http://www.webvariants.de
+ * Copyright (c) 2014, webvariants GmbH & Co. KG, http://www.webvariants.de
  *
  * This file is released under the terms of the MIT license. You can find the
  * complete text in the attached LICENSE file or online at:
