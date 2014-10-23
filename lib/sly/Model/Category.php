@@ -88,4 +88,8 @@ class sly_Model_Category extends sly_Model_Base_Article {
 
 		return $service->findByParentId($this->getId(), $clang, $ignoreOfflines);
 	}
+
+	public function isOnline() {
+		return sly_Core::getContainer()->getArticleService()->findByPK($this->id, $this->clang, sly_Service_Article::FIND_REVISION_ONLINE) !== null;
+	}
 }

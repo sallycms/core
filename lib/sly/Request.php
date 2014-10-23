@@ -31,6 +31,12 @@ class sly_Request {
 	protected $requestUri;
 	protected $method;
 
+	private $cache_base_path = null;
+	private $cache_port = null;
+	private $cache_port_trust = null;
+	private $cache_secure = null;
+	private $cache_secure_trust = null;
+
 	/**
 	 * Constructor
 	 *
@@ -121,8 +127,6 @@ class sly_Request {
 		return $request;
 	}
 
-	private $__base_url = array();
-
 	/**
 	 * Get the absolute base URL to the project's root (frontend)
 	 *
@@ -132,10 +136,6 @@ class sly_Request {
 	 * @return string
 	 */
 	public function getBaseUrl($addScriptPath = false, $forceProtocol = null, $forcePort = null) {
-		$key = json_encode(array($addScriptPath, $forceProtocol, $forcePort));
-		if (array_key_exists($key, $this->__base_url))
-			return $this->__base_url[$key];
-
 		$protocol = $forceProtocol === null ? $this->getScheme() : $forceProtocol;
 		$host     = $this->getHost();
 		$port     = $this->getPort();
@@ -163,6 +163,9 @@ class sly_Request {
 	 * @return string
 	 */
 	public function getBasePath() {
+		if ($this->cache_base_path !== null)
+			return $this->cache_base_path;
+
 		// in CLI, the SCRIPT_NAME would be something like 'C:\xamp\php\phpunit'...
 		if (PHP_SAPI === 'cli') {
 			return '/sally';
@@ -172,7 +175,7 @@ class sly_Request {
 		$path = dirname($path); // '/foo' or '/foo/sally/backend'
 		$path = str_replace('\\', '/', $path);
 
-		return $path ? $path : '/';
+		return $this->cache_base_path = $path ? $path : '/';
 	}
 
 	/**
@@ -269,8 +272,8 @@ class sly_Request {
 	 * $_FILES is never override, see rfc1867
 	 */
 	public function overrideGlobals() {
-		$_GET     = $this->query->all();
-		$_POST    = $this->request->all();
+		$_GET     = $this->get->all();
+		$_POST    = $this->post->all();
 		$_SERVER  = $this->server->all();
 		$_COOKIE  = $this->cookies->all();
 		$_REQUEST = $this->buildRequestArray($_GET, $_POST, $_COOKIE);
@@ -310,14 +313,14 @@ class sly_Request {
 	}
 
 	/**
-	* Normalizes a query string
-	*
-	* It builds a normalized query string, where keys/value pairs are
-	* alphabetized, have consistent escaping and unneeded delimiters are removed.
-	*
-	* @param  string $qs  query string
-	* @return string      a normalized query string for the Request
-	*/
+	 * Normalizes a query string
+	 *
+	 * It builds a normalized query string, where keys/value pairs are
+	 * alphabetized, have consistent escaping and unneeded delimiters are removed.
+	 *
+	 * @param  string $qs  query string
+	 * @return string      a normalized query string for the Request
+	 */
 	public static function normalizeQueryString($qs) {
 		if ('' == $qs) {
 			return '';
@@ -396,9 +399,6 @@ class sly_Request {
 		return $this->isSecure() ? 'https' : 'http';
 	}
 
-	private $__port = null;
-	private $__port_trust = null;
-
 	/**
 	 * Returns the port on which the request is made
 	 *
@@ -406,17 +406,17 @@ class sly_Request {
 	 */
 	public function getPort() {
 		if (self::$trustProxy) {
-			if ($this->__port_trust !== null)
-				return $this->__port_trust;
+			if ($this->cache_port_trust !== null)
+				return $this->cache_port_trust;
 
 			if ($this->headers->has('X-Forwarded-Port')) {
-				return $this->__port_trust = (int) $this->headers->get('X-Forwarded-Port', 'int', 80);
+				return $this->cache_port_trust = (int) $this->headers->get('X-Forwarded-Port', 'int', 80);
 			}
 		}
 
-		if ($this->__port !== null)
-			return $this->__port;
-		return $this->__port = $this->server->get('SERVER_PORT', 'int', 80);
+		if ($this->cache_port !== null)
+			return $this->cache_port;
+		return $this->cache_port = $this->server->get('SERVER_PORT', 'int', 80);
 	}
 
 	/**
@@ -485,6 +485,15 @@ class sly_Request {
 	}
 
 	/**
+	 * Returns the requested URI without any query string
+	 *
+	 * @return string  the raw URI (i.e. not urldecoded)
+	 */
+	public function getRequestPath() {
+		return preg_replace('/[&?].*/', '', $this->getRequestUri());
+	}
+
+	/**
 	 * Generates the normalized query string for the Request
 	 *
 	 * It builds a normalized query string, where keys/value pairs are
@@ -498,29 +507,26 @@ class sly_Request {
 		return '' === $qs ? null : $qs;
 	}
 
-	private $__secure = null;
-	private $__secure_trust = null;
-
 	/**
 	 * Checks whether the request is secure or not
 	 *
 	 * @return boolean
 	 */
 	public function isSecure() {
-		if ($this->__secure === null) {
-			$this->__secure = strtolower($this->server->get('HTTPS')) === 'on' || $this->server->get('HTTPS') == 1;
+		if ($this->cache_secure === null) {
+			$this->cache_secure = strtolower($this->server->get('HTTPS')) === 'on' || $this->server->get('HTTPS') == 1;
 		}
 
-		if ($this->__secure) {
+		if ($this->cache_secure) {
 			return true;
 		}
 
 		if (self::$trustProxy) {
-			if ($this->__secure_trust !== null) {
-				return $this->__secure_trust;
+			if ($this->cache_secure_trust !== null) {
+				return $this->cache_secure_trust;
 			}
 
-			return $this->__secure_trust = (strtolower($this->headers->get('SSL-HTTPS')) == 'on'|| $this->headers->get('SSL-HTTPS') == 1)
+			return $this->cache_secure_trust = (strtolower($this->headers->get('SSL-HTTPS')) == 'on'|| $this->headers->get('SSL-HTTPS') == 1)
 					|| (strtolower($this->headers->get('X-Forwarded-Proto')) == 'https');
 		}
 
@@ -826,5 +832,9 @@ class sly_Request {
 		}
 
 		return $requestUri;
+	}
+
+	public function overrideGet($get) {
+		$this->get = new sly_Util_ArrayObject($get);
 	}
 }

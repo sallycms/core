@@ -125,8 +125,6 @@ class sly_I18N implements sly_I18N_Base {
 	 * @return string       translated message or the key like in translate:key when not found
 	 */
 	public function msg($key) {
-		//var_dump($this->locale);
-		//var_dump($this->paths);
 		if (!$this->hasMsg($key)) {
 			return '[translate:'.$key.']';
 		}
@@ -150,11 +148,11 @@ class sly_I18N implements sly_I18N_Base {
 	/**
 	 * Check for a key
 	 *
-	 * @param  string $key key to look for
-	 * @return boolean     true if the key exists, else false
+	 * @param  string $key  key to look for
+	 * @return boolean      true if the key exists and is not empty, else false
 	 */
 	public function hasMsg($key) {
-		return isset($this->texts[$key]);
+		return isset($this->texts[$key]) && mb_strlen($this->texts[$key]) > 0;
 	}
 
 	/**

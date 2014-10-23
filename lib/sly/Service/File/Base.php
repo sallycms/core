@@ -114,7 +114,7 @@ abstract class sly_Service_File_Base {
 		$config    = array();
 
 		// get content from cache, when up to date
-		if ($this->isCacheValid($filename, $cachefile) || (file_exists($cachefile) && $forceCached)) {
+		if (($forceCached && file_exists($cachefile)) || $this->isCacheValid($filename, $cachefile)) {
 			// lock the cachefile
 			$handle = fopen($cachefile, 'r');
 			flock($handle, LOCK_SH);

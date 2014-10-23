@@ -8,7 +8,6 @@
  * http://www.opensource.org/licenses/mit-license.php
  */
 
-use Gaufrette\Filesystem;
 use Gaufrette\Util\Path;
 use wv\BabelCache\CacheInterface;
 
@@ -23,7 +22,7 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id implements sly_Contai
 	protected $cache;              ///< CacheInterface
 	protected $dispatcher;         ///< sly_Event_IDispatcher
 	protected $container;          ///< sly_Container
-	protected $mediaFs;            ///< Filesystem
+	protected $mediaFs;            ///< sly_Filesystem_Interface
 	protected $extBlacklist;       ///< array
 	protected $fsBaseUri;          ///< string
 
@@ -37,7 +36,7 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id implements sly_Contai
 	 * @param array                 $extBlacklist
 	 * @param string                $fsBaseUri
 	 */
-	public function __construct(sly_DB_Persistence $persistence, CacheInterface $cache, sly_Event_IDispatcher $dispatcher, Filesystem $mediaFs, array $extBlacklist, $fsBaseUri) {
+	public function __construct(sly_DB_Persistence $persistence, CacheInterface $cache, sly_Event_IDispatcher $dispatcher, sly_Filesystem_Interface $mediaFs, array $extBlacklist, $fsBaseUri) {
 		parent::__construct($persistence);
 
 		$this->cache        = $cache;
@@ -68,6 +67,20 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id implements sly_Contai
 	 */
 	protected function makeInstance(array $params) {
 		return new sly_Model_Medium($params);
+	}
+
+	public function find($where = null, $group = null, $order = null, $offset = null, $limit = null, $having = null) {
+		if (is_string($where) && !empty($where)) {
+			$where = "($where) AND deleted = 0";
+		}
+		else if (is_array($where)) {
+			$where['deleted'] = 0;
+		}
+		else {
+			$where = array('deleted' => 0);
+		}
+
+		return parent::find($where, $group, $order, $offset, $limit, $having);
 	}
 
 	/**
@@ -104,7 +117,7 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id implements sly_Contai
 
 		if ($id === null) {
 			$db = $this->getPersistence();
-			$id = $db->magicFetch('file', 'id', array('filename' => $filename));
+			$id = $db->magicFetch('file', 'id', array('filename' => $filename, 'deleted' => 0));
 
 			if ($id === false) {
 				return null;
@@ -125,10 +138,11 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id implements sly_Contai
 		$list      = $this->cache->get($namespace, $extension, null);
 
 		if ($list === null) {
-			$sql  = $this->getPersistence();
-			$list = array();
+			$sql   = $this->getPersistence();
+			$list  = array();
+			$where = array('SUBSTRING(filename, LOCATE(".", filename) + 1)' => $extension, 'deleted' => 0);
 
-			$sql->select('file', 'id', array('SUBSTRING(filename, LOCATE(".", filename) + 1)' => $extension), null, $orderBy.' '.$direction);
+			$sql->select('file', 'id', $where, null, $orderBy.' '.$direction);
 			foreach ($sql as $row) $list[] = (int) $row['id'];
 
 			$this->cache->set($namespace, $extension, $list);
@@ -155,7 +169,7 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id implements sly_Contai
 		if ($list === null) {
 			$list  = array();
 			$sql   = $this->getPersistence();
-			$where = array('category_id' => $categoryId);
+			$where = array('category_id' => $categoryId, 'deleted' => 0);
 
 			$sql->select('file', 'id', $where, null, $orderBy.' '.$direction);
 			foreach ($sql as $row) $list[] = (int) $row['id'];
@@ -284,6 +298,7 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id implements sly_Contai
 		$file->setFilesize(filesize($fileURI));
 		$file->setCategoryId($categoryID);
 		$file->setRevision(0);
+		$file->setDeleted(false);
 		$file->setAttributes('');
 		$file->setCreateColumns($user);
 
@@ -303,6 +318,10 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id implements sly_Contai
 
 		if (!file_exists($newFile)) {
 			throw new sly_Exception(t('file_not_found', $newFile));
+		}
+
+		if ($medium->isDeleted()) {
+			throw new sly_Exception(t('deleted_files_cannot_be_replaced'));
 		}
 
 		// check if the type of the new file matches the old one
@@ -327,6 +346,10 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id implements sly_Contai
 	public function replaceByUpload(sly_Model_Medium $medium, array $fileData) {
 		$service = new sly_Filesystem_Service($this->mediaFs);
 		$service->checkUpload($fileData);
+
+		if ($medium->isDeleted()) {
+			throw new sly_Exception(t('deleted_files_cannot_be_replaced'));
+		}
 
 		// check if the type of the new file matches the old one
 
@@ -386,22 +409,19 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id implements sly_Contai
 		}
 
 		try {
-			$sql = $this->getPersistence();
-			$sql->delete('file', array('id' => $medium->getId()));
-
-			$filename = $medium->getFilename();
-
-			if ($this->mediaFs->has($filename)) {
-				$this->mediaFs->delete($filename);
-			}
+			$medium->setDeleted(true);
+			$this->save($medium);
 		}
 		catch (Exception $e) {
 			// re-wrap DB & PDO exceptions
 			throw new sly_Exception($e->getMessage());
 		}
 
+		$hash = md5($medium->getFilename());
+
 		$this->cache->clear('sly.medium.list');
 		$this->cache->delete('sly.medium', $medium->getId());
+		$this->cache->delete('sly.medium', $hash);
 
 		$this->dispatcher->notify('SLY_MEDIA_DELETED', $medium);
 

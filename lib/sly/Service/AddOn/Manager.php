@@ -8,7 +8,6 @@
  * http://www.opensource.org/licenses/mit-license.php
  */
 
-use Gaufrette\Filesystem;
 use Gaufrette\Adapter\Local;
 use wv\BabelCache\CacheInterface;
 
@@ -96,7 +95,7 @@ class sly_Service_AddOn_Manager {
 	 */
 	public function deleteTempFiles($addon) {
 		$dir = $this->addOnService->getTempDirectory($addon);
-		$fs  = new Filesystem(new Local($dir));
+		$fs  = new sly_Filesystem_Filesystem(new Local($dir));
 
 		$this->fireEvent('PRE', 'DELETE_TEMP_FILES', $addon, array('filesystem' => $fs));
 

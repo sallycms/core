@@ -126,7 +126,8 @@ class sly_Core {
 		}
 		catch (Exception $e) {
 			header('Content-Type: text/plain; charset=UTF-8');
-			die('Could not load core configuration: '.$e->getMessage());
+			print 'Could not load core configuration: '.$e->getMessage();
+			exit(1);
 		}
 
 		// get and inject the current system environment

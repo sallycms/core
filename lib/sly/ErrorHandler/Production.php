@@ -104,6 +104,7 @@ class sly_ErrorHandler_Production extends sly_ErrorHandler_Base implements sly_E
 
 		header($_SERVER['SERVER_PROTOCOL'].' 500 Internal Server Error');
 		header('Content-Type: text/html; charset=UTF-8');
+		header('Cache-Control: private, no-cache');
 		header('Expires: Fri, 30 Oct 1998 14:19:41 GMT');
 
 		$errorpage = SLY_DEVELOPFOLDER.'/error.phtml';

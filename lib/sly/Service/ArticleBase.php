@@ -175,6 +175,11 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base implements
 		return !empty($items) ? $items[0] : null;
 	}
 
+	public function count($where = null, $group = null) {
+		$where = $this->fixWhereClause($where);
+		return parent::count($where, $group);
+	}
+
 	/**
 	 * finds article by id, clang and revision
 	 *

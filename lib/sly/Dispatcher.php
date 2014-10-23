@@ -101,7 +101,9 @@ abstract class sly_Dispatcher {
 			}
 
 			// check if the action is valid
-			$this->checkAction($controller, $action);
+			if (!($controller instanceof sly_Controller_Generic)) {
+				$this->checkAction($controller, $action);
+			}
 
 			// inject current request and container
 			$this->setupController($controller);
@@ -271,6 +273,6 @@ abstract class sly_Dispatcher {
 
 		// call the system error handler
 		$handler = $this->getContainer()->getErrorHandler();
-		$handler->handleException($e); // dies away (does not use sly_Response)
+		$handler->onCaughtException($e); // dies away (does not use sly_Response)
 	}
 }

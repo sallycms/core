@@ -357,8 +357,10 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 	}
 
 	/**
-	 * @param sly_Model_Article $article
-	 * @param sly_Model_User    $user
+	 * @param  sly_Model_Article $article
+	 * @param  sly_Model_User    $user
+	 * @param  array             $skipSliceIds
+	 * @return sly_Model_Article
 	 */
 	public function touch(sly_Model_Article $article, sly_Model_User $user = null, $skipSliceIds = array()) {
 		$user    = $this->getActor($user, __METHOD__);
@@ -370,7 +372,7 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 			$touched->setRevision($this->getMaxRevision($article) + 1);
 			$touched->setLatest(true);
 			$touched->setOnline(true);
-			$touched->setCreateColumns($user);
+			$touched->setUpdateColumns($user);
 
 			// update old latest revision
 			$sql->update('article', array('latest' => 0, 'online' => 0), array('id' => $article->getId(), 'clang' => $article->getClang()));
@@ -737,10 +739,11 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 		$clang  = $article->getClang();
 		$rev    = $article->getRevision();
 		$online = $article->isOnline();
+		$isCat  = $article instanceof sly_Model_Category;
 
 		// cache the URLs for this request (unlikely to change)
 
-		$cacheKey = substr(md5($id.'_'.$clang.'_'.$rev.'_'.json_encode($params).'_'.$divider), 0, 10);
+		$cacheKey = substr(md5($id.'_'.$clang.'_'.$rev.'_'.($isCat ? 1 : 0).'_'.json_encode($params).'_'.$divider), 0, 10);
 
 		if (!$disableCache && isset($this->urlCache[$cacheKey])) {
 			return $this->urlCache[$cacheKey];
@@ -756,19 +759,25 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 		// the listener must return an article (sly_Model_Article or int (ID)) or URL (string) to modify the returned URL
 
 		if ($redirect && $redirect !== $article) {
-			if (is_integer($redirect)) {
-				$id = $redirect;
-			}
-			elseif ($redirect instanceof sly_Model_Article) {
-				$id     = $redirect->getId();
-				$clang  = $redirect->getClang();
-				$rev    = $redirect->getRevision();
-				$online = $redirect->isOnline();
-			}
-			else {
+			if (is_string($redirect)) {
 				$this->urlCache[$cacheKey] = $redirect;
 
 				return $redirect;
+			}
+
+			if (is_integer($redirect)) {
+				$redirect = $this->findByPK($redirect, $clang, self::FIND_REVISION_BEST);
+			}
+
+			if ($redirect instanceof sly_Model_Base_Article) {
+				$id      = $redirect->getId();
+				$clang   = $redirect->getClang();
+				$rev     = $redirect->getRevision();
+				$online  = $redirect->isOnline();
+				$article = $redirect;
+			}
+			else {
+				throw new sly_Exception('SLY_URL_REDIRECT result must be an article instance or a valid article ID.');
 			}
 		}
 
@@ -776,10 +785,11 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 
 		$paramString = sly_Util_HTTP::queryString($params, $divider);
 		$url         = $dispatcher->filter('URL_REWRITE', '', array(
-			'id'            => $id,
-			'clang'         => $clang,
-			'revision'      => $rev,
-			'online'        => $online,
+			'article'       => $article,
+			'id'            => $id,      // deprecated, access 'article' directly
+			'clang'         => $clang,   // deprecated, access 'article' directly
+			'revision'      => $rev,     // deprecated, access 'article' directly
+			'online'        => $online,  // deprecated, access 'article' directly
 			'params'        => $paramString,
 			'divider'       => $divider,
 			'disable_cache' => $disableCache
@@ -810,5 +820,23 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 
 	public function clearUrlCache() {
 		$this->urlCache = array();
+	}
+
+	public function purgeArticleRevision(sly_Model_Article $article) {
+		$articleSliceService = $this->container->getArticleSliceService();
+		$eventDispatcher     = $this->container->getDispatcher();
+		$sql                 = $this->getPersistence();
+		$tableName           = $this->getTableName();
+
+		$sql->transactional(function() use ($sql, $tableName, $article, $articleSliceService, $eventDispatcher) {
+			$articleSliceService->delete($article, null, null, false);
+			if ($article->isLatest()) {
+				$sql->query('UPDATE '.$sql->getPrefix().$tableName.' SET latest = '.$sql->quote(1).' WHERE id = '.$sql->quote($article->getId()).' AND clang = '.$sql->quote($article->getClang()).' AND revision < '.$sql->quote($article->getRevision()).' ORDER BY revision DESC LIMIT 1');
+			}
+			$sql->delete($tableName, $article->getPKHash());
+
+
+			$eventDispatcher->notify('SLY_ART_REVISION_DELETED', $article);
+		});
 	}
 }
