@@ -12,8 +12,11 @@ if (PHP_SAPI === 'cli') {
 	return;
 }
 
+$cachedir = isset($_SERVER['HTTP_ENCODING_CACHEDIR']) ? $_SERVER['HTTP_ENCODING_CACHEDIR'] : null;
+$cachedir = is_null($cachedir) && isset($_SERVER['REDIRECT_HTTP_ENCODING_CACHEDIR']) ? $_SERVER['REDIRECT_HTTP_ENCODING_CACHEDIR'] : null;
+
 // bad request?
-if (!isset($_SERVER['HTTP_ENCODING_CACHEDIR']) || !is_string($_SERVER['HTTP_ENCODING_CACHEDIR'])) {
+if (!is_string($cachedir)) {
 	header('HTTP/1.0 400 Bad Request');
 	die;
 }
@@ -25,7 +28,7 @@ if (!isset($_GET['file']) || !is_string($_GET['file'])) {
 
 // get client encoding (attention: use the one set by htaccess for mod_headers awareness)
 
-$enc = trim($_SERVER['HTTP_ENCODING_CACHEDIR'], '/');
+$enc = trim($cachedir, '/');
 
 // check file
 
