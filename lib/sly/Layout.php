@@ -305,9 +305,10 @@ abstract class sly_Layout extends sly_Viewable {
 	 * @param string $href   href attribute value
 	 * @param string $type   type attribute value
 	 * @param string $title  title attribute value
+	 * @param string $sizes  sizes attribute value
 	 */
-	public function addLink($rel, $href, $type = '', $title= '') {
-		$this->links[] = array('rel' => trim($rel), 'href' => trim($href), 'type' => trim($type), 'title' => trim($title));
+	public function addLink($rel, $href, $type = '', $title= '', $sizes = '') {
+		$this->links[] = array('rel' => trim($rel), 'href' => trim($href), 'type' => trim($type), 'title' => trim($title), 'sizes'=>trim($sizes));
 	}
 
 	/**
