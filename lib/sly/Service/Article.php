@@ -828,6 +828,10 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 		$sql                 = $this->getPersistence();
 		$tableName           = $this->getTableName();
 
+		if ($article->isStartArticle() && $article->getRevision() === 0) {
+			throw new sly_Exception('Can not delete category revision');
+		}
+
 		$sql->transactional(function() use ($sql, $tableName, $article, $articleSliceService, $eventDispatcher) {
 			$articleSliceService->delete($article, null, null, false);
 			if ($article->isLatest()) {
