@@ -72,7 +72,7 @@ class sly_Router_Base implements sly_Router_Interface {
 	}
 
 	protected function getRequestUri(sly_Request $request) {
-		$requestUri = $request->getRequestUri();
+		$requestUri = rawurldecode($request->getRequestUri());
 
 		if (empty($requestUri)) {
 			throw new LogicException('Cannot route without a request URI.');
