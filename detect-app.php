@@ -12,7 +12,8 @@
 
 function _sly_router($server) {
 	$base   = dirname($server['SCRIPT_NAME']);
-	$reqUri = substr($server['REQUEST_URI'], strlen($base));
+	$reqUri = rawurldecode($server['REQUEST_URI']);
+	$reqUri = substr($reqUri, strlen($base));
 	$reqUri = preg_replace('/[?&].*$/', '', $reqUri);
 	$reqUri = trim($reqUri, '/');
 
