@@ -106,7 +106,7 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 	 * @param  int   $clang
 	 * @return array
 	 */
-	public function findAllRevisions($id, $clang, $sort = 'DESC',  $offset = null, $limit = null) {
+	public function findAllRevisions($id, $clang, $offset = null, $limit = null, $sort = 'DESC') {
 		$where  = compact('id', 'clang');
 		$order  = 'revision '.$sort;
 		$return = array();
