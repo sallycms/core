@@ -1,0 +1,70 @@
+<?php
+/*
+ * Copyright (c) 2014, webvariants GmbH & Co. KG, http://www.webvariants.de
+ *
+ * This file is released under the terms of the MIT license. You can find the
+ * complete text in the attached LICENSE file or online at:
+ *
+ * http://www.opensource.org/licenses/mit-license.php
+ */
+
+/**
+ * Folgende Datentypen sind möglich:
+ *
+ * string => strtotime($value)    (alles, was PHP als Zeitangabe versteht)
+ * int    => intval($value)       (UNIX-Timestamp)
+ * false  => time()               (jetzt)
+ * null   => ''                   (kein Datum ausgeben)
+ */
+
+$name     = $this->getName();
+$id       = $this->getID();
+$minYear  = 1970; // Und es machte Booom im UNIX-Universum...
+$maxYear  = date('Y') + 20;
+$value    = $this->getDisplayValue();
+
+if ($value === '') {
+	$value = null;
+}
+
+if ($value === false) {
+	$value = time();
+}
+
+// prepare formatting
+
+$type       = $this->withTime() ? 'datetime-local' : 'date';
+$dateformat = $this instanceof sly_Form_DateTime ? $this->getDateformat() : null;
+if (!$dateformat)
+	$dateformat = t($this->withTime() ? 'datetimeformat' : 'dateformat');
+$formatJS   = str_replace(
+	array('%a',  '%A',   '%b',  '%B',   '%e', '%d', /* '??', */ '%m', '%y', '%Y',  '%H',  '%M'),
+	array('ddd', 'dddd', 'mmm', 'mmmm', 'd',  'dd', /* 'm',  */ 'mm', 'yy', 'yyyy', 'HH', 'MM'),
+	$dateformat
+);
+
+// prepare date
+
+$format = $this->withTime() ? 'Y-m-d\TH:i' : 'Y-m-d';
+
+if ($value instanceof DateTime) {
+	$value = $value->format($format);
+}
+elseif ($value !== null) {
+	$stamp = sly_Util_String::isInteger($value) ? intval($value) : strtotime($value);
+	$value = date($format, $stamp);
+}
+
+// we need the format later on
+$attrs['data-format']  = $formatJS;
+
+$attrs['class']    = 'sly-form-text sly-form-'.$type;
+$attrs['type']     = $type;
+$attrs['name']     = $name;
+$attrs['id']       = $id;
+$attrs['value']    = $value === null ? '' : $value;
+$attrs['required'] = $this->getAttribute('required') ? 'required' : '';
+$attrs['disabled'] = $this->getAttribute('disabled') ? 'disabled' : '';
+$attrs['readonly'] = $this->getAttribute('readonly') ? 'readonly' : '';
+
+print '<input '.sly_Util_HTML::buildAttributeString($attrs).' />';
