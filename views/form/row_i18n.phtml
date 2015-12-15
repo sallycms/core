@@ -99,7 +99,7 @@ print $this->renderView('row_i18n_helper.phtml', compact('element', 'formRowClas
 
 if ($isMultilingual) {
 	$style = $isEqual ? ' style="display:none"' : '';
-	print '<div class="sly-form-i18n-container c-'.$containerID.'"'.$style.'>';
+	print '<div class="sly-form-row sly-form-i18n-container c-'.$containerID.'"'.$style.'>';
 
 	$element      = new sly_Form_Text($element->getLabel(), $element->getHelpText());
 	$formRowClass = array('sly-form-row', 'sly-num'.$rowNum);
