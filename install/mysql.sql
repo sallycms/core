@@ -1,4 +1,4 @@
--- Sally Database Dump Version 0.9.*
+-- Sally Database Dump Version 0.10.*
 -- Prefix sly_
 
 CREATE TABLE sly_article (id INT UNSIGNED NOT NULL, clang INT UNSIGNED NOT NULL, revision INT UNSIGNED DEFAULT 0 NOT NULL, latest TINYINT(1) DEFAULT '0' NOT NULL, online TINYINT(1) DEFAULT '0' NOT NULL, deleted TINYINT(1) DEFAULT '0' NOT NULL, type VARCHAR(64) NOT NULL, re_id INT UNSIGNED NOT NULL, path VARCHAR(255) NOT NULL, pos INT UNSIGNED NOT NULL, name VARCHAR(255) NOT NULL, catpos INT UNSIGNED NOT NULL, catname VARCHAR(255) NOT NULL, startpage TINYINT(1) DEFAULT '0' NOT NULL, createdate DATETIME NOT NULL, updatedate DATETIME NOT NULL, createuser VARCHAR(128) NOT NULL, updateuser VARCHAR(128) NOT NULL, attributes LONGTEXT NOT NULL, INDEX parents (re_id), INDEX types (type), PRIMARY KEY(id, clang, revision)) DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci ENGINE = InnoDB;
