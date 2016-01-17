@@ -156,7 +156,7 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 	 * @return boolean
 	 */
 	public function edit(sly_Model_Base_Article $obj, $name, $position = false, sly_Model_User $user = null) {
-		$obj = $this->touch($obj);
+		$obj = $this->touch($obj, $user);		
 		return $this->editHelper($obj, $name, $position, $user);
 	}
 
@@ -827,6 +827,10 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 		$eventDispatcher     = $this->container->getDispatcher();
 		$sql                 = $this->getPersistence();
 		$tableName           = $this->getTableName();
+
+		if ($article->isStartArticle() && $article->getRevision() === 0) {
+			throw new sly_Exception('Can not delete category revision');
+		}
 
 		$sql->transactional(function() use ($sql, $tableName, $article, $articleSliceService, $eventDispatcher) {
 			$articleSliceService->delete($article, null, null, false);
