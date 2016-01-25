@@ -435,7 +435,7 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id implements sly_Contai
 		$query    =
 			'SELECT s.article_id, s.clang, s.revision '.
 			'FROM '.$prefix.'slice sv, '.$prefix.'article_slice s, '.$prefix.'article a '.
-			'WHERE sv.id = s.slice_id AND a.id = s.article_id AND a.clang = s.clang AND serialized_values REGEXP ? '.
+			'WHERE a.deleted = 0 AND sv.id = s.slice_id AND a.id = s.article_id AND a.clang = s.clang AND serialized_values REGEXP ? '.
 			'GROUP BY s.article_id, s.clang';
 
 		$usages  = array();
