@@ -9,6 +9,10 @@
  */
 
 class sly_DB_DumpTest extends PHPUnit_Framework_TestCase {
+	protected function getDataSetName() {
+		return 'pristine-sally';
+	}
+	
 	public static function setUpBeforeClass() {
 		$dir = __DIR__;
 
