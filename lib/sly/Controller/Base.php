@@ -78,9 +78,15 @@ abstract class sly_Controller_Base {
 	 * @param  boolean $returnOutput  set to false to not use an output buffer
 	 * @return string                 the generated output if $returnOutput, else null
 	 */
-	protected function render() {
-		if (func_num_args() >= 2 && !empty(func_get_arg(1))) {
+	protected function render($filename, array $params = array(), $returnOutput = true) {
+		unset($filename, $returnOutput);
+
+		if (!empty($params)) {
+			unset($params);
 			extract(func_get_arg(1));
+		}
+		else {
+			unset($params);
 		}
 
 		// func_get_arg() does not return the default argument, so we have to check
