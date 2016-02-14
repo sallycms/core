@@ -97,7 +97,7 @@ class sly_Util_Template {
 	 * @return string                 the generated output if $returnOutput, else null
 	 */
 	private static function renderHelper() {
-		if (!empty(func_get_arg(1))) {
+		if (func_num_args() > 1 && is_array(func_get_arg(1))) {
 			extract(func_get_arg(1));
 		}
 		
