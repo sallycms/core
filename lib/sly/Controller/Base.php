@@ -79,7 +79,7 @@ abstract class sly_Controller_Base {
 	 * @return string                 the generated output if $returnOutput, else null
 	 */
 	protected function render() {
-		if (func_num_args() >= 2 && !empty(func_get_arg(1))) {
+		if (func_num_args() > 1 && is_array(func_get_arg(1))) {
 			extract(func_get_arg(1));
 		}
 
