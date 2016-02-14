@@ -96,15 +96,9 @@ class sly_Util_Template {
 	 * @param  boolean $returnOutput  set to false to not use an output buffer
 	 * @return string                 the generated output if $returnOutput, else null
 	 */
-	private static function renderHelper($filename, array $params, $returnOutput) {
-		unset($filename, $returnOutput);
-
-		if (!empty($params)) {
-			unset($params);
+	private static function renderHelper() {
+		if (func_num_args() > 1 && is_array(func_get_arg(1))) {
 			extract(func_get_arg(1));
-		}
-		else {
-			unset($params);
 		}
 
 		try {
