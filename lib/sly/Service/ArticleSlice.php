@@ -331,7 +331,7 @@ class sly_Service_ArticleSlice implements sly_ContainerAwareInterface {
 				$article = $artService->touch($article);
 			}
 
-			$maxPos    = $this->countSlices($article, $slot);
+			$maxPos    = $this->countSlices($article, $slot) - 1;
 			$newPos    = max(array(0, min(array($newPos, $maxPos)))); // normalize
 			$articleId = $article->getId();
 			$clang     = $article->getClang();
