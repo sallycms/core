@@ -340,7 +340,7 @@ class sly_Model_Base_Article extends sly_Model_Base {
 	 */
 	public function getParentTree($asObjects = true) {
 		$explode = explode('|', $this->getPath());
-		$explode = array_filter($explode);
+		$explode = array_values(array_filter($explode));
 
 		if ($this->getStartpage() == 1) {
 			$explode[] = $this->getId();

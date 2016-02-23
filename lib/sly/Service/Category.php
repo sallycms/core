@@ -307,13 +307,19 @@ class sly_Service_Category extends sly_Service_ArticleManager {
 				$cat = $this->findByPK($id, $clang);
 				$pos = $cat->getCatPosition();
 
-				$cat->setParentId($targetID);
-				$cat->setCatPosition($newPos);
-				$cat->setPath($newPath);
+				//set updatedate
 				$cat->setUpdateColumns($user);
-
-				// update the cat itself
 				$this->update($cat);
+
+				$sql->update(
+						$this->getTableName(),
+						array(
+							're_id'  => $targetID,
+							'catpos' => $newPos,
+							'path'   => $newPath
+						),
+						compact('id', 'clang')
+					);
 
 				// move all followers one position up
 				$followers = $this->getFollowerQuery($oldParent, $clang, $pos);

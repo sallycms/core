@@ -134,7 +134,7 @@ class sly_Util_Article {
 		if ($clang === false || $clang === null) {
 			$clang = sly_Core::getCurrentClang();
 		}
-		return self::findByCategory(0, $clang, $ignoreOfflines);
+		return self::findByCategory(0, $ignoreOfflines, $clang);
 	}
 
 	/**
