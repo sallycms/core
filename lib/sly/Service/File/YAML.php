@@ -28,7 +28,7 @@ class sly_Service_File_YAML extends sly_Service_File_Base {
 	 * @return mixed
 	 */
 	protected function readFile($filename) {
-		return Yaml::parse($filename);
+		return Yaml::parse(file_get_contents($filename));
 	}
 
 	/**
