@@ -30,7 +30,7 @@
         "symfony/yaml": "~2.2",
         "webvariants/babelcache": "~2.0",
         "sallycms/composer-installer": "~1.1",
-        "knplabs/gaufrette": "0.2.*@dev",
+        "knplabs/gaufrette": "0.2.*",
         "pimple/pimple": "~1.0"
     },
     "require-dev": {
