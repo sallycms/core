@@ -125,6 +125,7 @@ class sly_Core {
 			}
 		}
 		catch (Exception $e) {
+			header('HTTP/1.1 500 '.sly_Response::$statusTexts['500']);
 			header('Content-Type: text/plain; charset=UTF-8');
 			print 'Could not load core configuration: '.$e->getMessage();
 			exit(1);
