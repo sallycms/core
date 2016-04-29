@@ -81,7 +81,7 @@ abstract class sly_ErrorHandler_Base implements sly_ErrorHandler {
 	 *
 	 * @param Exception $exception
 	 */
-	public function onCaughtException(Exception $exception) {
+	public function onCaughtException($exception) {
 		// perform normal error handling (logging)
 		$this->handleException($exception);
 
@@ -117,7 +117,7 @@ abstract class sly_ErrorHandler_Base implements sly_ErrorHandler {
 	 * @param  Exception $e
 	 * @return boolean
 	 */
-	protected function isSevere(Exception $e) {
+	protected function isSevere($e) {
 		return (!($e instanceof sly_ErrorHandler_ErrorException)) || $e->isSevere();
 	}
 
@@ -129,7 +129,7 @@ abstract class sly_ErrorHandler_Base implements sly_ErrorHandler {
 	 *
 	 * @param Exception $e  the error that caused the script to die
 	 */
-	protected function aaaauuuggghhhh(Exception $e) {
+	protected function aaaauuuggghhhh($e) {
 		/* do nothing */
 	}
 }

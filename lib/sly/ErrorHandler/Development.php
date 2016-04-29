@@ -45,7 +45,7 @@ class sly_ErrorHandler_Development extends sly_ErrorHandler_Base {
 	 * Collects the string representation for all severe exception; does nothing
 	 * with non-severe exceptions.
 	 */
-	public function handleException(Exception $e) {
+	public function handleException($e) {
 		// due to display_errors=On, non-Exceptions have already been printed;
 		// for real Exceptions we have to do it later in the aaaauuuggghhhh handler
 		if ($this->isSevere($e)) {
@@ -61,7 +61,7 @@ class sly_ErrorHandler_Development extends sly_ErrorHandler_Base {
 	 *
 	 * @param Exception $e  the error that caused the script to die
 	 */
-	protected function aaaauuuggghhhh(Exception $e) {
+	protected function aaaauuuggghhhh($e) {
 		while (ob_get_level()) ob_end_clean();
 		ob_start('ob_gzhandler');
 
