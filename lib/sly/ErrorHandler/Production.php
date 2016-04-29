@@ -71,7 +71,7 @@ class sly_ErrorHandler_Production extends sly_ErrorHandler_Base implements sly_E
 	 *
 	 * @param Exception $e
 	 */
-	public function handleException(Exception $e) {
+	public function handleException($e) {
 		if (isset($_SERVER['REQUEST_METHOD'])) {
 			$req = $_SERVER['REQUEST_METHOD'].' '.$_SERVER['REQUEST_URI'];
 		}
@@ -98,7 +98,7 @@ class sly_ErrorHandler_Production extends sly_ErrorHandler_Base implements sly_E
 	 *
 	 * @param Exception $e  the error that caused the script to die
 	 */
-	protected function aaaauuuggghhhh(Exception $e) {
+	protected function aaaauuuggghhhh($e) {
 		while (ob_get_level()) ob_end_clean();
 		ob_start('ob_gzhandler');
 
