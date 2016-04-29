@@ -1,0 +1,19 @@
+language: php
+
+php:
+   - 5.3
+   - 5.4
+   - 5.5
+
+install:
+   - mysql --version
+   - chmod +x tests/setup-travis.sh
+   - ./tests/setup-travis.sh
+
+script:
+   - vendor/bin/phpunit -c tests/full.xml
+
+notifications:
+   email:
+      recipients:
+         - travis-ci-monitor@sallycms.de
