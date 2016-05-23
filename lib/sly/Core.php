@@ -461,8 +461,13 @@ class sly_Core {
 		static $version = null;
 
 		if ($version === null) {
-			$parser  = new sly_Service_VersionParser();
-			$version = $parser->getPackageVersionDetails(SLY_COREFOLDER);
+			$parser   = new sly_Service_VersionParser();
+			$composer = new sly_Util_Composer(null);
+			$composer->setPackage('sallycms/core');
+			$composer->getContent(SLY_VENDORFOLDER.'/composer');
+			$v = $composer->getKey('version_normalized', false);
+						
+			$version = $parser->getVersionDetails($v);
 		}
 
 		$pattern = str_replace('X', $version['major'], $pattern);

@@ -9,21 +9,14 @@
  */
 
 class sly_App_Tests implements sly_App_Interface {
-	protected $userID;
 	protected $container;
 
-	public function __construct(sly_Container $container, $userID) {
+	public function __construct(sly_Container $container) {
 		$this->container = $container;
-		$this->userID    = $userID;
 	}
 
 	public function initialize() {
 		$container = $this->getContainer();
-
-		// login the dummy user
-		$service = $container->getUserService();
-		$user    = $service->findById($this->userID);
-		$service->setCurrentUser($user);
 
 		// refresh develop ressources
 		$container->getTemplateService()->refresh();

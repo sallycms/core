@@ -217,7 +217,7 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id implements sly_Contai
 	 * @param  boolean $applyBlacklist  whether or not to to add '.txt' to blacklisted extensions
 	 * @return string                   final URI of the imported file
 	 */
-	public function importFile($source, $targetName, $applyBlacklist) {
+	public function importFile($source, $targetName, $applyBlacklist, $removeSource) {
 		if (!file_exists($source)) {
 			throw new sly_Exception(t('file_not_found', $source));
 		}
@@ -232,7 +232,7 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id implements sly_Contai
 
 		// add file to media filesystem
 		$service = new sly_Filesystem_Service($this->mediaFs);
-		$service->importFile($source, $targetName);
+		$service->importFile($source, $targetName, $removeSource);
 
 		return $this->fsBaseUri.$targetName;
 	}
@@ -448,6 +448,9 @@ class sly_Service_Medium extends sly_Service_Model_Base_Id implements sly_Contai
 
 		foreach ($sql->all() as $row) {
 			$article  = $service->findByPK($row['article_id'], $row['clang'], $row['revision']);
+			if (!$article instanceof sly_Model_Article) {
+				continue;
+			}
 			$usages[] = array(
 				'object' => $article,
 				'type'   => 'sly-article'
