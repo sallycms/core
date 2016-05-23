@@ -1,0 +1,47 @@
+{
+    "name": "sallycms/core",
+    "description": "Core Framework for SallyCMS",
+    "type": "sallycms-app",
+    "keywords": [
+        "cms",
+        "php",
+        "mysql",
+        "framework",
+        "sallycms"
+    ],
+    "authors": [
+        {
+            "name": "webvariants GmbH & Co. KG",
+            "homepage": "http://www.webvariants.de/"
+        }
+    ],
+    "homepage": "http://www.sallycms.de/",
+    "license": "MIT",
+    "autoload": {
+        "psr-0": {
+            "sly_": "lib/"
+        },
+        "files": [
+            "lib/functions.php"
+        ]
+    },
+    "require": {
+        "php": ">=5.3.3",
+        "symfony/yaml": "~2.2",
+        "webvariants/babelcache": "~2.0",
+        "sallycms/composer-installer": "~1.1",
+        "knplabs/gaufrette": "0.2.*",
+        "pimple/pimple": "~1.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "3.7.*",
+        "phpunit/dbunit": "1.2.*",
+        "phpunit/php-code-coverage": "1.2.*",
+        "doctrine/dbal": "~2.3.2"
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-default": "0.11.x-dev"
+        }
+    }
+}
