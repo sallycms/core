@@ -3,3 +3,4 @@ vendor/*
 tests/data/*
 tests/mediapool/*
 tests/config/.htaccess
+test-coverage/*

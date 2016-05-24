@@ -100,13 +100,13 @@ class sly_Container extends Pimple implements Countable {
 
 			$driverClass = 'sly_DB_PDO_Driver_'.strtoupper($driver);
 
-			return new $driverClass($config['host'], $config['login'], $config['password'], $config['name']);
+			return new $driverClass($config['host'], $config['user'], $config['password'], $config['dbname']);
 		});
 
 		$this['sly-pdo-connection'] = $this->share(function($container) {
 			$config = $container['sly-config']->get('database');
 			$driver = $container['sly-pdo-driver'];
-			$pdo    = new PDO($driver->getDSN(), $config['login'], $config['password'], $driver->getPDOOptions());
+			$pdo    = new PDO($driver->getDSN(), $config['user'], $config['password'], $driver->getPDOOptions());
 
 			$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 

@@ -93,7 +93,7 @@ class sly_Filesystem_Service {
 		return $this;
 	}
 
-	public function importFile($sourceFile, $targetFile, $removeSource) {
+	public function importFile($sourceFile, $targetFile, $removeSource = false) {
 		$in  = fopen($sourceFile, 'rb');
 		$out = $this->fs->createStream($targetFile);
 

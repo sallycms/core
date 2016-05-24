@@ -156,7 +156,7 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 	 * @return boolean
 	 */
 	public function edit(sly_Model_Base_Article $obj, $name, $position = false, sly_Model_User $user = null) {
-		$obj = $this->touch($obj);
+		$obj = $this->touch($obj, $user);		
 		return $this->editHelper($obj, $name, $position, $user);
 	}
 
