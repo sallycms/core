@@ -4,7 +4,7 @@ caching_strategy: blackhole
 database:
     driver: mysql
     host: localhost
-    login: develop
+    user: develop
     password: develop
-    name: sally_test
+    dbname: sally_test
     table_prefix: sly_

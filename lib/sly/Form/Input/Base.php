@@ -47,7 +47,7 @@ abstract class sly_Form_Input_Base extends sly_Form_ElementBase implements sly_F
 		$this->attributes['placeholder'] = $this->placeholder;
 
 		$attributeString = $this->getAttributeString();
-		return '<input '.$attributeString.' />'.($this->annotation ? ' '.$this->annotation : '');
+		return '<input '.$attributeString.' />'.($this->annotation ? ' <span class="sly-form-annotation">'.$this->annotation.'</span>' : '');
 	}
 
 	/**

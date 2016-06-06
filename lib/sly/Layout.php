@@ -163,6 +163,23 @@ abstract class sly_Layout extends sly_Viewable {
 	}
 
 	/**
+	 * Wrapper for addCSSFile with hash parameter from FileHasher for Caching
+	 *
+	 * @param  string $cssFile  path to css file
+	 * @param  string $media    media attribute für den CSS link
+	 * @param  string $group    group files by this param
+	 * @return boolean          true if the file was added, false if it already existed
+	 */
+	public function addCSSFileHashed($cssFile, $media = 'all', $group = 'default') {
+		
+		$container     = sly_Core::getContainer();
+		$hasher        = $container->getFilehasher();
+		$cssFileHashed = $hasher->hashUrlWithParameter($cssFile);
+
+		return $this->addCSSFile($cssFileHashed, $media, $group);
+	}
+
+	/**
 	 * Add inline JavaScript to the page
 	 *
 	 * Use this method if you have to generate dynamic JS and add it directly to
@@ -183,19 +200,36 @@ abstract class sly_Layout extends sly_Viewable {
 	 * groups, so that addOns can partially access them. Files must be unique
 	 * (or else the method returns false).
 	 *
-	 * @param  string $cssFile  path to js file
+	 * @param  string $jsFile  path to js file
+	 * @param  string $group   group files by this param
+	 * @return boolean         true if the file was added, false if it already existed
+	 */
+	public function addJavaScriptFile($jsFile, $group = 'default') {
+		$javascriptFile = trim($jsFile);
+
+		foreach ($this->javaScriptFiles as $files) {
+			if (in_array($javascriptFile, $files)) {
+				return false;
+			}
+		}
+		$this->javaScriptFiles[trim($group)][] = $javascriptFile;
+		return true;
+	}
+
+	/**
+	 * Wrapper for addJavaScriptFile with hash parameter from FileHasher for Caching
+	 *
+	 * @param  string $jsFile   path to js file
 	 * @param  string $group    group files by this param
 	 * @return boolean          true if the file was added, false if it already existed
 	 */
-	public function addJavaScriptFile($javascriptFile, $group = 'default') {
-		$javascriptFile = trim($javascriptFile);
+	public function addJavaScriptFileHashed($jsFile, $group = 'default') {
 
-		foreach ($this->javaScriptFiles as $files) {
-			if (in_array($javascriptFile, $files)) return false;
-		}
+		$container    = sly_Core::getContainer();
+		$hasher       = $container->getFilehasher();
+		$jsFileHashed = $hasher->hashUrlWithParameter($jsFile);
 
-		$this->javaScriptFiles[trim($group)][] = $javascriptFile;
-		return true;
+		return $this->addJavaScriptFile($jsFileHashed, $group);
 	}
 
 	/**
@@ -305,9 +339,10 @@ abstract class sly_Layout extends sly_Viewable {
 	 * @param string $href   href attribute value
 	 * @param string $type   type attribute value
 	 * @param string $title  title attribute value
+	 * @param string $sizes  sizes attribute value
 	 */
-	public function addLink($rel, $href, $type = '', $title= '') {
-		$this->links[] = array('rel' => trim($rel), 'href' => trim($href), 'type' => trim($type), 'title' => trim($title));
+	public function addLink($rel, $href, $type = '', $title= '', $sizes = '') {
+		$this->links[] = array('rel' => trim($rel), 'href' => trim($href), 'type' => trim($type), 'title' => trim($title), 'sizes'=>trim($sizes));
 	}
 
 	/**

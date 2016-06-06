@@ -26,12 +26,12 @@
 	</testsuites>
 
 	<logging>
-		<log type="coverage-html" target="../../test-coverage" showUncoveredFiles="false" />
+		<log type="coverage-html" target="../test-coverage" showUncoveredFiles="false" />
 	</logging>
 
 	<filter>
 		<whitelist>
-			<directory>../core/lib</directory>
+			<directory>../lib</directory>
 		</whitelist>
 	</filter>
 </phpunit>

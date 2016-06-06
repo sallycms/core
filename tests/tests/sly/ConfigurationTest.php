@@ -28,6 +28,20 @@ class sly_ConfigurationTest extends PHPUnit_Framework_TestCase {
 			$this->config->set('unittest', $this->test_array);
 		}
 	}
+	
+	/**
+	 * @expectedException sly_Exception
+	 */
+	public function testSetEmptyKey1() {
+		$this->config->set(null, 'scalar_value');
+	}
+	
+	/**
+	 * @expectedException sly_Exception
+	 */
+	public function testSetEmptyKey2() {
+		$this->config->set('', 'scalar_value');
+	}
 
 	public function testAssignScalar() {
 		$this->config->setStatic('unittest', 'scalar_value');
@@ -114,6 +128,21 @@ class sly_ConfigurationTest extends PHPUnit_Framework_TestCase {
 			'numArray' => array('red', 'green', 'blue'),
 			'assocArray' => array('red' => 'rot', 'blue' => 'heckiheckipatang')
 		), 'overwriting scalar failed');
+	}
+	
+	public function testRemove() {
+		$this->setBaseArray();
+		
+		$this->config->remove('unittest/assocArray/blue');
+		$this->assertEquals($this->config->get('unittest'), array(
+			'numArray' => array('red', 'green', 'blue'),
+			'assocArray' => array('red' => 'rot')
+		), 'remove leaf failed');
+		
+		$this->config->remove('unittest/assocArray');
+		$this->assertEquals($this->config->get('unittest'), array(
+			'numArray' => array('red', 'green', 'blue')
+		), 'remove tree failed');
 	}
 
 	/**

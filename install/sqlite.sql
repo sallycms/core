@@ -1,4 +1,4 @@
--- Sally Database Dump Version 0.9.*
+-- Sally Database Dump Version 0.10.*
 -- Prefix sly_
 
 CREATE TABLE sly_article (id INTEGER NOT NULL, clang INTEGER NOT NULL, revision INTEGER DEFAULT 0 NOT NULL, latest BOOLEAN DEFAULT '0' NOT NULL, online BOOLEAN DEFAULT '0' NOT NULL, deleted BOOLEAN DEFAULT '0' NOT NULL, type VARCHAR(64) NOT NULL, re_id INTEGER NOT NULL, path VARCHAR(255) NOT NULL, pos INTEGER NOT NULL, name VARCHAR(255) NOT NULL, catpos INTEGER NOT NULL, catname VARCHAR(255) NOT NULL, startpage BOOLEAN DEFAULT '0' NOT NULL, createdate DATETIME NOT NULL, updatedate DATETIME NOT NULL, createuser VARCHAR(128) NOT NULL, updateuser VARCHAR(128) NOT NULL, attributes CLOB NOT NULL, PRIMARY KEY(id, clang, revision));
