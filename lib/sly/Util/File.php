@@ -33,7 +33,7 @@ class sly_Util_File {
 			$filename = $dispatcher->filter('SLY_MEDIUM_FILENAME', $filename, array('orig' => $origFilename));
 		}
 
-		$filename = preg_replace('#[^a-z0-9.+-]#i', '_', $filename);
+		$filename = preg_replace('#[^a-z0-9.-]#i', '_', $filename);
 		$filename = trim(preg_replace('#_+#i', '_', $filename), '_');
 
 		return $filename;
