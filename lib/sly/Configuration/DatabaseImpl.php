@@ -15,16 +15,16 @@
  */
 class sly_Configuration_DatabaseImpl implements sly_Configuration_Reader, sly_Configuration_Writer {
 	protected $configDir;   ///< string
-	protected $persistence; ///< sly_DB_PDO_Persistence
+	protected $persistence; ///< sly_DB_Persistence
 	protected $fileService; ///< sly_Service_File_Base
 
-	public function __construct($configDirectory, sly_Service_File_Base $fileService, sly_DB_PDO_Persistence $persistence = null) {
+	public function __construct($configDirectory, sly_Service_File_Base $fileService, sly_DB_Persistence $persistence = null) {
 		$this->configDir   = rtrim($configDirectory, '/\\');
 		$this->fileService = $fileService;
 		$this->persistence = $persistence;
 	}
 
-	public function setPersistence(sly_DB_PDO_Persistence $persistence) {
+	public function setPersistence(sly_DB_Persistence $persistence) {
 		$this->persistence = $persistence;
 	}
 
