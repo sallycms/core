@@ -12,14 +12,12 @@
  * @ingroup registry
  */
 class sly_Registry_Persistent implements sly_Registry_Registry {
-	private $store;  ///< sly_Util_Array
-	private $pdo;    ///< sly_DB_PDO_Persistence
-	private $prefix; ///< string
+	private $store;       ///< sly_Util_Array
+	private $persistence; ///< sly_DB_Persistence
 
-	public function __construct(sly_DB_PDO_Persistence $persistence) {
-		$this->store  = new sly_Util_Array();
-		$this->pdo    = $persistence;
-		$this->prefix = $persistence->getPrefix();
+	public function __construct(sly_DB_Persistence $persistence) {
+		$this->store       = new sly_Util_Array();
+		$this->persistence = $persistence;
 	}
 
 	/**
@@ -28,7 +26,7 @@ class sly_Registry_Persistent implements sly_Registry_Registry {
 	 * @return mixed
 	 */
 	public function set($key, $value) {
-		$this->pdo->replace('registry', array('value' => serialize($value)), array('name' => $key));
+		$this->persistence->replace('registry', array('value' => serialize($value)), array('name' => $key));
 
 		return $this->store->set($key, $value);
 	}
@@ -70,7 +68,7 @@ class sly_Registry_Persistent implements sly_Registry_Registry {
 	 * @return boolean
 	 */
 	public function remove($key) {
-		$this->pdo->delete('registry', array('name' => $key));
+		$this->persistence->delete('registry', array('name' => $key));
 		return $this->store->remove($key);
 	}
 
@@ -79,9 +77,9 @@ class sly_Registry_Persistent implements sly_Registry_Registry {
 	 */
 	public function flush($key = '*') {
 		$pattern = str_replace(array('*', '?'), array('%', '_'), $key);
-		$table   = $this->prefix.'registry';
+		$table   = $this->persistence->getPrefix().'registry';
 
-		$this->pdo->query('DELETE FROM '.$table.' WHERE `name` LIKE ?', array($pattern));
+		$this->persistence->query('DELETE FROM '.$table.' WHERE `name` LIKE ?', array($pattern));
 		$this->store = new sly_Util_Array();
 	}
 
@@ -90,6 +88,6 @@ class sly_Registry_Persistent implements sly_Registry_Registry {
 	 * @return mixed
 	 */
 	protected function getValue($key) {
-		return $this->pdo->magicFetch('registry', 'value', array('name' => $key));
+		return $this->persistence->magicFetch('registry', 'value', array('name' => $key));
 	}
 }
