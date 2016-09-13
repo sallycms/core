@@ -69,7 +69,7 @@ class sly_ErrorHandler_Production extends sly_ErrorHandler_Base implements sly_E
 	 * log the exception and stop the script execution by displaying a neutral
 	 * error page.
 	 *
-	 * @param Exception $e
+	 * @param Exception|Error $e
 	 */
 	public function handleException($e) {
 		if (isset($_SERVER['REQUEST_METHOD'])) {
@@ -96,7 +96,7 @@ class sly_ErrorHandler_Production extends sly_ErrorHandler_Base implements sly_E
 	 * This method is the last one that is called when a script dies away and is
 	 * responsible for displaying the error page and sending the HTTP500 header.
 	 *
-	 * @param Exception $e  the error that caused the script to die
+	 * @param Exception|Error $e  the error that caused the script to die
 	 */
 	protected function aaaauuuggghhhh($e) {
 		while (ob_get_level()) ob_end_clean();
