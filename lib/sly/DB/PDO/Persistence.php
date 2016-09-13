@@ -14,7 +14,7 @@
  * @author  zozi@webvariants.de
  * @ingroup database
  */
-class sly_DB_PDO_Persistence extends sly_DB_Persistence {
+class sly_DB_PDO_Persistence implements sly_DB_Persistence {
 	protected $driver;           ///< string
 
 	private $connection = null;  ///< sly_DB_PDO_Connection
@@ -288,6 +288,15 @@ class sly_DB_PDO_Persistence extends sly_DB_Persistence {
 		return $this->getPDO()->quote($str, $paramType);
 	}
 
+	/**
+	 *
+	 * @param  string $identifier
+	 * @return string
+	 */
+	public function quoteIdentifier($identifier) {
+		return $this->getSQLbuilder('dummy')->quote_identifier($identifier);
+	}
+
 	// =========================================================================
 	// TRANSACTIONS
 	// =========================================================================
@@ -484,7 +493,7 @@ class sly_DB_PDO_Persistence extends sly_DB_Persistence {
 
 	public function rewind() {
 		if ($this->currentRow !== null) {
-			throw new sly_DB_PDO_Exception('Über ein PDO-Resultset kann nicht mehrfach iteriert werden!');
+			throw new sly_DB_Exception('Über ein PDO-Resultset kann nicht mehrfach iteriert werden!');
 		}
 	}
 
