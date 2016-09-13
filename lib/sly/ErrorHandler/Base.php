@@ -79,7 +79,7 @@ abstract class sly_ErrorHandler_Base implements sly_ErrorHandler {
 	 * log the exception and stop the script execution by displaying a neutral
 	 * error page.
 	 *
-	 * @param Exception $exception
+	 * @param Exception|Error $exception
 	 */
 	public function onCaughtException($exception) {
 		// perform normal error handling (logging)
@@ -114,7 +114,7 @@ abstract class sly_ErrorHandler_Base implements sly_ErrorHandler {
 	/**
 	 * Determine if an exception is severe
 	 *
-	 * @param  Exception $e
+	 * @param  Exception|Error $e
 	 * @return boolean
 	 */
 	protected function isSevere($e) {
@@ -127,7 +127,7 @@ abstract class sly_ErrorHandler_Base implements sly_ErrorHandler {
 	 * This method is the last one that is called when a script dies away and is
 	 * responsible for displaying the error page and sending the HTTP500 header.
 	 *
-	 * @param Exception $e  the error that caused the script to die
+	 * @param Exception|Error $e  the error that caused the script to die
 	 */
 	protected function aaaauuuggghhhh($e) {
 		/* do nothing */

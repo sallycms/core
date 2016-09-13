@@ -86,9 +86,13 @@ class sly_I18N implements sly_I18N_Base {
 	 */
 	public function appendFile($path, $prefix = '') {
 		// if the file is already included return
-		if(in_array($path, $this->paths)) return true;
+		foreach ($this->paths as $element) {
+			if ($element['path'] === $path) {
+				return true;
+			}
+		}
 
-		$this->paths[] = $path;
+		$this->paths[] = array('path' => $path, 'prefix' => $prefix);
 		$filename      = $path.'/'.$this->locale.'.yml';
 
 		if (is_readable($filename)) {
@@ -220,7 +224,7 @@ class sly_I18N implements sly_I18N_Base {
 		$this->texts  = array();
 		$this->paths  = array();
 		foreach ($paths as $path) {
-			$this->appendFile($path);
+			$this->appendFile($path['path'], $path['prefix']);
 		}
 	}
 }

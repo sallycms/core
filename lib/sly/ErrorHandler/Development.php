@@ -59,7 +59,7 @@ class sly_ErrorHandler_Development extends sly_ErrorHandler_Base {
 	 * This method is the last one that is called when a script dies away and is
 	 * responsible for displaying the error page and sending the HTTP500 header.
 	 *
-	 * @param Exception $e  the error that caused the script to die
+	 * @param Exception|Error $e  the error that caused the script to die
 	 */
 	protected function aaaauuuggghhhh($e) {
 		while (ob_get_level()) ob_end_clean();
