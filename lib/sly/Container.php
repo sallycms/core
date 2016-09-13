@@ -117,7 +117,7 @@ class sly_Container extends Pimple implements Countable {
 			return new sly_DB_PDO_Connection($driver, $pdo);
 		});
 
-		$this['sly-persistence'] = $this->inject(function($container) {
+		$this['sly-persistence-pdo'] = $this->inject(function($container) {
 			$config     = $container['sly-config']->get('database');
 			$connection = $container['sly-pdo-connection'];
 
@@ -125,6 +125,15 @@ class sly_Container extends Pimple implements Countable {
 			// a fresh instance for every access. We should refactor the database access
 			// to allow for a single persistence instance.
 			return new sly_DB_PDO_Persistence($config['driver'], $connection, $config['table_prefix']);
+		});
+
+		$this['sly-persistence'] = $this->inject(function($container) {
+			$connection = $container['sly-dbal-connection'];
+
+			// TODO: to support the iterator inside the persistence, we need to create
+			// a fresh instance for every access. We should refactor the database access
+			// to allow for a single persistence instance.
+			return new sly\Database\Persistence($connection);
 		});
 
 		$this['sly-cache-factory'] = $this->share(function($container) {
@@ -343,6 +352,15 @@ class sly_Container extends Pimple implements Countable {
 			return new sly_I18N(null, null, false);
 		});
 
+		$this['sly-dbal-connection'] = $this->share(function($container) {
+			$config = $container['sly-config']->get('database');
+
+			$config['driver']       = 'pdo_'.$config['driver'];
+			$config['wrapperClass'] = 'sly\Database\Connection';
+
+			return Doctrine\DBAL\DriverManager::getConnection($config);
+		});
+
 		//////////////////////////////////////////////////////////////////////////
 		// allow to overwrite default recipes
 
@@ -544,7 +562,7 @@ class sly_Container extends Pimple implements Countable {
 	}
 
 	/**
-	 * @return sly_DB_PDO_Persistence
+	 * @return sly_DB_Persistence
 	 */
 	public function getPersistence() {
 		return $this['sly-persistence'];
@@ -794,6 +812,14 @@ class sly_Container extends Pimple implements Countable {
 	 */
 	public function getFilehasher() {
 		return $this->get('sly-filehasher');
+	}
+
+	/**
+	 *
+	 * @return sly\Database\Connection
+	 */
+	public function getDBALConnection() {
+		return $this->get('sly-dbal-connection');
 	}
 
 	/*          setters for objects that are commonly set          */
