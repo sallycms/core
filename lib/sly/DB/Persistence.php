@@ -94,6 +94,15 @@ interface sly_DB_Persistence extends Iterator {
 	public function listTables($find = null);
 
 	/**
+	 * quotes a value (not recommended, better use prepared statements)
+	 *
+	 * @param  string $value
+	 * @return string
+	 */
+	public function quote($value);
+
+	/**
+	 * quotes an column identifier
 	 *
 	 * @param  string $identifier
 	 * @return string
