@@ -159,6 +159,10 @@ class sly_Filesystem_Prefixed extends Filesystem implements sly_Filesystem_Inter
 		$start  = mb_strlen($this->prefix);
 
 		foreach ($files as $file) {
+			if (mb_substr($file, 0, $start) !== $this->prefix) {
+				continue;
+			}
+
 			$rel = mb_substr($file, $start);
 
 			if (mb_strlen($rel) > 0) {
