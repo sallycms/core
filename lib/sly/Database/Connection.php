@@ -14,6 +14,8 @@ use Doctrine\DBAL\Connection as DoctrineConnection;
 use Doctrine\DBAL\Driver;
 use Doctrine\DBAL\Configuration;
 use Doctrine\Common\EventManager;
+use Doctrine\DBAL\Driver\ServerInfoAwareConnection;
+use Doctrine\DBAL\VersionAwarePlatformDriver;
 
 class Connection extends DoctrineConnection {
 	protected $prefix;
