@@ -62,6 +62,21 @@ class sly_Service_CategoryBaseTest extends sly_Service_CategoryTestBase {
 		$service->deleteById($id);
 
 		$this->assertNull($service->findByPK($id, self::$clang));
-		$service->deleteById(2);
+		$service->deleteById($id);
+	}
+
+	public function testFindTree() {
+		$service  = $this->getService();
+		$parentId = 0;
+		for($i=0; $i <= 3; $i++) {
+			$parentId = $service->add($parentId, $i, -1);
+		}
+
+		$categories = $service->findTree(0, self::$clang);
+
+		foreach($categories as $key => $category) {
+			$expectedName = (string) $key;
+			$this->assertEquals($expectedName, $category->getCatName());
+		}
 	}
 }

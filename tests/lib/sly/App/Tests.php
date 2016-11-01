@@ -30,6 +30,7 @@ class sly_App_Tests implements sly_App_Interface {
 
 		$config = $container->getConfig();
 		$config->set('/', sly_Util_YAML::load(SLY_CONFIGFOLDER.DIRECTORY_SEPARATOR.'sly_project.yml'));
+		$container->getUserService()->setCurrentUser(new sly_Model_User_Test());
 
 		// clear current cache
 		sly_Core::cache()->flush('sly');

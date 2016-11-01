@@ -83,8 +83,6 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base implements
 	public function find($where = null, $group = null, $order = null, $offset = null, $limit = null, $having = null, $revStrategy = self::FIND_REVISION_LATEST) {
 		$db        = $this->getPersistence();
 		$where     = $this->fixWhereClause($where);
-		$tableName = $db->getPrefix().$this->getTableName();
-		$query     = $db->getSQLbuilder($tableName);
 		$return    = array();
 
 		// SELECT * FROM sly_article
@@ -94,16 +92,20 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base implements
 		// [LIMIT [$offset,]$limit]
 
 		// transform $where into a string, so we can add our rev strategy clauses
+		if (sly_Util_Array::isAssoc($where)) {
+			foreach($where as $key => $value) {
+				$where[$key] = $db->quoteIdentifier($key).' = '.$db->quote($value);
+			}
 
-		$query->where($where);
+			$where = join(' AND ', $where);
+		}
 
-		$where = $query->get_where_clause();
 		$strat = null;
 
 		switch ($revStrategy) {
-			case self::FIND_REVISION_ONLINE: $strat = 'online = 1';               break;
-			case self::FIND_REVISION_LATEST: $strat = 'latest = 1';               break;
-			case self::FIND_REVISION_BEST:   $strat = 'latest = 1 OR online = 1'; break;
+			case self::FIND_REVISION_ONLINE: $strat = $db->quoteIdentifier('online').' = 1';               break;
+			case self::FIND_REVISION_LATEST: $strat = $db->quoteIdentifier('latest').' = 1';               break;
+			case self::FIND_REVISION_BEST:   $strat = $db->quoteIdentifier('latest').' = 1 OR '.$db->quoteIdentifier('online').' = 1'; break;
 			default:                         $strat = null;                       break;
 		}
 
@@ -114,28 +116,14 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base implements
 			$where = "($where) AND ($strat)";
 		}
 
-		// construct the real query
+		// add some more order information
 
-		$order  = $order ? "$order, online DESC, latest DESC" : 'online DESC, latest DESC';
-		$values = $query->bind_values();
-
-		array_unshift($values, $where);
-		call_user_func_array(array($query, 'where'), $values);
-
-		$query->select('*');
-		$query->order($order);
-
-		if ($group)  $query->group($group);
-		if ($offset) $query->offset($offset);
-		if ($limit)  $query->limit($limit);
-
-		// fetch data
-
-		$db->query($query, $query->bind_values());
+		$order = $order ? "$order, online DESC, latest DESC" : 'online DESC, latest DESC';
+		$db->select($this->tablename, '*', $where, $group, $order, $offset, $limit, $having);
 
 		$fetched = array();
 
-		foreach ($db->all() as $row) {
+		foreach ($db as $row) {
 			// based on the revision strategy, we only consider a subset of found revisions;
 			// perform the filtering before constructing the actual model instance
 

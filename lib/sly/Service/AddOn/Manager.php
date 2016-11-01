@@ -457,7 +457,7 @@ class sly_Service_AddOn_Manager {
 				}
 
 				// force InnoDB for CREATE statements without an ENGINE declaration
-				$persistence->exec('SET storage_engine = InnoDB');
+				$persistence->exec('SET default_storage_engine = InnoDB');
 			}
 
 			foreach ($queries as $query) {

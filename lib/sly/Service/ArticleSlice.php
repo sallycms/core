@@ -46,7 +46,7 @@ class sly_Service_ArticleSlice implements sly_ContainerAwareInterface {
 
 	/**
 	 *
-	 * @return sly_DB_PDO_Persistence
+	 * @return sly_DB_Persistence
 	 */
 	protected function getPersistence() {
 		return $this->container->getPersistence();

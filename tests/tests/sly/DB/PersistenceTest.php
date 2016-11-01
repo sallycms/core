@@ -8,7 +8,7 @@
  * http://www.opensource.org/licenses/mit-license.php
  */
 
-class sly_DB_PDO_PersistenceTest extends sly_BaseTest {
+class sly_DB_PersistenceTest extends sly_BaseTest {
 	private static $pers;
 
 	public static function setUpBeforeClass() {
@@ -29,11 +29,6 @@ class sly_DB_PDO_PersistenceTest extends sly_BaseTest {
 		for ($i = 0; $i < $len; ++$i) {
 			$this->assertEquals($expected[$i], $all[$i]);
 		}
-	}
-
-	public function testGetPDO() {
-		$this->assertInstanceOf('PDO', self::$pers->getPDO());
-		$this->assertInstanceOf('sly_DB_PDO_Connection', self::$pers->getConnection());
 	}
 
 	public function testIterator() {
@@ -119,7 +114,7 @@ class sly_DB_PDO_PersistenceTest extends sly_BaseTest {
 
 	/**
 	 * @depends           testIterator
-	 * @expectedException sly_DB_PDO_Exception
+	 * @expectedException sly_DB_Exception
 	 */
 	public function testIteratorRewind() {
 		self::$pers->query('SELECT 1,? UNION SELECT 2,? UNION SELECT 3,?', array('foo', 'bar', 'baz'));
@@ -201,6 +196,10 @@ class sly_DB_PDO_PersistenceTest extends sly_BaseTest {
 			array(
 				array(array('id' => 2), array('id' => 3)),
 				'article', 'id', array('clang' => 5), null, 'id', 1, 2
+			),
+			array(
+				array(array('id' => 2), array('id' => 3)),
+				'article', 'id', array('clang' => 5), null, 'id ASC, clang DESC', 1, 2
 			),
 		);
 	}
