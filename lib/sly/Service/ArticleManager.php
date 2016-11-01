@@ -277,7 +277,7 @@ abstract class sly_Service_ArticleManager extends sly_Service_ArticleBase {
 		$categoryID = (int) $categoryID;
 		$clang      = (int) $clang;
 		$where      = $this->getSiblingQuery($categoryID, $clang);
-		$order      = $this->getPositionField();
+		$order      = $this->getPositionField().' ASC';
 
 		return $this->find($where, null, $order, null, null, null, $findOnline === true ? self::FIND_REVISION_ONLINE : self::FIND_REVISION_LATEST);
 	}

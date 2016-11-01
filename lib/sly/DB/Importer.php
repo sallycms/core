@@ -12,10 +12,10 @@
  * @ingroup database
  */
 class sly_DB_Importer {
-	protected $persistence; ///< sly_DB_PDO_Persistence
+	protected $persistence; ///< sly_DB_Persistence
 	protected $dispatcher;  ///< sly_Event_IDispatcher
 
-	public function __construct(sly_DB_PDO_Persistence $persistence, sly_Event_IDispatcher $dispatcher) {
+	public function __construct(sly_DB_Persistence $persistence, sly_Event_IDispatcher $dispatcher) {
 		$this->persistence = $persistence;
 		$this->dispatcher  = $dispatcher;
 	}

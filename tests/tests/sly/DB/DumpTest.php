@@ -12,7 +12,7 @@ class sly_DB_DumpTest extends PHPUnit_Framework_TestCase {
 	protected function getDataSetName() {
 		return 'pristine-sally';
 	}
-	
+
 	public static function setUpBeforeClass() {
 		$dir = __DIR__;
 
@@ -20,11 +20,6 @@ class sly_DB_DumpTest extends PHPUnit_Framework_TestCase {
 		file_put_contents("$dir/dumpB.sql", "## Sally Database Dump Version 1\n");
 		file_put_contents("$dir/dumpC.sql", "");
 		file_put_contents("$dir/dumpD.sql", "-- Sally Database Dump Version 0.6\n-- Prefix "); // empty prefix!
-
-		// login the dummy user
-		$service = sly_Core::getContainer()->getUserService();
-		$user    = $service->findById(SLY_TESTING_USER_ID);
-		$service->setCurrentUser($user);
 	}
 
 	public static function tearDownAfterClass() {

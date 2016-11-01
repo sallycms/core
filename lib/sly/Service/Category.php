@@ -235,13 +235,15 @@ class sly_Service_Category extends sly_Service_ArticleManager {
 	/**
 	 * Selects a category and all children recursively
 	 *
-	 * @param  int $parentID   the sub-tree's root category or 0 for the whole tree
-	 * @param  int $clang      the language
-	 * @return array           sorted list of category IDs
+	 * @param  int     $parentID   the sub-tree's root category or 0 for the whole tree
+	 * @param  int     $clang      the language
+	 * @param  boolean $findOnline
+	 * @return array               list of categories, sorted by id
 	 */
-	public function findTree($parentID, $clang) {
-		$parentID = (int) $parentID;
-		$clang    = (int) $clang;
+	public function findTree($parentID, $clang, $findOnline = false) {
+		$parentID   = (int)  $parentID;
+		$clang      = (int)  $clang;
+		$findOnline = (bool) $findOnline;
 
 		if ($parentID === 0) {
 			$where = array('clang' => $clang);
@@ -250,7 +252,7 @@ class sly_Service_Category extends sly_Service_ArticleManager {
 			$where = 'clang = '.$clang.' AND (id = '.$parentID.' OR path LIKE "%|'.$parentID.'|%")';
 		}
 
-		return $this->find($where, null, 'id', null, null, null, $findOnline === true ? self::FIND_REVISION_ONLINE : self::FIND_REVISION_LATEST);
+		return $this->find($where, null, 'id ASC', null, null, null, $findOnline === true ? self::FIND_REVISION_ONLINE : self::FIND_REVISION_LATEST);
 	}
 
 	/**

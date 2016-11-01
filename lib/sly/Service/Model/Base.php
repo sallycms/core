@@ -14,10 +14,10 @@
 abstract class sly_Service_Model_Base {
 	protected $tablename;          ///< string
 	protected $hasCascade = false; ///< boolean
-	protected $persistence;        ///< sly_DB_PDO_Persistence
+	protected $persistence;        ///< sly_DB_Persistence
 
-	public function __construct(sly_DB_PDO_Persistence $persistence = null) {
-		$this->persistence = $persistence ?: sly_Core::getContainer()->getPersistence();
+	public function __construct(sly_DB_Persistence $persistence) {
+		$this->persistence = $persistence;
 	}
 
 	/**
@@ -115,7 +115,7 @@ abstract class sly_Service_Model_Base {
 	/**
 	 * gets a persistence object
 	 *
-	 * @return sly_DB_PDO_Persistence
+	 * @return sly_DB_Persistence
 	 */
 	protected function getPersistence() {
 		return $this->persistence;
