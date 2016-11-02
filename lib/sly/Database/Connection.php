@@ -14,6 +14,8 @@ use Doctrine\DBAL\Connection as DoctrineConnection;
 use Doctrine\DBAL\Driver;
 use Doctrine\DBAL\Configuration;
 use Doctrine\Common\EventManager;
+use Doctrine\DBAL\Driver\ServerInfoAwareConnection;
+use Doctrine\DBAL\VersionAwarePlatformDriver;
 
 class Connection extends DoctrineConnection {
 	protected $prefix;
@@ -57,27 +59,5 @@ class Connection extends DoctrineConnection {
 
 	public function getTable($tableExpression) {
 		return $this->getPrefix() . $tableExpression;
-	}
-
-	public function delete($tableExpression, array $identifier, array $types = array()) {
-		$tableExpression = $this->getTable($tableExpression);
-
-		parent::delete($tableExpression, $identifier, $types);
-	}
-
-	public function update($tableName, array $data, array $identifier, array $types = array()) {
-		$tableExpression = $this->getTable($tableExpression);
-
-		parent::update($tableName, $data, $identifier, $types);
-	}
-
-	public function insert($tableExpression, array $data, array $types = array()) {
-		$tableExpression = $this->getTable($tableExpression);
-
-		parent::insert($tableExpression, $data, $types);
-	}
-
-	public function createQueryBuilder() {
-		return parent::createQueryBuilder();
 	}
 }
