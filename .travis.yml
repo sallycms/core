@@ -10,6 +10,9 @@ install:
    - chmod +x tests/setup-travis.sh
    - ./tests/setup-travis.sh
 
+services:
+  - mysql
+
 script:
    - vendor/bin/phpunit -c tests/full.xml
 
