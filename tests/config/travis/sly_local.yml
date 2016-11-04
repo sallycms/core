@@ -6,5 +6,5 @@ database:
   host: localhost
   user: root
   password: ''
-  name: sally_test
+  dbname: sally_test
   table_prefix: sly_
