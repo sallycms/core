@@ -20,7 +20,7 @@ abstract class sly_DB_PDO_Driver {
 	 * @param array $config
 	 */
 	public function __construct(array $config) {
-		$this->config = $array;
+		$this->config = $config;
 	}
 
 	/**
