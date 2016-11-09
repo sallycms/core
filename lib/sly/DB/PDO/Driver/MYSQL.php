@@ -16,22 +16,22 @@ class sly_DB_PDO_Driver_MYSQL extends sly_DB_PDO_Driver {
 	 * @return string
 	 */
 	public function getDSN() {
-		if (strpos($this->host, '/') !== false) {
-			$dsn = 'mysql:unix_socket='.$this->host;
+		if (strpos($this->config['host'], '/') !== false) {
+			$dsn = 'mysql:unix_socket='.$this->config['host'];
 		}
 		else {
-			$parts = explode(':', $this->host);
+			$parts = explode(':', $this->config['host']);
 
 			if (count($parts) === 1) {
-				$dsn = 'mysql:host='.$this->host;
+				$dsn = 'mysql:host='.$this->config['host'];
 			}
 			else {
 				$dsn = sprintf('mysql:host=%s;port=%s', $parts[0], $parts[1]);
 			}
 		}
 
-		if (!empty($this->database)) {
-			$dsn .= ';dbname='.$this->database;
+		if (!empty($this->config['dbname'])) {
+			$dsn .= ';dbname='.$this->config['dbname'];
 		}
 
 		return $dsn.';charset=utf8';

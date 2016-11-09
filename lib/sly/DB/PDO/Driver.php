@@ -12,24 +12,15 @@
  * @ingroup database
  */
 abstract class sly_DB_PDO_Driver {
-	protected $host;     ///< string
-	protected $login;    ///< string
-	protected $password; ///< string
-	protected $database; ///< string
+	protected $config;     ///< array
 
 	public static $drivers = array('mysql', 'oci', 'pgsql', 'sqlite'); ///< array
 
 	/**
-	 * @param string $host
-	 * @param string $login
-	 * @param string $password
-	 * @param string $database
+	 * @param array $config
 	 */
-	public function __construct($host, $login, $password, $database) {
-		$this->host     = (string) $host;
-		$this->login    = (string) $login;
-		$this->password = (string) $password;
-		$this->database = (string) $database;
+	public function __construct(array $config) {
+		$this->config = $array;
 	}
 
 	/**

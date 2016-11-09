@@ -16,8 +16,8 @@ class sly_DB_PDO_Driver_PGSQL extends sly_DB_PDO_Driver {
 	 * @return string
 	 */
 	public function getDSN() {
-		$dsn = 'pgsql:host='.$this->host;
-		if(!empty($this->database)) $dsn .=';dbname='.$this->database;
+		$dsn = 'pgsql:host='.$this->config['host'];
+		if(!empty($this->config['dbname'])) $dsn .=';dbname='.$this->config['dbname'];
 		return $dsn;
 	}
 
