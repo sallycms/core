@@ -32,7 +32,7 @@ class sly_DB_PersistenceTest extends sly_BaseTest {
 	}
 
 	public function testIterator() {
-		self::$pers->query('SELECT 1,? UNION SELECT 2,? UNION SELECT 3,?', array('foo', 'bar', 'baz'));
+		self::$pers->query('SELECT 1,? as foo UNION SELECT 2,? UNION SELECT 3,?', array('foo', 'bar', 'baz'));
 
 		$idx      = 0;
 		$expected = array(
@@ -52,7 +52,7 @@ class sly_DB_PersistenceTest extends sly_BaseTest {
 	}
 
 	public function testGetAll() {
-		self::$pers->query('SELECT 1,? UNION SELECT 2,? UNION SELECT 3,?', array('foo', 'bar', 'baz'));
+		self::$pers->query('SELECT 1,? as foo UNION SELECT 2,? UNION SELECT 3,?', array('foo', 'bar', 'baz'));
 
 		$expected = array(
 			array(1 => 1, 'foo' => 'foo'),
@@ -133,11 +133,11 @@ class sly_DB_PersistenceTest extends sly_BaseTest {
 		$this->assertResultSet(array(array('1' => '1')));
 
 		// simple placeholders
-		$this->assertSame(self::$pers, self::$pers->query('SELECT 1,?', array('test')));
+		$this->assertSame(self::$pers, self::$pers->query('SELECT 1,? as test', array('test')));
 		$this->assertResultSet(array(array('1' => '1', 'test' => 'test')));
 
 		// named placeholders
-		$this->assertSame(self::$pers, self::$pers->query('SELECT 1,:foo', array('foo' => 'testX')));
+		$this->assertSame(self::$pers, self::$pers->query('SELECT 1,:foo as testX', array('foo' => 'testX')));
 		$this->assertResultSet(array(array('1' => '1', 'testX' => 'testX')));
 	}
 
