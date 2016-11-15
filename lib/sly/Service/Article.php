@@ -156,7 +156,7 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 	 * @return boolean
 	 */
 	public function edit(sly_Model_Base_Article $obj, $name, $position = false, sly_Model_User $user = null) {
-		$obj = $this->touch($obj, $user);		
+		$obj = $this->touch($obj, $user);
 		return $this->editHelper($obj, $name, $position, $user);
 	}
 
@@ -226,8 +226,8 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 	 * @param  boolean $findOnline
 	 * @return array
 	 */
-	public function findArticlesByCategory($categoryId, $clang, $ignoreOfflines = false) {
-		return $this->findElementsInCategory($categoryId, $clang, $ignoreOfflines);
+	public function findArticlesByCategory($categoryId, $clang, $findOnline = false) {
+		return $this->findElementsInCategory($categoryId, $clang, $findOnline);
 	}
 
 	/**
