@@ -17,8 +17,8 @@ abstract class sly_BaseTest extends PHPUnit_Extensions_Database_TestCase {
 	 */
 	public function getConnection() {
 		if (!$this->pdo) {
-			$conn      = sly_Core::getContainer()->get('sly-pdo-connection');
-			$this->pdo = $conn->getPDO();
+			$conn      = sly_Core::getContainer()->get('sly-dbal-connection');
+			$this->pdo = $conn->getWrappedConnection();
 		}
 
 		return $this->createDefaultDBConnection($this->pdo);
