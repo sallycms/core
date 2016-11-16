@@ -13,8 +13,18 @@ if (PHP_SAPI !== 'cli') {
 }
 
 $travis = getenv('TRAVIS') !== false;
+$cfg    = getenv('CFG');
 $here   = __DIR__;
 $root   = dirname($here);
+
+if(empty($cfg)) {
+	$cfg = 'mysql';
+}
+
+if(empty($cfg) && $travis) {
+	$cfg = 'mysql-travis';
+}
+
 
 // define Testuser
 if (!defined('SLY_TESTING_USER_ID')) define('SLY_TESTING_USER_ID', 1);
@@ -30,20 +40,36 @@ if (!is_dir(SLY_ADDONFOLDER)) mkdir(SLY_ADDONFOLDER);
 if (!is_dir(SLY_DATAFOLDER))  mkdir(SLY_DATAFOLDER, 0777, true);
 
 // set our own config folder
-if ($travis) {
-	define('SLY_CONFIGFOLDER', $here.DIRECTORY_SEPARATOR.'config'.DIRECTORY_SEPARATOR.'travis');
-}
-else {
-	define('SLY_CONFIGFOLDER', $here.DIRECTORY_SEPARATOR.'config');
-}
+define('SLY_CONFIGFOLDER', $here.DIRECTORY_SEPARATOR.'config'.DIRECTORY_SEPARATOR.$cfg);
 
-// load core system
-$loader    = require $here.'/../autoload.php';
-$container = sly_Core::boot($loader, 'test', 'tests', 'tests');
-
-// add dummy lib and tests
+// autoloader
+$loader = require $here.'/../autoload.php';
 $loader->add('sly_', $here.DIRECTORY_SEPARATOR.'lib');
 $loader->add('sly_', $here.DIRECTORY_SEPARATOR.'tests');
+
+$container = new sly_Container();
+
+$container['sly-config-reader'] = $container->share(function() {
+	return new sly_Test_Configuration_Reader();
+});
+
+$container['sly-config-writer'] = $container->share(function() {
+	return new sly_Test_Configuration_Writer();
+});
+
+// load core system
+sly_Core::boot($loader, 'test', 'tests', 'tests', $container);
+
+/* @var $conn sly\Database\Connection */
+$dbDriver  = $container['sly-config']->get('database/driver');
+$conn      = $container['sly-dbal-connection'];
+$dbManager = $conn->getSchemaManager();
+
+foreach($dbManager->listTables() as $table) {
+	$dbManager->dropTable($table);
+}
+
+$conn->exec(file_get_contents(SLY_BASE.DIRECTORY_SEPARATOR.'install'.DIRECTORY_SEPARATOR.$dbDriver.'.sql'));
 
 // init the app
 $app = new sly_App_Tests($container, 1);

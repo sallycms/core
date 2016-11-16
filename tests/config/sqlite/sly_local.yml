@@ -1,0 +1,7 @@
+setup: false
+instname: sly59f008fea53fb4447830
+caching_strategy: blackhole
+database:
+    driver: sqlite
+    memory: true
+    table_prefix: sly_

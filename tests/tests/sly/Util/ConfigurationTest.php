@@ -9,16 +9,16 @@
  */
 
 class sly_Util_ConfigurationTest extends PHPUnit_Framework_TestCase {
-	
+
 	public function testLoadYamlFile() {
 		$config = new sly_Configuration();
 		$config->setContainer(sly_Core::getContainer());
-		
-		sly_Util_Configuration::loadYamlFile($config, __DIR__.'/../../../config/sly_local.yml', true);
-		sly_Util_Configuration::loadYamlFile($config, __DIR__.'/../../../config/sly_project.yml', false);
-		
-		$this->assertArrayHasKey('dbname', $config->get('database'));
+
+		sly_Util_Configuration::loadYamlFile($config, SLY_CONFIGFOLDER.DIRECTORY_SEPARATOR.'sly_local.yml', true);
+		sly_Util_Configuration::loadYamlFile($config, SLY_CONFIGFOLDER.DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR.'sly_project.yml', false);
+
+		$this->assertArrayHasKey('driver', $config->get('database'));
 		$this->assertArrayHasKey('templates', $config->get('/'));
 	}
-			
+
 }
