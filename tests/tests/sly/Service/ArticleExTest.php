@@ -248,4 +248,34 @@ class sly_Service_ArticleExTest extends sly_Service_ArticleTestBase {
 		$this->assertCount(3, $service->findArticlesByCategory(0, self::$clangA));
 		$this->assertCount(1, $service->findArticlesByCategory(1, self::$clangA));
 	}
+
+	public function testOrder() {
+		$service = $this->getService();
+		$cat     = 1;
+		$one     = $service->add($cat, 'Test 1');
+		$two     = $service->add($cat, 'Test 2');
+		$three   = $service->add($cat, 'Test 3');
+
+		$articles = $service->find(array('re_id' => $cat, 'clang' => self::$clangA), null, 'pos ASC', null, null, null, sly_Service_Article::FIND_REVISION_LATEST);
+		$this->assertCount(3, $articles);
+		$this->assertEquals($three, end($articles)->getId());
+
+		$articles = $service->find(array('re_id' => $cat, 'clang' => self::$clangA), null, 'pos ASC', null, null, null, sly_Service_Article::FIND_REVISION_BEST);
+		$this->assertCount(3, $articles);
+		$this->assertEquals($three, end($articles)->getId());
+
+		$service->setOffline($articles[1]);
+
+		foreach($articles as $article) {
+			$service->edit($article, $article->getName().' rev2');
+		}
+
+		$articles = $service->find(array('re_id' => $cat, 'clang' => self::$clangA), null, 'pos ASC', null, null, null, sly_Service_Article::FIND_REVISION_LATEST);
+		$this->assertCount(3, $articles);
+		$this->assertEquals($three, end($articles)->getId());
+
+		$articles = $service->find(array('re_id' => $cat, 'clang' => self::$clangA), null, 'pos ASC', null, null, null, sly_Service_Article::FIND_REVISION_BEST);
+		$this->assertCount(3, $articles);
+		$this->assertEquals($three, end($articles)->getId());
+	}
 }
