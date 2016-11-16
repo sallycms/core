@@ -1,5 +1,3 @@
 #!/bin/sh
 
 mysql -e "CREATE DATABASE IF NOT EXISTS sally_test CHARACTER SET utf8 COLLATE utf8_general_ci"
-mysql --database=sally_test < install/mysql.sql
-mysql --database=sally_test -e "INSERT INTO sly_user (id,name,description,login,password,status,attributes,lasttrydate,timezone,createdate,updatedate,createuser,updateuser) VALUES (1, 'Admin', '', 'admin', 'c5e4335577bb89540b15e2f5251e8bc02ced5b32', 1, '{\"isAdmin\":true}', '2011-10-03 04:15:32', 'Europe/Berlin', '2011-04-13 02:37:08', '2011-07-22 02:05:11', 'setup', 'admin')"
