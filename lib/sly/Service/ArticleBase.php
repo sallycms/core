@@ -103,10 +103,19 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base implements
 		$strat = null;
 
 		switch ($revStrategy) {
-			case self::FIND_REVISION_ONLINE: $strat = $db->quoteIdentifier('online').' = 1';               break;
-			case self::FIND_REVISION_LATEST: $strat = $db->quoteIdentifier('latest').' = 1';               break;
-			case self::FIND_REVISION_BEST:   $strat = $db->quoteIdentifier('latest').' = 1 OR '.$db->quoteIdentifier('online').' = 1'; break;
-			default:                         $strat = null;                       break;
+			case self::FIND_REVISION_ONLINE:
+				$strat = $db->quoteIdentifier('online').' = 1';
+				break;
+			case self::FIND_REVISION_LATEST:
+				$strat = $db->quoteIdentifier('latest').' = 1';
+				break;
+			case self::FIND_REVISION_BEST:
+				$strat = $db->quoteIdentifier('latest').' = 1 OR '.$db->quoteIdentifier('online').' = 1';
+				$order = $order ? "$order, online DESC, latest DESC" : 'online DESC, latest DESC';
+				break;
+			default:
+				$strat = null;
+				break;
 		}
 
 		if ($where === null) {
@@ -117,8 +126,6 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base implements
 		}
 
 		// add some more order information
-
-		$order = $order ? "$order, online DESC, latest DESC" : 'online DESC, latest DESC';
 		$db->select($this->tablename, '*', $where, $group, $order, $offset, $limit, $having);
 
 		$fetched = array();
