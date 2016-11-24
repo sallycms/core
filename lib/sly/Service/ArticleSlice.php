@@ -127,7 +127,7 @@ class sly_Service_ArticleSlice implements sly_ContainerAwareInterface {
 	 * @throws sly_Exception
 	 * @param  sly_Model_ArticleSlice  $article
 	 */
-	public function deleteByArticleSlice(sly_Model_ArticleSlice $slice, sly_Model_User $user, $useVersioning = true) {
+	public function deleteByArticleSlice(sly_Model_ArticleSlice $slice, sly_Model_User $user = null, $useVersioning = true) {
 		return $this->delete($slice->getArticle(), $slice->getSlot(), $slice->getPosition(), $user, $useVersioning);
 	}
 
@@ -140,7 +140,7 @@ class sly_Service_ArticleSlice implements sly_ContainerAwareInterface {
 	 * @param  int               $pos
 	 * @throws sly_Exception
 	 */
-	public function delete(sly_Model_Article $article, $slot = null, $pos = null, sly_Model_User $user, $useVersioning = true) {
+	public function delete(sly_Model_Article $article, $slot = null, $pos = null, sly_Model_User $user = null, $useVersioning = true) {
 		$self           = $this;
 		$user           = $this->getActor($user, __METHOD__);
 		$dispatcher     = $this->getDispatcher();
