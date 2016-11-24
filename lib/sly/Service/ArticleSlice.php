@@ -127,8 +127,8 @@ class sly_Service_ArticleSlice implements sly_ContainerAwareInterface {
 	 * @throws sly_Exception
 	 * @param  sly_Model_ArticleSlice  $article
 	 */
-	public function deleteByArticleSlice(sly_Model_ArticleSlice $slice, $useVersioning = true) {
-		return $this->delete($slice->getArticle(), $slice->getSlot(), $slice->getPosition(), $useVersioning);
+	public function deleteByArticleSlice(sly_Model_ArticleSlice $slice, sly_Model_User $user, $useVersioning = true) {
+		return $this->delete($slice->getArticle(), $slice->getSlot(), $slice->getPosition(), $user, $useVersioning);
 	}
 
 	/**
@@ -140,17 +140,18 @@ class sly_Service_ArticleSlice implements sly_ContainerAwareInterface {
 	 * @param  int               $pos
 	 * @throws sly_Exception
 	 */
-	public function delete(sly_Model_Article $article, $slot = null, $pos = null, $useVersioning = true) {
+	public function delete(sly_Model_Article $article, $slot = null, $pos = null, sly_Model_User $user, $useVersioning = true) {
 		$self           = $this;
+		$user           = $this->getActor($user, __METHOD__);
 		$dispatcher     = $this->getDispatcher();
 		$sql            = $this->getPersistence();
 		$sliceService   = $this->getSliceService();
 		$articleService = $this->getArticleService();
 		$tableName      = $this->tablename;
 
-		$sql->transactional(function() use ($self, $article, $slot, $pos, $useVersioning, $sql, $dispatcher, $articleService, $sliceService, $tableName) {
+		$sql->transactional(function() use ($self, $article, $slot, $pos, $user, $useVersioning, $sql, $dispatcher, $articleService, $sliceService, $tableName) {
 			if ($useVersioning) {
-				$article = $articleService->touch($article);
+				$article = $articleService->touch($article, $user);
 			}
 
 			$where = array(
@@ -211,13 +212,14 @@ class sly_Service_ArticleSlice implements sly_ContainerAwareInterface {
 	public function edit(sly_Model_Article $article, $slot, $pos, array $values, sly_Model_User $user = null, $useVersioning = true) {
 		$sql          = $this->getPersistence();
 		$self         = $this;
+		$user         = $this->getActor($user, __METHOD__);
 		$dispatcher   = $this->getDispatcher();
 		$artService   = $this->getArticleService();
 		$sliceService = $this->getSliceService();
 
 		return $sql->transactional(function() use ($self, $article, $slot, $pos, $values, $user, $useVersioning, $sql, $artService, $dispatcher, $sliceService) {
 			if ($useVersioning) {
-				$article = $artService->touch($article);
+				$article = $artService->touch($article, $user);
 			}
 
 			$articleSlice = $self->findOne(array(
@@ -280,7 +282,7 @@ class sly_Service_ArticleSlice implements sly_ContainerAwareInterface {
 
 		return $sql->transactional(function() use ($self, $article, $slot, $module, $values, $user, $useVersioning, $sliceService, $artService, $dispatcher, $pos) {
 			if ($useVersioning) {
-				$article = $artService->touch($article);
+				$article = $artService->touch($article, $user);
 			}
 
 			$target = $self->countSlices($article, $slot);
@@ -328,7 +330,7 @@ class sly_Service_ArticleSlice implements sly_ContainerAwareInterface {
 
 		try {
 			if ($useVersioning) {
-				$article = $artService->touch($article);
+				$article = $artService->touch($article, $user);
 			}
 
 			$maxPos    = $this->countSlices($article, $slot) - 1;
