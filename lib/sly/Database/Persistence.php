@@ -161,7 +161,7 @@ class Persistence implements sly_DB_Persistence {
 		$conn = $sql->getConnection();
 
 		$sql->select($select);
-		$sql->from($conn->getTable($table), $conn->getDatabasePlatform()->quoteSingleIdentifier($table));
+		$sql->from($conn->getTable($table), $conn->getDatabasePlatform()->quoteIdentifier($table));
 
 		$this->where($sql, $where);
 
