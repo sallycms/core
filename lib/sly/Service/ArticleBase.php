@@ -104,13 +104,13 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base implements
 
 		switch ($revStrategy) {
 			case self::FIND_REVISION_ONLINE:
-				$strat = $db->quoteIdentifier('online').' = 1';
+				$strat = $db->quoteIdentifier('online').' = '.$db->quote(1);
 				break;
 			case self::FIND_REVISION_LATEST:
-				$strat = $db->quoteIdentifier('latest').' = 1';
+				$strat = $db->quoteIdentifier('latest').' = '.$db->quote(1);
 				break;
 			case self::FIND_REVISION_BEST:
-				$strat = $db->quoteIdentifier('latest').' = 1 OR '.$db->quoteIdentifier('online').' = 1';
+				$strat = $db->quoteIdentifier('latest').' = '.$db->quote(1).' OR '.$db->quoteIdentifier('online').' = '.$db->quote(1);
 				$order = $order ? "$order, online DESC, latest DESC" : 'online DESC, latest DESC';
 				break;
 			default:
@@ -241,8 +241,12 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base implements
 		$field  = $this->getModelType() === 'article' ? 'pos' : 'catpos';
 
 		$db->query(sprintf(
-			'UPDATE %sarticle SET %s = %s %s 1 WHERE %s',
-			$prefix, $field, $field, $op, $where
+			'UPDATE %s SET %s = %s %s 1 WHERE %s',
+			$db->getConnection()->getTable($this->tablename),
+			$db->quoteIdentifier($field),
+			$db->quoteIdentifier($field),
+			$op,
+			$where
 		));
 	}
 
@@ -253,7 +257,7 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base implements
 			return sprintf('%s >= %d', $field, $min);
 		}
 
-		return sprintf('%s BETWEEN %d AND %d', $field, $min, $max);
+		return sprintf('%s BETWEEN %d AND %d', $this->getPersistence()->quoteIdentifier($field), $min, $max);
 	}
 
 	protected function getFollowerQuery($parent, $clang, $min, $max = null) {

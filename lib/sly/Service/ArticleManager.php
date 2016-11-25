@@ -255,7 +255,8 @@ abstract class sly_Service_ArticleManager extends sly_Service_ArticleBase {
 
 	protected function fixWhereClause($where) {
 		if (is_string($where) && !empty($where)) {
-			$where = "($where) AND deleted = 0";
+			$db = $this->getPersistence();
+			$where = '('.$where.') AND '.$db->quoteIdentifier('deleted').' = '.$db->quote(0);
 		}
 		elseif (is_array($where)) {
 			$where['deleted'] = 0;

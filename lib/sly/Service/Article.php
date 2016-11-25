@@ -32,11 +32,12 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 	 */
 	protected function getSiblingQuery($categoryID, $clang = null) {
 		$categoryID = (int) $categoryID;
-		$where      = '((re_id = '.$categoryID.' AND startpage = 0) OR id = '.$categoryID.')';
+		$sql = $this->getPersistence();
+		$where      = '(('.$sql->quoteIdentifier('re_id').' = '.$sql->quote($categoryID).' AND '.$sql->quoteIdentifier('startpage').' = '.$sql->quote(0).') OR id = '.$sql->quote($categoryID).')';
 
 		if ($clang !== null) {
 			$clang = (int) $clang;
-			$where = "$where AND clang = $clang";
+			$where = $where.' AND '.$sql->quoteIdentifier('clang').' = '.$sql->quote($clang);
 		}
 
 		return $where;
@@ -835,7 +836,7 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 		$sql->transactional(function() use ($sql, $tableName, $article, $articleSliceService, $eventDispatcher) {
 			$articleSliceService->delete($article, null, null, false);
 			if ($article->isLatest()) {
-				$sql->query('UPDATE '.$sql->getPrefix().$tableName.' SET latest = '.$sql->quote(1).' WHERE id = '.$sql->quote($article->getId()).' AND clang = '.$sql->quote($article->getClang()).' AND revision < '.$sql->quote($article->getRevision()).' ORDER BY revision DESC LIMIT 1');
+				$sql->query('UPDATE '.$sql->getConnection()->getTable($tableName).' SET latest = '.$sql->quote(1).' WHERE id = '.$sql->quote($article->getId()).' AND clang = '.$sql->quote($article->getClang()).' AND revision < '.$sql->quote($article->getRevision()).' ORDER BY revision DESC LIMIT 1');
 			}
 			$sql->delete($tableName, $article->getPKHash());
 
