@@ -157,10 +157,11 @@ class Persistence implements sly_DB_Persistence {
 	 * @return boolean         always true
 	 */
 	public function select($table, $select = '*', $where = null, $group = null, $order = null, $offset = null, $limit = null, $having = null, $joins = null) {
-		$sql    = $this->getSQLbuilder();
+		$sql  = $this->getSQLbuilder();
+		$conn = $sql->getConnection();
 
 		$sql->select($select);
-		$sql->from($sql->getConnection()->getTable($table), $table);
+		$sql->from($conn->getTable($table), $conn->getDatabasePlatform()->quoteSingleIdentifier($table));
 
 		$this->where($sql, $where);
 

@@ -58,6 +58,6 @@ class Connection extends DoctrineConnection {
 	}
 
 	public function getTable($tableExpression) {
-		return $this->getPrefix() . $tableExpression;
+		return $this->getDatabasePlatform()->quoteIdentifier($this->getPrefix() . $tableExpression);
 	}
 }
