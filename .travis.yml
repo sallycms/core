@@ -10,7 +10,7 @@ php:
 env:
    - CFG=sqlite
    - CFG=mysql-travis
-   - CFG=psql-travis
+   - CFG=pgsql-travis
 
 install:
    - mysql --version
