@@ -54,7 +54,7 @@ class Persistence implements sly_DB_Persistence {
 			throw new \sly_DB_Exception('Connection to database failed.');
 		}
 		catch (DBALException $e) {
-			$this->error($query);
+			$this->error($e, $query);
 		}
 
 		return $this;
@@ -435,10 +435,10 @@ class Persistence implements sly_DB_Persistence {
 	/**
 	 * @throws sly_DB_Exception
 	 */
-	protected function error($query) {
+	protected function error(DBALException $e, $query) {
 		$message = 'Es trat ein Datenbank-Fehler auf: ';
-		$error   = $this->statement->errorInfo();
-		throw new sly_DB_Exception($query.' '.$message.'Fehlercode: '. $error[0] .' '.$error[2], $error[1]);
+		$error   = $e->getMessage();
+		throw new sly_DB_Exception($query.' '.$message.'Fehlercode: '. $e->getCode(), $e->getCode());
 	}
 
 	/**
