@@ -77,9 +77,8 @@ class sly_Registry_Persistent implements sly_Registry_Registry {
 	 */
 	public function flush($key = '*') {
 		$pattern = str_replace(array('*', '?'), array('%', '_'), $key);
-		$table   = $this->persistence->getPrefix().'registry';
+		$this->persistence->delete('registry', $this->persistence->quoteIdentifier('name').' LIKE '.$this->persistence->quote($pattern));
 
-		$this->persistence->query('DELETE FROM '.$table.' WHERE `name` LIKE ?', array($pattern));
 		$this->store = new sly_Util_Array();
 	}
 

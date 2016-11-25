@@ -161,7 +161,7 @@ class Persistence implements sly_DB_Persistence {
 		$conn = $sql->getConnection();
 
 		$sql->select($select);
-		$sql->from($conn->getTable($table), $conn->getDatabasePlatform()->quoteIdentifier($table));
+		$sql->from($conn->getTable($table), $this->quoteIdentifier($table));
 
 		$this->where($sql, $where);
 
@@ -327,7 +327,7 @@ class Persistence implements sly_DB_Persistence {
 		}
 		elseif (is_array($where)) {
 			foreach($where as $column => $value) {
-				$sql->andWhere($column .' = ?');
+				$sql->andWhere($this->quoteIdentifier($column) .' = ?');
 				$sql->createPositionalParameter($value);
 			}
 		}
