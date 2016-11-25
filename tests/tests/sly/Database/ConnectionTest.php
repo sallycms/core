@@ -29,7 +29,7 @@ class sly_Database_ConnectionTest extends TestCase {
 	}
 
 	public function testTableName() {
-		$this->assertSame(self::$connection->getTable('foobar'), 'sly_foobar');
+		$this->assertSame(self::$connection->getTable('foobar'), self::$connection->getDatabasePlatform()->quoteIdentifier('sly_foobar'));
 	}
 
 
