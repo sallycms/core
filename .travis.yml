@@ -10,6 +10,7 @@ php:
 env:
    - CFG=sqlite
    - CFG=mysql-travis
+   - CFG=psql-travis
 
 install:
    - mysql --version
@@ -20,7 +21,8 @@ install:
    - ./tests/setup-travis.sh
 
 services:
-  - mysql
+   - mysql
+   - postgresql
 
 script:
    - vendor/bin/phpunit -c tests/full.xml
