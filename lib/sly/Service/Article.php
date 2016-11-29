@@ -242,7 +242,7 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 		$clang = (int) $clang;
 		$where = compact('type', 'clang');
 
-		return $this->find($where, null, null, null, null, null, $findOnline === true ? self::FIND_REVISION_ONLINE : self::FIND_REVISION_LATEST);
+		return $this->find($where, null, 'id ASC', null, null, null, $findOnline === true ? self::FIND_REVISION_ONLINE : self::FIND_REVISION_LATEST);
 	}
 
 	/**
