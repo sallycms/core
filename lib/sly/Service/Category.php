@@ -28,19 +28,17 @@ class sly_Service_Category extends sly_Service_ArticleManager {
 	 * @param  boolean $asArray
 	 * @return mixed                the condition either as an array or as a string
 	 */
-	protected function getSiblingQuery($categoryID, $clang = null, $asArray = false) {
+	protected function getSiblingQuery($categoryID, $clang = null) {
+		$db    = $this->getPersistence();
 		$where = array('re_id' => (int) $categoryID, 'startpage' => 1);
 
 		if ($clang !== null) {
 			$where['clang'] = (int) $clang;
 		}
 
-		if ($asArray) {
-			return $where;
-		}
 
 		foreach ($where as $col => $value) {
-			$where[$col] = "$col = $value";
+			$where[$col] = $db->quoteIdentifier($col).' = '.$db->quote($value);
 		}
 
 		return implode(' AND ', array_values($where));
@@ -332,8 +330,8 @@ class sly_Service_Category extends sly_Service_ArticleManager {
 
 			$from   = $oldPath.$id.'|';
 			$to     = $newPath.$id.'|';
-			$where  = 'path LIKE "'.$from.'%"';
-			$update = 'path = REPLACE(path, "'.$from.'", "'.$to.'")';
+			$where  = $sql->quoteIdentifier('path').' LIKE '.$sql->quote($from.'%');
+			$update = $sql->quoteIdentifier('path').' = REPLACE('.$sql->quoteIdentifier('path').', '.$sql->quote($from).', '.$sql->quote($to).')';
 			$prefix = $sql->getPrefix();
 
 			$sql->query('UPDATE '.$prefix.'article SET '.$update.' WHERE '.$where);
@@ -358,13 +356,14 @@ class sly_Service_Category extends sly_Service_ArticleManager {
 	}
 
 	protected function fixWhereClause($where) {
+		$db    = $this->getPersistence();
 		$where = parent::fixWhereClause($where);
 
 		if (is_array($where)) {
 			$where['startpage'] = 1;
 		}
 		else {
-			$where = "($where) AND startpage = 1";
+			$where = '('.$where.') AND '.$db->quoteIdentifier('startpage').' = '.$db->quote(1);
 		}
 
 		return $where;

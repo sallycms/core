@@ -32,7 +32,7 @@ abstract class sly_Service_ArticleManager extends sly_Service_ArticleBase {
 		$field  = $this->getPositionField();
 		$maxPos = $db->magicFetch($this->getTableName(), 'MAX('.$field.')', $where);
 
-		return $maxPos;
+		return (int) $maxPos;
 	}
 
 	/**

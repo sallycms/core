@@ -631,8 +631,9 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 
 			// switch parent id and adjust paths
 			$prefix = $sql->getPrefix();
+			$path   = $sql->quoteIdentifier('path');
 			$sql->update($table, array('re_id' => $articleID), array('re_id' => $oldCat));
-			$sql->query('UPDATE '.$prefix.$table.' SET path = REPLACE(path, "|'.$oldCat.'|", "|'.$articleID.'|") WHERE path LIKE "%|'.$oldCat.'|%"');
+			$sql->query('UPDATE '.$prefix.$table.' SET '.$path.' = REPLACE('.$path.', '.$sql->quote('|'.$oldCat.'|').', '.$sql->quote('|'.$articleID.'|').') WHERE '.$path.' LIKE '.$sql->quote('%|'.$oldCat.'|%'));
 
 			// notify system
 			$dispatcher->notify('SLY_ART_TO_STARTPAGE', $articleID, array('old_cat' => $oldCat, 'user' => $user));
