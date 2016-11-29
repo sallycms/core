@@ -11,7 +11,10 @@ env:
    - CFG=sqlite
    - CFG=mysql-travis
    - CFG=pgsql-travis
-
+   
+before_script:
+   - psql -c 'CREATE DATABASE sally_test;' -U postgres
+   - mysql -e 'CREATE DATABASE IF NOT EXISTS sally_test CHARACTER SET utf8 COLLATE utf8_general_ci;'
 install:
    - mysql --version
    - composer self-update
