@@ -20,8 +20,6 @@ install:
    - composer self-update
    - composer update --dev
    - chmod +x vendor/bin/phpunit
-   - chmod +x tests/setup-travis.sh
-   - ./tests/setup-travis.sh
 
 services:
    - mysql
