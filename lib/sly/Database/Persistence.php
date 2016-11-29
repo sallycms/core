@@ -295,7 +295,11 @@ class Persistence implements sly_DB_Persistence {
 
 		if (count($data) == 1) {
 			$ret = array_values($data);
-			return $ret[0];
+			$data = $ret[0];
+                        
+                        if (is_resource($data)) {
+                            $data = stream_get_contents($data);
+                        }
 		}
 
 		return $data;
