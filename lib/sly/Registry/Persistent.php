@@ -50,7 +50,9 @@ class sly_Registry_Persistent implements sly_Registry_Registry {
 	 * @return boolean
 	 */
 	public function has($key) {
-		if ($this->store->has($key)) return true;
+		if ($this->store->has($key)) {
+                    return true;
+                }
 
 		$value = $this->getValue($key);
 
@@ -69,6 +71,7 @@ class sly_Registry_Persistent implements sly_Registry_Registry {
 	 */
 	public function remove($key) {
 		$this->persistence->delete('registry', array('name' => $key));
+                
 		return $this->store->remove($key);
 	}
 
@@ -78,7 +81,6 @@ class sly_Registry_Persistent implements sly_Registry_Registry {
 	public function flush($key = '*') {
 		$pattern = str_replace(array('*', '?'), array('%', '_'), $key);
 		$this->persistence->delete('registry', $this->persistence->quoteIdentifier('name').' LIKE '.$this->persistence->quote($pattern));
-
 		$this->store = new sly_Util_Array();
 	}
 
