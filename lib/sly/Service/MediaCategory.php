@@ -124,12 +124,16 @@ class sly_Service_MediaCategory extends sly_Service_Model_Base_Id implements sly
 	 */
 	public function findTree($parentID, $asObjects = true) {
 		$parentID = (int) $parentID;
+		$sort     = 'id ASC';
+		$where    = null;
+		$sql      = $this->getPersistence();
 
-		if ($parentID === 0) {
-			return $this->findBy('tree_0', '1', 'id', $asObjects);
+		if ($parentID !== 0) {
+			$where = $sql->quoteIdentifier('id').' = '.$sql->quote($parentID);
+			$where .= ' OR '.$sql->quoteIdentifier('path').' LIKE '.$sql->quote('%|'.$parentID.'|%');
 		}
 
-		return $this->findBy('tree_'.$parentID, 'id = '.$parentID.' OR path LIKE "%|'.$parentID.'|%"', 'id', $asObjects);
+		return $this->findBy('tree_'.$parentID, $where, $sort, $asObjects);
 	}
 
 	/**
@@ -149,7 +153,9 @@ class sly_Service_MediaCategory extends sly_Service_Model_Base_Id implements sly
 			$list = array();
 
 			$sql->select('file_category', 'id', $where, null, $sortBy);
-			foreach ($sql as $row) $list[] = (int) $row['id'];
+			foreach ($sql as $row) {
+				$list[] = (int) $row['id'];
+			}
 
 			$this->cache->set($namespace, $cacheKey, $list);
 		}
