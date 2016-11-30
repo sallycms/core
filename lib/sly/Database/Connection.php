@@ -60,4 +60,15 @@ class Connection extends DoctrineConnection {
 	public function getTable($tableExpression) {
 		return $this->getDatabasePlatform()->quoteIdentifier($this->getPrefix() . $tableExpression);
 	}
+	
+	public function lastInsertId($seqName = null)
+    {
+		$params = $this->getParams();
+		
+		if ($params['driver'] === 'pdo_pgsql') {
+			$seqName = $seqName.'_id_seq';
+		}
+		
+        return parent::lastInsertId($seqName);
+    }
 }

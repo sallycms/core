@@ -30,9 +30,9 @@ abstract class sly_Service_Model_Base_Id extends sly_Service_Model_Base {
 		$persistence = $this->getPersistence();
 		$data        = $model->toHash();
 
-		if ($model->getId() == sly_Model_Base_Id::NEW_ID) {
+		if ($model->getId() === sly_Model_Base_Id::NEW_ID) {
 			$persistence->insert($this->getTableName(), $data);
-			$model->setId($persistence->lastId());
+			$model->setId($persistence->lastId($persistence->getPrefix().$this->tablename));
 		}
 		else {
 			$persistence->update($this->getTableName(), $data, $model->getPKHash());

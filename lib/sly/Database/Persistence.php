@@ -236,8 +236,8 @@ class Persistence implements sly_DB_Persistence {
 	/**
 	 * @return int
 	 */
-	public function lastId() {
-		return intval($this->connection->lastInsertId());
+	public function lastId($seqName = null) {
+		return intval($this->connection->lastInsertId($seqName));
 	}
 
 	/**

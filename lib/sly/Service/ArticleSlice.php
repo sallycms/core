@@ -113,7 +113,7 @@ class sly_Service_ArticleSlice implements sly_ContainerAwareInterface {
 			$sql->insert($table, $slice->toHash());
 
 			// make sure the slice knows its ID
-			$slice->setId($sql->lastId());
+			$slice->setId($sql->lastId($pre.$table));
 		});
 	}
 

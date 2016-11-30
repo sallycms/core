@@ -112,7 +112,7 @@ class sly_Service_User extends sly_Service_Model_Base_Id {
 	 */
 	public function save(sly_Model_Base $user, sly_Model_User $manager = null) {
 		$manager = $this->getActor($manager, __METHOD__);
-		$adding  = $user->getId() == sly_Model_Base_Id::NEW_ID;
+		$adding  = $user->getId() === sly_Model_Base_Id::NEW_ID;
 
 		if (mb_strlen($user->getLogin()) === 0) {
 			throw new sly_Exception(t('no_username_given'));

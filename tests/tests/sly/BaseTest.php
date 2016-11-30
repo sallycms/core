@@ -53,13 +53,16 @@ abstract class sly_BaseTest extends PHPUnit_Extensions_Database_TestCase {
 			$core = new PHPUnit_Extensions_Database_DataSet_YamlDataSet(__DIR__.'/../../datasets/'.$name.'.yml');
 			$comp->addDataSet($core);
 		}
-                
-                if ($name === 'sally-demopage' && sly_Core::config()->get('database/driver') === 'pgsql') {
-                    $this->getConnection()->getConnection()->query("SELECT setval('sly_article_slice_id_seq', 7, FALSE);");
-                    $this->getConnection()->getConnection()->query("SELECT setval('sly_clang_id_seq', 8, FALSE);");
-                    $this->getConnection()->getConnection()->query("SELECT setval('sly_slice_id_seq', 7, FALSE);");
-                    $this->getConnection()->getConnection()->query("SELECT setval('sly_user_id_seq', 2, FALSE);");
-                }
+		
+		if(sly_Core::config()->get('database/driver') === 'pgsql') {
+			$this->getConnection()->getConnection()->query("SELECT setval('sly_user_id_seq', 2, FALSE);");
+
+			if ($name === 'sally-demopage') {
+				$this->getConnection()->getConnection()->query("SELECT setval('sly_article_slice_id_seq', 7, FALSE);");
+				$this->getConnection()->getConnection()->query("SELECT setval('sly_clang_id_seq', 8, FALSE);");
+				$this->getConnection()->getConnection()->query("SELECT setval('sly_slice_id_seq', 7, FALSE);");
+			}
+		}
 
 		foreach ($this->getAdditionalDataSets() as $ds) {
 			$comp->addDataSet($ds);
