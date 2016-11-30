@@ -682,19 +682,19 @@ class sly_Service_Article extends sly_Service_ArticleManager {
 			foreach ($slices as $articleSlice) {
 				$srcSlot = $articleSlice->getSlot();
 				// skip slots not present in the destination article
-				if (!in_array($articleSlice->getSlot(), $dstSlots)) continue;
-
-				// find position in target article
-				$position = $dest->countSlices($srcSlot);
-
-				// find slices to copy
-				$slice = $articleSlice->getSlice();
+				if (!in_array($articleSlice->getSlot(), $dstSlots)) {
+					continue;
+				}
 
 				// "delete" slice
-				if (in_array($slice->getId(), $skipSliceIds))
+				if (in_array($articleSlice->getSliceId(), $skipSliceIds)) {
 					continue;
-
-				$slice = $sServ->copy($slice);
+				}
+				
+				// find position in target article
+				$position = $dest->countSlices($srcSlot);
+				$slice    = $articleSlice->getSlice();
+				$slice    = $sServ->copy($slice);
 
 				$aSlice = new Sly_Model_ArticleSlice(array(
 					'clang'      => $dest->getClang(),
