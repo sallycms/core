@@ -111,7 +111,7 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base implements
 				break;
 			case self::FIND_REVISION_BEST:
 				$strat = $db->quoteIdentifier('latest').' = '.$db->quote(1).' OR '.$db->quoteIdentifier('online').' = '.$db->quote(1);
-				$order = $order ? "$order, online DESC, latest DESC" : 'online DESC, latest DESC';
+				//$order = $order ? "$order, online DESC, latest DESC" : 'online DESC, latest DESC';
 				break;
 			default:
 				$strat = null;
@@ -133,27 +133,16 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base implements
 		foreach ($db as $row) {
 			// based on the revision strategy, we only consider a subset of found revisions;
 			// perform the filtering before constructing the actual model instance
-
-			if ($revStrategy === self::FIND_REVISION_BEST) {
-				// only take the first row per article
-				$key = $row['id'].'_'.$row['clang'];
-
-				// online revision may overwrite latest revision
-				if (isset($fetched[$key]) && !$row['online']) {
-					continue;
-				}
-
+			
+			$key = $row['id'].'_'.$row['clang'];
+			
+			if ($revStrategy !== self::FIND_REVISION_BEST || !isset($fetched[$key]) || $row['online']) {
 				$fetched[$key] = $row;
-			}
-			else {
-				$return[] = $this->makeInstance($row);
 			}
 		}
 
-		if ($revStrategy === self::FIND_REVISION_BEST) {
-			foreach ($fetched as $row) {
-				$return[] = $this->makeInstance($row);
-			}
+		foreach ($fetched as $row) {
+			$return[] = $this->makeInstance($row);
 		}
 
 		return $return;
@@ -166,7 +155,7 @@ abstract class sly_Service_ArticleBase extends sly_Service_Model_Base implements
 	 * @param int   $revStrategy  FIND_REVISION_ONLINE, FIND_REVISION_LATEST or null to disable any kind of revision filtering
 	 */
 	public function findOne($where = null, $revStrategy = self::FIND_REVISION_LATEST) {
-		$items = $this->find($where, null, null, null, 1, null, $revStrategy);
+		$items = $this->find($where, null, null, null, null, null, $revStrategy);
 		return !empty($items) ? $items[0] : null;
 	}
 
