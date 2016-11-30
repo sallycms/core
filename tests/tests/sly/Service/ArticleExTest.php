@@ -248,6 +248,97 @@ class sly_Service_ArticleExTest extends sly_Service_ArticleTestBase {
 		$this->assertCount(3, $service->findArticlesByCategory(0, self::$clangA));
 		$this->assertCount(1, $service->findArticlesByCategory(1, self::$clangA));
 	}
+	
+	public function testSetOnline() {
+		$service = $this->getService();
+		$id      = $service->add(1, 'Test 1');
+		$clang   = self::$clangA;
+		
+		$one     = $service->findByPK($id, $clang, 0);
+		$service->touch($one);
+		$service->touch($one);
+		$two     = $service->findByPK($id, $clang, 1);
+		$three   = $service->findByPK($id, $clang, 2);
+		$online  = $service->setOnline($two);
+		
+		// the article should be online
+		$this->assertTrue($online->isOnline(), 'should be online');
+		
+		// there can only be one online revision
+		/* @var $conn sly\Database\Connection */
+		$conn = sly_Core::getContainer()->get('sly-dbal-connection');
+		$rows = $conn->fetchAll('SELECT revision FROM '.$conn->getTable('article').' WHERE id = ? AND clang = ? and online = ?', array($id, $clang, 1));
+		$this->assertEquals(1, count($rows));
+		$this->assertEquals($two->getRevision(), $online->getRevision());
+		$this->assertEquals($two->getRevision(), $rows[0]['revision']);
+	}
+	
+	/**
+	 * @depends testSetOnline
+	 */
+	public function testSetOffline() {
+		$service = $this->getService();
+		$id      = $service->add(1, 'Test 1');
+		$clang   = self::$clangA;
+		
+		$one     = $service->findByPK($id, $clang, 0);
+		$service->touch($one);
+		$two     = $service->findByPK($id, $clang, 1);
+		$this->assertTrue($two->isOnline(), 'should be online');
+		$offline =  $service->setOffline($two);
+		
+		// the article should be online
+		$this->assertTrue($offline->isOffline(), 'should be online');
+		
+		// there can only be one online revision
+		/* @var $conn sly\Database\Connection */
+		$conn = sly_Core::getContainer()->get('sly-dbal-connection');
+		$rows = $conn->fetchAll('SELECT revision FROM '.$conn->getTable('article').' WHERE id = ? AND clang = ? and online = ?', array($id, $clang, 1));
+		$this->assertEquals(0, count($rows));
+	}
+	
+	/**
+	 * @depends testSetOffline
+	 */
+	public function testFindSingle() {
+		$service = $this->getService();
+		$id      = $service->add(1, 'Test 1');
+		$clang   = self::$clangA;
+		
+		$one     = $service->findByPK($id, $clang, 0);
+		$service->touch($one);
+		$service->touch($one);
+		$service->touch($one);
+		$service->touch($one);
+		$service->touch($one);
+		$two     = $service->findByPK($id, $clang, 1);
+		
+		$service->setOnline($two);
+		
+		$test  = $service->findByPK($id, $clang, sly_Service_Article::FIND_REVISION_ONLINE);
+		$this->assertEquals(1, $test->getRevision());
+		
+		$test  = $service->findByPK($id, $clang, sly_Service_Article::FIND_REVISION_BEST);
+		$this->assertEquals(1, $test->getRevision());
+		
+		$test  = $service->findByPK($id, $clang, sly_Service_Article::FIND_REVISION_LATEST);
+		$this->assertEquals(5, $test->getRevision());
+		
+		$service->setOnline($test);
+		$test  = $service->findByPK($id, $clang, sly_Service_Article::FIND_REVISION_ONLINE);
+		$this->assertEquals(5, $test->getRevision());
+		
+		$one  = $service->findByPK($id, $clang, 0);
+		$service->setOnline($one);
+		
+		$test  = $service->findByPK($id, $clang, sly_Service_Article::FIND_REVISION_BEST);
+		$this->assertEquals(0, $test->getRevision());
+		
+		$service->setOffline($test);
+		
+		$test  = $service->findByPK($id, $clang, sly_Service_Article::FIND_REVISION_BEST);
+		$this->assertEquals(5, $test->getRevision());
+	}
 
 	public function testOrder() {
 		$service = $this->getService();
@@ -263,6 +354,10 @@ class sly_Service_ArticleExTest extends sly_Service_ArticleTestBase {
 		$articles = $service->find(array('re_id' => $cat, 'clang' => self::$clangA), null, 'pos ASC', null, null, null, sly_Service_Article::FIND_REVISION_BEST);
 		$this->assertCount(3, $articles);
 		$this->assertEquals($three, end($articles)->getId());
+		
+		$articles = $service->find(array('re_id' => $cat, 'clang' => self::$clangA), null, 'pos DESC', null, null, null, sly_Service_Article::FIND_REVISION_BEST);
+		$this->assertCount(3, $articles);
+		$this->assertEquals($three, reset($articles)->getId());
 
 		$service->setOffline($articles[1]);
 
@@ -277,5 +372,9 @@ class sly_Service_ArticleExTest extends sly_Service_ArticleTestBase {
 		$articles = $service->find(array('re_id' => $cat, 'clang' => self::$clangA), null, 'pos ASC', null, null, null, sly_Service_Article::FIND_REVISION_BEST);
 		$this->assertCount(3, $articles);
 		$this->assertEquals($three, end($articles)->getId());
+		
+		$articles = $service->find(array('re_id' => $cat, 'clang' => self::$clangA), null, 'pos DESC', null, null, null, sly_Service_Article::FIND_REVISION_BEST);
+		$this->assertCount(3, $articles);
+		$this->assertEquals($three, reset($articles)->getId());
 	}
 }
